@@ -3,10 +3,10 @@
 
   <parent>
     <groupId>org.codehaus.mojo</groupId>
-    <artifactId>mojo</artifactId>
-    <version>17</version>
-    <!--artifactId>mojo-sandbox-parent</artifactId-->
-    <!--version>5-SNAPSHOT</version-->
+    <!--artifactId>mojo</artifactId-->
+    <!--version>17</version-->
+    <artifactId>mojo-sandbox</artifactId>
+    <version>4</version>
   </parent>
 
   <groupId>org.codehaus.mojo</groupId>
@@ -81,13 +81,5 @@
       </exclusions>
     </dependency>
   </dependencies>
-
-  <repositories>
-    <repository>
-      <id>codehaus-snapshots</id>
-      <name>Maven Codehaus Snapshots</name>
-      <url>http://repo1.maven.org/maven2/</url>
-    </repository>
-  </repositories>
 
 </project>
