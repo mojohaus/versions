@@ -1,0 +1,14 @@
+<project>
+  <body>
+    <menu name="Overview">
+      <item name="Introduction" href="index.html"/>
+      <item name="Goals" href="plugin-info.html"/>
+      <item name="Usage" href="usage.html"/>
+      <item name="FAQ" href="faq.html"/>
+    </menu>
+    <menu name="Examples">
+      <item name="Updating the Parent version" href="examples/update-parent.html"/>
+      <item name="Updating a version specified in a property" href="examples/update-properties.html"/>
+    </menu>
+  </body>
+</project>

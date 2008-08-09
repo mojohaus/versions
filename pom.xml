@@ -1,0 +1,93 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>mojo</artifactId>
+    <version>17</version>
+    <!--artifactId>mojo-sandbox-parent</artifactId-->
+    <!--version>5-SNAPSHOT</version-->
+  </parent>
+
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>versions-maven-plugin</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>maven-plugin</packaging>
+
+  <name>Versions Maven Plugin</name>
+  <description>
+    Versions plugin for Maven 2. The versions plugin updates the versions of components in the pom.
+  </description>
+  <inceptionYear>2008</inceptionYear>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Stephen Connolly</name>
+      <email>stephen.alan.connolly@gmail.com</email>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+      <timezone>0</timezone>
+    </developer>
+  </developers>
+
+  <prerequisites>
+    <maven>2.0.6</maven>
+  </prerequisites>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-project</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-settings</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>1.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-interactivity-api</artifactId>
+      <version>1.0-alpha-6</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>plexus-utils</artifactId>
+          <groupId>plexus</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+  <repositories>
+    <repository>
+      <id>codehaus-snapshots</id>
+      <name>Maven Codehaus Snapshots</name>
+      <url>http://repo1.maven.org/maven2/</url>
+    </repository>
+  </repositories>
+
+</project>
