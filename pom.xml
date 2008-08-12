@@ -25,6 +25,12 @@
     </license>
   </licenses>
 
+  <scm>
+    <connection>scm:svn:http://svn.codehaus.org/mojo/trunk/sandbox/versions-maven-plugin</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/sandbox/versions-maven-plugin</developerConnection>
+    <url>http://svn.codehaus.org/mojo/trunk/sandbox/versions-maven-plugin</url>
+  </scm>
+
   <developers>
     <developer>
       <name>Stephen Connolly</name>
