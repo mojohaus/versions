@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import com.bea.xml.stream.MXParserFactory;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -30,7 +31,10 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -282,25 +286,35 @@ public abstract class AbstractVersionsUpdaterMojo
             reader = new BufferedInputStream( new FileInputStream( outFile ) );
 
             byte[] content = new byte[(int) outFile.length()];
-            StringBuffer pom = new StringBuffer( content.length );
+            StringBuffer input = new StringBuffer( content.length );
             try
             {
                 int length = reader.read( content, 0, content.length );
-                pom.append( new String( content, 0, length, POM_ENCODING ) );
+                input.append( new String( content, 0, length, POM_ENCODING ) );
             }
             finally
             {
                 reader.close();
             }
 
-            if ( update( pom ) )
+            XMLInputFactory inputFactory = MXParserFactory.newInstance();
+
+            ModifiedPomXMLEventReader newPom = new ModifiedPomXMLEventReader( input, inputFactory );
+
+            update( newPom );
+
+            if ( newPom.isModified() )
             {
                 OutputStream out = new BufferedOutputStream( new FileOutputStream( outFile ) );
-                out.write( pom.toString().getBytes( POM_ENCODING ) );
+                out.write( input.toString().getBytes( POM_ENCODING ) );
                 out.close();
             }
         }
         catch ( IOException e )
+        {
+            getLog().error( e );
+        }
+        catch ( XMLStreamException e )
         {
             getLog().error( e );
         }
@@ -309,13 +323,12 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Updates the pom.
      *
-     * @param pom The pom as a StringBuffer.
-     * @return <code>true</code> if the pom has been modified.
+     * @param pom The pom to update.
      * @throws MojoExecutionException If things go wrong.
      * @throws MojoFailureException   If things go wrong.
      */
-    protected abstract boolean update( StringBuffer pom )
-        throws MojoExecutionException, MojoFailureException;
+    protected abstract void update( ModifiedPomXMLEventReader pom )
+        throws MojoExecutionException, MojoFailureException, XMLStreamException;
 
     /**
      * Returns <code>true</code> if the update should be applied.

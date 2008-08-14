@@ -25,6 +25,12 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
+import java.util.Stack;
+import java.util.regex.Pattern;
 
 /**
  * Updates properties to refer to the latest versions.
@@ -42,14 +48,16 @@ public class UpdatePropertiesMojo
 
     /**
      * {@inheritDoc}
+     *
+     * @param pom
      */
-    protected boolean update( StringBuffer pom )
-        throws MojoExecutionException, MojoFailureException
+    protected void update( ModifiedPomXMLEventReader pom )
+        throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         if ( linkItems == null || linkItems.length == 0 )
         {
             getLog().info( "Nothing to link" );
-            return false;
+            return;
         }
         boolean madeReplacement = false;
         for ( int i = 0; i < linkItems.length; i++ )
@@ -75,7 +83,7 @@ public class UpdatePropertiesMojo
             }
 
             String itemCoordinates = item.getGroupId() + ":" + item.getArtifactId();
-            String currentVersion = getPropertyValue( pom, item.getProperty() );
+            String currentVersion = getPropertyValue( pom.asStringBuffer(), item.getProperty() );
             String version = currentVersion;
 
             if ( version == null )
@@ -89,7 +97,7 @@ public class UpdatePropertiesMojo
                 version = item.getVersion();
             }
 
-            VersionRange versionRange = null;
+            VersionRange versionRange;
             try
             {
                 versionRange = VersionRange.createFromVersionSpec( version );
@@ -106,45 +114,46 @@ public class UpdatePropertiesMojo
 
             if ( !shouldApplyUpdate( artifact, currentVersion, updateVersion ) )
             {
-                return false;
+                return;
             }
 
-            String searchStr = new StringBuffer()
-                .append( "<" )
-                .append( item.getProperty() )
-                .append( ">" )
-                .append( currentVersion )
-                .append( "</" )
-                .append( item.getProperty() )
-                .append( ">" )
-                .toString();
-            String replaceStr = new StringBuffer()
-                .append( "<" )
-                .append( item.getProperty() )
-                .append( ">" )
-                .append( updateVersion.toString() )
-                .append( "</" )
-                .append( item.getProperty() )
-                .append( ">" )
-                .toString();
+            Stack stack = new Stack();
+            String path = "";
 
-            if ( searchStr.equals( replaceStr ) )
+            Pattern pathRegex =
+                Pattern.compile( "/project/properties(?:/profiles/profile)?/" + Pattern.quote( item.getProperty() ) );
+
+            while ( pom.hasNext() )
             {
-                getLog().info( itemCoordinates + " is already up to date." );
-                continue;
-            }
+                XMLEvent event = pom.nextEvent();
+                if ( event.isStartElement() )
+                {
+                    stack.push( path );
+                    path += "/" + event.asStartElement().getName().getLocalPart();
 
-            getLog().info( "Updating " + itemCoordinates + " from version " + currentVersion + " to " + updateVersion );
-
-            int index = pom.indexOf( searchStr );
-            while ( index < pom.length() && ( index > 0 ) )
-            {
-                pom.replace( index, index + searchStr.length(), replaceStr );
-                index = pom.indexOf( searchStr, index + replaceStr.length() );
-                madeReplacement = true;
+                    if ( pathRegex.matcher( path ).matches() )
+                    {
+                        pom.mark( 0 );
+                    }
+                }
+                if ( event.isEndElement() )
+                {
+                    if ( pathRegex.matcher( path ).matches() )
+                    {
+                        pom.mark( 1 );
+                        if ( pom.hasMark( 0 ) )
+                        {
+                            pom.replaceBetween( 0, 1, updateVersion.toString() );
+                            getLog().info( "Updating " + itemCoordinates + " from version " + currentVersion + " to " +
+                                updateVersion );
+                            pom.clearMark( 0 );
+                            pom.clearMark( 1 );
+                        }
+                    }
+                    path = (String) stack.pop();
+                }
             }
         }
-        return madeReplacement;
     }
 
 }

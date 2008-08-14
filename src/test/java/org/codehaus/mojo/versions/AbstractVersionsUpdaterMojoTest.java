@@ -26,7 +26,6 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
  */
-
 public class AbstractVersionsUpdaterMojoTest
     extends TestCase
 {
