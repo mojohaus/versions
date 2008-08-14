@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 
-import com.bea.xml.stream.XMLOutputFactoryBase;
 import junit.framework.TestCase;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -55,7 +54,7 @@ public class RewriteWithStAXTest
         ByteArrayInputStream source = new ByteArrayInputStream( rawInput );
         ByteArrayOutputStream dest = new ByteArrayOutputStream();
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLOutputFactory outputFactory = XMLOutputFactoryBase.newInstance();
+        XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
         XMLEventReader eventReader = inputFactory.createXMLEventReader( source );
         XMLEventWriter eventWriter = outputFactory.createXMLEventWriter( dest, "utf-8" );
         while ( eventReader.hasNext() )
