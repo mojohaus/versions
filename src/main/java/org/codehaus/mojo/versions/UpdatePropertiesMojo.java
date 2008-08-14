@@ -43,6 +43,11 @@ import java.util.regex.Pattern;
 public class UpdatePropertiesMojo
     extends AbstractVersionsUpdaterMojo
 {
+    private static final String REGEX_QUOTE_END = "\\E";
+
+    private static final String REGEX_QUOTE_START = "\\Q";
+
+    private static final String REGEX_QUOTE_END_ESCAPED = REGEX_QUOTE_END + '\\' + REGEX_QUOTE_END + REGEX_QUOTE_START;
 
 // -------------------------- OTHER METHODS --------------------------
 
@@ -121,7 +126,7 @@ public class UpdatePropertiesMojo
             String path = "";
 
             Pattern pathRegex =
-                Pattern.compile( "/project/properties(?:/profiles/profile)?/" + Pattern.quote( item.getProperty() ) );
+                Pattern.compile( "/project/properties(?:/profiles/profile)?/" + quote( item.getProperty() ) );
 
             while ( pom.hasNext() )
             {
@@ -155,5 +160,39 @@ public class UpdatePropertiesMojo
             }
         }
     }
+
+    private static String quote( String s )
+    {
+        int i = s.indexOf( REGEX_QUOTE_END );
+        if ( i == -1 )
+        {
+            // we're safe as nobody has a crazy \E in the string
+            return REGEX_QUOTE_START + s + REGEX_QUOTE_END;
+        }
+
+        // damn there's at least one \E in the string
+        StringBuffer sb = new StringBuffer( s.length() + 32 );
+        // each escape-escape takes 10 chars...
+        // hope there's less than 4 of them
+
+        sb.append( REGEX_QUOTE_START );
+        int pos = 0;
+        do
+        {
+            // we are safe from pos to i
+            sb.append( s.substring( pos, i ) );
+            // now escape-escape
+            sb.append( REGEX_QUOTE_END_ESCAPED );
+            // move the working start
+            pos = i + REGEX_QUOTE_END.length();
+        }
+        while ( ( i = s.indexOf( REGEX_QUOTE_END, pos ) ) != -1 );
+
+        sb.append( s.substring( pos, s.length() ) );
+        sb.append( REGEX_QUOTE_END );
+
+        return sb.toString();
+    }
+
 
 }

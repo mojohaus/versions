@@ -25,7 +25,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 import java.io.ByteArrayInputStream;
-import java.nio.charset.Charset;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Represents the modified pom file. Note: implementations of the StAX API (JSR-173) are not good round-trip rewriting
@@ -78,19 +78,25 @@ public class ModifiedPomXMLEventReader
     public void rewind()
         throws XMLStreamException
     {
-        backing = factory.createXMLEventReader(
-            new ByteArrayInputStream( pom.toString().getBytes( Charset.forName( "utf-8" ) ) ) );
-        nextEnd = 0;
-        nextDelta = 0;
-        for ( int i = 0; i < MAX_MARKS; i++ )
+        try
         {
-            markStart[i] = -1;
-            markEnd[i] = -1;
-            markDelta[i] = 0;
+            backing = factory.createXMLEventReader( new ByteArrayInputStream( pom.toString().getBytes( "utf-8" ) ) );
+            nextEnd = 0;
+            nextDelta = 0;
+            for ( int i = 0; i < MAX_MARKS; i++ )
+            {
+                markStart[i] = -1;
+                markEnd[i] = -1;
+                markDelta[i] = 0;
+            }
+            lastStart = -1;
+            lastEnd = -1;
+            lastDelta = 0;
         }
-        lastStart = -1;
-        lastEnd = -1;
-        lastDelta = 0;
+        catch ( UnsupportedEncodingException e )
+        {
+            throw new XMLStreamException( e );
+        }
     }
 
     public void clearMark( int index )
