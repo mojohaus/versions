@@ -390,26 +390,17 @@ public abstract class AbstractVersionsUpdaterMojo
                     p2 = p2.substring( 0, index );
                     q2 = p2.substring( index );
                 }
-                Integer n1 = null;
-                Integer n2 = null;
                 try
                 {
-                    n1 = Integer.valueOf( p1 );
-                    n2 = Integer.valueOf( p2 );
-                }
-                catch ( NumberFormatException e )
-                {
-                    // ignore
-                }
-                if ( n1 != null && n2 != null )
-                {
+                    Integer n1 = Integer.valueOf( p1 );
+                    Integer n2 = Integer.valueOf( p2 );
                     int result = n1.compareTo( n2 );
                     if ( result != 0 )
                     {
                         return result;
                     }
                 }
-                else
+                catch ( NumberFormatException e )
                 {
                     int result = p1.compareTo( p2 );
                     if ( result != 0 )
