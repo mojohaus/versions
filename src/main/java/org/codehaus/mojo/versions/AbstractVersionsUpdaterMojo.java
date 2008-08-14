@@ -343,6 +343,12 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
 
+        if ( updateVersion == null )
+        {
+            getLog().warn( "Not updating version: could not resolve any versions" );
+            return false;
+        }
+
         artifact.setVersion( updateVersion.toString() );
         try
         {
