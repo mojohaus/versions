@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 
 import junit.framework.TestCase;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.stax2.XMLInputFactory2;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -53,7 +54,8 @@ public class RewriteWithStAXTest
         byte[] rawInput = input.getBytes( "utf-8" );
         ByteArrayInputStream source = new ByteArrayInputStream( rawInput );
         ByteArrayOutputStream dest = new ByteArrayOutputStream();
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
         XMLEventReader eventReader = inputFactory.createXMLEventReader( source );
         XMLEventWriter eventWriter = outputFactory.createXMLEventWriter( dest, "utf-8" );
@@ -80,7 +82,8 @@ public class RewriteWithStAXTest
 
         StringBuffer output = new StringBuffer( input );
 
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
         ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
         while ( eventReader.hasNext() )
         {
@@ -199,7 +202,8 @@ public class RewriteWithStAXTest
 
         StringBuffer output = new StringBuffer( input );
 
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
         ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
 
         Stack stack = new Stack();

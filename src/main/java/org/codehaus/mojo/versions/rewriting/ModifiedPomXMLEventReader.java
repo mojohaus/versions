@@ -268,7 +268,11 @@ public class ModifiedPomXMLEventReader
         {
             next = backing.nextEvent();
             nextStart = nextEnd;
-            nextEnd = next.getLocation().getCharacterOffset();
+            if ( backing.hasNext() )
+            {
+                nextEnd = backing.peek().getLocation().getCharacterOffset();
+            }
+
             if ( nextEnd != -1 )
             {
                 if ( !next.isCharacters() )

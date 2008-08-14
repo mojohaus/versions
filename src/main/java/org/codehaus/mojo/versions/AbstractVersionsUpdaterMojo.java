@@ -31,6 +31,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.stax2.XMLInputFactory2;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -296,7 +297,8 @@ public abstract class AbstractVersionsUpdaterMojo
                 reader.close();
             }
 
-            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+            XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+            inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
 
             ModifiedPomXMLEventReader newPom = new ModifiedPomXMLEventReader( input, inputFactory );
 
