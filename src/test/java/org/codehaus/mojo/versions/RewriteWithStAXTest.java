@@ -34,7 +34,6 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.Charset;
 import java.util.Stack;
 
 /**
@@ -53,8 +52,7 @@ public class RewriteWithStAXTest
             "    <artifactId>mojo-&amp;sandbox-parent</artifactId>\n" + "    <version>5-SNAPSHOT</version>\r" +
             "  </parent>\r" + "<build/></project>";
 
-        Charset charset = Charset.forName( "utf-8" );
-        byte[] rawInput = input.getBytes( charset );
+        byte[] rawInput = input.getBytes( "utf-8" );
         ByteArrayInputStream source = new ByteArrayInputStream( rawInput );
         ByteArrayOutputStream dest = new ByteArrayOutputStream();
         XMLInputFactory inputFactory = MXParserFactory.newInstance();
@@ -66,7 +64,7 @@ public class RewriteWithStAXTest
             eventWriter.add( eventReader.nextEvent() );
         }
 
-        String output = new String( dest.toByteArray(), charset );
+        String output = new String( dest.toByteArray(), "utf-8" );
 
         assertFalse( "StAX implementation is not good enough", input.equals( output ) );
     }
