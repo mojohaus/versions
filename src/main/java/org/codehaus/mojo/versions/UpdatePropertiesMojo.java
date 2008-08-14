@@ -43,10 +43,19 @@ import java.util.regex.Pattern;
 public class UpdatePropertiesMojo
     extends AbstractVersionsUpdaterMojo
 {
+    /**
+     * The end of a regex literal sequence.
+     */
     private static final String REGEX_QUOTE_END = "\\E";
 
+    /**
+     * The start of a regex literal sequence.
+     */
     private static final String REGEX_QUOTE_START = "\\Q";
 
+    /**
+     * Escape the escapes.
+     */
     private static final String REGEX_QUOTE_END_ESCAPED = REGEX_QUOTE_END + '\\' + REGEX_QUOTE_END + REGEX_QUOTE_START;
 
 // -------------------------- OTHER METHODS --------------------------
@@ -87,9 +96,9 @@ public class UpdatePropertiesMojo
                 }
             }
 
-            String itemCoordinates = item.getGroupId() + ":" + item.getArtifactId();
-            String currentVersion = getPropertyValue( pom.asStringBuffer(), item.getProperty() );
-            String version = currentVersion;
+            String itemCoords = item.getGroupId() + ":" + item.getArtifactId();
+            String curVer = getPropertyValue( pom.asStringBuffer(), item.getProperty() );
+            String version = curVer;
 
             if ( version == null )
             {
@@ -115,9 +124,9 @@ public class UpdatePropertiesMojo
             Artifact artifact = artifactFactory.createDependencyArtifact( item.getGroupId(), item.getArtifactId(),
                                                                           versionRange, "pom", null, null );
 
-            ArtifactVersion updateVersion = findLatestVersion( artifact, versionRange );
+            ArtifactVersion newVer = findLatestVersion( artifact, versionRange );
 
-            if ( !shouldApplyUpdate( artifact, currentVersion, updateVersion ) )
+            if ( !shouldApplyUpdate( artifact, curVer, newVer ) )
             {
                 return;
             }
@@ -148,9 +157,8 @@ public class UpdatePropertiesMojo
                         pom.mark( 1 );
                         if ( pom.hasMark( 0 ) )
                         {
-                            pom.replaceBetween( 0, 1, updateVersion.toString() );
-                            getLog().info( "Updating " + itemCoordinates + " from version " + currentVersion + " to " +
-                                updateVersion );
+                            pom.replaceBetween( 0, 1, newVer.toString() );
+                            getLog().info( "Updating " + itemCoords + " from version " + curVer + " to " + newVer );
                             pom.clearMark( 0 );
                             pom.clearMark( 1 );
                         }
@@ -161,6 +169,12 @@ public class UpdatePropertiesMojo
         }
     }
 
+    /**
+     * Takes a string and returns the regex that will match that string exactly.
+     *
+     * @param s The string to match.
+     * @return The regex that will match the string exactly.
+     */
     private static String quote( String s )
     {
         int i = s.indexOf( REGEX_QUOTE_END );
@@ -185,8 +199,9 @@ public class UpdatePropertiesMojo
             sb.append( REGEX_QUOTE_END_ESCAPED );
             // move the working start
             pos = i + REGEX_QUOTE_END.length();
+            i = s.indexOf( REGEX_QUOTE_END, pos );
         }
-        while ( ( i = s.indexOf( REGEX_QUOTE_END, pos ) ) != -1 );
+        while ( i != -1 );
 
         sb.append( s.substring( pos, s.length() ) );
         sb.append( REGEX_QUOTE_END );

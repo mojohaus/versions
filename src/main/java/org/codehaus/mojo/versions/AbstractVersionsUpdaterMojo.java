@@ -327,6 +327,8 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param pom The pom to update.
      * @throws MojoExecutionException If things go wrong.
      * @throws MojoFailureException   If things go wrong.
+     * @throws javax.xml.stream.XMLStreamException
+     *                                If things go wrong.
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException;

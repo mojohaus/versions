@@ -37,44 +37,102 @@ import java.io.UnsupportedEncodingException;
 public class ModifiedPomXMLEventReader
     implements XMLEventReader
 {
+    /**
+     * Field pom
+     */
     private final StringBuffer pom;
 
+    /**
+     * Field modified
+     */
     private boolean modified = false;
 
+    /**
+     * Field factory
+     */
     private final XMLInputFactory factory;
 
+    /**
+     * Field nextStart
+     */
     private int nextStart = 0;
 
+    /**
+     * Field nextEnd
+     */
     private int nextEnd = 0;
 
+    /**
+     * Field markStart
+     */
     private int[] markStart = new int[MAX_MARKS];
 
+    /**
+     * Field markEnd
+     */
     private int[] markEnd = new int[MAX_MARKS];
 
+    /**
+     * Field markDelta
+     */
     private int[] markDelta = new int[MAX_MARKS];
 
+    /**
+     * Field lastStart
+     */
     private int lastStart = -1;
 
-    private int lastEnd = -1;
+    /**
+     * Field lastEnd
+     */
+    private int lastEnd;
 
+    /**
+     * Field lastDelta
+     */
     private int lastDelta = 0;
 
+    /**
+     * Field next
+     */
     private XMLEvent next = null;
 
+    /**
+     * Field nextDelta
+     */
     private int nextDelta = 0;
 
+    /**
+     * Field backing
+     */
     private XMLEventReader backing;
 
+    /**
+     * Field MAX_MARKS
+     */
     private static final int MAX_MARKS = 3;
 
+    /**
+     * Constructor ModifiedPomXMLEventReader creates a new ModifiedPomXMLEventReader instance.
+     *
+     * @param pom     of type StringBuffer
+     * @param factory of type XMLInputFactory
+     * @throws XMLStreamException when
+     */
     public ModifiedPomXMLEventReader( StringBuffer pom, XMLInputFactory factory )
         throws XMLStreamException
     {
         this.pom = pom;
         this.factory = factory;
         rewind();
+        lastEnd = -1;
     }
 
+    /**
+     * Rewind to the start so we can run through again.
+     *
+     * @throws XMLStreamException when things go wrong.
+     */
     public void rewind()
         throws XMLStreamException
     {
@@ -99,11 +157,21 @@ public class ModifiedPomXMLEventReader
         }
     }
 
+    /**
+     * Clears the mark.
+     *
+     * @param index the mark to clear.
+     */
     public void clearMark( int index )
     {
         markStart[index] = -1;
     }
 
+    /**
+     * Sets a mark to the current event.
+     *
+     * @param index the mark to set.
+     */
     public void mark( int index )
     {
         markStart[index] = lastStart;
@@ -111,22 +179,35 @@ public class ModifiedPomXMLEventReader
         markDelta[index] = lastDelta;
     }
 
+    /**
+     * Returns <code>true</code> if the specified mark is defined.
+     *
+     * @param index The mark.
+     * @return <code>true</code> if the specified mark is defined.
+     */
     public boolean hasMark( int index )
     {
         return markStart[index] != -1;
     }
 
+    /**
+     * Replaces the current element with the replacement text.
+     *
+     * @param replacement The replacement.
+     */
     public void replace( String replacement )
     {
         if ( lastStart < 0 || lastEnd < lastStart )
         {
             throw new IllegalStateException();
         }
-        if ( replacement.equals( pom.substring( lastDelta + lastStart, lastDelta + lastEnd ) ) )
+        int start = lastDelta + lastStart;
+        int end = lastDelta + lastEnd;
+        if ( replacement.equals( pom.substring( start, end ) ) )
         {
             return;
         }
-        pom.replace( lastDelta + lastStart, lastDelta + lastEnd, replacement );
+        pom.replace( start, end, replacement );
         int delta = replacement.length() - lastEnd - lastStart;
         nextDelta += delta;
         for ( int i = 0; i < MAX_MARKS; i++ )
@@ -140,18 +221,25 @@ public class ModifiedPomXMLEventReader
         modified = true;
     }
 
+    /**
+     * Replaces the specified marked element with the replacement text.
+     *
+     * @param index       The mark.
+     * @param replacement The replacement.
+     */
     public void replaceMark( int index, String replacement )
     {
         if ( !hasMark( index ) )
         {
             throw new IllegalStateException();
         }
-        if ( replacement.equals(
-            pom.substring( markDelta[index] + markStart[index], markDelta[index] + markEnd[index] ) ) )
+        int start = markDelta[index] + markStart[index];
+        int end = markDelta[index] + markEnd[index];
+        if ( replacement.equals( pom.substring( start, end ) ) )
         {
             return;
         }
-        pom.replace( markDelta[index] + markStart[index], markDelta[index] + markEnd[index], replacement );
+        pom.replace( start, end, replacement );
         int delta = replacement.length() - markEnd[index] - markStart[index];
         nextDelta += delta;
         if ( lastStart == markStart[index] && lastEnd == markEnd[index] )
@@ -181,20 +269,27 @@ public class ModifiedPomXMLEventReader
         modified = true;
     }
 
+    /**
+     * Replaces all content between marks index1 and index2 with the replacement text.
+     *
+     * @param index1      The event mark to replace after.
+     * @param index2      The event mark to replace before.
+     * @param replacement The replacement.
+     */
     public void replaceBetween( int index1, int index2, String replacement )
     {
         if ( !hasMark( index1 ) || !hasMark( index2 ) || markStart[index1] > markStart[index2] )
         {
             throw new IllegalStateException();
         }
-        if ( replacement.equals(
-            pom.substring( markDelta[index1] + markEnd[index1], markDelta[index2] + markStart[index2] ) ) )
+        int start = markDelta[index1] + markEnd[index1];
+        int end = markDelta[index2] + markStart[index2];
+        if ( replacement.equals( pom.substring( start, end ) ) )
         {
             return;
         }
-        pom.replace( markDelta[index1] + markEnd[index1], markDelta[index2] + markStart[index2], replacement );
-        int delta = replacement.length() -
-            ( ( markDelta[index2] + markStart[index2] ) - ( markDelta[index1] + markEnd[index1] ) );
+        pom.replace( start, end, replacement );
+        int delta = replacement.length() - ( end - start );
         nextDelta += delta;
 
         for ( int i = 0; i < MAX_MARKS; i++ )
@@ -284,8 +379,7 @@ public class ModifiedPomXMLEventReader
                 }
                 else
                 {
-                    while ( nextEnd > nextStart + 1 && ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' ||
-                        ( nextEnd > nextStart + 2 && c( nextEnd - 2 ) == '<' ) ) )
+                    while ( nextEndIncludesNextEvent() || nextEndIncludesNextEndElement() )
                     {
                         nextEnd--;
                     }
@@ -299,15 +393,41 @@ public class ModifiedPomXMLEventReader
         }
     }
 
+    /**
+     * Returns <code>true</code> if nextEnd is including the start of the next event.
+     *
+     * @return <code>true</code> if nextEnd is including the start of the next event.
+     */
+    private boolean nextEndIncludesNextEvent()
+    {
+        return nextEnd > nextStart + 1 && ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
+    }
+
+    /**
+     * Returns <code>true</code> if nextEnd is including the start of and end element.
+     *
+     * @return <code>true</code> if nextEnd is including the start of and end element.
+     */
+    private boolean nextEndIncludesNextEndElement()
+    {
+        return ( nextEnd > nextStart + 2 && c( nextEnd - 2 ) == '<' );
+    }
+
+    /**
+     * Gets the character at the index provided by the StAX parser.
+     *
+     * @param index the index.
+     * @return char The character.
+     */
     private char c( int index )
     {
         return pom.charAt( nextDelta + index );
     }
 
     /**
-     * Getter for property 'peekVerbatim'.
+     * Returns the verbatim text of the element returned by {@link #peek()}.
      *
-     * @return Value for property 'peekVerbatim'.
+     * @return the verbatim text of the element returned by {@link #peek()}.
      */
     public String getPeekVerbatim()
     {
@@ -318,6 +438,12 @@ public class ModifiedPomXMLEventReader
         return "";
     }
 
+    /**
+     * the verbatim text of the current element when {@link #mark(int)} was called.
+     *
+     * @param index The mark index.
+     * @return the current element when {@link #mark(int)} was called.
+     */
     public String getMarkVerbatim( int index )
     {
         if ( hasMark( index ) )
@@ -407,7 +533,6 @@ public class ModifiedPomXMLEventReader
      * {@inheritDoc}
      */
     public Object getProperty( String name )
-        throws IllegalArgumentException
     {
         return backing.getProperty( name );
     }
@@ -423,8 +548,13 @@ public class ModifiedPomXMLEventReader
         backing = null;
     }
 
+    /**
+     * Returns a copy of the backing string buffer.
+     *
+     * @return a copy of the backing string buffer.
+     */
     public StringBuffer asStringBuffer()
     {
-        return pom;
+        return new StringBuffer( pom );
     }
 }
