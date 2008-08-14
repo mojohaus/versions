@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 
-import com.bea.xml.stream.MXParserFactory;
 import com.bea.xml.stream.XMLOutputFactoryBase;
 import junit.framework.TestCase;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -55,7 +54,7 @@ public class RewriteWithStAXTest
         byte[] rawInput = input.getBytes( "utf-8" );
         ByteArrayInputStream source = new ByteArrayInputStream( rawInput );
         ByteArrayOutputStream dest = new ByteArrayOutputStream();
-        XMLInputFactory inputFactory = MXParserFactory.newInstance();
+        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         XMLOutputFactory outputFactory = XMLOutputFactoryBase.newInstance();
         XMLEventReader eventReader = inputFactory.createXMLEventReader( source );
         XMLEventWriter eventWriter = outputFactory.createXMLEventWriter( dest, "utf-8" );
@@ -82,7 +81,7 @@ public class RewriteWithStAXTest
 
         StringBuffer output = new StringBuffer( input );
 
-        XMLInputFactory inputFactory = MXParserFactory.newInstance();
+        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
         while ( eventReader.hasNext() )
         {
@@ -201,7 +200,7 @@ public class RewriteWithStAXTest
 
         StringBuffer output = new StringBuffer( input );
 
-        XMLInputFactory inputFactory = MXParserFactory.newInstance();
+        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
 
         Stack stack = new Stack();

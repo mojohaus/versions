@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import com.bea.xml.stream.MXParserFactory;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -297,7 +296,7 @@ public abstract class AbstractVersionsUpdaterMojo
                 reader.close();
             }
 
-            XMLInputFactory inputFactory = MXParserFactory.newInstance();
+            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 
             ModifiedPomXMLEventReader newPom = new ModifiedPomXMLEventReader( input, inputFactory );
 
