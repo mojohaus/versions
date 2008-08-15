@@ -39,13 +39,24 @@ mvn versions:update-parent
 
   A more detailed example can be found {{{examples/update-parent.html} here}}.
 
-** Geting information about available plugin updates
+** Checking for new versions of plugins
 
   To get information about newer versions of plugins that you are using in your build, just invoke the
   display-plugin-updates goal.
 
 ---
 mvn version:display-plugin-updates
+---
+
+  A more detailed example can be found {{{examples/display-plugin-updates.html} here}}.
+
+** Checking for new versions of dependencies
+
+  To get information about newer versions of dependencies that you are using in your build, just invoke the
+  display-dependency-updates goal.
+
+---
+mvn version:display-dependency-updates
 ---
 
   A more detailed example can be found {{{examples/display-plugin-updates.html} here}}.
