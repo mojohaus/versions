@@ -56,11 +56,13 @@ public class UpdateParentMojo
         if ( getProject().getParent() == null )
         {
             getLog().info( "Project does not have a parent" );
+            return;
         }
 
         if ( reactorProjects.contains( getProject().getParent() ) )
         {
             getLog().info( "Project's parent is part of the reactor" );
+            return;
         }
 
         String currentVersion = getProject().getParent().getVersion();
