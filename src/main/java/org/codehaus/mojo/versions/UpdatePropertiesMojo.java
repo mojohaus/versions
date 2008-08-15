@@ -127,7 +127,7 @@ public class UpdatePropertiesMojo
 
             if ( !shouldApplyUpdate( artifact, curVer, newVer ) )
             {
-                break;
+                continue;
             }
 
             Stack stack = new Stack();
