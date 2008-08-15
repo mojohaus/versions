@@ -60,6 +60,13 @@ public class LinkItem
      */
     private String version = null;
 
+    /**
+     * Override snapshot permisibility.
+     *
+     * @parameter
+     */
+    private Boolean allowSnapshots = null;
+
 // --------------------------- CONSTRUCTORS ---------------------------
 
     /**
@@ -151,7 +158,27 @@ public class LinkItem
         this.version = version;
     }
 
-// ------------------------ CANONICAL METHODS ------------------------
+    /**
+     * Getter for property 'allowSnapshots'.
+     *
+     * @return Value for property 'allowSnapshots'.
+     */
+    public Boolean getAllowSnapshots()
+    {
+        return allowSnapshots;
+    }
+
+    /**
+     * Setter for property 'allowSnapshots'.
+     *
+     * @param allowSnapshots Value to set for property 'allowSnapshots'.
+     */
+    public void setAllowSnapshots( Boolean allowSnapshots )
+    {
+        this.allowSnapshots = allowSnapshots;
+    }
+
+    // ------------------------ CANONICAL METHODS ------------------------
 
     /**
      * {@inheritDoc}

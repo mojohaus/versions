@@ -99,7 +99,7 @@ public class DisplayDependencyUpdatesMojo
                                                                           dependency.getClassifier(),
                                                                           dependency.getScope() );
 
-            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange );
+            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null );
 
             if ( artifactVersion != null &&
                 getVersionComparator().compare( new DefaultArtifactVersion( version ), artifactVersion ) < 0 )

@@ -195,15 +195,25 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Finds the latest version of the specified artifact that matches the version range.
      *
-     * @param artifact     The artifact.
-     * @param versionRange The version range.
+     * @param artifact       The artifact.
+     * @param versionRange   The version range.
+     * @param allowSnapshots <code>null</code> for no override, otherwise the local override to apply.
      * @return The latest version of the specified artifact that matches the specified version range or
      *         <code>null</code> if no matching version could be found.
      * @throws MojoExecutionException If the artifact metadata could not be found.
      */
-    protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange )
+    protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange, Boolean allowSnapshots )
         throws MojoExecutionException
     {
+        boolean snapshotsExcluded = Boolean.FALSE.equals( this.allowSnapshots );
+        if ( Boolean.TRUE.equals( allowSnapshots ) )
+        {
+            snapshotsExcluded = false;
+        }
+        if ( Boolean.FALSE.equals( allowSnapshots ) )
+        {
+            snapshotsExcluded = true;
+        }
         final List versions;
         try
         {
@@ -222,7 +232,7 @@ public abstract class AbstractVersionsUpdaterMojo
         for ( Iterator j = versions.iterator(); j.hasNext(); )
         {
             ArtifactVersion ver = (ArtifactVersion) j.next();
-            if ( Boolean.FALSE.equals( allowSnapshots ) && ver.toString().endsWith( SNAPSHOT ) )
+            if ( snapshotsExcluded && ver.toString().endsWith( SNAPSHOT ) )
             {
                 // not this version as it's a snapshot and we've been told no snapshots.
                 continue;

@@ -85,7 +85,7 @@ public class UpdateParentMojo
                                                                       getProject().getParent().getArtifactId(),
                                                                       versionRange, "pom", null, null );
 
-        ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange );
+        ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null );
 
         if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion ) )
         {

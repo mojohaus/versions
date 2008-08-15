@@ -92,7 +92,7 @@ public class DisplayPluginUpdatesMojo
 
             Artifact artifact = artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
 
-            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange );
+            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null );
 
             String newVersion;
 

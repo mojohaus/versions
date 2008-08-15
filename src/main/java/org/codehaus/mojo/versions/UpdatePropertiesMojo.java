@@ -124,7 +124,7 @@ public class UpdatePropertiesMojo
             Artifact artifact = artifactFactory.createDependencyArtifact( item.getGroupId(), item.getArtifactId(),
                                                                           versionRange, "pom", null, null );
 
-            ArtifactVersion newVer = findLatestVersion( artifact, versionRange );
+            ArtifactVersion newVer = findLatestVersion( artifact, versionRange, item.getAllowSnapshots() );
 
             if ( !shouldApplyUpdate( artifact, curVer, newVer ) )
             {
