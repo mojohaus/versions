@@ -73,7 +73,6 @@ public class UpdatePropertiesMojo
             getLog().info( "Nothing to link" );
             return;
         }
-        boolean madeReplacement = false;
         for ( int i = 0; i < linkItems.length; i++ )
         {
             LinkItem item = linkItems[i];
@@ -128,7 +127,7 @@ public class UpdatePropertiesMojo
 
             if ( !shouldApplyUpdate( artifact, curVer, newVer ) )
             {
-                return;
+                break;
             }
 
             Stack stack = new Stack();
