@@ -46,6 +46,7 @@ public class AbstractVersionsUpdaterMojoTest
         assertTrue( instance.compare( "2", "1" ) > 0 );
         assertTrue( instance.compare( "1", "1-SNAPSHOT" ) > 0 );
         assertTrue( instance.compare( "1", "1.0" ) > 0 );
+        assertTrue( instance.compare( "1.1", "1" ) > 0 );
         assertTrue( instance.compare( "5.1.0.0.24", "5.1.0.0.9" ) > 0 );
         assertTrue( instance.compare( "5.1.0.0.2a4", "5.1.0.0.9" ) < 0 );
     }

@@ -445,10 +445,42 @@ public abstract class AbstractVersionsUpdaterMojo
             }
             if ( tok1.hasMoreTokens() )
             {
+                Integer n2 = new Integer( 0 );
+                while ( tok1.hasMoreTokens() )
+                {
+                    try
+                    {
+                        Integer n1 = Integer.valueOf( tok1.nextToken() );
+                        int result = n1.compareTo( n2 );
+                        if ( result != 0 )
+                        {
+                            return result;
+                        }
+                    }
+                    catch ( NumberFormatException e )
+                    {
+                    }
+                }
                 return -1;
             }
             if ( tok2.hasMoreTokens() )
             {
+                Integer n1 = new Integer( 0 );
+                while ( tok2.hasMoreTokens() )
+                {
+                    try
+                    {
+                        Integer n2 = Integer.valueOf( tok2.nextToken() );
+                        int result = n1.compareTo( n2 );
+                        if ( result != 0 )
+                        {
+                            return result;
+                        }
+                    }
+                    catch ( NumberFormatException e )
+                    {
+                    }
+                }
                 return +1;
             }
             return 0;
