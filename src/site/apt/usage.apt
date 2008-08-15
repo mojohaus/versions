@@ -59,7 +59,7 @@ mvn version:display-plugin-updates
 mvn version:display-dependency-updates
 ---
 
-  A more detailed example can be found {{{examples/display-plugin-updates.html} here}}.
+  A more detailed example can be found {{{examples/display-dependency-updates.html} here}}.
 
 ** Updating versions specified by properties
 
