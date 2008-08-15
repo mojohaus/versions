@@ -37,150 +37,19 @@ Usage
 mvn versions:update-parent
 ---
 
-  Here's an example:
+  A more detailed example can be found {{{examples/update-parent.html} here}}.
+
+** Geting information about available plugin updates
+
+  To get information about newer versions of plugins that you are using in your build, just invoke the
+  display-plugin-updates goal.
 
 ---
-svn checkout http://svn.codehaus.org/mojo/tags/xmlbeans-maven-plugin-2.3.1 xmlbeans-maven-plugin
-cd xmlbeans-maven-plugin
-mvn versions:update-parent
+mvn version:display-plugin-updates
 ---
 
-  Which produced the following output:
-
----
-[INFO] Scanning for projects...
-...
-[INFO] ------------------------------------------------------------------------
-[INFO] Building Maven XML Beans Plugin
-[INFO]    task-segment: [versions:update-parent]
-[INFO] ------------------------------------------------------------------------
-[INFO] [versions:update-parent]
-...
-[INFO] artifact org.codehaus.mojo:mojo: checking for updates from codehaus.org
-[INFO] artifact org.codehaus.mojo:mojo: checking for updates from central
-[INFO] Updating parent from 14 to 17
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESSFUL
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 24 seconds
-[INFO] Finished at: Thu Aug 14 15:17:04 IST 2008
-[INFO] Final Memory: 9M/166M
-[INFO] ------------------------------------------------------------------------
----
-
-  You can restrict the versions to be considered:
-
----
-mvn versions:update-parent "-DparentVersion=[14,16)"
----
-
-  By default, if the newest version is a -SNAPSHOT, that will be used. You can force snapshots to be excluded:
-
----
-mvn versions:update-parent -DallowSnapshots=false
----
+  A more detailed example can be found {{{examples/display-plugin-updates.html} here}}.
 
 ** Updating versions specified by properties
 
-  This goal helps when you use properties to define versions.  For example if you have a suite of projects and you
-  want to ensure that you use the same version of each dependency in the suite, you might have a dependency section
-  that looks like
-
----
-<project>
-  ...
-  <dependencies>
-    ...
-    <dependency>
-      <groupId>com.foo.bar</groupId>
-      <artifactId>manchu-core</artifactId>
-      <version>[${manchu.version}]</version>
-    </dependency>
-    ...
-    <dependency>
-      <groupId>com.foo.bar</groupId>
-      <artifactId>manchu-extra</artifactId>
-      <version>[${manchu.version}]</version>
-    </dependency>
-    ...
-  </dependencies>
-  ...
-  <properties>
-    ...
-    <manchu.version>1.5.0</manchu.version>
-    ...
-  </properties>
-  ...
-</project>
----
-
-  The aim being to allow updating the version of all the suite components in one go.  The versions-maven-plugin can help
-  automating these updates.  For example if we add the following to the pom:
-
----
-<project>
-  ...
-  <build>
-    ...
-    <plugins>
-      ...
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>versions-maven-plugin</artifactId>
-        <configuration>
-          ...
-          <linkItems>
-            <linkItem>
-              <property>manchu.version</property>
-              <groupId>com.foo.bar</groupId>
-              <artifactId>manchu-core</artifactId>
-            </linkItem>
-          </linkItems>
-          ...
-        </configuration>
-      </plugin>
-      ...
-    </plugins>
-    ...
-  </build>
-  ...
-</project>
----
-
-  Then executing the update-properties goal will update the manchu.version property to the latest version available to
-  you (i.e. based on your local repository and all currently active remote repositories)
-
-  If you want to restrict updates to within a specific range, for example, suppose we only want the 1.5 stream of
-  manchu:
-
----
-<project>
-  ...
-  <build>
-    ...
-    <plugins>
-      ...
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>versions-maven-plugin</artifactId>
-        <configuration>
-          ...
-          <linkItems>
-            <linkItem>
-              <property>manchu.version</property>
-              <groupId>com.foo.bar</groupId>
-              <artifactId>manchu-core</artifactId>
-              <version>[1.5.0,1.6.0-!)</version>
-            </linkItem>
-          </linkItems>
-          ...
-        </configuration>
-      </plugin>
-      ...
-    </plugins>
-    ...
-  </build>
-  ...
-</project>
----
-
+  This goal helps when you use properties to define versions.  Please see the example {{{examples/update-properties.html}here}}

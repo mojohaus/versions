@@ -21,4 +21,105 @@
 
 Update Properties
 
-  Todo
+  This goal is useful when you define dependency versions using properties. For example if you have a suite of projects
+  and you want to ensure that you use the same version of each dependency in the suite, you might have a dependency
+  section that looks like
+
+---
+<project>
+  ...
+  <dependencies>
+    ...
+    <dependency>
+      <groupId>com.foo.bar</groupId>
+      <artifactId>manchu-core</artifactId>
+      <version>[${manchu.version}]</version>
+    </dependency>
+    ...
+    <dependency>
+      <groupId>com.foo.bar</groupId>
+      <artifactId>manchu-extra</artifactId>
+      <version>[${manchu.version}]</version>
+    </dependency>
+    ...
+  </dependencies>
+  ...
+  <properties>
+    ...
+    <manchu.version>1.5.0</manchu.version>
+    ...
+  </properties>
+  ...
+</project>
+---
+
+  The aim being to allow updating the version of all the suite components in one go.  The versions-maven-plugin can help
+  automating these updates.  For example if we add the following to the pom:
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <configuration>
+          ...
+          <linkItems>
+            <linkItem>
+              <property>manchu.version</property>
+              <groupId>com.foo.bar</groupId>
+              <artifactId>manchu-core</artifactId>
+            </linkItem>
+          </linkItems>
+          ...
+        </configuration>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+  Then executing the update-properties goal will update the manchu.version property to the latest version available to
+  you (i.e. based on your local repository and all currently active remote repositories)
+
+  If you want to restrict updates to within a specific range, for example, suppose we only want the 1.5 stream of
+  manchu:
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <configuration>
+          ...
+          <linkItems>
+            <linkItem>
+              <property>manchu.version</property>
+              <groupId>com.foo.bar</groupId>
+              <artifactId>manchu-core</artifactId>
+              <version>[1.5.0,1.6.0-!)</version>
+            </linkItem>
+          </linkItems>
+          ...
+        </configuration>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+

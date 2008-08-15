@@ -1,0 +1,99 @@
+ ~~ Licensed to the Apache Software Foundation (ASF) under one
+ ~~ or more contributor license agreements.  See the NOTICE file
+ ~~ distributed with this work for additional information
+ ~~ regarding copyright ownership.  The ASF licenses this file
+ ~~ to you under the Apache License, Version 2.0 (the
+ ~~ "License"); you may not use this file except in compliance
+ ~~ with the License.  You may obtain a copy of the License at
+ ~~
+ ~~   http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing,
+ ~~ software distributed under the License is distributed on an
+ ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~~ KIND, either express or implied.  See the License for the
+ ~~ specific language governing permissions and limitations
+ ~~ under the License.
+
+ -----
+ Checking for new plugin updates
+ -----
+
+Checking for new plugin updates
+
+  The display-plugin-updates goal will check all the plugins and reporters used in your project and display a list
+  of those plugins with newer versions available.
+
+  Here are some examples of what this looks like:
+
+---
+svn checkout http://svn.codehaus.org/mojo/trunk/mojo/build-helper-maven-plugin build-helper-maven-plugin
+cd build-helper-maven-plugin
+mvn versions:display-plugin-updates
+---
+
+  Which produced the following output:
+
+---
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Build Helper Maven Plugin
+[INFO]    task-segment: [versions:display-plugin-updates]
+[INFO] ------------------------------------------------------------------------
+[INFO] [versions:display-plugin-updates]
+[INFO]
+[INFO] The following plugin updates are available:
+[INFO]   maven-checkstyle-plugin .................................. 2.1 -> 2.2
+[INFO]   maven-plugin-plugin .................................. 2.4.1 -> 2.4.2
+[INFO]   maven-pmd-plugin ......................................... 2.3 -> 2.4
+[INFO]   maven-project-info-reports-plugin ...................... 2.0.1 -> 2.1
+[INFO]   maven-surefire-report-plugin ......................... 2.4.2 -> 2.4.3
+[INFO]
+[INFO] All plugins have a version specified.
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1 second
+[INFO] Finished at: Fri Aug 15 09:45:42 IST 2008
+[INFO] Final Memory: 9M/167M
+[INFO] ------------------------------------------------------------------------
+---
+
+  The plugin will also warn if you have not specified the versions of any plugins that you are using and tell you what
+  version you are currently using.  Best practice in Maven is to always specify the plugin versions in order to
+  ensure that builds are reproducable.
+
+---
+svn checkout http://svn.codehaus.org/mojo/tags/xmlbeans-maven-plugin-2.3.1 xmlbeans-maven-plugin
+cd xmlbeans-maven-plugin
+mvn versions:display-plugin-updates
+---
+
+  Which produced the following output:
+
+---
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Maven XML Beans Plugin
+[INFO]    task-segment: [versions:display-plugin-updates]
+[INFO] ------------------------------------------------------------------------
+[INFO] [versions:display-plugin-updates]
+[INFO]
+[INFO] All plugins are using the latest versions.
+[INFO]
+[WARNING] The following plugins do not have their version specified:
+[WARNING]   maven-checkstyle-plugin ...................................... 2.2
+[WARNING]   maven-javadoc-plugin ......................................... 2.4
+[WARNING]   maven-jxr-plugin ............................................. 2.1
+[WARNING]   maven-plugin-plugin ........................................ 2.4.2
+[WARNING]   maven-pmd-plugin ............................................. 2.4
+[WARNING]   maven-surefire-report-plugin ............................... 2.4.3
+[WARNING]   org.codehaus.mojo:taglist-maven-plugin ....................... 2.2
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1 second
+[INFO] Finished at: Fri Aug 15 09:34:03 IST 2008
+[INFO] Final Memory: 9M/167M
+[INFO] ------------------------------------------------------------------------
+---

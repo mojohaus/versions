@@ -21,4 +21,45 @@
 
 Update Parent
 
-  Todo
+  Here's an example:
+
+---
+svn checkout http://svn.codehaus.org/mojo/tags/xmlbeans-maven-plugin-2.3.1 xmlbeans-maven-plugin
+cd xmlbeans-maven-plugin
+mvn versions:update-parent
+---
+
+  Which produced the following output:
+
+---
+[INFO] Scanning for projects...
+...
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Maven XML Beans Plugin
+[INFO]    task-segment: [versions:update-parent]
+[INFO] ------------------------------------------------------------------------
+[INFO] [versions:update-parent]
+...
+[INFO] artifact org.codehaus.mojo:mojo: checking for updates from codehaus.org
+[INFO] artifact org.codehaus.mojo:mojo: checking for updates from central
+[INFO] Updating parent from 14 to 17
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 24 seconds
+[INFO] Finished at: Thu Aug 14 15:17:04 IST 2008
+[INFO] Final Memory: 9M/166M
+[INFO] ------------------------------------------------------------------------
+---
+
+  You can restrict the versions to be considered:
+
+---
+mvn versions:update-parent "-DparentVersion=[14,16)"
+---
+
+  By default, if the newest version is a -SNAPSHOT, that will be used. You can force snapshots to be excluded:
+
+---
+mvn versions:update-parent -DallowSnapshots=false
+---
