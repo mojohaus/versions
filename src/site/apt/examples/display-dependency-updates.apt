@@ -37,9 +37,9 @@ mvn versions:display-dependency-updates
 ---
 [INFO] ------------------------------------------------------------------------
 [INFO] Building Build Helper Maven Plugin
-[INFO]    task-segment: [versions:display-plugin-updates]
+[INFO]    task-segment: [versions:display-dependency-updates]
 [INFO] ------------------------------------------------------------------------
-[INFO] [versions:display-plugin-updates]
+[INFO] [versions:display-dependency-updates]
 [INFO]
 [INFO] The following dependency updates are available:
 [INFO]   org.apache.maven:maven-artifact ........................ 2.0 -> 2.0.9
