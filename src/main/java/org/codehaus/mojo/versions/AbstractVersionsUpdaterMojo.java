@@ -379,7 +379,7 @@ public abstract class AbstractVersionsUpdaterMojo
 
         if ( currentVersion.equals( updateVersion.toString() ) )
         {
-            getLog().info( "Not updating version: current version already up to date." );
+            getLog().info( "Current version of " + artifact.toString() + " is the latest." );
             return false;
         }
         return true;
