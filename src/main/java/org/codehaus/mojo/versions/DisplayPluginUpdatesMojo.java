@@ -62,7 +62,18 @@ public class DisplayPluginUpdatesMojo
                 }
                 if ( r == 0 )
                 {
-                    r = getPluginVersion( o1 ).compareTo( getPluginVersion( o2 ) );
+                    String v1 = getPluginVersion( o1 );
+                    String v2 = getPluginVersion( o2 );
+                    if ( v1 == null )
+                    {
+                        // hope I got the +1/-1 the right way around
+                        return v2 == null ? 0 : -1;
+                    }
+                    if ( v2 == null ) 
+                    {
+                        return 1;
+                    }
+                    r = v1.compareTo( v2 );
                 }
                 return r;
             }

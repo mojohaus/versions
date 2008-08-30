@@ -68,7 +68,18 @@ public class DisplayDependencyUpdatesMojo
                 }
                 if ( r == 0 )
                 {
-                    r = d1.getVersion().compareTo( d2.getVersion() );
+                    String v1 = d1.getVersion();
+                    String v2 = d2.getVersion();
+                    if ( v1 == null )
+                    {
+                        // hope I got the +1/-1 the right way around
+                        return v2 == null ? 0 : -1;
+                    }
+                    if ( v2 == null )
+                    {
+                        return 1;
+                    }
+                    r = v1.compareTo( v2 );
                 }
                 return r;
             }
