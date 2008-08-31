@@ -4,13 +4,13 @@
 
   <parent>
     <groupId>org.codehaus.mojo</groupId>
-    <artifactId>mojo-sandbox-parent</artifactId>
-    <version>5-SNAPSHOT</version>
+    <artifactId>mojo-parent</artifactId>
+    <version>18</version>
   </parent>
 
   <groupId>org.codehaus.mojo</groupId>
   <artifactId>versions-maven-plugin</artifactId>
-  <version>1.0.0-alpha-1-SNAPSHOT</version>
+  <version>1.0-alpha-1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
@@ -37,7 +37,7 @@
       <name>Stephen Connolly</name>
       <email>stephen.alan.connolly@gmail.com</email>
       <roles>
-        <role>Java Developer</role>
+        <role>Lead Developer</role>
       </roles>
       <timezone>0</timezone>
     </developer>
