@@ -43,19 +43,15 @@ mvn versions:display-plugin-updates
 [INFO]
 [INFO] The following plugin updates are available:
 [INFO]   maven-checkstyle-plugin .................................. 2.1 -> 2.2
-[INFO]   maven-plugin-plugin .................................. 2.4.1 -> 2.4.2
-[INFO]   maven-pmd-plugin ......................................... 2.3 -> 2.4
-[INFO]   maven-project-info-reports-plugin ...................... 2.0.1 -> 2.1
-[INFO]   maven-surefire-report-plugin ......................... 2.4.2 -> 2.4.3
 [INFO]
 [INFO] All plugins have a version specified.
 [INFO]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESSFUL
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1 second
-[INFO] Finished at: Fri Aug 15 09:45:42 IST 2008
-[INFO] Final Memory: 9M/167M
+[INFO] Total time: < 1 second
+[INFO] Finished at: Mon Sep 01 15:49:10 IST 2008
+[INFO] Final Memory: 10M/167M
 [INFO] ------------------------------------------------------------------------
 ---
 
@@ -63,37 +59,146 @@ mvn versions:display-plugin-updates
   version you are currently using.  Best practice in Maven is to always specify the plugin versions in order to
   ensure that builds are reproducable.
 
+  For example the following pom.xml:
+
 ---
-svn checkout http://svn.codehaus.org/mojo/tags/xmlbeans-maven-plugin-2.3.1 xmlbeans-maven-plugin
-cd xmlbeans-maven-plugin
-mvn versions:display-plugin-updates
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.ap
+ache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.codehaus.mojo.versions-maven-plugin.it</groupId>
+  <artifactId>parent</artifactId>
+  <version>2.0</version>
+  <packaging>pom</packaging>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>2.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.4</source>
+            <target>1.4</target>
+          </configuration>
+        </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.1</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
 ---
 
-  Which produced the following output:
+  produced the following output:
 
 ---
 [INFO] ------------------------------------------------------------------------
-[INFO] Building Maven XML Beans Plugin
+[INFO] Building Unnamed - org.codehaus.mojo.versions-maven-plugin.it:parent:pom:2.0
 [INFO]    task-segment: [versions:display-plugin-updates]
 [INFO] ------------------------------------------------------------------------
 [INFO] [versions:display-plugin-updates]
 [INFO]
-[INFO] All plugins are using the latest versions.
+[INFO] The following plugin updates are available:
+[INFO]   maven-checkstyle-plugin .................................. 2.1 -> 2.2
+[INFO]   maven-clean-plugin ....................................... 2.1 -> 2.2
 [INFO]
 [WARNING] The following plugins do not have their version specified:
-[WARNING]   maven-checkstyle-plugin ...................................... 2.2
-[WARNING]   maven-javadoc-plugin ......................................... 2.4
-[WARNING]   maven-jxr-plugin ............................................. 2.1
-[WARNING]   maven-plugin-plugin ........................................ 2.4.2
-[WARNING]   maven-pmd-plugin ............................................. 2.4
-[WARNING]   maven-surefire-report-plugin ............................... 2.4.3
-[WARNING]   org.codehaus.mojo:taglist-maven-plugin ....................... 2.2
+[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.2
 [INFO]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESSFUL
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1 second
-[INFO] Finished at: Fri Aug 15 09:34:03 IST 2008
-[INFO] Final Memory: 9M/167M
+[INFO] Total time: < 1 second
+[INFO] Finished at: Mon Sep 01 15:55:18 IST 2008
+[INFO] Final Memory: 6M/104M
+[INFO] ------------------------------------------------------------------------
+---
+
+  And the following pom:
+
+---
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.codehaus.mojo.versions-maven-plugin.it</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.0</version>
+    <relativePath>../parent-2.0/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>child</artifactId>
+  <packaging>pom</packaging>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>2.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
+---
+
+  produced the following output:
+
+---
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Unnamed - org.codehaus.mojo.versions-maven-plugin.it:child:pom:2.0
+[INFO]    task-segment: [versions:display-plugin-updates]
+[INFO] ------------------------------------------------------------------------
+[INFO] [versions:display-plugin-updates]
+[INFO]
+[INFO] The following plugin updates are available:
+[INFO]   maven-checkstyle-plugin .................................. 2.0 -> 2.2
+[INFO]   maven-javadoc-plugin ..................................... 2.4 -> 2.5
+[INFO]
+[WARNING] The following plugins do not have their version specified:
+[WARNING]   maven-clean-plugin .......................... (from super-pom) 2.2
+[WARNING]   maven-javadoc-plugin ........................ (from super-pom) 2.4
+[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.2
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: < 1 second
+[INFO] Finished at: Mon Sep 01 15:57:04 IST 2008
+[INFO] Final Memory: 6M/104M
 [INFO] ------------------------------------------------------------------------
 ---

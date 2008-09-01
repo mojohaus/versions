@@ -88,10 +88,13 @@ public class DisplayPluginUpdatesMojo
 
         Set plugins = new TreeSet( new PluginComparator() );
 
+        Map excludePluginManagement = new HashMap( superPomPluginManagement );
+        excludePluginManagement.putAll( parentPluginManagement );
+
         try
         {
             addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPluginManagement().getPlugins(),
-                               parentPluginManagement );
+                               excludePluginManagement );
         }
         catch ( NullPointerException e )
         {
