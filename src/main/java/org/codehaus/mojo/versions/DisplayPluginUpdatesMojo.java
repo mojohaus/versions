@@ -20,10 +20,12 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -33,6 +35,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,6 +63,17 @@ public class DisplayPluginUpdatesMojo
     {
         List parents = getParentProjects( getProject() );
 
+        Map superPomPluginManagement = new HashMap();
+        try
+        {
+            superPomPluginManagement.putAll(
+                getPluginManagement( projectBuilder.buildStandaloneSuperProject( localRepository ) ) );
+        }
+        catch ( ProjectBuildingException e )
+        {
+            throw new MojoExecutionException( "Could not determine the super pom.xml", e );
+        }
+
         Map parentPluginManagement = new HashMap();
         Map parentBuildPlugins = new HashMap();
         Map parentReportPlugins = new HashMap();
@@ -74,12 +88,67 @@ public class DisplayPluginUpdatesMojo
 
         Set plugins = new TreeSet( new PluginComparator() );
 
-        addProjectPlugins( plugins, getProject().getPluginManagement().getPlugins(), parentPluginManagement );
+        try
+        {
+            addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPluginManagement().getPlugins(),
+                               parentPluginManagement );
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
 
-        addProjectPlugins( plugins, getProject().getBuildPlugins(), parentBuildPlugins );
+        try
+        {
+            addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPlugins(), parentBuildPlugins );
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
 
-        addProjectPlugins( plugins, getProject().getReportPlugins(), parentReportPlugins );
+        try
+        {
+            addProjectPlugins( plugins, getProject().getOriginalModel().getReporting().getPlugins(),
+                               parentReportPlugins );
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
+        i = getProject().getOriginalModel().getProfiles().iterator();
+        while ( i.hasNext() )
+        {
+            Profile profile = (Profile) i.next();
+            try
+            {
+                addProjectPlugins( plugins, profile.getBuild().getPluginManagement().getPlugins(),
+                                   parentPluginManagement );
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
+            }
 
+            try
+            {
+                addProjectPlugins( plugins, profile.getBuild().getPlugins(), parentBuildPlugins );
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
+            }
+
+            try
+            {
+
+                addProjectPlugins( plugins, profile.getReporting().getPlugins(), parentReportPlugins );
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
+            }
+        }
         List updates = new ArrayList();
         List lockdown = new ArrayList();
         i = plugins.iterator();
@@ -89,6 +158,10 @@ public class DisplayPluginUpdatesMojo
             String groupId = getPluginGroupId( plugin );
             String artifactId = getPluginArtifactId( plugin );
             String version = getPluginVersion( plugin );
+            if ( version == null )
+            {
+                version = (String) parentPluginManagement.get( ArtifactUtils.versionlessKey( groupId, artifactId ) );
+            }
             getLog().debug( "Checking " + groupId + ":" + artifactId + " for updates newer than " + version );
 
             VersionRange versionRange;
@@ -109,7 +182,9 @@ public class DisplayPluginUpdatesMojo
 
             if ( version == null && artifactVersion != null )
             {
-                newVersion = artifactVersion.toString();
+
+                version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
+                newVersion = version != null ? version : artifactVersion.toString();
                 StringBuilder buf = new StringBuilder();
                 if ( "org.apache.maven.plugins".equals( groupId ) )
                 {
@@ -121,16 +196,21 @@ public class DisplayPluginUpdatesMojo
                 }
                 buf.append( artifactId );
                 buf.append( ' ' );
-                int padding = 65 - newVersion.length();
+                int padding = 65 - newVersion.length() - ( version != null ? 17 : 0 );
                 while ( buf.length() < padding )
                 {
                     buf.append( '.' );
                 }
                 buf.append( ' ' );
+                if ( version != null )
+                {
+                    buf.append( "(from super-pom) " );
+                }
                 buf.append( newVersion );
                 lockdown.add( buf.toString() );
             }
-            else if ( artifactVersion != null && version.compareTo( newVersion = artifactVersion.toString() ) < 0 )
+            if ( version != null && artifactVersion != null &&
+                version.compareTo( newVersion = artifactVersion.toString() ) < 0 )
             {
                 StringBuilder buf = new StringBuilder();
                 if ( "org.apache.maven.plugins".equals( groupId ) )
@@ -186,13 +266,20 @@ public class DisplayPluginUpdatesMojo
         getLog().info( "" );
     }
 
-    private void addProjectPlugins( Set plugins, List pluginSource, Map parentDefinitions )
+    /**
+     * Adds those project plugins which are not inherited from the parent definitions to the list of plugins.
+     *
+     * @param plugins           The list of plugins.
+     * @param projectPlugins    The project's plugins.
+     * @param parentDefinitions The parent plugin definitions.
+     */
+    private void addProjectPlugins( Set plugins, Collection projectPlugins, Map parentDefinitions )
     {
-        Iterator j = pluginSource.iterator();
+        Iterator j = projectPlugins.iterator();
         while ( j.hasNext() )
         {
             Object plugin = j.next();
-            String coord = getPluginGroupId( plugin ) + ":" + getPluginArtifactId( plugin );
+            String coord = getPluginCoords( plugin );
             String version = getPluginVersion( plugin );
             String parentVersion = (String) parentDefinitions.get( coord );
             if ( parentVersion == null || !parentVersion.equals( version ) )
@@ -202,55 +289,179 @@ public class DisplayPluginUpdatesMojo
         }
     }
 
-    private Map getReportPlugins( MavenProject parentProject, boolean onlyInherited )
+    /**
+     * Gets the report plugins of a specific project.
+     *
+     * @param project              the project to get the report plugins from.
+     * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be
+     *                             inherited by child projects.
+     * @return The map of effective plugin versions keyed by coordinates.
+     */
+    private Map getReportPlugins( MavenProject project, boolean onlyIncludeInherited )
     {
-        Iterator j;
         Map reportPlugins = new HashMap();
-        j = parentProject.getReportPlugins().iterator();
-        while ( j.hasNext() )
+        try
         {
-            Object plugin = j.next();
-            String coord = getPluginGroupId( plugin ) + ":" + getPluginArtifactId( plugin );
-            String version = getPluginVersion( plugin );
-            if ( version != null && ( !onlyInherited || getPluginInherited( plugin ) ) )
+            Iterator j = project.getOriginalModel().getReporting().getPlugins().iterator();
+            while ( j.hasNext() )
             {
-                reportPlugins.put( coord, version );
+                Object plugin = j.next();
+                String coord = getPluginCoords( plugin );
+                String version = getPluginVersion( plugin );
+                if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+                {
+                    reportPlugins.put( coord, version );
+                }
+            }
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
+        Iterator i = project.getOriginalModel().getProfiles().iterator();
+        while ( i.hasNext() )
+        {
+            Profile profile = (Profile) i.next();
+            try
+            {
+                Iterator j = profile.getReporting().getPlugins().iterator();
+                while ( j.hasNext() )
+                {
+                    Object plugin = j.next();
+                    String coord = getPluginCoords( plugin );
+                    String version = getPluginVersion( plugin );
+                    if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+                    {
+                        reportPlugins.put( coord, version );
+                    }
+                }
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
             }
         }
         return reportPlugins;
     }
 
-    private Map getBuildPlugins( MavenProject project, boolean onlyInherited )
+    /**
+     * Gets the build plugins of a specific project.
+     *
+     * @param project              the project to get the build plugins from.
+     * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be
+     *                             inherited by child projects.
+     * @return The map of effective plugin versions keyed by coordinates.
+     */
+    private Map getBuildPlugins( MavenProject project, boolean onlyIncludeInherited )
     {
-        Iterator j = project.getBuildPlugins().iterator();
         Map buildPlugins = new HashMap();
-        while ( j.hasNext() )
+        try
         {
-            Object plugin = j.next();
-            String coord = getPluginGroupId( plugin ) + ":" + getPluginArtifactId( plugin );
-            String version = getPluginVersion( plugin );
-            if ( version != null && ( !onlyInherited || getPluginInherited( plugin ) ) )
+            Iterator j = project.getOriginalModel().getBuild().getPlugins().iterator();
+            while ( j.hasNext() )
             {
-                buildPlugins.put( coord, version );
+                Object plugin = j.next();
+                String coord = getPluginCoords( plugin );
+                String version = getPluginVersion( plugin );
+                if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+                {
+                    buildPlugins.put( coord, version );
+                }
+            }
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
+        Iterator i = project.getOriginalModel().getProfiles().iterator();
+        while ( i.hasNext() )
+        {
+            Profile profile = (Profile) i.next();
+            try
+            {
+                Iterator j = profile.getBuild().getPlugins().iterator();
+                while ( j.hasNext() )
+                {
+                    Object plugin = j.next();
+                    String coord = getPluginCoords( plugin );
+                    String version = getPluginVersion( plugin );
+                    if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+                    {
+                        buildPlugins.put( coord, version );
+                    }
+                }
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
             }
         }
         return buildPlugins;
     }
 
+    /**
+     * Returns the coordinates of a plugin.
+     *
+     * @param plugin The plugin
+     * @return The groupId and artifactId separated by a colon.
+     */
+    private static String getPluginCoords( Object plugin )
+    {
+        return getPluginGroupId( plugin ) + ":" + getPluginArtifactId( plugin );
+    }
+
+    /**
+     * Gets the plugin management plugins of a specific project.
+     *
+     * @param project the project to get the plugin management plugins from.
+     * @return The map of effective plugin versions keyed by coordinates.
+     */
     private Map getPluginManagement( MavenProject project )
     {
+        // we want only those parts of pluginManagement that are defined in this project
         Map pluginManagement = new HashMap();
-        Iterator j = project.getPluginManagement().getPlugins().iterator();
-        while ( j.hasNext() )
+        try
         {
-            Object plugin = j.next();
-            String coord = getPluginGroupId( plugin ) + ":" + getPluginArtifactId( plugin );
-            String version = getPluginVersion( plugin );
-            if ( version != null )
+            Iterator j = project.getOriginalModel().getBuild().getPluginManagement().getPlugins().iterator();
+            while ( j.hasNext() )
             {
-                pluginManagement.put( coord, version );
+                Plugin plugin = (Plugin) j.next();
+                String coord = getPluginCoords( plugin );
+                String version = getPluginVersion( plugin );
+                if ( version != null )
+                {
+                    pluginManagement.put( coord, version );
+                }
             }
         }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
+        Iterator i = project.getOriginalModel().getProfiles().iterator();
+        while ( i.hasNext() )
+        {
+            Profile profile = (Profile) i.next();
+            try
+            {
+                Iterator j = profile.getBuild().getPluginManagement().getPlugins().iterator();
+                while ( j.hasNext() )
+                {
+                    Plugin plugin = (Plugin) j.next();
+                    String coord = getPluginCoords( plugin );
+                    String version = getPluginVersion( plugin );
+                    if ( version != null )
+                    {
+                        pluginManagement.put( coord, version );
+                    }
+                }
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
+            }
+        }
+
         return pluginManagement;
     }
 
@@ -271,15 +482,6 @@ public class DisplayPluginUpdatesMojo
             project = project.getParent();
             parents.add( 0, project );
         }
-        try
-        {
-            parents.add( 0, projectBuilder.buildStandaloneSuperProject( localRepository ) );
-        }
-        catch ( ProjectBuildingException e )
-        {
-            throw new MojoExecutionException( "Could not determine the super pom.xml", e );
-        }
-
         return parents;
     }
 
@@ -330,7 +532,7 @@ public class DisplayPluginUpdatesMojo
      */
     private static boolean getPluginInherited( Object plugin )
     {
-        return Boolean.TRUE.equals( plugin instanceof ReportPlugin
+        return "true".equalsIgnoreCase( plugin instanceof ReportPlugin
             ? ( (ReportPlugin) plugin ).getInherited()
             : ( (Plugin) plugin ).getInherited() );
     }

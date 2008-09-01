@@ -96,7 +96,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>2.4.1</version>
+        <version>2.4.2</version>
         <configuration>
           <goalPrefix>versions</goalPrefix>
         </configuration>
