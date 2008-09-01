@@ -30,6 +30,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
 
@@ -72,6 +73,11 @@ public abstract class AbstractVersionsUpdaterMojo
      * @component
      */
     protected org.apache.maven.artifact.resolver.ArtifactResolver resolver;
+
+    /**
+     * @component
+     */
+    protected MavenProjectBuilder projectBuilder;
 
     /**
      * @parameter expression="${localRepository}"

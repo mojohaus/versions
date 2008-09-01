@@ -25,8 +25,6 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -54,36 +52,7 @@ public class DisplayDependencyUpdatesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        Set dependencies = new TreeSet( new Comparator()
-        {
-            public int compare( Object o1, Object o2 )
-            {
-                Dependency d1 = (Dependency) o1;
-                Dependency d2 = (Dependency) o2;
-
-                int r = d1.getGroupId().compareTo( d2.getGroupId() );
-                if ( r == 0 )
-                {
-                    r = d1.getArtifactId().compareTo( d2.getArtifactId() );
-                }
-                if ( r == 0 )
-                {
-                    String v1 = d1.getVersion();
-                    String v2 = d2.getVersion();
-                    if ( v1 == null )
-                    {
-                        // hope I got the +1/-1 the right way around
-                        return v2 == null ? 0 : -1;
-                    }
-                    if ( v2 == null )
-                    {
-                        return 1;
-                    }
-                    r = v1.compareTo( v2 );
-                }
-                return r;
-            }
-        } );
+        Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
         List updates = new ArrayList();
         Iterator i = dependencies.iterator();
@@ -149,30 +118,47 @@ public class DisplayDependencyUpdatesMojo
         getLog().info( "" );
     }
 
-    private static String getPluginGroupId( Object plugin )
-    {
-        return plugin instanceof ReportPlugin
-            ? ( (ReportPlugin) plugin ).getGroupId()
-            : ( (Plugin) plugin ).getGroupId();
-    }
-
-    private static String getPluginArtifactId( Object plugin )
-    {
-        return plugin instanceof ReportPlugin
-            ? ( (ReportPlugin) plugin ).getArtifactId()
-            : ( (Plugin) plugin ).getArtifactId();
-    }
-
-    private static String getPluginVersion( Object plugin )
-    {
-        return plugin instanceof ReportPlugin
-            ? ( (ReportPlugin) plugin ).getVersion()
-            : ( (Plugin) plugin ).getVersion();
-    }
-
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         // do nothing
+    }
+
+    /**
+     * A comparator used to sort dependencies by group id, artifact id and finally version.
+     */
+    private static class DependencyComparator
+        implements Comparator
+    {
+        /**
+         * @see java.util.Comparator#compare(Object, Object)
+         */
+        public int compare( Object o1, Object o2 )
+        {
+            Dependency d1 = (Dependency) o1;
+            Dependency d2 = (Dependency) o2;
+
+            int r = d1.getGroupId().compareTo( d2.getGroupId() );
+            if ( r == 0 )
+            {
+                r = d1.getArtifactId().compareTo( d2.getArtifactId() );
+            }
+            if ( r == 0 )
+            {
+                String v1 = d1.getVersion();
+                String v2 = d2.getVersion();
+                if ( v1 == null )
+                {
+                    // hope I got the +1/-1 the right way around
+                    return v2 == null ? 0 : -1;
+                }
+                if ( v2 == null )
+                {
+                    return 1;
+                }
+                r = v1.compareTo( v2 );
+            }
+            return r;
+        }
     }
 }
