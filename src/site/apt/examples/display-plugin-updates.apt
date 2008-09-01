@@ -121,6 +121,8 @@ ache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 [INFO]   maven-clean-plugin ....................................... 2.1 -> 2.2
 [INFO]
 [WARNING] The following plugins do not have their version specified:
+[WARNING]   maven-compiler-plugin ..................... (from super-pom) 2.0.2
+[WARNING]   maven-javadoc-plugin ........................ (from super-pom) 2.4
 [WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.2
 [INFO]
 [INFO] ------------------------------------------------------------------------
