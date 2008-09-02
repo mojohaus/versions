@@ -3,8 +3,8 @@
 
   <parent>
     <groupId>org.codehaus.mojo</groupId>
-    <artifactId>mojo</artifactId>
-    <version>17</version>
+    <artifactId>mojo-parent</artifactId>
+    <version>18</version>
   </parent>
 
   <groupId>org.codehaus.mojo</groupId>
