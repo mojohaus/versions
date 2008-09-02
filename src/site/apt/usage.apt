@@ -50,7 +50,7 @@ mvn versions:update-parent
   <<<display-plugin-updates>>> goal.
 
 ---
-mvn version:display-plugin-updates
+mvn versions:display-plugin-updates
 ---
 
   {{{examples/display-plugin-updates.html} A more detailed example of the <<<display-plugin-updates>>> goal}}.
@@ -61,7 +61,7 @@ mvn version:display-plugin-updates
   <<<display-dependency-updates>>> goal.
 
 ---
-mvn version:display-dependency-updates
+mvn versions:display-dependency-updates
 ---
 
   {{{examples/display-dependency-updates.html} A more detailed example of the <<<display-dependency-updates>>> goal}}.
