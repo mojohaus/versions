@@ -44,6 +44,16 @@ public class UpdateParentMojo
     extends AbstractVersionsUpdaterMojo
 {
 
+// ------------------------------ FIELDS ------------------------------
+
+    /**
+     * Version specification to control artifact resolution.
+     *
+     * @parameter expression="${parentVersion}"
+     * @since 1.0
+     */
+    protected String parentVersion = null;
+
 // -------------------------- OTHER METHODS --------------------------
 
     /**

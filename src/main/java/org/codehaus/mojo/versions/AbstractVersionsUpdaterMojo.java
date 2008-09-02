@@ -116,30 +116,6 @@ public abstract class AbstractVersionsUpdaterMojo
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
-     * The properties to update and the artifact coordinates that they are to be updated from.
-     *
-     * @parameter
-     * @since 1.0
-     */
-    protected LinkItem[] linkItems;
-
-    /**
-     * A comma separated list of properties to update.
-     *
-     * @parameter expression="${includeProperties}"
-     * @since 1.0
-     */
-    protected String includeProperties = null;
-
-    /**
-     * A comma separated list of properties to not update.
-     *
-     * @parameter expression="${excludeProperties}"
-     * @since 1.0
-     */
-    protected String excludeProperties = null;
-
-    /**
      * The versioning rule to use when comparing versions. Valid values are <code>maven</code> which is the default or
      * <code>numeric</code> which will handle long version numbers provided all components are numeric.
      *
@@ -147,14 +123,6 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0
      */
     protected String comparisonMethod = null;
-
-    /**
-     * Version specification to control artifact resolution.
-     *
-     * @parameter expression="${parentVersion}"
-     * @since 1.0
-     */
-    protected String parentVersion = null;
 
     /**
      * Version specification to control artifact resolution.

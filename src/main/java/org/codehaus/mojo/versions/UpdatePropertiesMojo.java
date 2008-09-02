@@ -69,6 +69,30 @@ public class UpdatePropertiesMojo
      */
     private static final String REGEX_QUOTE_END_ESCAPED = REGEX_QUOTE_END + '\\' + REGEX_QUOTE_END + REGEX_QUOTE_START;
 
+    /**
+     * The properties to update and the artifact coordinates that they are to be updated from.
+     *
+     * @parameter
+     * @since 1.0
+     */
+    protected LinkItem[] linkItems;
+
+    /**
+     * A comma separated list of properties to update.
+     *
+     * @parameter expression="${includeProperties}"
+     * @since 1.0
+     */
+    protected String includeProperties = null;
+
+    /**
+     * A comma separated list of properties to not update.
+     *
+     * @parameter expression="${excludeProperties}"
+     * @since 1.0
+     */
+    protected String excludeProperties = null;
+
 // -------------------------- STATIC METHODS --------------------------
 
     /**
