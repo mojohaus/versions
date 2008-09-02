@@ -14,7 +14,7 @@
 
   <name>Versions Maven Plugin</name>
   <description>
-    Versions plugin for Maven 2. The versions plugin updates the versions of components in the pom.
+    Versions Plugin for Maven 2. The Versions Plugin updates the versions of components in the POM.
   </description>
   <inceptionYear>2008</inceptionYear>
   <licenses>
@@ -24,6 +24,11 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/MVERSIONS</url>
+  </issueManagement>
 
   <scm>
     <connection>scm:svn:http://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</connection>
