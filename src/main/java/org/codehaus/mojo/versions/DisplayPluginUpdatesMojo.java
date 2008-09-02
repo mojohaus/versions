@@ -143,7 +143,7 @@ public class DisplayPluginUpdatesMojo
             {
                 version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
                 newVersion = version != null ? version : artifactVersion.toString();
-                StringBuilder buf = new StringBuilder();
+                StringBuffer buf = new StringBuffer();
                 if ( "org.apache.maven.plugins".equals( groupId ) )
                 {
                     // a core plugin... group id is not needed
@@ -177,7 +177,7 @@ public class DisplayPluginUpdatesMojo
             }
             if ( version != null && artifactVersion != null && version.compareTo( newVersion ) < 0 )
             {
-                StringBuilder buf = new StringBuilder();
+                StringBuffer buf = new StringBuffer();
                 if ( "org.apache.maven.plugins".equals( groupId ) )
                 {
                     // a core plugin... group id is not needed

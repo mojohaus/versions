@@ -290,7 +290,7 @@ public class ModifiedPomXMLEventReader
      */
     public StringBuffer asStringBuffer()
     {
-        return new StringBuffer( pom );
+        return new StringBuffer( pom.toString() );
     }
 
     /**

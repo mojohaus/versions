@@ -101,7 +101,7 @@ public class DisplayDependencyUpdatesMojo
             if ( artifactVersion != null && getVersionComparator().compare( currentVersion, artifactVersion ) < 0 )
             {
                 String newVersion = artifactVersion.toString();
-                StringBuilder buf = new StringBuilder();
+                StringBuffer buf = new StringBuffer();
                 buf.append( groupId ).append( ':' );
                 buf.append( artifactId );
                 buf.append( ' ' );
