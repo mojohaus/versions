@@ -125,7 +125,7 @@ public abstract class AbstractVersionsUpdaterMojo
     protected String comparisonMethod;
 
     /**
-     * Version specification to control artifact resolution.
+     * Whether to allow snapshots when searching for the latest version of an artifact.
      *
      * @parameter expression="${allowSnapshots}" default-value="true"
      * @since 1.0
