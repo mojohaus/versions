@@ -37,6 +37,14 @@ import java.io.UnsupportedEncodingException;
 public class ModifiedPomXMLEventReader
     implements XMLEventReader
 {
+
+// ------------------------------ FIELDS ------------------------------
+
+    /**
+     * Field MAX_MARKS
+     */
+    private static final int MAX_MARKS = 3;
+
     /**
      * Field pom
      */
@@ -107,10 +115,7 @@ public class ModifiedPomXMLEventReader
      */
     private XMLEventReader backing;
 
-    /**
-     * Field MAX_MARKS
-     */
-    private static final int MAX_MARKS = 3;
+// --------------------------- CONSTRUCTORS ---------------------------
 
     /**
      * Constructor ModifiedPomXMLEventReader creates a new ModifiedPomXMLEventReader instance.
@@ -157,163 +162,7 @@ public class ModifiedPomXMLEventReader
         }
     }
 
-    /**
-     * Clears the mark.
-     *
-     * @param index the mark to clear.
-     */
-    public void clearMark( int index )
-    {
-        markStart[index] = -1;
-    }
-
-    /**
-     * Sets a mark to the current event.
-     *
-     * @param index the mark to set.
-     */
-    public void mark( int index )
-    {
-        markStart[index] = lastStart;
-        markEnd[index] = lastEnd;
-        markDelta[index] = lastDelta;
-    }
-
-    /**
-     * Returns <code>true</code> if the specified mark is defined.
-     *
-     * @param index The mark.
-     * @return <code>true</code> if the specified mark is defined.
-     */
-    public boolean hasMark( int index )
-    {
-        return markStart[index] != -1;
-    }
-
-    /**
-     * Replaces the current element with the replacement text.
-     *
-     * @param replacement The replacement.
-     */
-    public void replace( String replacement )
-    {
-        if ( lastStart < 0 || lastEnd < lastStart )
-        {
-            throw new IllegalStateException();
-        }
-        int start = lastDelta + lastStart;
-        int end = lastDelta + lastEnd;
-        if ( replacement.equals( pom.substring( start, end ) ) )
-        {
-            return;
-        }
-        pom.replace( start, end, replacement );
-        int delta = replacement.length() - lastEnd - lastStart;
-        nextDelta += delta;
-        for ( int i = 0; i < MAX_MARKS; i++ )
-        {
-            if ( hasMark( i ) && lastStart == markStart[i] && markEnd[i] == lastEnd )
-            {
-                markEnd[i] += delta;
-            }
-        }
-        lastEnd += delta;
-        modified = true;
-    }
-
-    /**
-     * Replaces the specified marked element with the replacement text.
-     *
-     * @param index       The mark.
-     * @param replacement The replacement.
-     */
-    public void replaceMark( int index, String replacement )
-    {
-        if ( !hasMark( index ) )
-        {
-            throw new IllegalStateException();
-        }
-        int start = markDelta[index] + markStart[index];
-        int end = markDelta[index] + markEnd[index];
-        if ( replacement.equals( pom.substring( start, end ) ) )
-        {
-            return;
-        }
-        pom.replace( start, end, replacement );
-        int delta = replacement.length() - markEnd[index] - markStart[index];
-        nextDelta += delta;
-        if ( lastStart == markStart[index] && lastEnd == markEnd[index] )
-        {
-            lastEnd += delta;
-        }
-        else if ( lastStart > markStart[index] )
-        {
-            lastDelta += delta;
-        }
-        for ( int i = 0; i < MAX_MARKS; i++ )
-        {
-            if ( i == index || markStart[i] == -1 )
-            {
-                continue;
-            }
-            if ( markStart[i] > markStart[index] )
-            {
-                markDelta[i] += delta;
-            }
-            else if ( markStart[i] == markStart[index] && markEnd[i] == markEnd[index] )
-            {
-                markDelta[i] += delta;
-            }
-        }
-        markEnd[index] += delta;
-        modified = true;
-    }
-
-    /**
-     * Replaces all content between marks index1 and index2 with the replacement text.
-     *
-     * @param index1      The event mark to replace after.
-     * @param index2      The event mark to replace before.
-     * @param replacement The replacement.
-     */
-    public void replaceBetween( int index1, int index2, String replacement )
-    {
-        if ( !hasMark( index1 ) || !hasMark( index2 ) || markStart[index1] > markStart[index2] )
-        {
-            throw new IllegalStateException();
-        }
-        int start = markDelta[index1] + markEnd[index1];
-        int end = markDelta[index2] + markStart[index2];
-        if ( replacement.equals( pom.substring( start, end ) ) )
-        {
-            return;
-        }
-        pom.replace( start, end, replacement );
-        int delta = replacement.length() - ( end - start );
-        nextDelta += delta;
-
-        for ( int i = 0; i < MAX_MARKS; i++ )
-        {
-            if ( i == index1 || i == index2 || markStart[i] == -1 )
-            {
-                continue;
-            }
-            if ( markStart[i] > markStart[index2] )
-            {
-                markDelta[i] += delta;
-            }
-            else if ( markStart[i] == markEnd[index1] && markEnd[i] == markStart[index1] )
-            {
-                markDelta[i] += delta;
-            }
-            else if ( markStart[i] > markEnd[index1] || markEnd[i] < markStart[index2] )
-            {
-                markStart[i] = -1;
-            }
-        }
-
-        modified = true;
-    }
+// --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
      * Getter for property 'modified'.
@@ -325,147 +174,10 @@ public class ModifiedPomXMLEventReader
         return modified;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public XMLEvent nextEvent()
-        throws XMLStreamException
-    {
-        try
-        {
-            return next;
-        }
-        finally
-        {
-            next = null;
-            lastStart = nextStart;
-            lastEnd = nextEnd;
-            lastDelta = nextDelta;
-        }
-    }
+// ------------------------ INTERFACE METHODS ------------------------
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean hasNext()
-    {
-        if ( next != null )
-        {
-            // fast path
-            return true;
-        }
-        if ( !backing.hasNext() )
-        {
-            // fast path
-            return false;
-        }
-        try
-        {
-            next = backing.nextEvent();
-            nextStart = nextEnd;
-            if ( backing.hasNext() )
-            {
-                nextEnd = backing.peek().getLocation().getCharacterOffset();
-            }
+// --------------------- Interface Iterator ---------------------
 
-            if ( nextEnd != -1 )
-            {
-                if ( !next.isCharacters() )
-                {
-                    while ( nextStart < nextEnd && ( c( nextStart ) == '\n' || c( nextStart ) == '\r' ) )
-                    {
-                        nextStart++;
-                    }
-                }
-                else
-                {
-                    while ( nextEndIncludesNextEvent() || nextEndIncludesNextEndElement() )
-                    {
-                        nextEnd--;
-                    }
-                }
-            }
-            return true;
-        }
-        catch ( XMLStreamException e )
-        {
-            return false;
-        }
-    }
-
-    /**
-     * Returns <code>true</code> if nextEnd is including the start of the next event.
-     *
-     * @return <code>true</code> if nextEnd is including the start of the next event.
-     */
-    private boolean nextEndIncludesNextEvent()
-    {
-        return nextEnd > nextStart + 1 && ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
-    }
-
-    /**
-     * Returns <code>true</code> if nextEnd is including the start of and end element.
-     *
-     * @return <code>true</code> if nextEnd is including the start of and end element.
-     */
-    private boolean nextEndIncludesNextEndElement()
-    {
-        return ( nextEnd > nextStart + 2 && c( nextEnd - 2 ) == '<' );
-    }
-
-    /**
-     * Gets the character at the index provided by the StAX parser.
-     *
-     * @param index the index.
-     * @return char The character.
-     */
-    private char c( int index )
-    {
-        return pom.charAt( nextDelta + index );
-    }
-
-    /**
-     * Returns the verbatim text of the element returned by {@link #peek()}.
-     *
-     * @return the verbatim text of the element returned by {@link #peek()}.
-     */
-    public String getPeekVerbatim()
-    {
-        if ( hasNext() )
-        {
-            return pom.substring( nextDelta + nextStart, nextDelta + nextEnd );
-        }
-        return "";
-    }
-
-    /**
-     * the verbatim text of the current element when {@link #mark(int)} was called.
-     *
-     * @param index The mark index.
-     * @return the current element when {@link #mark(int)} was called.
-     */
-    public String getMarkVerbatim( int index )
-    {
-        if ( hasMark( index ) )
-        {
-            return pom.substring( markDelta[index] + markStart[index], markDelta[index] + markEnd[index] );
-        }
-        return "";
-    }
-
-    /**
-     * Getter for property 'verbatim'.
-     *
-     * @return Value for property 'verbatim'.
-     */
-    public String getVerbatim()
-    {
-        if ( lastStart >= 0 && lastEnd >= lastStart )
-        {
-            return pom.substring( lastDelta + lastStart, lastDelta + lastEnd );
-        }
-        return "";
-    }
 
     /**
      * {@inheritDoc}
@@ -488,6 +200,27 @@ public class ModifiedPomXMLEventReader
     public void remove()
     {
         throw new UnsupportedOperationException();
+    }
+
+// --------------------- Interface XMLEventReader ---------------------
+
+    /**
+     * {@inheritDoc}
+     */
+    public XMLEvent nextEvent()
+        throws XMLStreamException
+    {
+        try
+        {
+            return next;
+        }
+        finally
+        {
+            next = null;
+            lastStart = nextStart;
+            lastEnd = nextEnd;
+            lastDelta = nextDelta;
+        }
     }
 
     /**
@@ -548,6 +281,8 @@ public class ModifiedPomXMLEventReader
         backing = null;
     }
 
+// -------------------------- OTHER METHODS --------------------------
+
     /**
      * Returns a copy of the backing string buffer.
      *
@@ -557,4 +292,286 @@ public class ModifiedPomXMLEventReader
     {
         return new StringBuffer( pom );
     }
+
+    /**
+     * Clears the mark.
+     *
+     * @param index the mark to clear.
+     */
+    public void clearMark( int index )
+    {
+        markStart[index] = -1;
+    }
+
+    /**
+     * the verbatim text of the current element when {@link #mark(int)} was called.
+     *
+     * @param index The mark index.
+     * @return the current element when {@link #mark(int)} was called.
+     */
+    public String getMarkVerbatim( int index )
+    {
+        if ( hasMark( index ) )
+        {
+            return pom.substring( markDelta[index] + markStart[index], markDelta[index] + markEnd[index] );
+        }
+        return "";
+    }
+
+    /**
+     * Returns the verbatim text of the element returned by {@link #peek()}.
+     *
+     * @return the verbatim text of the element returned by {@link #peek()}.
+     */
+    public String getPeekVerbatim()
+    {
+        if ( hasNext() )
+        {
+            return pom.substring( nextDelta + nextStart, nextDelta + nextEnd );
+        }
+        return "";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasNext()
+    {
+        if ( next != null )
+        {
+            // fast path
+            return true;
+        }
+        if ( !backing.hasNext() )
+        {
+            // fast path
+            return false;
+        }
+        try
+        {
+            next = backing.nextEvent();
+            nextStart = nextEnd;
+            if ( backing.hasNext() )
+            {
+                nextEnd = backing.peek().getLocation().getCharacterOffset();
+            }
+
+            if ( nextEnd != -1 )
+            {
+                if ( !next.isCharacters() )
+                {
+                    while ( nextStart < nextEnd && ( c( nextStart ) == '\n' || c( nextStart ) == '\r' ) )
+                    {
+                        nextStart++;
+                    }
+                }
+                else
+                {
+                    while ( nextEndIncludesNextEvent() || nextEndIncludesNextEndElement() )
+                    {
+                        nextEnd--;
+                    }
+                }
+            }
+            return true;
+        }
+        catch ( XMLStreamException e )
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Getter for property 'verbatim'.
+     *
+     * @return Value for property 'verbatim'.
+     */
+    public String getVerbatim()
+    {
+        if ( lastStart >= 0 && lastEnd >= lastStart )
+        {
+            return pom.substring( lastDelta + lastStart, lastDelta + lastEnd );
+        }
+        return "";
+    }
+
+    /**
+     * Sets a mark to the current event.
+     *
+     * @param index the mark to set.
+     */
+    public void mark( int index )
+    {
+        markStart[index] = lastStart;
+        markEnd[index] = lastEnd;
+        markDelta[index] = lastDelta;
+    }
+
+    /**
+     * Returns <code>true</code> if nextEnd is including the start of and end element.
+     *
+     * @return <code>true</code> if nextEnd is including the start of and end element.
+     */
+    private boolean nextEndIncludesNextEndElement()
+    {
+        return ( nextEnd > nextStart + 2 && c( nextEnd - 2 ) == '<' );
+    }
+
+    /**
+     * Returns <code>true</code> if nextEnd is including the start of the next event.
+     *
+     * @return <code>true</code> if nextEnd is including the start of the next event.
+     */
+    private boolean nextEndIncludesNextEvent()
+    {
+        return nextEnd > nextStart + 1 && ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
+    }
+
+    /**
+     * Gets the character at the index provided by the StAX parser.
+     *
+     * @param index the index.
+     * @return char The character.
+     */
+    private char c( int index )
+    {
+        return pom.charAt( nextDelta + index );
+    }
+
+    /**
+     * Replaces the current element with the replacement text.
+     *
+     * @param replacement The replacement.
+     */
+    public void replace( String replacement )
+    {
+        if ( lastStart < 0 || lastEnd < lastStart )
+        {
+            throw new IllegalStateException();
+        }
+        int start = lastDelta + lastStart;
+        int end = lastDelta + lastEnd;
+        if ( replacement.equals( pom.substring( start, end ) ) )
+        {
+            return;
+        }
+        pom.replace( start, end, replacement );
+        int delta = replacement.length() - lastEnd - lastStart;
+        nextDelta += delta;
+        for ( int i = 0; i < MAX_MARKS; i++ )
+        {
+            if ( hasMark( i ) && lastStart == markStart[i] && markEnd[i] == lastEnd )
+            {
+                markEnd[i] += delta;
+            }
+        }
+        lastEnd += delta;
+        modified = true;
+    }
+
+    /**
+     * Returns <code>true</code> if the specified mark is defined.
+     *
+     * @param index The mark.
+     * @return <code>true</code> if the specified mark is defined.
+     */
+    public boolean hasMark( int index )
+    {
+        return markStart[index] != -1;
+    }
+
+    /**
+     * Replaces all content between marks index1 and index2 with the replacement text.
+     *
+     * @param index1      The event mark to replace after.
+     * @param index2      The event mark to replace before.
+     * @param replacement The replacement.
+     */
+    public void replaceBetween( int index1, int index2, String replacement )
+    {
+        if ( !hasMark( index1 ) || !hasMark( index2 ) || markStart[index1] > markStart[index2] )
+        {
+            throw new IllegalStateException();
+        }
+        int start = markDelta[index1] + markEnd[index1];
+        int end = markDelta[index2] + markStart[index2];
+        if ( replacement.equals( pom.substring( start, end ) ) )
+        {
+            return;
+        }
+        pom.replace( start, end, replacement );
+        int delta = replacement.length() - ( end - start );
+        nextDelta += delta;
+
+        for ( int i = 0; i < MAX_MARKS; i++ )
+        {
+            if ( i == index1 || i == index2 || markStart[i] == -1 )
+            {
+                continue;
+            }
+            if ( markStart[i] > markStart[index2] )
+            {
+                markDelta[i] += delta;
+            }
+            else if ( markStart[i] == markEnd[index1] && markEnd[i] == markStart[index1] )
+            {
+                markDelta[i] += delta;
+            }
+            else if ( markStart[i] > markEnd[index1] || markEnd[i] < markStart[index2] )
+            {
+                markStart[i] = -1;
+            }
+        }
+
+        modified = true;
+    }
+
+    /**
+     * Replaces the specified marked element with the replacement text.
+     *
+     * @param index       The mark.
+     * @param replacement The replacement.
+     */
+    public void replaceMark( int index, String replacement )
+    {
+        if ( !hasMark( index ) )
+        {
+            throw new IllegalStateException();
+        }
+        int start = markDelta[index] + markStart[index];
+        int end = markDelta[index] + markEnd[index];
+        if ( replacement.equals( pom.substring( start, end ) ) )
+        {
+            return;
+        }
+        pom.replace( start, end, replacement );
+        int delta = replacement.length() - markEnd[index] - markStart[index];
+        nextDelta += delta;
+        if ( lastStart == markStart[index] && lastEnd == markEnd[index] )
+        {
+            lastEnd += delta;
+        }
+        else if ( lastStart > markStart[index] )
+        {
+            lastDelta += delta;
+        }
+        for ( int i = 0; i < MAX_MARKS; i++ )
+        {
+            if ( i == index || markStart[i] == -1 )
+            {
+                continue;
+            }
+            if ( markStart[i] > markStart[index] )
+            {
+                markDelta[i] += delta;
+            }
+            else if ( markStart[i] == markStart[index] && markEnd[i] == markEnd[index] )
+            {
+                markDelta[i] += delta;
+            }
+        }
+        markEnd[index] += delta;
+        modified = true;
+    }
+
 }

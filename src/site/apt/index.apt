@@ -1,0 +1,80 @@
+ ~~ Licensed to the Apache Software Foundation (ASF) under one
+ ~~ or more contributor license agreements.  See the NOTICE file
+ ~~ distributed with this work for additional information
+ ~~ regarding copyright ownership.  The ASF licenses this file
+ ~~ to you under the Apache License, Version 2.0 (the
+ ~~ "License"); you may not use this file except in compliance
+ ~~ with the License.  You may obtain a copy of the License at
+ ~~
+ ~~   http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing,
+ ~~ software distributed under the License is distributed on an
+ ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~~ KIND, either express or implied.  See the License for the
+ ~~ specific language governing permissions and limitations
+ ~~ under the License.
+
+ ------
+ Introduction
+ ------
+ Stephen Connolly
+ ------
+ 2008-09-02
+ ------
+
+
+Versions Maven Plugin
+
+  The Versions Plugin is used when you want to manage the versions of artifacts in a projects pom file.
+
+* Goals Overview
+
+  The Versions Plugin has four goals.
+
+  * {{{display-dependency-updates.html}versions:display-dependency-updates}} which scans a projects dependencies and
+  produces a report of those dependencies which have newer versions available.
+
+  * {{{display-plugin-updates.html}versions:display-plugin-updates}} which scans a projects plugins and produces a
+  report of those plugins which have newer versions available.
+
+  * {{{update-parent.html}versions:update-parent}} which updates the parent section of a project so that it references the
+  newest available versions.  For example, if you use a corporate root pom, this goal can be helpful if you need
+  to ensure you are using the latest version of the corporate root pom.
+
+  * {{{update-properties.html}versions:update-properties}} which updates properties defined in a project so that they
+  correspond to the latest available version of specific dependencies.  This can be useful if a suite of dependencies
+  must all be locked to the one version.
+
+* Usage
+
+  General instructions on how to use the Plugin Name can be found on the {{{usage.html}usage page}}. Some more
+  specific use cases are described in the examples given below. Last but not least, users occasionally contribute
+  additional examples, tips or errata to the
+  {{{http://docs.codehaus.org/display/MAVENUSER/Versions+Plugin}plugin's wiki page}}.
+
+  In case you still have questions regarding the plugin's usage, please have a look at the {{{faq.html}FAQ}} and feel
+  free to contact the {{{mail-lists.html}user mailing list}}. The posts to the mailing list are archived and could
+  already contain the answer to your question as part of an older thread. Hence, it is also worth browsing/searching
+  the {{{mail-lists.html}mail archive}}.
+
+  If you feel like the plugin is missing a feature or has a defect, you can fill a feature request or bug report in our
+  {{{issue-tracking.html}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
+  concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this reason,
+  entire debug logs, POMs or most preferably little demo projects attached to the issue are very much appreciated.
+  Of course, patches are welcome, too. Contributors can check out the project from our
+  {{{source-repository.html}source repository}} and will find supplementary information in the
+  {{{http://maven.apache.org/guides/development/guide-helping.html}guide to helping with Maven}}.
+
+* Examples
+
+  To provide you with better understanding of some usages of the Plugin Name,
+  you can take a look into the following examples:
+
+  * {{{examples/display-dependency-updates.html}Displaying available updates to project dependencies}}
+
+  * {{{examples/display-plugin-updates.html}Displaying available updates to plugins used in a project}}
+
+  * {{{examples/update-parent.html}Updating the project's parent to the latest available}}
+
+  * {{{examples/update-properties.html}Updating properties defined in the project's based on dependency version availablility}}

@@ -32,12 +32,13 @@ import javax.xml.stream.events.XMLEvent;
 import java.util.Stack;
 
 /**
- * Updates the parent to the latest version.
+ * Sets the parent version to the latest parent version.
  *
  * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
  * @goal update-parent
- * @requires-project
- * @description Sets the parent version to the latest parent version.
+ * @requiresProject true
+ * @requiresDirectInvocation true
+ * @since 1.0
  */
 public class UpdateParentMojo
     extends AbstractVersionsUpdaterMojo
@@ -46,9 +47,12 @@ public class UpdateParentMojo
 // -------------------------- OTHER METHODS --------------------------
 
     /**
-     * {@inheritDoc}
-     *
-     * @param pom
+     * @param pom the pom to update.
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
+     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @since 1.0
      */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
@@ -73,7 +77,7 @@ public class UpdateParentMojo
             version = parentVersion;
         }
 
-        VersionRange versionRange = null;
+        VersionRange versionRange;
         try
         {
             versionRange = VersionRange.createFromVersionSpec( version );
@@ -105,7 +109,11 @@ public class UpdateParentMojo
             if ( event.isStartElement() )
             {
                 stack.push( path );
-                path += "/" + event.asStartElement().getName().getLocalPart();
+                path = new StringBuffer()
+                    .append( path )
+                    .append( "/" )
+                    .append( event.asStartElement().getName().getLocalPart() )
+                    .toString();
 
                 if ( "/project/parent/version".equals( path ) )
                 {
@@ -127,7 +135,6 @@ public class UpdateParentMojo
                 path = (String) stack.pop();
             }
         }
-
     }
 
 }

@@ -38,17 +38,32 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Displays the available updates for a project.
+ * Displays all dependencies that have newer versions available.
  *
  * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
  * @goal display-dependency-updates
- * @requires-project
- * @dontrequiresDependencyResolution test
- * @description Displays all dependencies that have newer versions available.
+ * @requiresProject true
+ * @requiresDirectInvocation false
+ * @since 1.0
  */
 public class DisplayDependencyUpdatesMojo
     extends AbstractVersionsUpdaterMojo
 {
+    /**
+     * The width to pad info messages.
+     */
+    private static final int INFO_PAD_SIZE = 68;
+
+// ------------------------ INTERFACE METHODS ------------------------
+
+// --------------------- Interface Mojo ---------------------
+
+    /**
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @see AbstractVersionsUpdaterMojo#execute()
+     * @since 1.0
+     */
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -81,15 +96,16 @@ public class DisplayDependencyUpdatesMojo
 
             ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null );
 
-            if ( artifactVersion != null &&
-                getVersionComparator().compare( new DefaultArtifactVersion( version ), artifactVersion ) < 0 )
+            DefaultArtifactVersion currentVersion = new DefaultArtifactVersion( version );
+
+            if ( artifactVersion != null && getVersionComparator().compare( currentVersion, artifactVersion ) < 0 )
             {
                 String newVersion = artifactVersion.toString();
                 StringBuilder buf = new StringBuilder();
                 buf.append( groupId ).append( ':' );
                 buf.append( artifactId );
                 buf.append( ' ' );
-                int padding = 68 - version.length() - newVersion.length() - 4;
+                int padding = INFO_PAD_SIZE - version.length() - newVersion.length() - 4;
                 while ( buf.length() < padding )
                 {
                     buf.append( '.' );
@@ -118,20 +134,39 @@ public class DisplayDependencyUpdatesMojo
         getLog().info( "" );
     }
 
+// -------------------------- OTHER METHODS --------------------------
+
+    /**
+     * @param pom the pom to update.
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
+     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @since 1.0
+     */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         // do nothing
     }
 
+// -------------------------- INNER CLASSES --------------------------
+
     /**
      * A comparator used to sort dependencies by group id, artifact id and finally version.
+     *
+     * @since 1.0
      */
     private static class DependencyComparator
         implements Comparator
     {
+
         /**
+         * @param o1 the first object
+         * @param o2 the second object.
+         * @return the comparison result
          * @see java.util.Comparator#compare(Object, Object)
+         * @since 1.0
          */
         public int compare( Object o1, Object o2 )
         {
@@ -160,5 +195,7 @@ public class DisplayDependencyUpdatesMojo
             }
             return r;
         }
+
     }
+
 }

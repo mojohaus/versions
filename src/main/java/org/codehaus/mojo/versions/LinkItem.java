@@ -23,6 +23,7 @@ package org.codehaus.mojo.versions;
  * LinkItem represents information specified for a linked artifact version manged through a property.
  *
  * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @since 1.0
  */
 public class LinkItem
 {
@@ -34,6 +35,7 @@ public class LinkItem
      *
      * @parameter
      * @required
+     * @since 1.0
      */
     private String groupId;
 
@@ -42,6 +44,7 @@ public class LinkItem
      *
      * @parameter
      * @required
+     * @since 1.0
      */
     private String artifactId;
 
@@ -50,6 +53,7 @@ public class LinkItem
      *
      * @parameter
      * @required
+     * @since 1.0
      */
     private String property;
 
@@ -57,6 +61,7 @@ public class LinkItem
      * Version specification to control artifact resolution.
      *
      * @parameter
+     * @since 1.0
      */
     private String version = null;
 
@@ -64,6 +69,7 @@ public class LinkItem
      * Override snapshot permisibility.
      *
      * @parameter
+     * @since 1.0
      */
     private Boolean allowSnapshots = null;
 
@@ -71,6 +77,8 @@ public class LinkItem
 
     /**
      * Constructs a new LinkItem.
+     *
+     * @since 1.0
      */
     public LinkItem()
     {
@@ -79,89 +87,10 @@ public class LinkItem
 // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
-     * Getter for property 'artifactId'.
-     *
-     * @return Value for property 'artifactId'.
-     */
-    public String getArtifactId()
-    {
-        return artifactId;
-    }
-
-    /**
-     * Setter for property 'artifactId'.
-     *
-     * @param artifactId Value to set for property 'artifactId'.
-     */
-    public void setArtifactId( String artifactId )
-    {
-        this.artifactId = artifactId;
-    }
-
-    /**
-     * Getter for property 'groupId'.
-     *
-     * @return Value for property 'groupId'.
-     */
-    public String getGroupId()
-    {
-        return groupId;
-    }
-
-    /**
-     * Setter for property 'groupId'.
-     *
-     * @param groupId Value to set for property 'groupId'.
-     */
-    public void setGroupId( String groupId )
-    {
-        this.groupId = groupId;
-    }
-
-    /**
-     * Getter for property 'property'.
-     *
-     * @return Value for property 'property'.
-     */
-    public String getProperty()
-    {
-        return property;
-    }
-
-    /**
-     * Setter for property 'property'.
-     *
-     * @param property Value to set for property 'property'.
-     */
-    public void setProperty( String property )
-    {
-        this.property = property;
-    }
-
-    /**
-     * Getter for property 'version'.
-     *
-     * @return Value for property 'version'.
-     */
-    public String getVersion()
-    {
-        return version;
-    }
-
-    /**
-     * Setter for property 'version'.
-     *
-     * @param version Value to set for property 'version'.
-     */
-    public void setVersion( String version )
-    {
-        this.version = version;
-    }
-
-    /**
      * Getter for property 'allowSnapshots'.
      *
      * @return Value for property 'allowSnapshots'.
+     * @since 1.0
      */
     public Boolean getAllowSnapshots()
     {
@@ -172,16 +101,107 @@ public class LinkItem
      * Setter for property 'allowSnapshots'.
      *
      * @param allowSnapshots Value to set for property 'allowSnapshots'.
+     * @since 1.0
      */
     public void setAllowSnapshots( Boolean allowSnapshots )
     {
         this.allowSnapshots = allowSnapshots;
     }
 
-    // ------------------------ CANONICAL METHODS ------------------------
+    /**
+     * Getter for property 'artifactId'.
+     *
+     * @return Value for property 'artifactId'.
+     * @since 1.0
+     */
+    public String getArtifactId()
+    {
+        return artifactId;
+    }
+
+    /**
+     * Setter for property 'artifactId'.
+     *
+     * @param artifactId Value to set for property 'artifactId'.
+     * @since 1.0
+     */
+    public void setArtifactId( String artifactId )
+    {
+        this.artifactId = artifactId;
+    }
+
+    /**
+     * Getter for property 'groupId'.
+     *
+     * @return Value for property 'groupId'.
+     * @since 1.0
+     */
+    public String getGroupId()
+    {
+        return groupId;
+    }
+
+    /**
+     * Setter for property 'groupId'.
+     *
+     * @param groupId Value to set for property 'groupId'.
+     * @since 1.0
+     */
+    public void setGroupId( String groupId )
+    {
+        this.groupId = groupId;
+    }
+
+    /**
+     * Getter for property 'property'.
+     *
+     * @return Value for property 'property'.
+     * @since 1.0
+     */
+    public String getProperty()
+    {
+        return property;
+    }
+
+    /**
+     * Setter for property 'property'.
+     *
+     * @param property Value to set for property 'property'.
+     * @since 1.0
+     */
+    public void setProperty( String property )
+    {
+        this.property = property;
+    }
+
+    /**
+     * Getter for property 'version'.
+     *
+     * @return Value for property 'version'.
+     * @since 1.0
+     */
+    public String getVersion()
+    {
+        return version;
+    }
+
+    /**
+     * Setter for property 'version'.
+     *
+     * @param version Value to set for property 'version'.
+     * @since 1.0
+     */
+    public void setVersion( String version )
+    {
+        this.version = version;
+    }
+
+// ------------------------ CANONICAL METHODS ------------------------
 
     /**
      * {@inheritDoc}
+     *
+     * @since 1.0
      */
     public String toString()
     {

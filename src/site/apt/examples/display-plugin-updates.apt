@@ -62,8 +62,7 @@ mvn versions:display-plugin-updates
   For example the following pom.xml:
 
 ---
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.ap
-ache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project>
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.codehaus.mojo.versions-maven-plugin.it</groupId>
@@ -137,7 +136,7 @@ ache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   And the following pom:
 
 ---
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project>
   <modelVersion>4.0.0</modelVersion>
 
   <parent>

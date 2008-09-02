@@ -26,8 +26,9 @@ Usage
 
 * Basic Usage
 
-  Maven 2.0 does not currently support re-reading modifications of the pom.xml within the one invokation of Maven.
-  As this plugin modifies the pom.xml file, you need to run it separately from any other goals or life-cycle phases.
+  Maven 2.0 does not currently support re-reading modifications of the pom.xml within the one invocation of Maven.
+  As the {{{update-parent.html}prefix:update-parent}} and {{{update-properties.html}prefix:update-properties}} goals
+  modify the pom.xml file, you need to run these goals separately from any other goals or life-cycle phases.
 
 ** Updating the parent version
 
@@ -37,7 +38,7 @@ Usage
 mvn versions:update-parent
 ---
 
-  A more detailed example can be found {{{examples/update-parent.html} here}}.
+  {{{examples/update-parent.html} A more detailed example of the update-parent goal}}.
 
 ** Checking for new versions of plugins
 
@@ -48,7 +49,7 @@ mvn versions:update-parent
 mvn version:display-plugin-updates
 ---
 
-  A more detailed example can be found {{{examples/display-plugin-updates.html} here}}.
+  {{{examples/display-plugin-updates.html} A more detailed example of the display-plugin-updates goal}}.
 
 ** Checking for new versions of dependencies
 
@@ -59,8 +60,9 @@ mvn version:display-plugin-updates
 mvn version:display-dependency-updates
 ---
 
-  A more detailed example can be found {{{examples/display-dependency-updates.html} here}}.
+  {{{examples/display-dependency-updates.html} A more detailed example of the display-dependency-updates goal}}.
 
 ** Updating versions specified by properties
 
-  This goal helps when you use properties to define versions.  Please see the example {{{examples/update-properties.html}here}}
+  This goal helps when you use properties to define versions.  Please see the
+  {{{examples/update-properties.html}update-properties example}}
