@@ -116,21 +116,21 @@ public abstract class AbstractVersionsUpdaterMojo
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
-     * The versioning rule to use when comparing versions. Valid values are <code>maven</code> which is the default or
+     * The versioning rule to use when comparing versions. Valid values are <code>maven</code> or
      * <code>numeric</code> which will handle long version numbers provided all components are numeric.
      *
-     * @parameter expression="${comparisonMethod}"
+     * @parameter expression="${comparisonMethod}" default-value="maven"
      * @since 1.0
      */
-    protected String comparisonMethod = null;
+    protected String comparisonMethod;
 
     /**
      * Version specification to control artifact resolution.
      *
-     * @parameter expression="${allowSnapshots}"
+     * @parameter expression="${allowSnapshots}" default-value="true"
      * @since 1.0
      */
-    protected Boolean allowSnapshots = Boolean.TRUE;
+    protected Boolean allowSnapshots;
 
     /**
      * @parameter expression="${reactorProjects}"
