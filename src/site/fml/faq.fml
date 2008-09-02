@@ -21,9 +21,9 @@ under the License.
     <title>General</title>
 
     <faq id="versions">
-      <question>What does the versions maven plugin do?</question>
+      <question>What does the Versions Maven Plugin do?</question>
       <answer>
-        <p>The versions maven plugin provides a means to update version information in a Maven project</p>
+        <p>The Versions Maven Plugin provides a means to update version information in a Maven project</p>
       </answer>
     </faq>
   </part>

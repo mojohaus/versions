@@ -18,10 +18,14 @@
  -----
  Checking for new plugin updates
  -----
+ Stephen Connolly
+ ------
+ 2008-09-02
+ ------
 
 Checking for new plugin updates
 
-  The display-plugin-updates goal will check all the plugins and reporters used in your project and display a list
+  The <<<display-plugin-updates>>> goal will check all the plugins and reports used in your project and display a list
   of those plugins with newer versions available.
 
   Here are some examples of what this looks like:
@@ -32,7 +36,7 @@ cd build-helper-maven-plugin
 mvn versions:display-plugin-updates
 ---
 
-  Which produced the following output:
+  Which produces the following output:
 
 ---
 [INFO] ------------------------------------------------------------------------
@@ -59,7 +63,7 @@ mvn versions:display-plugin-updates
   version you are currently using.  Best practice in Maven is to always specify the plugin versions in order to
   ensure that builds are reproducable.
 
-  For example the following pom.xml:
+  For example the following <<<pom.xml>>>:
 
 ---
 <project>
@@ -106,7 +110,7 @@ mvn versions:display-plugin-updates
 </project>
 ---
 
-  produced the following output:
+  produces the following output:
 
 ---
 [INFO] ------------------------------------------------------------------------
@@ -133,7 +137,7 @@ mvn versions:display-plugin-updates
 [INFO] ------------------------------------------------------------------------
 ---
 
-  And the following pom:
+  And the following POM:
 
 ---
 <project>
@@ -177,7 +181,7 @@ mvn versions:display-plugin-updates
 </project>
 ---
 
-  produced the following output:
+  produces the following output:
 
 ---
 [INFO] ------------------------------------------------------------------------

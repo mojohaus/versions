@@ -18,12 +18,16 @@
  -----
  Update Properties
  -----
+ Stephen Connolly
+ ------
+ 2008-09-02
+ ------
 
 Update Properties
 
   This goal is useful when you define dependency versions using properties. For example if you have a suite of projects
   and you want to ensure that you use the same version of each dependency in the suite, you might have a dependency
-  section that looks like
+  section that looks like this:
 
 ---
 <project>
@@ -54,7 +58,7 @@ Update Properties
 ---
 
   The aim being to allow updating the version of all the suite components in one go.  The versions-maven-plugin can help
-  automating these updates.  For example if we add the following to the pom:
+  you to automate these updates.  For example if we add the following to the POM:
 
 ---
 <project>
@@ -86,8 +90,8 @@ Update Properties
 </project>
 ---
 
-  Then executing the update-properties goal will update the manchu.version property to the latest version available to
-  you (i.e. based on your local repository and all currently active remote repositories)
+  Then executing the <<<update-properties>>> goal will update the <<<manchu.version>>> property to the latest version available to
+  you (i.e. based on your local repository and all currently active remote repositories).
 
   If you want to restrict updates to within a specific range, for example, suppose we only want the 1.5 stream of
   manchu:

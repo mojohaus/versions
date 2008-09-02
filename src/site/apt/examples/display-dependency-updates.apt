@@ -18,10 +18,14 @@
  -----
  Checking for new dependency updates
  -----
+ Stephen Connolly
+ ------
+ 2008-09-02
+ ------
 
 Checking for new dependency updates
 
-  The display-dependency-updates goal will check all the dependencies used in your project and display a list
+  The <<<display-dependency-updates>>> goal will check all the dependencies used in your project and display a list
   of those dependencies with newer versions available.
 
   Here are some examples of what this looks like:
@@ -32,7 +36,7 @@ cd build-helper-maven-plugin
 mvn versions:display-dependency-updates
 ---
 
-  Which produced the following output:
+  Which produces the following output:
 
 ---
 [INFO] ------------------------------------------------------------------------

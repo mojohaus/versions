@@ -18,6 +18,10 @@
  -----
  Update Parent
  -----
+ Stephen Connolly
+ ------
+ 2008-09-02
+ ------
 
 Update Parent
 
@@ -29,7 +33,7 @@ cd xmlbeans-maven-plugin
 mvn versions:update-parent
 ---
 
-  Which produced the following output:
+  Which produces the following output:
 
 ---
 [INFO] Scanning for projects...

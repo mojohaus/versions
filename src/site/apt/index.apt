@@ -26,29 +26,29 @@
 
 Versions Maven Plugin
 
-  The Versions Plugin is used when you want to manage the versions of artifacts in a projects pom file.
+  The Versions Plugin is used when you want to manage the versions of artifacts in a project's POM.
 
 * Goals Overview
 
   The Versions Plugin has four goals.
 
-  * {{{display-dependency-updates.html}versions:display-dependency-updates}} which scans a projects dependencies and
+  * {{{display-dependency-updates-mojo.html}versions:display-dependency-updates}} scans a project's dependencies and
   produces a report of those dependencies which have newer versions available.
 
-  * {{{display-plugin-updates.html}versions:display-plugin-updates}} which scans a projects plugins and produces a
+  * {{{display-plugin-updates-mojo.html}versions:display-plugin-updates}} scans a project's plugins and produces a
   report of those plugins which have newer versions available.
 
-  * {{{update-parent.html}versions:update-parent}} which updates the parent section of a project so that it references the
-  newest available versions.  For example, if you use a corporate root pom, this goal can be helpful if you need
-  to ensure you are using the latest version of the corporate root pom.
+  * {{{update-parent-mojo.html}versions:update-parent}} updates the parent section of a project so that it references the
+  newest available version.  For example, if you use a corporate root POM, this goal can be helpful if you need
+  to ensure you are using the latest version of the corporate root POM.
 
-  * {{{update-properties.html}versions:update-properties}} which updates properties defined in a project so that they
+  * {{{update-properties-mojo.html}versions:update-properties}} updates properties defined in a project so that they
   correspond to the latest available version of specific dependencies.  This can be useful if a suite of dependencies
-  must all be locked to the one version.
+  must all be locked to one version.
 
 * Usage
 
-  General instructions on how to use the Plugin Name can be found on the {{{usage.html}usage page}}. Some more
+  General instructions on how to use the Versions Plugin can be found on the {{{usage.html}usage page}}. Some more
   specific use cases are described in the examples given below. Last but not least, users occasionally contribute
   additional examples, tips or errata to the
   {{{http://docs.codehaus.org/display/MAVENUSER/Versions+Plugin}plugin's wiki page}}.
@@ -77,4 +77,4 @@ Versions Maven Plugin
 
   * {{{examples/update-parent.html}Updating the project's parent to the latest available}}
 
-  * {{{examples/update-properties.html}Updating properties defined in the project's based on dependency version availablility}}
+  * {{{examples/update-properties.html}Updating properties defined in the project based on dependency version availablility}}

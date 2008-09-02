@@ -18,51 +18,55 @@
  -----
  Usage
  -----
+ Stephen Connolly
+ ------
+ 2008-09-02
+ ------
 
 Usage
 
   The plugin offers goals for updating the versions of artifacts referenced in
-  a maven pom.xml file.
+  a Maven <<<pom.xml>>> file.
 
 * Basic Usage
 
-  Maven 2.0 does not currently support re-reading modifications of the pom.xml within the one invocation of Maven.
-  As the {{{update-parent.html}prefix:update-parent}} and {{{update-properties.html}prefix:update-properties}} goals
-  modify the pom.xml file, you need to run these goals separately from any other goals or life-cycle phases.
+  Maven 2.0 does not currently support re-reading modifications of the <<<pom.xml>>> within one invocation of Maven.
+  As the {{{update-parent-mojo.html}versions:update-parent}} and {{{update-properties-mojo.html}versions:update-properties}} goals
+  modify the <<<pom.xml>>> file, you need to run these goals separately from any other goals or life-cycle phases.
 
 ** Updating the parent version
 
-  To update the parent version of your pom to the latest available, just invoke the update-parent goal.
+  To update the parent version of your POM to the latest available, just invoke the <<<update-parent>>> goal.
 
 ---
 mvn versions:update-parent
 ---
 
-  {{{examples/update-parent.html} A more detailed example of the update-parent goal}}.
+  {{{examples/update-parent.html} A more detailed example of the <<<update-parent>>> goal}}.
 
 ** Checking for new versions of plugins
 
   To get information about newer versions of plugins that you are using in your build, just invoke the
-  display-plugin-updates goal.
+  <<<display-plugin-updates>>> goal.
 
 ---
 mvn version:display-plugin-updates
 ---
 
-  {{{examples/display-plugin-updates.html} A more detailed example of the display-plugin-updates goal}}.
+  {{{examples/display-plugin-updates.html} A more detailed example of the <<<display-plugin-updates>>> goal}}.
 
 ** Checking for new versions of dependencies
 
   To get information about newer versions of dependencies that you are using in your build, just invoke the
-  display-dependency-updates goal.
+  <<<display-dependency-updates>>> goal.
 
 ---
 mvn version:display-dependency-updates
 ---
 
-  {{{examples/display-dependency-updates.html} A more detailed example of the display-dependency-updates goal}}.
+  {{{examples/display-dependency-updates.html} A more detailed example of the <<<display-dependency-updates>>> goal}}.
 
 ** Updating versions specified by properties
 
   This goal helps when you use properties to define versions.  Please see the
-  {{{examples/update-properties.html}update-properties example}}
+  {{{examples/update-properties.html}<<<update-properties>>> example}}.
