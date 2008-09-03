@@ -34,36 +34,65 @@ under the License.
       <answer>
         <p>The current implementation of
           <a href="http://maven.apache.org/ref/current/maven-artifact/xref/org/apache/maven/artifact/versioning/DefaultArtifactVersion.html">
-          <code>DefaultArtifactVersion</code></a> in the core of Maven expects that version numbers will have a very
+            <code>DefaultArtifactVersion</code>
+          </a>
+          in the core of Maven expects that version numbers will have a very
           specific format:
         </p>
         <p>
-          <i>MajorVersion [ </i>
+          <i>MajorVersion [</i>
           <code>.</code>
-          <i>MinorVersion [ </i>
+          <i>MinorVersion [</i>
           <code>.</code>
           <i>IncrementalVersion ] ] [</i>
           <code>-</code>
           <i>BuildNumber | Qualifier ]</i>
         </p>
-        <p>Where <i>MajorVersion</i>, <i>MinorVersion</i>, <i>IncrementalVersion</i>, and <i>BuildNumber</i> are all
-          numeric and <i>Qualifier</i> is a string.  If your version number does not match this format, then the entire
-          version number is treated as being the <i>Qualifier</i>.
+        <p>Where<i>MajorVersion</i>,<i>MinorVersion</i>,<i>IncrementalVersion</i>, and
+          <i>BuildNumber</i>
+          are all
+          numeric and
+          <i>Qualifier</i>
+          is a string. If your version number does not match this format, then the entire
+          version number is treated as being the<i>Qualifier</i>.
         </p>
-        <p>Version numbers in maven are compared using the individual components, so <i>MajorVersion</i>, <i>
-          MinorVersion</i>, <i>IncrementalVersion</i>, and <i>BuildNumber</i> are all compared as <code>Integer</code>s
-          while <i>Qualifier</i> is compared as a <code>String</code>.
+        <p>Version numbers in maven are compared using the individual components, so<i>MajorVersion</i>,<i>
+          MinorVersion</i>,<i>IncrementalVersion</i>, and
+          <i>BuildNumber</i>
+          are all compared as<code>Integer</code>s
+          while
+          <i>Qualifier</i>
+          is compared as a<code>String</code>.
         </p>
-        <p>From the above you may have guessed neither <code>1.0.0.9</code> nor <code>1.0.0.23</code> match the exact
-          format that Maven expects, and as a result they are mapped as being just a <i>Qualifier</i>.
-          String comparison will sort <code>1.0.0.9</code> &gt; <code>1.0.0.23</code>.
+        <p>From the above you may have guessed neither
+          <code>1.0.0.9</code>
+          nor
+          <code>1.0.0.23</code>
+          match the exact
+          format that Maven expects, and as a result they are mapped as being just a<i>Qualifier</i>.
+          String comparison will sort
+          <code>1.0.0.9</code>
+          &gt;<code>1.0.0.23</code>.
         </p>
         <p>If you need version numbers to be sorted "correctly" set the
-          <a href="update-parent-mojo.html#comparisonMethod"><code>comparisonMethod</code></a> parameter to
-          <code>numeric</code> as this will compare very long version numbers "correctly" provided each number is
-          separated by <code>.</code> (in addition any if either number contains a non-numeric component, that part
-          will be compared using <code>String</code> comparison... thus <code>2.0.0.5.7.95</code> &lt;
-          <code>2.0.0.5.27.5</code> &lt; <code>2.0.0.5.7a.1</code> &lt; <code>2.0.0.6.0.0</code>)
+          <a href="update-parent-mojo.html#comparisonMethod">
+            <code>comparisonMethod</code>
+          </a>
+          parameter to
+          <code>numeric</code>
+          as this will compare very long version numbers "correctly" provided each number is
+          separated by
+          <code>.</code>
+          (in addition any if either number contains a non-numeric component, that part
+          will be compared using
+          <code>String</code>
+          comparison... thus
+          <code>2.0.0.5.7.95</code>
+          &lt;
+          <code>2.0.0.5.27.5</code>
+          &lt;
+          <code>2.0.0.5.7a.1</code>
+          &lt;<code>2.0.0.6.0.0</code>)
         </p>
       </answer>
     </faq>
