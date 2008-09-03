@@ -19,25 +19,47 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.BuildFailureException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.Lifecycle;
+import org.apache.maven.lifecycle.LifecycleExecutionException;
+import org.apache.maven.lifecycle.LifecycleExecutor;
+import org.apache.maven.lifecycle.mapping.LifecycleMapping;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.plugin.InvalidPluginException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.PluginManager;
+import org.apache.maven.plugin.PluginManagerException;
+import org.apache.maven.plugin.PluginNotFoundException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugin.version.PluginVersionNotFoundException;
+import org.apache.maven.plugin.version.PluginVersionResolutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.util.ReflectionUtils;
+import org.codehaus.plexus.util.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -56,20 +78,132 @@ import java.util.TreeSet;
 public class DisplayPluginUpdatesMojo
     extends AbstractVersionsUpdaterMojo
 {
+
+// ------------------------------ FIELDS ------------------------------
+
     /**
      * The width to pad warn messages.
+     *
+     * @since 1.0
      */
     private static final int WARN_PAD_SIZE = 65;
 
     /**
      * The width to pad info messages.
+     *
+     * @since 1.0
      */
     private static final int INFO_PAD_SIZE = 68;
 
     /**
      * String to flag a plugin version being forced by the super-pom.
+     *
+     * @since 1.0
      */
     private static final String FROM_SUPER_POM = "(from super-pom) ";
+
+    /**
+     * @component
+     * @since 1.0
+     */
+    private LifecycleExecutor lifecycleExecutor;
+
+    /**
+     * The session.
+     *
+     * @readonly
+     * @parameter expression="${session}"
+     * @since 1.0
+     */
+    private MavenSession session;
+
+    /**
+     * The plugin manager.
+     *
+     * @component
+     * @since 1.0
+     */
+    private PluginManager pluginManager;
+
+// --------------------- GETTER / SETTER METHODS ---------------------
+
+    /**
+     * Returns the pluginManagement section of the super-pom.
+     *
+     * @return Returns the pluginManagement section of the super-pom.
+     * @throws MojoExecutionException when things go wrong.
+     */
+    private Map getSuperPomPluginManagement()
+        throws MojoExecutionException
+    {
+        Map superPomPluginManagement = new HashMap();
+        try
+        {
+            superPomPluginManagement.putAll(
+                getPluginManagement( projectBuilder.buildStandaloneSuperProject( localRepository ) ) );
+        }
+        catch ( ProjectBuildingException e )
+        {
+            throw new MojoExecutionException( "Could not determine the super pom.xml", e );
+        }
+        return superPomPluginManagement;
+    }
+
+    /**
+     * Gets the plugin management plugins of a specific project.
+     *
+     * @param project the project to get the plugin management plugins from.
+     * @return The map of effective plugin versions keyed by coordinates.
+     * @since 1.0
+     */
+    private Map getPluginManagement( MavenProject project )
+    {
+        // we want only those parts of pluginManagement that are defined in this project
+        Map pluginManagement = new HashMap();
+        try
+        {
+            Iterator j = project.getOriginalModel().getBuild().getPluginManagement().getPlugins().iterator();
+            while ( j.hasNext() )
+            {
+                Plugin plugin = (Plugin) j.next();
+                String coord = getPluginCoords( plugin );
+                String version = getPluginVersion( plugin );
+                if ( version != null )
+                {
+                    pluginManagement.put( coord, version );
+                }
+            }
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
+        Iterator i = project.getOriginalModel().getProfiles().iterator();
+        while ( i.hasNext() )
+        {
+            Profile profile = (Profile) i.next();
+            try
+            {
+                Iterator j = profile.getBuild().getPluginManagement().getPlugins().iterator();
+                while ( j.hasNext() )
+                {
+                    Plugin plugin = (Plugin) j.next();
+                    String coord = getPluginCoords( plugin );
+                    String version = getPluginVersion( plugin );
+                    if ( version != null )
+                    {
+                        pluginManagement.put( coord, version );
+                    }
+                }
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
+            }
+        }
+
+        return pluginManagement;
+    }
 
 // ------------------------ INTERFACE METHODS ------------------------
 
@@ -231,188 +365,7 @@ public class DisplayPluginUpdatesMojo
         getLog().info( "" );
     }
 
-    /**
-     * Returns the set of all plugins used by the project.
-     *
-     * @param superPomPluginManagement the super pom's pluginManagement plugins.
-     * @param parentPluginManagement   the parent pom's pluginManagement plugins.
-     * @param parentBuildPlugins       the parent pom's build plugins.
-     * @param parentReportPlugins      the parent pom's report plugins.
-     * @return the set of plugins used by the project.
-     */
-    private Set getProjectPlugins( Map superPomPluginManagement, Map parentPluginManagement, Map parentBuildPlugins,
-                                   Map parentReportPlugins )
-    {
-        Iterator i;
-        Set plugins = new TreeSet( new PluginComparator() );
-
-        Map excludePluginManagement = new HashMap( superPomPluginManagement );
-        excludePluginManagement.putAll( parentPluginManagement );
-
-        try
-        {
-            addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPluginManagement().getPlugins(),
-                               excludePluginManagement );
-        }
-        catch ( NullPointerException e )
-        {
-            // guess there are no plugins here
-        }
-
-        try
-        {
-            addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPlugins(), parentBuildPlugins );
-        }
-        catch ( NullPointerException e )
-        {
-            // guess there are no plugins here
-        }
-
-        try
-        {
-            addProjectPlugins( plugins, getProject().getOriginalModel().getReporting().getPlugins(),
-                               parentReportPlugins );
-        }
-        catch ( NullPointerException e )
-        {
-            // guess there are no plugins here
-        }
-        i = getProject().getOriginalModel().getProfiles().iterator();
-        while ( i.hasNext() )
-        {
-            Profile profile = (Profile) i.next();
-            try
-            {
-                addProjectPlugins( plugins, profile.getBuild().getPluginManagement().getPlugins(),
-                                   excludePluginManagement );
-            }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
-            }
-
-            try
-            {
-                addProjectPlugins( plugins, profile.getBuild().getPlugins(), parentBuildPlugins );
-            }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
-            }
-
-            try
-            {
-                addProjectPlugins( plugins, profile.getReporting().getPlugins(), parentReportPlugins );
-            }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
-            }
-        }
-        return plugins;
-    }
-
-    /**
-     * Returns the pluginManagement section of the super-pom.
-     *
-     * @return Returns the pluginManagement section of the super-pom.
-     * @throws MojoExecutionException when things go wrong.
-     */
-    private Map getSuperPomPluginManagement()
-        throws MojoExecutionException
-    {
-        Map superPomPluginManagement = new HashMap();
-        try
-        {
-            superPomPluginManagement.putAll(
-                getPluginManagement( projectBuilder.buildStandaloneSuperProject( localRepository ) ) );
-        }
-        catch ( ProjectBuildingException e )
-        {
-            throw new MojoExecutionException( "Could not determine the super pom.xml", e );
-        }
-        return superPomPluginManagement;
-    }
-
 // -------------------------- OTHER METHODS --------------------------
-
-    /**
-     * Adds those project plugins which are not inherited from the parent definitions to the list of plugins.
-     *
-     * @param plugins           The list of plugins.
-     * @param projectPlugins    The project's plugins.
-     * @param parentDefinitions The parent plugin definitions.
-     * @since 1.0
-     */
-    private void addProjectPlugins( Set plugins, Collection projectPlugins, Map parentDefinitions )
-    {
-        Iterator j = projectPlugins.iterator();
-        while ( j.hasNext() )
-        {
-            Object plugin = j.next();
-            String coord = getPluginCoords( plugin );
-            String version = getPluginVersion( plugin );
-            String parentVersion = (String) parentDefinitions.get( coord );
-            if ( parentVersion == null || !parentVersion.equals( version ) )
-            {
-                plugins.add( plugin );
-            }
-        }
-    }
-
-    /**
-     * Returns the coordinates of a plugin.
-     *
-     * @param plugin The plugin
-     * @return The groupId and artifactId separated by a colon.
-     * @since 1.0
-     */
-    private static String getPluginCoords( Object plugin )
-    {
-        return getPluginGroupId( plugin ) + ":" + getPluginArtifactId( plugin );
-    }
-
-    /**
-     * Returns the ArtifactId of a {@link Plugin} or {@link ReportPlugin}
-     *
-     * @param plugin the {@link Plugin} or {@link ReportPlugin}
-     * @return the ArtifactId of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0
-     */
-    private static String getPluginArtifactId( Object plugin )
-    {
-        return plugin instanceof ReportPlugin
-            ? ( (ReportPlugin) plugin ).getArtifactId()
-            : ( (Plugin) plugin ).getArtifactId();
-    }
-
-    /**
-     * Returns the GroupId of a {@link Plugin} or {@link ReportPlugin}
-     *
-     * @param plugin the {@link Plugin} or {@link ReportPlugin}
-     * @return the GroupId of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0
-     */
-    private static String getPluginGroupId( Object plugin )
-    {
-        return plugin instanceof ReportPlugin
-            ? ( (ReportPlugin) plugin ).getGroupId()
-            : ( (Plugin) plugin ).getGroupId();
-    }
-
-    /**
-     * Returns the Version of a {@link Plugin} or {@link ReportPlugin}
-     *
-     * @param plugin the {@link Plugin} or {@link ReportPlugin}
-     * @return the Version of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0
-     */
-    private static String getPluginVersion( Object plugin )
-    {
-        return plugin instanceof ReportPlugin
-            ? ( (ReportPlugin) plugin ).getVersion()
-            : ( (Plugin) plugin ).getVersion();
-    }
 
     /**
      * Gets the build plugins of a specific project.
@@ -485,6 +438,366 @@ public class DisplayPluginUpdatesMojo
     }
 
     /**
+     * Returns the lifecycle plugins of a specific project.
+     *
+     * @param project the project to get the lifecycle plugins from.
+     * @return The map of effective plugin versions keyed by coordinates.
+     * @throws org.apache.maven.plugin.MojoExecutionException
+     *          if things go wrong.
+     * @since 1.0
+     */
+    private Map getLifecyclePlugins( MavenProject project )
+        throws MojoExecutionException
+    {
+        Map lifecyclePlugins = new HashMap();
+        try
+        {
+            Set plugins = getBoundPlugins( project, "clean,deploy,site" );
+            Iterator i = plugins.iterator();
+            while ( i.hasNext() )
+            {
+                Plugin plugin = (Plugin) i.next();
+                lifecyclePlugins.put( getPluginCoords( plugin ), plugin );
+            }
+        }
+        catch ( PluginNotFoundException e )
+        {
+            throw new MojoExecutionException( "Could not find plugin", e );
+        }
+        catch ( LifecycleExecutionException e )
+        {
+            throw new MojoExecutionException( "Could not determine lifecycle", e );
+        }
+        catch ( IllegalAccessException e )
+        {
+            throw new MojoExecutionException( "Could not determine lifecycles", e );
+        }
+        return lifecyclePlugins;
+    }
+
+    /**
+     * Gets the plugins that are bound to the defined phases. This does not find plugins bound in the pom to a phase
+     * later than the plugin is executing.
+     *
+     * @param project   the project
+     * @param thePhases the the phases
+     * @return the bound plugins
+     * @throws org.apache.maven.plugin.PluginNotFoundException
+     *                                     the plugin not found exception
+     * @throws LifecycleExecutionException the lifecycle execution exception
+     * @throws IllegalAccessException      the illegal access exception
+     */
+    // pilfered this from enforcer-rules
+    // TODO coordinate with Brian Fox to remove the duplicate code
+    private Set getBoundPlugins( MavenProject project, String thePhases )
+        throws PluginNotFoundException, LifecycleExecutionException, IllegalAccessException
+    {
+        // I couldn't find a direct way to get at the lifecycles list.
+        List lifecycles = (List) ReflectionUtils.getValueIncludingSuperclasses( "lifecycles", lifecycleExecutor );
+
+        Set allPlugins = new HashSet();
+
+        // lookup the bindings for all the passed in phases
+        String[] lifecyclePhases = thePhases.split( "," );
+        for ( int i = 0; i < lifecyclePhases.length; i++ )
+        {
+            String lifecyclePhase = lifecyclePhases[i];
+            if ( StringUtils.isNotEmpty( lifecyclePhase ) )
+            {
+                try
+                {
+                    Lifecycle lifecycle = getLifecycleForPhase( lifecycles, lifecyclePhase );
+                    allPlugins.addAll( getAllPlugins( project, lifecycle ) );
+                }
+                catch ( BuildFailureException e )
+                {
+                    // i'm going to swallow this because the
+                    // user may have declared a phase that
+                    // doesn't exist for every module.
+                }
+            }
+        }
+        return allPlugins;
+    }
+
+    /**
+     * Gets the lifecycle for phase.
+     *
+     * @param lifecycles The list of lifecycles.
+     * @param phase      the phase
+     * @return the lifecycle for phase
+     * @throws BuildFailureException       the build failure exception
+     * @throws LifecycleExecutionException the lifecycle execution exception
+     */
+    private Lifecycle getLifecycleForPhase( List lifecycles, String phase )
+        throws BuildFailureException, LifecycleExecutionException
+    {
+        Lifecycle lifecycle = (Lifecycle) getPhaseToLifecycleMap( lifecycles ).get( phase );
+
+        if ( lifecycle == null )
+        {
+            throw new BuildFailureException( "Unable to find lifecycle for phase '" + phase + "'" );
+        }
+        return lifecycle;
+    }
+
+    /*
+     * Uses borrowed lifecycle code to get a list of all plugins bound to the lifecycle.
+     */
+    /**
+     * Gets the all plugins.
+     *
+     * @param project   the project
+     * @param lifecycle the lifecycle
+     * @return the all plugins
+     * @throws PluginNotFoundException     the plugin not found exception
+     * @throws LifecycleExecutionException the lifecycle execution exception
+     */
+    private Set getAllPlugins( MavenProject project, Lifecycle lifecycle )
+        throws PluginNotFoundException, LifecycleExecutionException
+
+    {
+        HashSet plugins = new HashSet();
+        // first, bind those associated with the packaging
+        Map mappings = findMappingsForLifecycle( project, lifecycle );
+
+        Iterator iter = mappings.entrySet().iterator();
+        while ( iter.hasNext() )
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+            String value = (String) entry.getValue();
+            String[] tokens = value.split( ":" );
+
+            Plugin plugin = new Plugin();
+            plugin.setGroupId( tokens[0] );
+            plugin.setArtifactId( tokens[1] );
+            plugins.add( plugin );
+        }
+
+        List mojos = findOptionalMojosForLifecycle( project, lifecycle );
+        iter = mojos.iterator();
+        while ( iter.hasNext() )
+        {
+            String value = (String) iter.next();
+            String[] tokens = value.split( ":" );
+
+            Plugin plugin = new Plugin();
+            plugin.setGroupId( tokens[0] );
+            plugin.setArtifactId( tokens[1] );
+            plugins.add( plugin );
+        }
+
+        for ( Iterator i = project.getBuildPlugins().iterator(); i.hasNext(); )
+        {
+            plugins.add( i.next() );
+        }
+
+        return plugins;
+    }
+
+    /**
+     * Find mappings for lifecycle.
+     *
+     * @param project   the project
+     * @param lifecycle the lifecycle
+     * @return the map
+     * @throws LifecycleExecutionException the lifecycle execution exception
+     * @throws PluginNotFoundException     the plugin not found exception
+     */
+    private Map findMappingsForLifecycle( MavenProject project, Lifecycle lifecycle )
+        throws LifecycleExecutionException, PluginNotFoundException
+    {
+        String packaging = project.getPackaging();
+        Map mappings = null;
+
+        LifecycleMapping m = (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging,
+                                                               session.getSettings(), session.getLocalRepository() );
+        if ( m != null )
+        {
+            mappings = m.getPhases( lifecycle.getId() );
+        }
+
+        Map defaultMappings = lifecycle.getDefaultPhases();
+
+        if ( mappings == null )
+        {
+            try
+            {
+                m = (LifecycleMapping) session.lookup( LifecycleMapping.ROLE, packaging );
+                mappings = m.getPhases( lifecycle.getId() );
+            }
+            catch ( ComponentLookupException e )
+            {
+                if ( defaultMappings == null )
+                {
+                    throw new LifecycleExecutionException(
+                        "Cannot find lifecycle mapping for packaging: \'" + packaging + "\'.", e );
+                }
+            }
+        }
+
+        if ( mappings == null )
+        {
+            if ( defaultMappings == null )
+            {
+                throw new LifecycleExecutionException(
+                    "Cannot find lifecycle mapping for packaging: \'" + packaging + "\', and there is no default" );
+            }
+            else
+            {
+                mappings = defaultMappings;
+            }
+        }
+
+        return mappings;
+    }
+
+    /**
+     * Find optional mojos for lifecycle.
+     *
+     * @param project   the project
+     * @param lifecycle the lifecycle
+     * @return the list
+     * @throws LifecycleExecutionException the lifecycle execution exception
+     * @throws PluginNotFoundException     the plugin not found exception
+     */
+    private List findOptionalMojosForLifecycle( MavenProject project, Lifecycle lifecycle )
+        throws LifecycleExecutionException, PluginNotFoundException
+    {
+        String packaging = project.getPackaging();
+        List optionalMojos = null;
+
+        LifecycleMapping m = (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging,
+                                                               session.getSettings(), session.getLocalRepository() );
+
+        if ( m != null )
+        {
+            optionalMojos = m.getOptionalMojos( lifecycle.getId() );
+        }
+
+        if ( optionalMojos == null )
+        {
+            try
+            {
+                m = (LifecycleMapping) session.lookup( LifecycleMapping.ROLE, packaging );
+                optionalMojos = m.getOptionalMojos( lifecycle.getId() );
+            }
+            catch ( ComponentLookupException e )
+            {
+                getLog().debug( "Error looking up lifecycle mapping to retrieve optional mojos. Lifecycle ID: " +
+                    lifecycle.getId() + ". Error: " + e.getMessage(), e );
+            }
+        }
+
+        if ( optionalMojos == null )
+        {
+            optionalMojos = Collections.EMPTY_LIST;
+        }
+
+        return optionalMojos;
+    }
+
+    /**
+     * Find extension.
+     *
+     * @param project         the project
+     * @param role            the role
+     * @param roleHint        the role hint
+     * @param settings        the settings
+     * @param localRepository the local repository
+     * @return the object
+     * @throws LifecycleExecutionException the lifecycle execution exception
+     * @throws PluginNotFoundException     the plugin not found exception
+     */
+    private Object findExtension( MavenProject project, String role, String roleHint, Settings settings,
+                                  ArtifactRepository localRepository )
+        throws LifecycleExecutionException, PluginNotFoundException
+    {
+        Object pluginComponent = null;
+
+        for ( Iterator i = project.getBuildPlugins().iterator(); i.hasNext() && pluginComponent == null; )
+        {
+            Plugin plugin = (Plugin) i.next();
+
+            if ( plugin.isExtensions() )
+            {
+                verifyPlugin( plugin, project, settings, localRepository );
+
+                // TODO: if moved to the plugin manager we
+                // already have the descriptor from above
+                // and so do can lookup the container
+                // directly
+                try
+                {
+                    pluginComponent = pluginManager.getPluginComponent( plugin, role, roleHint );
+                }
+                catch ( ComponentLookupException e )
+                {
+                    getLog().debug( "Unable to find the lifecycle component in the extension", e );
+                }
+                catch ( PluginManagerException e )
+                {
+                    throw new LifecycleExecutionException(
+                        "Error getting extensions from the plugin '" + plugin.getKey() + "': " + e.getMessage(), e );
+                }
+            }
+        }
+        return pluginComponent;
+    }
+
+    /**
+     * Verify plugin.
+     *
+     * @param plugin          the plugin
+     * @param project         the project
+     * @param settings        the settings
+     * @param localRepository the local repository
+     * @return the plugin descriptor
+     * @throws LifecycleExecutionException the lifecycle execution exception
+     * @throws PluginNotFoundException     the plugin not found exception
+     */
+    private PluginDescriptor verifyPlugin( Plugin plugin, MavenProject project, Settings settings,
+                                           ArtifactRepository localRepository )
+        throws LifecycleExecutionException, PluginNotFoundException
+    {
+        PluginDescriptor pluginDescriptor;
+        try
+        {
+            pluginDescriptor = pluginManager.verifyPlugin( plugin, project, settings, localRepository );
+        }
+        catch ( PluginManagerException e )
+        {
+            throw new LifecycleExecutionException(
+                "Internal error in the plugin manager getting plugin '" + plugin.getKey() + "': " + e.getMessage(), e );
+        }
+        catch ( PluginVersionResolutionException e )
+        {
+            throw new LifecycleExecutionException( e.getMessage(), e );
+        }
+        catch ( InvalidVersionSpecificationException e )
+        {
+            throw new LifecycleExecutionException( e.getMessage(), e );
+        }
+        catch ( InvalidPluginException e )
+        {
+            throw new LifecycleExecutionException( e.getMessage(), e );
+        }
+        catch ( ArtifactNotFoundException e )
+        {
+            throw new LifecycleExecutionException( e.getMessage(), e );
+        }
+        catch ( ArtifactResolutionException e )
+        {
+            throw new LifecycleExecutionException( e.getMessage(), e );
+        }
+        catch ( PluginVersionNotFoundException e )
+        {
+            throw new LifecycleExecutionException( e.getMessage(), e );
+        }
+        return pluginDescriptor;
+    }
+
+    /**
      * Returns all the parent projects of the specified project, with the root project first.
      *
      * @param project The maven project to get the parents of
@@ -505,60 +818,209 @@ public class DisplayPluginUpdatesMojo
         return parents;
     }
 
-    /**
-     * Gets the plugin management plugins of a specific project.
-     *
-     * @param project the project to get the plugin management plugins from.
-     * @return The map of effective plugin versions keyed by coordinates.
-     * @since 1.0
+    /*
+     * NOTE: All the code following this point was scooped from the DefaultLifecycleExecutor. There must be a better way
+     * but for now it should work.
      */
-    private Map getPluginManagement( MavenProject project )
+    /**
+     * Gets the phase to lifecycle map.
+     *
+     * @param lifecycles The list of lifecycles.
+     * @return the phase to lifecycle map.
+     * @throws LifecycleExecutionException the lifecycle execution exception.
+     */
+    public Map getPhaseToLifecycleMap( List lifecycles )
+        throws LifecycleExecutionException
     {
-        // we want only those parts of pluginManagement that are defined in this project
-        Map pluginManagement = new HashMap();
-        try
+        Map phaseToLifecycleMap = new HashMap();
+
+        for ( Iterator i = lifecycles.iterator(); i.hasNext(); )
         {
-            Iterator j = project.getOriginalModel().getBuild().getPluginManagement().getPlugins().iterator();
-            while ( j.hasNext() )
+            Lifecycle lifecycle = (Lifecycle) i.next();
+
+            for ( Iterator p = lifecycle.getPhases().iterator(); p.hasNext(); )
             {
-                Plugin plugin = (Plugin) j.next();
-                String coord = getPluginCoords( plugin );
-                String version = getPluginVersion( plugin );
-                if ( version != null )
+                String phase = (String) p.next();
+
+                if ( phaseToLifecycleMap.containsKey( phase ) )
                 {
-                    pluginManagement.put( coord, version );
+                    Lifecycle prevLifecycle = (Lifecycle) phaseToLifecycleMap.get( phase );
+                    throw new LifecycleExecutionException( "Phase '" + phase +
+                        "' is defined in more than one lifecycle: '" + lifecycle.getId() + "' and '" +
+                        prevLifecycle.getId() + "'" );
+                }
+                else
+                {
+                    phaseToLifecycleMap.put( phase, lifecycle );
                 }
             }
+        }
+        return phaseToLifecycleMap;
+    }
+
+    /**
+     * Returns the set of all plugins used by the project.
+     *
+     * @param superPomPluginManagement the super pom's pluginManagement plugins.
+     * @param parentPluginManagement   the parent pom's pluginManagement plugins.
+     * @param parentBuildPlugins       the parent pom's build plugins.
+     * @param parentReportPlugins      the parent pom's report plugins.
+     * @return the set of plugins used by the project.
+     * @throws org.apache.maven.plugin.MojoExecutionException
+     *          if things go wrong.
+     */
+    private Set getProjectPlugins( Map superPomPluginManagement, Map parentPluginManagement, Map parentBuildPlugins,
+                                   Map parentReportPlugins )
+        throws MojoExecutionException
+    {
+        Map plugins = new HashMap();
+
+        Map excludePluginManagement = new HashMap( superPomPluginManagement );
+        excludePluginManagement.putAll( parentPluginManagement );
+
+        try
+        {
+            addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPluginManagement().getPlugins(),
+                               excludePluginManagement );
         }
         catch ( NullPointerException e )
         {
             // guess there are no plugins here
         }
-        Iterator i = project.getOriginalModel().getProfiles().iterator();
+
+        addProjectPlugins( plugins, getLifecyclePlugins( getProject() ).values(), Collections.EMPTY_MAP );
+
+        try
+        {
+            addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPlugins(), parentBuildPlugins );
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
+
+        try
+        {
+            addProjectPlugins( plugins, getProject().getOriginalModel().getReporting().getPlugins(),
+                               parentReportPlugins );
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no plugins here
+        }
+        Iterator i = getProject().getOriginalModel().getProfiles().iterator();
         while ( i.hasNext() )
         {
             Profile profile = (Profile) i.next();
             try
             {
-                Iterator j = profile.getBuild().getPluginManagement().getPlugins().iterator();
-                while ( j.hasNext() )
-                {
-                    Plugin plugin = (Plugin) j.next();
-                    String coord = getPluginCoords( plugin );
-                    String version = getPluginVersion( plugin );
-                    if ( version != null )
-                    {
-                        pluginManagement.put( coord, version );
-                    }
-                }
+                addProjectPlugins( plugins, profile.getBuild().getPluginManagement().getPlugins(),
+                                   excludePluginManagement );
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
+            }
+
+            try
+            {
+                addProjectPlugins( plugins, profile.getBuild().getPlugins(), parentBuildPlugins );
+            }
+            catch ( NullPointerException e )
+            {
+                // guess there are no plugins here
+            }
+
+            try
+            {
+                addProjectPlugins( plugins, profile.getReporting().getPlugins(), parentReportPlugins );
             }
             catch ( NullPointerException e )
             {
                 // guess there are no plugins here
             }
         }
+        Set result = new TreeSet( new PluginComparator() );
+        result.addAll( plugins.values() );
+        return result;
+    }
 
-        return pluginManagement;
+    /**
+     * Adds those project plugins which are not inherited from the parent definitions to the list of plugins.
+     *
+     * @param plugins           The list of plugins.
+     * @param projectPlugins    The project's plugins.
+     * @param parentDefinitions The parent plugin definitions.
+     * @since 1.0
+     */
+    private void addProjectPlugins( Map plugins, Collection projectPlugins, Map parentDefinitions )
+    {
+        Iterator j = projectPlugins.iterator();
+        while ( j.hasNext() )
+        {
+            Object plugin = j.next();
+            String coord = getPluginCoords( plugin );
+            String version = getPluginVersion( plugin );
+            String parentVersion = (String) parentDefinitions.get( coord );
+            if ( parentVersion == null || !parentVersion.equals( version ) )
+            {
+                plugins.put( coord, plugin );
+            }
+        }
+    }
+
+    /**
+     * Returns the coordinates of a plugin.
+     *
+     * @param plugin The plugin
+     * @return The groupId and artifactId separated by a colon.
+     * @since 1.0
+     */
+    private static String getPluginCoords( Object plugin )
+    {
+        return getPluginGroupId( plugin ) + ":" + getPluginArtifactId( plugin );
+    }
+
+    /**
+     * Returns the ArtifactId of a {@link Plugin} or {@link ReportPlugin}
+     *
+     * @param plugin the {@link Plugin} or {@link ReportPlugin}
+     * @return the ArtifactId of the {@link Plugin} or {@link ReportPlugin}
+     * @since 1.0
+     */
+    private static String getPluginArtifactId( Object plugin )
+    {
+        return plugin instanceof ReportPlugin
+            ? ( (ReportPlugin) plugin ).getArtifactId()
+            : ( (Plugin) plugin ).getArtifactId();
+    }
+
+    /**
+     * Returns the GroupId of a {@link Plugin} or {@link ReportPlugin}
+     *
+     * @param plugin the {@link Plugin} or {@link ReportPlugin}
+     * @return the GroupId of the {@link Plugin} or {@link ReportPlugin}
+     * @since 1.0
+     */
+    private static String getPluginGroupId( Object plugin )
+    {
+        return plugin instanceof ReportPlugin
+            ? ( (ReportPlugin) plugin ).getGroupId()
+            : ( (Plugin) plugin ).getGroupId();
+    }
+
+    /**
+     * Returns the Version of a {@link Plugin} or {@link ReportPlugin}
+     *
+     * @param plugin the {@link Plugin} or {@link ReportPlugin}
+     * @return the Version of the {@link Plugin} or {@link ReportPlugin}
+     * @since 1.0
+     */
+    private static String getPluginVersion( Object plugin )
+    {
+        return plugin instanceof ReportPlugin
+            ? ( (ReportPlugin) plugin ).getVersion()
+            : ( (Plugin) plugin ).getVersion();
     }
 
     /**
