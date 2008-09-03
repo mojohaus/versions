@@ -127,7 +127,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
      *
-     * @parameter expression="${allowSnapshots}" default-value="true"
+     * @parameter expression="${allowSnapshots}" default-value="false"
      * @since 1.0
      */
     protected Boolean allowSnapshots;
