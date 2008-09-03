@@ -54,6 +54,8 @@ import org.codehaus.plexus.util.ReflectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -875,8 +877,30 @@ public class DisplayPluginUpdatesMojo
     {
         Map plugins = new HashMap();
 
+        getLog().debug( "Building list of project plugins..." );
+
+        if ( getLog().isDebugEnabled() )
+        {
+            StringWriter origModel = new StringWriter();
+
+            try
+            {
+                origModel.append( "Original model:\n" );
+                getProject().writeOriginalModel( origModel );
+                getLog().debug( origModel.toString() );
+            }
+            catch ( IOException e )
+            {
+            }
+        }
+
+        debugVersionMap( "super-pom version map", superPomPluginManagement );
+        debugVersionMap( "parent version map", parentPluginManagement );
+
         Map excludePluginManagement = new HashMap( superPomPluginManagement );
         excludePluginManagement.putAll( parentPluginManagement );
+
+        debugVersionMap( "aggregate version map", excludePluginManagement );
 
         try
         {
@@ -887,8 +911,11 @@ public class DisplayPluginUpdatesMojo
         {
             // guess there are no plugins here
         }
+        debugPluginMap( "after adding local pluginManagement", plugins );
 
         addProjectPlugins( plugins, getLifecyclePlugins( getProject() ).values(), parentPluginManagement );
+
+        debugPluginMap( "after adding lifecycle plugins", plugins );
 
         try
         {
@@ -898,6 +925,7 @@ public class DisplayPluginUpdatesMojo
         {
             // guess there are no plugins here
         }
+        debugPluginMap( "after adding build plugins", plugins );
 
         try
         {
@@ -921,6 +949,7 @@ public class DisplayPluginUpdatesMojo
             {
                 // guess there are no plugins here
             }
+            debugPluginMap( "after adding build pluginManagement for profile " + profile.getId(), plugins );
 
             try
             {
@@ -930,6 +959,7 @@ public class DisplayPluginUpdatesMojo
             {
                 // guess there are no plugins here
             }
+            debugPluginMap( "after adding build plugins for profile " + profile.getId(), plugins );
 
             try
             {
@@ -939,6 +969,7 @@ public class DisplayPluginUpdatesMojo
             {
                 // guess there are no plugins here
             }
+            debugPluginMap( "after adding reporting plugins for profile " + profile.getId(), plugins );
         }
         Set result = new TreeSet( new PluginComparator() );
         result.addAll( plugins.values() );
@@ -969,6 +1000,58 @@ public class DisplayPluginUpdatesMojo
                     plugins.put( coord, plugin );
                 }
             }
+        }
+    }
+
+    /**
+     * Logs at debug level a map of plugins keyed by versionless key.
+     *
+     * @param description log description
+     * @param plugins     a map with keys being the {@link String} corresponding to the versionless artifact key and
+     *                    values being {@link Plugin} or {@link ReportPlugin}.
+     */
+    private void debugPluginMap( String description, Map plugins )
+    {
+        if ( getLog().isDebugEnabled() )
+        {
+            Set sorted = new TreeSet( new PluginComparator() );
+            sorted.addAll( plugins.values() );
+            StringBuffer buf = new StringBuffer( description );
+            Iterator i = sorted.iterator();
+            while ( i.hasNext() )
+            {
+                Object plugin = i.next();
+                buf.append( "\n    " );
+                buf.append( getPluginCoords( plugin ) );
+                buf.append( ":" );
+                buf.append( getPluginVersion( plugin ) );
+            }
+            getLog().debug( buf.toString() );
+        }
+    }
+
+    /**
+     * Logs at debug level a map of plugin versions keyed by versionless key.
+     *
+     * @param description log description
+     * @param plugins     a map with keys being the {@link String} corresponding to the versionless artifact key and
+     *                    values being {@link String} plugin version.
+     */
+    private void debugVersionMap( String description, Map plugins )
+    {
+        if ( getLog().isDebugEnabled() )
+        {
+            StringBuffer buf = new StringBuffer( description );
+            Iterator i = plugins.entrySet().iterator();
+            while ( i.hasNext() )
+            {
+                Map.Entry plugin = (Map.Entry) i.next();
+                buf.append( "\n    " );
+                buf.append( plugin.getKey() );
+                buf.append( ":" );
+                buf.append( plugin.getValue() );
+            }
+            getLog().debug( buf.toString() );
         }
     }
 
