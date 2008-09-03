@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
@@ -65,13 +66,6 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0
      */
     private static final String POM_ENCODING = "UTF-8";
-
-    /**
-     * The string that identifies a snapshot.
-     *
-     * @since 1.0
-     */
-    private static final String SNAPSHOT = "-SNAPSHOT";
 
     /**
      * @component
@@ -232,7 +226,7 @@ public abstract class AbstractVersionsUpdaterMojo
         for ( Iterator j = versions.iterator(); j.hasNext(); )
         {
             ArtifactVersion ver = (ArtifactVersion) j.next();
-            if ( snapshotsExcluded && ver.toString().endsWith( SNAPSHOT ) )
+            if ( snapshotsExcluded && ArtifactUtils.isSnapshot( ver.toString() ) )
             {
                 // not this version as it's a snapshot and we've been told no snapshots.
                 continue;
