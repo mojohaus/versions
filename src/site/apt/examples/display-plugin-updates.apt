@@ -122,10 +122,16 @@ mvn versions:display-plugin-updates
 [INFO] The following plugin updates are available:
 [INFO]   maven-checkstyle-plugin .................................. 2.1 -> 2.2
 [INFO]   maven-clean-plugin ....................................... 2.1 -> 2.2
+[INFO]   maven-deploy-plugin ...................................... 2.3 -> 2.4
+[INFO]   maven-javadoc-plugin ..................................... 2.4 -> 2.5
+[INFO]   maven-site-plugin .......................... 2.0-beta-6 -> 2.0-beta-7
 [INFO]
 [WARNING] The following plugins do not have their version specified:
 [WARNING]   maven-compiler-plugin ..................... (from super-pom) 2.0.2
+[WARNING]   maven-deploy-plugin ......................... (from super-pom) 2.3
+[WARNING]   maven-install-plugin ........................ (from super-pom) 2.2
 [WARNING]   maven-javadoc-plugin ........................ (from super-pom) 2.4
+[WARNING]   maven-site-plugin .................... (from super-pom) 2.0-beta-6
 [WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.2
 [INFO]
 [INFO] ------------------------------------------------------------------------
@@ -192,11 +198,17 @@ mvn versions:display-plugin-updates
 [INFO]
 [INFO] The following plugin updates are available:
 [INFO]   maven-checkstyle-plugin .................................. 2.0 -> 2.2
+[INFO]   maven-clean-plugin ....................................... 2.1 -> 2.2
+[INFO]   maven-deploy-plugin ...................................... 2.3 -> 2.4
 [INFO]   maven-javadoc-plugin ..................................... 2.4 -> 2.5
+[INFO]   maven-site-plugin .......................... 2.0-beta-6 -> 2.0-beta-7
 [INFO]
 [WARNING] The following plugins do not have their version specified:
-[WARNING]   maven-clean-plugin .......................... (from super-pom) 2.2
+[WARNING]   maven-compiler-plugin ..................... (from super-pom) 2.0.2
+[WARNING]   maven-deploy-plugin ......................... (from super-pom) 2.3
+[WARNING]   maven-install-plugin ........................ (from super-pom) 2.2
 [WARNING]   maven-javadoc-plugin ........................ (from super-pom) 2.4
+[WARNING]   maven-site-plugin .................... (from super-pom) 2.0-beta-6
 [WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.2
 [INFO]
 [INFO] ------------------------------------------------------------------------

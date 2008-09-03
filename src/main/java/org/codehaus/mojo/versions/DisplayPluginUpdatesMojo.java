@@ -888,7 +888,7 @@ public class DisplayPluginUpdatesMojo
             // guess there are no plugins here
         }
 
-        addProjectPlugins( plugins, getLifecyclePlugins( getProject() ).values(), Collections.EMPTY_MAP );
+        addProjectPlugins( plugins, getLifecyclePlugins( getProject() ).values(), parentPluginManagement );
 
         try
         {
@@ -964,7 +964,10 @@ public class DisplayPluginUpdatesMojo
             String parentVersion = (String) parentDefinitions.get( coord );
             if ( parentVersion == null || !parentVersion.equals( version ) )
             {
-                plugins.put( coord, plugin );
+                if ( !plugins.containsKey( coord ) || getPluginVersion( plugins.get( coord ) ) == null )
+                {
+                    plugins.put( coord, plugin );
+                }
             }
         }
     }
