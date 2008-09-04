@@ -9,7 +9,7 @@
 
   <groupId>org.codehaus.mojo</groupId>
   <artifactId>versions-maven-plugin</artifactId>
-  <version>1.0-alpha-1-SNAPSHOT</version>
+  <version>1.0-alpha-1</version>
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
@@ -31,9 +31,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</developerConnection>
-    <url>http://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</url>
+    <connection>scm:svn:http://svn.codehaus.org/mojo/tags/versions-maven-plugin-1.0-alpha-1</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/tags/versions-maven-plugin-1.0-alpha-1</developerConnection>
+    <url>http://svn.codehaus.org/mojo/tags/versions-maven-plugin-1.0-alpha-1</url>
   </scm>
 
   <developers>
@@ -144,7 +144,7 @@
                 </goals>
                 <configuration>
                   <tasks>
-                    <mkdir dir="target"/>
+                    <mkdir dir="target" />
                   </tasks>
                 </configuration>
               </execution>
