@@ -180,28 +180,35 @@ public class DisplayPluginUpdatesMojo
         {
             // guess there are no plugins here
         }
-        Iterator i = project.getOriginalModel().getProfiles().iterator();
-        while ( i.hasNext() )
+        try
         {
-            Profile profile = (Profile) i.next();
-            try
+            Iterator i = project.getOriginalModel().getProfiles().iterator();
+            while ( i.hasNext() )
             {
-                Iterator j = profile.getBuild().getPluginManagement().getPlugins().iterator();
-                while ( j.hasNext() )
+                Profile profile = (Profile) i.next();
+                try
                 {
-                    Plugin plugin = (Plugin) j.next();
-                    String coord = getPluginCoords( plugin );
-                    String version = getPluginVersion( plugin );
-                    if ( version != null )
+                    Iterator j = profile.getBuild().getPluginManagement().getPlugins().iterator();
+                    while ( j.hasNext() )
                     {
-                        pluginManagement.put( coord, version );
+                        Plugin plugin = (Plugin) j.next();
+                        String coord = getPluginCoords( plugin );
+                        String version = getPluginVersion( plugin );
+                        if ( version != null )
+                        {
+                            pluginManagement.put( coord, version );
+                        }
                     }
                 }
+                catch ( NullPointerException e )
+                {
+                    // guess there are no plugins here
+                }
             }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
-            }
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no profiles here
         }
 
         return pluginManagement;
@@ -399,28 +406,35 @@ public class DisplayPluginUpdatesMojo
         {
             // guess there are no plugins here
         }
-        Iterator i = project.getOriginalModel().getProfiles().iterator();
-        while ( i.hasNext() )
+        try
         {
-            Profile profile = (Profile) i.next();
-            try
+            Iterator i = project.getOriginalModel().getProfiles().iterator();
+            while ( i.hasNext() )
             {
-                Iterator j = profile.getBuild().getPlugins().iterator();
-                while ( j.hasNext() )
+                Profile profile = (Profile) i.next();
+                try
                 {
-                    Object plugin = j.next();
-                    String coord = getPluginCoords( plugin );
-                    String version = getPluginVersion( plugin );
-                    if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+                    Iterator j = profile.getBuild().getPlugins().iterator();
+                    while ( j.hasNext() )
                     {
-                        buildPlugins.put( coord, version );
+                        Object plugin = j.next();
+                        String coord = getPluginCoords( plugin );
+                        String version = getPluginVersion( plugin );
+                        if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+                        {
+                            buildPlugins.put( coord, version );
+                        }
                     }
                 }
+                catch ( NullPointerException e )
+                {
+                    // guess there are no plugins here
+                }
             }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
-            }
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no profiles here
         }
         return buildPlugins;
     }
@@ -1139,28 +1153,35 @@ public class DisplayPluginUpdatesMojo
         {
             // guess there are no plugins here
         }
-        Iterator i = project.getOriginalModel().getProfiles().iterator();
-        while ( i.hasNext() )
+        try
         {
-            Profile profile = (Profile) i.next();
-            try
+            Iterator i = project.getOriginalModel().getProfiles().iterator();
+            while ( i.hasNext() )
             {
-                Iterator j = profile.getReporting().getPlugins().iterator();
-                while ( j.hasNext() )
+                Profile profile = (Profile) i.next();
+                try
                 {
-                    Object plugin = j.next();
-                    String coord = getPluginCoords( plugin );
-                    String version = getPluginVersion( plugin );
-                    if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+                    Iterator j = profile.getReporting().getPlugins().iterator();
+                    while ( j.hasNext() )
                     {
-                        reportPlugins.put( coord, version );
+                        Object plugin = j.next();
+                        String coord = getPluginCoords( plugin );
+                        String version = getPluginVersion( plugin );
+                        if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+                        {
+                            reportPlugins.put( coord, version );
+                        }
                     }
                 }
+                catch ( NullPointerException e )
+                {
+                    // guess there are no plugins here
+                }
             }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
-            }
+        }
+        catch ( NullPointerException e )
+        {
+            // guess there are no profiles here
         }
         return reportPlugins;
     }

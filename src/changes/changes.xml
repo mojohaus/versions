@@ -1,0 +1,28 @@
+<document>
+    <properties>
+        <title>Maven 2.x Versions Plugin changelog</title>
+        <author email="stephen.alan.connolly@gmail.com">
+            Stephen Connolly
+        </author>
+    </properties>
+    <body>
+        <release version="1.0-alpha-1" date="2008-09-05" description="First alpha release">
+            <action dev="stephenconnolly" type="fix" issue="MVERSIONS-1">
+                Rewrote the plugin detection code to correctly identify the current version of
+                a plugin that is in use.
+            </action>
+            <action dev="stephenconnolly" type="fix" issue="MVERSIONS-2">
+                Updated the plugin detection code to add plugins from the project lifecycle.
+            </action>
+            <action dev="dennisl" type="update">
+                Upgraned to mojo-parent version 18.
+            </action>
+            <action dev="stephenconnolly" type="update">
+                Updated the site documentation.
+            </action>
+            <action dev="dennisl" type="update">
+                Refactored plugin parameters to ensure that they only apply to the goals to which they apply.
+            </action>
+        </release>
+    </body>
+</document>
