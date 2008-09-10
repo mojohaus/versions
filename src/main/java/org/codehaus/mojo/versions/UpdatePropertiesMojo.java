@@ -210,9 +210,16 @@ public class UpdatePropertiesMojo
                             {
                                 artifactId = text;
                             }
-                            else if ( path.endsWith( "version" ) && text.startsWith( "${" ) && text.endsWith( "}" ) )
+                            else if ( path.endsWith( "version" ) )
                             {
-                                property = text.substring( 2, text.lastIndexOf( "}" ) ).trim();
+                                int start = text.indexOf( "${" );
+                                int middle = text.indexOf( "${", start );
+                                int end = text.lastIndexOf( "}" );
+                                if ( start != -1 && end != -1 && end > start && middle == -1 )
+                                {
+                                    property = text.substring( start + 2, end ).trim();
+
+                                }
                             }
                             path = (String) stack.pop();
                         }

@@ -58,7 +58,46 @@ Update Properties
 ---
 
   The aim being to allow updating the version of all the suite components in one go.  The versions-maven-plugin can help
-  you to automate these updates.  For example if we add the following to the POM:
+  you to automate these updates.
+
+  By default, the versions-maven-plugin will look at the dependencies in your POM.  If any dependencies declare a version
+  which depends on evaluating a single property that is defined in the POM, for example:
+
+---
+    <!-- strongly recommend this version -->
+    <dependency>
+      <groupId>com.foo.bar</groupId>
+      <artifactId>manchu-core</artifactId>
+      <version>${manchu.version}</version>
+    </dependency>
+
+    <!-- force this version -->
+    <dependency>
+      <groupId>com.foo.bar</groupId>
+      <artifactId>manchu-core</artifactId>
+      <version>[${manchu.version}]</version>
+    </dependency>
+
+    <!-- any version between this version and 2.0.0, excluding 2.0.0 and 2.0.0-SNAPSHOT -->
+    <dependency>
+      <groupId>com.foo.bar</groupId>
+      <artifactId>manchu-core</artifactId>
+      <version>[${manchu.version},2.0.0-!)</version>
+    </dependency>
+
+    <!-- any version between version 1.0.0 and this version inclusive -->
+    <dependency>
+      <groupId>com.foo.bar</groupId>
+      <artifactId>manchu-core</artifactId>
+      <version>[1.0.0,${manchu.version}]</version>
+    </dependency>
+---
+
+  If multiple dependencies use the property to define the version, then the first dependency will be used to determine
+  what versions are available (and consequently what version to update the property to)
+
+  The automatic detection can be overridden by adding a version-maven-plugin configuration section to the POM,
+  for example if we add the following to the POM:
 
 ---
 <project>
@@ -116,6 +155,33 @@ Update Properties
               <version>[1.5.0,1.6.0-!)</version>
             </linkItem>
           </linkItems>
+          ...
+        </configuration>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+  Additionally, if you want to disable the automatic detection of properties set the autoLinkItems parameter to false
+  (or define the command line property, e.g. mvn versions:update-properties -DautoLinkItems=false)
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <configuration>
+          ...
+          <autoLinkItems>false</autoLinkItems>
           ...
         </configuration>
       </plugin>
