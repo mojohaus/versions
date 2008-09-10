@@ -1,20 +1,23 @@
 package org.codehaus.mojo.versions;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.ProfileManager;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
 import java.io.File;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
 
 /**
@@ -29,50 +32,26 @@ import java.util.TreeSet;
  * @since 1.0
  */
 public class UpdateChildModulesMojo
-    extends AbstractMojo
+    extends AbstractVersionsUpdaterMojo
 {
 
     /**
-     * @parameter expression="${reactorProjects}"
-     * @required
+     * @parameter expression="${session}"
      * @readonly
      * @since 1.0
      */
-    protected List reactorProjects;
-
-    /**
-     * @parameter expression="${project}"
-     * @required
-     * @readonly
-     * @since 1.0
-     */
-    private MavenProject project;
-
-    /**
-     * @component
-     * @since 1.0
-     */
-    private MavenProjectBuilder projectBuilder;
-
-    /**
-     * @component
-     * @since 1.0
-     */
-    private ArtifactRepository artifactRepository;
-
-    /**
-     * @component
-     * @since 1.0
-     */
-    private ProfileManager profileManager;
+    private MavenSession session;
 
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
 
-        Set childModules = getAllChildModules( project );
+        ProfileManager profileManager =
+            new DefaultProfileManager( session.getContainer(), session.getExecutionProperties() );
 
-        removeMissingChildModules( project, childModules );
+        Set childModules = getAllChildModules( getProject() );
+
+        removeMissingChildModules( getProject(), childModules );
 
         Iterator i = childModules.iterator();
 
@@ -82,7 +61,7 @@ public class UpdateChildModulesMojo
         {
             String modulePath = (String) i.next();
 
-            File moduleDir = new File( project.getBasedir(), modulePath );
+            File moduleDir = new File( getProject().getBasedir(), modulePath );
 
             File moduleProjectFile;
 
@@ -99,13 +78,24 @@ public class UpdateChildModulesMojo
 
             try
             {
-                MavenProject childProject =
-                    projectBuilder.build( moduleProjectFile, artifactRepository, profileManager );
+                MavenProject childProject = projectBuilder.build( moduleProjectFile, localRepository, profileManager );
                 Parent childParent = childProject.getOriginalModel().getParent();
-                if ( childParent != null && project.getGroupId().equals( childParent.getGroupId() ) &&
-                    project.getArtifactId().equals( childParent.getArtifactId() ) )
+                if ( childParent != null && getProject().getGroupId().equals( childParent.getGroupId() ) &&
+                    getProject().getArtifactId().equals( childParent.getArtifactId() ) )
                 {
-
+                    if ( childProject.getParent().getVersion().equals( getProject().getVersion() ) )
+                    {
+                        getLog().info( modulePath + " => " +
+                            ArtifactUtils.versionlessKey( getProject().getArtifact() ) + ":" +
+                            getProject().getVersion() );
+                    }
+                    else
+                    {
+                        getLog().warn( modulePath + " => " +
+                            ArtifactUtils.versionlessKey( getProject().getArtifact() ) + ":" +
+                            childProject.getParent().getVersion() + " -> " + getProject().getVersion() );
+                        process( moduleProjectFile );
+                    }
                 }
             }
             catch ( ProjectBuildingException e )
@@ -125,7 +115,48 @@ public class UpdateChildModulesMojo
             throw pbe;
         }
 
-        throw new UnsupportedOperationException( "Implement the remainder of this." );
+    }
+
+    protected void update( ModifiedPomXMLEventReader pom )
+        throws MojoExecutionException, MojoFailureException, XMLStreamException
+    {
+        getLog().debug( "Updating parent to " + getProject().getVersion() );
+
+        Stack stack = new Stack();
+        String path = "";
+
+        while ( pom.hasNext() )
+        {
+            XMLEvent event = pom.nextEvent();
+            if ( event.isStartElement() )
+            {
+                stack.push( path );
+                path = new StringBuffer()
+                    .append( path )
+                    .append( "/" )
+                    .append( event.asStartElement().getName().getLocalPart() )
+                    .toString();
+
+                if ( "/project/parent/version".equals( path ) )
+                {
+                    pom.mark( 0 );
+                }
+            }
+            if ( event.isEndElement() )
+            {
+                if ( "/project/parent/version".equals( path ) )
+                {
+                    pom.mark( 1 );
+                    if ( pom.hasMark( 0 ) )
+                    {
+                        pom.replaceBetween( 0, 1, getProject().getVersion() );
+                        getLog().debug( "Made an update to " + getProject().getVersion() );
+                        return;
+                    }
+                }
+                path = (String) stack.pop();
+            }
+        }
     }
 
     private Set getAllChildModules( MavenProject project )
