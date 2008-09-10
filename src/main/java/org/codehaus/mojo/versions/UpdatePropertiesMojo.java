@@ -30,6 +30,10 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
@@ -75,7 +79,7 @@ public class UpdatePropertiesMojo
      * @parameter
      * @since 1.0
      */
-    protected LinkItem[] linkItems;
+    private LinkItem[] linkItems;
 
     /**
      * A comma separated list of properties to update.
@@ -83,7 +87,7 @@ public class UpdatePropertiesMojo
      * @parameter expression="${includeProperties}"
      * @since 1.0
      */
-    protected String includeProperties = null;
+    private String includeProperties = null;
 
     /**
      * A comma separated list of properties to not update.
@@ -91,7 +95,15 @@ public class UpdatePropertiesMojo
      * @parameter expression="${excludeProperties}"
      * @since 1.0
      */
-    protected String excludeProperties = null;
+    private String excludeProperties = null;
+
+    /**
+     * Whether properties linking versions should be auto-detected or not.
+     *
+     * @parameter expression="${autoLink}" defaultValue="false"
+     * @since 1.0
+     */
+    private boolean autoLink;
 
 // -------------------------- STATIC METHODS --------------------------
 
@@ -149,6 +161,130 @@ public class UpdatePropertiesMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
+        LinkItem[] linkItems;
+        if ( autoLink )
+        {
+            Map properties = new HashMap();
+            if ( this.linkItems != null )
+            {
+                for ( int i = 0; i < this.linkItems.length; i++ )
+                {
+                    properties.put( this.linkItems[i].getProperty(), this.linkItems[i] );
+                }
+            }
+            getLog().info( "Searching for properties to update" );
+            try
+            {
+                Map localDependencies = new HashMap();
+                Set localProperties = new HashSet();
+                Stack stack = new Stack();
+                String path = "";
+                String groupId = null;
+                String artifactId = null;
+                String property = null;
+                Pattern dependencyPathMatcher = Pattern.compile(
+                    "/project(/profiles/profile)?((/dependencyManagement)?|(/build(/pluginManagement)?/plugins/plugin))/dependencies/dependency/(groupId|artifactId|version)" );
+                Pattern propertyPathMatcher = Pattern.compile( "/project(/profiles/profile)?/properties/[^/]*" );
+                while ( pom.hasNext() )
+                {
+                    XMLEvent event = pom.nextEvent();
+                    if ( event.isStartDocument() )
+                    {
+                        path = "";
+                        stack.clear();
+                    }
+                    else if ( event.isStartElement() )
+                    {
+                        stack.push( path );
+
+                        path = path + "/" + event.asStartElement().getName().getLocalPart();
+
+                        getLog().debug( "path=" + path );
+
+                        if ( dependencyPathMatcher.matcher( path ).matches() )
+                        {
+                            String text = pom.getElementText().trim();
+                            if ( path.endsWith( "groupId" ) )
+                            {
+                                getLog().debug( "groupId=" + text );
+                                groupId = text;
+                            }
+                            else if ( path.endsWith( "artifactId" ) )
+                            {
+                                getLog().debug( "artifactId=" + text );
+                                artifactId = text;
+                            }
+                            else if ( path.endsWith( "version" ) && text.startsWith( "${" ) && text.endsWith( "}" ) )
+                            {
+                                getLog().debug( "version=" + text );
+                                property = text.substring( 2, text.lastIndexOf( "}" ) ).trim();
+                            }
+                            path = (String) stack.pop();
+                        }
+                        else if ( path.endsWith( "dependency" ) )
+                        {
+                            getLog().debug( "Found dependency" );
+                            groupId = null;
+                            artifactId = null;
+                            property = null;
+                        }
+                        else if ( propertyPathMatcher.matcher( path ).matches() )
+                        {
+                            property = event.asStartElement().getName().getLocalPart();
+                            getLog().debug( "Found property=" + property );
+                            if ( !properties.containsKey( property ) && !localProperties.contains( property ) )
+                            {
+                                LinkItem candidate = (LinkItem) localDependencies.remove( property );
+                                if ( candidate == null )
+                                {
+                                    localProperties.add( property );
+                                }
+                                else
+                                {
+                                    properties.put( property, candidate );
+                                    getLog().info( "Associating property ${" + property + "} with " +
+                                        ArtifactUtils.versionlessKey( candidate.getGroupId(),
+                                                                      candidate.getArtifactId() ) );
+                                }
+                            }
+                        }
+                    }
+                    else if ( event.isEndElement() )
+                    {
+                        if ( path.endsWith( "dependency" ) && groupId != null && artifactId != null &&
+                            property != null && !properties.containsKey( property ) )
+                        {
+                            LinkItem candidate = new LinkItem();
+                            candidate.setGroupId( groupId );
+                            candidate.setArtifactId( artifactId );
+                            candidate.setProperty( property );
+                            if ( localProperties.contains( property ) )
+                            {
+                                properties.put( property, candidate );
+                                localProperties.remove( property );
+                                getLog().info( "Associating property ${" + property + "} with " +
+                                    ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() ) );
+                            }
+                            else
+                            {
+                                localDependencies.put( property, candidate );
+                            }
+                        }
+                        path = (String) stack.pop();
+                    }
+                }
+
+            }
+            finally
+            {
+                pom.rewind();
+            }
+            linkItems = (LinkItem[]) properties.values().toArray( new LinkItem[properties.size()] );
+        }
+        else
+        {
+            linkItems = this.linkItems;
+        }
         if ( linkItems == null || linkItems.length == 0 )
         {
             getLog().info( "Nothing to link" );
