@@ -100,10 +100,10 @@ public class UpdatePropertiesMojo
     /**
      * Whether properties linking versions should be auto-detected or not.
      *
-     * @parameter expression="${autoLink}" defaultValue="false"
+     * @parameter expression="${autoLinkItems}" defaultValue="true"
      * @since 1.0
      */
-    private boolean autoLink;
+    private boolean autoLinkItems;
 
 // -------------------------- STATIC METHODS --------------------------
 
@@ -162,7 +162,7 @@ public class UpdatePropertiesMojo
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         LinkItem[] linkItems;
-        if ( autoLink )
+        if ( autoLinkItems )
         {
             Map properties = new HashMap();
             if ( this.linkItems != null )
