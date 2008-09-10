@@ -1,10 +1,15 @@
 package org.codehaus.mojo.versions;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.profiles.ProfileManager;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
 
 import java.io.File;
 import java.util.Iterator;
@@ -43,6 +48,24 @@ public class UpdateChildModulesMojo
      */
     private MavenProject project;
 
+    /**
+     * @component
+     * @since 1.0
+     */
+    private MavenProjectBuilder projectBuilder;
+
+    /**
+     * @component
+     * @since 1.0
+     */
+    private ArtifactRepository artifactRepository;
+
+    /**
+     * @component
+     * @since 1.0
+     */
+    private ProfileManager profileManager;
+
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -50,6 +73,57 @@ public class UpdateChildModulesMojo
         Set childModules = getAllChildModules( project );
 
         removeMissingChildModules( project, childModules );
+
+        Iterator i = childModules.iterator();
+
+        MojoExecutionException pbe = null;
+
+        while ( i.hasNext() )
+        {
+            String modulePath = (String) i.next();
+
+            File moduleDir = new File( project.getBasedir(), modulePath );
+
+            File moduleProjectFile;
+
+            if ( moduleDir.isDirectory() )
+            {
+                moduleProjectFile = new File( moduleDir, "pom.xml" );
+            }
+            else
+            {
+                // i don't think this should ever happen... but just in case
+                // the module references the file-name
+                moduleProjectFile = moduleDir;
+            }
+
+            try
+            {
+                MavenProject childProject =
+                    projectBuilder.build( moduleProjectFile, artifactRepository, profileManager );
+                Parent childParent = childProject.getOriginalModel().getParent();
+                if ( childParent != null && project.getGroupId().equals( childParent.getGroupId() ) &&
+                    project.getArtifactId().equals( childParent.getArtifactId() ) )
+                {
+
+                }
+            }
+            catch ( ProjectBuildingException e )
+            {
+                getLog().debug( "Could not parse " + moduleProjectFile.getPath(), e );
+                if ( pbe == null )
+                {
+                    // save this until we get to the end.
+                    pbe = new MojoExecutionException( "Could not parse " + moduleProjectFile.getPath(), e );
+                }
+            }
+        }
+
+        if ( pbe != null )
+        {
+            // ok, now throw the first one to blow up.
+            throw pbe;
+        }
 
         throw new UnsupportedOperationException( "Implement the remainder of this." );
     }
