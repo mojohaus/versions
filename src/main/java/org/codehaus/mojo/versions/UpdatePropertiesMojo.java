@@ -199,31 +199,25 @@ public class UpdatePropertiesMojo
 
                         path = path + "/" + event.asStartElement().getName().getLocalPart();
 
-                        getLog().debug( "path=" + path );
-
                         if ( dependencyPathMatcher.matcher( path ).matches() )
                         {
                             String text = pom.getElementText().trim();
                             if ( path.endsWith( "groupId" ) )
                             {
-                                getLog().debug( "groupId=" + text );
                                 groupId = text;
                             }
                             else if ( path.endsWith( "artifactId" ) )
                             {
-                                getLog().debug( "artifactId=" + text );
                                 artifactId = text;
                             }
                             else if ( path.endsWith( "version" ) && text.startsWith( "${" ) && text.endsWith( "}" ) )
                             {
-                                getLog().debug( "version=" + text );
                                 property = text.substring( 2, text.lastIndexOf( "}" ) ).trim();
                             }
                             path = (String) stack.pop();
                         }
                         else if ( path.endsWith( "dependency" ) )
                         {
-                            getLog().debug( "Found dependency" );
                             groupId = null;
                             artifactId = null;
                             property = null;
@@ -231,7 +225,6 @@ public class UpdatePropertiesMojo
                         else if ( propertyPathMatcher.matcher( path ).matches() )
                         {
                             property = event.asStartElement().getName().getLocalPart();
-                            getLog().debug( "Found property=" + property );
                             if ( !properties.containsKey( property ) && !localProperties.contains( property ) )
                             {
                                 LinkItem candidate = (LinkItem) localDependencies.remove( property );
