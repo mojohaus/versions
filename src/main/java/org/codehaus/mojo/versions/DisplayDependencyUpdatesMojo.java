@@ -44,7 +44,7 @@ import java.util.TreeSet;
  * @goal display-dependency-updates
  * @requiresProject true
  * @requiresDirectInvocation false
- * @since 1.0
+ * @since 1.0-alpha-1
  */
 public class DisplayDependencyUpdatesMojo
     extends AbstractVersionsUpdaterMojo
@@ -62,7 +62,7 @@ public class DisplayDependencyUpdatesMojo
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @see AbstractVersionsUpdaterMojo#execute()
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -142,7 +142,7 @@ public class DisplayDependencyUpdatesMojo
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
@@ -155,7 +155,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * A comparator used to sort dependencies by group id, artifact id and finally version.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static class DependencyComparator
         implements Comparator
@@ -166,7 +166,7 @@ public class DisplayDependencyUpdatesMojo
          * @param o2 the second object.
          * @return the comparison result
          * @see java.util.Comparator#compare(Object, Object)
-         * @since 1.0
+         * @since 1.0-alpha-1
          */
         public int compare( Object o1, Object o2 )
         {

@@ -38,7 +38,7 @@ import java.util.Stack;
  * @goal update-parent
  * @requiresProject true
  * @requiresDirectInvocation true
- * @since 1.0
+ * @since 1.0-alpha-1
  */
 public class UpdateParentMojo
     extends AbstractVersionsUpdaterMojo
@@ -50,7 +50,7 @@ public class UpdateParentMojo
      * Version specification to control artifact resolution.
      *
      * @parameter expression="${parentVersion}"
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected String parentVersion = null;
 
@@ -62,7 +62,7 @@ public class UpdateParentMojo
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException

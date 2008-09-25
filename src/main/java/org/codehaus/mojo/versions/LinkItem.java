@@ -23,7 +23,7 @@ package org.codehaus.mojo.versions;
  * LinkItem represents information specified for a linked artifact version manged through a property.
  *
  * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
- * @since 1.0
+ * @since 1.0-alpha-1
  */
 public class LinkItem
 {
@@ -35,7 +35,7 @@ public class LinkItem
      *
      * @parameter
      * @required
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private String groupId;
 
@@ -44,7 +44,7 @@ public class LinkItem
      *
      * @parameter
      * @required
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private String artifactId;
 
@@ -53,7 +53,7 @@ public class LinkItem
      *
      * @parameter
      * @required
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private String property;
 
@@ -61,7 +61,7 @@ public class LinkItem
      * Version specification to control artifact resolution.
      *
      * @parameter
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private String version = null;
 
@@ -69,7 +69,7 @@ public class LinkItem
      * Override snapshot permisibility.
      *
      * @parameter
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private Boolean allowSnapshots = null;
 
@@ -78,7 +78,7 @@ public class LinkItem
     /**
      * Constructs a new LinkItem.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public LinkItem()
     {
@@ -90,7 +90,7 @@ public class LinkItem
      * Getter for property 'allowSnapshots'.
      *
      * @return Value for property 'allowSnapshots'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public Boolean getAllowSnapshots()
     {
@@ -101,7 +101,7 @@ public class LinkItem
      * Setter for property 'allowSnapshots'.
      *
      * @param allowSnapshots Value to set for property 'allowSnapshots'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void setAllowSnapshots( Boolean allowSnapshots )
     {
@@ -112,7 +112,7 @@ public class LinkItem
      * Getter for property 'artifactId'.
      *
      * @return Value for property 'artifactId'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public String getArtifactId()
     {
@@ -123,7 +123,7 @@ public class LinkItem
      * Setter for property 'artifactId'.
      *
      * @param artifactId Value to set for property 'artifactId'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void setArtifactId( String artifactId )
     {
@@ -134,7 +134,7 @@ public class LinkItem
      * Getter for property 'groupId'.
      *
      * @return Value for property 'groupId'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public String getGroupId()
     {
@@ -145,7 +145,7 @@ public class LinkItem
      * Setter for property 'groupId'.
      *
      * @param groupId Value to set for property 'groupId'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void setGroupId( String groupId )
     {
@@ -156,7 +156,7 @@ public class LinkItem
      * Getter for property 'property'.
      *
      * @return Value for property 'property'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public String getProperty()
     {
@@ -167,7 +167,7 @@ public class LinkItem
      * Setter for property 'property'.
      *
      * @param property Value to set for property 'property'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void setProperty( String property )
     {
@@ -178,7 +178,7 @@ public class LinkItem
      * Getter for property 'version'.
      *
      * @return Value for property 'version'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public String getVersion()
     {
@@ -189,7 +189,7 @@ public class LinkItem
      * Setter for property 'version'.
      *
      * @param version Value to set for property 'version'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void setVersion( String version )
     {
@@ -201,7 +201,7 @@ public class LinkItem
     /**
      * {@inheritDoc}
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public String toString()
     {

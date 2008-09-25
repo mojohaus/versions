@@ -63,39 +63,39 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * The encoding used for the pom file.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static final String POM_ENCODING = "UTF-8";
 
     /**
      * @component
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected org.apache.maven.artifact.factory.ArtifactFactory artifactFactory;
 
     /**
      * @component
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected org.apache.maven.artifact.resolver.ArtifactResolver resolver;
 
     /**
      * @component
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected MavenProjectBuilder projectBuilder;
 
     /**
      * @parameter expression="${localRepository}"
      * @readonly
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected org.apache.maven.artifact.repository.ArtifactRepository localRepository;
 
     /**
      * @parameter expression="${project.remoteArtifactRepositories}"
      * @readonly
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected List remoteRepositories;
 
@@ -105,7 +105,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @component
      * @required
      * @readonly
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected ArtifactMetadataSource artifactMetadataSource;
 
@@ -114,7 +114,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * <code>numeric</code> which will handle long version numbers provided all components are numeric.
      *
      * @parameter expression="${comparisonMethod}" default-value="maven"
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected String comparisonMethod;
 
@@ -122,7 +122,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Whether to allow snapshots when searching for the latest version of an artifact.
      *
      * @parameter expression="${allowSnapshots}" default-value="false"
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected Boolean allowSnapshots;
 
@@ -130,7 +130,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @parameter expression="${reactorProjects}"
      * @required
      * @readonly
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected List reactorProjects;
 
@@ -138,7 +138,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @parameter expression="${project}"
      * @required
      * @readonly
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private MavenProject project;
 
@@ -148,7 +148,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Getter for property 'project'.
      *
      * @return Value for property 'project'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public MavenProject getProject()
     {
@@ -159,7 +159,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Setter for property 'project'.
      *
      * @param project Value to set for property 'project'.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void setProject( MavenProject project )
     {
@@ -173,7 +173,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * {@inheritDoc}
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -193,7 +193,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return The latest version of the specified artifact that matches the specified version range or
      *         <code>null</code> if no matching version could be found.
      * @throws MojoExecutionException If the artifact metadata could not be found.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  Boolean allowingSnapshots )
@@ -251,7 +251,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Returns the version comparator to use.
      *
      * @return the version comparator to use.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected Comparator getVersionComparator()
     {
@@ -269,7 +269,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param pom      The pom.
      * @param property The property.
      * @return The value as defined in the pom or <code>null</code> if not defined.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected String getPropertyValue( StringBuffer pom, String property )
     {
@@ -282,7 +282,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param outFile The file to process.
      * @throws MojoExecutionException If things go wrong.
      * @throws MojoFailureException   If things go wrong.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected void process( File outFile )
         throws MojoExecutionException, MojoFailureException
@@ -336,7 +336,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws MojoFailureException   If things go wrong.
      * @throws javax.xml.stream.XMLStreamException
      *                                If things go wrong.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException;
@@ -348,7 +348,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param currentVersion The current version of the artifact.
      * @param updateVersion  The proposed new version of the artifact.
      * @return <code>true</code> if the update should be applied.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
     {
@@ -390,7 +390,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * A comparator which will compare all segments of a dot separated version string as numbers if possible,
      * i.e. 1.3.34 &gt; 1.3.9 and 1.3.4.3.2.34 &gt; 1.3.4.3.2.9 and 1.3.4.3.2.34 &gt; 1.3.4.3.2.34-SNAPSHOT
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     static class NumericVersionComparator
         implements Comparator
@@ -504,7 +504,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * A comparator which uses Maven's version rules, i.e. 1.3.34 &gt; 1.3.9 but 1.3.4.3.2.34 &lt; 1.3.4.3.2.9.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static class MavenVersionComparator
         implements Comparator

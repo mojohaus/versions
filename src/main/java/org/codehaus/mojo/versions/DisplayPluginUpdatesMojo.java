@@ -75,7 +75,7 @@ import java.util.TreeSet;
  * @goal display-plugin-updates
  * @requiresProject true
  * @requiresDirectInvocation false
- * @since 1.0
+ * @since 1.0-alpha-1
  */
 public class DisplayPluginUpdatesMojo
     extends AbstractVersionsUpdaterMojo
@@ -86,27 +86,27 @@ public class DisplayPluginUpdatesMojo
     /**
      * The width to pad warn messages.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static final int WARN_PAD_SIZE = 65;
 
     /**
      * The width to pad info messages.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static final int INFO_PAD_SIZE = 68;
 
     /**
      * String to flag a plugin version being forced by the super-pom.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static final String FROM_SUPER_POM = "(from super-pom) ";
 
     /**
      * @component
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private LifecycleExecutor lifecycleExecutor;
 
@@ -115,7 +115,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @readonly
      * @parameter expression="${session}"
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private MavenSession session;
 
@@ -123,7 +123,7 @@ public class DisplayPluginUpdatesMojo
      * The plugin manager.
      *
      * @component
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private PluginManager pluginManager;
 
@@ -156,7 +156,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @param project the project to get the plugin management plugins from.
      * @return The map of effective plugin versions keyed by coordinates.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private Map getPluginManagement( MavenProject project )
     {
@@ -222,7 +222,7 @@ public class DisplayPluginUpdatesMojo
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @see AbstractVersionsUpdaterMojo#execute()
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -383,7 +383,7 @@ public class DisplayPluginUpdatesMojo
      * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be
      *                             inherited by child projects.
      * @return The map of effective plugin versions keyed by coordinates.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private Map getBuildPlugins( MavenProject project, boolean onlyIncludeInherited )
     {
@@ -444,7 +444,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @param plugin the {@link Plugin} or {@link ReportPlugin}
      * @return the Inherited of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static boolean getPluginInherited( Object plugin )
     {
@@ -460,7 +460,7 @@ public class DisplayPluginUpdatesMojo
      * @return The map of effective plugin versions keyed by coordinates.
      * @throws org.apache.maven.plugin.MojoExecutionException
      *          if things go wrong.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private Map getLifecyclePlugins( MavenProject project )
         throws MojoExecutionException
@@ -820,7 +820,7 @@ public class DisplayPluginUpdatesMojo
      * @return the parent projects of the specified project, with the root project first.
      * @throws org.apache.maven.plugin.MojoExecutionException
      *          if the super-pom could not be created.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private List getParentProjects( MavenProject project )
         throws MojoExecutionException
@@ -996,7 +996,7 @@ public class DisplayPluginUpdatesMojo
      * @param plugins           The list of plugins.
      * @param projectPlugins    The project's plugins.
      * @param parentDefinitions The parent plugin definitions.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private void addProjectPlugins( Map plugins, Collection projectPlugins, Map parentDefinitions )
     {
@@ -1074,7 +1074,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @param plugin The plugin
      * @return The groupId and artifactId separated by a colon.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static String getPluginCoords( Object plugin )
     {
@@ -1086,7 +1086,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @param plugin the {@link Plugin} or {@link ReportPlugin}
      * @return the ArtifactId of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static String getPluginArtifactId( Object plugin )
     {
@@ -1100,7 +1100,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @param plugin the {@link Plugin} or {@link ReportPlugin}
      * @return the GroupId of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static String getPluginGroupId( Object plugin )
     {
@@ -1114,7 +1114,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @param plugin the {@link Plugin} or {@link ReportPlugin}
      * @return the Version of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static String getPluginVersion( Object plugin )
     {
@@ -1130,7 +1130,7 @@ public class DisplayPluginUpdatesMojo
      * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be
      *                             inherited by child projects.
      * @return The map of effective plugin versions keyed by coordinates.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private Map getReportPlugins( MavenProject project, boolean onlyIncludeInherited )
     {
@@ -1192,7 +1192,7 @@ public class DisplayPluginUpdatesMojo
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
@@ -1205,7 +1205,7 @@ public class DisplayPluginUpdatesMojo
     /**
      * A comparator used to sort plugins by group id, artifact id and finally version.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static class PluginComparator
         implements Comparator
@@ -1216,7 +1216,7 @@ public class DisplayPluginUpdatesMojo
          * @param o2 the second object.
          * @return the comparison result
          * @see java.util.Comparator#compare(Object, Object)
-         * @since 1.0
+         * @since 1.0-alpha-1
          */
         public int compare( Object o1, Object o2 )
         {

@@ -29,7 +29,7 @@ import java.util.TreeSet;
  * @aggregator
  * @requiresProject true
  * @requiresDirectInvocation true
- * @since 1.0
+ * @since 1.0-alpha-2
  */
 public class UpdateChildModulesMojo
     extends AbstractVersionsUpdaterMojo
@@ -38,7 +38,7 @@ public class UpdateChildModulesMojo
     /**
      * @parameter expression="${session}"
      * @readonly
-     * @since 1.0
+     * @since 1.0-alpha-2
      */
     private MavenSession session;
 

@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  * @goal update-properties
  * @requiresProject true
  * @requiresDirectInvocation true
- * @since 1.0
+ * @since 1.0-alpha-1
  */
 public class UpdatePropertiesMojo
     extends AbstractVersionsUpdaterMojo
@@ -55,21 +55,21 @@ public class UpdatePropertiesMojo
     /**
      * The end of a regex literal sequence.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static final String REGEX_QUOTE_END = "\\E";
 
     /**
      * The start of a regex literal sequence.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static final String REGEX_QUOTE_START = "\\Q";
 
     /**
      * Escape the escapes.
      *
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static final String REGEX_QUOTE_END_ESCAPED = REGEX_QUOTE_END + '\\' + REGEX_QUOTE_END + REGEX_QUOTE_START;
 
@@ -77,7 +77,7 @@ public class UpdatePropertiesMojo
      * The properties to update and the artifact coordinates that they are to be updated from.
      *
      * @parameter
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private LinkItem[] linkItems;
 
@@ -85,7 +85,7 @@ public class UpdatePropertiesMojo
      * A comma separated list of properties to update.
      *
      * @parameter expression="${includeProperties}"
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private String includeProperties = null;
 
@@ -93,7 +93,7 @@ public class UpdatePropertiesMojo
      * A comma separated list of properties to not update.
      *
      * @parameter expression="${excludeProperties}"
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private String excludeProperties = null;
 
@@ -101,7 +101,7 @@ public class UpdatePropertiesMojo
      * Whether properties linking versions should be auto-detected or not.
      *
      * @parameter expression="${autoLinkItems}" defaultValue="true"
-     * @since 1.0
+     * @since 1.0-alpha-2
      */
     private boolean autoLinkItems;
 
@@ -112,7 +112,7 @@ public class UpdatePropertiesMojo
      *
      * @param s The string to match.
      * @return The regex that will match the string exactly.
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     private static String quote( String s )
     {
@@ -156,7 +156,7 @@ public class UpdatePropertiesMojo
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
-     * @since 1.0
+     * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
