@@ -30,7 +30,7 @@ Versions Maven Plugin
 
 * Goals Overview
 
-  The Versions Plugin has four goals.
+  The Versions Plugin has five goals.
 
   * {{{display-dependency-updates-mojo.html}versions:display-dependency-updates}} scans a project's dependencies and
   produces a report of those dependencies which have newer versions available.
@@ -45,6 +45,12 @@ Versions Maven Plugin
   * {{{update-properties-mojo.html}versions:update-properties}} updates properties defined in a project so that they
   correspond to the latest available version of specific dependencies.  This can be useful if a suite of dependencies
   must all be locked to one version.
+
+  * {{{update-child-modules-mojo.html}versions:update-child-modules}} updates the parent section of the child modules
+  of a project so the version matches the version of the current project. For example, if you have an aggregator pom
+  that is also the parent for the projects that it aggregates and the children and parent versions get out of sync, this
+  mojo can help fix the versions of the child modules. (Note you may need to invoke Maven with the -N option in order to
+  run this goal if your project is broken so badly that it cannot build because of the version mis-match).
 
 * Usage
 
