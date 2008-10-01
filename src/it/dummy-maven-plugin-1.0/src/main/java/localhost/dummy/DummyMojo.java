@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions.it;
+package localhost.dummy;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
