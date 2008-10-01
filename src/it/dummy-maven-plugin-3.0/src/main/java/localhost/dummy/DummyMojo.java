@@ -49,14 +49,14 @@ public class DummyMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        getLog().info( "This is version 1.0" );
+        getLog().info( "This is version 3.0" );
         File target = new File( project.getBuild().getDirectory() );
         target.mkdirs();
         File output = new File( target, "dummy.version" );
         try
         {
             FileWriter out = new FileWriter( output );
-            out.write( "1.0\n" );
+            out.write( "3.0\n" );
             out.close();
             getLog().info( "Created " + output.getPath() );
         }
