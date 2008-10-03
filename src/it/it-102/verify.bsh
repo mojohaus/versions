@@ -1,5 +1,5 @@
 import java.io.*;
-import java.util.regex.*;
+import java.util.regex.Pattern;
 
 try
 {
@@ -14,14 +14,12 @@ try
         buf.append("\n");
         line = in.readLine();
     }
-    Pattern p = Pattern.compile("\\Qlocalhost:dummy-maven-plugin\\E\\s*\\.*\\s*1\\.0\\s+->\\s+3\\.0");
-    Matcher m = p.matcher(buf.toString());
-    if ( !m.find() ) 
+    if (Pattern.compile("\\Qlocalhost:dummy-maven-plugin\\E\\s*\\.*\\s*+3\\.0\\s+->\\s+[0-9\\.]+")
+            .matcher(buf.toString()).find() ) 
     {
-        System.out.println("Did not suggest updating dummy-maven-plugin to version 3.0");
+        System.out.println("Suggested updating dummy-maven-plugin from version 3.0");
         return false;
     }
-    System.out.println(m.group(0));
 }
 catch( Throwable t )
 {
