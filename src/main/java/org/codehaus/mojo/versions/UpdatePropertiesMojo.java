@@ -173,111 +173,102 @@ public class UpdatePropertiesMojo
                 }
             }
             getLog().info( "Searching for properties to update" );
-            try
+            Map localDependencies = new HashMap();
+            Set localProperties = new HashSet();
+            Stack stack = new Stack();
+            String path = "";
+            String groupId = null;
+            String artifactId = null;
+            String property = null;
+            Pattern dependencyPathMatcher = Pattern.compile(
+                "/project(/profiles/profile)?((/dependencyManagement)?|(/build(/pluginManagement)?/plugins/plugin))/dependencies/dependency/(groupId|artifactId|version)" );
+            Pattern propertyPathMatcher = Pattern.compile( "/project(/profiles/profile)?/properties/[^/]*" );
+            while ( pom.hasNext() )
             {
-                Map localDependencies = new HashMap();
-                Set localProperties = new HashSet();
-                Stack stack = new Stack();
-                String path = "";
-                String groupId = null;
-                String artifactId = null;
-                String property = null;
-                Pattern dependencyPathMatcher = Pattern.compile(
-                    "/project(/profiles/profile)?((/dependencyManagement)?|(/build(/pluginManagement)?/plugins/plugin))/dependencies/dependency/(groupId|artifactId|version)" );
-                Pattern propertyPathMatcher = Pattern.compile( "/project(/profiles/profile)?/properties/[^/]*" );
-                while ( pom.hasNext() )
+                XMLEvent event = pom.nextEvent();
+                if ( event.isStartDocument() )
                 {
-                    XMLEvent event = pom.nextEvent();
-                    if ( event.isStartDocument() )
-                    {
-                        path = "";
-                        stack.clear();
-                    }
-                    else if ( event.isStartElement() )
-                    {
-                        stack.push( path );
+                    path = "";
+                    stack.clear();
+                }
+                else if ( event.isStartElement() )
+                {
+                    stack.push( path );
 
-                        path = path + "/" + event.asStartElement().getName().getLocalPart();
+                    path = path + "/" + event.asStartElement().getName().getLocalPart();
 
-                        if ( dependencyPathMatcher.matcher( path ).matches() )
-                        {
-                            String text = pom.getElementText().trim();
-                            if ( path.endsWith( "groupId" ) )
-                            {
-                                groupId = text;
-                            }
-                            else if ( path.endsWith( "artifactId" ) )
-                            {
-                                artifactId = text;
-                            }
-                            else if ( path.endsWith( "version" ) )
-                            {
-                                int start = text.indexOf( "${" );
-                                int middle = text.indexOf( "${", start );
-                                int end = text.lastIndexOf( "}" );
-                                if ( start != -1 && end != -1 && end > start && middle == -1 )
-                                {
-                                    property = text.substring( start + 2, end ).trim();
-
-                                }
-                            }
-                            path = (String) stack.pop();
-                        }
-                        else if ( path.endsWith( "dependency" ) )
-                        {
-                            groupId = null;
-                            artifactId = null;
-                            property = null;
-                        }
-                        else if ( propertyPathMatcher.matcher( path ).matches() )
-                        {
-                            property = event.asStartElement().getName().getLocalPart();
-                            if ( !properties.containsKey( property ) && !localProperties.contains( property ) )
-                            {
-                                LinkItem candidate = (LinkItem) localDependencies.remove( property );
-                                if ( candidate == null )
-                                {
-                                    localProperties.add( property );
-                                }
-                                else
-                                {
-                                    properties.put( property, candidate );
-                                    getLog().info( "Associating property ${" + property + "} with " +
-                                        ArtifactUtils.versionlessKey( candidate.getGroupId(),
-                                                                      candidate.getArtifactId() ) );
-                                }
-                            }
-                        }
-                    }
-                    else if ( event.isEndElement() )
+                    if ( dependencyPathMatcher.matcher( path ).matches() )
                     {
-                        if ( path.endsWith( "dependency" ) && groupId != null && artifactId != null &&
-                            property != null && !properties.containsKey( property ) )
+                        String text = pom.getElementText().trim();
+                        if ( path.endsWith( "groupId" ) )
                         {
-                            LinkItem candidate = new LinkItem();
-                            candidate.setGroupId( groupId );
-                            candidate.setArtifactId( artifactId );
-                            candidate.setProperty( property );
-                            if ( localProperties.contains( property ) )
+                            groupId = text;
+                        }
+                        else if ( path.endsWith( "artifactId" ) )
+                        {
+                            artifactId = text;
+                        }
+                        else if ( path.endsWith( "version" ) )
+                        {
+                            int start = text.indexOf( "${" );
+                            int middle = text.indexOf( "${", start );
+                            int end = text.lastIndexOf( "}" );
+                            if ( start != -1 && end != -1 && end > start && middle == -1 )
                             {
-                                properties.put( property, candidate );
-                                localProperties.remove( property );
-                                getLog().info( "Associating property ${" + property + "} with " +
-                                    ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() ) );
-                            }
-                            else
-                            {
-                                localDependencies.put( property, candidate );
+                                property = text.substring( start + 2, end ).trim();
+
                             }
                         }
                         path = (String) stack.pop();
                     }
+                    else if ( path.endsWith( "dependency" ) )
+                    {
+                        groupId = null;
+                        artifactId = null;
+                        property = null;
+                    }
+                    else if ( propertyPathMatcher.matcher( path ).matches() )
+                    {
+                        property = event.asStartElement().getName().getLocalPart();
+                        if ( !properties.containsKey( property ) && !localProperties.contains( property ) )
+                        {
+                            LinkItem candidate = (LinkItem) localDependencies.remove( property );
+                            if ( candidate == null )
+                            {
+                                localProperties.add( property );
+                            }
+                            else
+                            {
+                                properties.put( property, candidate );
+                                getLog().info( "Associating property ${" + property + "} with " +
+                                    ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() ) );
+                            }
+                        }
+                    }
                 }
-
-            }
-            finally
-            {
-                pom.rewind();
+                else if ( event.isEndElement() )
+                {
+                    if ( path.endsWith( "dependency" ) && groupId != null && artifactId != null && property != null &&
+                        !properties.containsKey( property ) )
+                    {
+                        LinkItem candidate = new LinkItem();
+                        candidate.setGroupId( groupId );
+                        candidate.setArtifactId( artifactId );
+                        candidate.setProperty( property );
+                        if ( localProperties.contains( property ) )
+                        {
+                            properties.put( property, candidate );
+                            localProperties.remove( property );
+                            getLog().info( "Associating property ${" + property + "} with " +
+                                ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() ) );
+                        }
+                        else
+                        {
+                            localDependencies.put( property, candidate );
+                        }
+                    }
+                    path = (String) stack.pop();
+                }
             }
             linkItems = (LinkItem[]) properties.values().toArray( new LinkItem[properties.size()] );
         }
@@ -354,6 +345,8 @@ public class UpdatePropertiesMojo
                 .append( "/project/properties(?:/profiles/profile)?/" )
                 .append( quote( item.getProperty() ) )
                 .toString() );
+
+            pom.rewind(); // fixes MVERSIONS-8
 
             while ( pom.hasNext() )
             {
