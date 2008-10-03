@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>localhost</groupId>
-  <artifactId>it-002</artifactId>
+  <artifactId>it-004</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <name>update-properties with one property restricted by a range</name>
+  <name>update-properties with one property auto-linked and range limited</name>
 
   <properties>
     <api>1.0</api>
@@ -18,6 +18,13 @@
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>2.2</version>
+          <dependencies>
+           <dependency>
+             <groupId>localhost</groupId>
+             <artifactId>dummy-api</artifactId>
+             <version>[${api},2.1-!)</version>
+             </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
@@ -33,24 +40,6 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
-    <plugins>
-      <plugin>
-        <groupId>@project.groupId@</groupId>
-        <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
-        <configuration>
-          <linkItems>
-            <linkItem>
-              <property>api</property>
-              <groupId>localhost</groupId>
-              <artifactId>dummy-api</artifactId>
-              <version>[1.0,2.0-!)</version>
-            </linkItem>
-          </linkItems>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 
 </project>

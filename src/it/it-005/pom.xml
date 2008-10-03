@@ -3,14 +3,28 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>localhost</groupId>
-  <artifactId>it-002</artifactId>
+  <artifactId>it-005</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <name>update-properties with one property restricted by a range</name>
+  <name>update-properties with one property auto-linked in a profile</name>
 
   <properties>
-    <api>1.0</api>
+    <api>2.1</api>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>foo</id>
+
+      <dependencies>
+        <dependency>
+          <groupId>localhost</groupId>
+          <artifactId>dummy-api</artifactId>
+          <version>[2.0,${api}]</version>
+          </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
   <build>
     <pluginManagement>
@@ -33,24 +47,6 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
-    <plugins>
-      <plugin>
-        <groupId>@project.groupId@</groupId>
-        <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
-        <configuration>
-          <linkItems>
-            <linkItem>
-              <property>api</property>
-              <groupId>localhost</groupId>
-              <artifactId>dummy-api</artifactId>
-              <version>[1.0,2.0-!)</version>
-            </linkItem>
-          </linkItems>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 
 </project>

@@ -1,0 +1,28 @@
+import java.io.*;
+
+try
+{
+    File file = new File( basedir, "pom.xml" );
+    BufferedReader in = new BufferedReader(new FileReader(file));
+    StringBuilder buf = new StringBuilder();
+    BufferedReader in = new BufferedReader(new FileReader(file));
+    StringBuilder buf = new StringBuilder();
+    String line = in.readLine();
+    while (line != null) {
+        buf.append(line);
+        buf.append("\n");
+        line = in.readLine();
+    }
+    if ( !buf.toString().contains("<api>2.0</api>") )
+    {
+        System.err.println( "Version not updated to 2.0" );
+        return false;
+    }
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;
