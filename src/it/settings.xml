@@ -8,7 +8,7 @@
       </activation>
       <repositories>
         <repository>
-          <id>local.central</id>
+          <id>central</id>
           <url>file:///@localRepository@</url>
           <releases>
             <enabled>true</enabled>
@@ -17,16 +17,16 @@
             <enabled>true</enabled>
           </snapshots>
         </repository>
-        <repository>
-          <id>codehaus.snapshots</id>
-          <url>http://snapshots.repository.codehaus.org/</url>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository>
+        <!--<repository>-->
+          <!--<id>codehaus.snapshots</id>-->
+          <!--<url>http://snapshots.repository.codehaus.org/</url>-->
+          <!--<releases>-->
+            <!--<enabled>false</enabled>-->
+          <!--</releases>-->
+          <!--<snapshots>-->
+            <!--<enabled>true</enabled>-->
+          <!--</snapshots>-->
+        <!--</repository>-->
       </repositories>
       <pluginRepositories>
         <pluginRepository>

@@ -3,9 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>localhost</groupId>
-  <artifactId>dummy-api</artifactId>
-  <version>3.0</version>
-  <packaging>jar</packaging>
+  <artifactId>it-001</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <name>update-properties with one property only</name>
+
+  <properties>
+    <api>1.0</api>
+  </properties>
 
   <build>
     <pluginManagement>
@@ -13,10 +18,6 @@
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>2.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.0.2</version>
         </plugin>
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
@@ -27,23 +28,28 @@
           <version>2.2</version>
         </plugin>
         <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.2</version>
-        </plugin>
-        <plugin>
           <artifactId>maven-site-plugin</artifactId>
           <version>2.0-beta-6</version>
         </plugin>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.4.2</version>
-        </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>@project.groupId@</groupId>
+        <artifactId>@project.artifactId@</artifactId>
+        <version>@project.version@</version>
+        <configuration>
+          <linkItems>
+            <linkItem>
+              <property>api</property>
+              <groupId>localhost</groupId>
+              <artifactId>dummy-api</artifactId>
+            </linkItem>
+          </linkItems>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
 </project>
