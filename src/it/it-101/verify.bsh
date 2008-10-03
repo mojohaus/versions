@@ -1,0 +1,30 @@
+import java.io.*;
+
+try
+{
+    File file = new File( basedir, "build.log" );
+    BufferedReader in = new BufferedReader(new FileReader(file));
+    StringBuilder buf = new StringBuilder();
+    BufferedReader in = new BufferedReader(new FileReader(file));
+    StringBuilder buf = new StringBuilder();
+    String line = in.readLine();
+    while (line != null) {
+        buf.append(line);
+        buf.append("\n");
+        line = in.readLine();
+    }
+    if (java.util.regex.Pattern.compile(
+            "localhost:dummy-maven-plugin\\s*[\\.]\\s*+1.0\\s+->\\s+3.0")
+            .matcher(buf.toString()).find() ) 
+    {
+        System.out.println("Did not suggest updating dummy-maven-plugin to version 3.0");
+        return false;
+    }
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;
