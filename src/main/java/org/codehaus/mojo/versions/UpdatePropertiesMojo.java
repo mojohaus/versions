@@ -180,6 +180,7 @@ public class UpdatePropertiesMojo
             String groupId = null;
             String artifactId = null;
             String property = null;
+            String versions = null;
             Pattern dependencyPathMatcher = Pattern.compile(
                 "/project(/profiles/profile)?((/dependencyManagement)?|(/build(/pluginManagement)?/plugins/plugin))/dependencies/dependency/(groupId|artifactId|version)" );
             Pattern propertyPathMatcher = Pattern.compile( "/project(/profiles/profile)?/properties/[^/]*" );
@@ -211,12 +212,23 @@ public class UpdatePropertiesMojo
                         else if ( path.endsWith( "version" ) )
                         {
                             int start = text.indexOf( "${" );
-                            int middle = text.indexOf( "${", start );
+                            int middle = text.indexOf( "${", start + 1 );
                             int end = text.lastIndexOf( "}" );
                             if ( start != -1 && end != -1 && end > start && middle == -1 )
                             {
                                 property = text.substring( start + 2, end ).trim();
+                                if ( start > 0 && end < text.length() )
+                                {
+                                    String prefix = text.substring( 0, start ).trim();
+                                    String postfix = text.substring( end + 1, text.length() ).trim();
+                                    if ( ( prefix.startsWith( "[" ) || prefix.startsWith( "(" ) ) && (
+                                        postfix.endsWith( "]" ) || postfix.endsWith( ")" ) )
+                                        && ( prefix.length() > 1 || postfix.length() > 1) )
+                                    {
+                                        versions = prefix + postfix;
+                                    }
 
+                                }
                             }
                         }
                         path = (String) stack.pop();
@@ -226,6 +238,7 @@ public class UpdatePropertiesMojo
                         groupId = null;
                         artifactId = null;
                         property = null;
+                        versions = null;
                     }
                     else if ( propertyPathMatcher.matcher( path ).matches() )
                     {
@@ -240,31 +253,42 @@ public class UpdatePropertiesMojo
                             else
                             {
                                 properties.put( property, candidate );
-                                getLog().info( "Associating property ${" + property + "} with " +
-                                    ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() ) );
+                                getLog().info( "Associating property ${" + property + "} with "
+                                    + ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() )
+                                    + ( candidate.getVersion() != null ? " within the version range "
+                                    + candidate.getVersion() : "" ) );
                             }
                         }
                     }
                 }
                 else if ( event.isEndElement() )
                 {
-                    if ( path.endsWith( "dependency" ) && groupId != null && artifactId != null && property != null &&
-                        !properties.containsKey( property ) )
+                    if ( path.endsWith( "dependency" ) )
                     {
-                        LinkItem candidate = new LinkItem();
-                        candidate.setGroupId( groupId );
-                        candidate.setArtifactId( artifactId );
-                        candidate.setProperty( property );
-                        if ( localProperties.contains( property ) )
+                        if ( groupId != null && artifactId != null && property != null && !properties.containsKey(
+                            property ) )
                         {
-                            properties.put( property, candidate );
-                            localProperties.remove( property );
-                            getLog().info( "Associating property ${" + property + "} with " +
-                                ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() ) );
-                        }
-                        else
-                        {
-                            localDependencies.put( property, candidate );
+                            LinkItem candidate = new LinkItem();
+                            candidate.setGroupId( groupId );
+                            candidate.setArtifactId( artifactId );
+                            candidate.setProperty( property );
+                            if ( versions != null )
+                            {
+                                candidate.setVersion( versions );
+                            }
+                            if ( localProperties.contains( property ) )
+                            {
+                                properties.put( property, candidate );
+                                localProperties.remove( property );
+                                getLog().info( "Associating property ${" + property + "} with "
+                                    + ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() )
+                                    + ( candidate.getVersion() != null ? " within the version range "
+                                    + candidate.getVersion() : "" ) );
+                            }
+                            else
+                            {
+                                localDependencies.put( property, candidate );
+                            }
                         }
                     }
                     path = (String) stack.pop();
