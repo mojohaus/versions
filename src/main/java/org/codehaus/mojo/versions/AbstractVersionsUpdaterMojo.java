@@ -287,35 +287,16 @@ public abstract class AbstractVersionsUpdaterMojo
     protected void process( File outFile )
         throws MojoExecutionException, MojoFailureException
     {
-        BufferedInputStream reader;
         try
         {
-            reader = new BufferedInputStream( new FileInputStream( outFile ) );
-
-            byte[] content = new byte[(int) outFile.length()];
-            StringBuffer input = new StringBuffer( content.length );
-            try
-            {
-                int length = reader.read( content, 0, content.length );
-                input.append( new String( content, 0, length, POM_ENCODING ) );
-            }
-            finally
-            {
-                reader.close();
-            }
-
-            XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-            inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
-
-            ModifiedPomXMLEventReader newPom = new ModifiedPomXMLEventReader( input, inputFactory );
+            StringBuffer input = readFile( outFile );
+            ModifiedPomXMLEventReader newPom = newModifiedPomXER( input );
 
             update( newPom );
 
             if ( newPom.isModified() )
             {
-                OutputStream out = new BufferedOutputStream( new FileOutputStream( outFile ) );
-                out.write( input.toString().getBytes( POM_ENCODING ) );
-                out.close();
+                writeFile( outFile, input );
             }
         }
         catch ( IOException e )
@@ -325,6 +306,72 @@ public abstract class AbstractVersionsUpdaterMojo
         catch ( XMLStreamException e )
         {
             getLog().error( e );
+        }
+
+    }
+
+    /**
+     * Creates a {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader} from a StringBuffer.
+     *
+     * @param input The XML to read and modify.
+     * @return The {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader}.
+     */
+    protected final ModifiedPomXMLEventReader newModifiedPomXER( StringBuffer input )
+    {
+        ModifiedPomXMLEventReader newPom = null;
+        try
+        {
+            XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+            inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
+            newPom = new ModifiedPomXMLEventReader( input, inputFactory );
+        }
+        catch ( XMLStreamException e )
+        {
+            getLog().error( e );
+        }
+        return newPom;
+    }
+
+    /**
+     * Writes a StringBuffer into a file.
+     *
+     * @param outFile The file to read.
+     * @param input   The contents of the file.
+     * @throws IOException when things go wrong.
+     */
+    protected final void writeFile( File outFile, StringBuffer input )
+        throws IOException
+    {
+        OutputStream out = new BufferedOutputStream( new FileOutputStream( outFile ) );
+        out.write( input.toString().getBytes( POM_ENCODING ) );
+        out.close();
+    }
+
+    /**
+     * Reads a file into a StringBuffer.
+     *
+     * @param outFile The file to read.
+     * @return StringBuffer The contents of the file.
+     * @throws IOException when things go wrong.
+     */
+    protected final StringBuffer readFile( File outFile )
+        throws IOException
+    {
+        StringBuffer input;
+        BufferedInputStream reader;
+        reader = new BufferedInputStream( new FileInputStream( outFile ) );
+
+        byte[] content = new byte[(int) outFile.length()];
+        input = new StringBuffer( content.length );
+        try
+        {
+            int length = reader.read( content, 0, content.length );
+            input.append( new String( content, 0, length, POM_ENCODING ) );
+            return input;
+        }
+        finally
+        {
+            reader.close();
         }
     }
 

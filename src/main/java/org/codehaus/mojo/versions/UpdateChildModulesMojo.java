@@ -2,23 +2,21 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.profiles.DefaultProfileManager;
-import org.apache.maven.profiles.ProfileManager;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 /**
  * Scans the current projects child modules, updating the versions of any which use the current project to
@@ -45,9 +43,6 @@ public class UpdateChildModulesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-
-        ProfileManager profileManager =
-            new DefaultProfileManager( session.getContainer(), session.getExecutionProperties() );
 
         Set childModules = getAllChildModules( getProject() );
 
@@ -78,27 +73,93 @@ public class UpdateChildModulesMojo
 
             try
             {
-                MavenProject childProject = projectBuilder.build( moduleProjectFile, localRepository, profileManager );
-                Parent childParent = childProject.getOriginalModel().getParent();
-                if ( childParent != null && getProject().getGroupId().equals( childParent.getGroupId() ) &&
-                    getProject().getArtifactId().equals( childParent.getArtifactId() ) )
+                // the aim of this goal is to fix problems when the project cannot be parsed by Maven
+                // so we have to parse the file by hand!
+                StringBuffer childPom = readFile( moduleProjectFile );
+                ModifiedPomXMLEventReader pom = newModifiedPomXER( childPom );
+                Stack stack = new Stack();
+                String path = "";
+                String groupId = null;
+                String artifactId = null;
+                String version = null;
+                Pattern pattern = Pattern.compile( "/project/parent/(groupId|artifactId|version)" );
+                while ( pom.hasNext() )
                 {
-                    if ( childProject.getParent().getVersion().equals( getProject().getVersion() ) )
+                    XMLEvent event = pom.nextEvent();
+                    if ( event.isStartDocument() )
                     {
-                        getLog().info( modulePath + " => " +
-                            ArtifactUtils.versionlessKey( getProject().getArtifact() ) + ":" +
-                            getProject().getVersion() );
+                        path = "";
+                        stack.clear();
                     }
-                    else
+                    else if ( event.isStartElement() )
                     {
-                        getLog().warn( modulePath + " => " +
-                            ArtifactUtils.versionlessKey( getProject().getArtifact() ) + ":" +
-                            childProject.getParent().getVersion() + " -> " + getProject().getVersion() );
-                        process( moduleProjectFile );
+                        stack.push( path );
+
+                        path = path + "/" + event.asStartElement().getName().getLocalPart();
+
+                        if ( pattern.matcher( path ).matches() )
+                        {
+                            String text = pom.getElementText().trim();
+                            if ( path.endsWith( "groupId" ) )
+                            {
+                                groupId = text;
+                            }
+                            else if ( path.endsWith( "artifactId" ) )
+                            {
+                                artifactId = text;
+                            }
+                            else if ( path.endsWith( "version" ) )
+                            {
+                                version = text;
+                            }
+                            path = (String) stack.pop();
+                        }
+                    }
+                    else if ( event.isEndElement() )
+                    {
+                        if ( "/project/parent".equals( path ) )
+                        {
+                            getLog().info( "Module: " + modulePath );
+
+                            if ( getProject().getGroupId().equals( groupId ) && getProject().getArtifactId().equals(
+                                artifactId ) )
+                            {
+
+                                if ( getProject().getVersion().equals( version ) )
+                                {
+                                    getLog().info( "  Parent is "
+                                        + ArtifactUtils.versionlessKey( getProject().getArtifact() ) + ":"
+                                        + getProject().getVersion() );
+                                }
+                                else
+                                {
+                                    getLog().info( "  Parent was "
+                                        + ArtifactUtils.versionlessKey( getProject().getArtifact() ) + ":" + version
+                                        + ", now " + ArtifactUtils.versionlessKey( getProject().getArtifact() ) + ":"
+                                        + getProject().getVersion() );
+                                    process( moduleProjectFile );
+                                }
+                            }
+                            else
+                            {
+                                getLog().info( "  does not use "
+                                    + ArtifactUtils.versionlessKey( getProject().getArtifact() ) + " as its parent" );
+                            }
+                        }
+                        path = (String) stack.pop();
                     }
                 }
             }
-            catch ( ProjectBuildingException e )
+            catch ( XMLStreamException e )
+            {
+                getLog().debug( "Could not parse " + moduleProjectFile.getPath(), e );
+                if ( pbe == null )
+                {
+                    // save this until we get to the end.
+                    pbe = new MojoExecutionException( "Could not parse " + moduleProjectFile.getPath(), e );
+                }
+            }
+            catch ( IOException e )
             {
                 getLog().debug( "Could not parse " + moduleProjectFile.getPath(), e );
                 if ( pbe == null )
