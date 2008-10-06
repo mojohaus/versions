@@ -4,9 +4,7 @@ import java.util.regex.*;
 try
 {
     File file = new File( basedir, "build.log" );
-    BufferedReader in = new BufferedReader(new FileReader(file));
-    StringBuilder buf = new StringBuilder();
-    BufferedReader in = new BufferedReader(new FileReader(file));
+    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
     StringBuilder buf = new StringBuilder();
     String line = in.readLine();
     while (line != null) {
