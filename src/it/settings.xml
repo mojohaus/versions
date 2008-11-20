@@ -17,16 +17,6 @@
             <enabled>true</enabled>
           </snapshots>
         </repository>
-        <!--<repository>-->
-          <!--<id>codehaus.snapshots</id>-->
-          <!--<url>http://snapshots.repository.codehaus.org/</url>-->
-          <!--<releases>-->
-            <!--<enabled>false</enabled>-->
-          <!--</releases>-->
-          <!--<snapshots>-->
-            <!--<enabled>true</enabled>-->
-          <!--</snapshots>-->
-        <!--</repository>-->
       </repositories>
       <pluginRepositories>
         <pluginRepository>

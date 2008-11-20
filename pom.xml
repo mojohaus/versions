@@ -177,4 +177,7 @@
     </profile>
   </profiles>
 
+  <properties>
+    <pluginVersion>${project.version}</pluginVersion>  
+  </properties>
 </project>

@@ -109,6 +109,7 @@ Update Properties
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
         <configuration>
           ...
           <linkItems>
@@ -145,6 +146,7 @@ Update Properties
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
         <configuration>
           ...
           <linkItems>
@@ -179,6 +181,7 @@ Update Properties
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
         <configuration>
           ...
           <autoLinkItems>false</autoLinkItems>

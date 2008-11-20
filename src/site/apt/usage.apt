@@ -31,10 +31,18 @@ Usage
 * Basic Usage
 
   Maven 2.0 does not currently support re-reading modifications of the <<<pom.xml>>> within one invocation of Maven.
-  As the {{{update-parent-mojo.html}versions:update-parent}} and {{{update-properties-mojo.html}versions:update-properties}} goals
+
+  The following goals:
+
+    * {{{update-child-modules-mojo.html}versions:update-child-modules}}
+
+    * {{{update-parent-mojo.html}versions:update-parent}}
+
+    * {{{update-properties-mojo.html}versions:update-properties}}
+
   modify the <<<pom.xml>>> file, you need to run these goals separately from any other goals or life-cycle phases.
 
-** Updating the parent version
+** Updating the parent version (Note: modifies <<<pom.xml>>> files)
 
   To update the parent version of your POM to the latest available, just invoke the <<<update-parent>>> goal.
 
@@ -43,6 +51,21 @@ mvn versions:update-parent
 ---
 
   {{{examples/update-parent.html} A more detailed example of the <<<update-parent>>> goal}}.
+
+** Fixing a multi-module build (Note: modifies <<<pom.xml>>> files)
+
+  If you have a multi-module build where the aggregator pom (i.e. the one with packaging of <<<pom>>> and the
+  <<<modules>>> section) is also the parent referenced by its child modules, and the aggregator version does not
+  match the version specified in the parent section of the child modules, Maven will not let you build the project.
+  To fix all the child modules, use the {{{update-child-modules-mojo.html}versions:update-child-modules}} goal and invoke
+  Maven in non-recursive mode.
+
+---
+mvn -N versions:update-child-modules
+---
+
+  {{{examples/update-child-modules.html} A more detailed example of the <<<update-child-modules>>> goal}}.
+
 
 ** Checking for new versions of plugins
 
@@ -66,7 +89,7 @@ mvn versions:display-dependency-updates
 
   {{{examples/display-dependency-updates.html} A more detailed example of the <<<display-dependency-updates>>> goal}}.
 
-** Updating versions specified by properties
+** Updating versions specified by properties (Note: modifies <<<pom.xml>>> files)
 
   This goal helps when you use properties to define versions.  Please see the
   {{{examples/update-properties.html}<<<update-properties>>> example}}.
