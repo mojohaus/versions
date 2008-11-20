@@ -34,7 +34,7 @@
   <scm>
     <connection>scm:svn:http://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</connection>
     <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</developerConnection>
-    <url>http://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</url>
+    <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/versions-maven-plugin</url>
   </scm>
 
   <developers>
