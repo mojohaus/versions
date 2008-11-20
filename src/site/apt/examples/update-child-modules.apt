@@ -16,14 +16,14 @@
  ~~ under the License.
 
  -----
- Update Child Modules
+ Fixing a multi-module build
  -----
  Stephen Connolly
  ------
  2008-09-25
  ------
 
-Update Child Modules
+Fixing a multi-module build
 
   If you have a multi-module build where the aggregator pom (i.e. the one with packaging of <<<pom>>> and the
   <<<modules>>> section) is also the parent referenced by its child modules, and the aggregator version does not
