@@ -15,6 +15,9 @@
         a single execution of update-properties mojo.
       </action>
       <action dev="stephenconnolly" type="update">
+        Implemented auto-detection of properties for the update-properties mojo.
+      </action>
+      <action dev="stephenconnolly" type="update">
         Implemented integration tests for four of the mojos.
       </action>
       <action dev="stephenconnolly" type="update">
