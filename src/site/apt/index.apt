@@ -77,10 +77,14 @@ Versions Maven Plugin
   To provide you with better understanding of some usages of the Plugin Name,
   you can take a look into the following examples:
 
-  * {{{examples/display-dependency-updates.html}Displaying available updates to project dependencies}}
+  * {{{examples/display-dependency-updates.html}Displaying available updates to project dependencies}}.
 
-  * {{{examples/display-plugin-updates.html}Displaying available updates to plugins used in a project}}
+  * {{{examples/display-plugin-updates.html}Displaying available updates to plugins used in a project}}.
 
-  * {{{examples/update-parent.html}Updating the project's parent to the latest available}}
+  * {{{examples/update-parent.html}Updating the project's parent to the latest available}}.
 
-  * {{{examples/update-properties.html}Updating properties defined in the project based on dependency version availablility}}
+  * {{{examples/update-properties.html}Updating properties defined in the project based on dependency version
+    availablility}}.
+
+  * {{{examples/update-child-modules.html}Fixing a multi-module project when the parent references in the child modules
+    are broken}}.
