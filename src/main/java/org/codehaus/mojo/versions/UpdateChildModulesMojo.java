@@ -54,13 +54,6 @@ public class UpdateChildModulesMojo
 {
 
     /**
-     * @parameter expression="${session}"
-     * @readonly
-     * @since 1.0-alpha-2
-     */
-    private MavenSession session;
-
-    /**
      * Called when this mojo is executed.
      *
      * @throws MojoExecutionException when things go wrong.
