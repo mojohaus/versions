@@ -899,12 +899,13 @@ public class DisplayPluginUpdatesMojo
 
             try
             {
-                origModel.append( "Original model:\n" );
+                origModel.write( "Original model:\n" );
                 getProject().writeOriginalModel( origModel );
                 getLog().debug( origModel.toString() );
             }
             catch ( IOException e )
             {
+                // ignore
             }
         }
 
