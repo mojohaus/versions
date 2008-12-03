@@ -161,8 +161,8 @@ public class UpdatePropertiesMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        LinkItem[] linkItems;
-        if ( autoLinkItems == null || Boolean.TRUE.equals(autoLinkItems) )
+        LinkItem[] items;
+        if ( autoLinkItems == null || Boolean.TRUE.equals( autoLinkItems ) )
         {
             Map properties = new HashMap();
             if ( this.linkItems != null )
@@ -221,8 +221,8 @@ public class UpdatePropertiesMojo
                                 {
                                     String prefix = text.substring( 0, start ).trim();
                                     String postfix = text.substring( end + 1, text.length() ).trim();
-                                    if ( ( prefix.startsWith( "[" ) || prefix.startsWith( "(" ) ) && (
-                                        postfix.endsWith( "]" ) || postfix.endsWith( ")" ) )
+                                    if ( ( prefix.startsWith( "[" ) || prefix.startsWith( "(" ) )
+                                        && ( postfix.endsWith( "]" ) || postfix.endsWith( ")" ) )
                                         && ( prefix.length() > 1 || postfix.length() > 1) )
                                     {
                                         versions = prefix + postfix;
@@ -294,8 +294,9 @@ public class UpdatePropertiesMojo
                     path = (String) stack.pop();
                 }
             }
-            dependencyPathMatcher = Pattern.compile(
-                "/project(/profiles/profile)?((/reporting/plugins/plugin)?|(/build(/pluginManagement)?/plugins/plugin))/(groupId|artifactId|version)" );
+            dependencyPathMatcher = Pattern.compile("/project(/profiles/profile)?"
+                + "((/reporting/plugins/plugin)?" 
+                + "|(/build(/pluginManagement)?/plugins/plugin))/(groupId|artifactId|version)" );
             pom.rewind();
             while ( pom.hasNext() )
             {
@@ -395,20 +396,20 @@ public class UpdatePropertiesMojo
                     path = (String) stack.pop();
                 }
             }
-            linkItems = (LinkItem[]) properties.values().toArray( new LinkItem[properties.size()] );
+            items = (LinkItem[]) properties.values().toArray( new LinkItem[properties.size()] );
         }
         else
         {
-            linkItems = this.linkItems;
+            items = this.linkItems;
         }
-        if ( linkItems == null || linkItems.length == 0 )
+        if ( items == null || items.length == 0 )
         {
             getLog().info( "Nothing to link" );
             return;
         }
-        for ( int i = 0; i < linkItems.length; i++ )
+        for ( int i = 0; i < items.length; i++ )
         {
-            LinkItem item = linkItems[i];
+            LinkItem item = items[i];
 
             if ( includeProperties != null )
             {

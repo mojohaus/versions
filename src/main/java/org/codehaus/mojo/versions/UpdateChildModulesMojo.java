@@ -1,5 +1,24 @@
 package org.codehaus.mojo.versions;
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Profile;
@@ -16,6 +35,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
@@ -40,6 +60,12 @@ public class UpdateChildModulesMojo
      */
     private MavenSession session;
 
+    /**
+     * Called when this mojo is executed.
+     *
+     * @throws MojoExecutionException when things go wrong.
+     * @throws MojoFailureException when things go wrong.
+     */
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -178,6 +204,14 @@ public class UpdateChildModulesMojo
 
     }
 
+    /**
+     * Updates the pom file.
+     *
+     * @param pom The pom file to update.
+     * @throws MojoExecutionException when things go wrong.
+     * @throws MojoFailureException when things go wrong.
+     * @throws XMLStreamException when things go wrong.
+     */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
@@ -220,6 +254,13 @@ public class UpdateChildModulesMojo
         }
     }
 
+    /**
+     * Returns a set of all child modules for a project, including any defined in profiles (ignoring profile
+     * activation).
+     *
+     * @param project The project.
+     * @return the set of all child modules of the project.
+     */
     private Set getAllChildModules( MavenProject project )
     {
         getLog().debug( "Finding child modules..." );
@@ -235,19 +276,25 @@ public class UpdateChildModulesMojo
         return childModules;
     }
 
-    private void debugModules( String message, Set childModules )
+    /**
+     * Outputs a debug message with a list of modules.
+     *
+     * @param message The message to display.
+     * @param modules The modules to append to the message.
+     */
+    private void debugModules( String message, Collection modules )
     {
         Iterator i;
         if ( getLog().isDebugEnabled() )
         {
             getLog().debug( message );
-            if ( childModules.isEmpty() )
+            if ( modules.isEmpty() )
             {
                 getLog().debug( "None." );
             }
             else
             {
-                i = childModules.iterator();
+                i = modules.iterator();
                 while ( i.hasNext() )
                 {
                     getLog().debug( "  " + i.next() );
@@ -257,7 +304,13 @@ public class UpdateChildModulesMojo
         }
     }
 
-    private void removeMissingChildModules( MavenProject project, Set childModules )
+    /**
+     * Modifies the collection of child modules removing those which cannot be found relative to the parent.
+     *
+     * @param project the project.
+     * @param childModules the child modules.
+     */
+    private void removeMissingChildModules( MavenProject project, Collection childModules )
     {
         getLog().debug( "Removing child modules which are missing..." );
         Iterator i = childModules.iterator();
@@ -265,11 +318,21 @@ public class UpdateChildModulesMojo
         {
             String modulePath = (String) i.next();
             File moduleFile = new File( project.getBasedir(), modulePath );
-            if ( !moduleFile.exists() )
+
+            if ( moduleFile.isDirectory() && new File(moduleFile, "pom.xml").isFile())
             {
-                getLog().debug( "Removing missing child module " + modulePath );
-                i.remove();
+                // it's a directory that exists
+                continue;
             }
+
+            if ( moduleFile.isFile())
+            {
+                // it's the pom.xml file directly referenced and it exists.
+                continue;
+            }
+
+            getLog().debug( "Removing missing child module " + modulePath );
+            i.remove();
         }
         debugModules( "After removing missing", childModules );
     }

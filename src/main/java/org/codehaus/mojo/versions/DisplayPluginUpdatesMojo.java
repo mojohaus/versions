@@ -700,8 +700,8 @@ public class DisplayPluginUpdatesMojo
             }
             catch ( ComponentLookupException e )
             {
-                getLog().debug( "Error looking up lifecycle mapping to retrieve optional mojos. Lifecycle ID: " +
-                    lifecycle.getId() + ". Error: " + e.getMessage(), e );
+                getLog().debug( "Error looking up lifecycle mapping to retrieve optional mojos. Lifecycle ID: "
+                    + lifecycle.getId() + ". Error: " + e.getMessage(), e );
             }
         }
 
@@ -861,9 +861,9 @@ public class DisplayPluginUpdatesMojo
                 if ( phaseToLifecycleMap.containsKey( phase ) )
                 {
                     Lifecycle prevLifecycle = (Lifecycle) phaseToLifecycleMap.get( phase );
-                    throw new LifecycleExecutionException( "Phase '" + phase +
-                        "' is defined in more than one lifecycle: '" + lifecycle.getId() + "' and '" +
-                        prevLifecycle.getId() + "'" );
+                    throw new LifecycleExecutionException( "Phase '" + phase
+                        + "' is defined in more than one lifecycle: '" + lifecycle.getId() + "' and '"
+                        + prevLifecycle.getId() + "'" );
                 }
                 else
                 {
