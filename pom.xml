@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -9,7 +10,7 @@
 
   <groupId>org.codehaus.mojo</groupId>
   <artifactId>versions-maven-plugin</artifactId>
-  <version>1.0-alpha-3</version>
+  <version>1.0-alpha-2-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
@@ -31,9 +32,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/mojo/tags/versions-maven-plugin-1.0-alpha-3</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/tags/versions-maven-plugin-1.0-alpha-3</developerConnection>
-    <url>http://fisheye.codehaus.org/browse/mojo/tags/versions-maven-plugin-1.0-alpha-3</url>
+    <connection>scm:svn:http://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</developerConnection>
+    <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/versions-maven-plugin</url>
   </scm>
 
   <developers>
