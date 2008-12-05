@@ -6,7 +6,7 @@
     </author>
   </properties>
   <body>
-    <release version="1.0-alpha-2-SNAPSHOT" date="2008-12-01" description="Second alpha release">
+    <release version="1.0-alpha-2" date="2008-12-05" description="Second alpha release">
       <action dev="stephenconnolly" type="fix" issue="MVERSIONS-5">
         Implemented update-child-modules mojo.
       </action>
