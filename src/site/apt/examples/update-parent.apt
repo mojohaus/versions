@@ -62,8 +62,9 @@ mvn versions:update-parent
 mvn versions:update-parent "-DparentVersion=[14,16)"
 ---
 
-  By default, if the newest version is a -SNAPSHOT, that will be used. You can force snapshots to be excluded:
+  Note that, by default, -SNAPSHOT versions are ignored. You can force snapshots to be 
+  included with the allowSnapshots parameter:
 
 ---
-mvn versions:update-parent -DallowSnapshots=false
+mvn versions:update-parent -DallowSnapshots=true
 ---
