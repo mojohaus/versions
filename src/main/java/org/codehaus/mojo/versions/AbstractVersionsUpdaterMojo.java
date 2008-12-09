@@ -33,6 +33,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.ordering.ComparableVersion;
 import org.codehaus.stax2.XMLInputFactory2;
 
 import javax.xml.stream.XMLInputFactory;
@@ -110,8 +111,9 @@ public abstract class AbstractVersionsUpdaterMojo
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
-     * The versioning rule to use when comparing versions. Valid values are <code>maven</code> or
-     * <code>numeric</code> which will handle long version numbers provided all components are numeric.
+     * The versioning rule to use when comparing versions. Valid values are <code>maven</code>,
+     * <code>numeric</code> which will handle long version numbers provided all components are numeric, or 
+     * <code>mercury</code> which will use the mercury version number comparison rules.
      *
      * @parameter expression="${comparisonMethod}" default-value="maven"
      * @since 1.0-alpha-1
@@ -258,6 +260,10 @@ public abstract class AbstractVersionsUpdaterMojo
         if ( "numeric".equalsIgnoreCase( comparisonMethod ) )
         {
             return new NumericVersionComparator();
+        }
+        else if ( "mercury".equalsIgnoreCase( comparisonMethod ) ) 
+        {
+            return new MercuryVersionComparator();
         }
         return new MavenVersionComparator();
     }
@@ -563,6 +569,25 @@ public abstract class AbstractVersionsUpdaterMojo
         public int compare( Object o1, Object o2 )
         {
             return ( (ArtifactVersion) o1 ).compareTo( (ArtifactVersion) o2 );
+        }
+
+    }
+
+    /**
+     * A comparator which uses Mercury's version rules.
+     *
+     * @since 1.0-alpha-3
+     */
+    private static class MercuryVersionComparator
+        implements Comparator
+    {
+
+        /**
+         * {@inheritDoc}
+         */
+        public int compare( Object o1, Object o2 )
+        {
+            return new ComparableVersion( o1.toString() ).compareTo( new ComparableVersion( o2.toString() ) );
         }
 
     }
