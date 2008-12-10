@@ -148,11 +148,14 @@
     <profile>
       <!-- run integration tests
           to use this profile:
-          o run integration tests: mvn -Pintegration
+          or run integration tests: mvn -Pintegration
+          
+          if you have never ran these integration tests locally,
+          you may want to run mvn -Ppre-integration first
       -->
       <id>integration</id>
       <build>
-        <defaultGoal>integration-test</defaultGoal>
+        <defaultGoal>verify</defaultGoal>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -174,9 +177,63 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <!-- prepare the local repository
+          if you are building on a really clean system, not all the required
+          plugins are in your local repository... this execution ensures they
+          are resolved so that the integration tests can run
+
+          to use this profile:
+          mvn -Ppre-integration
+      -->
+      <id>pre-integration</id>
+      <build>
+        <defaultGoal>verify</defaultGoal>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-invoker-plugin</artifactId>
+            <version>1.3</version>
+            <configuration>
+              <streamLogs>false</streamLogs>
+            </configuration>
+            <executions>
+              <execution>
+                <id>pre-integration-test</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <projectsDirectory>src/it</projectsDirectory>
+                  <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+                  <localRepositoryPath>${settings.localRepository}</localRepositoryPath>
+                  <settingsFile>src/it/prep-settings.xml</settingsFile>
+                  <showErrors>false</showErrors>
+                  <streamLogs>false</streamLogs>
+                  <noLog>true</noLog>
+                  <suppressSummaries>true</suppressSummaries>
+                  <setupIncludes childMergeOverride="true">
+                  </setupIncludes>
+                  <pomIncludes>
+                    <pomInclude>dummy-*/pom.xml</pomInclude>
+                  </pomIncludes>
+                  <goals>
+                    <goal>verify</goal>
+                    <goal>org.apache.maven.plugins:maven-dependency-plugin:2.0:go-offline</goal>
+                  </goals>
+                  <invokerPropertiesFile>ignore</invokerPropertiesFile>
+                  <ignoreFailures>true</ignoreFailures>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <properties>
-    <pluginVersion>${project.version}</pluginVersion>  
+    <pluginVersion>${project.version}</pluginVersion>
   </properties>
 </project>
