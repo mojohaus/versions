@@ -1,0 +1,30 @@
+import java.io.*;
+import java.util.regex.*;
+
+try
+{
+    File file = new File( basedir, "build.log" );
+    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+    StringBuilder buf = new StringBuilder();
+    String line = in.readLine();
+    while (line != null) {
+        buf.append(line);
+        buf.append("\n");
+        line = in.readLine();
+    }
+    Pattern p = Pattern.compile("\\QAll plugins have a version specified.\\E");
+    Matcher m = p.matcher(buf.toString());
+    if ( m.find() )
+    {
+        System.out.println("Did not notice that clean plugin does not have a version specified");
+        return false;
+    }
+    System.out.println(m.group(0));
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;
