@@ -257,7 +257,7 @@ public class DisplayPluginUpdatesMojo
             }
             catch ( ModelInterpolationException e )
             {
-                throw new MojoExecutionException( "", e );
+                throw new MojoExecutionException( e.getMessage(), e );
             }
             parentPluginManagement.putAll( getPluginManagement( originalModel ) );
             parentBuildPlugins.putAll( getBuildPlugins( originalModel, true ) );
