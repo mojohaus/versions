@@ -33,6 +33,7 @@ import org.apache.maven.lifecycle.Lifecycle;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.mapping.LifecycleMapping;
+import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
@@ -47,6 +48,8 @@ import org.apache.maven.plugin.version.PluginVersionNotFoundException;
 import org.apache.maven.plugin.version.PluginVersionResolutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.interpolation.ModelInterpolationException;
+import org.apache.maven.project.interpolation.ModelInterpolator;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -111,6 +114,12 @@ public class DisplayPluginUpdatesMojo
     private LifecycleExecutor lifecycleExecutor;
 
     /**
+     * @component
+     * @since 1.0-alpha-3
+     */
+    private ModelInterpolator modelInterpolator;
+
+    /**
      * The session.
      *
      * @readonly
@@ -141,8 +150,8 @@ public class DisplayPluginUpdatesMojo
         Map superPomPluginManagement = new HashMap();
         try
         {
-            superPomPluginManagement.putAll(
-                getPluginManagement( projectBuilder.buildStandaloneSuperProject( localRepository ) ) );
+            MavenProject superProject = projectBuilder.buildStandaloneSuperProject( localRepository );
+            superPomPluginManagement.putAll( getPluginManagement( superProject.getOriginalModel() ) );
         }
         catch ( ProjectBuildingException e )
         {
@@ -154,17 +163,17 @@ public class DisplayPluginUpdatesMojo
     /**
      * Gets the plugin management plugins of a specific project.
      *
-     * @param project the project to get the plugin management plugins from.
+     * @param model the model to get the plugin management plugins from.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
      */
-    private Map getPluginManagement( MavenProject project )
+    private Map getPluginManagement( Model model )
     {
         // we want only those parts of pluginManagement that are defined in this project
         Map pluginManagement = new HashMap();
         try
         {
-            Iterator j = project.getOriginalModel().getBuild().getPluginManagement().getPlugins().iterator();
+            Iterator j = model.getBuild().getPluginManagement().getPlugins().iterator();
             while ( j.hasNext() )
             {
                 Plugin plugin = (Plugin) j.next();
@@ -182,7 +191,7 @@ public class DisplayPluginUpdatesMojo
         }
         try
         {
-            Iterator i = project.getOriginalModel().getProfiles().iterator();
+            Iterator i = model.getProfiles().iterator();
             while ( i.hasNext() )
             {
                 Profile profile = (Profile) i.next();
@@ -227,20 +236,32 @@ public class DisplayPluginUpdatesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        List parents = getParentProjects( getProject() );
-
         Map superPomPluginManagement = getSuperPomPluginManagement();
 
         Map parentPluginManagement = new HashMap();
         Map parentBuildPlugins = new HashMap();
         Map parentReportPlugins = new HashMap();
+
+        List parents = getParentProjects( getProject() );
+
         Iterator i = parents.iterator();
         while ( i.hasNext() )
         {
             MavenProject parentProject = (MavenProject) i.next();
-            parentPluginManagement.putAll( getPluginManagement( parentProject ) );
-            parentBuildPlugins.putAll( getBuildPlugins( parentProject, true ) );
-            parentReportPlugins.putAll( getReportPlugins( parentProject, true ) );
+
+            Model originalModel;
+            try
+            {
+                originalModel =
+                    modelInterpolator.interpolate( parentProject.getOriginalModel(), getProject().getProperties() );
+            }
+            catch ( ModelInterpolationException e )
+            {
+                throw new MojoExecutionException( "", e );
+            }
+            parentPluginManagement.putAll( getPluginManagement( originalModel ) );
+            parentBuildPlugins.putAll( getBuildPlugins( originalModel, true ) );
+            parentReportPlugins.putAll( getReportPlugins( originalModel, true ) );
         }
 
         Set plugins = getProjectPlugins( superPomPluginManagement, parentPluginManagement, parentBuildPlugins,
@@ -379,18 +400,18 @@ public class DisplayPluginUpdatesMojo
     /**
      * Gets the build plugins of a specific project.
      *
-     * @param project              the project to get the build plugins from.
+     * @param model                the model to get the build plugins from.
      * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be
      *                             inherited by child projects.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
      */
-    private Map getBuildPlugins( MavenProject project, boolean onlyIncludeInherited )
+    private Map getBuildPlugins( Model model, boolean onlyIncludeInherited )
     {
         Map buildPlugins = new HashMap();
         try
         {
-            Iterator j = project.getOriginalModel().getBuild().getPlugins().iterator();
+            Iterator j = model.getBuild().getPlugins().iterator();
             while ( j.hasNext() )
             {
                 Object plugin = j.next();
@@ -408,7 +429,7 @@ public class DisplayPluginUpdatesMojo
         }
         try
         {
-            Iterator i = project.getOriginalModel().getProfiles().iterator();
+            Iterator i = model.getProfiles().iterator();
             while ( i.hasNext() )
             {
                 Profile profile = (Profile) i.next();
@@ -917,9 +938,19 @@ public class DisplayPluginUpdatesMojo
 
         debugVersionMap( "aggregate version map", excludePluginManagement );
 
+        Model originalModel;
         try
         {
-            addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPluginManagement().getPlugins(),
+            originalModel =
+                modelInterpolator.interpolate( getProject().getOriginalModel(), getProject().getProperties() );
+        }
+        catch ( ModelInterpolationException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
+        try
+        {
+            addProjectPlugins( plugins, originalModel.getBuild().getPluginManagement().getPlugins(),
                                excludePluginManagement );
         }
         catch ( NullPointerException e )
@@ -934,7 +965,7 @@ public class DisplayPluginUpdatesMojo
 
         try
         {
-            addProjectPlugins( plugins, getProject().getOriginalModel().getBuild().getPlugins(), parentBuildPlugins );
+            addProjectPlugins( plugins, originalModel.getBuild().getPlugins(), parentBuildPlugins );
         }
         catch ( NullPointerException e )
         {
@@ -944,14 +975,13 @@ public class DisplayPluginUpdatesMojo
 
         try
         {
-            addProjectPlugins( plugins, getProject().getOriginalModel().getReporting().getPlugins(),
-                               parentReportPlugins );
+            addProjectPlugins( plugins, originalModel.getReporting().getPlugins(), parentReportPlugins );
         }
         catch ( NullPointerException e )
         {
             // guess there are no plugins here
         }
-        Iterator i = getProject().getOriginalModel().getProfiles().iterator();
+        Iterator i = originalModel.getProfiles().iterator();
         while ( i.hasNext() )
         {
             Profile profile = (Profile) i.next();
@@ -1127,18 +1157,18 @@ public class DisplayPluginUpdatesMojo
     /**
      * Gets the report plugins of a specific project.
      *
-     * @param project              the project to get the report plugins from.
+     * @param model                the model to get the report plugins from.
      * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be
      *                             inherited by child projects.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
      */
-    private Map getReportPlugins( MavenProject project, boolean onlyIncludeInherited )
+    private Map getReportPlugins( Model model, boolean onlyIncludeInherited )
     {
         Map reportPlugins = new HashMap();
         try
         {
-            Iterator j = project.getOriginalModel().getReporting().getPlugins().iterator();
+            Iterator j = model.getReporting().getPlugins().iterator();
             while ( j.hasNext() )
             {
                 Object plugin = j.next();
@@ -1156,7 +1186,7 @@ public class DisplayPluginUpdatesMojo
         }
         try
         {
-            Iterator i = project.getOriginalModel().getProfiles().iterator();
+            Iterator i = model.getProfiles().iterator();
             while ( i.hasNext() )
             {
                 Profile profile = (Profile) i.next();
