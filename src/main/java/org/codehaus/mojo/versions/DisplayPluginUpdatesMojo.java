@@ -367,7 +367,7 @@ public class DisplayPluginUpdatesMojo
         getLog().info( "" );
         if ( updates.isEmpty() )
         {
-            getLog().info( "All plugins are using the latest versions." );
+            getLog().info( "All plugins with a version specified are using the latest versions." );
         }
         else
         {
