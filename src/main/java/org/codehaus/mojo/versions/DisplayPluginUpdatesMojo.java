@@ -26,6 +26,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
@@ -57,6 +58,7 @@ import org.codehaus.plexus.util.ReflectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -69,7 +71,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 /**
  * Displays all plugins that have newer versions available.
@@ -135,6 +139,8 @@ public class DisplayPluginUpdatesMojo
      * @since 1.0-alpha-1
      */
     private PluginManager pluginManager;
+
+    private static final String APACHE_MAVEN_PLUGINS_GROUPID = "org.apache.maven.plugins";
 
 // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -236,6 +242,20 @@ public class DisplayPluginUpdatesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        Set pluginsWithVersionsSpecified;
+        try
+        {
+            pluginsWithVersionsSpecified = findPluginsWithVersionsSpecified( getProject() );
+        }
+        catch ( XMLStreamException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
+
         Map superPomPluginManagement = getSuperPomPluginManagement();
 
         Map parentPluginManagement = new HashMap();
@@ -265,7 +285,7 @@ public class DisplayPluginUpdatesMojo
         }
 
         Set plugins = getProjectPlugins( superPomPluginManagement, parentPluginManagement, parentBuildPlugins,
-                                         parentReportPlugins );
+                                         parentReportPlugins, pluginsWithVersionsSpecified );
         List updates = new ArrayList();
         List lockdown = new ArrayList();
         i = plugins.iterator();
@@ -276,6 +296,7 @@ public class DisplayPluginUpdatesMojo
             String artifactId = getPluginArtifactId( plugin );
             String version = getPluginVersion( plugin );
             String coords = ArtifactUtils.versionlessKey( groupId, artifactId );
+
             if ( version == null )
             {
                 version = (String) parentPluginManagement.get( coords );
@@ -303,12 +324,24 @@ public class DisplayPluginUpdatesMojo
 
             String newVersion;
 
-            if ( version == null && artifactVersion != null )
+            if ( version == null && pluginsWithVersionsSpecified.contains( coords ) )
+            {
+                // Hack ALERT!
+                //
+                // All this should be re-written in a less "pom is xml" way... but it'll
+                // work for now :-(
+                //
+                // we have removed the version information, as it was the same as from
+                // the super-pom... but it actually was specified.
+                version = artifactVersion != null ? artifactVersion.toString() : null;
+            }
+
+            if ( version == null && artifactVersion != null && !pluginsWithVersionsSpecified.contains( coords ) )
             {
                 version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
                 newVersion = version != null ? version : artifactVersion.toString();
                 StringBuffer buf = new StringBuffer();
-                if ( "org.apache.maven.plugins".equals( groupId ) )
+                if ( APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
                 {
                     // a core plugin... group id is not needed
                 }
@@ -339,10 +372,11 @@ public class DisplayPluginUpdatesMojo
             {
                 newVersion = null;
             }
-            if ( version != null && artifactVersion != null && version.compareTo( newVersion ) < 0 )
+            if ( version != null && artifactVersion != null && newVersion != null
+                && new DefaultArtifactVersion( version ).compareTo( new DefaultArtifactVersion( newVersion ) ) < 0 )
             {
                 StringBuffer buf = new StringBuffer();
-                if ( "org.apache.maven.plugins".equals( groupId ) )
+                if ( APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
                 {
                     // a core plugin... group id is not needed
                 }
@@ -393,6 +427,101 @@ public class DisplayPluginUpdatesMojo
             }
         }
         getLog().info( "" );
+    }
+
+    private static final class StackState
+    {
+        private final String path;
+
+        private String groupId;
+
+        private String artifactId;
+
+        private String version;
+
+        public StackState( String path )
+        {
+            this.path = path;
+        }
+
+        public String toString()
+        {
+            return path + "[groupId=" + groupId + ", artifactId=" + artifactId + ", version=" + version + "]";
+        }
+    }
+
+    /**
+     * Returns a set of Strings which correspond to the plugin coordinates where there is a version
+     * specified.
+     *
+     * @param project The project to get the plugins with versions specified.
+     * @return a set of Strings which correspond to the plugin coordinates where there is a version
+     *         specified.
+     */
+    private Set findPluginsWithVersionsSpecified( MavenProject project )
+        throws IOException, XMLStreamException
+    {
+        Set result = new HashSet();
+        ModifiedPomXMLEventReader pom = newModifiedPomXER( readFile( project.getFile() ) );
+
+        Pattern pathRegex = Pattern.compile(
+            "/project(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );
+        Stack pathStack = new Stack();
+        StackState curState = null;
+        StackState parentState = null;
+        while ( pom.hasNext() )
+        {
+            XMLEvent event = pom.nextEvent();
+            if ( event.isStartDocument() )
+            {
+                curState = new StackState( "" );
+                pathStack.clear();
+            }
+            else if ( event.isStartElement() )
+            {
+                String elementName = event.asStartElement().getName().getLocalPart();
+                if ( curState != null && pathRegex.matcher( curState.path ).matches() )
+                {
+                    if ( "groupId".equals( elementName ) )
+                    {
+                        curState.groupId = pom.getElementText().trim();
+                        continue;
+                    }
+                    else if ( "artifactId".equals( elementName ) )
+                    {
+                        curState.artifactId = pom.getElementText().trim();
+                        continue;
+
+                    }
+                    else if ( "version".equals( elementName ) )
+                    {
+                        curState.version = pom.getElementText().trim();
+                        continue;
+                    }
+                }
+
+                pathStack.push( curState );
+                curState = new StackState( curState.path + "/" + elementName );
+            }
+            else if ( event.isEndElement() )
+            {
+                if ( curState != null && pathRegex.matcher( curState.path ).matches() )
+                {
+                    if ( curState.artifactId != null && curState.version != null )
+                    {
+                        if ( curState.groupId == null )
+                        {
+                            curState.groupId = APACHE_MAVEN_PLUGINS_GROUPID;
+                        }
+                        result.add( curState.groupId + ":" + curState.artifactId );
+                    }
+                }
+                curState = (StackState) pathStack.pop();
+            }
+        }
+
+        return result;
+
     }
 
 // -------------------------- OTHER METHODS --------------------------
@@ -898,16 +1027,17 @@ public class DisplayPluginUpdatesMojo
     /**
      * Returns the set of all plugins used by the project.
      *
-     * @param superPomPluginManagement the super pom's pluginManagement plugins.
-     * @param parentPluginManagement   the parent pom's pluginManagement plugins.
-     * @param parentBuildPlugins       the parent pom's build plugins.
-     * @param parentReportPlugins      the parent pom's report plugins.
+     * @param superPomPluginManagement     the super pom's pluginManagement plugins.
+     * @param parentPluginManagement       the parent pom's pluginManagement plugins.
+     * @param parentBuildPlugins           the parent pom's build plugins.
+     * @param parentReportPlugins          the parent pom's report plugins.
+     * @param pluginsWithVersionsSpecified the plugin coords that have a version defined in the project.
      * @return the set of plugins used by the project.
      * @throws org.apache.maven.plugin.MojoExecutionException
      *          if things go wrong.
      */
     private Set getProjectPlugins( Map superPomPluginManagement, Map parentPluginManagement, Map parentBuildPlugins,
-                                   Map parentReportPlugins )
+                                   Map parentReportPlugins, Set pluginsWithVersionsSpecified )
         throws MojoExecutionException
     {
         Map plugins = new HashMap();
@@ -937,6 +1067,10 @@ public class DisplayPluginUpdatesMojo
         excludePluginManagement.putAll( parentPluginManagement );
 
         debugVersionMap( "aggregate version map", excludePluginManagement );
+
+        excludePluginManagement.keySet().removeAll( pluginsWithVersionsSpecified );
+
+        debugVersionMap( "final aggregate version map", excludePluginManagement );
 
         Model originalModel;
         try
