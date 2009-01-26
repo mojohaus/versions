@@ -6,6 +6,29 @@
     </author>
   </properties>
   <body>
+    <release version="1.0-alpha-3-SNAPSHOT" date="2009-01-26" description="Third alpha release">
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-3">
+        display-plugin-updates now identifys the
+        plugin version as not being provided when derived from the super-pom
+      </action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-8">
+        Property Placedholders no longer output in versions:display-plugin-updates
+      </action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-8">
+        display-plugin-updates now can differentate between that version is
+        not defined if same versio as in parent pom is defined
+      </action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-8">
+        Add comparisonMethod=mercury
+      </action>
+      <action dev="stephenconnolly" due-to="mbeerman" due-to-email="mbeerman@yahoo.com"
+              type="add" issue="MVERSIONS-18">
+        Expose updated versions as a report
+      </action>
+      <action dev="stephenconnolly" type="update" issue="MVERSIONS-12">
+        Fixed site documentation.
+      </action>
+    </release>
     <release version="1.0-alpha-2" date="2008-12-05" description="Second alpha release">
       <action dev="stephenconnolly" type="fix" issue="MVERSIONS-5">
         Implemented update-child-modules mojo.
