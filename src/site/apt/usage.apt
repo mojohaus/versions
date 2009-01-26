@@ -93,3 +93,23 @@ mvn versions:display-dependency-updates
 
   This goal helps when you use properties to define versions.  Please see the
   {{{examples/update-properties.html}<<<update-properties>>> example}}.
+
+* Report Usage
+
+  The plugin also offers a reporting view; it makes no changes to your project,
+  but makes it easy for reviewers to survey available updates without even having
+  to launch Maven themselves. Updates are further categorized as major, minor, and
+  incremental, to make it easier to decide which updates to take.
+  
+  To add this report to your project's site, add the following snippet to your POM:
+  
++---+
+<reporting>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>versions-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</reporting>
++---+
