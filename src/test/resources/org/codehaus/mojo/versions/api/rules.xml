@@ -1,0 +1,8 @@
+<ruleset comparisonMethod="maven">
+  <rules>
+    <rule groupId="*.maven" comparisonMethod="mercury"/>
+    <rule groupId="com.mycompany" comparisonMethod="numeric"/>
+    <rule groupId="com.mycompany.maven" comparisonMethod="maven"/>
+    <rule groupId="com.mycompany.maven" artifactId="old-maven-plugin" comparisonMethod="mercury"/>
+  </rules>
+</ruleset>

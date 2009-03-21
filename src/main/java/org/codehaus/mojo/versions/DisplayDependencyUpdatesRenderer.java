@@ -19,15 +19,15 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
 import org.codehaus.mojo.versions.DisplayDependencyUpdatesReport.MultiVersionSummary;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * This class renders the version information gathered by DisplayDependencyUpdatesReport.
@@ -46,14 +46,14 @@ public class DisplayDependencyUpdatesRenderer
      */
     public DisplayDependencyUpdatesRenderer( Sink sink, Map availableVersions, Comparator comparator )
     {
-        super( sink );
+        super( (org.codehaus.doxia.sink.Sink) sink );
         this.availableVersions = availableVersions;
         this.comparator = comparator;
     }
 
     public String getTitle()
     {
-        return "Dependency Updates";
+        return "Dependency ArtifactVersions";
     }
 
     protected void renderBody()

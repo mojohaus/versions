@@ -53,6 +53,7 @@ import org.apache.maven.project.interpolation.ModelInterpolationException;
 import org.apache.maven.project.interpolation.ModelInterpolator;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.ReflectionUtils;
 import org.codehaus.plexus.util.StringUtils;
@@ -140,9 +141,7 @@ public class DisplayPluginUpdatesMojo
      */
     private PluginManager pluginManager;
 
-    private static final String APACHE_MAVEN_PLUGINS_GROUPID = "org.apache.maven.plugins";
-
-// --------------------- GETTER / SETTER METHODS ---------------------
+    // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
      * Returns the pluginManagement section of the super-pom.
@@ -320,7 +319,7 @@ public class DisplayPluginUpdatesMojo
 
             Artifact artifact = artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
 
-            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null );
+            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null, true );
 
             String newVersion;
 
@@ -341,7 +340,7 @@ public class DisplayPluginUpdatesMojo
                 version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
                 newVersion = version != null ? version : artifactVersion.toString();
                 StringBuffer buf = new StringBuffer();
-                if ( APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
+                if ( PomHelper.APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
                 {
                     // a core plugin... group id is not needed
                 }
@@ -376,7 +375,7 @@ public class DisplayPluginUpdatesMojo
                 && new DefaultArtifactVersion( version ).compareTo( new DefaultArtifactVersion( newVersion ) ) < 0 )
             {
                 StringBuffer buf = new StringBuffer();
-                if ( APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
+                if ( PomHelper.APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
                 {
                     // a core plugin... group id is not needed
                 }
@@ -511,7 +510,7 @@ public class DisplayPluginUpdatesMojo
                     {
                         if ( curState.groupId == null )
                         {
-                            curState.groupId = APACHE_MAVEN_PLUGINS_GROUPID;
+                            curState.groupId = PomHelper.APACHE_MAVEN_PLUGINS_GROUPID;
                         }
                         result.add( curState.groupId + ":" + curState.artifactId );
                     }

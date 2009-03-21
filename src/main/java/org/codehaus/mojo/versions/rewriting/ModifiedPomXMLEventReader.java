@@ -19,6 +19,10 @@ package org.codehaus.mojo.versions.rewriting;
  * under the License.
  */
 
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.model.Model;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -26,6 +30,8 @@ import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.StringReader;
+import java.io.IOException;
 
 /**
  * Represents the modified pom file. Note: implementations of the StAX API (JSR-173) are not good round-trip rewriting
@@ -572,6 +578,13 @@ public class ModifiedPomXMLEventReader
         }
         markEnd[index] += delta;
         modified = true;
+    }
+
+    public Model parse()
+        throws IOException, XmlPullParserException
+    {
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        return reader.read( new StringReader(pom.toString()) );
     }
 
 }

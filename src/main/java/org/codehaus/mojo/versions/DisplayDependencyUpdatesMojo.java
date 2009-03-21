@@ -94,11 +94,11 @@ public class DisplayDependencyUpdatesMojo
                                                                           dependency.getClassifier(),
                                                                           dependency.getScope() );
 
-            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null );
+            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null, false );
 
             DefaultArtifactVersion currentVersion = new DefaultArtifactVersion( version );
 
-            if ( artifactVersion != null && getVersionComparator().compare( currentVersion, artifactVersion ) < 0 )
+            if ( artifactVersion != null && getHelper().getVersionComparator( artifact ).compare( currentVersion, artifactVersion ) < 0 )
             {
                 String newVersion = artifactVersion.toString();
                 StringBuffer buf = new StringBuffer();

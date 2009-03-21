@@ -26,7 +26,12 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.model.Model;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.RegexUtils;
+import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
@@ -35,7 +40,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.regex.Pattern;
+import java.io.IOException;
 
 /**
  * Sets properties to the latest versions of specific artifacts.
@@ -51,27 +59,6 @@ public class UpdatePropertiesMojo
 {
 
 // ------------------------------ FIELDS ------------------------------
-
-    /**
-     * The end of a regex literal sequence.
-     *
-     * @since 1.0-alpha-1
-     */
-    private static final String REGEX_QUOTE_END = "\\E";
-
-    /**
-     * The start of a regex literal sequence.
-     *
-     * @since 1.0-alpha-1
-     */
-    private static final String REGEX_QUOTE_START = "\\Q";
-
-    /**
-     * Escape the escapes.
-     *
-     * @since 1.0-alpha-1
-     */
-    private static final String REGEX_QUOTE_END_ESCAPED = REGEX_QUOTE_END + '\\' + REGEX_QUOTE_END + REGEX_QUOTE_START;
 
     /**
      * The properties to update and the artifact coordinates that they are to be updated from.
@@ -107,48 +94,7 @@ public class UpdatePropertiesMojo
 
 // -------------------------- STATIC METHODS --------------------------
 
-    /**
-     * Takes a string and returns the regex that will match that string exactly.
-     *
-     * @param s The string to match.
-     * @return The regex that will match the string exactly.
-     * @since 1.0-alpha-1
-     */
-    private static String quote( String s )
-    {
-        int i = s.indexOf( REGEX_QUOTE_END );
-        if ( i == -1 )
-        {
-            // we're safe as nobody has a crazy \E in the string
-            return REGEX_QUOTE_START + s + REGEX_QUOTE_END;
-        }
-
-        // damn there's at least one \E in the string
-        StringBuffer sb = new StringBuffer( s.length() + 32 );
-        // each escape-escape takes 10 chars...
-        // hope there's less than 4 of them
-
-        sb.append( REGEX_QUOTE_START );
-        int pos = 0;
-        do
-        {
-            // we are safe from pos to i
-            sb.append( s.substring( pos, i ) );
-            // now escape-escape
-            sb.append( REGEX_QUOTE_END_ESCAPED );
-            // move the working start
-            pos = i + REGEX_QUOTE_END.length();
-            i = s.indexOf( REGEX_QUOTE_END, pos );
-        }
-        while ( i != -1 );
-
-        sb.append( s.substring( pos, s.length() ) );
-        sb.append( REGEX_QUOTE_END );
-
-        return sb.toString();
-    }
-
-// -------------------------- OTHER METHODS --------------------------
+    // -------------------------- OTHER METHODS --------------------------
 
     /**
      * @param pom the pom to update.
@@ -457,7 +403,7 @@ public class UpdatePropertiesMojo
             Artifact artifact = artifactFactory.createDependencyArtifact( item.getGroupId(), item.getArtifactId(),
                                                                           versionRange, "pom", null, null );
 
-            ArtifactVersion newVer = findLatestVersion( artifact, versionRange, item.getAllowSnapshots() );
+            ArtifactVersion newVer = findLatestVersion( artifact, versionRange, item.getAllowSnapshots(), false );
 
             if ( !shouldApplyUpdate( artifact, curVer, newVer ) )
             {
@@ -469,7 +415,7 @@ public class UpdatePropertiesMojo
 
             Pattern pathRegex = Pattern.compile( new StringBuffer()
                 .append( "/project/properties(?:/profiles/profile)?/" )
-                .append( quote( item.getProperty() ) )
+                .append( RegexUtils.quote( item.getProperty() ) )
                 .toString() );
 
             pom.rewind(); // fixes MVERSIONS-8

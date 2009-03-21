@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import junit.framework.TestCase;
+import org.codehaus.mojo.versions.ordering.NumericVersionComparator;
 
 /**
  * Basic tests for {@linkplain org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo}.
@@ -30,8 +31,7 @@ public class AbstractVersionsUpdaterMojoTest
     extends TestCase
 {
 
-    private AbstractVersionsUpdaterMojo.NumericVersionComparator instance =
-        new AbstractVersionsUpdaterMojo.NumericVersionComparator();
+    private NumericVersionComparator instance = new NumericVersionComparator();
 
     /**
      * Basic test.

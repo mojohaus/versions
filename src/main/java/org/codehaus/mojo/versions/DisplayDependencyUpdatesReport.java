@@ -19,7 +19,13 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.io.File;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.reporting.MavenReport;
+import org.codehaus.mojo.versions.ordering.VersionComparators;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -27,34 +33,22 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.reporting.MavenReport;
-import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.doxia.sink.Sink;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
 /**
  * This report summarizes all project dependencies for which newer versions may exist. For convenience, the new versions
  * are segregated by incremental, minor, and major changes, since each tends to have a different level of effort (and
  * risk) involved when upgrading.
  *
- * @author Matthew Beermann <matthew.beermann@cerner.com>
+ * @author <a href="mailto:matthew.beermann@cerner.com">Matthew Beermann</a>
+ * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
  * @goal display-dependency-updates-report
  * @requiresDependencyResolution runtime
  * @requiresProject true
  * @since 1.0-alpha-3
  */
 public class DisplayDependencyUpdatesReport
-    extends AbstractVersionsUpdaterMojo
-    implements MavenReport
+    extends AbstractVersionsReport
 {
+
     /**
      * A list of groupId:artifactId keys, which indicate that the corresponding artifact(s) should be omitted from the
      * report (even when showAll is true). For example:<br/>
@@ -67,14 +61,6 @@ public class DisplayDependencyUpdatesReport
     protected ArrayList excludes;
 
     /**
-     * Directory where reports will go.
-     *
-     * @parameter expression="${project.reporting.outputDirectory}"
-     * @required
-     */
-    protected File reportOutputDirectory;
-
-    /**
      * If true, show <i>all</i> unexcluded dependencies in the report - even those that have no updates available.
      *
      * @parameter expression="${showAll}" default-value="false"
@@ -82,19 +68,18 @@ public class DisplayDependencyUpdatesReport
      */
     protected Boolean showAll;
 
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public boolean canGenerateReport()
     {
         return true;
     }
 
-    public void generate( Sink sink, Locale locale )
-        throws MavenReportException
+    /**
+     * generates the report.
+     *
+     * @param locale the locale to generate the report for.
+     * @param sink   the report formatting tool.
+     */
+    protected void doGenerateReport( Locale locale, org.apache.maven.doxia.sink.Sink sink )
     {
         Map artifacts = new TreeMap();
         for ( Iterator it = getProject().getArtifacts().iterator(); it.hasNext(); )
@@ -111,19 +96,19 @@ public class DisplayDependencyUpdatesReport
                 // Find the latest version, accepting major changes
                 // Range: [current,)
                 ArtifactVersion latestMajor = findLatestVersion( artifact, VersionRange.createFromVersionSpec(
-                    "[" + artifact.getVersion() + ",)" ), allowSnapshots );
+                    "[" + artifact.getVersion() + ",)" ), getAllowSnapshots(), false );
 
                 // Find the latest version, accepting minor changes
                 // Range: [current, (currentMajor+1).0.0)
                 ArtifactVersion latestMinor = findLatestVersion( artifact, VersionRange.createFromVersionSpec(
                     "[" + artifact.getVersion() + "," + ( currentVersion.getMajorVersion() + 1 ) + ".0.0)" ),
-                                                                 allowSnapshots );
+                                                                 getAllowSnapshots(), false );
 
                 // Find the latest version, accepting incremental changes
                 // Range: [current, (currentMajor).(currentMinor+1).0)
                 ArtifactVersion latestIncremental = findLatestVersion( artifact, VersionRange.createFromVersionSpec(
                     "[" + artifact.getVersion() + "," + currentVersion.getMajorVersion() + "."
-                        + ( currentVersion.getMinorVersion() + 1 ) + ".0)" ), allowSnapshots );
+                        + ( currentVersion.getMinorVersion() + 1 ) + ".0)" ), getAllowSnapshots(), false );
 
                 // Add the results of our search to the collection
                 MultiVersionSummary summary =
@@ -141,8 +126,9 @@ public class DisplayDependencyUpdatesReport
         }
 
         // Last but not least, send everything we've gathered off to be rendered
-        DisplayDependencyUpdatesRenderer renderer =
-            new DisplayDependencyUpdatesRenderer( sink, artifacts, getVersionComparator() );
+        DisplayDependencyUpdatesRenderer renderer = new DisplayDependencyUpdatesRenderer( sink, artifacts,
+                                                                                          VersionComparators.getVersionComparator(
+                                                                                              getComparisonMethod() ) );
         renderer.render();
     }
 
@@ -158,17 +144,12 @@ public class DisplayDependencyUpdatesReport
 
     public String getName( Locale locale )
     {
-        return "Dependency Updates";
+        return "Dependency ArtifactVersions";
     }
 
     public String getOutputName()
     {
-        return "versions";
-    }
-
-    public File getReportOutputDirectory()
-    {
-        return reportOutputDirectory;
+        return "dependency-updates-report";
     }
 
     protected boolean hasUpdates( MultiVersionSummary summary )
@@ -187,7 +168,7 @@ public class DisplayDependencyUpdatesReport
         }
 
         // Are any of the versions we found larger than the one we have now?
-        Comparator comparator = getVersionComparator();
+        Comparator comparator = VersionComparators.getVersionComparator( getComparisonMethod() );
         if ( summary.getLatestIncremental() != null
             && comparator.compare( currentVersion, summary.getLatestIncremental() ) < 0 )
         {
@@ -227,11 +208,6 @@ public class DisplayDependencyUpdatesReport
     public boolean isExternalReport()
     {
         return false;
-    }
-
-    public void setReportOutputDirectory( File reportOutputDirectory )
-    {
-        this.reportOutputDirectory = reportOutputDirectory;
     }
 
     protected static class MultiVersionSummary
