@@ -104,8 +104,18 @@ public class PomHelper
         }
     }
 
+    /**
+     * Searches the pom re-defining the specified property to the specified version.
+     *
+     * @param pom       The pom to modify.
+     * @param profileId The profile in which to modify the property.
+     * @param property  The property to modify.
+     * @param value     The new value of the property.
+     * @return <code>true</code> if a replacement was made.
+     * @throws XMLStreamException if somethinh went wrong.
+     */
     public static boolean setPropertyVersion( final ModifiedPomXMLEventReader pom, final String profileId,
-                                              final String propertyName, final String value )
+                                              final String property, final String value )
         throws XMLStreamException
     {
         pom.rewind();
@@ -118,14 +128,13 @@ public class PomHelper
         boolean madeReplacement = false;
         if ( profileId == null )
         {
-            propertyRegex = Pattern.compile( "/project/properties/" + RegexUtils.quote( propertyName ) );
+            propertyRegex = Pattern.compile( "/project/properties/" + RegexUtils.quote( property ) );
             matchScopeRegex = Pattern.compile( "/project/properties" );
             projectProfileId = null;
         }
         else
         {
-            propertyRegex =
-                Pattern.compile( "/project/profiles/profile/properties/" + RegexUtils.quote( propertyName ) );
+            propertyRegex = Pattern.compile( "/project/profiles/profile/properties/" + RegexUtils.quote( property ) );
             matchScopeRegex = Pattern.compile( "/project/profiles/profile" );
             projectProfileId = Pattern.compile( "/project/profiles/profile/id" );
         }
@@ -173,9 +182,9 @@ public class PomHelper
                     {
                         pom.replaceBetween( 0, 1, value );
                         madeReplacement = true;
-                        pom.clearMark( 0 );
-                        pom.clearMark( 1 );
                     }
+                    pom.clearMark( 0 );
+                    pom.clearMark( 1 );
                     inMatchScope = false;
                 }
                 path = (String) stack.pop();
@@ -184,6 +193,123 @@ public class PomHelper
         return madeReplacement;
     }
 
+    /**
+     * Searches the pom re-defining the project version to the specified version.
+     *
+     * @param pom   The pom to modify.
+     * @param value The new value of the property.
+     * @return <code>true</code> if a replacement was made.
+     * @throws XMLStreamException if somethinh went wrong.
+     */
+    public static boolean setProjectVersion( final ModifiedPomXMLEventReader pom, final String value )
+        throws XMLStreamException
+    {
+        pom.rewind();
+        Stack stack = new Stack();
+        String path = "";
+        final Pattern matchScopeRegex;
+        boolean madeReplacement = false;
+        matchScopeRegex = Pattern.compile( "/project/version" );
+
+        pom.rewind();
+
+        while ( pom.hasNext() )
+        {
+            XMLEvent event = pom.nextEvent();
+            if ( event.isStartElement() )
+            {
+                stack.push( path );
+                path = new StringBuffer().append( path ).append( "/" ).append(
+                    event.asStartElement().getName().getLocalPart() ).toString();
+
+                if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    pom.mark( 0 );
+                }
+            }
+            if ( event.isEndElement() )
+            {
+                if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    pom.mark( 1 );
+                    if ( pom.hasMark( 0 ) && pom.hasMark( 1 ) )
+                    {
+                        pom.replaceBetween( 0, 1, value );
+                        madeReplacement = true;
+                    }
+                    pom.clearMark( 0 );
+                    pom.clearMark( 1 );
+                }
+                path = (String) stack.pop();
+            }
+        }
+        return madeReplacement;
+    }
+
+    /**
+     * Searches the pom re-defining the project version to the specified version.
+     *
+     * @param pom   The pom to modify.
+     * @param value The new value of the property.
+     * @return <code>true</code> if a replacement was made.
+     * @throws XMLStreamException if somethinh went wrong.
+     */
+    public static boolean setProjectParentVersion( final ModifiedPomXMLEventReader pom, final String value )
+        throws XMLStreamException
+    {
+        pom.rewind();
+        Stack stack = new Stack();
+        String path = "";
+        final Pattern matchScopeRegex;
+        boolean madeReplacement = false;
+        matchScopeRegex = Pattern.compile( "/project/parent/version" );
+
+        pom.rewind();
+
+        while ( pom.hasNext() )
+        {
+            XMLEvent event = pom.nextEvent();
+            if ( event.isStartElement() )
+            {
+                stack.push( path );
+                path = new StringBuffer().append( path ).append( "/" ).append(
+                    event.asStartElement().getName().getLocalPart() ).toString();
+
+                if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    pom.mark( 0 );
+                }
+            }
+            if ( event.isEndElement() )
+            {
+                if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    pom.mark( 1 );
+                    if ( pom.hasMark( 0 ) && pom.hasMark( 1 ) )
+                    {
+                        pom.replaceBetween( 0, 1, value );
+                        madeReplacement = true;
+                    }
+                    pom.clearMark( 0 );
+                    pom.clearMark( 1 );
+                }
+                path = (String) stack.pop();
+            }
+        }
+        return madeReplacement;
+    }
+
+    /**
+     * Searches the pom re-defining the specified dependency to the specified version.
+     *
+     * @param pom        The pom to modify.
+     * @param groupId    The groupId of the dependency.
+     * @param artifactId The artifactId of the dependency.
+     * @param oldVersion The old version of the dependency.
+     * @param newVersion The new version of the dependency.
+     * @return <code>true</code> if a replacement was made.
+     * @throws XMLStreamException if somethinh went wrong.
+     */
     public static boolean setDependencyVersion( final ModifiedPomXMLEventReader pom, final String groupId,
                                                 final String artifactId, final String oldVersion,
                                                 final String newVersion )
@@ -260,6 +386,110 @@ public class PomHelper
                 {
                     if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) && haveGroupId && haveArtifactId
                         && haveOldVersion )
+                    {
+                        pom.replaceBetween( 0, 1, newVersion );
+                        madeReplacement = true;
+                    }
+                    pom.clearMark( 0 );
+                    pom.clearMark( 1 );
+                    haveArtifactId = false;
+                    haveGroupId = false;
+                    haveOldVersion = false;
+                    inMatchScope = false;
+                }
+                path = (String) stack.pop();
+            }
+        }
+        return madeReplacement;
+    }
+
+    /**
+     * Searches the pom re-defining the specified plugin to the specified version.
+     *
+     * @param pom        The pom to modify.
+     * @param groupId    The groupId of the dependency.
+     * @param artifactId The artifactId of the dependency.
+     * @param oldVersion The old version of the dependency.
+     * @param newVersion The new version of the dependency.
+     * @return <code>true</code> if a replacement was made.
+     * @throws XMLStreamException if somethinh went wrong.
+     */
+    public static boolean setPluginVersion( final ModifiedPomXMLEventReader pom, final String groupId,
+                                            final String artifactId, final String oldVersion, final String newVersion )
+        throws XMLStreamException
+    {
+        pom.rewind();
+        Stack stack = new Stack();
+        String path = "";
+        final Pattern matchScopeRegex;
+        final Pattern matchTargetRegex;
+        boolean inMatchScope = false;
+        boolean madeReplacement = false;
+        boolean haveGroupId = false;
+        boolean needGroupId = groupId != null && !APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId );
+        boolean haveArtifactId = false;
+        boolean haveOldVersion = false;
+
+        matchScopeRegex = Pattern.compile(
+            "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin" );
+
+        matchTargetRegex = Pattern.compile(
+            "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin"
+                + "((/groupId)|(/artifactId)|(/version))" );
+
+        pom.rewind();
+
+        while ( pom.hasNext() )
+        {
+            XMLEvent event = pom.nextEvent();
+            if ( event.isStartElement() )
+            {
+                stack.push( path );
+                final String elementName = event.asStartElement().getName().getLocalPart();
+                path = new StringBuffer().append( path ).append( "/" ).append( elementName ).toString();
+
+                if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    // we're in a new match scope
+                    // reset any previous partial matches
+                    inMatchScope = true;
+                    pom.clearMark( 0 );
+                    pom.clearMark( 1 );
+
+                    haveGroupId = false;
+                    haveArtifactId = false;
+                    haveOldVersion = false;
+                }
+                else if ( inMatchScope && matchTargetRegex.matcher( path ).matches() )
+                {
+                    if ( "groupId".equals( elementName ) )
+                    {
+                        haveGroupId = groupId.equals( pom.getElementText().trim() );
+                        path = (String) stack.pop();
+                    }
+                    else if ( "artifactId".equals( elementName ) )
+                    {
+                        haveArtifactId = artifactId.equals( pom.getElementText().trim() );
+                        path = (String) stack.pop();
+                    }
+                    else if ( "version".equals( elementName ) )
+                    {
+                        pom.mark( 0 );
+                    }
+                }
+            }
+            if ( event.isEndElement() )
+            {
+                if ( matchTargetRegex.matcher( path ).matches() && "version".equals(
+                    event.asEndElement().getName().getLocalPart() ) )
+                {
+                    pom.mark( 1 );
+                    haveOldVersion = oldVersion.equals( pom.getBetween( 0, 1 ).trim() );
+                }
+                else if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) && ( haveGroupId || !needGroupId )
+                        && haveArtifactId && haveOldVersion )
                     {
                         pom.replaceBetween( 0, 1, newVersion );
                         madeReplacement = true;
