@@ -361,7 +361,7 @@ public class PomHelper
     {
         Stack stack = new Stack();
         String path = "";
-        final Pattern matchScopeRegex = Pattern.compile( "/project/parent/((/groupId)|(/artifactId)|(/version))" );
+        final Pattern matchScopeRegex = Pattern.compile( "/project/parent((/groupId)|(/artifactId)|(/version))" );
         String groupId = null;
         String artifactId = null;
         String version = null;
@@ -379,7 +379,6 @@ public class PomHelper
 
                 if ( matchScopeRegex.matcher( path ).matches() )
                 {
-                    path = (String) stack.pop();
                     if ( "groupId".equals( elementName ) )
                     {
                         groupId = pom.getElementText().trim();
