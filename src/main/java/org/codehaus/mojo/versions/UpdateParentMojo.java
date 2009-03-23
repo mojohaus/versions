@@ -26,6 +26,7 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.api.PomHelper;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
@@ -110,40 +111,9 @@ public class UpdateParentMojo
 
         getLog().info( "Updating parent from " + currentVersion + " to " + artifactVersion.toString() );
 
-        Stack stack = new Stack();
-        String path = "";
-
-        while ( pom.hasNext() )
+        if ( PomHelper.setProjectParentVersion( pom, artifactVersion.toString() ) )
         {
-            XMLEvent event = pom.nextEvent();
-            if ( event.isStartElement() )
-            {
-                stack.push( path );
-                path = new StringBuffer()
-                    .append( path )
-                    .append( "/" )
-                    .append( event.asStartElement().getName().getLocalPart() )
-                    .toString();
-
-                if ( "/project/parent/version".equals( path ) )
-                {
-                    pom.mark( 0 );
-                }
-            }
-            if ( event.isEndElement() )
-            {
-                if ( "/project/parent/version".equals( path ) )
-                {
-                    pom.mark( 1 );
-                    if ( pom.hasMark( 0 ) )
-                    {
-                        pom.replaceBetween( 0, 1, artifactVersion.toString() );
-                        getLog().debug( "Made an update from " + currentVersion + " to " + artifactVersion.toString() );
-                        return;
-                    }
-                }
-                path = (String) stack.pop();
-            }
+            getLog().debug( "Made an update from " + currentVersion + " to " + artifactVersion.toString() );
         }
     }
 
