@@ -486,6 +486,17 @@ public class ModifiedPomXMLEventReader
         return markStart[index] != -1;
     }
 
+    public String getBetween(int index1, int index2) {
+        if ( !hasMark( index1 ) || !hasMark( index2 ) || markStart[index1] > markStart[index2] )
+        {
+            throw new IllegalStateException();
+        }
+        int start = markDelta[index1] + markEnd[index1];
+        int end = markDelta[index2] + markStart[index2];
+        return pom.substring( start, end ) ;
+        
+    }
+    
     /**
      * Replaces all content between marks index1 and index2 with the replacement text.
      *
