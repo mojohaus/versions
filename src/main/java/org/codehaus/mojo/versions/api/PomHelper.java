@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.api;
 */
 
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
@@ -27,6 +28,7 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
@@ -38,6 +40,7 @@ import javax.xml.stream.events.XMLEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.File;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -47,6 +50,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
@@ -118,7 +122,6 @@ public class PomHelper
                                               final String property, final String value )
         throws XMLStreamException
     {
-        pom.rewind();
         Stack stack = new Stack();
         String path = "";
         final Pattern propertyRegex;
@@ -204,7 +207,6 @@ public class PomHelper
     public static boolean setProjectVersion( final ModifiedPomXMLEventReader pom, final String value )
         throws XMLStreamException
     {
-        pom.rewind();
         Stack stack = new Stack();
         String path = "";
         final Pattern matchScopeRegex;
@@ -247,6 +249,54 @@ public class PomHelper
     }
 
     /**
+     * Retrieves the project version from the pom.
+     *
+     * @param pom The pom.
+     * @return the project version or <code>null</code> if the project version is not defined (i.e. inherited from parent version).
+     * @throws XMLStreamException if something went wrong.
+     */
+    public static String getProjectVersion( final ModifiedPomXMLEventReader pom )
+        throws XMLStreamException
+    {
+        Stack stack = new Stack();
+        String path = "";
+        final Pattern matchScopeRegex = Pattern.compile( "/project/version" );
+
+        pom.rewind();
+
+        while ( pom.hasNext() )
+        {
+            XMLEvent event = pom.nextEvent();
+            if ( event.isStartElement() )
+            {
+                stack.push( path );
+                path = new StringBuffer().append( path ).append( "/" ).append(
+                    event.asStartElement().getName().getLocalPart() ).toString();
+
+                if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    pom.mark( 0 );
+                }
+            }
+            if ( event.isEndElement() )
+            {
+                if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    pom.mark( 1 );
+                    if ( pom.hasMark( 0 ) && pom.hasMark( 1 ) )
+                    {
+                        return pom.getBetween( 0, 1 ).trim();
+                    }
+                    pom.clearMark( 0 );
+                    pom.clearMark( 1 );
+                }
+                path = (String) stack.pop();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Searches the pom re-defining the project version to the specified version.
      *
      * @param pom   The pom to modify.
@@ -257,7 +307,6 @@ public class PomHelper
     public static boolean setProjectParentVersion( final ModifiedPomXMLEventReader pom, final String value )
         throws XMLStreamException
     {
-        pom.rewind();
         Stack stack = new Stack();
         String path = "";
         final Pattern matchScopeRegex;
@@ -300,6 +349,68 @@ public class PomHelper
     }
 
     /**
+     * Gets the parent artifact from the pom.
+     *
+     * @param pom    The pom.
+     * @param helper The helper (used to create the artifact).
+     * @return The parent artifact or <code>null</code> if no parent is specified.
+     * @throws XMLStreamException if something went wrong.
+     */
+    public static Artifact getProjectParent( final ModifiedPomXMLEventReader pom, VersionsHelper helper )
+        throws XMLStreamException
+    {
+        Stack stack = new Stack();
+        String path = "";
+        final Pattern matchScopeRegex = Pattern.compile( "/project/parent/((/groupId)|(/artifactId)|(/version))" );
+        String groupId = null;
+        String artifactId = null;
+        String version = null;
+
+        pom.rewind();
+
+        while ( pom.hasNext() )
+        {
+            XMLEvent event = pom.nextEvent();
+            if ( event.isStartElement() )
+            {
+                stack.push( path );
+                final String elementName = event.asStartElement().getName().getLocalPart();
+                path = new StringBuffer().append( path ).append( "/" ).append( elementName ).toString();
+
+                if ( matchScopeRegex.matcher( path ).matches() )
+                {
+                    path = (String) stack.pop();
+                    if ( "groupId".equals( elementName ) )
+                    {
+                        groupId = pom.getElementText().trim();
+                        path = (String) stack.pop();
+                    }
+                    else if ( "artifactId".equals( elementName ) )
+                    {
+                        artifactId = pom.getElementText().trim();
+                        path = (String) stack.pop();
+                    }
+                    else if ( "version".equals( elementName ) )
+                    {
+                        version = pom.getElementText().trim();
+                        path = (String) stack.pop();
+                    }
+                }
+            }
+            if ( event.isEndElement() )
+            {
+                path = (String) stack.pop();
+            }
+        }
+        if ( groupId == null || artifactId == null || version == null )
+        {
+            return null;
+        }
+        return helper.createDependencyArtifact( groupId, artifactId, VersionRange.createFromVersion( version ), "pom",
+                                                null, null, false );
+    }
+
+    /**
      * Searches the pom re-defining the specified dependency to the specified version.
      *
      * @param pom        The pom to modify.
@@ -315,7 +426,6 @@ public class PomHelper
                                                 final String newVersion )
         throws XMLStreamException
     {
-        pom.rewind();
         Stack stack = new Stack();
         String path = "";
         final Pattern matchScopeRegex;
@@ -418,7 +528,6 @@ public class PomHelper
                                             final String artifactId, final String oldVersion, final String newVersion )
         throws XMLStreamException
     {
-        pom.rewind();
         Stack stack = new Stack();
         String path = "";
         final Pattern matchScopeRegex;
@@ -782,5 +891,91 @@ public class PomHelper
                 i.remove();
             }
         }
+    }
+
+    /**
+     * Returns a set of all child modules for a project, including any defined in profiles (ignoring profile
+     * activation).
+     *
+     * @param project The project.
+     * @param logger
+     * @return the set of all child modules of the project.
+     */
+    public static Set getAllChildModules( MavenProject project, Log logger )
+    {
+        logger.debug( "Finding child modules..." );
+        Set childModules = new TreeSet();
+        childModules.addAll( project.getOriginalModel().getModules() );
+        Iterator i = project.getOriginalModel().getProfiles().iterator();
+        while ( i.hasNext() )
+        {
+            Profile profile = (Profile) i.next();
+            childModules.addAll( profile.getModules() );
+        }
+        debugModules( logger, "Child modules:", childModules );
+        return childModules;
+    }
+
+    /**
+     * Outputs a debug message with a list of modules.
+     *
+     * @param logger  The logger to log to.
+     * @param message The message to display.
+     * @param modules The modules to append to the message.
+     */
+    public static void debugModules( Log logger, String message, Collection modules )
+    {
+        Iterator i;
+        if ( logger.isDebugEnabled() )
+        {
+            logger.debug( message );
+            if ( modules.isEmpty() )
+            {
+                logger.debug( "None." );
+            }
+            else
+            {
+                i = modules.iterator();
+                while ( i.hasNext() )
+                {
+                    logger.debug( "  " + i.next() );
+                }
+            }
+
+        }
+    }
+
+    /**
+     * Modifies the collection of child modules removing those which cannot be found relative to the parent.
+     *
+     * @param logger       The logger to log to.
+     * @param project      the project.
+     * @param childModules the child modules.
+     */
+    public static void removeMissingChildModules( Log logger, MavenProject project, Collection childModules )
+    {
+        logger.debug( "Removing child modules which are missing..." );
+        Iterator i = childModules.iterator();
+        while ( i.hasNext() )
+        {
+            String modulePath = (String) i.next();
+            File moduleFile = new File( project.getBasedir(), modulePath );
+
+            if ( moduleFile.isDirectory() && new File( moduleFile, "pom.xml" ).isFile() )
+            {
+                // it's a directory that exists
+                continue;
+            }
+
+            if ( moduleFile.isFile() )
+            {
+                // it's the pom.xml file directly referenced and it exists.
+                continue;
+            }
+
+            logger.debug( "Removing missing child module " + modulePath );
+            i.remove();
+        }
+        debugModules( logger, "After removing missing", childModules );
     }
 }
