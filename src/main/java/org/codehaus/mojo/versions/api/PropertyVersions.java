@@ -190,6 +190,11 @@ public class PropertyVersions
             + '\'' + ", associations=" + associations + '}';
     }
 
+    public void clearAssociations()
+    {
+        associations.clear();
+    }
+
     private static final class DefaultArtifactAssociation
         implements Comparable, ArtifactAssocation
     {

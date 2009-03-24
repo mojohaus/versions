@@ -20,22 +20,24 @@ package org.codehaus.mojo.versions.api;
  */
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.UnsupportedProtocolException;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
@@ -394,5 +396,16 @@ public class DefaultVersionsHelper
     {
         return artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, type, classifier, scope,
                                                          optional );
+    }
+
+    public Artifact createDependencyArtifact( Dependency dependency )
+        throws InvalidVersionSpecificationException
+    {
+        return createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(),
+                                         dependency.getVersion() == null
+                                             ? VersionRange.createFromVersionSpec( "[0,]" )
+                                             : VersionRange.createFromVersionSpec( dependency.getVersion() ),
+                                         dependency.getType(), dependency.getClassifier(), dependency.getScope(),
+                                         dependency.isOptional() );
     }
 }

@@ -32,14 +32,18 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.codehaus.stax2.XMLInputFactory2;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -179,6 +183,21 @@ public abstract class AbstractVersionsUpdaterMojo
      * Our versions helper.
      */
     private VersionsHelper helper;
+
+    /**
+     * The Maven Project.
+     *
+     * @parameter expression="${session}"
+     * @required
+     * @readonly
+     * @since 1.0-alpha-1
+     */
+    protected MavenSession session;
+
+    /**
+     * @component
+     */
+    protected PathTranslator pathTranslator;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -443,4 +462,8 @@ public abstract class AbstractVersionsUpdaterMojo
         return true;
     }
 
+    protected ExpressionEvaluator getExpressionEvaluator()
+    {
+        return new VersionsExpressionEvaluator( session, pathTranslator, project );
+    }
 }

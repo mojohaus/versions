@@ -24,26 +24,26 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.model.Model;
+import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.RegexUtils;
-import org.codehaus.mojo.versions.api.PropertyVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.regex.Pattern;
-import java.io.IOException;
 
 /**
  * Sets properties to the latest versions of specific artifacts.
@@ -61,12 +61,12 @@ public class UpdatePropertiesMojo
 // ------------------------------ FIELDS ------------------------------
 
     /**
-     * The properties to update and the artifact coordinates that they are to be updated from.
+     * Any restrictions that apply to specific properties.
      *
      * @parameter
-     * @since 1.0-alpha-1
+     * @since 1.0-alpha-3
      */
-    private LinkItem[] linkItems;
+    private Property[] properties;
 
     /**
      * A comma separated list of properties to update.
@@ -107,359 +107,132 @@ public class UpdatePropertiesMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        LinkItem[] items;
+        final PropertyVersions[] propertyVersions;
+        try
+        {
+            propertyVersions = PomHelper.getPropertyVersions( getHelper(), getProject(), getExpressionEvaluator() );
+        }
+        catch ( ExpressionEvaluationException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
+
+        Map properties = new HashMap();
+        if ( this.properties != null )
+        {
+            for ( int i = 0; i < this.properties.length; i++ )
+            {
+                properties.put( this.properties[i].getName(), this.properties[i] );
+            }
+        }
+        Map versions = new HashMap();
         if ( autoLinkItems == null || Boolean.TRUE.equals( autoLinkItems ) )
         {
-            Map properties = new HashMap();
-            if ( this.linkItems != null )
+            for ( int i = 0; i < propertyVersions.length; i++ )
             {
-                for ( int i = 0; i < this.linkItems.length; i++ )
+                versions.put( propertyVersions[i].getName(), propertyVersions[i] );
+                if ( !properties.containsKey( propertyVersions[i].getName() ) )
                 {
-                    properties.put( this.linkItems[i].getProperty(), this.linkItems[i] );
+                    properties.put( propertyVersions[i].getName(), new Property( propertyVersions[i] ) );
                 }
             }
-            getLog().info( "Searching for properties to update" );
-            Map localDependencies = new HashMap();
-            Set localProperties = new HashSet();
-            Stack stack = new Stack();
-            String path = "";
-            String groupId = null;
-            String artifactId = null;
-            String property = null;
-            String versions = null;
-            Pattern dependencyPathMatcher = Pattern.compile(
-                "/project(/profiles/profile)?((/dependencyManagement)?|(/build(/pluginManagement)?/plugins/plugin))/dependencies/dependency/(groupId|artifactId|version)" );
-            Pattern propertyPathMatcher = Pattern.compile( "/project(/profiles/profile)?/properties/[^/]*" );
-            while ( pom.hasNext() )
-            {
-                XMLEvent event = pom.nextEvent();
-                if ( event.isStartDocument() )
-                {
-                    path = "";
-                    stack.clear();
-                }
-                else if ( event.isStartElement() )
-                {
-                    stack.push( path );
-
-                    path = path + "/" + event.asStartElement().getName().getLocalPart();
-
-                    if ( dependencyPathMatcher.matcher( path ).matches() )
-                    {
-                        String text = pom.getElementText().trim();
-                        if ( path.endsWith( "groupId" ) )
-                        {
-                            groupId = text;
-                        }
-                        else if ( path.endsWith( "artifactId" ) )
-                        {
-                            artifactId = text;
-                        }
-                        else if ( path.endsWith( "version" ) )
-                        {
-                            int start = text.indexOf( "${" );
-                            int middle = text.indexOf( "${", start + 1 );
-                            int end = text.lastIndexOf( "}" );
-                            if ( start != -1 && end != -1 && end > start && middle == -1 )
-                            {
-                                property = text.substring( start + 2, end ).trim();
-                                if ( start > 0 && end < text.length() )
-                                {
-                                    String prefix = text.substring( 0, start ).trim();
-                                    String postfix = text.substring( end + 1, text.length() ).trim();
-                                    if ( ( prefix.startsWith( "[" ) || prefix.startsWith( "(" ) )
-                                        && ( postfix.endsWith( "]" ) || postfix.endsWith( ")" ) )
-                                        && ( prefix.length() > 1 || postfix.length() > 1) )
-                                    {
-                                        versions = prefix + postfix;
-                                    }
-
-                                }
-                            }
-                        }
-                        path = (String) stack.pop();
-                    }
-                    else if ( path.endsWith( "dependency" ) )
-                    {
-                        groupId = null;
-                        artifactId = null;
-                        property = null;
-                        versions = null;
-                    }
-                    else if ( propertyPathMatcher.matcher( path ).matches() )
-                    {
-                        property = event.asStartElement().getName().getLocalPart();
-                        if ( !properties.containsKey( property ) && !localProperties.contains( property ) )
-                        {
-                            LinkItem candidate = (LinkItem) localDependencies.remove( property );
-                            if ( candidate == null )
-                            {
-                                localProperties.add( property );
-                            }
-                            else
-                            {
-                                properties.put( property, candidate );
-                                getLog().info( "Associating property ${" + property + "} with "
-                                    + ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() )
-                                    + ( candidate.getVersion() != null ? " within the version range "
-                                    + candidate.getVersion() : "" ) );
-                            }
-                        }
-                    }
-                }
-                else if ( event.isEndElement() )
-                {
-                    if ( path.endsWith( "dependency" ) )
-                    {
-                        if ( groupId != null && artifactId != null && property != null && !properties.containsKey(
-                            property ) )
-                        {
-                            LinkItem candidate = new LinkItem();
-                            candidate.setGroupId( groupId );
-                            candidate.setArtifactId( artifactId );
-                            candidate.setProperty( property );
-                            if ( versions != null )
-                            {
-                                candidate.setVersion( versions );
-                            }
-                            if ( localProperties.contains( property ) )
-                            {
-                                properties.put( property, candidate );
-                                localProperties.remove( property );
-                                getLog().info( "Associating property ${" + property + "} with "
-                                    + ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() )
-                                    + ( candidate.getVersion() != null ? " within the version range "
-                                    + candidate.getVersion() : "" ) );
-                            }
-                            else
-                            {
-                                localDependencies.put( property, candidate );
-                            }
-                        }
-                    }
-                    path = (String) stack.pop();
-                }
-            }
-            dependencyPathMatcher = Pattern.compile("/project(/profiles/profile)?"
-                + "((/reporting/plugins/plugin)?" 
-                + "|(/build(/pluginManagement)?/plugins/plugin))/(groupId|artifactId|version)" );
-            pom.rewind();
-            while ( pom.hasNext() )
-            {
-                XMLEvent event = pom.nextEvent();
-                if ( event.isStartDocument() )
-                {
-                    path = "";
-                    stack.clear();
-                }
-                else if ( event.isStartElement() )
-                {
-                    stack.push( path );
-
-                    path = path + "/" + event.asStartElement().getName().getLocalPart();
-
-                    if ( dependencyPathMatcher.matcher( path ).matches() )
-                    {
-                        String text = pom.getElementText().trim();
-                        if ( path.endsWith( "groupId" ) )
-                        {
-                            groupId = text;
-                        }
-                        else if ( path.endsWith( "artifactId" ) )
-                        {
-                            artifactId = text;
-                        }
-                        else if ( path.endsWith( "version" ) )
-                        {
-                            int start = text.indexOf( "${" );
-                            int middle = text.indexOf( "${", start + 1 );
-                            int end = text.lastIndexOf( "}" );
-                            if ( start != -1 && end != -1 && end > start && middle == -1 )
-                            {
-                                property = text.substring( start + 2, end ).trim();
-                            }
-                        }
-                        path = (String) stack.pop();
-                    }
-                    else if ( path.endsWith( "plugin" ) )
-                    {
-                        groupId = null;
-                        artifactId = null;
-                        property = null;
-                        versions = null;
-                    }
-                    else if ( propertyPathMatcher.matcher( path ).matches() )
-                    {
-                        property = event.asStartElement().getName().getLocalPart();
-                        if ( !properties.containsKey( property ) && !localProperties.contains( property ) )
-                        {
-                            LinkItem candidate = (LinkItem) localDependencies.remove( property );
-                            if ( candidate == null )
-                            {
-                                localProperties.add( property );
-                            }
-                            else
-                            {
-                                properties.put( property, candidate );
-                                getLog().info( "Associating property ${" + property + "} with "
-                                    + ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() )
-                                    + ( candidate.getVersion() != null ? " within the version range "
-                                    + candidate.getVersion() : "" ) );
-                            }
-                        }
-                    }
-                }
-                else if ( event.isEndElement() )
-                {
-                    if ( path.endsWith( "dependency" ) )
-                    {
-                        if ( groupId != null && artifactId != null && property != null && !properties.containsKey(
-                            property ) )
-                        {
-                            LinkItem candidate = new LinkItem();
-                            candidate.setGroupId( groupId );
-                            candidate.setArtifactId( artifactId );
-                            candidate.setProperty( property );
-                            if ( versions != null )
-                            {
-                                candidate.setVersion( versions );
-                            }
-                            if ( localProperties.contains( property ) )
-                            {
-                                properties.put( property, candidate );
-                                localProperties.remove( property );
-                                getLog().info( "Associating property ${" + property + "} with "
-                                    + ArtifactUtils.versionlessKey( candidate.getGroupId(), candidate.getArtifactId() )
-                                    + ( candidate.getVersion() != null ? " within the version range "
-                                    + candidate.getVersion() : "" ) );
-                            }
-                            else
-                            {
-                                localDependencies.put( property, candidate );
-                            }
-                        }
-                    }
-                    path = (String) stack.pop();
-                }
-            }
-            items = (LinkItem[]) properties.values().toArray( new LinkItem[properties.size()] );
         }
-        else
+        getLog().info( "Searching for properties to update" );
+        Iterator i = properties.values().iterator();
+        while ( i.hasNext() )
         {
-            items = this.linkItems;
-        }
-        if ( items == null || items.length == 0 )
-        {
-            getLog().info( "Nothing to link" );
-            return;
-        }
-        for ( int i = 0; i < items.length; i++ )
-        {
-            LinkItem item = items[i];
-
+            Property property = (Property) i.next();
             if ( includeProperties != null )
             {
-                if ( includeProperties.indexOf( item.getProperty() ) < 0 )
+                if ( includeProperties.indexOf( property.getName() ) < 0 )
                 {
-                    getLog().debug( "Skipping update of property \"" + item.getProperty() + "\"" );
+                    getLog().debug( "Skipping update of property ${" + property.getName() + "}" );
                     continue;
                 }
             }
 
             if ( excludeProperties != null )
             {
-                if ( excludeProperties.indexOf( item.getProperty() ) >= 0 )
+                if ( excludeProperties.indexOf( property.getName() ) >= 0 )
                 {
-                    getLog().debug( "Ignoring update of property \"" + item.getProperty() + "\"" );
+                    getLog().debug( "Ignoring update of property ${" + property.getName() + "}" );
                     continue;
                 }
             }
 
-            String itemCoords = ArtifactUtils.versionlessKey( item.getGroupId(), item.getArtifactId() );
-            String curVer = getPropertyValue( pom.asStringBuffer(), item.getProperty() );
-            String version = curVer;
-
+            getLog().debug( "Property ${" + property.getName() + "}" );
+            PropertyVersions version = (PropertyVersions) versions.get( property.getName() );
             if ( version == null )
             {
-                getLog().warn( "This project does not define the property \"" + item.getProperty() + "\"" );
-                continue;
+                getLog().debug( "Looks like this property is not associated with any dependency..." );
+                version = new PropertyVersions( null, property.getName(), getHelper() );
             }
-
-            if ( item.getVersion() != null )
+            if ( !property.isAutoLinkDependencies() )
             {
-                version = item.getVersion();
+                getLog().debug( "Removing any autoLinkDependencies" );
+                version.clearAssociations();
             }
-
-            VersionRange versionRange;
+            Dependency[] dependencies = property.getDependencies();
+            if ( dependencies != null )
+            {
+                for ( int j = 0; j < dependencies.length; j++ )
+                {
+                    try
+                    {
+                        getLog().debug( "Adding association to " + dependencies[j] );
+                        version.addAssociation( getHelper().createDependencyArtifact( dependencies[j] ), false );
+                    }
+                    catch ( InvalidVersionSpecificationException e )
+                    {
+                        throw new MojoExecutionException( e.getMessage(), e );
+                    }
+                }
+            }
+            ArtifactVersion[] artifactVersions =
+                version.getVersions( !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots ) );
+            getLog().debug( "Set of valid available versions is " + Arrays.asList( artifactVersions ) );
+            VersionRange range;
             try
             {
-                versionRange = VersionRange.createFromVersionSpec( version );
+                if ( property.getVersion() != null )
+                {
+                    range = VersionRange.createFromVersionSpec( property.getVersion() );
+                    getLog().debug( "Restricting results to " + range );
+                }
+                else
+                {
+                    range = VersionRange.createFromVersionSpec( "[0,]" );
+                }
             }
             catch ( InvalidVersionSpecificationException e )
             {
-                throw new MojoExecutionException( "Invalid version range specification for " + item.toString(), e );
+                throw new MojoExecutionException( e.getMessage(), e );
             }
-
-            Artifact artifact = artifactFactory.createDependencyArtifact( item.getGroupId(), item.getArtifactId(),
-                                                                          versionRange, "pom", null, null );
-
-            ArtifactVersion newVer = findLatestVersion( artifact, versionRange, item.getAllowSnapshots(), false );
-
-            if ( !shouldApplyUpdate( artifact, curVer, newVer ) )
+            final String currentVersion = getProject().getProperties().getProperty( property.getName() );
+            ArtifactVersion winner = null;
+            for ( int j = artifactVersions.length - 1; j >= 0; j-- )
             {
-                continue;
-            }
-
-            Stack stack = new Stack();
-            String path = "";
-
-            Pattern pathRegex = Pattern.compile( new StringBuffer()
-                .append( "/project/properties(?:/profiles/profile)?/" )
-                .append( RegexUtils.quote( item.getProperty() ) )
-                .toString() );
-
-            pom.rewind(); // fixes MVERSIONS-8
-
-            while ( pom.hasNext() )
-            {
-                XMLEvent event = pom.nextEvent();
-                if ( event.isStartElement() )
+                if ( range.containsVersion( artifactVersions[j] ) && !currentVersion.equals(
+                    artifactVersions[j].toString() ) )
                 {
-                    stack.push( path );
-                    path = new StringBuffer()
-                        .append( path )
-                        .append( "/" )
-                        .append( event.asStartElement().getName().getLocalPart() )
-                        .toString();
-
-                    if ( pathRegex.matcher( path ).matches() )
-                    {
-                        pom.mark( 0 );
-                    }
-                }
-                if ( event.isEndElement() )
-                {
-                    if ( pathRegex.matcher( path ).matches() )
-                    {
-                        pom.mark( 1 );
-                        if ( pom.hasMark( 0 ) )
-                        {
-                            pom.replaceBetween( 0, 1, newVer.toString() );
-                            getLog().info( new StringBuffer()
-                                .append( "Updating " )
-                                .append( itemCoords )
-                                .append( " from version " )
-                                .append( curVer )
-                                .append( " to " )
-                                .append( newVer )
-                                .toString() );
-                            pom.clearMark( 0 );
-                            pom.clearMark( 1 );
-                        }
-                    }
-                    path = (String) stack.pop();
+                    winner = artifactVersions[j];
+                    break;
                 }
             }
+            // TODO search the reactor
+            if ( winner == null )
+            {
+                getLog().info( "Could not find any valid version to update to" );
+            }
+            if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
+            {
+                getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
+            }
+
         }
     }
 

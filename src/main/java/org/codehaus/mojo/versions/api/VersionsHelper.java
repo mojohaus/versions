@@ -23,7 +23,9 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.model.Dependency;
 
 import java.util.Comparator;
 
@@ -110,4 +112,7 @@ public interface VersionsHelper
      */
     Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange version, String type,
                                        String classifier, String scope, boolean optional );
+
+    Artifact createDependencyArtifact( Dependency dependency )
+        throws InvalidVersionSpecificationException;
 }
