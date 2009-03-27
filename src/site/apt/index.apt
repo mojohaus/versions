@@ -20,7 +20,7 @@
  ------
  Stephen Connolly
  ------
- 2008-09-02
+ 2009-03-27
  ------
 
 
@@ -30,7 +30,7 @@ Versions Maven Plugin
 
 * Goals Overview
 
-  The Versions Plugin has five goals.
+  The Versions Plugin has seven goals.
 
   * {{{display-dependency-updates-mojo.html}versions:display-dependency-updates}} scans a project's dependencies and
   produces a report of those dependencies which have newer versions available.
@@ -51,6 +51,12 @@ Versions Maven Plugin
   that is also the parent for the projects that it aggregates and the children and parent versions get out of sync, this
   mojo can help fix the versions of the child modules. (Note you may need to invoke Maven with the -N option in order to
   run this goal if your project is broken so badly that it cannot build because of the version mis-match).
+
+  * {{{lock-snapshots-mojo.html}versions:lock-snapshots}} searches the pom for all -SNAPSHOT versions and replaces them
+  with the current timestamp version of that -SNAPSHOT, e.g. -20090327.172306-4 
+
+  * {{{unlock-snapshots-mojo.html}versions:lock-snapshots}} searches the pom for all timestamp locked snapshot versions 
+  and replaces them with -SNAPSHOT. 
 
 * Usage
 
