@@ -161,12 +161,13 @@ public class UpdatePropertiesMojo
             PropertyVersions version = (PropertyVersions) versions.get( property.getName() );
             if ( version == null || !version.isAssociated() )
             {
-                getLog().debug( "Looks like this property is not associated with any dependency..." );
+                getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not "
+                    + "associated with any dependency..." );
                 version = new PropertyVersions( null, property.getName(), getHelper() );
             }
             if ( !property.isAutoLinkDependencies() )
             {
-                getLog().debug( "Removing any autoLinkDependencies" );
+                getLog().debug( "Property ${" + property.getName() + "}: Removing any autoLinkDependencies" );
                 version.clearAssociations();
             }
             Dependency[] dependencies = property.getDependencies();
@@ -176,7 +177,7 @@ public class UpdatePropertiesMojo
                 {
                     try
                     {
-                        getLog().debug( "Adding association to " + dependencies[j] );
+                        getLog().debug( "Property ${" + property.getName() + "}: Adding association to " + dependencies[j] );
                         version.addAssociation( getHelper().createDependencyArtifact( dependencies[j] ), false );
                     }
                     catch ( InvalidVersionSpecificationException e )
@@ -187,14 +188,14 @@ public class UpdatePropertiesMojo
             }
             ArtifactVersion[] artifactVersions =
                 version.getVersions( !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots ) );
-            getLog().debug( "Set of valid available versions is " + Arrays.asList( artifactVersions ) );
+            getLog().debug( "Property ${" + property.getName() + "}: Set of valid available versions is " + Arrays.asList( artifactVersions ) );
             VersionRange range;
             try
             {
                 if ( property.getVersion() != null )
                 {
                     range = VersionRange.createFromVersionSpec( property.getVersion() );
-                    getLog().debug( "Restricting results to " + range );
+                    getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
                 }
                 else
                 {
@@ -213,28 +214,28 @@ public class UpdatePropertiesMojo
                 {
                     if ( currentVersion.equals( artifactVersions[j].toString() ) )
                     {
-                        getLog().debug( "No newer version" );
+                        getLog().debug( "Property ${" + property.getName() + "}: No newer version" );
                         break;
                     }
                     winner = artifactVersions[j];
-                    getLog().debug( "Newest version is: " + winner );
+                    getLog().debug( "Property ${" + property.getName() + "}: Newest version is: " + winner );
                     break;
                 }
             }
             if ( property.isSearchReactor() )
             {
-                getLog().debug( "Searching reactor for a valid version..." );
+                getLog().debug( "Property ${" + property.getName() + "}: Searching reactor for a valid version..." );
                 Collection reactorArtifacts = getHelper().extractArtifacts( reactorProjects );
                 ArtifactVersion[] reactorVersions = version.getVersions( reactorArtifacts );
                 ArtifactVersion fromReactor = null;
-                if ( artifactVersions.length > 0 )
+                if ( reactorVersions.length > 0 )
                 {
-                    for ( int j = artifactVersions.length - 1; j >= 0; j-- )
+                    for ( int j = reactorVersions.length - 1; j >= 0; j-- )
                     {
-                        if ( range.containsVersion( artifactVersions[j] ) )
+                        if ( range.containsVersion( reactorVersions[j] ) )
                         {
-                            fromReactor = artifactVersions[j];
-                            getLog().debug( "Reactor has version " + fromReactor );
+                            fromReactor = reactorVersions[j];
+                            getLog().debug( "Property ${" + property.getName() + "}: Reactor has version " + fromReactor );
                             break;
                         }
                     }
@@ -243,31 +244,31 @@ public class UpdatePropertiesMojo
                 {
                     if ( property.isPreferReactor() )
                     {
-                        getLog().debug( "Reactor has a version and we prefer the reactor" );
+                        getLog().debug( "Property ${" + property.getName() + "}: Reactor has a version and we prefer the reactor" );
                         winner = fromReactor;
                     }
                     else
                     {
                         if ( winner == null )
                         {
-                            getLog().debug( "Reactor has the only version" );
+                            getLog().debug( "Property ${" + property.getName() + "}: Reactor has the only version" );
                             winner = fromReactor;
                         }
                         else if ( version.compare( winner, fromReactor ) < 0 )
                         {
-                            getLog().debug( "Reactor has a newer version" );
+                            getLog().debug( "Property ${" + property.getName() + "}: Reactor has a newer version" );
                             winner = fromReactor;
                         }
                         else
                         {
-                            getLog().debug( "Reactor has the same or older version" );
+                            getLog().debug( "Property ${" + property.getName() + "}: Reactor has the same or older version" );
                         }
                     }
                 }
             }
             if ( winner == null || currentVersion.equals( winner.toString() ) )
             {
-                getLog().info( "Could not find any valid version to update to" );
+                getLog().info( "Property ${" + property.getName() + "}: Could not find any valid version to update to" );
             }
             if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
             {
