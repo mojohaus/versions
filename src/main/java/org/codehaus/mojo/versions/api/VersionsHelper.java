@@ -19,15 +19,18 @@ package org.codehaus.mojo.versions.api;
 * under the License.
 */
 
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.Collection;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -113,6 +116,26 @@ public interface VersionsHelper
     Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange version, String type,
                                        String classifier, String scope, boolean optional );
 
+    /**
+     * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code> which extracts the
+     * parameters from the Dependency instance.
+     *
+     * @param dependency The dependency to create the artifact for.
+     * @return The corresponding dependency artifact.
+     * @throws InvalidVersionSpecificationException
+     *          if the version specified in the dependency is invalid.
+     * @since 1.0-alpha-3
+     */
     Artifact createDependencyArtifact( Dependency dependency )
         throws InvalidVersionSpecificationException;
+
+    /**
+     * Takes a {@link List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a {@link Set} of {@link Artifact} instances.
+     *
+     * @param mavenProjects the {@link List} of {@link org.apache.maven.project.MavenProject} instances.
+     * @return a {@link Set} of {@link Artifact} instances.
+     * @since 1.0-alpha-3
+     */
+    Set/*<Artifact>*/ extractArtifacts( Collection/*<MavenProject>*/ mavenProjects );
+
 }

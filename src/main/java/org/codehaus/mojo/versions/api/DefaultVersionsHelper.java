@@ -38,6 +38,7 @@ import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
@@ -53,6 +54,9 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
@@ -407,5 +411,29 @@ public class DefaultVersionsHelper
                                              : VersionRange.createFromVersionSpec( dependency.getVersion() ),
                                          dependency.getType(), dependency.getClassifier(), dependency.getScope(),
                                          dependency.isOptional() );
+    }
+
+    /**
+     * Takes a {@link java.util.List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a {@link java.util.Set} of {@link org.apache.maven.artifact.Artifact} instances.
+     *
+     * @param mavenProjects the {@link java.util.List} of {@link org.apache.maven.project.MavenProject} instances.
+     * @return a {@link java.util.Set} of {@link org.apache.maven.artifact.Artifact} instances.
+     * @throws org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
+     *          if any of the {@link org.apache.maven.project.MavenProject} versions are invalid (should never happen).
+     * @since 1.0-alpha-3
+     */
+    public Set/*<Artifact>*/ extractArtifacts( Collection/*<MavenProject>*/ mavenProjects )
+    {
+        Set/*<Artifact>*/ result = new HashSet();
+        Iterator i = mavenProjects.iterator();
+        while (i.hasNext()) {
+            Object next = i.next();
+            if (next instanceof MavenProject ) {
+                MavenProject project = (MavenProject)next;
+                result.add(project.getArtifact());                
+            }
+        }
+        
+        return result;
     }
 }

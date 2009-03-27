@@ -22,10 +22,12 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,7 +81,7 @@ public class PropertyVersions
         return (ArtifactAssocation[]) associations.toArray( new ArtifactAssocation[associations.size()] );
     }
 
-    private Comparator[] lookupComparators( VersionsHelper helper )
+    private Comparator[] lookupComparators()
     {
         Set result = new HashSet();
         Iterator i = associations.iterator();
@@ -89,6 +91,108 @@ public class PropertyVersions
             result.add( helper.getVersionComparator( association.getArtifact() ) );
         }
         return (Comparator[]) result.toArray( new Comparator[result.size()] );
+    }
+
+    public int compare( ArtifactVersion v1, ArtifactVersion v2 )
+        throws MojoExecutionException
+    {
+        if (!isAssociated())
+        {
+            throw new IllegalStateException( "Cannot compare versions for a property with no associations");
+        }
+        Comparator[] comparators = lookupComparators();
+        assert comparators.length >= 1 : "we have at least one association => at least one comparator";
+        int result = comparators[0].compare( v1, v2 );
+        for (int i = 1; i < comparators.length; i++) {
+            int alt = comparators[i].compare( v1, v2 );
+            if ( result != alt && ( result >= 0 && alt < 0 ) || ( result <= 0 && alt > 0 ) )
+            {
+                throw new MojoExecutionException( "Property " + name + " is associated with multiple artifacts"
+                    + " and these artifacts use different version sorting rules and these rules are effectively"
+                    + " incompatible for the two of versions being compared.\nFirst rule says compare(\"" + v1 
+                    + "\", \"" + v2 + "\") = " + result + "\nSecond rule says compare(\"" + v1 
+                    + "\", \"" + v2 + "\") = " + alt );
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Uses the supplied {@link Collection} of {@link Artifact} instances to see if an ArtifactVersion can be provided.
+     *
+     * @param artifacts The {@link Collection} of {@link Artifact} instances .
+     * @return The versions that can be resolved from the supplied Artifact instances or an empty array if no version
+     *         can be resolved (i.e. the property is not associated with any of the supplied artifacts or the property is
+     *         also associated to an artifact that has not been provided).
+     * @since 1.0-alpha-3
+     */
+    public ArtifactVersion[] getVersions( Collection/*<Artifact>*/ artifacts )
+        throws MojoExecutionException
+    {
+        List/*<ArtifactVersion>*/ result = new ArrayList();
+        // go through all the associations
+        // see if they are met from the collection
+        // add the version if they are
+        // go through all the versions
+        // see if the version is available for all associations
+        Iterator i = associations.iterator();
+        while ( i.hasNext() )
+        {
+            ArtifactAssocation association = (ArtifactAssocation) i.next();
+            Iterator j = artifacts.iterator();
+            while ( j.hasNext() )
+            {
+                Artifact artifact = (Artifact) j.next();
+                if ( association.getGroupId().equals( artifact.getGroupId() ) && association.getArtifactId().equals(
+                    artifact.getArtifactId() ) )
+                {
+                    try
+                    {
+                        result.add( artifact.getSelectedVersion() );
+                    }
+                    catch ( OverConstrainedVersionException e )
+                    {
+                        // ignore this one as we cannot resolve a valid version
+                    }
+                }
+            }
+        }
+        // we now have a list of all the versions that partially satisfy the association requirements
+        Iterator k = result.iterator();
+        while ( k.hasNext() )
+        {
+            ArtifactVersion candidate = (ArtifactVersion) k.next();
+            i = associations.iterator();
+            while ( i.hasNext() )
+            {
+                ArtifactAssocation association = (ArtifactAssocation) i.next();
+                boolean haveMatch = false;
+                Iterator j = artifacts.iterator();
+                while ( j.hasNext() && !haveMatch )
+                {
+                    Artifact artifact = (Artifact) j.next();
+                    if ( association.getGroupId().equals( artifact.getGroupId() ) && association.getArtifactId().equals(
+                        artifact.getArtifactId() ) )
+                    {
+                        try
+                        {
+                            haveMatch = candidate.toString().equals( artifact.getSelectedVersion().toString() );
+                        }
+                        catch ( OverConstrainedVersionException e )
+                        {
+                            // ignore this one again
+                        }
+                    }
+                }
+                if ( !haveMatch )
+                {
+                    // candidate is not valid as at least one association cannot be met
+                    k.remove();
+                    break;
+                }
+            }
+        }
+        return asArtifactVersionArray( result );
     }
 
     /**
@@ -138,6 +242,12 @@ public class PropertyVersions
                 result = new ArrayList( Arrays.asList( versions.getVersions( includeSnapshots ) ) );
             }
         }
+        return asArtifactVersionArray( result );
+    }
+
+    private ArtifactVersion[] asArtifactVersionArray( List result )
+        throws MojoExecutionException
+    {
         if ( result == null || result.isEmpty() )
         {
             return new ArtifactVersion[0];
@@ -145,7 +255,7 @@ public class PropertyVersions
         else
         {
             final ArtifactVersion[] answer = (ArtifactVersion[]) result.toArray( new ArtifactVersion[result.size()] );
-            Comparator[] rules = lookupComparators( helper );
+            Comparator[] rules = lookupComparators();
             assert rules.length > 0;
             Arrays.sort( answer, rules[0] );
             if ( rules.length == 1 || answer.length == 1 )

@@ -19,8 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -30,20 +28,15 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-import java.util.regex.Pattern;
 
 /**
  * Sets properties to the latest versions of specific artifacts.
@@ -166,7 +159,7 @@ public class UpdatePropertiesMojo
 
             getLog().debug( "Property ${" + property.getName() + "}" );
             PropertyVersions version = (PropertyVersions) versions.get( property.getName() );
-            if ( version == null )
+            if ( version == null || !version.isAssociated() )
             {
                 getLog().debug( "Looks like this property is not associated with any dependency..." );
                 version = new PropertyVersions( null, property.getName(), getHelper() );
@@ -216,15 +209,63 @@ public class UpdatePropertiesMojo
             ArtifactVersion winner = null;
             for ( int j = artifactVersions.length - 1; j >= 0; j-- )
             {
-                if ( range.containsVersion( artifactVersions[j] ) && !currentVersion.equals(
-                    artifactVersions[j].toString() ) )
+                if ( range.containsVersion( artifactVersions[j] ) )
                 {
+                    if ( currentVersion.equals( artifactVersions[j].toString() ) )
+                    {
+                        getLog().debug( "No newer version" );
+                        break;
+                    }
                     winner = artifactVersions[j];
+                    getLog().debug( "Newest version is: " + winner );
                     break;
                 }
             }
-            // TODO search the reactor
-            if ( winner == null )
+            if ( property.isSearchReactor() )
+            {
+                getLog().debug( "Searching reactor for a valid version..." );
+                Collection reactorArtifacts = getHelper().extractArtifacts( reactorProjects );
+                ArtifactVersion[] reactorVersions = version.getVersions( reactorArtifacts );
+                ArtifactVersion fromReactor = null;
+                if ( artifactVersions.length > 0 )
+                {
+                    for ( int j = artifactVersions.length - 1; j >= 0; j-- )
+                    {
+                        if ( range.containsVersion( artifactVersions[j] ) )
+                        {
+                            fromReactor = artifactVersions[j];
+                            getLog().debug( "Reactor has version " + fromReactor );
+                            break;
+                        }
+                    }
+                }
+                if ( fromReactor != null && ( winner != null || !currentVersion.equals( fromReactor.toString() ) ) )
+                {
+                    if ( property.isPreferReactor() )
+                    {
+                        getLog().debug( "Reactor has a version and we prefer the reactor" );
+                        winner = fromReactor;
+                    }
+                    else
+                    {
+                        if ( winner == null )
+                        {
+                            getLog().debug( "Reactor has the only version" );
+                            winner = fromReactor;
+                        }
+                        else if ( version.compare( winner, fromReactor ) < 0 )
+                        {
+                            getLog().debug( "Reactor has a newer version" );
+                            winner = fromReactor;
+                        }
+                        else
+                        {
+                            getLog().debug( "Reactor has the same or older version" );
+                        }
+                    }
+                }
+            }
+            if ( winner == null || currentVersion.equals( winner.toString() ) )
             {
                 getLog().info( "Could not find any valid version to update to" );
             }
