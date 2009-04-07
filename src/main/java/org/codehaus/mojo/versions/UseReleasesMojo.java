@@ -49,6 +49,38 @@ public class UseReleasesMojo
     // ------------------------------ FIELDS ------------------------------
 
     /**
+     * A comma separated list of group ids to update.
+     *
+     * @parameter expression="${includeGroupIds}"
+     * @since 1.0-alpha-3
+     */
+    private String includeGroupIds = null;
+
+    /**
+     * A comma separated list of artifact ids to update.
+     *
+     * @parameter expression="${includeArtifactIds}"
+     * @since 1.0-alpha-3
+     */
+    private String includeArtifactIds = null;
+
+    /**
+     * A comma separated list of group ids to not update.
+     *
+     * @parameter expression="${excludeGroupIds}"
+     * @since 1.0-alpha-3
+     */
+    private String excludeGroupIds = null;
+
+    /**
+     * A comma separated list of artifact ids to not update.
+     *
+     * @parameter expression="${excludeArtifactIds}"
+     * @since 1.0-alpha-3
+     */
+    private String excludeArtifactIds = null; 
+
+    /**
      * Pattern to match a snapshot version.
      */
     public final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
