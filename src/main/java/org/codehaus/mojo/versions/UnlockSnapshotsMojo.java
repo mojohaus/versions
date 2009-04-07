@@ -52,7 +52,7 @@ public class UnlockSnapshotsMojo
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
      */
-    public final Pattern matchSnapshotRegex = Pattern.compile( "-\\d{8}.\\d{6}-\\d+" );
+    public final Pattern matchSnapshotRegex = Pattern.compile( "-(\\d{8}\\.\\d{6})-(\\d+)$" );
 
     // ------------------------------ METHODS --------------------------
 

@@ -312,4 +312,17 @@ public class ArtifactVersions
     }
 
 
+    public boolean containsVersion( String version )
+    {
+        Iterator i = versions.iterator();
+        while ( i.hasNext() )
+        {
+            ArtifactVersion candidate = (ArtifactVersion) i.next();
+            if ( version.equals( candidate.toString() ) )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }
