@@ -30,6 +30,7 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -38,7 +39,6 @@ import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
@@ -51,12 +51,12 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
@@ -426,14 +426,50 @@ public class DefaultVersionsHelper
     {
         Set/*<Artifact>*/ result = new HashSet();
         Iterator i = mavenProjects.iterator();
-        while (i.hasNext()) {
+        while ( i.hasNext() )
+        {
             Object next = i.next();
-            if (next instanceof MavenProject ) {
-                MavenProject project = (MavenProject)next;
-                result.add(project.getArtifact());                
+            if ( next instanceof MavenProject )
+            {
+                MavenProject project = (MavenProject) next;
+                result.add( project.getArtifact() );
             }
         }
-        
+
         return result;
+    }
+
+    /**
+     * Returns <code>true</code> if the artifact matches the include/exclude rules. Include superceeds exclude.
+     *
+     * @param artifact           The artifact to query
+     * @param includeGroupIds    A comma separated list of group Ids to include, or <code>null</code> or an empty string to include any.
+     * @param includeArtifactIds A comma separated list of artifact Ids to include, or <code>null</code> or an empty string to include any.
+     * @param excludeGroupIds    A comma separated list of group Ids to exclude, or <code>null</code> or an empty string to exclude none.
+     * @param excludeArtifactIds A comma separated list of artifact Ids to exclude, or <code>null</code> or an empty string to exclude none.
+     * @return <code>true</code> if the artifact can be included.
+     */
+    public boolean isIncluded( Artifact artifact, String includeGroupIds, String includeArtifactIds,
+                               String excludeGroupIds, String excludeArtifactIds )
+    {
+        Pattern groupIdPattern =
+            Pattern.compile( "(.*,)?\\s*" + RegexUtils.quote( artifact.getGroupId() ) + "\\s*(,.*)?" );
+        boolean haveIncludeGroupIds = includeGroupIds != null && includeGroupIds.trim().length() != 0;
+        boolean haveIncludeGroupIdsMatch = haveIncludeGroupIds && groupIdPattern.matcher( includeGroupIds ).matches();
+        boolean haveExcludeGroupIds = excludeGroupIds != null && excludeGroupIds.trim().length() != 0;
+        boolean haveExcludeGroupIdsMatch = haveExcludeGroupIds && groupIdPattern.matcher( excludeGroupIds ).matches();
+        Pattern artifactIdPattern =
+            Pattern.compile( "(.*,)?\\s*" + RegexUtils.quote( artifact.getArtifactId() ) + "\\s*(,.*)?" );
+        boolean haveIncludeArtifactIds = includeArtifactIds != null && includeArtifactIds.trim().length() != 0;
+        boolean haveIncludeArtifactIdsMatch =
+            haveIncludeArtifactIds && artifactIdPattern.matcher( includeArtifactIds ).matches();
+        boolean haveExcludeArtifactIds = excludeArtifactIds != null && excludeArtifactIds.trim().length() != 0;
+        boolean haveExcludeArtifactIdsMatch =
+            haveExcludeArtifactIds && artifactIdPattern.matcher( excludeArtifactIds ).matches();
+
+        return ( !haveIncludeGroupIds || haveIncludeGroupIdsMatch )
+            && ( !haveExcludeGroupIds || !haveExcludeGroupIdsMatch || haveIncludeGroupIdsMatch )
+            && ( !haveIncludeArtifactIds || haveIncludeArtifactIdsMatch ) && ( !haveExcludeArtifactIds
+            || !haveExcludeArtifactIdsMatch || haveIncludeArtifactIdsMatch );
     }
 }

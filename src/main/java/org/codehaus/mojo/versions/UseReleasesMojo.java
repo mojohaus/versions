@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -78,7 +79,7 @@ public class UseReleasesMojo
      * @parameter expression="${excludeArtifactIds}"
      * @since 1.0-alpha-3
      */
-    private String excludeArtifactIds = null; 
+    private String excludeArtifactIds = null;
 
     /**
      * Pattern to match a snapshot version.
@@ -122,8 +123,13 @@ public class UseReleasesMojo
                 String releaseVersion = versionMatcher.group( 1 );
                 try
                 {
-                    ArtifactVersions versions =
-                        getHelper().lookupArtifactVersions( getHelper().createDependencyArtifact( dep ), false );
+                    Artifact artifact = getHelper().createDependencyArtifact( dep );
+                    if ( !getHelper().isIncluded( artifact, includeGroupIds, includeArtifactIds, excludeGroupIds,
+                                                  excludeArtifactIds ) )
+                    {
+                        continue;
+                    }
+                    ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                     if ( versions.containsVersion( releaseVersion ) )
                     {
                         if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
