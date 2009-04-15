@@ -55,7 +55,7 @@ Versions Maven Plugin
   * {{{lock-snapshots-mojo.html}versions:lock-snapshots}} searches the pom for all -SNAPSHOT versions and replaces them
   with the current timestamp version of that -SNAPSHOT, e.g. -20090327.172306-4 
 
-  * {{{unlock-snapshots-mojo.html}versions:lock-snapshots}} searches the pom for all timestamp locked snapshot versions 
+  * {{{unlock-snapshots-mojo.html}versions:unlock-snapshots}} searches the pom for all timestamp locked snapshot versions 
   and replaces them with -SNAPSHOT. 
 
 * Usage
