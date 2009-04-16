@@ -15,19 +15,18 @@ import java.util.regex.Pattern;
  */
 public class FlexibleArtifactFilter implements ArtifactFilter
 {
-    private final Pattern includeGroupIdPattern;
-    private final Pattern includeArtifactIdPattern;
-    private final Pattern includeTypePattern;
-    private final Pattern includeClassifierPattern;
-    private final Pattern excludeGroupIdPattern;
-    private final Pattern excludeArtifactIdPattern;
-    private final Pattern excludeTypePattern;
-    private final Pattern excludeClassifierPattern;
+    private final Pattern includeGroupIdPattern = null;
+    private final Pattern includeArtifactIdPattern = null;
+    private final Pattern includeTypePattern = null;
+    private final Pattern includeClassifierPattern = null;
+    private final Pattern excludeGroupIdPattern = null;
+    private final Pattern excludeArtifactIdPattern = null;
+    private final Pattern excludeTypePattern = null;
+    private final Pattern excludeClassifierPattern = null;
 
 
     public boolean include( Artifact artifact )
     {
-        ArtifactFilter f = new ExcludesArtifactFilter( ); 
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 }
