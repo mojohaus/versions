@@ -22,10 +22,16 @@ package org.codehaus.mojo.versions.api;
 import junit.framework.TestCase;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
+import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.manager.DefaultWagonManager;
 import org.apache.maven.artifact.manager.WagonConfigurationException;
+import org.apache.maven.artifact.metadata.ArtifactMetadata;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -37,7 +43,10 @@ import org.apache.maven.wagon.providers.file.FileWagon;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Test {@link DefaultVersionsHelper}
@@ -80,7 +89,7 @@ public class DefaultVersionsHelperTest
     {
         VersionsHelper instance = createHelper();
 
-        assertTrue( instance.isIncluded( makeArtifact( instance, "mygroup", "myartifact" ), null, null, null, null ) );
+        assertTrue( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, null, null ) );
     }
 
     public void testIsIncludedWithIncludeRulesOnly()
@@ -89,29 +98,277 @@ public class DefaultVersionsHelperTest
         VersionsHelper instance = createHelper();
 
         assertTrue(
-            instance.isIncluded( makeArtifact( instance, "mygroup", "myartifact" ), "yourgroup,mygroup", null, null,
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "yourgroup,mygroup", null, null, null ) );
+        assertTrue(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "yourgroup,mygroup,theirgroup", null, null,
                                  null ) );
         assertTrue(
-            instance.isIncluded( makeArtifact( instance, "mygroup", "myartifact" ), "yourgroup,mygroup,theirgroup", null, null,
-                                 null ) );
-        assertTrue(
-            instance.isIncluded( makeArtifact( instance, "mygroup", "myartifact" ), "mygroup,theirgroup", null, null,
-                                 null ) );
-        assertTrue(
-            instance.isIncluded( makeArtifact( instance, "mygroup", "myartifact" ), "mygroup", null, null,
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "mygroup,theirgroup", null, null, null ) );
+        assertTrue( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "mygroup", null, null, null ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "yourgroup,theirgroup", null, null,
                                  null ) );
         assertFalse(
-            instance.isIncluded( makeArtifact( instance, "mygroup", "myartifact" ), "yourgroup,theirgroup", null, null,
-                                 null ) );
-        assertFalse(
-            instance.isIncluded( makeArtifact( instance, "mygroup", "myartifact" ), "yourgroup,ourgroup,theirgroup", null, null,
-                                 null ) );
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "yourgroup,ourgroup,theirgroup", null,
+                                 null, null ) );
     }
 
-    private Artifact makeArtifact( VersionsHelper instance, String artifactId, String groupId )
+    public void testIsIncludedWithExcludeRulesOnly()
+        throws Exception
     {
-        return instance.createDependencyArtifact( groupId, artifactId, VersionRange.createFromVersion( "1.0" ), "pom",
-                                                  "", "compile", false );
+        VersionsHelper instance = createHelper();
+
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "yourgroup,mygroup", null ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "yourgroup,mygroup,theirgroup",
+                                 null ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "mygroup,theirgroup", null ) );
+        assertFalse( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "mygroup", null ) );
+        assertTrue(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "yourgroup,theirgroup",
+                                 null ) );
+        assertTrue( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null,
+                                          "yourgroup,ourgroup,theirgroup", null ) );
+    }
+
+    private Artifact newMockArtifact( final String groupId, final String artifactId )
+    {
+        return new Artifact()
+        {
+            public String getGroupId()
+            {
+                return groupId;
+            }
+
+            public String getArtifactId()
+            {
+                return artifactId;
+            }
+
+            public String getVersion()
+            {
+                return null;
+            }
+
+            public void setVersion( String s )
+            {
+
+            }
+
+            public String getScope()
+            {
+                return null;
+            }
+
+            public String getType()
+            {
+                return null;
+            }
+
+            public String getClassifier()
+            {
+                return null;
+            }
+
+            public boolean hasClassifier()
+            {
+                return false;
+            }
+
+            public File getFile()
+            {
+                return null;
+            }
+
+            public void setFile( File file )
+            {
+
+            }
+
+            public String getBaseVersion()
+            {
+                return null;
+            }
+
+            public void setBaseVersion( String s )
+            {
+
+            }
+
+            public String getId()
+            {
+                return null;
+            }
+
+            public String getDependencyConflictId()
+            {
+                return null;
+            }
+
+            public void addMetadata( ArtifactMetadata artifactMetadata )
+            {
+
+            }
+
+            public Collection getMetadataList()
+            {
+                return null;
+            }
+
+            public void setRepository( ArtifactRepository artifactRepository )
+            {
+
+            }
+
+            public ArtifactRepository getRepository()
+            {
+                return null;
+            }
+
+            public void updateVersion( String s, ArtifactRepository artifactRepository )
+            {
+
+            }
+
+            public String getDownloadUrl()
+            {
+                return null;
+            }
+
+            public void setDownloadUrl( String s )
+            {
+
+            }
+
+            public ArtifactFilter getDependencyFilter()
+            {
+                return null;
+            }
+
+            public void setDependencyFilter( ArtifactFilter artifactFilter )
+            {
+
+            }
+
+            public ArtifactHandler getArtifactHandler()
+            {
+                return null;
+            }
+
+            public List getDependencyTrail()
+            {
+                return null;
+            }
+
+            public void setDependencyTrail( List list )
+            {
+
+            }
+
+            public void setScope( String s )
+            {
+
+            }
+
+            public VersionRange getVersionRange()
+            {
+                return null;
+            }
+
+            public void setVersionRange( VersionRange versionRange )
+            {
+
+            }
+
+            public void selectVersion( String s )
+            {
+
+            }
+
+            public void setGroupId( String s )
+            {
+
+            }
+
+            public void setArtifactId( String s )
+            {
+
+            }
+
+            public boolean isSnapshot()
+            {
+                return false;
+            }
+
+            public void setResolved( boolean b )
+            {
+
+            }
+
+            public boolean isResolved()
+            {
+                return false;
+            }
+
+            public void setResolvedVersion( String s )
+            {
+
+            }
+
+            public void setArtifactHandler( ArtifactHandler artifactHandler )
+            {
+
+            }
+
+            public boolean isRelease()
+            {
+                return false;
+            }
+
+            public void setRelease( boolean b )
+            {
+
+            }
+
+            public List getAvailableVersions()
+            {
+                return null;
+            }
+
+            public void setAvailableVersions( List list )
+            {
+
+            }
+
+            public boolean isOptional()
+            {
+                return false;
+            }
+
+            public void setOptional( boolean b )
+            {
+
+            }
+
+            public ArtifactVersion getSelectedVersion()
+                throws OverConstrainedVersionException
+            {
+                return null;
+            }
+
+            public boolean isSelectedVersionKnown()
+                throws OverConstrainedVersionException
+            {
+                return false;
+            }
+
+            public int compareTo( Object o )
+            {
+                return 0;
+            }
+        };
     }
 
     private VersionsHelper createHelper()
