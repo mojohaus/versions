@@ -111,6 +111,28 @@ public class DefaultVersionsHelperTest
         assertFalse(
             instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "yourgroup,ourgroup,theirgroup", null,
                                  null, null ) );
+
+        assertTrue(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, "yourartifact,myartifact", null,
+                                 null ) );
+        assertTrue( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null,
+                                         "yourartifact,myartifact,theirartifact", null, null ) );
+        assertTrue(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, "myartifact,theirartifact", null,
+                                 null ) );
+        assertTrue( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, "myartifact", null, null ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, "yourartifact,theirartifact", null,
+                                 null ) );
+        assertFalse( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null,
+                                          "yourartifact,ourartifact,theirartifact", null, null ) );
+
+        assertTrue(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "mygroup", "myartifact", null, null ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "mygroup", "yourartifact", null, null ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "yourgroup", "myartifact", null, null ) );
     }
 
     public void testIsIncludedWithExcludeRulesOnly()
@@ -126,11 +148,10 @@ public class DefaultVersionsHelperTest
         assertFalse(
             instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "mygroup,theirgroup", null ) );
         assertFalse( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "mygroup", null ) );
-        assertTrue(
-            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "yourgroup,theirgroup",
-                                 null ) );
+        assertTrue( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null, "yourgroup,theirgroup",
+                                         null ) );
         assertTrue( instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), null, null,
-                                          "yourgroup,ourgroup,theirgroup", null ) );
+                                         "yourgroup,ourgroup,theirgroup", null ) );
     }
 
     private Artifact newMockArtifact( final String groupId, final String artifactId )
