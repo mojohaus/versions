@@ -174,6 +174,26 @@ public class DefaultVersionsHelperTest
 
     }
 
+
+    public void testIsIncludedWithAllRules()
+        throws Exception
+    {
+        VersionsHelper instance = createHelper();
+
+        assertTrue(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "mygroup", "myartifact", "mygroup", "myartifact" ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "yourgroup", "myartifact", "mygroup", "myartifact" ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "mygroup", "yourartifact", "mygroup", "myartifact" ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "yourgroup", "myartifact", "yourgroup", "myartifact" ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "mygroup", "yourartifact", "mygroup", "myartifact" ) );
+        assertFalse(
+            instance.isIncluded( newMockArtifact( "mygroup", "myartifact" ), "mygroup", "yourartifact", "mygroup", "yourartifact" ) );
+    }
+
     private Artifact newMockArtifact( final String groupId, final String artifactId )
     {
         return new Artifact()
