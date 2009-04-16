@@ -111,7 +111,7 @@ public class DefaultVersionsHelperTest
     private Artifact makeArtifact( VersionsHelper instance, String artifactId, String groupId )
     {
         return instance.createDependencyArtifact( groupId, artifactId, VersionRange.createFromVersion( "1.0" ), "pom",
-                                                  null, "compile", false );
+                                                  "", "compile", false );
     }
 
     private VersionsHelper createHelper()
