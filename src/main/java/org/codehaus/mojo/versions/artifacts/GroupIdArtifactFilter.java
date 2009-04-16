@@ -1,6 +1,7 @@
 package org.codehaus.mojo.versions.artifacts;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 
 import java.util.regex.Pattern;
@@ -21,7 +22,7 @@ public class GroupIdArtifactFilter
         this.excludeGroupIds = excludeGroupIds;
     }
 
-    public boolean matches( Artifact artifact )
+    public boolean include( Artifact artifact )
     {
         Pattern groupIdPattern =
             Pattern.compile( "(.*,)?\\s*" + RegexUtils.quote( artifact.getGroupId() ) + "\\s*(,.*)?" );

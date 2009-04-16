@@ -1,12 +1,13 @@
 package org.codehaus.mojo.versions.artifacts;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 
 import java.util.regex.Pattern;
 
 /**
- * An {@link org.codehaus.mojo.versions.artifacts.ArtifactFilter} that filters artifacts based on their ArtifactId.
+ * An {@link ArtifactFilter} that filters artifacts based on their ArtifactId.
  */
 public class ArtifactIdArtifactFilter
     implements ArtifactFilter
@@ -21,7 +22,7 @@ public class ArtifactIdArtifactFilter
         this.excludeArtifactIds = excludeArtifactIds;
     }
 
-    public boolean matches( Artifact artifact )
+    public boolean include( Artifact artifact )
     {
         Pattern artifactIdPattern =
             Pattern.compile( "(.*,)?\\s*" + RegexUtils.quote( artifact.getArtifactId() ) + "\\s*(,.*)?" );

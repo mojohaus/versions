@@ -1,14 +1,15 @@
 package org.codehaus.mojo.versions.artifacts;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 
 /**
- * An {@link org.codehaus.mojo.versions.artifacts.ArtifactFilter} that matches everything.
+ * An {@link ArtifactFilter} that matches everything.
  */
 public class DefaultArtifactFilter
     implements ArtifactFilter
 {
-    public boolean matches( Artifact artifact )
+    public boolean include( Artifact artifact )
     {
         return true;
     }
