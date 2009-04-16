@@ -40,7 +40,7 @@ import java.util.ArrayList;
 /**
  * Test {@link DefaultVersionsHelper}
  */
-public class VersionsHelperTest
+public class DefaultVersionsHelperTest
     extends TestCase
 {
     public void testWildcardMatching()
