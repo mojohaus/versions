@@ -138,7 +138,7 @@ public class LockSnapshotsMojo
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
                                                          lockedVersion ) )
                     {
-                        getLog().debug( "Version set to " + lockedVersion + " for dependnecy: " + dep );
+                        getLog().debug( "Version set to " + lockedVersion + " for dependency: " + dep );
                     }
                 }
             }
