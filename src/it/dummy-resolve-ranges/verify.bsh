@@ -11,9 +11,12 @@ try
         buf.append("\n");
         line = in.readLine();
     }
-    if ( !buf.toString().contains("<version>2.0.8/version>") )
+    if ( ! ( buf.toString().contains("<version>2.0.6/version>") 
+            || buf.toString().contains("<version>2.0.7/version>")
+            || buf.toString().contains("<version>2.0.8/version>") )
+       )
     {
-        System.err.println( "Version of maven-project not resolved to 2.0.8" );
+        System.err.println( "Version of maven-project not resolved to 2.0.6, 2.0.7, or 2.0.8" );
         return false;
     }
     if ( !buf.toString().contains("<version>1.5.1</version>") )
