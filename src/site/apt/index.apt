@@ -30,7 +30,7 @@ Versions Maven Plugin
 
 * Goals Overview
 
-  The Versions Plugin has seven goals.
+  The Versions Plugin has the following goals.
 
   * {{{display-dependency-updates-mojo.html}versions:display-dependency-updates}} scans a project's dependencies and
   produces a report of those dependencies which have newer versions available.
@@ -58,6 +58,9 @@ Versions Maven Plugin
   * {{{unlock-snapshots-mojo.html}versions:unlock-snapshots}} searches the pom for all timestamp locked snapshot versions 
   and replaces them with -SNAPSHOT. 
 
+  * {{{resolve-ranges.html}versions:resolve-ranges}} finds dependencies using version ranges and resolves the range
+  to the specific version being used. 
+  
 * Usage
 
   General instructions on how to use the Versions Plugin can be found on the {{{usage.html}usage page}}. Some more
@@ -94,3 +97,6 @@ Versions Maven Plugin
 
   * {{{examples/update-child-modules.html}Fixing a multi-module project when the parent references in the child modules
     are broken}}.
+
+  * {{{examples/resolve-versions.html}Resolving dependency version ranges}}.
+    

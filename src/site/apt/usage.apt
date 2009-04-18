@@ -113,3 +113,17 @@ mvn versions:display-dependency-updates
     </plugins>
 </reporting>
 +---+
+
+** Resolving version ranges
+
+  If a pom contains version ranges in one or more dependencies, it can be useful 
+  to collapse those ranges to the specific versions used during the build.
+  
+  <<<resolve-ranges>>> goal.
+
+---
+mvn versions:resolve-ranges
+---
+
+  More examples of the {{{examples/resolve-ranges.html} <<<resolve-ranges>>>}} goal.
+

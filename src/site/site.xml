@@ -12,6 +12,7 @@
       <item name="Updating the Parent version" href="examples/update-parent.html"/>
       <item name="Updating a version specified in a property" href="examples/update-properties.html"/>
       <item name="Fixing a multi-module build" href="examples/update-child-modules.html"/>
+      <item name="Resolve version ranges" href="examples/resolve-ranges.html"/>
     </menu>
   </body>
 </project>

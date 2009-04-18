@@ -104,6 +104,11 @@
       <artifactId>maven-reporting-impl</artifactId>
       <version>2.0.4.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-common-artifact-filters</artifactId>
+      <version>1.0</version>
+    </dependency>
 
     <!-- Doxia -->
     <dependency>

@@ -33,6 +33,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLStreamException;
@@ -489,7 +490,9 @@ public class PomHelper
                     event.asEndElement().getName().getLocalPart() ) )
                 {
                     pom.mark( 1 );
-                    haveOldVersion = oldVersion.equals( pom.getBetween( 0, 1 ).trim() );
+                    String compressedPomVersion = StringUtils.deleteWhitespace( pom.getBetween( 0, 1 ).trim() );
+                    String compressedOldVersion = StringUtils.deleteWhitespace( oldVersion );
+                    haveOldVersion = compressedOldVersion.equals( compressedPomVersion );
                 }
                 else if ( matchScopeRegex.matcher( path ).matches() )
                 {
