@@ -19,21 +19,15 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
-import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,38 +45,10 @@ import javax.xml.stream.XMLStreamException;
  * @since 1.0-alpha-3
  */
 public class ResolveRangesMojo
-    extends AbstractVersionsUpdaterMojo
+    extends AbstractVersionsDependencyUpdaterMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
-
-    /**
-     * A comma separated list of artifact patterns to include. Follows the pattern
-     * "groupId:artifactId:type:classifier:version".
-     * 
-     * @parameter expression="${includes}"
-     * @since 1.0-alpha-3
-     */
-    private String includes = null;
-
-    /**
-     * A comma separated list of artifact patterns to exclude. Follows the pattern
-     * "groupId:artifactId:type:classifier:version".
-     * 
-     * @parameter expression="${excludes}"
-     * @since 1.0-alpha-3
-     */
-    private String excludes = null;
-
-    /**
-     * Artifact filter to determine if artifact should be included
-     */
-    private PatternIncludesArtifactFilter includesFilter;
-
-    /**
-     * Artifact filter to determine if artifact should be excluded
-     */
-    private PatternExcludesArtifactFilter excludesFilter;
 
     /**
      * Pattern to match a version range. For example 1.0-20090128.202731-1
@@ -124,6 +90,8 @@ public class ResolveRangesMojo
                 
                 if ( isIncluded( artifact ) )
                 {
+                    getLog().debug( "Resolving version range for dependency: " + artifact );
+
                     if ( PomHelper.setDependencyVersion( pom, artifact.getGroupId(), artifact.getArtifactId(),
                                                          dep.getVersion(), artifact.getVersion() ) )
                     {
@@ -134,102 +102,4 @@ public class ResolveRangesMojo
         }
     }
 
-    /**
-     * Try to find the dependency artifact that matches the given dependency.
-     * 
-     * @param dependency
-     * @return
-     */
-    private Artifact findArtifact( Dependency dependency )
-    {
-        Iterator iter = getProject().getDependencyArtifacts().iterator();
-        while ( iter.hasNext() )
-        {
-            Artifact artifact = (Artifact) iter.next();
-            if ( compare( artifact, dependency ) )
-            {
-                return artifact;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Compare and artifact to a dependency. Returns true only if the groupId, artifactId, type, and classifier are all
-     * equal.
-     * 
-     * @param artifact
-     * @param dep
-     * @return true if artifact and dep refer to the same artifact
-     */
-    private boolean compare( Artifact artifact, Dependency dep )
-    {
-        if ( !StringUtils.equals( artifact.getGroupId(), dep.getGroupId() ) )
-        {
-            return false;
-        }
-        if ( !StringUtils.equals( artifact.getArtifactId(), dep.getArtifactId() ) )
-        {
-            return false;
-        }
-        if ( !StringUtils.equals( artifact.getType(), dep.getType() ) )
-        {
-            return false;
-        }
-        if ( !StringUtils.equals( artifact.getClassifier(), dep.getClassifier() ) )
-        {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Determine if the artifact is included in the list of artifacts to be resolved.
-     * 
-     * @param artifact
-     * @return true if the artifact version should be resolved, false otherwise
-     */
-    private boolean isIncluded( Artifact artifact )
-    {
-        getLog().debug( "Resolving version range for dependency: " + artifact );
-
-        boolean result = true;
-        
-        ArtifactFilter includesFilter = this.getIncludesArtifactFilter();
-        
-        if ( includesFilter != null )
-        {
-            result = includesFilter.include( artifact );
-        }
-        
-        ArtifactFilter excludesFilter = this.getExcludesArtifactFilter();
-        
-        if ( excludesFilter != null )
-        {
-            result = excludesFilter.include( artifact );
-        }
-        
-        return result;
-
-    }
-
-    private ArtifactFilter getIncludesArtifactFilter()
-    {
-        if ( this.includesFilter == null &&  this.includes != null )
-        {
-            List patterns = Arrays.asList( includes.split( "," ) );
-            this.includesFilter = new PatternIncludesArtifactFilter( patterns );
-        }
-        return this.includesFilter;
-    }
-
-    private ArtifactFilter getExcludesArtifactFilter()
-    {
-        if ( this.excludesFilter == null &&  this.excludes != null )
-        {
-            List patterns = Arrays.asList( excludes.split( "," ) );
-            this.excludesFilter = new PatternExcludesArtifactFilter( patterns );
-        }
-        return this.excludesFilter;
-    }
 }

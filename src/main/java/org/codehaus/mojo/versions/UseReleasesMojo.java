@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -44,42 +43,10 @@ import java.util.regex.Pattern;
  * @since 1.0-alpha-3
  */
 public class UseReleasesMojo
-    extends AbstractVersionsUpdaterMojo
+    extends AbstractVersionsDependencyUpdaterMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
-
-    /**
-     * A comma separated list of group ids to update.
-     *
-     * @parameter expression="${includeGroupIds}"
-     * @since 1.0-alpha-3
-     */
-    private String includeGroupIds = null;
-
-    /**
-     * A comma separated list of artifact ids to update.
-     *
-     * @parameter expression="${includeArtifactIds}"
-     * @since 1.0-alpha-3
-     */
-    private String includeArtifactIds = null;
-
-    /**
-     * A comma separated list of group ids to not update.
-     *
-     * @parameter expression="${excludeGroupIds}"
-     * @since 1.0-alpha-3
-     */
-    private String excludeGroupIds = null;
-
-    /**
-     * A comma separated list of artifact ids to not update.
-     *
-     * @parameter expression="${excludeArtifactIds}"
-     * @since 1.0-alpha-3
-     */
-    private String excludeArtifactIds = null;
 
     /**
      * Pattern to match a snapshot version.
@@ -121,27 +88,20 @@ public class UseReleasesMojo
             if ( versionMatcher.matches() )
             {
                 String releaseVersion = versionMatcher.group( 1 );
-                try
+                Artifact artifact = this.findArtifact( dep );
+                if ( !isIncluded( artifact ) )
                 {
-                    Artifact artifact = getHelper().createDependencyArtifact( dep );
-                    if ( !getHelper().isIncluded( artifact, includeGroupIds, includeArtifactIds, excludeGroupIds,
-                                                  excludeArtifactIds ) )
-                    {
                         continue;
-                    }
-                    ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                    if ( versions.containsVersion( releaseVersion ) )
-                    {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             releaseVersion ) )
-                        {
-                            getLog().debug( "Version set to " + releaseVersion + " for dependnecy: " + dep );
-                        }
-                    }
                 }
-                catch ( InvalidVersionSpecificationException e )
+
+                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+                if ( versions.containsVersion( releaseVersion ) )
                 {
-                    throw new MojoExecutionException( e.getMessage(), e );
+                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                                         releaseVersion ) )
+                    {
+                        getLog().debug( "Version set to " + releaseVersion + " for dependnecy: " + dep );
+                    }
                 }
             }
         }

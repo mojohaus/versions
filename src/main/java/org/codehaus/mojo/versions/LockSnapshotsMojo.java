@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.metadata.SnapshotArtifactRepositoryMetadata;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -47,42 +46,10 @@ import java.util.regex.Pattern;
  * @since 1.0-alpha-3
  */
 public class LockSnapshotsMojo
-    extends AbstractVersionsUpdaterMojo
+        extends AbstractVersionsDependencyUpdaterMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
-
-    /**
-     * A comma separated list of group ids to update.
-     *
-     * @parameter expression="${includeGroupIds}"
-     * @since 1.0-alpha-3
-     */
-    private String includeGroupIds = null;
-
-    /**
-     * A comma separated list of artifact ids to update.
-     *
-     * @parameter expression="${includeArtifactIds}"
-     * @since 1.0-alpha-3
-     */
-    private String includeArtifactIds = null;
-
-    /**
-     * A comma separated list of group ids to not update.
-     *
-     * @parameter expression="${excludeGroupIds}"
-     * @since 1.0-alpha-3
-     */
-    private String excludeGroupIds = null;
-
-    /**
-     * A comma separated list of artifact ids to not update.
-     *
-     * @parameter expression="${excludeArtifactIds}"
-     * @since 1.0-alpha-3
-     */
-    private String excludeArtifactIds = null;
 
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
@@ -116,18 +83,12 @@ public class LockSnapshotsMojo
         while ( iter.hasNext() )
         {
             Dependency dep = (Dependency) iter.next();
-            try
+                
+            if ( !isIncluded( this.findArtifact( dep ) ) )
             {
-                if ( !getHelper().isIncluded( getHelper().createDependencyArtifact( dep ), includeGroupIds,
-                                              includeArtifactIds, excludeGroupIds, excludeArtifactIds ) )
-                {
                     continue;
-                }
             }
-            catch ( InvalidVersionSpecificationException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
+
             String version = dep.getVersion();
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( versionMatcher.find() && versionMatcher.end() == version.length() )
@@ -209,4 +170,5 @@ public class LockSnapshotsMojo
         }
         return version;
     }
+
 }
