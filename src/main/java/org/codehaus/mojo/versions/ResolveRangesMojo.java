@@ -26,17 +26,16 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
+import javax.xml.stream.XMLStreamException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.stream.XMLStreamException;
-
 /**
  * Attempts to resolve dependency version ranges to the specific version being used in the build. For example a version
  * range of "[1.0, 1.2)" would be resolved to the specific version currently in use "1.1".
- * 
+ *
  * @author Paul Gier
  * @goal resolve-ranges
  * @requiresProject true
@@ -60,8 +59,8 @@ public class ResolveRangesMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException when things go wrong in a very bad way
-     * @throws XMLStreamException when things go wrong with XML streaming
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -69,7 +68,16 @@ public class ResolveRangesMojo
     {
         // Note we have to get the dependencies from the model because the dependencies in the 
         // project may have already had their range resolved [MNG-4138]
-        resolveRanges( pom, getProject().getModel().getDependencies() );
+        if ( getProject().getModel().getDependencyManagement() != null
+            && getProject().getModel().getDependencyManagement().getDependencies() != null
+            && isProcessingDependencyManagement() )
+        {
+            resolveRanges( pom, getProject().getModel().getDependencyManagement().getDependencies() );
+        }
+        if ( isProcessingDependencies() )
+        {
+            resolveRanges( pom, getProject().getModel().getDependencies() );
+        }
     }
 
     private void resolveRanges( ModifiedPomXMLEventReader pom, Collection dependencies )
@@ -83,11 +91,11 @@ public class ResolveRangesMojo
             Dependency dep = (Dependency) iter.next();
 
             Matcher versionMatcher = matchRangeRegex.matcher( dep.getVersion() );
-            
+
             if ( versionMatcher.find() )
             {
                 Artifact artifact = this.findArtifact( dep );
-                
+
                 if ( isIncluded( artifact ) )
                 {
                     getLog().debug( "Resolving version range for dependency: " + artifact );

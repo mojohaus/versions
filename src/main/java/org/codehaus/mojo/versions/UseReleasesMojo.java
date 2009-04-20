@@ -68,11 +68,14 @@ public class UseReleasesMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        if ( getProject().getDependencyManagement() != null )
+        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
             useReleases( pom, getProject().getDependencyManagement().getDependencies() );
         }
-        useReleases( pom, getProject().getDependencies() );
+        if ( isProcessingDependencies() )
+        {
+            useReleases( pom, getProject().getDependencies() );
+        }
     }
 
     private void useReleases( ModifiedPomXMLEventReader pom, Collection dependencies )
@@ -91,7 +94,7 @@ public class UseReleasesMojo
                 Artifact artifact = this.findArtifact( dep );
                 if ( !isIncluded( artifact ) )
                 {
-                        continue;
+                    continue;
                 }
 
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );

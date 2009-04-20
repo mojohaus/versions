@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  * @since 1.0-alpha-3
  */
 public class LockSnapshotsMojo
-        extends AbstractVersionsDependencyUpdaterMojo
+    extends AbstractVersionsDependencyUpdaterMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -68,11 +68,14 @@ public class LockSnapshotsMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        if ( getProject().getDependencyManagement() != null )
+        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
             lockSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
         }
-        lockSnapshots( pom, getProject().getDependencies() );
+        if ( isProcessingDependencies() )
+        {
+            lockSnapshots( pom, getProject().getDependencies() );
+        }
     }
 
     private void lockSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
@@ -83,10 +86,10 @@ public class LockSnapshotsMojo
         while ( iter.hasNext() )
         {
             Dependency dep = (Dependency) iter.next();
-                
+
             if ( !isIncluded( this.findArtifact( dep ) ) )
             {
-                    continue;
+                continue;
             }
 
             String version = dep.getVersion();

@@ -67,11 +67,14 @@ public class UnlockSnapshotsMojo
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
 
-        if ( getProject().getDependencyManagement() != null )
+        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
             unlockSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
         }
-        unlockSnapshots( pom, getProject().getDependencies() );
+        if ( isProcessingDependencies() )
+        {
+            unlockSnapshots( pom, getProject().getDependencies() );
+        }
     }
 
     private void unlockSnapshots( ModifiedPomXMLEventReader pom, List dependencies )
@@ -84,7 +87,7 @@ public class UnlockSnapshotsMojo
 
             if ( !isIncluded( this.findArtifact( dep ) ) )
             {
-                    continue;
+                continue;
             }
 
             String version = dep.getVersion();

@@ -56,6 +56,22 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @since 1.0-alpha-3
      */
     private String excludes = null;
+    
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @parameter expression="${processDependencies}" defaultValue="true"
+     * @since 1.0-alpha-3
+     */
+    private Boolean processDependencies;
+    
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @parameter expression="${processDependencyManagement}" defaultValue="true"
+     * @since 1.0-alpha-3
+     */
+    private Boolean processDependencyManagement;
 
     /**
      * Artifact filter to determine if artifact should be included
@@ -67,6 +83,26 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      */
     private PatternExcludesArtifactFilter excludesFilter;
 
+    /**
+     * Should the project/dependencies section of the pom be processed.
+     * @return returns <code>true if the project/dependencies section of the pom should be processed.
+     * @since 1.0-alpha-3
+     */
+    public boolean isProcessingDependencies() {
+        // true if true or null
+        return !Boolean.FALSE.equals( processDependencies );
+    }
+    
+    /**
+     * Should the project/dependencyManagement section of the pom be processed.
+     * @return returns <code>true if the project/dependencyManagement section of the pom should be processed.
+     * @since 1.0-alpha-3
+     */
+    public boolean isProcessingDependencyManagement() {
+        // true if true or null
+        return !Boolean.FALSE.equals( processDependencyManagement );
+    }
+    
     /**
      * Try to find the dependency artifact that matches the given dependency.
      *
