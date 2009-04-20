@@ -24,6 +24,7 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -324,5 +325,30 @@ public class ArtifactVersions
             }
         }
         return false;
+    }
+
+    /**
+     * Returns all the available versions newer than the provided version.
+     *
+     * @param version The lower (exclusive) bound.
+     * @return all the available versions newer than the provided version.
+     * @since 1.0-alpha-3
+     */
+    public ArtifactVersion[] getNewerVersions( String version )
+    {
+        return getNewerVersions( version, true );
+    }
+
+    /**
+     * Returns all available versions within the specified version range.
+     *
+     * @param version          The lower (exclusive) bound.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return all the available versions newer than the provided version.
+     * @since 1.0-alpha-3
+     */
+    public ArtifactVersion[] getNewerVersions( String version, boolean includeSnapshots )
+    {
+        return getNewerVersions( new DefaultArtifactVersion( version), includeSnapshots );
     }
 }

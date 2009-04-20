@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -91,6 +90,7 @@ public class UseLatestReleasesMojo
 
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
+                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
                 continue;
             }
 
@@ -98,30 +98,23 @@ public class UseLatestReleasesMojo
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( !versionMatcher.matches() )
             {
-                Artifact artifact = this.findArtifact( dep );
+                Artifact artifact = this.toArtifact( dep );
                 if ( !isIncluded( artifact ) )
                 {
                     continue;
                 }
 
+                getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                try
+                ArtifactVersion[] newer = versions.getNewerVersions( version, false );
+                if ( newer.length > 0 )
                 {
-                    ArtifactVersion[] newer = versions.getNewerVersions( artifact.getSelectedVersion(), false );
-                    if ( newer.length > 0 )
+                    String newVersion = newer[newer.length - 1].toString();
+                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                                         newVersion ) )
                     {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             newer[newer.length - 1].toString() ) )
-                        {
-                            getLog().debug(
-                                "Version set to " + newer[newer.length - 1].toString() + " for dependnecy: " + dep );
-                        }
+                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
                     }
-                }
-                catch ( OverConstrainedVersionException e )
-                {
-                    getLog().warn( "This should never happen as your build should not work at all if this is thrown",
-                                   e );
                 }
             }
         }

@@ -89,6 +89,7 @@ public class UseReleasesMojo
 
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
+                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
                 continue;
             }
 
@@ -97,19 +98,20 @@ public class UseReleasesMojo
             if ( versionMatcher.matches() )
             {
                 String releaseVersion = versionMatcher.group( 1 );
-                Artifact artifact = this.findArtifact( dep );
+                Artifact artifact = this.toArtifact( dep );
                 if ( !isIncluded( artifact ) )
                 {
                     continue;
                 }
 
+                getLog().debug( "Looking for a release of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 if ( versions.containsVersion( releaseVersion ) )
                 {
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
                                                          releaseVersion ) )
                     {
-                        getLog().debug( "Version set to " + releaseVersion + " for dependnecy: " + dep );
+                        getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
                     }
                 }
             }

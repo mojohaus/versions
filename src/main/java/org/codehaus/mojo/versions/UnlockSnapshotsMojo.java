@@ -87,10 +87,11 @@ public class UnlockSnapshotsMojo
 
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
+                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
                 continue;
             }
-            
-            if ( !isIncluded( this.findArtifact( dep ) ) )
+
+            if ( !isIncluded( this.toArtifact( dep ) ) )
             {
                 continue;
             }
@@ -103,7 +104,7 @@ public class UnlockSnapshotsMojo
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
                                                      unlockedVersion ) )
                 {
-                    getLog().debug( "Version set to " + unlockedVersion + " for dependnecy: " + dep );
+                    getLog().info( "Unlocked " + toString( dep ) + " to version " + unlockedVersion );
                 }
             }
         }

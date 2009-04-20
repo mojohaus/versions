@@ -101,7 +101,7 @@ public class ResolveRangesMojo
             {
                 Artifact artifact = this.findArtifact( dep );
 
-                if ( isIncluded( artifact ) )
+                if ( artifact != null && isIncluded( artifact ) )
                 {
                     getLog().debug( "Resolving version range for dependency: " + artifact );
 
