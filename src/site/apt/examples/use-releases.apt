@@ -16,23 +16,17 @@
  ~~ under the License.
 
  -----
- Unlocking snapshot dependencies
+ Replacing -SNAPSHOT versions with their corresponding releases
  -----
  Stephen Connolly, Paul Gier
  ------
  2009-04-20
  ------
 
-Unlocking snapshot dependencies
+Replacing -SNAPSHOT versions with their corresponding releases
 
-  If your pom contains a lot of -SNAPSHOT dependencies and those -SNAPSHOT dependencies are a moving target, it
-  can sometimes be helpful to temporarily replace the -SNAPSHOT with a locked -YYYYMMDD.HHMMSS-NNN snapshot.
-  In the long term, you will need to return to the -SNAPSHOT dependencies and then replace them with their
-  release version, but if you need a short term semi-reproducible build, locked -SNAPSHOTs can sometimes be a
-  useful hack.
-
-  If your pom has specified locked snapshot versions (these will end with the form -YYYYMMDD.HHMMSS-NNN) for certain
-  ependencies:
+  If you need a new feature that is being developed in a dependency of your project, and that feature has not been
+  released yet, you may decide to add a dependency on the -SNAPSHOT version of the next release:
 
 +---+
   <dependencies>
@@ -40,20 +34,21 @@ Unlocking snapshot dependencies
     <dependency>
       <groupId>org.codehaus.cargo</groupId>
       <artifactId>cargo-core-api</artifactId>
-      <version>1.0-20081117.213112-16</version>
+      <version>1.0-alpha-7-SNAPSHOT</version>
     </dependency>
 
   </dependencies>
 +---+
 
-  Using the <<<unlock-snapshots>>> goal, the locked snapshot versions can be unlocked again to regular -SNAPSHOT
-  versions.
-  
+  At some stage, this -SNAPSHOT version will be released. The <<<use-releases>>> goal, will look at all your project
+  dependencies and see what -SNAPSHOT versions have been released.  If any of your projects -SNAPSHOT versions have
+  a corresponding release version, then it will replace the -SNAPSHOT with its corresponding release version.
+
 ---
 mvn versions:unlock-snapshots
 ---
 
-  The pom dependencies are modified to look like the following.
+  When org.codehaus.cargo:cargo-core-api releases the 1.0-alpha-7 version this would update the pom to look like:
 
 +---+
   <dependencies>
@@ -61,18 +56,18 @@ mvn versions:unlock-snapshots
     <dependency>
       <groupId>org.codehaus.cargo</groupId>
       <artifactId>cargo-core-api</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0-alpha-7</version>
     </dependency>
     
   </dependencies>
 +---+
 
-  You can restrict which dependencies should have their -SNAPSHOT versions unlocked.  For example,
+  You can restrict which dependencies should be processed.  For example,
   the following will only match dependencies that match the groupId "org.codehaus.plexus" and artifactId
   "plexus-utils"
 
 ---
-mvn versions:unlock-snapshots -Dincludes=org.codehaus.plexus:plexus-utils
+mvn versions:use-releases -Dincludes=org.codehaus.plexus:plexus-utils
 ---
 
   The <<<includes>>> and <<<excludes>>> parameters follow the format <<<groupId:artifactId:type:classifier>>>.
@@ -83,7 +78,7 @@ mvn versions:unlock-snapshots -Dincludes=org.codehaus.plexus:plexus-utils
   artifactId matching "junit".
 
 ---
-mvn versions:unlock-snapshots -Dincludes=org.codehaus.plexus:*,junit:junit
+mvn versions:use-releases -Dincludes=org.codehaus.plexus:*,junit:junit
 ---
 
   By default, both the <<<project/dependencyManagment>>> and <<<project/dependencies>>> sections will be processed.
@@ -93,12 +88,12 @@ mvn versions:unlock-snapshots -Dincludes=org.codehaus.plexus:*,junit:junit
   This example will only process the <<<project/dependencyManagment>>> section of your pom:
 
 ---
-mvn versions:unlock-snapshots -DprocessDependencies=false
+mvn versions:use-releases -DprocessDependencies=false
 ---
 
   While this example will only process the <<<project/dependencies>>> section of your pom:
 
 ---
-mvn versions:unlock-snapshots -DprocessDependencyManagement=false
+mvn versions:use-releases -DprocessDependencyManagement=false
 ---
 

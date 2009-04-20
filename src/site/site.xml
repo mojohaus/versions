@@ -13,6 +13,9 @@
       <item name="Updating a version specified in a property" href="examples/update-properties.html"/>
       <item name="Fixing a multi-module build" href="examples/update-child-modules.html"/>
       <item name="Resolve version ranges" href="examples/resolve-ranges.html"/>
+      <item name="Locking snapshot dependencies" href="examples/lock-snapshots.html"/>
+      <item name="Unlocking snapshot dependencies" href="examples/unlock-snapshots.html"/>
+      <item name="Replacing -SNAPSHOT versions with their corresponding releases" href="examples/use-releases.html"/>
     </menu>
   </body>
 </project>

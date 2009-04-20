@@ -16,14 +16,14 @@
  ~~ under the License.
 
  -----
- Lock Snapshots
+ Locking snapshot dependencies
  -----
  Stephen Connolly, Paul Gier
  ------
  2009-04-20
  ------
 
-Lock Snapshots
+Locking snapshot dependencies
 
   If your pom contains a lot of -SNAPSHOT dependencies and those -SNAPSHOT dependencies are a moving target, it
   can sometimes be helpful to temporarily replace the -SNAPSHOT with a locked -YYYYMMDD.HHMMSS-NNN snapshot.
