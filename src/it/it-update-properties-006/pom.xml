@@ -41,18 +41,26 @@
         <artifactId>@project.artifactId@</artifactId>
         <version>@project.version@</version>
         <configuration>
-          <linkItems>
-            <linkItem>
-              <property>api</property>
-              <groupId>localhost</groupId>
-              <artifactId>dummy-api</artifactId>
-            </linkItem>
-            <linkItem>
-              <property>impl</property>
-              <groupId>localhost</groupId>
-              <artifactId>dummy-impl</artifactId>
-            </linkItem>
-          </linkItems>
+          <properties>
+            <property>
+              <name>api</name>
+              <dependencies>
+                <dependency>
+                  <groupId>localhost</groupId>
+                  <artifactId>dummy-api</artifactId>
+                </dependency>
+              </dependencies>
+            </property>
+            <property>
+              <name>impl</name>
+              <dependencies>
+                <dependency>
+                  <groupId>localhost</groupId>
+                  <artifactId>dummy-impl</artifactId>
+                </dependency>
+              </dependencies>
+            </property>
+          </properties>
         </configuration>
       </plugin>
     </plugins>

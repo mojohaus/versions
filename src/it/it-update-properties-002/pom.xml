@@ -40,14 +40,18 @@
         <artifactId>@project.artifactId@</artifactId>
         <version>@project.version@</version>
         <configuration>
-          <linkItems>
-            <linkItem>
-              <property>api</property>
-              <groupId>localhost</groupId>
-              <artifactId>dummy-api</artifactId>
+          <properties>
+            <property>
+              <name>api</name>
+              <dependencies>
+                <dependency>
+                  <groupId>localhost</groupId>
+                  <artifactId>dummy-api</artifactId>
+                </dependency>
+              </dependencies>
               <version>[1.0,2.0-!)</version>
-            </linkItem>
-          </linkItems>
+            </property>
+          </properties>
         </configuration>
       </plugin>
     </plugins>
