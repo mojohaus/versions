@@ -1,0 +1,113 @@
+ ~~ Licensed to the Apache Software Foundation (ASF) under one
+ ~~ or more contributor license agreements.  See the NOTICE file
+ ~~ distributed with this work for additional information
+ ~~ regarding copyright ownership.  The ASF licenses this file
+ ~~ to you under the Apache License, Version 2.0 (the
+ ~~ "License"); you may not use this file except in compliance
+ ~~ with the License.  You may obtain a copy of the License at
+ ~~
+ ~~   http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing,
+ ~~ software distributed under the License is distributed on an
+ ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~~ KIND, either express or implied.  See the License for the
+ ~~ specific language governing permissions and limitations
+ ~~ under the License.
+
+ -----
+ Version number rules
+ -----
+ Stephen Connolly
+ ------
+ 2009-04-20
+ ------
+
+Version number rules
+
+* Introduction
+
+  The current implementation of
+  {{{http://maven.apache.org/ref/current/maven-artifact/xref/org/apache/maven/artifact/versioning/DefaultArtifactVersion.html}<<<DefaultArtifactVersion>>>}}
+  in the core of Maven expects that version numbers will have a very specific format:
+
+  <<< <MajorVersion [> . <MinorVersion [> . <IncrementalVersion ] ] [> - <BuildNumber | Qualifier ]> >>>
+
+  Where <MajorVersion>, <MinorVersion>, <IncrementalVersion> and <BuildNumber> are all numeric and <Qualifier>
+  is a string. If your version number does not match this format, then the entire version number is treated as being
+  the <Qualifier>.
+
+  If your version numbers do not match this scheme, you may face issues with
+
+    * version ranges (unfortunately there is nothing that the <<<versions-maven-plugin>>> can do to help you with
+      your problems with version ranges and your version numbering scheme... well you could replace your
+      version ranges with properties and use the update-properties goal)
+
+    * goals in this plugin that sort versions, for example update-properties (you can do things to help with these
+      kinds of problems)
+
+  The <<<versions-maven-plugin>>> knows three rules for comparing version numbers:
+
+    [<<<maven>>>] The standard Maven 2.x version numbering scheme.
+
+    [<<<mercury>>>] The "new" version numbering scheme used by the {{{http://maven.apache.org/mercury/index.html}Maven Mercury}.
+
+    [<<<numeric>>>] An alternative version numbering scheme, similar to <<<mercury>>> but with no "special" qualifiers.
+    
+  The <<<versions-maven-plugin>>> will assume that all version numbers follow the <<<maven>>> scheme unless you tell
+  it otherwise.
+
+* Rules.xml
+
+  To specify the version schemes to use, you must define a rule-set xml file, for example:
+
+---
+<ruleset comparisonMethod="maven">
+  <rules>
+    <rule groupId="*.maven" comparisonMethod="mercury"/>
+    <rule groupId="com.mycompany" comparisonMethod="numeric"/>
+    <rule groupId="com.mycompany.maven" comparisonMethod="maven"/>
+    <rule groupId="com.mycompany.maven" artifactId="old-maven-plugin" comparisonMethod="mercury"/>
+  </rules>
+</ruleset>
+---
+
+  You can then use the <<<rulesUri>>> parameter to specify the rule-set to be used by the
+  <<<versions-maven-plugin>>>.
+
+  Note: the <<<groupId>>> attribute in the <<<rule>>> elements has a lazy <<<.*>>> at the end, such that
+  <<<com.mycompany>>> will match <<<com.mycompany>>>, <<<com.mycompany.foo>>>, <<<com.mycompany.foo.bar>>>, etc.
+
+  If you have your ruleset xml file hosted at, for example, http://www.mycompany.com/maven-version-rules.xml
+  then the following configuration in your corporate pom would ensure that all projects use this rule set.
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
+        <configuration>
+          ...
+          <properties>
+            ...
+            <rulesUri>http://www.mycompany.com/maven-version-rules.xml</rulesUri>
+            ...
+          </properties>
+          ...
+        </configuration>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+  

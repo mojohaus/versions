@@ -74,25 +74,10 @@ under the License.
           <code>1.0.0.9</code>
           &gt;<code>1.0.0.23</code>.
         </p>
-        <p>If you need version numbers to be sorted "correctly" set the
-          <a href="update-parent-mojo.html#comparisonMethod">
-            <code>comparisonMethod</code>
-          </a>
-          parameter to
-          <code>numeric</code>
-          as this will compare very long version numbers "correctly" provided each number is
-          separated by
-          <code>.</code>
-          (in addition any if either number contains a non-numeric component, that part
-          will be compared using
-          <code>String</code>
-          comparison... thus
-          <code>2.0.0.5.7.95</code>
-          &lt;
-          <code>2.0.0.5.27.5</code>
-          &lt;
-          <code>2.0.0.5.7a.1</code>
-          &lt;<code>2.0.0.6.0.0</code>)
+        <p>If you need version numbers to be sorted "correctly" you will need to define some
+          <a href="version-rules.html">
+            version number comparison rules
+          </a>.
         </p>
       </answer>
     </faq>

@@ -5,6 +5,7 @@
       <item name="Goals" href="plugin-info.html"/>
       <item name="Usage" href="usage.html"/>
       <item name="FAQ" href="faq.html"/>
+      <item name="Version number rules" href="version-rules.html"/>
     </menu>
     <menu name="Examples">
       <item name="Checking for new dependency updates" href="examples/display-dependency-updates.html"/>
