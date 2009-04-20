@@ -22,9 +22,9 @@ under the License.
 <model xsd.namespace="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0"
        xsd.targetNamespace="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0">
   <id>rule</id>
-  <name>Rule</name>
+  <name>Version number comparison rules</name>
   <description>
-    A rule for handling Maven artifacts.
+    A collection of version number comparison rules.
   </description>
   <defaults>
     <default>
