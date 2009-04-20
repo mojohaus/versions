@@ -102,7 +102,7 @@ mvn versions:display-dependency-updates
   This goal helps when you use properties to define versions.  Please see the
   {{{examples/update-properties.html}<<<update-properties>>> example}}.
 
-** Resolving version ranges
+** Resolving version ranges (Note: modifies <<<pom.xml>>> files)
 
   If a pom contains version ranges in one or more dependencies, it can be useful 
   to collapse those ranges to the specific versions used during the build, just invoke the <<<resolve-ranges>>> goal.
@@ -113,7 +113,7 @@ mvn versions:resolve-ranges
 
   More examples of the {{{examples/resolve-ranges.html} <<<resolve-ranges>>>}} goal.
 
-** Locking and unlocking -SNAPSHOT versions
+** Locking and unlocking -SNAPSHOT versions (Note: modifies <<<pom.xml>>> files)
 
   If your pom contains a lot of -SNAPSHOT dependencies and those -SNAPSHOT dependencies are a moving target, it
   can sometimes be helpful to temporarily replace the -SNAPSHOT with a locked -YYYYMMDD.HHMMSS-NNN snapshot.
@@ -139,7 +139,7 @@ mvn versions:unlock-snapshots
 
   More examples of the {{{examples/unlock-snapshots.html} <<<unlock-snapshots>>>}} goal.
 
-** Picking up releases of -SNAPSHOT dependencies
+** Picking up releases of -SNAPSHOT dependencies (Note: modifies <<<pom.xml>>> files)
 
   It is better to depend on a released version of a dependency, rather than the -SNAPSHOT of that version.  For
   example, it is better to depend on version 1.3.4 rather than 1.3.4-SNAPSHOT.  Of course if you are waiting for
