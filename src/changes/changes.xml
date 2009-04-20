@@ -7,6 +7,12 @@
   </properties>
   <body>
     <release version="1.0-alpha-3-SNAPSHOT" date="2009-01-26" description="Third alpha release">
+      <action dev="pgier" type="add" issue="MVERSIONS-24">
+        Enable resolution of dependency version ranges
+      </action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-21">
+        Add mojo to lock snapshots to timestamp version
+      </action>
       <action dev="stephenconnolly" type="fix" issue="MVERSIONS-3">
         display-plugin-updates now identifys the
         plugin version as not being provided when derived from the super-pom
