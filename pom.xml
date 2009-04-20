@@ -185,6 +185,8 @@
         <version>1.0.1</version>
         <executions>
           <execution>
+            <id>generate-sources</id>
+            <phase>generate-sources</phase>
             <goals>
               <!-- Generate the xpp3 reader code -->
               <goal>xpp3-reader</goal>
@@ -193,6 +195,23 @@
               <!-- Generate the Java sources for the model itself -->
               <goal>java</goal>
             </goals>
+          </execution>
+          <execution>
+            <id>site-doc</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>xdoc</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>site-xsd</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>xsd</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/generated-site/resources/xsd</outputDirectory>
+            </configuration>
           </execution>
         </executions>
         <configuration>
