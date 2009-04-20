@@ -16,46 +16,40 @@
  ~~ under the License.
 
  -----
- Resolve Ranges
+ Lock Snapshots
  -----
- Paul Gier, Stephen Connolly
+ Stephen Connolly, Paul Gier
  ------
  2009-04-20
  ------
 
-Resolve ranges
+Lock Snapshots
 
-  A pom may specify version ranges for certain dependencies.
+  If your pom contains a lot of -SNAPSHOT dependencies and those -SNAPSHOT dependencies are a moving target, it
+  can sometimes be helpful to temporarily replace the -SNAPSHOT with a locked -YYYYMMDD.HHMMSS-NNN snapshot.
+  In the long term, you will need to return to the -SNAPSHOT dependencies and then replace them with their
+  release version, but if you need a short term semi-reproducible build, locked -SNAPSHOTs can sometimes be a
+  useful hack.
+
+  A pom will most likely specify -SNAPSHOT versions for certain dependencies.
 
 +---+
   <dependencies>
   
     <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-project</artifactId>
-      <version>[2.0.7, 2.0.9)</version>
+      <groupId>org.codehaus.cargo</groupId>
+      <artifactId>cargo-core-api</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
-    
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>[1.5.0, 1.5.1 ]</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>[3.0, 3.8.2)</version>
-    </dependency>
-    
+
   </dependencies>
 +---+
 
-  Using the resolve-ranges goal, the version ranges can be set to the specific version
-  used in the build.
+  Using the <<<lock-snapshots>>> goal, the version range can be locked down to the specific timestamped snapshot
+  version used in the build.
   
 ---
-mvn versions:resolve-ranges
+mvn versions:lock-snapshots
 ---
 
   The pom dependencies are modified to look like the following.
@@ -64,32 +58,20 @@ mvn versions:resolve-ranges
   <dependencies>
   
     <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-project</artifactId>
-      <version>2.0.8</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>1.5.1</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <groupId>org.codehaus.cargo</groupId>
+      <artifactId>cargo-core-api</artifactId>
+      <version>1.0-20081117.213112-16</version>
     </dependency>
     
   </dependencies>
 +---+
 
-  You can restrict which dependencies should have their ranges collapsed.  For example,
+  You can restrict which dependencies should have their -SNAPSHOT versions locked down.  For example,
   the following will only match dependencies that match the groupId "org.codehaus.plexus" and artifactId
   "plexus-utils"
 
 ---
-mvn versions:resolve-ranges -Dincludes=org.codehaus.plexus:plexus-utils
+mvn versions:lock-snapshots -Dincludes=org.codehaus.plexus:plexus-utils
 ---
 
   The <<<includes>>> and <<<excludes>>> parameters follow the format <<<groupId:artifactId:type:classifier>>>.
@@ -100,7 +82,7 @@ mvn versions:resolve-ranges -Dincludes=org.codehaus.plexus:plexus-utils
   artifactId matching "junit".
 
 ---
-mvn versions:resolve-ranges -Dincludes=org.codehaus.plexus:*,junit:junit
+mvn versions:lock-snapshots -Dincludes=org.codehaus.plexus:*,junit:junit
 ---
 
   By default, both the <<<project/dependencyManagment>>> and <<<project/dependencies>>> sections will be processed.
@@ -110,12 +92,12 @@ mvn versions:resolve-ranges -Dincludes=org.codehaus.plexus:*,junit:junit
   This example will only process the <<<project/dependencyManagment>>> section of your pom:
 
 ---
-mvn versions:resolve-ranges -DprocessDependencies=false
+mvn versions:lock-snapshots -DprocessDependencies=false
 ---
 
   While this example will only process the <<<project/dependencies>>> section of your pom:
 
 ---
-mvn versions:resolve-ranges -DprocessDependencyManagement=false
+mvn versions:lock-snapshots -DprocessDependencyManagement=false
 ---
 

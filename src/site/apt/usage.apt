@@ -34,11 +34,19 @@ Usage
 
   The following goals:
 
+    * {{{lock-snapshots-mojo.html}versions:lock-snapshots}}
+
+    * {{{resolve-ranges-mojo.html}versions:resolve-ranges}}
+
+    * {{{unlock-snapshots-mojo.html}versions:unlock-snapshots}}
+
     * {{{update-child-modules-mojo.html}versions:update-child-modules}}
 
     * {{{update-parent-mojo.html}versions:update-parent}}
 
     * {{{update-properties-mojo.html}versions:update-properties}}
+
+    * {{{use-releases-mojo.html}versions:use-releases}}
 
   modify the <<<pom.xml>>> file, you need to run these goals separately from any other goals or life-cycle phases.
 
@@ -117,13 +125,55 @@ mvn versions:display-dependency-updates
 ** Resolving version ranges
 
   If a pom contains version ranges in one or more dependencies, it can be useful 
-  to collapse those ranges to the specific versions used during the build.
-  
-  <<<resolve-ranges>>> goal.
+  to collapse those ranges to the specific versions used during the build, just invoke the <<<resolve-ranges>>> goal.
 
 ---
 mvn versions:resolve-ranges
 ---
 
   More examples of the {{{examples/resolve-ranges.html} <<<resolve-ranges>>>}} goal.
+
+** Locking and unlocking -SNAPSHOT versions
+
+  If your pom contains a lot of -SNAPSHOT dependencies and those -SNAPSHOT dependencies are a moving target, it
+  can sometimes be helpful to temporarily replace the -SNAPSHOT with a locked -YYYYMMDD.HHMMSS-NNN snapshot.
+  In the long term, you will need to return to the -SNAPSHOT dependencies and then replace them with their
+  release version, but if you need a short term semi-reproducible build, locked -SNAPSHOTs can sometimes be a
+  useful hack.
+
+  To replace -SNAPSHOT dependencies with their current locked snapshot equivalents, just invoke the <<<lock-snapshots>>>
+  goal.
+
+---
+mvn versions:lock-snapshots
+---
+
+  More examples of the {{{examples/lock-snapshots.html} <<<lock-snapshots>>>}} goal.
+
+  To return to regular -SNAPSHOT dependencies, i.e. replace 1.9.6-20090103.152537-3 with 1.9.6-SNAPSHOT, just invoke
+  the <<<unlock-snapshots>>> goal.
+
+---
+mvn versions:unlock-snapshots
+---
+
+  More examples of the {{{examples/unlock-snapshots.html} <<<unlock-snapshots>>>}} goal.
+
+** Picking up releases of -SNAPSHOT dependencies
+
+  It is better to depend on a released version of a dependency, rather than the -SNAPSHOT of that version.  For
+  example, it is better to depend on version 1.3.4 rather than 1.3.4-SNAPSHOT.  Of course if you are waiting for
+  1.3.4 to be released, you will have had to add 1.3.4-SNAPSHOT as a dependency.
+
+  The <<<use-releases>>> goal will look at your project dependencies and see if any -SNAPSHOT versions have been
+  released, replacing the -SNAPSHOT version with the corresponding release version.
+
+  To replace -SNAPSHOT dependencies with their corresponding release version, just invoke the <<<use-releases>>>
+  goal.
+
+---
+mvn versions:use-releases
+---
+
+  More examples of the {{{examples/use-releases.html} <<<lock-snapshots>>>}} goal.
 
