@@ -45,8 +45,8 @@ Lock Snapshots
   </dependencies>
 +---+
 
-  Using the <<<lock-snapshots>>> goal, the version range can be locked down to the specific timestamped snapshot
-  version used in the build.
+  Using the <<<lock-snapshots>>> goal, the version can be locked down to the specific timestamped snapshot version used
+  in the build.
   
 ---
 mvn versions:lock-snapshots
