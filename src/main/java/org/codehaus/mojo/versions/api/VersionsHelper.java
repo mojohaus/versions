@@ -138,17 +138,4 @@ public interface VersionsHelper
      */
     Set/*<Artifact>*/ extractArtifacts( Collection/*<MavenProject>*/ mavenProjects );
 
-    /**
-     * Returns <code>true</code> if the artifact matches the include/exclude rules.  Include (when defined) superceeds exclude.
-     *
-     * @param artifact           The artifact to query
-     * @param includeGroupIds    A comma separated list of group Ids to include, or <code>null</code> or an empty string to include any.
-     * @param includeArtifactIds A comma separated list of artifact Ids to include, or <code>null</code> or an empty string to include any.
-     * @param excludeGroupIds    A comma separated list of group Ids to exclude, or <code>null</code> or an empty string to exclude none.
-     * @param excludeArtifactIds A comma separated list of artifact Ids to exclude, or <code>null</code> or an empty string to exclude none.
-     * @return <code>true</code> if the artifact can be included.
-     */
-    boolean isIncluded( Artifact artifact, String includeGroupIds, String includeArtifactIds, String excludeGroupIds,
-                        String excludeArtifactIds );
-
 }
