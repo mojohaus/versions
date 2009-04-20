@@ -86,6 +86,12 @@ public class UseReleasesMojo
         while ( i.hasNext() )
         {
             Dependency dep = (Dependency) i.next();
+
+            if ( isExcludeReactor() && isProducedByReactor( dep ) )
+            {
+                continue;
+            }
+
             String version = dep.getVersion();
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( versionMatcher.matches() )

@@ -85,6 +85,11 @@ public class UnlockSnapshotsMojo
         {
             Dependency dep = (Dependency) iter.next();
 
+            if ( isExcludeReactor() && isProducedByReactor( dep ) )
+            {
+                continue;
+            }
+            
             if ( !isIncluded( this.findArtifact( dep ) ) )
             {
                 continue;

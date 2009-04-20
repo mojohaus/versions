@@ -24,6 +24,7 @@ import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
+import org.apache.maven.project.MavenProject;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Iterator;
@@ -75,13 +76,23 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
 
     /**
      * Artifact filter to determine if artifact should be included
+     * @since 1.0-alpha-3
      */
     private PatternIncludesArtifactFilter includesFilter;
 
     /**
      * Artifact filter to determine if artifact should be excluded
+     * @since 1.0-alpha-3
      */
     private PatternExcludesArtifactFilter excludesFilter;
+
+    /**
+     * Whether to skip processing dependencies that are produced as part of the current reactor.
+     *
+     * @parameter expression="${excludeReactor}" defaultValue="true"
+     * @since 1.0-alpha-3
+     */
+    private Boolean excludeReactor;
 
     /**
      * Should the project/dependencies section of the pom be processed.
@@ -104,10 +115,21 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
     }
     
     /**
+     * Should the artifacts produced in the current reactor be excluded from processing.
+     * @return returns <code>true if the artifacts produced in the current reactor should be excluded from processing.
+     * @since 1.0-alpha-3
+     */
+    public boolean isExcludeReactor() {
+        // true if true or null
+        return !Boolean.FALSE.equals( excludeReactor );
+    }
+    
+    /**
      * Try to find the dependency artifact that matches the given dependency.
      *
      * @param dependency
      * @return
+     * @since 1.0-alpha-3
      */
     protected Artifact findArtifact( Dependency dependency )
     {
@@ -121,6 +143,47 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
             }
         }
         return null;
+    }
+
+    /**
+     * Returns <code>true</code> if the dependency is produced by the current reactor.
+     * @param dependency the dependency to heck.
+     * @return <code>true</code> if the dependency is produced by the current reactor.
+     * @since 1.0-alpha-3
+     */
+    protected boolean isProducedByReactor( Dependency dependency ) {
+        Iterator iter = reactorProjects.iterator();
+        while ( iter.hasNext() )
+        {
+            MavenProject project = (MavenProject) iter.next();
+            if ( compare( project, dependency ) )
+            {
+                return true;
+            }
+        }
+        return false;
+        
+    }
+
+    /**
+     * Compare a project to a dependency. Returns true only if the groupId and artifactId are all
+     * equal.
+     *
+     * @param project the project
+     * @param dep the dependency
+     * @return true if project and dep refer to the same artifact
+     */
+    private boolean compare( MavenProject project, Dependency dep )
+    {
+        if ( !StringUtils.equals( project.getGroupId(), dep.getGroupId() ) )
+        {
+            return false;
+        }
+        if ( !StringUtils.equals( project.getArtifactId(), dep.getArtifactId() ) )
+        {
+            return false;
+        }
+        return true;
     }
 
     /**

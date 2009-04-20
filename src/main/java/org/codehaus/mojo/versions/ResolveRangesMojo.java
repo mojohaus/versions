@@ -90,6 +90,11 @@ public class ResolveRangesMojo
         {
             Dependency dep = (Dependency) iter.next();
 
+            if ( isExcludeReactor() && isProducedByReactor( dep ) )
+            {
+                continue;
+            }
+
             Matcher versionMatcher = matchRangeRegex.matcher( dep.getVersion() );
 
             if ( versionMatcher.find() )
