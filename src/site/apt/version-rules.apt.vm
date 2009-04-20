@@ -59,7 +59,7 @@ Version number rules
 
 * Rules.xml
 
-  To specify the version schemes to use, you must define a rule-set xml file, for example:
+  To specify the version schemes to use, you must define a {{{rule.html}rule-set xml file}, for example:
 
 ---
 <ruleset comparisonMethod="maven">
@@ -71,6 +71,8 @@ Version number rules
   </rules>
 </ruleset>
 ---
+
+  The rule-set files must match the {{{xsd/rule-1.0.0}XSD schema}}.
 
   You can then use the <<<rulesUri>>> parameter to specify the rule-set to be used by the
   <<<versions-maven-plugin>>>.

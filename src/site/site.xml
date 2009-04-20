@@ -18,5 +18,9 @@
       <item name="Unlocking snapshot dependencies" href="examples/unlock-snapshots.html"/>
       <item name="Replacing -SNAPSHOT versions with their corresponding releases" href="examples/use-releases.html"/>
     </menu>
+    <menu name="Reference">
+      <item name="Version number comparison rule-sets" href="rule.html"/>
+      <item name="rule-1.0.0.xsd" href="xsd/rule-1.0.0.xsd"/>
+    </menu>
   </body>
 </project>
