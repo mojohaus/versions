@@ -50,6 +50,35 @@ Usage
 
   modify the <<<pom.xml>>> file, you need to run these goals separately from any other goals or life-cycle phases.
 
+  Note: The first time any of the goals that modify the <<<pom.xml>>> file run, they will create a local backup copy
+  <<<pom.xml.versionsBackup>>>. Subsequent modifications will leave this backup unchanged.  The
+  {{{accept-mojo.html}versions:accept}} goal will remove the backup copy, while the
+  {{{revert-mojo.html}versions:revert}} goal will restore the backup copy. It is best practice
+  to use a Source Code Management system and not rely on the <<<pom.xml.versionsBackup>>> files created by the
+  versions-maven-plugin.
+
+** Reverting modifications to the <<<pom.xml>>> files (Note: modifies <<<pom.xml>>> files)
+
+  To restore your <<<pom.xml>>> files to their initial state, before you started modifying it with the
+  versions-maven-plugin, invoke the <<<revert>>> goal. Note that it is best practice
+  to use a Source Code Management system and not rely on the <<<pom.xml.versionsBackup>>> files created by the
+  versions-maven-plugin.
+
+---
+mvn versions:revert
+---
+
+** Accepting modifications to the <<<pom.xml>>> files
+
+  To accept the modifications made to your <<<pom.xml>>> files by the versions-maven-plugin invoke the <<<accept>>>
+  goal. This will have the effect of removing any <<<pom.xml.versionsBackup>>> files. Note that it is best practice
+  to use a Source Code Management system and not rely on the <<<pom.xml.versionsBackup>>> files created by the
+  versions-maven-plugin.
+
+---
+mvn versions:accept
+---
+
 ** Updating the parent version (Note: modifies <<<pom.xml>>> files)
 
   To update the parent version of your POM to the latest available, just invoke the <<<update-parent>>> goal.
