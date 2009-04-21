@@ -20,13 +20,14 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -34,16 +35,16 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.execution.MavenSession;
-import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
-import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.stax2.XMLInputFactory2;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -137,11 +138,13 @@ public abstract class AbstractVersionsUpdaterMojo
 
     /**
      * @component
+     * @since 1.0-alpha-3
      */
     private WagonManager wagonManager;
 
     /**
      * @parameter expression="${settings}"
+     * @since 1.0-alpha-3
      */
     private Settings settings;
 
@@ -150,6 +153,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * This is used when wagon needs extra authentication information.
      *
      * @parameter expression="${maven.version.rules.serverId}" default-value="serverId";
+     * @since 1.0-alpha-3
      */
     private String serverId;
 
@@ -160,6 +164,14 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-3
      */
     private String rulesUri;
+
+    /**
+     * Controls whether a backup pom should be created (default is true).
+     *
+     * @parameter expression="${generateBackupPoms}"
+     * @since 1.0-alpha-3
+     */
+    private Boolean generateBackupPoms;
 
     /**
      * The versioning rule to use when comparing versions. Valid values are <code>maven</code>,
@@ -206,9 +218,9 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         if ( helper == null )
         {
-              helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories, remotePluginRepositories,
-                                         localRepository, wagonManager, settings, serverId, rulesUri, comparisonMethod,
-                                         getLog() );
+            helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
+                                                remotePluginRepositories, localRepository, wagonManager, settings,
+                                                serverId, rulesUri, comparisonMethod, getLog() );
         }
         return helper;
     }
@@ -327,6 +339,23 @@ public abstract class AbstractVersionsUpdaterMojo
 
             if ( newPom.isModified() )
             {
+                if ( Boolean.FALSE.equals( generateBackupPoms ) )
+                {
+                    getLog().debug( "Skipping generation of backup file" );
+                }
+                else
+                {
+                    File backupFile = new File( outFile.getParentFile(), outFile.getName() + ".versionsBackup" );
+                    if ( !backupFile.exists() )
+                    {
+                        getLog().debug( "Backing up " + outFile + " to " + backupFile );
+                        FileUtils.copyFile( outFile, backupFile );
+                    }
+                    else
+                    {
+                        getLog().debug( "Leaving existing backup " + backupFile + " unmodified" );
+                    }
+                }
                 writeFile( outFile, input );
             }
         }
