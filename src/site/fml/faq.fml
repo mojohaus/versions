@@ -81,5 +81,36 @@ under the License.
         </p>
       </answer>
     </faq>
+    <faq id="repo-metadata">
+      <question>Why is foo:bar version x.y.z not being detected?</question>
+      <answer>
+        <p>
+          In order to determine what versions of an artifact are present, Maven relies on the presence of
+          meta-data files in the repository.  If the meta-data files are missing or contain invalid information
+          then Maven will not know about versions that are available in your repositories.
+        </p>
+        <p>
+          Here are some common reasons why your metadata can be invalid:
+        </p>
+        <ul>
+          <li>
+            You are using a local repository as a remote repository. Stop, don't do this. The local repository
+            uses a separate set of metadata files from those used by a remote repository. There are tools available
+            to convert a local repository into a remote repository, but you're really better off using a repository
+            manager.
+          </li>
+          <li>
+            Artifacts have been deployed by non-maven metadata aware tools.
+          </li>
+          <li>
+            Tools that claim to be maven meta-data aware have clobbered the metadata files.
+          </li>
+        </ul>
+        <p>
+          In most cases, using a repository manager will solve these issues as the repository managers usually
+          rebuild the metadata files based on the artifacts that are present.
+        </p>
+      </answer>
+    </faq>
   </part>
 </faqs>

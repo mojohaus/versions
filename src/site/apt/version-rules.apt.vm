@@ -59,7 +59,7 @@ Version number rules
 
 * Rules.xml
 
-  To specify the version schemes to use, you must define a {{{rule.html}rule-set xml file}, for example:
+  To specify the version schemes to use, you must define a {{{rule.html}rule-set xml file}}, for example:
 
 ---
 <ruleset comparisonMethod="maven">
