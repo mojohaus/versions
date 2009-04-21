@@ -33,12 +33,12 @@ import java.io.IOException;
  * Removes the initial backup of the pom, thereby accepting the changes.
  *
  * @author Stephen Connolly
- * @goal accept
+ * @goal commit
  * @requiresProject true
  * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
-public class AcceptMojo
+public class CommitMojo
     extends AbstractMojo
 {
     /**

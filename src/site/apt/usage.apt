@@ -52,10 +52,10 @@ Usage
 
   Note: The first time any of the goals that modify the <<<pom.xml>>> file run, they will create a local backup copy
   <<<pom.xml.versionsBackup>>>. Subsequent modifications will leave this backup unchanged.  The
-  {{{accept-mojo.html}versions:accept}} goal will remove the backup copy, while the
+  {{{accept-mojo.html}versions:commit}} goal will remove the backup copy, while the
   {{{revert-mojo.html}versions:revert}} goal will restore the backup copy. It is best practice
   to use a Source Code Management system and not rely on the <<<pom.xml.versionsBackup>>> files created by the
-  versions-maven-plugin.
+  versions-maven-plugin. The {{{accept-mojo.html}versions:commit}} and {{{revert-mojo.html}versions:revert}} goals are only a "Poor Man's SCM".
 
 ** Reverting modifications to the <<<pom.xml>>> files (Note: modifies <<<pom.xml>>> files)
 
@@ -70,13 +70,13 @@ mvn versions:revert
 
 ** Accepting modifications to the <<<pom.xml>>> files
 
-  To accept the modifications made to your <<<pom.xml>>> files by the versions-maven-plugin invoke the <<<accept>>>
+  To accept the modifications made to your <<<pom.xml>>> files by the versions-maven-plugin invoke the <<<commit>>>
   goal. This will have the effect of removing any <<<pom.xml.versionsBackup>>> files. Note that it is best practice
   to use a Source Code Management system and not rely on the <<<pom.xml.versionsBackup>>> files created by the
   versions-maven-plugin.
 
 ---
-mvn versions:accept
+mvn versions:commit
 ---
 
 ** Updating the parent version (Note: modifies <<<pom.xml>>> files)
