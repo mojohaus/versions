@@ -20,7 +20,7 @@
  ------
  Stephen Connolly
  ------
- 2009-03-27
+ 2009-04-21
  ------
 
 
@@ -58,8 +58,29 @@ Versions Maven Plugin
   * {{{unlock-snapshots-mojo.html}versions:unlock-snapshots}} searches the pom for all timestamp locked snapshot versions 
   and replaces them with -SNAPSHOT. 
 
-  * {{{resolve-ranges.html}versions:resolve-ranges}} finds dependencies using version ranges and resolves the range
+  * {{{resolve-ranges-mojo.html}versions:resolve-ranges}} finds dependencies using version ranges and resolves the range
   to the specific version being used. 
+  
+  * {{{use-releases-mojo.html}versions:use-releases}} searches the pom for all -SNAPSHOT versions which have been 
+  released and replaces them with the corresponding release version. 
+  
+  * {{{use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which 
+  have been a newer release and replaces them with the next release version. 
+  
+  * {{{use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which 
+  have been a newer release and replaces them with the latest release version. 
+  
+  * {{{use-next-versions-mojo.html}versions:use-next-versions}} searches the pom for all versions which 
+  have been a newer version and replaces them with the next version. 
+  
+  * {{{use-latest-versions-mojo.html}versions:use-latest-versions}} searches the pom for all versions which 
+  have been a newer version and replaces them with the latest version. 
+  
+  * {{{commit-mojo.html}versions:commit}} removes the <<<pom.xml.versionsBackup>>> files. Forms one half of the 
+  built-in "Poor Man's SCM". 
+  
+  * {{{revert-mojo.html}versions:revert}} restores the <<<pom.xml>>> files from the <<<pom.xml.versionsBackup>>> files. 
+  Forms one half of the built-in "Poor Man's SCM". 
   
 * Usage
 
