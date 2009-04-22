@@ -202,7 +202,8 @@ public class UpdatePropertiesMojo
                 }
                 else
                 {
-                    range = VersionRange.createFromVersionSpec( "[0,]" );
+                    range = null;
+                    getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
                 }
             }
             catch ( InvalidVersionSpecificationException e )
@@ -213,7 +214,7 @@ public class UpdatePropertiesMojo
             ArtifactVersion winner = null;
             for ( int j = artifactVersions.length - 1; j >= 0; j-- )
             {
-                if ( range.containsVersion( artifactVersions[j] ) )
+                if ( range == null || range.containsVersion( artifactVersions[j] ) )
                 {
                     if ( currentVersion.equals( artifactVersions[j].toString() ) )
                     {
@@ -225,6 +226,7 @@ public class UpdatePropertiesMojo
                     break;
                 }
             }
+            getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + winner );
             if ( property.isSearchReactor() )
             {
                 getLog().debug( "Property ${" + property.getName() + "}: Searching reactor for a valid version..." );
@@ -238,7 +240,7 @@ public class UpdatePropertiesMojo
                 {
                     for ( int j = reactorVersions.length - 1; j >= 0; j-- )
                     {
-                        if ( range.containsVersion( reactorVersions[j] ) )
+                        if ( range == null || range.containsVersion( reactorVersions[j] ) )
                         {
                             fromReactor = reactorVersions[j];
                             getLog().debug(
