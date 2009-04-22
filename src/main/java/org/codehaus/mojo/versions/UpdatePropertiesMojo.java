@@ -216,11 +216,11 @@ public class UpdatePropertiesMojo
             {
                 if ( range == null || range.containsVersion( artifactVersions[j] ) )
                 {
-//                    if ( currentVersion.equals( artifactVersions[j].toString() ) )
-//                    {
-//                        getLog().debug( "Property ${" + property.getName() + "}: No newer version" );
-//                        break;
-//                    }
+                    if ( currentVersion.equals( artifactVersions[j].toString() ) )
+                    {
+                        getLog().debug( "Property ${" + property.getName() + "}: No newer version" );
+                        break;
+                    }
                     winner = artifactVersions[j];
                     getLog().debug( "Property ${" + property.getName() + "}: Newest version is: " + winner );
                     break;
