@@ -280,7 +280,8 @@ public class UpdatePropertiesMojo
                 getLog().info(
                     "Property ${" + property.getName() + "}: Could not find any valid version to update to" );
             }
-            if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
+            else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(),
+                                                    winner.toString() ) )
             {
                 getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
             }
