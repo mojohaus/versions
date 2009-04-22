@@ -144,6 +144,7 @@ public abstract class AbstractVersionsUpdaterMojo
 
     /**
      * @parameter expression="${settings}"
+     * @readonly
      * @since 1.0-alpha-3
      */
     private Settings settings;

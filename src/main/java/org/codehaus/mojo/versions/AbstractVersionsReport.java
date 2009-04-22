@@ -143,11 +143,14 @@ public abstract class AbstractVersionsReport
 
     /**
      * @component
+     * @since 1.0-alpha-3
      */
     private WagonManager wagonManager;
 
     /**
      * @parameter expression="${settings}"
+     * @readonly
+     * @since 1.0-alpha-3
      */
     private Settings settings;
 
@@ -156,6 +159,7 @@ public abstract class AbstractVersionsReport
      * This is used when wagon needs extra authentication information.
      *
      * @parameter expression="${maven.version.rules.serverId}" default-value="serverId";
+     * @since 1.0-alpha-3
      */
     private String serverId;
 
