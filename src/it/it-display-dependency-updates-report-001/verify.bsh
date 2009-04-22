@@ -2,7 +2,7 @@ import java.io.*;
 
 try
 {
-    File file = new File( basedir, "target/site/versions.html" );
+    File file = new File( basedir, "target/site/dependency-updates-report.html" );
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
     StringBuilder buf = new StringBuilder();
     String line = in.readLine();
