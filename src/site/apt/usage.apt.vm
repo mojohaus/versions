@@ -197,12 +197,13 @@ mvn versions:use-releases
 
 +---+
 <reporting>
-    <plugins>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>versions-maven-plugin</artifactId>
-        </plugin>
-    </plugins>
+  <plugins>
+    <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>versions-maven-plugin</artifactId>
+      <version>${pluginVersion}</version>
+    </plugin>
+  </plugins>
 </reporting>
 +---+
 
