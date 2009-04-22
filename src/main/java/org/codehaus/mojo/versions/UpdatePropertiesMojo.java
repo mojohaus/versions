@@ -216,11 +216,11 @@ public class UpdatePropertiesMojo
             {
                 if ( range == null || range.containsVersion( artifactVersions[j] ) )
                 {
-                    if ( currentVersion.equals( artifactVersions[j].toString() ) )
-                    {
-                        getLog().debug( "Property ${" + property.getName() + "}: No newer version" );
-                        break;
-                    }
+//                    if ( currentVersion.equals( artifactVersions[j].toString() ) )
+//                    {
+//                        getLog().debug( "Property ${" + property.getName() + "}: No newer version" );
+//                        break;
+//                    }
                     winner = artifactVersions[j];
                     getLog().debug( "Property ${" + property.getName() + "}: Newest version is: " + winner );
                     break;
@@ -280,7 +280,7 @@ public class UpdatePropertiesMojo
             if ( winner == null || currentVersion.equals( winner.toString() ) )
             {
                 getLog().info(
-                    "Property ${" + property.getName() + "}: Could not find any valid version to update to" );
+                    "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion.toString() );
             }
             else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(),
                                                     winner.toString() ) )
