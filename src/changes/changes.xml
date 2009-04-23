@@ -6,7 +6,7 @@
     </author>
   </properties>
   <body>
-    <release version="1.0-alpha-3-SNAPSHOT" date="2009-01-26" description="Third alpha release">
+    <release version="1.0-alpha-3" date="2009-04-23" description="Third alpha release">
       <action dev="pgier" type="add" issue="MVERSIONS-24">
         Enable resolution of dependency version ranges
       </action>
