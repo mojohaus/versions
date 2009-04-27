@@ -72,7 +72,7 @@ Version number rules
 </ruleset>
 ---
 
-  The rule-set files must match the {{{xsd/rule-1.0.0}XSD schema}}.
+  The rule-set files must match the {{{xsd/rule-1.0.0.xsd}XSD schema}}.
 
   You can then use the <<<rulesUri>>> parameter to specify the rule-set to be used by the
   <<<versions-maven-plugin>>>.
