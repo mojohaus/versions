@@ -421,7 +421,8 @@ public class ModifiedPomXMLEventReader
      */
     private boolean nextEndIncludesNextEndElement()
     {
-        return ( nextEnd > nextStart + 2 && c( nextEnd - 2 ) == '<' );
+        return ( nextEnd > nextStart + 2 && nextEnd - 2 < pom.length() 
+            && c( nextEnd - 2 ) == '<' );
     }
 
     /**
@@ -431,7 +432,8 @@ public class ModifiedPomXMLEventReader
      */
     private boolean nextEndIncludesNextEvent()
     {
-        return nextEnd > nextStart + 1 && ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
+        return nextEnd > nextStart + 1 && nextEnd - 2 < pom.length() 
+            && ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
     }
 
     /**
