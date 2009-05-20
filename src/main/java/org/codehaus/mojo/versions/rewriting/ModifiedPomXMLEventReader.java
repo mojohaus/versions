@@ -366,7 +366,8 @@ public class ModifiedPomXMLEventReader
             {
                 if ( !next.isCharacters() )
                 {
-                    while ( nextStart < nextEnd && ( c( nextStart ) == '\n' || c( nextStart ) == '\r' ) )
+                    while ( nextStart < nextEnd && nextStart < pom.length() 
+                        && ( c( nextStart ) == '\n' || c( nextStart ) == '\r' ) )
                     {
                         nextStart++;
                     }
@@ -379,7 +380,7 @@ public class ModifiedPomXMLEventReader
                     }
                 }
             }
-            return true;
+            return nextStart < pom.length();
         }
         catch ( XMLStreamException e )
         {
