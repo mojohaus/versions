@@ -211,6 +211,10 @@ public class UpdatePropertiesMojo
                 throw new MojoExecutionException( e.getMessage(), e );
             }
             final String currentVersion = getProject().getProperties().getProperty( property.getName() );
+            if ( currentVersion == null )
+            {
+                continue;
+            }
             ArtifactVersion winner = null;
             for ( int j = artifactVersions.length - 1; j >= 0; j-- )
             {
@@ -279,8 +283,7 @@ public class UpdatePropertiesMojo
             }
             if ( winner == null || currentVersion.equals( winner.toString() ) )
             {
-                getLog().info(
-                    "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion.toString() );
+                getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
             }
             else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(),
                                                     winner.toString() ) )
