@@ -331,13 +331,27 @@ public class DefaultVersionsHelper
         {
             try
             {
-
+                int split = rulesUri.lastIndexOf( '/' );
+                String baseUri;
+                String fileUri;
+                if ( split != -1 )
+                {
+                    baseUri = rulesUri.substring( 0, split ) + '/';
+                    fileUri = split + 1 < rulesUri.length() ? rulesUri.substring( split + 1 ) : "";
+                }
+                else
+                {
+                    baseUri = rulesUri;
+                    fileUri = "";
+                }
                 try
                 {
-                    Wagon wagon = WagonUtils.createWagon( serverId, rulesUri, wagonManager, settings, logger );
+                    Wagon wagon = WagonUtils.createWagon( serverId, baseUri, wagonManager, settings, logger );
                     try
                     {
-                        ruleSet.setRules( getRuleSet( wagon, "" ).getRules() );
+                        logger.debug( "Trying to load ruleset from file \"" + fileUri + "\" in " + baseUri );
+                        ruleSet.setRules( getRuleSet( wagon, fileUri ).getRules() );
+                        logger.debug( "Rule set loaded" );
                     }
                     finally
                     {
