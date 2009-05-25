@@ -48,6 +48,8 @@ Usage
 
     * {{{use-releases-mojo.html}versions:use-releases}}
 
+    * {{{set-mojo.html}versions:set}}
+
   modify the <<<pom.xml>>> file, you need to run these goals separately from any other goals or life-cycle phases.
 
   Note: The first time any of the goals that modify the <<<pom.xml>>> file run, they will create a local backup copy
@@ -185,6 +187,16 @@ mvn versions:use-releases
 ---
 
   More examples of the {{{examples/use-releases.html} <<<lock-snapshots>>>}} goal.
+
+** Setting the project version
+
+  To set the project version to a specific version, just invoke the <<<set>>> goal.
+
+---
+mvn versions:set -DnewVersion=1.0.1-SNAPSHOT
+---
+
+  More examples of the {{{examples/set.html} <<<set>>>}} goal.
 
 * Report Usage
 
