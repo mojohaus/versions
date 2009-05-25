@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
@@ -29,7 +30,10 @@ import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.profiles.ProfileManager;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
@@ -1100,6 +1104,55 @@ public class PomHelper
             targetGroupId = model.getParent().getGroupId();
         }
         return targetGroupId;
+    }
+
+    /**
+     * Finds the local root of the specified project.
+     *
+     * @param project              The project to find the local root for.
+     * @param localRepository      the local repo.
+     * @param globalProfileManager the global profile manager.
+     * @param logger
+     * @return The local root (note this may be the project passed as an argument).
+     */
+    public static MavenProject getLocalRoot( MavenProjectBuilder builder, MavenProject project,
+                                             ArtifactRepository localRepository, ProfileManager globalProfileManager,
+                                             Log logger )
+    {
+        logger.info( "Searching for local aggregator root..." );
+        while ( true )
+        {
+            final File parentDir = project.getBasedir().getParentFile();
+            if ( parentDir.isDirectory() )
+            {
+                logger.debug( "Checking to see if " + parentDir + " is an aggregator parent" );
+                File parent = new File( parentDir, "pom.xml" );
+                if ( parent.isFile() )
+                {
+                    try
+                    {
+                        final MavenProject parentProject =
+                            builder.build( parent, localRepository, globalProfileManager );
+                        if ( getAllChildModules( parentProject, logger ).contains( project.getBasedir().getName() ) )
+                        {
+                            logger.debug( parentDir + " is an aggregator parent" );
+                            project = parentProject;
+                            continue;
+                        }
+                        else
+                        {
+                            logger.debug( parentDir + " is not an aggregator parent" );
+                        }
+                    }
+                    catch ( ProjectBuildingException e )
+                    {
+                        logger.warn( e );
+                    }
+                }
+            }
+            logger.debug( "Local aggregation root is " + project.getBasedir() );
+            return project;
+        }
     }
 
     /**
