@@ -1016,12 +1016,24 @@ public class PomHelper
      */
     public static void removeMissingChildModules( Log logger, MavenProject project, Collection childModules )
     {
+        removeMissingChildModules( logger, project.getBasedir(), childModules );
+    }
+
+    /**
+     * Modifies the collection of child modules removing those which cannot be found relative to the parent.
+     *
+     * @param logger       The logger to log to.
+     * @param basedir      the project basedir.
+     * @param childModules the child modules.
+     */
+    public static void removeMissingChildModules( Log logger, File basedir, Collection childModules )
+    {
         logger.debug( "Removing child modules which are missing..." );
         Iterator i = childModules.iterator();
         while ( i.hasNext() )
         {
             String modulePath = (String) i.next();
-            File moduleFile = new File( project.getBasedir(), modulePath );
+            File moduleFile = new File( basedir, modulePath );
 
             if ( moduleFile.isDirectory() && new File( moduleFile, "pom.xml" ).isFile() )
             {
