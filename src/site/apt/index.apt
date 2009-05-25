@@ -60,7 +60,9 @@ Versions Maven Plugin
 
   * {{{resolve-ranges-mojo.html}versions:resolve-ranges}} finds dependencies using version ranges and resolves the range
   to the specific version being used. 
-  
+
+  * {{{set-mojo.html}versuibs:set}} can be used to set the project version from the command line.
+
   * {{{use-releases-mojo.html}versions:use-releases}} searches the pom for all -SNAPSHOT versions which have been 
   released and replaces them with the corresponding release version. 
   
