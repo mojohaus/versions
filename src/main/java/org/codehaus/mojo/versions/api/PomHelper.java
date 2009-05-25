@@ -933,15 +933,28 @@ public class PomHelper
      * activation).
      *
      * @param project The project.
-     * @param logger
+     * @param logger  The logger to use.
      * @return the set of all child modules of the project.
      */
     public static Set getAllChildModules( MavenProject project, Log logger )
     {
+        return getAllChildModules( project.getOriginalModel(), logger );
+    }
+
+    /**
+     * Returns a set of all child modules for a project, including any defined in profiles (ignoring profile
+     * activation).
+     *
+     * @param model  The project model.
+     * @param logger The logger to use.
+     * @return the set of all child modules of the project.
+     */
+    public static Set getAllChildModules( Model model, Log logger )
+    {
         logger.debug( "Finding child modules..." );
         Set childModules = new TreeSet();
-        childModules.addAll( project.getOriginalModel().getModules() );
-        Iterator i = project.getOriginalModel().getProfiles().iterator();
+        childModules.addAll( model.getModules() );
+        Iterator i = model.getProfiles().iterator();
         while ( i.hasNext() )
         {
             Profile profile = (Profile) i.next();
