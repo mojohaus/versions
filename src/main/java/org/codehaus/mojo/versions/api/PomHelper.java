@@ -26,6 +26,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.Parent;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.plugin.logging.Log;
@@ -43,7 +44,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.File;
 import java.io.StringReader;
-import java.io.FileNotFoundException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +54,7 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -1053,4 +1054,210 @@ public class PomHelper
         debugModules( logger, "After removing missing", childModules );
     }
 
+    /**
+     * Extracts the version from a raw model, interpolating from the parent if necessary.
+     *
+     * @param model The model.
+     * @return The version.
+     */
+    public static String getVersion( Model model )
+    {
+        String targetVersion = model.getVersion();
+        if ( targetVersion == null && model.getParent() != null )
+        {
+            targetVersion = model.getParent().getVersion();
+        }
+        return targetVersion;
+    }
+
+    /**
+     * Extracts the artifactId from a raw model, interpolating from the parent if necessary.
+     *
+     * @param model The model.
+     * @return The artifactId.
+     */
+    public static String getArtifactId( Model model )
+    {
+        String sourceArtifactId = model.getArtifactId();
+        if ( sourceArtifactId == null && model.getParent() != null )
+        {
+            sourceArtifactId = model.getParent().getArtifactId();
+        }
+        return sourceArtifactId;
+    }
+
+    /**
+     * Extracts the groupId from a raw model, interpolating from the parent if necessary.
+     *
+     * @param model The model.
+     * @return The groupId.
+     */
+    public static String getGroupId( Model model )
+    {
+        String targetGroupId = model.getGroupId();
+        if ( targetGroupId == null && model.getParent() != null )
+        {
+            targetGroupId = model.getParent().getGroupId();
+        }
+        return targetGroupId;
+    }
+
+    /**
+     * Builds a map of raw models keyed by module path.
+     *
+     * @param project The project to build from.
+     * @param logger  The logger for logging.
+     * @return A map of raw models keyed by path relative to the project's basedir.
+     * @throws IOException if things go wrong.
+     */
+    public static Map/*<String,Model>*/ getReactorModels( MavenProject project, Log logger )
+        throws IOException
+    {
+        Map result = new LinkedHashMap();
+        final Model model = getRawModel( project );
+        final String path = "";
+        result.put( path, model );
+        result.putAll( getReactorModels( path, model, project, logger ) );
+        return result;
+    }
+
+    /**
+     * Builds a sub-map of raw models keyed by module path.
+     *
+     * @param path    The relative path to base the sub-map on.
+     * @param model   The model at the relative path.
+     * @param project The project to build from.
+     * @param logger  The logger for logging.
+     * @return A map of raw models keyed by path relative to the project's basedir.
+     * @throws IOException if things go wrong.
+     */
+    private static Map/*<String,Model>*/ getReactorModels( String path, Model model, MavenProject project, Log logger )
+        throws IOException
+    {
+        if ( path.length() > 0 && !path.endsWith( "/" ) )
+        {
+            path += '/';
+        }
+        Map result = new LinkedHashMap();
+        Map childResults = new LinkedHashMap();
+
+        File baseDir = path.length() > 0 ? new File( project.getBasedir(), path ) : project.getBasedir();
+
+        Set childModules = getAllChildModules( model, logger );
+
+        removeMissingChildModules( logger, baseDir, childModules );
+
+        Iterator i = childModules.iterator();
+
+        while ( i.hasNext() )
+        {
+            final String moduleName = (String) i.next();
+            String modulePath = path + moduleName;
+
+            File moduleDir = new File( baseDir, moduleName );
+
+            File moduleProjectFile;
+
+            if ( moduleDir.isDirectory() )
+            {
+                moduleProjectFile = new File( moduleDir, "pom.xml" );
+            }
+            else
+            {
+                // i don't think this should ever happen... but just in case
+                // the module references the file-name
+                moduleProjectFile = moduleDir;
+            }
+
+            try
+            {
+                // the aim of this goal is to fix problems when the project cannot be parsed by Maven
+                // so we have to work with the raw model and not the interpolated parsed model from maven
+                Model moduleModel = getRawModel( moduleProjectFile );
+                result.put( modulePath, moduleModel );
+                childResults.putAll( getReactorModels( modulePath, moduleModel, project, logger ) );
+            }
+            catch ( IOException e )
+            {
+                logger.debug( "Could not parse " + moduleProjectFile.getPath(), e );
+            }
+        }
+        result.putAll( childResults ); // more efficient update order if all children are added after siblings
+        return result;
+    }
+
+    /**
+     * Returns all the models that have a specified groupId and artifactId as parent.
+     *
+     * @param reactor    The map of models keyed by path.
+     * @param groupId    The groupId of the parent.
+     * @param artifactId The artifactId of the parent.
+     * @return a map of models that have a specified groupId and artifactId as parent keyed by path.
+     */
+    public static Map/*<String,Model>*/ getChildModels( Map/*<String,Model>*/ reactor, String groupId,
+                                                        String artifactId )
+    {
+        final Map result = new LinkedHashMap();
+        final Iterator iterator = reactor.entrySet().iterator();
+        while ( iterator.hasNext() )
+        {
+            final Map.Entry entry = (Map.Entry) iterator.next();
+            final String path = (String) entry.getKey();
+            final Model model = (Model) entry.getValue();
+            final Parent parent = model.getParent();
+            if ( parent != null && groupId.equals( parent.getGroupId() ) && artifactId.equals(
+                parent.getArtifactId() ) )
+            {
+                result.put( path, model );
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the model that has the specified groupId and artifactId or <code>null</code> if no such model exists.
+     *
+     * @param reactor    The map of models keyed by path.
+     * @param groupId    The groupId to match.
+     * @param artifactId The artifactId to match.
+     * @return The model or <code>null</code> if the model was not in the reactor.
+     */
+    public static Model getModel( Map/*<String,Model>*/ reactor, String groupId, String artifactId )
+    {
+        final Iterator iterator = reactor.values().iterator();
+        while ( iterator.hasNext() )
+        {
+            final Model model = (Model) iterator.next();
+
+            if ( groupId.equals( getGroupId( model ) ) && artifactId.equals( getArtifactId( model ) ) )
+            {
+                return model;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a count of how many parents a model has in the reactor.
+     *
+     * @param reactor The map of models keyed by path.
+     * @param model   The model.
+     * @return The number of parents of this model in the reactor.
+     */
+    public static int getReactorParentCount( Map/*<String,Model>*/ reactor, Model model )
+    {
+        if ( model.getParent() == null )
+        {
+            return 0;
+        }
+        else
+        {
+            Model parentModel = getModel( reactor, model.getParent().getGroupId(), model.getParent().getArtifactId() );
+            if ( parentModel != null )
+            {
+                return getReactorParentCount( reactor, parentModel ) + 1;
+            }
+            return 0;
+        }
+    }
 }
