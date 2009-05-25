@@ -43,6 +43,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.File;
 import java.io.StringReader;
+import java.io.FileNotFoundException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -82,11 +83,24 @@ public class PomHelper
     public static Model getRawModel( MavenProject project )
         throws IOException
     {
+        return getRawModel( project.getFile() );
+    }
+
+    /**
+     * Gets the raw model before any interpolation what-so-ever.
+     *
+     * @param moduleProjectFile The project file to get the raw model for.
+     * @return The raw model.
+     * @throws IOException if the file is not found or if the file does not parse.
+     */
+    public static Model getRawModel( File moduleProjectFile )
+        throws IOException
+    {
         FileReader fileReader = null;
         BufferedReader bufferedReader = null;
         try
         {
-            fileReader = new FileReader( project.getFile() );
+            fileReader = new FileReader( moduleProjectFile );
             bufferedReader = new BufferedReader( fileReader );
             MavenXpp3Reader reader = new MavenXpp3Reader();
             return reader.read( bufferedReader );
@@ -1026,4 +1040,5 @@ public class PomHelper
         }
         debugModules( logger, "After removing missing", childModules );
     }
+
 }
