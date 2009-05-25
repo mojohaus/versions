@@ -42,6 +42,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.File;
+import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -105,6 +106,38 @@ public class PomHelper
             if ( fileReader != null )
             {
                 fileReader.close();
+            }
+        }
+    }
+
+    /**
+     * Gets the current raw model before any interpolation what-so-ever.
+     *
+     * @param modifiedPomXMLEventReader The {@link ModifiedPomXMLEventReader} to get the raw model for.
+     * @return The raw model.
+     * @throws IOException if the file is not found or if the file does not parse.
+     */
+    public static Model getRawModel( ModifiedPomXMLEventReader modifiedPomXMLEventReader )
+        throws IOException
+    {
+        StringReader stringReader = null;
+        try
+        {
+            stringReader = new StringReader( modifiedPomXMLEventReader.asStringBuffer().toString() );
+            MavenXpp3Reader reader = new MavenXpp3Reader();
+            return reader.read( stringReader );
+        }
+        catch ( XmlPullParserException e )
+        {
+            IOException ioe = new IOException( e.getMessage() );
+            ioe.initCause( e );
+            throw ioe;
+        }
+        finally
+        {
+            if ( stringReader != null )
+            {
+                stringReader.close();
             }
         }
     }
