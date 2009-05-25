@@ -17,6 +17,7 @@
       <item name="Locking snapshot dependencies" href="examples/lock-snapshots.html"/>
       <item name="Unlocking snapshot dependencies" href="examples/unlock-snapshots.html"/>
       <item name="Replacing -SNAPSHOT versions with their corresponding releases" href="examples/use-releases.html"/>
+      <item name="Changing the project version" href="examples/set.html"/>
     </menu>
     <menu name="Reference">
       <item name="Version number comparison rule-sets" href="rule.html"/>
