@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>20</version>
+    <version>21</version>
   </parent>
 
   <groupId>org.codehaus.mojo</groupId>
@@ -309,12 +309,12 @@
     <profile>
       <!-- run integration tests
           to use this profile:
-          or run integration tests: mvn -Pintegration
+          or run integration tests: mvn -Prun-its
           
           if you have never ran these integration tests locally,
-          you may want to run mvn -Ppre-integration first
+          you may want to run mvn -Pprep-its first
       -->
-      <id>integration</id>
+      <id>run-its</id>
       <build>
         <defaultGoal>verify</defaultGoal>
         <plugins>
@@ -345,9 +345,9 @@
           are resolved so that the integration tests can run
 
           to use this profile:
-          mvn -Ppre-integration
+          mvn -Pprep-its
       -->
-      <id>pre-integration</id>
+      <id>prep-its</id>
       <build>
         <defaultGoal>verify</defaultGoal>
         <plugins>
