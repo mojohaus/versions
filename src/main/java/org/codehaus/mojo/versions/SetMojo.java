@@ -20,25 +20,25 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Set;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Sets the current projects version, updating the details of any child modules as necessary.
@@ -105,65 +105,47 @@ public class SetMojo
             final Map reactor = PomHelper.getReactorModels( project, getLog() );
 
             // now fake out the triggering change
-            Model current = PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() );
+            final Model current = PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() );
             current.setVersion( newVersion );
 
-            Set files = new LinkedHashSet();
+            final Set files = new LinkedHashSet();
             files.add( getProject().getFile() );
 
-            List order = new ArrayList( reactor.keySet() );
-            Collections.sort( order, new Comparator()
-            {
-                public int compare( Object o1, Object o2 )
-                {
-                    Model m1 = (Model) reactor.get( o1 );
-                    Model m2 = (Model) reactor.get( o2 );
-                    int d1 = PomHelper.getReactorParentCount( reactor, m1 );
-                    int d2 = PomHelper.getReactorParentCount( reactor, m2 );
-                    if ( d1 < d2 )
-                    {
-                        return -1;
-                    }
-                    else if ( d1 > d2 )
-                    {
-                        return 1;
-                    }
-                    return 0;
-                }
-            } );
+            final List order = new ArrayList( reactor.keySet() );
+            Collections.sort( order, new ReactorDepthComparator( reactor ) );
 
-            Iterator i = order.iterator();
+            final Iterator i = order.iterator();
             while ( i.hasNext() )
             {
-                String sourcePath = (String) i.next();
-                Model sourceModel = (Model) reactor.get( sourcePath );
+                final String sourcePath = (String) i.next();
+                final Model sourceModel = (Model) reactor.get( sourcePath );
 
                 getLog().debug( sourcePath.length() == 0
                     ? "Processing root module as parent"
                     : "Processing " + sourcePath + " as a parent." );
 
-                String sourceGroupId = PomHelper.getGroupId( sourceModel );
+                final String sourceGroupId = PomHelper.getGroupId( sourceModel );
                 if ( sourceGroupId == null )
                 {
                     getLog().warn( "Module " + sourcePath + " is missing a groupId." );
                     continue;
                 }
-                String sourceArtifactId = PomHelper.getArtifactId( sourceModel );
+                final String sourceArtifactId = PomHelper.getArtifactId( sourceModel );
                 if ( sourceArtifactId == null )
                 {
                     getLog().warn( "Module " + sourcePath + " is missing an artifactId." );
                     continue;
                 }
-                String sourceVersion = PomHelper.getVersion( sourceModel );
+                final String sourceVersion = PomHelper.getVersion( sourceModel );
                 if ( sourceVersion == null )
                 {
                     getLog().warn( "Module " + sourcePath + " is missing a version." );
                     continue;
                 }
 
-                File moduleDir = new File( project.getBasedir(), sourcePath );
+                final File moduleDir = new File( project.getBasedir(), sourcePath );
 
-                File moduleProjectFile;
+                final File moduleProjectFile;
 
                 if ( moduleDir.isDirectory() )
                 {
@@ -182,13 +164,14 @@ public class SetMojo
                     "Looking for modules which use " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
                         + " as their parent" );
 
-                Iterator j = PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
+                final Iterator j =
+                    PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
 
                 while ( j.hasNext() )
                 {
-                    Map.Entry target = (Map.Entry) j.next();
-                    String targetPath = (String) target.getKey();
-                    Model targetModel = (Model) target.getValue();
+                    final Map.Entry target = (Map.Entry) j.next();
+                    final String targetPath = (String) target.getKey();
+                    final Model targetModel = (Model) target.getValue();
                     final Parent parent = targetModel.getParent();
                     if ( sourceVersion.equals( parent.getVersion() ) )
                     {
@@ -211,7 +194,8 @@ public class SetMojo
                 }
             }
 
-            Iterator k = files.iterator();
+            // now process all the updates
+            final Iterator k = files.iterator();
             while ( k.hasNext() )
             {
                 process( (File) k.next() );
@@ -398,5 +382,32 @@ public class SetMojo
         }
     }
 
+    private static class ReactorDepthComparator
+        implements Comparator
+    {
+        private final Map reactor;
+
+        public ReactorDepthComparator( Map reactor )
+        {
+            this.reactor = reactor;
+        }
+
+        public int compare( Object o1, Object o2 )
+        {
+            final Model m1 = (Model) reactor.get( o1 );
+            final Model m2 = (Model) reactor.get( o2 );
+            final int d1 = PomHelper.getReactorParentCount( reactor, m1 );
+            final int d2 = PomHelper.getReactorParentCount( reactor, m2 );
+            if ( d1 < d2 )
+            {
+                return -1;
+            }
+            else if ( d1 > d2 )
+            {
+                return 1;
+            }
+            return 0;
+        }
+    }
 }
 
