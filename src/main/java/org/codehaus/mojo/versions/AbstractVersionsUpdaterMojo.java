@@ -48,10 +48,8 @@ import org.codehaus.stax2.XMLInputFactory2;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -333,7 +331,7 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         try
         {
-            StringBuffer input = readFile( outFile );
+            StringBuffer input = PomHelper.readFile( outFile );
             ModifiedPomXMLEventReader newPom = newModifiedPomXER( input );
 
             update( newPom );
@@ -406,34 +404,6 @@ public abstract class AbstractVersionsUpdaterMojo
         OutputStream out = new BufferedOutputStream( new FileOutputStream( outFile ) );
         out.write( input.toString().getBytes( PomHelper.POM_ENCODING ) );
         out.close();
-    }
-
-    /**
-     * Reads a file into a StringBuffer.
-     *
-     * @param outFile The file to read.
-     * @return StringBuffer The contents of the file.
-     * @throws IOException when things go wrong.
-     */
-    protected final StringBuffer readFile( File outFile )
-        throws IOException
-    {
-        StringBuffer input;
-        BufferedInputStream reader;
-        reader = new BufferedInputStream( new FileInputStream( outFile ) );
-
-        byte[] content = new byte[(int) outFile.length()];
-        input = new StringBuffer( content.length );
-        try
-        {
-            int length = reader.read( content, 0, content.length );
-            input.append( new String( content, 0, length, PomHelper.POM_ENCODING ) );
-            return input;
-        }
-        finally
-        {
-            reader.close();
-        }
     }
 
     /**

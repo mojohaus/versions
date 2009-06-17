@@ -48,6 +48,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.File;
 import java.io.StringReader;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -1311,6 +1313,34 @@ public class PomHelper
                 return getReactorParentCount( reactor, parentModel ) + 1;
             }
             return 0;
+        }
+    }
+
+    /**
+     * Reads a file into a StringBuffer.
+     *
+     * @param outFile The file to read.
+     * @return StringBuffer The contents of the file.
+     * @throws java.io.IOException when things go wrong.
+     */
+    public static StringBuffer readFile( File outFile )
+        throws IOException
+    {
+        StringBuffer input;
+        BufferedInputStream reader;
+        reader = new BufferedInputStream( new FileInputStream( outFile ) );
+
+        byte[] content = new byte[(int) outFile.length()];
+        input = new StringBuffer( content.length );
+        try
+        {
+            int length = reader.read( content, 0, content.length );
+            input.append( new String( content, 0, length, POM_ENCODING ) );
+            return input;
+        }
+        finally
+        {
+            reader.close();
         }
     }
 }
