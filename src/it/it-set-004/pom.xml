@@ -10,6 +10,6 @@
 	<groupId>localhost</groupId>
 	<artifactId>it-set-004</artifactId>
 	<packaging>jar</packaging>
-	<version>${env.YOUR_COMPANY_BUILD_VERSION}</version>
+	<version>${V1234567890123456789012}</version>
 	<name>set version for pom with no dependencies</name>
 </project>
