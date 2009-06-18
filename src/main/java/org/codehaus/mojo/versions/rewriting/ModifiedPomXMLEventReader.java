@@ -160,6 +160,7 @@ public class ModifiedPomXMLEventReader
             lastStart = -1;
             lastEnd = -1;
             lastDelta = 0;
+            next = null;
         }
         catch ( UnsupportedEncodingException e )
         {

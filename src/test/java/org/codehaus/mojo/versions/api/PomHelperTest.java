@@ -31,11 +31,15 @@ public class PomHelperTest
 
         ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory );
 
-        PomHelper.setProjectVersion( pom, "1" );
-        System.out.println( pom.asStringBuffer().toString() );
-        PomHelper.setDependencyVersion( pom, "localhost", "it-set-004", "${V1234567890123456789012}", "1" );
+        String oldVersion = PomHelper.getProjectVersion( pom );
 
-        System.out.println( pom.asStringBuffer().toString() );
+        String newVersion = "1";
+
+        assertTrue( "The pom has been modified", PomHelper.setProjectVersion( pom, newVersion ) );
+
+        assertEquals( newVersion, PomHelper.getProjectVersion( pom ) );
+
+        assertNotSame( oldVersion, newVersion );
     }
 
 }
