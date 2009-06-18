@@ -19,8 +19,8 @@ package org.codehaus.mojo.versions.rewriting;
  * under the License.
  */
 
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLEventReader;
@@ -29,9 +29,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.StringReader;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Represents the modified pom file. Note: implementations of the StAX API (JSR-173) are not good round-trip rewriting
@@ -136,7 +136,6 @@ public class ModifiedPomXMLEventReader
         this.pom = pom;
         this.factory = factory;
         rewind();
-        lastEnd = -1;
     }
 
     /**
@@ -366,8 +365,8 @@ public class ModifiedPomXMLEventReader
             {
                 if ( !next.isCharacters() )
                 {
-                    while ( nextStart < nextEnd && nextStart < pom.length() 
-                        && ( c( nextStart ) == '\n' || c( nextStart ) == '\r' ) )
+                    while ( nextStart < nextEnd && nextStart < pom.length() && ( c( nextStart ) == '\n'
+                        || c( nextStart ) == '\r' ) )
                     {
                         nextStart++;
                     }
@@ -421,8 +420,7 @@ public class ModifiedPomXMLEventReader
      */
     private boolean nextEndIncludesNextEndElement()
     {
-        return ( nextEnd > nextStart + 2 && nextEnd - 2 < pom.length() 
-            && c( nextEnd - 2 ) == '<' );
+        return ( nextEnd > nextStart + 2 && nextEnd - 2 < pom.length() && c( nextEnd - 2 ) == '<' );
     }
 
     /**
@@ -432,8 +430,8 @@ public class ModifiedPomXMLEventReader
      */
     private boolean nextEndIncludesNextEvent()
     {
-        return nextEnd > nextStart + 1 && nextEnd - 2 < pom.length() 
-            && ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
+        return nextEnd > nextStart + 1 && nextEnd - 2 < pom.length() && ( c( nextEnd - 1 ) == '<'
+            || c( nextEnd - 1 ) == '&' );
     }
 
     /**
@@ -489,17 +487,18 @@ public class ModifiedPomXMLEventReader
         return markStart[index] != -1;
     }
 
-    public String getBetween(int index1, int index2) {
+    public String getBetween( int index1, int index2 )
+    {
         if ( !hasMark( index1 ) || !hasMark( index2 ) || markStart[index1] > markStart[index2] )
         {
             throw new IllegalStateException();
         }
         int start = markDelta[index1] + markEnd[index1];
         int end = markDelta[index2] + markStart[index2];
-        return pom.substring( start, end ) ;
-        
+        return pom.substring( start, end );
+
     }
-    
+
     /**
      * Replaces all content between marks index1 and index2 with the replacement text.
      *
@@ -598,7 +597,7 @@ public class ModifiedPomXMLEventReader
         throws IOException, XmlPullParserException
     {
         MavenXpp3Reader reader = new MavenXpp3Reader();
-        return reader.read( new StringReader(pom.toString()) );
+        return reader.read( new StringReader( pom.toString() ) );
     }
 
 }
