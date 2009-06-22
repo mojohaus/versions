@@ -15,6 +15,7 @@ package org.codehaus.mojo.versions.ordering;
  * the License.
  */
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -24,13 +25,11 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Stack;
 
-/*
+/**
  * Generic implementation of version comparison.
- * 
+ *
  * @author <a href="mailto:kenney@apache.org">Kenney Westerhof</a>
- * 
  * @author <a href="mailto:hboutemy@apache.org">Herve Boutemy</a>
- * 
  * @version $Id: ComparableVersion.java 720520 2008-11-25 16:07:14Z bentmann $
  */
 public class ComparableVersion
@@ -63,11 +62,20 @@ public class ComparableVersion
     private static class IntegerItem
         implements Item
     {
-        private Integer value;
+        private static final BigInteger BigInteger_ZERO = new BigInteger( "0" );
 
-        public IntegerItem( Integer i )
+        private final BigInteger value;
+
+        public static final IntegerItem ZERO = new IntegerItem();
+
+        private IntegerItem()
         {
-            this.value = i;
+            this.value = BigInteger_ZERO;
+        }
+
+        public IntegerItem( String str )
+        {
+            this.value = new BigInteger( str );
         }
 
         public int getType()
@@ -77,14 +85,14 @@ public class ComparableVersion
 
         public boolean isNull()
         {
-            return ( value.intValue() == 0 );
+            return BigInteger_ZERO.equals( value );
         }
 
         public int compareTo( Item item )
         {
             if ( item == null )
             {
-                return value.intValue() == 0 ? 0 : 1; // 1.0 == 1, 1.1 > 1
+                return BigInteger_ZERO.equals( value ) ? 0 : 1; // 1.0 == 1, 1.1 > 1
             }
 
             switch ( item.getType() )
@@ -115,11 +123,12 @@ public class ComparableVersion
     private static class StringItem
         implements Item
     {
-        private final static String[] QUALIFIERS = { "snapshot", "alpha", "beta", "milestone", "rc", "", "sp" };
+        private final static String[] QUALIFIERS = {"snapshot", "alpha", "beta", "milestone", "rc", "", "sp"};
 
         private final static List _QUALIFIERS = Arrays.asList( QUALIFIERS );
 
         private final static Properties ALIASES = new Properties();
+
         static
         {
             ALIASES.put( "ga", "" );
@@ -168,10 +177,10 @@ public class ComparableVersion
 
         /**
          * Returns a comparable for a qualifier.
-         *
+         * <p/>
          * This method both takes into account the ordering of known qualifiers as well as lexical ordering for unknown
          * qualifiers.
-         *
+         * <p/>
          * just returning an Integer with the index here is faster, but requires a lot of if/then/else to check for -1
          * or QUALIFIERS.size and then resort to lexical ordering. Most comparisons are decided by the first character,
          * so this is still fast. If more characters are needed then it requires a lexical sort anyway.
@@ -340,7 +349,7 @@ public class ComparableVersion
             {
                 if ( i == startIndex )
                 {
-                    list.add( new IntegerItem( new Integer( 0 ) ) );
+                    list.add( IntegerItem.ZERO );
                 }
                 else
                 {
@@ -352,7 +361,7 @@ public class ComparableVersion
             {
                 if ( i == startIndex )
                 {
-                    list.add( new IntegerItem( new Integer( 0 ) ) );
+                    list.add( IntegerItem.ZERO );
                 }
                 else
                 {
@@ -412,7 +421,7 @@ public class ComparableVersion
 
     private static Item parseItem( boolean isDigit, String buf )
     {
-        return isDigit ? (Item) new IntegerItem( new Integer( buf ) ) : (Item) new StringItem( buf, false );
+        return isDigit ? (Item) new IntegerItem( buf ) : (Item) new StringItem( buf, false );
     }
 
     public int compareTo( Object o )
