@@ -39,4 +39,14 @@ public class NumericVersionComparatorTest
     public void testBigValues() throws Exception {
         assertTrue(instance.compare( "1.92.0", "1.100000000000000000000000.0" ) < 0);
     }
+
+    public void testStringValues() throws Exception {
+        assertTrue(instance.compare( "1.a20.0", "1.a3.0" ) < 0);
+        assertTrue(instance.compare( "1.a20.0", "1.b10.0" ) < 0);
+        assertTrue(instance.compare( "1.a.0.b.0", "1.a.0.b.1" ) < 0);
+        assertTrue(instance.compare( "1.a.0.b.0", "2.a.0.b.1" ) < 0);
+        assertTrue(instance.compare( "1.a.0.b.0", "1.a.0.b" ) < 0);
+        assertTrue(instance.compare( "1.a.0.b.0", "1.a.0.b.0" ) == 0);
+        assertTrue(instance.compare( "1.a.0.b", "1.a.0.b.0" ) > 0);
+    }
 }
