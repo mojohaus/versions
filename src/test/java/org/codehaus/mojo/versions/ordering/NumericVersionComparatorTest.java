@@ -38,6 +38,8 @@ public class NumericVersionComparatorTest
     
     public void testBigValues() throws Exception {
         assertTrue(instance.compare( "1.92.0", "1.100000000000000000000000.0" ) < 0);
+        assertTrue(instance.compare( "1.100000000000000000000000.0", "1.92.0") > 0);
+        assertTrue(instance.compare( "1.100000000000000000000000.0", "1.100000000000000000000000.0") == 0);
     }
 
     public void testStringValues() throws Exception {

@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.ordering;
 
 import java.util.Comparator;
 import java.util.StringTokenizer;
+import java.math.BigInteger;
 
 /**
  * A comparator which will compare all segments of a dot separated version string as numbers if possible,
@@ -32,6 +33,7 @@ import java.util.StringTokenizer;
 public class NumericVersionComparator
     implements Comparator
 {
+    private static final BigInteger BIG_INTEGER_ZERO = new BigInteger( "0" );
 
     /**
      * {@inheritDoc}
@@ -62,8 +64,8 @@ public class NumericVersionComparator
             }
             try
             {
-                Integer n1 = Integer.valueOf( p1 );
-                Integer n2 = Integer.valueOf( p2 );
+                BigInteger n1 = new BigInteger( p1 );
+                BigInteger n2 = new BigInteger( p2 );
                 int result = n1.compareTo( n2 );
                 if ( result != 0 )
                 {
@@ -93,12 +95,12 @@ public class NumericVersionComparator
         }
         if ( tok1.hasMoreTokens() )
         {
-            Integer n2 = new Integer( 0 );
+            BigInteger n2 = BIG_INTEGER_ZERO;
             while ( tok1.hasMoreTokens() )
             {
                 try
                 {
-                    Integer n1 = Integer.valueOf( tok1.nextToken() );
+                    BigInteger n1 = new BigInteger( tok1.nextToken() );
                     int result = n1.compareTo( n2 );
                     if ( result != 0 )
                     {
@@ -114,12 +116,12 @@ public class NumericVersionComparator
         }
         if ( tok2.hasMoreTokens() )
         {
-            Integer n1 = new Integer( 0 );
+            BigInteger n1 = BIG_INTEGER_ZERO;
             while ( tok2.hasMoreTokens() )
             {
                 try
                 {
-                    Integer n2 = Integer.valueOf( tok2.nextToken() );
+                    BigInteger n2 = new BigInteger( tok2.nextToken() );
                     int result = n1.compareTo( n2 );
                     if ( result != 0 )
                     {
