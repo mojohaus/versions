@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
+import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.StringTokenizer;
-import java.math.BigInteger;
 
 /**
  * A comparator which will compare all segments of a dot separated version string as numbers if possible,
@@ -53,14 +53,14 @@ public class NumericVersionComparator
             if ( p1.indexOf( '-' ) >= 0 )
             {
                 int index = p1.indexOf( '-' );
-                p1 = p1.substring( 0, index );
                 q1 = p1.substring( index );
+                p1 = p1.substring( 0, index );
             }
             if ( p2.indexOf( '-' ) >= 0 )
             {
                 int index = p2.indexOf( '-' );
-                p2 = p2.substring( 0, index );
                 q2 = p2.substring( index );
+                p2 = p2.substring( 0, index );
             }
             try
             {
@@ -82,7 +82,11 @@ public class NumericVersionComparator
             }
             if ( q1 != null && q2 != null )
             {
-                return q1.compareTo( q2 );
+                final int result = q1.compareTo( q2 );
+                if ( result != 0 )
+                {
+                    return result;
+                }
             }
             if ( q1 != null )
             {
@@ -109,7 +113,8 @@ public class NumericVersionComparator
                 }
                 catch ( NumberFormatException e )
                 {
-                    // ignore
+                    // any token is better than zero
+                    return +1;
                 }
             }
             return -1;
@@ -130,7 +135,8 @@ public class NumericVersionComparator
                 }
                 catch ( NumberFormatException e )
                 {
-                    // ignore
+                    // any token is better than zero
+                    return -1;
                 }
             }
             return +1;
@@ -140,15 +146,17 @@ public class NumericVersionComparator
 
     /**
      * Returns a hash code value for the comparator class.
+     *
      * @return the hash code.
      */
     public int hashCode()
     {
-        return getClass().hashCode();    
+        return getClass().hashCode();
     }
 
     /**
      * Returns true if this object is the same type of comparator as the parameter.
+     *
      * @param obj the reference object with which to compare.
      * @return <code>true</code> if this object is the same as the obj
      *         argument; <code>false</code> otherwise.
@@ -157,6 +165,6 @@ public class NumericVersionComparator
      */
     public boolean equals( Object obj )
     {
-        return obj == this || (obj != null && getClass().equals( obj.getClass() ));
+        return obj == this || ( obj != null && getClass().equals( obj.getClass() ) );
     }
 }

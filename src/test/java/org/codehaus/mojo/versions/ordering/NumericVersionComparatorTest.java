@@ -46,9 +46,26 @@ public class NumericVersionComparatorTest
         assertTrue(instance.compare( "1.a20.0", "1.a3.0" ) < 0);
         assertTrue(instance.compare( "1.a20.0", "1.b10.0" ) < 0);
         assertTrue(instance.compare( "1.a.0.b.0", "1.a.0.b.1" ) < 0);
+        assertTrue(instance.compare( "1.162%a.0.b.0", "1.162%a.0.b.1" ) < 0);
+        assertTrue(instance.compare( "1.162%a.0.b.0", "1.2.0.b.1" ) < 0);
+        assertTrue(instance.compare( "1.0a.0.b.0", "1.162%.0.b.1" ) < 0);
         assertTrue(instance.compare( "1.a.0.b.0", "2.a.0.b.1" ) < 0);
         assertTrue(instance.compare( "1.a.0.b.0", "1.a.0.b" ) < 0);
         assertTrue(instance.compare( "1.a.0.b.0", "1.a.0.b.0" ) == 0);
         assertTrue(instance.compare( "1.a.0.b", "1.a.0.b.0" ) > 0);
+        assertTrue(instance.compare( "1.a.0.0", "1.a.0" ) < 0);
+        assertTrue(instance.compare( "1.a.0", "1.a.0.0" ) > 0);
+        assertTrue(instance.compare( "1.a.0.1", "1.a.0" ) > 0);
+        assertTrue(instance.compare( "1.a.0", "1.a.0.1" ) < 0);
+        assertTrue(instance.compare( "1.a.0.b", "1.a.0" ) > 0);
+        assertTrue(instance.compare( "1.a.0", "1.a.0.b" ) < 0);
+    }
+
+    public void testQualifiers() throws Exception {
+        assertTrue(instance.compare( "1.0-alpha.10", "1.0-alpha.20" ) < 0);
+        assertTrue(instance.compare( "1.0-alpha.10", "1.0-beta.1" ) < 0);
+        assertTrue(instance.compare( "1.0", "1.0-alpha.2" ) > 0);
+        assertTrue(instance.compare( "1.0-alpha.10", "1.0" ) < 0);
+        assertTrue(instance.compare( "1.0.10", "1.0-alpha.10" ) > 0);
     }
 }
