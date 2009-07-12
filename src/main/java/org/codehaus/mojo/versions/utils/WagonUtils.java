@@ -19,18 +19,18 @@ package org.codehaus.mojo.versions.utils;
 * under the License.
 */
 
-import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.UnsupportedProtocolException;
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.observers.Debug;
-import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.settings.Settings;
-import org.apache.maven.settings.Proxy;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.manager.WagonConfigurationException;
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.settings.Proxy;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.UnsupportedProtocolException;
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.observers.Debug;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.repository.Repository;
 
 /**
  * Utility methods to help with using {@link Wagon}s.

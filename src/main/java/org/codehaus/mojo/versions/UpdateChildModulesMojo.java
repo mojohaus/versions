@@ -20,22 +20,23 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Scans the current projects child modules, updating the versions of any which use the current project to

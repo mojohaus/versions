@@ -1,15 +1,12 @@
 package org.codehaus.mojo.versions.utils;
 
-import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
-import org.codehaus.plexus.logging.Logger;
-import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
-import org.apache.maven.plugin.MojoExecution;
-import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.path.PathTranslator;
+import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
+import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.project.MavenProject;
-
-import java.util.Properties;
+import org.apache.maven.project.path.PathTranslator;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 
 /**
  * Created by IntelliJ IDEA.
