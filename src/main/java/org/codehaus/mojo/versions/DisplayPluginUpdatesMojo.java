@@ -468,7 +468,6 @@ public class DisplayPluginUpdatesMojo
             "/project(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );
         Stack pathStack = new Stack();
         StackState curState = null;
-        StackState parentState = null;
         while ( pom.hasNext() )
         {
             XMLEvent event = pom.nextEvent();
