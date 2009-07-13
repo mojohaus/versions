@@ -46,7 +46,7 @@ public class DisplayDependencyUpdatesRenderer
      */
     public DisplayDependencyUpdatesRenderer( Sink sink, Map availableVersions, Comparator comparator )
     {
-        super( (org.codehaus.doxia.sink.Sink) sink );
+        super( sink );
         this.availableVersions = availableVersions;
         this.comparator = comparator;
     }

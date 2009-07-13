@@ -2,10 +2,10 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>localhost</groupId>
-    <artifactId>it-401</artifactId>
+    <artifactId>it-dependency-updates-report-001</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
-    <name>display-dependency-updates-report</name>
+    <name>dependency-updates-report</name>
     <dependencies>
         <dependency>
             <groupId>localhost</groupId>
@@ -22,7 +22,7 @@
                 <reportSets>
                     <reportSet>
                         <reports>
-                            <report>display-dependency-updates-report</report>
+                            <report>dependency-updates-report</report>
                         </reports>
                     </reportSet>
                 </reportSets>

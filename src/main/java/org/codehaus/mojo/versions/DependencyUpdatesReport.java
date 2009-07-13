@@ -1,8 +1,22 @@
 package org.codehaus.mojo.versions;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,33 +47,47 @@ public class DependencyUpdatesReport
      * @param sink   the report formatting tool
      */
     protected void doGenerateReport( Locale locale, Sink sink )
+        throws MavenReportException, MojoExecutionException
     {
-        sink.head();
-        sink.title();
-        sink.text( getText( locale, "report.header" ) );
-        sink.title_();
-        sink.head_();
+        Map/*<Dependency,List<ArtifactVersion>*/ dependencyUpdates = new TreeMap( new DependencyComparator() );
+        Set dependencies = new TreeSet( new DependencyComparator() );
+        dependencies.addAll( getProject().getDependencies() );
+        Iterator i = dependencies.iterator();
+        while ( i.hasNext() )
+        {
+            Dependency dependency = (Dependency) i.next();
+            String groupId = dependency.getGroupId();
+            String artifactId = dependency.getArtifactId();
+            String version = dependency.getVersion();
+            getLog().debug( "Checking " + groupId + ":" + artifactId + " for updates newer than " + version );
 
-        sink.body();
-        sink.section1();
+            VersionRange versionRange = null;
+            try
+            {
+                versionRange = VersionRange.createFromVersionSpec( version );
+            }
+            catch ( InvalidVersionSpecificationException e )
+            {
+                throw new MavenReportException( "Invalid version range specification: " + version, e );
+            }
 
-        sink.sectionTitle1();
-        sink.text( getText( locale, "report.mainTitle" ) );
-        sink.sectionTitle1_();
+            Artifact artifact =
+                artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, dependency.getType(),
+                                                          dependency.getClassifier(), dependency.getScope() );
 
-        sink.paragraph();
-        sink.text( getText( locale, "report.emptyDescription" ) );
-        sink.paragraph_();
+            ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, false );
+            dependencyUpdates.put( dependency,
+                                   Arrays.asList( artifactVersions.getNewerVersions( dependency.getVersion() ) ) );
 
-        sink.section1_();
-
-        sink.body_();
-        sink.flush();
-        sink.close();
+        }
+        DependencyUpdatesRenderer renderer =
+            new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates );
+        renderer.render();
     }
 
     public String getOutputName()
     {
         return "dependency-updates-report";
     }
+
 }

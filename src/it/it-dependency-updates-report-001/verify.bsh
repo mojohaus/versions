@@ -1,0 +1,27 @@
+import java.io.*;
+
+try
+{
+    File file = new File( basedir, "target/site/dependency-updates-report.html" );
+    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+    StringBuilder buf = new StringBuilder();
+    String line = in.readLine();
+    while (line != null) {
+        buf.append(line);
+        buf.append("\n");
+        line = in.readLine();
+    }
+	
+	if( buf.indexOf( "1.1.1, 1.2, 1.3, 2.0, 2.1, 3.0" ) < 0 )
+	{
+		System.out.println( "Did not pick up newer versions" );
+		return false;
+	}
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;

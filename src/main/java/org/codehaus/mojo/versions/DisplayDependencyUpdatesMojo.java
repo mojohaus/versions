@@ -28,11 +28,11 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
 
 import javax.xml.stream.XMLStreamException;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -152,51 +152,5 @@ public class DisplayDependencyUpdatesMojo
     }
 
 // -------------------------- INNER CLASSES --------------------------
-
-    /**
-     * A comparator used to sort dependencies by group id, artifact id and finally version.
-     *
-     * @since 1.0-alpha-1
-     */
-    private static class DependencyComparator
-        implements Comparator
-    {
-
-        /**
-         * @param o1 the first object
-         * @param o2 the second object.
-         * @return the comparison result
-         * @see java.util.Comparator#compare(Object, Object)
-         * @since 1.0-alpha-1
-         */
-        public int compare( Object o1, Object o2 )
-        {
-            Dependency d1 = (Dependency) o1;
-            Dependency d2 = (Dependency) o2;
-
-            int r = d1.getGroupId().compareTo( d2.getGroupId() );
-            if ( r == 0 )
-            {
-                r = d1.getArtifactId().compareTo( d2.getArtifactId() );
-            }
-            if ( r == 0 )
-            {
-                String v1 = d1.getVersion();
-                String v2 = d2.getVersion();
-                if ( v1 == null )
-                {
-                    // hope I got the +1/-1 the right way around
-                    return v2 == null ? 0 : -1;
-                }
-                if ( v2 == null )
-                {
-                    return 1;
-                }
-                r = v1.compareTo( v2 );
-            }
-            return r;
-        }
-
-    }
 
 }

@@ -82,7 +82,7 @@ public abstract class AbstractVersionsReport
      * @component
      * @since 1.0-alpha-3
      */
-    private org.apache.maven.artifact.factory.ArtifactFactory artifactFactory;
+    protected org.apache.maven.artifact.factory.ArtifactFactory artifactFactory;
 
     /**
      * @component
@@ -197,24 +197,41 @@ public abstract class AbstractVersionsReport
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     public VersionsHelper getHelper()
-        throws MojoExecutionException
+        throws MavenReportException
     {
         if ( helper == null )
         {
-            helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories, remotePluginRepositories,
-                                         localRepository, wagonManager, settings, serverId, rulesUri, comparisonMethod,
-                                         getLog() );
+            try
+            {
+                helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
+                                                    remotePluginRepositories, localRepository, wagonManager, settings,
+                                                    serverId, rulesUri, comparisonMethod, getLog() );
+            }
+            catch ( MojoExecutionException e )
+            {
+                throw new MavenReportException( e.getMessage(), e );
+            }
         }
         return helper;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected void executeReport( Locale locale )
         throws MavenReportException
     {
         if ( !Boolean.TRUE.equals( skip ) )
         {
             getLog().info( getSink().toString() );
-            doGenerateReport( locale, getSink() );
+            try
+            {
+                doGenerateReport( locale, getSink() );
+            }
+            catch ( MojoExecutionException e )
+            {
+                throw new MavenReportException( e.getMessage(), e );
+            }
         }
     }
 
@@ -223,8 +240,10 @@ public abstract class AbstractVersionsReport
      *
      * @param locale the locale to generate the report for.
      * @param sink   the report formatting tool.
+     * @throws MavenReportException when things go wrong.
      */
-    protected abstract void doGenerateReport( Locale locale, Sink sink );
+    protected abstract void doGenerateReport( Locale locale, Sink sink )
+        throws MavenReportException, MojoExecutionException;
 
     /**
      * Finds the latest version of the specified artifact that matches the version range.
@@ -239,7 +258,7 @@ public abstract class AbstractVersionsReport
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
-        throws MojoExecutionException
+        throws MavenReportException
     {
         boolean includeSnapshots = Boolean.TRUE.equals( this.allowSnapshots );
         if ( Boolean.TRUE.equals( allowingSnapshots ) )
@@ -250,8 +269,16 @@ public abstract class AbstractVersionsReport
         {
             includeSnapshots = false;
         }
-        final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
-        return artifactVersions.getLatestVersion( versionRange, includeSnapshots );
+        try
+        {
+            final ArtifactVersions artifactVersions =
+                getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
+            return artifactVersions.getLatestVersion( versionRange, includeSnapshots );
+        }
+        catch ( MojoExecutionException e )
+        {
+            throw new MavenReportException( e.getMessage(), e );
+        }
     }
 
     /**
@@ -324,5 +351,10 @@ public abstract class AbstractVersionsReport
     public ArtifactResolver getResolver()
     {
         return resolver;
+    }
+
+    public I18N getI18n()
+    {
+        return i18n;
     }
 }
