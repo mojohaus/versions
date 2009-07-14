@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+
 import java.util.Comparator;
 
 /**
@@ -28,7 +30,7 @@ import java.util.Comparator;
  * @since 1.0-alpha-3
  */
 public class MercuryVersionComparator
-    implements Comparator
+    implements VersionComparator
 {
 
     /**
@@ -59,5 +61,15 @@ public class MercuryVersionComparator
     public boolean equals( Object obj )
     {
         return obj == this || (obj != null && getClass().equals( obj.getClass() ));
+    }
+
+    public int getSegmentCount( ArtifactVersion v )
+    {
+        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
+    {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

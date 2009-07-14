@@ -20,8 +20,7 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-
-import java.util.Comparator;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 /**
  * A comparator which uses Maven's version rules, i.e. 1.3.34 &gt; 1.3.9 but 1.3.4.3.2.34 &lt; 1.3.4.3.2.9.
@@ -30,7 +29,7 @@ import java.util.Comparator;
  * @since 1.0-alpha-3
  */
 public class MavenVersionComparator
-    implements Comparator
+    implements VersionComparator
 {
 
     /**
@@ -43,15 +42,17 @@ public class MavenVersionComparator
 
     /**
      * Returns a hash code value for the comparator class.
+     *
      * @return the hash code.
      */
     public int hashCode()
     {
-        return getClass().hashCode();    
+        return getClass().hashCode();
     }
 
     /**
      * Returns true if this object is the same type of comparator as the parameter.
+     *
      * @param obj the reference object with which to compare.
      * @return <code>true</code> if this object is the same as the obj
      *         argument; <code>false</code> otherwise.
@@ -60,6 +61,35 @@ public class MavenVersionComparator
      */
     public boolean equals( Object obj )
     {
-        return obj == this || (obj != null && getClass().equals( obj.getClass() ));
+        return obj == this || ( obj != null && getClass().equals( obj.getClass() ) );
+    }
+
+    public int getSegmentCount( ArtifactVersion v )
+    {
+        return 4;
+    }
+
+    public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
+    {
+        if ( segment < 0 || segment > getSegmentCount( v ) )
+        {
+            throw new IllegalArgumentException( "Invalid segment" );
+        }
+        switch ( segment )
+        {
+            case 0:
+                return new DefaultArtifactVersion( "" + ( v.getMajorVersion() + 1 ) + ".0.0" );
+            case 1:
+                return new DefaultArtifactVersion(
+                    "" + v.getMajorVersion() + "." + ( v.getMinorVersion() + 1 ) + ".0" );
+            case 2:
+                return new DefaultArtifactVersion(
+                    "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + ( v.getIncrementalVersion() + 1 ) );
+            case 3:
+            default:
+                return new DefaultArtifactVersion(
+                    "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + v.getIncrementalVersion() + "-" + (
+                        v.getBuildNumber() + 1 ) );
+        }
     }
 }

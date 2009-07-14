@@ -19,8 +19,10 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+
 import java.math.BigInteger;
-import java.util.Comparator;
 import java.util.StringTokenizer;
 
 /**
@@ -31,9 +33,11 @@ import java.util.StringTokenizer;
  * @since 1.0-alpha-3
  */
 public class NumericVersionComparator
-    implements Comparator
+    implements VersionComparator
 {
     private static final BigInteger BIG_INTEGER_ZERO = new BigInteger( "0" );
+
+    private static final BigInteger BIG_INTEGER_ONE = new BigInteger( "1" );
 
     /**
      * {@inheritDoc}
@@ -166,5 +170,215 @@ public class NumericVersionComparator
     public boolean equals( Object obj )
     {
         return obj == this || ( obj != null && getClass().equals( obj.getClass() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getSegmentCount( ArtifactVersion v )
+    {
+        final String version = v.toString();
+        StringTokenizer tok = new StringTokenizer( version, "." );
+        int count = 0;
+        while ( tok.hasMoreTokens() )
+        {
+            count++;
+            tok.nextToken();
+        }
+
+        return count;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
+    {
+        if ( segment < 0 || segment > getSegmentCount( v ) )
+        {
+            throw new IllegalArgumentException( "Invalid segment" );
+        }
+        final String version = v.toString();
+        StringBuffer buf = new StringBuffer();
+        StringTokenizer tok = new StringTokenizer( version, "." );
+        boolean first = true;
+        while ( segment >= 0 && tok.hasMoreTokens() )
+        {
+            if ( first )
+            {
+                first = false;
+            }
+            else
+            {
+                buf.append( '.' );
+            }
+            String p = tok.nextToken();
+            String q = null;
+            if ( p.indexOf( '-' ) >= 0 )
+            {
+                int index = p.indexOf( '-' );
+                q = p.substring( index + 1 );
+                p = p.substring( 0, index );
+            }
+
+            if ( segment == 0 )
+            {
+                try
+                {
+                    BigInteger n = new BigInteger( p );
+                    p = n.add( BIG_INTEGER_ONE ).toString();
+                    q = null;
+                }
+                catch ( NumberFormatException e )
+                {
+                    // ok, let's try some common tricks
+                    if ( "alpha".equalsIgnoreCase( p ) )
+                    {
+                        if ( q == null )
+                        {
+                            p = "beta";
+                        }
+                        else
+                        {
+                            try
+                            {
+                                BigInteger n = new BigInteger( q );
+                                q = n.add( BIG_INTEGER_ONE ).toString();
+                            }
+                            catch ( NumberFormatException e1 )
+                            {
+                                p = "beta";
+                                q = null;
+                            }
+                        }
+                    }
+                    else if ( "beta".equalsIgnoreCase( p ) )
+                    {
+                        if ( q == null )
+                        {
+                            p = "rc";
+                        }
+                        else
+                        {
+                            try
+                            {
+                                BigInteger n = new BigInteger( q );
+                                q = n.add( BIG_INTEGER_ONE ).toString();
+                            }
+                            catch ( NumberFormatException e1 )
+                            {
+                                p = "rc";
+                                q = null;
+                            }
+                        }
+                    }
+                    else if ( "rc".equalsIgnoreCase( p ) )
+                    {
+                        if ( q == null )
+                        {
+                            p = "ga";
+                        }
+                        else
+                        {
+                            try
+                            {
+                                BigInteger n = new BigInteger( q );
+                                q = n.add( BIG_INTEGER_ONE ).toString();
+                            }
+                            catch ( NumberFormatException e1 )
+                            {
+                                p = "ga";
+                                q = null;
+                            }
+                        }
+                    }
+                    else if ( "ga".equalsIgnoreCase( p ) )
+                    {
+                        if ( q == null )
+                        {
+                            p = "sp";
+                            q = "1";
+                        }
+                        else
+                        {
+                            try
+                            {
+                                BigInteger n = new BigInteger( q );
+                                q = n.add( BIG_INTEGER_ONE ).toString();
+                            }
+                            catch ( NumberFormatException e1 )
+                            {
+                                p = "sp";
+                                q = "1";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int i = p.length();
+                        boolean done = false;
+                        while ( !done && i > 0 )
+                        {
+                            i--;
+                            char c = p.charAt( i );
+                            if ( '0' <= c && c < '9' )
+                            {
+                                c++;
+                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
+                                done = true;
+                            }
+                            else if ( c == '9' )
+                            {
+                                c++;
+                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
+                            }
+                            else if ( 'A' <= c && c < 'Z' )
+                            {
+                                c++;
+                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
+                                done = true;
+                            }
+                            else if ( c == 'Z' )
+                            {
+                                c++;
+                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
+                            }
+                            else if ( 'a' <= c && c < 'z' )
+                            {
+                                c++;
+                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
+                                done = true;
+                            }
+                            else if ( c == 'z' )
+                            {
+                                c++;
+                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
+                            }
+                        }
+                    }
+                }
+            }
+            buf.append( p );
+            if ( q != null )
+            {
+                buf.append( '-' );
+                buf.append( q );
+            }
+            segment--;
+        }
+        while ( tok.hasMoreTokens() )
+        {
+            if ( first )
+            {
+                first = false;
+            }
+            else
+            {
+                buf.append( '.' );
+            }
+            tok.nextToken();
+            buf.append( "0" );
+        }
+        return new DefaultArtifactVersion( buf.toString() );
     }
 }

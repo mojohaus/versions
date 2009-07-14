@@ -42,7 +42,7 @@ public final class VersionComparators
      * @return the version comparator to use.
      * @since 1.0-alpha-1
      */
-    public static Comparator getVersionComparator( String comparisonMethod )
+    public static VersionComparator getVersionComparator( String comparisonMethod )
     {
         if ( "numeric".equalsIgnoreCase( comparisonMethod ) )
         {
