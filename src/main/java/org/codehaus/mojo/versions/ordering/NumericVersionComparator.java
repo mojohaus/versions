@@ -179,14 +179,7 @@ public class NumericVersionComparator
     {
         final String version = v.toString();
         StringTokenizer tok = new StringTokenizer( version, "." );
-        int count = 0;
-        while ( tok.hasMoreTokens() )
-        {
-            count++;
-            tok.nextToken();
-        }
-
-        return count;
+        return tok.countTokens();
     }
 
     /**

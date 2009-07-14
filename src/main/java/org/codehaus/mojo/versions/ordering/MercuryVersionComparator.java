@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions.ordering;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import java.util.Comparator;
+import java.util.StringTokenizer;
 
 /**
  * A comparator which uses Mercury's version rules.
@@ -65,11 +66,17 @@ public class MercuryVersionComparator
 
     public int getSegmentCount( ArtifactVersion v )
     {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        final String version = v.toString();
+        StringTokenizer tok = new StringTokenizer( version, ".-");
+        return tok.countTokens();
     }
 
     public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
     {
+        if ( segment < 0 || segment > getSegmentCount( v ) )
+        {
+            throw new IllegalArgumentException( "Invalid segment" );
+        }
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }
