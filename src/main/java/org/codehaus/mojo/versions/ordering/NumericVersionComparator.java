@@ -249,6 +249,26 @@ public class NumericVersionComparator
                     {
                         if ( q == null )
                         {
+                            p = "milestone";
+                        }
+                        else
+                        {
+                            try
+                            {
+                                BigInteger n = new BigInteger( q );
+                                q = n.add( BIG_INTEGER_ONE ).toString();
+                            }
+                            catch ( NumberFormatException e1 )
+                            {
+                                p = "milestone";
+                                q = null;
+                            }
+                        }
+                    }
+                    else if ( "milestone".equalsIgnoreCase( p ) )
+                    {
+                        if ( q == null )
+                        {
                             p = "rc";
                         }
                         else
@@ -265,7 +285,7 @@ public class NumericVersionComparator
                             }
                         }
                     }
-                    else if ( "rc".equalsIgnoreCase( p ) )
+                    else if ( "cr".equalsIgnoreCase( p ) || "rc".equalsIgnoreCase(p ))
                     {
                         if ( q == null )
                         {
@@ -285,7 +305,7 @@ public class NumericVersionComparator
                             }
                         }
                     }
-                    else if ( "ga".equalsIgnoreCase( p ) )
+                    else if ( "ga".equalsIgnoreCase( p ) || "final".equalsIgnoreCase( p ))
                     {
                         if ( q == null )
                         {
