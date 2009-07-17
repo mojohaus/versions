@@ -285,7 +285,7 @@ public class NumericVersionComparator
                             }
                         }
                     }
-                    else if ( "cr".equalsIgnoreCase( p ) || "rc".equalsIgnoreCase(p ))
+                    else if ( "cr".equalsIgnoreCase( p ) || "rc".equalsIgnoreCase( p ) )
                     {
                         if ( q == null )
                         {
@@ -305,7 +305,7 @@ public class NumericVersionComparator
                             }
                         }
                     }
-                    else if ( "ga".equalsIgnoreCase( p ) || "final".equalsIgnoreCase( p ))
+                    else if ( "ga".equalsIgnoreCase( p ) || "final".equalsIgnoreCase( p ) )
                     {
                         if ( q == null )
                         {
@@ -328,46 +328,7 @@ public class NumericVersionComparator
                     }
                     else
                     {
-                        int i = p.length();
-                        boolean done = false;
-                        while ( !done && i > 0 )
-                        {
-                            i--;
-                            char c = p.charAt( i );
-                            if ( '0' <= c && c < '9' )
-                            {
-                                c++;
-                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
-                                done = true;
-                            }
-                            else if ( c == '9' )
-                            {
-                                c++;
-                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
-                            }
-                            else if ( 'A' <= c && c < 'Z' )
-                            {
-                                c++;
-                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
-                                done = true;
-                            }
-                            else if ( c == 'Z' )
-                            {
-                                c++;
-                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
-                            }
-                            else if ( 'a' <= c && c < 'z' )
-                            {
-                                c++;
-                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
-                                done = true;
-                            }
-                            else if ( c == 'z' )
-                            {
-                                c++;
-                                p = p.substring( 0, i ) + c + ( i + 1 < p.length() ? p.substring( i + 1 ) : "" );
-                            }
-                        }
+                        p = VersionComparators.alphaNumIncrement( p );
                     }
                 }
             }

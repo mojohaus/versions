@@ -135,59 +135,7 @@ public class MercuryVersionComparator
                     }
                     else
                     {
-                        int i = token.length();
-                        boolean done = false;
-                        newToken = token;
-                        while ( !done && i > 0 )
-                        {
-                            i--;
-                            char c = token.charAt( i );
-                            if ( '0' <= c && c < '9' )
-                            {
-                                c++;
-                                newToken =
-                                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring(
-                                        i + 1 ) : "" );
-                                done = true;
-                            }
-                            else if ( c == '9' )
-                            {
-                                c++;
-                                newToken =
-                                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring(
-                                        i + 1 ) : "" );
-                            }
-                            else if ( 'A' <= c && c < 'Z' )
-                            {
-                                c++;
-                                newToken =
-                                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring(
-                                        i + 1 ) : "" );
-                                done = true;
-                            }
-                            else if ( c == 'Z' )
-                            {
-                                c++;
-                                newToken =
-                                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring(
-                                        i + 1 ) : "" );
-                            }
-                            else if ( 'a' <= c && c < 'z' )
-                            {
-                                c++;
-                                newToken =
-                                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring(
-                                        i + 1 ) : "" );
-                                done = true;
-                            }
-                            else if ( c == 'z' )
-                            {
-                                c++;
-                                newToken =
-                                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring(
-                                        i + 1 ) : "" );
-                            }
-                        }
+                        newToken = VersionComparators.alphaNumIncrement( token );
                     }
                 }
 
@@ -221,4 +169,5 @@ public class MercuryVersionComparator
         }
         return new DefaultArtifactVersion( result.toString() );
     }
+
 }

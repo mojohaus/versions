@@ -68,90 +68,51 @@ public class MavenVersionComparator
     {
         // if the version does not match the maven rules, then we have only one segment
         // i.e. the qualifier
-        return v.toString().equals( v.getQualifier() ) ? 1 : 4;
+        final String version = v.toString();
+        return ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0
+            || v.getBuildNumber() != 0
+            || ( ( version.indexOf( '.' ) != -1 || version.indexOf( '-' ) != -1 ) && !version.equals(
+            v.getQualifier() ) ) || version.length() == 0 ) ? 4 : 1;
     }
 
     public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
     {
         int segmentCount = getSegmentCount( v );
+        // TODO make more preserving of number of segments
         if ( segment < 0 || segment >= segmentCount )
         {
             throw new IllegalArgumentException( "Invalid segment" );
         }
-        if (segmentCount == 1) {
-            // only the qualifier
-            String oldVersion = v.toString();
-            int i = oldVersion.length();
-            boolean done = false;
-            String newVersion = oldVersion;
-            while ( !done && i > 0 )
-            {
-                i--;
-                char c = oldVersion.charAt( i );
-                if ( '0' <= c && c < '9' )
-                {
-                    c++;
-                    newVersion =
-                        newVersion.substring( 0, i ) + c + ( i + 1 < newVersion.length() ? newVersion.substring(
-                            i + 1 ) : "" );
-                    done = true;
-                }
-                else if ( c == '9' )
-                {
-                    c++;
-                    newVersion =
-                        newVersion.substring( 0, i ) + c + ( i + 1 < newVersion.length() ? newVersion.substring(
-                            i + 1 ) : "" );
-                }
-                else if ( 'A' <= c && c < 'Z' )
-                {
-                    c++;
-                    newVersion =
-                        newVersion.substring( 0, i ) + c + ( i + 1 < newVersion.length() ? newVersion.substring(
-                            i + 1 ) : "" );
-                    done = true;
-                }
-                else if ( c == 'Z' )
-                {
-                    c++;
-                    newVersion =
-                        newVersion.substring( 0, i ) + c + ( i + 1 < newVersion.length() ? newVersion.substring(
-                            i + 1 ) : "" );
-                }
-                else if ( 'a' <= c && c < 'z' )
-                {
-                    c++;
-                    newVersion =
-                        newVersion.substring( 0, i ) + c + ( i + 1 < newVersion.length() ? newVersion.substring(
-                            i + 1 ) : "" );
-                    done = true;
-                }
-                else if ( c == 'z' )
-                {
-                    c++;
-                    newVersion =
-                        newVersion.substring( 0, i ) + c + ( i + 1 < newVersion.length() ? newVersion.substring(
-                            i + 1 ) : "" );
-                }
-            }
-            
-            return new DefaultArtifactVersion( newVersion );
-        } else
-        switch ( segment )
+        if ( segmentCount == 1 )
         {
-            case 0:
-                return new DefaultArtifactVersion( "" + ( v.getMajorVersion() + 1 ) + ".0.0" );
-            case 1:
-                return new DefaultArtifactVersion(
-                    "" + v.getMajorVersion() + "." + ( v.getMinorVersion() + 1 ) + ".0" );
-            case 2:
-                return new DefaultArtifactVersion(
-                    "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + ( v.getIncrementalVersion() + 1 ) );
-            case 3:
-            default:
-                return new DefaultArtifactVersion(
-                    "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + v.getIncrementalVersion() + "-" + (
-                        v.getBuildNumber() + 1 ) );
+            // only the qualifier
+            return new DefaultArtifactVersion( VersionComparators.alphaNumIncrement( v.toString() ) );
+        }
+        else
+        {
+            switch ( segment )
+            {
+                case 0:
+                    return new DefaultArtifactVersion( "" + ( v.getMajorVersion() + 1 ) + ".0.0" );
+                case 1:
+                    return new DefaultArtifactVersion(
+                        "" + v.getMajorVersion() + "." + ( v.getMinorVersion() + 1 ) + ".0" );
+                case 2:
+                    return new DefaultArtifactVersion(
+                        "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + ( v.getIncrementalVersion()
+                            + 1 ) );
+                case 3:
+                default:
+                    if ( v.getQualifier() != null )
+                    {
+                        return new DefaultArtifactVersion(
+                            "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + v.getIncrementalVersion() + "-"
+                                + ( VersionComparators.alphaNumIncrement( v.getQualifier() ) ) );
+                    }
+                    return new DefaultArtifactVersion(
+                        "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + v.getIncrementalVersion() + "-" + (
+                            v.getBuildNumber() + 1 ) );
+            }
         }
     }
 }
