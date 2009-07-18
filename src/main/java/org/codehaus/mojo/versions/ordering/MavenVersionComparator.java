@@ -69,10 +69,9 @@ public class MavenVersionComparator
         // if the version does not match the maven rules, then we have only one segment
         // i.e. the qualifier
         final String version = v.toString();
-        return ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0
-            || v.getBuildNumber() != 0
-            || ( ( version.indexOf( '.' ) != -1 || version.indexOf( '-' ) != -1 ) && !version.equals(
-            v.getQualifier() ) ) || version.length() == 0 ) ? 4 : 1;
+        return ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0 ||
+            v.getBuildNumber() != 0 || ( ( version.indexOf( '.' ) != -1 || version.indexOf( '-' ) != -1 ) &&
+            !version.equals( v.getQualifier() ) ) || version.length() == 0 ) ? 4 : 1;
     }
 
     public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
@@ -83,36 +82,140 @@ public class MavenVersionComparator
         {
             throw new IllegalArgumentException( "Invalid segment" );
         }
+        String version = v.toString();
         if ( segmentCount == 1 )
         {
             // only the qualifier
-            return new DefaultArtifactVersion( VersionComparators.alphaNumIncrement( v.toString() ) );
+            if ( version.endsWith( "-SNAPSHOT" ) )
+            {
+                // this is likely something like alpha-1-SNAPSHOT
+                version =
+                    VersionComparators.alphaNumIncrement( version.substring( 0, version.lastIndexOf( "-SNAPSHOT" ) ) ) +
+                        "-SNAPSHOT";
+            }
+            else
+            {
+                version = VersionComparators.alphaNumIncrement( version );
+            }
+            return new DefaultArtifactVersion( version );
         }
         else
         {
+            int major = v.getMajorVersion();
+            int minor = v.getMinorVersion();
+            int incremental = v.getIncrementalVersion();
+            int build = v.getBuildNumber();
+            String qualifier = v.getQualifier();
+
+            int minorIndex = version.indexOf( '.' );
+            boolean haveMinor = minorIndex != -1;
+            int incrementalIndex = haveMinor ? version.indexOf( '.', minorIndex + 1 ) : -1;
+            boolean haveIncremental = incrementalIndex != -1;
+            int buildIndex = version.indexOf( '-' );
+            boolean haveBuild = buildIndex != -1 && qualifier == null;
+            boolean haveQualifier = buildIndex != -1 && qualifier != null;
+
             switch ( segment )
             {
                 case 0:
-                    return new DefaultArtifactVersion( "" + ( v.getMajorVersion() + 1 ) + ".0.0" );
-                case 1:
-                    return new DefaultArtifactVersion(
-                        "" + v.getMajorVersion() + "." + ( v.getMinorVersion() + 1 ) + ".0" );
-                case 2:
-                    return new DefaultArtifactVersion(
-                        "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + ( v.getIncrementalVersion()
-                            + 1 ) );
-                case 3:
-                default:
-                    if ( v.getQualifier() != null )
+                    major++;
+                    minor = 0;
+                    incremental = 0;
+                    build = 0;
+                    if ( haveQualifier && qualifier.endsWith( "SNAPSHOT" ) )
                     {
-                        return new DefaultArtifactVersion(
-                            "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + v.getIncrementalVersion() + "-"
-                                + ( VersionComparators.alphaNumIncrement( v.getQualifier() ) ) );
+                        qualifier = "SNAPSHOT";
                     }
-                    return new DefaultArtifactVersion(
-                        "" + v.getMajorVersion() + "." + v.getMinorVersion() + "." + v.getIncrementalVersion() + "-" + (
-                            v.getBuildNumber() + 1 ) );
+                    break;
+                case 1:
+                    minor++;
+                    incremental = 0;
+                    build = 0;
+                    if ( haveQualifier && qualifier.endsWith( "SNAPSHOT" ) )
+                    {
+                        qualifier = "SNAPSHOT";
+                    }
+                    break;
+                case 2:
+                    incremental++;
+                    build = 0;
+                    if ( haveQualifier && qualifier.endsWith( "SNAPSHOT" ) )
+                    {
+                        qualifier = "SNAPSHOT";
+                    }
+                    break;
+                case 3:
+                    if ( haveQualifier )
+                    {
+                        if ( "SNAPSHOT".equals( qualifier ) )
+                        {
+                            // next thing after a snapshot is a release
+                            qualifier = null;
+                            build = 1;
+                        }
+                        else if ( qualifier.endsWith( "-SNAPSHOT" ) )
+                        {
+                            // this is likely something like alpha-1-SNAPSHOT
+                            qualifier =
+                                qualifierIncrement( qualifier.substring( 0, qualifier.lastIndexOf( "-SNAPSHOT" ) ) ) +
+                                    "-SNAPSHOT";
+                        }
+                        else
+                        {
+                            qualifier = qualifierIncrement( qualifier );
+                        }
+                    }
+                    else
+                    {
+                        build++;
+                    }
+                    break;
             }
+            StringBuffer result = new StringBuffer();
+            result.append( major );
+            if ( haveMinor || minor > 0 || incremental > 0)
+            {
+                result.append( '.' );
+                result.append( minor );
+            }
+            if ( haveIncremental || incremental > 0)
+            {
+                result.append( '.' );
+                result.append( incremental );
+            }
+            if ( haveQualifier && qualifier != null )
+            {
+                result.append( '-' );
+                result.append( qualifier );
+            }
+            else if ( haveBuild || build > 0 )
+            {
+                result.append( '-' );
+                result.append( build );
+            }
+            return new DefaultArtifactVersion( result.toString() );
         }
+    }
+
+    private String qualifierIncrement( String qualifier )
+    {
+        if ( qualifier.toLowerCase().startsWith( "alpha" ) )
+        {
+            return qualifier.substring( 0, 5 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 5 ) );
+        }
+        if ( qualifier.toLowerCase().startsWith( "beta" ) )
+        {
+            return qualifier.substring( 0, 4 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 4 ) );
+        }
+        if ( qualifier.toLowerCase().startsWith( "milestone" ) )
+        {
+            return qualifier.substring( 0, 8 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 8 ) );
+        }
+        if ( qualifier.toLowerCase().startsWith( "cr" ) || qualifier.toLowerCase().startsWith( "rc" ) ||
+            qualifier.toLowerCase().startsWith( "sp" ) )
+        {
+            return qualifier.substring( 0, 2 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 2 ) );
+        }
+        return VersionComparators.alphaNumIncrement( qualifier );
     }
 }

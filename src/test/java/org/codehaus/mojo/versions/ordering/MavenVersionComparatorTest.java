@@ -41,11 +41,11 @@ public class MavenVersionComparatorTest
     public void testSegmentIncrementing()
         throws Exception
     {
-        assertEquals( new DefaultArtifactVersion( "6.0.0" ).toString(),
+        assertEquals( new DefaultArtifactVersion( "6" ).toString(),
                       instance.incrementSegment( new DefaultArtifactVersion( "5" ), 0 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "6.0.0" ).toString(),
+        assertEquals( new DefaultArtifactVersion( "6.0" ).toString(),
                       instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), 0 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.1.0" ).toString(),
+        assertEquals( new DefaultArtifactVersion( "5.1" ).toString(),
                       instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), 1 ).toString() );
         assertEquals( new DefaultArtifactVersion( "5.1.0" ).toString(),
                       instance.incrementSegment( new DefaultArtifactVersion( "5.0.1" ), 1 ).toString() );
@@ -57,5 +57,13 @@ public class MavenVersionComparatorTest
                       instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.az" ), 0 ).toString() );
         assertEquals( new DefaultArtifactVersion( "5.alpha-wins.2" ).toString(),
                       instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-wins.1" ), 0 ).toString() );
+        assertEquals( new DefaultArtifactVersion( "1.0-alpha-3-SNAPSHOT" ).toString(),
+                      instance.incrementSegment( new DefaultArtifactVersion( "1.0-alpha-2-SNAPSHOT" ), 3 ).toString() );
+        assertEquals( new DefaultArtifactVersion( "1.0-alpha-90-SNAPSHOT" ).toString(),
+                      instance.incrementSegment( new DefaultArtifactVersion( "1.0-alpha-9-SNAPSHOT" ), 3 ).toString() );
+        assertEquals( new DefaultArtifactVersion( "1.0-za-SNAPSHOT" ).toString(),
+                      instance.incrementSegment( new DefaultArtifactVersion( "1.0-z-SNAPSHOT" ), 3 ).toString() );
+        assertEquals( new DefaultArtifactVersion( "1.0-z90-SNAPSHOT" ).toString(),
+                      instance.incrementSegment( new DefaultArtifactVersion( "1.0-z9-SNAPSHOT" ), 3 ).toString() );
     }
 }

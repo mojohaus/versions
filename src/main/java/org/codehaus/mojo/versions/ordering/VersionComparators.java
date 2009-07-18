@@ -103,6 +103,35 @@ public final class VersionComparators
                     newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring( i + 1 ) : "" );
             }
         }
-        return newToken;
+        if ( done )
+        {
+            return newToken;
+        }
+        else
+        {
+            // ok this is roll-over time
+            boolean lastNumeric = false;
+            boolean lastAlpha = false;
+            boolean lastUpper = false;
+            i = token.length();
+            while ( !lastAlpha && !lastNumeric && i > 0 )
+            {
+                i--;
+                char c = token.charAt( i );
+                lastAlpha = Character.isLetter( c );
+                lastUpper = c == Character.toUpperCase( c );
+                lastNumeric = Character.isDigit( c );
+            }
+            if ( lastAlpha )
+            {
+                if ( lastUpper )
+                {
+                    return token + 'A';
+                }
+                return token + 'a';
+            }
+            return token + '0';
+
+        }
     }
 }

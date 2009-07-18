@@ -77,6 +77,7 @@ public class MercuryVersionComparator
 
     public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
     {
+        // TODO handle -SNAPSHOT versions
         if ( segment < 0 || segment > getSegmentCount( v ) )
         {
             throw new IllegalArgumentException( "Invalid segment" );
