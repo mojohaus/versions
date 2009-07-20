@@ -1,5 +1,11 @@
 package org.codehaus.mojo.versions.ordering;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /*
 * Licensed to the Apache Software Foundation (ASF) under one
 * or more contributor license agreements.  See the NOTICE file
@@ -132,6 +138,37 @@ public final class VersionComparators
             }
             return token + '0';
 
+        }
+    }
+
+    static boolean isSnapshot( ArtifactVersion v )
+    {
+        Pattern matchSnapshotRegex = Pattern.compile( "(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$" );
+
+        return matchSnapshotRegex.matcher( v.toString() ).matches();
+    }
+
+    static DefaultArtifactVersion stripSnapshot( ArtifactVersion v )
+    {
+        final String version = v.toString();
+        return new DefaultArtifactVersion( version.substring( 0, version.length() - "-SNAPSHOT".length() ) );
+    }
+
+    static DefaultArtifactVersion copySnapshot( ArtifactVersion source, ArtifactVersion destination )
+    {
+        if ( isSnapshot( destination ) )
+        {
+            destination = stripSnapshot( destination );
+        }
+        Pattern matchSnapshotRegex = Pattern.compile( "(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$" );
+        final Matcher matcher = matchSnapshotRegex.matcher( source.toString() );
+        if ( matcher.matches() )
+        {
+            return new DefaultArtifactVersion( destination.toString() + matcher.group( 1 ) );
+        }
+        else
+        {
+            return new DefaultArtifactVersion( destination.toString() + "-SNAPSHOT" );
         }
     }
 }

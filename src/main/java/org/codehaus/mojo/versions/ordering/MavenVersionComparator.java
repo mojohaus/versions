@@ -66,18 +66,38 @@ public class MavenVersionComparator
 
     public int getSegmentCount( ArtifactVersion v )
     {
+        if ( VersionComparators.isSnapshot( v ) )
+        {
+            return innerGetSegmentCount( VersionComparators.stripSnapshot( v ) );
+        }
+        return innerGetSegmentCount( v );
+
+    }
+
+    private int innerGetSegmentCount( ArtifactVersion v )
+    {
         // if the version does not match the maven rules, then we have only one segment
         // i.e. the qualifier
         final String version = v.toString();
-        return ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0 ||
-            v.getBuildNumber() != 0 || ( ( version.indexOf( '.' ) != -1 || version.indexOf( '-' ) != -1 ) &&
-            !version.equals( v.getQualifier() ) ) || version.length() == 0 ) ? 4 : 1;
+        return ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0
+            || v.getBuildNumber() != 0
+            || ( ( version.indexOf( '.' ) != -1 || version.indexOf( '-' ) != -1 ) && !version.equals(
+            v.getQualifier() ) ) || version.length() == 0 ) ? 4 : 1;
     }
 
     public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
     {
-        int segmentCount = getSegmentCount( v );
-        // TODO make more preserving of number of segments
+        if ( VersionComparators.isSnapshot( v ) )
+        {
+            return VersionComparators.copySnapshot( v, innerIncrementSegment( VersionComparators.stripSnapshot( v ),
+                                                                              segment ) );
+        }
+        return innerIncrementSegment( v, segment );
+    }
+
+    private ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
+    {
+        int segmentCount = innerGetSegmentCount( v );
         if ( segment < 0 || segment >= segmentCount )
         {
             throw new IllegalArgumentException( "Invalid segment" );
@@ -86,17 +106,7 @@ public class MavenVersionComparator
         if ( segmentCount == 1 )
         {
             // only the qualifier
-            if ( version.endsWith( "-SNAPSHOT" ) )
-            {
-                // this is likely something like alpha-1-SNAPSHOT
-                version =
-                    VersionComparators.alphaNumIncrement( version.substring( 0, version.lastIndexOf( "-SNAPSHOT" ) ) ) +
-                        "-SNAPSHOT";
-            }
-            else
-            {
-                version = VersionComparators.alphaNumIncrement( version );
-            }
+            version = VersionComparators.alphaNumIncrement( version );
             return new DefaultArtifactVersion( version );
         }
         else
@@ -157,8 +167,8 @@ public class MavenVersionComparator
                         {
                             // this is likely something like alpha-1-SNAPSHOT
                             qualifier =
-                                qualifierIncrement( qualifier.substring( 0, qualifier.lastIndexOf( "-SNAPSHOT" ) ) ) +
-                                    "-SNAPSHOT";
+                                qualifierIncrement( qualifier.substring( 0, qualifier.lastIndexOf( "-SNAPSHOT" ) ) )
+                                    + "-SNAPSHOT";
                         }
                         else
                         {
@@ -173,12 +183,12 @@ public class MavenVersionComparator
             }
             StringBuffer result = new StringBuffer();
             result.append( major );
-            if ( haveMinor || minor > 0 || incremental > 0)
+            if ( haveMinor || minor > 0 || incremental > 0 )
             {
                 result.append( '.' );
                 result.append( minor );
             }
-            if ( haveIncremental || incremental > 0)
+            if ( haveIncremental || incremental > 0 )
             {
                 result.append( '.' );
                 result.append( incremental );
@@ -211,8 +221,8 @@ public class MavenVersionComparator
         {
             return qualifier.substring( 0, 8 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 8 ) );
         }
-        if ( qualifier.toLowerCase().startsWith( "cr" ) || qualifier.toLowerCase().startsWith( "rc" ) ||
-            qualifier.toLowerCase().startsWith( "sp" ) )
+        if ( qualifier.toLowerCase().startsWith( "cr" ) || qualifier.toLowerCase().startsWith( "rc" )
+            || qualifier.toLowerCase().startsWith( "sp" ) )
         {
             return qualifier.substring( 0, 2 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 2 ) );
         }
