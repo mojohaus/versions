@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.ordering;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * A comparator which uses Maven's version rules, i.e. 1.3.34 &gt; 1.3.9 but 1.3.4.3.2.34 &lt; 1.3.4.3.2.9.
@@ -29,7 +30,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
  * @since 1.0-alpha-3
  */
 public class MavenVersionComparator
-    implements VersionComparator
+    extends AbstractVersionComparator
 {
 
     /**
@@ -41,61 +42,57 @@ public class MavenVersionComparator
     }
 
     /**
-     * Returns a hash code value for the comparator class.
-     *
-     * @return the hash code.
+     * {@inheritDoc}
      */
-    public int hashCode()
-    {
-        return getClass().hashCode();
-    }
-
-    /**
-     * Returns true if this object is the same type of comparator as the parameter.
-     *
-     * @param obj the reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the obj
-     *         argument; <code>false</code> otherwise.
-     * @see #hashCode()
-     * @see java.util.Hashtable
-     */
-    public boolean equals( Object obj )
-    {
-        return obj == this || ( obj != null && getClass().equals( obj.getClass() ) );
-    }
-
-    public int getSegmentCount( ArtifactVersion v )
-    {
-        if ( VersionComparators.isSnapshot( v ) )
-        {
-            return innerGetSegmentCount( VersionComparators.stripSnapshot( v ) );
-        }
-        return innerGetSegmentCount( v );
-
-    }
-
-    private int innerGetSegmentCount( ArtifactVersion v )
+    protected int innerGetSegmentCount( ArtifactVersion v )
     {
         // if the version does not match the maven rules, then we have only one segment
         // i.e. the qualifier
-        final String version = v.toString();
-        return ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0
-            || v.getBuildNumber() != 0
-            || ( ( version.indexOf( '.' ) != -1 || version.indexOf( '-' ) != -1 ) && !version.equals(
-            v.getQualifier() ) ) || version.length() == 0 ) ? 4 : 1;
-    }
-
-    public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
-    {
-        if ( VersionComparators.isSnapshot( v ) )
+        if ( v.getBuildNumber() != 0 )
         {
-            return VersionComparators.copySnapshot( v, innerIncrementSegment( VersionComparators.stripSnapshot( v ),
-                                                                              segment ) );
+            // the version was successfully parsed, and we have a build number
+            // have to have four segments
+            return 4;
         }
-        return innerIncrementSegment( v, segment );
+        if ( ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0 )
+            && v.getQualifier() != null )
+        {
+            // the version was successfully parsed, and we have a qualifier
+            // have to have four segments
+            return 4;
+        }
+        final String version = v.toString();
+        if ( version.indexOf( '-' ) != -1 )
+        {
+            // the version has parts and was not parsed successfully
+            // have to have one segment
+            return version.equals( v.getQualifier() ) ? 1 : 4;
+        }
+        if ( version.indexOf( '.' ) != -1 )
+        {
+            // the version has parts and was not parsed successfully
+            // have to have one segment
+            return version.equals( v.getQualifier() ) ? 1 : 3;
+        }
+        if ( StringUtils.isEmpty( version ) )
+        {
+            return 3;
+        }
+        try
+        {
+            Integer.parseInt( version );
+            return 3;
+        }
+        catch ( NumberFormatException e )
+        {
+            return 1;
+        }
     }
 
-    private ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
+    /**
+     * {@inheritDoc}
+     */
+    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
     {
         int segmentCount = innerGetSegmentCount( v );
         if ( segment < 0 || segment >= segmentCount )
@@ -132,10 +129,7 @@ public class MavenVersionComparator
                     minor = 0;
                     incremental = 0;
                     build = 0;
-                    if ( haveQualifier && qualifier.endsWith( "SNAPSHOT" ) )
-                    {
-                        qualifier = "SNAPSHOT";
-                    }
+                    qualifier = null;
                     break;
                 case 1:
                     minor++;
@@ -149,31 +143,12 @@ public class MavenVersionComparator
                 case 2:
                     incremental++;
                     build = 0;
-                    if ( haveQualifier && qualifier.endsWith( "SNAPSHOT" ) )
-                    {
-                        qualifier = "SNAPSHOT";
-                    }
+                    qualifier = null;
                     break;
                 case 3:
                     if ( haveQualifier )
                     {
-                        if ( "SNAPSHOT".equals( qualifier ) )
-                        {
-                            // next thing after a snapshot is a release
-                            qualifier = null;
-                            build = 1;
-                        }
-                        else if ( qualifier.endsWith( "-SNAPSHOT" ) )
-                        {
-                            // this is likely something like alpha-1-SNAPSHOT
-                            qualifier =
-                                qualifierIncrement( qualifier.substring( 0, qualifier.lastIndexOf( "-SNAPSHOT" ) ) )
-                                    + "-SNAPSHOT";
-                        }
-                        else
-                        {
-                            qualifier = qualifierIncrement( qualifier );
-                        }
+                        qualifier = qualifierIncrement( qualifier );
                     }
                     else
                     {

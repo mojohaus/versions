@@ -33,7 +33,7 @@ import java.util.StringTokenizer;
  * @since 1.0-alpha-3
  */
 public class NumericVersionComparator
-    implements VersionComparator
+    extends AbstractVersionComparator
 {
     private static final BigInteger BIG_INTEGER_ZERO = new BigInteger( "0" );
 
@@ -149,33 +149,9 @@ public class NumericVersionComparator
     }
 
     /**
-     * Returns a hash code value for the comparator class.
-     *
-     * @return the hash code.
-     */
-    public int hashCode()
-    {
-        return getClass().hashCode();
-    }
-
-    /**
-     * Returns true if this object is the same type of comparator as the parameter.
-     *
-     * @param obj the reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the obj
-     *         argument; <code>false</code> otherwise.
-     * @see #hashCode()
-     * @see java.util.Hashtable
-     */
-    public boolean equals( Object obj )
-    {
-        return obj == this || ( obj != null && getClass().equals( obj.getClass() ) );
-    }
-
-    /**
      * {@inheritDoc}
      */
-    public int getSegmentCount( ArtifactVersion v )
+    protected int innerGetSegmentCount( ArtifactVersion v )
     {
         final String version = v.toString();
         StringTokenizer tok = new StringTokenizer( version, "." );
@@ -185,10 +161,9 @@ public class NumericVersionComparator
     /**
      * {@inheritDoc}
      */
-    public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
+    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
     {
-        // TODO handle -SNAPSHOT versions
-        if ( segment < 0 || segment > getSegmentCount( v ) )
+        if ( segment < 0 || segment > innerGetSegmentCount( v ) )
         {
             throw new IllegalArgumentException( "Invalid segment" );
         }

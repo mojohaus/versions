@@ -30,40 +30,34 @@ public class MavenVersionComparatorTest
     public void testSegmentCounting()
         throws Exception
     {
-        assertEquals( 4, instance.getSegmentCount( new DefaultArtifactVersion( "5" ) ) );
-        assertEquals( 4, instance.getSegmentCount( new DefaultArtifactVersion( "5.0" ) ) );
+        assertEquals( 3, instance.getSegmentCount( new DefaultArtifactVersion( "5" ) ) );
+        assertEquals( 3, instance.getSegmentCount( new DefaultArtifactVersion( "5.0" ) ) );
         assertEquals( 4, instance.getSegmentCount( new DefaultArtifactVersion( "5-0" ) ) );
         assertEquals( 1, instance.getSegmentCount( new DefaultArtifactVersion( "5.3.a" ) ) );
         assertEquals( 1, instance.getSegmentCount( new DefaultArtifactVersion( "5.0.a.1.4.5" ) ) );
-        assertEquals( 4, instance.getSegmentCount( new DefaultArtifactVersion( "" ) ) );
+        assertEquals( 3, instance.getSegmentCount( new DefaultArtifactVersion( "" ) ) );
     }
 
     public void testSegmentIncrementing()
         throws Exception
     {
-        assertEquals( new DefaultArtifactVersion( "6" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5" ), 0 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "6.0" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), 0 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.1" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), 1 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.1.0" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0.1" ), 1 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.alpha.2" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha.1" ), 0 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.alpha-1.2" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.1" ), 0 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.alpha-1.ba" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.az" ), 0 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.alpha-wins.2" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-wins.1" ), 0 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "1.0-alpha-3-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "1.0-alpha-2-SNAPSHOT" ), 3 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "1.0-alpha-90-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "1.0-alpha-9-SNAPSHOT" ), 3 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "1.0-za-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "1.0-z-SNAPSHOT" ), 3 ).toString() );
-        assertEquals( new DefaultArtifactVersion( "1.0-z90-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "1.0-z9-SNAPSHOT" ), 3 ).toString() );
+        assertIncrement( "6", "5", 0 );
+        assertIncrement( "6.0", "5.0", 0 );
+        assertIncrement( "5.1", "5.0", 1 );
+        assertIncrement( "5.1.0", "5.0.1", 1 );
+        assertIncrement( "5.alpha.2", "5.alpha.1", 0 );
+        assertIncrement( "5.alpha-1.2", "5.alpha-1.1", 0 );
+        assertIncrement( "5.alpha-1.ba", "5.alpha-1.az", 0 );
+        assertIncrement( "5.alpha-wins.2", "5.alpha-wins.1", 0 );
+        assertIncrement( "1.0-alpha-3-SNAPSHOT", "1.0-alpha-2-SNAPSHOT", 3 );
+        assertIncrement( "1.0-alpha-90-SNAPSHOT", "1.0-alpha-9-SNAPSHOT", 3 );
+        assertIncrement( "1.0-za-SNAPSHOT", "1.0-z-SNAPSHOT", 3 );
+        assertIncrement( "1.0-z90-SNAPSHOT", "1.0-z9-SNAPSHOT", 3 );
+    }
+
+    private void assertIncrement( String expected, String initial, int segment )
+    {
+        assertEquals( expected,
+                      instance.incrementSegment( new DefaultArtifactVersion( initial ), segment ).toString() );
     }
 }

@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
  */
 public final class VersionComparators
 {
+    private static final Pattern SNAPSHOT_PATTERN = Pattern.compile( "(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$" );
 
     private VersionComparators()
     {
@@ -143,28 +144,31 @@ public final class VersionComparators
 
     static boolean isSnapshot( ArtifactVersion v )
     {
-        Pattern matchSnapshotRegex = Pattern.compile( "(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$" );
-
-        return matchSnapshotRegex.matcher( v.toString() ).matches();
+        return SNAPSHOT_PATTERN.matcher( v.toString() ).find();
     }
 
-    static DefaultArtifactVersion stripSnapshot( ArtifactVersion v )
+    static ArtifactVersion stripSnapshot( ArtifactVersion v )
     {
         final String version = v.toString();
-        return new DefaultArtifactVersion( version.substring( 0, version.length() - "-SNAPSHOT".length() ) );
+        final Matcher matcher = SNAPSHOT_PATTERN.matcher( version );
+        if ( matcher.find() )
+        {
+            return new DefaultArtifactVersion( version.substring( 0, matcher.start( 1 ) - 1 ) );
+        }
+        return v;
     }
 
-    static DefaultArtifactVersion copySnapshot( ArtifactVersion source, ArtifactVersion destination )
+    static ArtifactVersion copySnapshot( ArtifactVersion source, ArtifactVersion destination )
     {
         if ( isSnapshot( destination ) )
         {
             destination = stripSnapshot( destination );
         }
-        Pattern matchSnapshotRegex = Pattern.compile( "(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$" );
+        Pattern matchSnapshotRegex = SNAPSHOT_PATTERN;
         final Matcher matcher = matchSnapshotRegex.matcher( source.toString() );
-        if ( matcher.matches() )
+        if ( matcher.find() )
         {
-            return new DefaultArtifactVersion( destination.toString() + matcher.group( 1 ) );
+            return new DefaultArtifactVersion( destination.toString() + "-" + matcher.group( 0 ) );
         }
         else
         {
