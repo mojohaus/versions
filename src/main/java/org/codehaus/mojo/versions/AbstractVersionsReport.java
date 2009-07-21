@@ -323,7 +323,7 @@ public abstract class AbstractVersionsReport
      */
     public String getName( Locale locale )
     {
-        return getText( locale, "report.name" );
+        return getText( locale, "report.title" );
     }
 
     /**

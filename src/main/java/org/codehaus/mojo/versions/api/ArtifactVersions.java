@@ -25,9 +25,9 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -61,34 +61,34 @@ public class ArtifactVersions
      *
      * @since 1.0-alpha-3
      */
-    private final Comparator/*<ArtifactVersion>*/ rule;
+    private final VersionComparator versionComparator;
 
     /**
      * Creates a new {@link ArtifactVersions} instance.
      *
-     * @param artifact The artifact.
-     * @param versions The versions.
-     * @param rule     The version comparison rule.
+     * @param artifact          The artifact.
+     * @param versions          The versions.
+     * @param versionComparator The version comparison rule.
      * @since 1.0-alpha-3
      */
-    public ArtifactVersions( Artifact artifact, ArtifactVersion[] versions, Comparator rule )
+    public ArtifactVersions( Artifact artifact, ArtifactVersion[] versions, VersionComparator versionComparator )
     {
-        this( artifact, Arrays.asList( versions ), rule );
+        this( artifact, Arrays.asList( versions ), versionComparator );
     }
 
     /**
      * Creates a new {@link ArtifactVersions} instance.
      *
-     * @param artifact The artifact.
-     * @param versions The versions.
-     * @param rule     The version comparison rule.
+     * @param artifact          The artifact.
+     * @param versions          The versions.
+     * @param versionComparator The version comparison rule.
      * @since 1.0-alpha-3
      */
-    public ArtifactVersions( Artifact artifact, List versions, Comparator rule )
+    public ArtifactVersions( Artifact artifact, List versions, VersionComparator versionComparator )
     {
         this.artifact = artifact;
-        this.rule = rule;
-        this.versions = new TreeSet( rule );
+        this.versionComparator = versionComparator;
+        this.versions = new TreeSet( versionComparator );
         this.versions.addAll( versions );
     }
 
@@ -152,7 +152,7 @@ public class ArtifactVersions
         }
         else
         {
-            result = new TreeSet( rule );
+            result = new TreeSet( versionComparator );
             Iterator i = versions.iterator();
             while ( i.hasNext() )
             {
@@ -178,7 +178,7 @@ public class ArtifactVersions
     public ArtifactVersion[] getVersions( VersionRange versionRange, boolean includeSnapshots )
     {
         Set/*<ArtifactVersion>*/ result;
-        result = new TreeSet( rule );
+        result = new TreeSet( versionComparator );
         Iterator i = versions.iterator();
         while ( i.hasNext() )
         {
@@ -219,12 +219,12 @@ public class ArtifactVersions
     public ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
     {
         Set/*<ArtifactVersion>*/ result;
-        result = new TreeSet( rule );
+        result = new TreeSet( versionComparator );
         Iterator i = versions.tailSet( version ).iterator();
         while ( i.hasNext() )
         {
             ArtifactVersion candidate = (ArtifactVersion) i.next();
-            if ( rule.compare( version, candidate ) >= 0 )
+            if ( versionComparator.compare( version, candidate ) >= 0 )
             {
                 // the tailSet will skip most older versions except the pivot element
                 continue;
@@ -257,7 +257,7 @@ public class ArtifactVersions
      * <code>null</code> if no such version exists.
      *
      * @param currentVersion   the current version.
-     * @param upperBound       the exclusive upper bound.
+     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
@@ -267,7 +267,8 @@ public class ArtifactVersions
     {
         try
         {
-            final String versionRangeStr = "(" + currentVersion.toString() + "," + upperBound.toString() + ")";
+            final String versionRangeStr =
+                "(" + currentVersion.toString() + "," + ( upperBound == null ? "" : upperBound.toString() ) + ")";
             return getLatestVersion( VersionRange.createFromVersionSpec( versionRangeStr ), includeSnapshots );
         }
         catch ( InvalidVersionSpecificationException e )
@@ -304,7 +305,7 @@ public class ArtifactVersions
             {
                 latest = candidate;
             }
-            else if ( rule.compare( latest, candidate ) < 0 )
+            else if ( versionComparator.compare( latest, candidate ) < 0 )
             {
                 latest = candidate;
             }
@@ -312,7 +313,12 @@ public class ArtifactVersions
         return latest;
     }
 
-
+    /**
+     * Returns <code>true</code> if the specific version is in the list of versions.
+     *
+     * @param version the specific version.
+     * @return <code>true</code> if the specific version is in the list of versions.
+     */
     public boolean containsVersion( String version )
     {
         Iterator i = versions.iterator();
@@ -349,6 +355,93 @@ public class ArtifactVersions
      */
     public ArtifactVersion[] getNewerVersions( String version, boolean includeSnapshots )
     {
-        return getNewerVersions( new DefaultArtifactVersion( version), includeSnapshots );
+        return getNewerVersions( new DefaultArtifactVersion( version ), includeSnapshots );
     }
+
+    /**
+     * Gets the rule for version comparison of this artifact.
+     *
+     * @return the rule for version comparison of this artifact.
+     * @since 1.0-beta-1
+     */
+    public VersionComparator getVersionComparator()
+    {
+        return versionComparator;
+    }
+
+    /**
+     * Returns the next version after the specified current version, but less than the specified upper bound or
+     * <code>null</code> if no such version exists.
+     *
+     * @param currentVersion the current version.
+     * @param upperBound     the exclusive upper bound.
+     * @return the next version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @since 1.0-beta-1
+     */
+    public ArtifactVersion getNextVersion( ArtifactVersion currentVersion, ArtifactVersion upperBound )
+    {
+        return getNextVersion( currentVersion, upperBound, true );
+    }
+
+    /**
+     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
+     * <code>null</code> if no such version exists.
+     *
+     * @param currentVersion   the current version.
+     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @since 1.0-beta-1
+     */
+    public ArtifactVersion getNextVersion( ArtifactVersion currentVersion, ArtifactVersion upperBound,
+                                           boolean includeSnapshots )
+    {
+        try
+        {
+            final String versionRangeStr =
+                "(" + currentVersion.toString() + "," + ( upperBound == null ? "" : upperBound.toString() ) + ")";
+            return getOldestVersion( VersionRange.createFromVersionSpec( versionRangeStr ), includeSnapshots );
+        }
+        catch ( InvalidVersionSpecificationException e )
+        {
+            return null; // no valid version
+        }
+    }
+
+    /**
+     * Returns the oldest version within the specified version range or
+     * <code>null</code> if no such version exists.
+     *
+     * @param versionRange     The version range within which the version must exist.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the oldest version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @since 1.0-beta-1
+     */
+    public ArtifactVersion getOldestVersion( VersionRange versionRange, boolean includeSnapshots )
+    {
+        ArtifactVersion oldest = null;
+        Iterator i = versions.iterator();
+        while ( i.hasNext() )
+        {
+            ArtifactVersion candidate = (ArtifactVersion) i.next();
+            if ( !versionRange.containsVersion( candidate ) )
+            {
+                continue;
+            }
+            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
+            {
+                continue;
+            }
+            if ( oldest == null )
+            {
+                oldest = candidate;
+            }
+            else if ( versionComparator.compare( oldest, candidate ) > 0 )
+            {
+                oldest = candidate;
+            }
+        }
+        return oldest;
+    }
+
 }

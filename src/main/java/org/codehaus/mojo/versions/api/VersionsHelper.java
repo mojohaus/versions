@@ -21,14 +21,15 @@ package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -69,7 +70,7 @@ public interface VersionsHelper
      * @return the version comparator to use.
      * @since 1.0-alpha-3
      */
-    Comparator getVersionComparator( Artifact artifact );
+    VersionComparator getVersionComparator( Artifact artifact );
 
     /**
      * Returns the version comparator to use for the specified groupId and artifactId.
@@ -79,7 +80,7 @@ public interface VersionsHelper
      * @return the version comparator to use.
      * @since 1.0-alpha-3
      */
-    Comparator getVersionComparator( String groupId, String artifactId );
+    VersionComparator getVersionComparator( String groupId, String artifactId );
 
     /**
      * Returns the artifact factory to use.
@@ -137,5 +138,14 @@ public interface VersionsHelper
      * @since 1.0-alpha-3
      */
     Set/*<Artifact>*/ extractArtifacts( Collection/*<MavenProject>*/ mavenProjects );
+
+    /**
+     * Creates an {@link ArtifactVersion} instance from a string.
+     *
+     * @param version the string representation of the version.
+     * @return The artifact version.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion createArtifactVersion( String version );
 
 }

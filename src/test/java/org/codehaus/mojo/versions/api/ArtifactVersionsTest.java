@@ -48,9 +48,10 @@ public class ArtifactVersionsTest
             new ArtifactVersion[]{new DefaultArtifactVersion( "1.0" ), new DefaultArtifactVersion( "3.0" ),
                 new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "1.0" ),
                 new DefaultArtifactVersion( "1.0.1" ),};
-        ArtifactVersions instance = new ArtifactVersions(
+        final DefaultArtifact artifact =
             new DefaultArtifact( "group", "artifact", VersionRange.createFromVersionSpec( "[1.0,3.0]" ), "foo", "bar",
-                                 "jar", new DefaultArtifactHandler() ), versions, new MavenVersionComparator() );
+                                 "jar", new DefaultArtifactHandler() );
+        ArtifactVersions instance = new ArtifactVersions( artifact, versions, new MavenVersionComparator() );
         assertEquals( "artifact", instance.getArtifactId() );
         assertEquals( "group", instance.getGroupId() );
         System.out.println( Arrays.asList( instance.getVersions() ) );

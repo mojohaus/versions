@@ -25,6 +25,8 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
@@ -42,6 +44,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.mojo.versions.utils.WagonUtils;
@@ -52,7 +55,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -189,16 +191,17 @@ public class DefaultVersionsHelper
         {
             throw new MojoExecutionException( "Could not retrieve metadata for " + artifact, e );
         }
-        return new ArtifactVersions( artifact, versions, getVersionComparator( artifact ) );
+        return new ArtifactVersions( artifact, versions,
+                                     getVersionComparator( artifact ) );
     }
 
 
-    public Comparator getVersionComparator( Artifact artifact )
+    public VersionComparator getVersionComparator( Artifact artifact )
     {
         return getVersionComparator( artifact.getGroupId(), artifact.getArtifactId() );
     }
 
-    public Comparator getVersionComparator( String groupId, String artifactId )
+    public VersionComparator getVersionComparator( String groupId, String artifactId )
     {
         final List/*<Rule>*/ rules = ruleSet.getRules();
         String comparisonMethod = ruleSet.getComparisonMethod();
@@ -453,4 +456,8 @@ public class DefaultVersionsHelper
         return result;
     }
 
+    public ArtifactVersion createArtifactVersion( String version )
+    {
+        return new DefaultArtifactVersion( version );
+    }
 }

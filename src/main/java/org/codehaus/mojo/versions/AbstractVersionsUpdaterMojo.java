@@ -91,7 +91,7 @@ public abstract class AbstractVersionsUpdaterMojo
     protected org.apache.maven.artifact.resolver.ArtifactResolver resolver;
 
     /**
-     * @component
+     * @component     allo
      * @since 1.0-alpha-1
      */
     protected MavenProjectBuilder projectBuilder;
