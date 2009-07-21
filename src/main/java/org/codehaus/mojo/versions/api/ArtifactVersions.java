@@ -23,7 +23,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
@@ -265,16 +264,53 @@ public class ArtifactVersions
     public ArtifactVersion getLatestVersion( ArtifactVersion currentVersion, ArtifactVersion upperBound,
                                              boolean includeSnapshots )
     {
-        try
+        return getLatestVersion( currentVersion, upperBound, includeSnapshots, false, false );
+    }
+
+    /**
+     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
+     * <code>null</code> if no such version exists.
+     *
+     * @param lowerBound       the lower bound..
+     * @param upperBound       the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @param includeLower     <code>true</code> if the lower bound is inclusive.
+     * @param includeUpper     <code>true> if the upper bound is inclusive.
+     * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @since 1.0-alpha-3
+     */
+    public ArtifactVersion getLatestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
+                                             boolean includeSnapshots, boolean includeLower, boolean includeUpper )
+    {
+        ArtifactVersion latest = null;
+        Iterator i = versions.iterator();
+        while ( i.hasNext() )
         {
-            final String versionRangeStr =
-                "(" + currentVersion.toString() + "," + ( upperBound == null ? "" : upperBound.toString() ) + ")";
-            return getLatestVersion( VersionRange.createFromVersionSpec( versionRangeStr ), includeSnapshots );
+            ArtifactVersion candidate = (ArtifactVersion) i.next();
+            int lower = lowerBound == null ? -1 : versionComparator.compare( lowerBound, candidate );
+            int upper = upperBound == null ? +1 : versionComparator.compare( upperBound, candidate );
+            if ( lower > 0 || upper < 0 )
+            {
+                continue;
+            }
+            if ( ( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 ) )
+            {
+                continue;
+            }
+            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
+            {
+                continue;
+            }
+            if ( latest == null )
+            {
+                latest = candidate;
+            }
+            else if ( versionComparator.compare( latest, candidate ) < 0 )
+            {
+                latest = candidate;
+            }
         }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            return null; // no valid version
-        }
+        return latest;
     }
 
     /**
@@ -373,39 +409,14 @@ public class ArtifactVersions
      * Returns the next version after the specified current version, but less than the specified upper bound or
      * <code>null</code> if no such version exists.
      *
-     * @param currentVersion the current version.
-     * @param upperBound     the exclusive upper bound.
-     * @return the next version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @param lowerBound the inclusive lower bound.
+     * @param upperBound the exclusive upper bound.
+     * @return the next version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-beta-1
      */
-    public ArtifactVersion getNextVersion( ArtifactVersion currentVersion, ArtifactVersion upperBound )
+    public ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
     {
-        return getNextVersion( currentVersion, upperBound, true );
-    }
-
-    /**
-     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
-     * <code>null</code> if no such version exists.
-     *
-     * @param currentVersion   the current version.
-     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
-     * @since 1.0-beta-1
-     */
-    public ArtifactVersion getNextVersion( ArtifactVersion currentVersion, ArtifactVersion upperBound,
-                                           boolean includeSnapshots )
-    {
-        try
-        {
-            final String versionRangeStr =
-                "(" + currentVersion.toString() + "," + ( upperBound == null ? "" : upperBound.toString() ) + ")";
-            return getOldestVersion( VersionRange.createFromVersionSpec( versionRangeStr ), includeSnapshots );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            return null; // no valid version
-        }
+        return getOldestVersion( lowerBound, upperBound, true );
     }
 
     /**
@@ -425,6 +436,67 @@ public class ArtifactVersions
         {
             ArtifactVersion candidate = (ArtifactVersion) i.next();
             if ( !versionRange.containsVersion( candidate ) )
+            {
+                continue;
+            }
+            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
+            {
+                continue;
+            }
+            if ( oldest == null )
+            {
+                oldest = candidate;
+            }
+            else if ( versionComparator.compare( oldest, candidate ) > 0 )
+            {
+                oldest = candidate;
+            }
+        }
+        return oldest;
+    }
+
+    /**
+     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
+     * <code>null</code> if no such version exists.
+     *
+     * @param lowerBound       the current version.
+     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @since 1.0-beta-1
+     */
+    public ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
+                                             boolean includeSnapshots )
+    {
+        return getOldestVersion( lowerBound, upperBound, includeSnapshots, false, false );
+    }
+
+    /**
+     * Returns the oldest version within the specified bounds or <code>null</code> if no such version exists.
+     *
+     * @param lowerBound       the current version.
+     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @param includeLower     <code>true</code> if the lower bound is inclusive.
+     * @param includeUpper     <code>true> if the upper bound is inclusive.
+     * @return the oldest version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @since 1.0-beta-1
+     */
+    public ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
+                                             boolean includeSnapshots, boolean includeLower, boolean includeUpper )
+    {
+        ArtifactVersion oldest = null;
+        Iterator i = versions.iterator();
+        while ( i.hasNext() )
+        {
+            ArtifactVersion candidate = (ArtifactVersion) i.next();
+            int lower = lowerBound == null ? -1 : versionComparator.compare( lowerBound, candidate );
+            int upper = upperBound == null ? +1 : versionComparator.compare( upperBound, candidate );
+            if ( lower > 0 || upper < 0 )
+            {
+                continue;
+            }
+            if ( ( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 ) )
             {
                 continue;
             }

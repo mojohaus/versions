@@ -64,6 +64,10 @@ public class DependencyUpdatesRenderer
                 (Map.Entry) it.next();
             Dependency dependency = (Dependency) entry.getKey();
             ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) entry.getValue();
+            if ( details.getAll().length == 0 )
+            {
+                continue;
+            }
             renderDependencySummary( dependency, details );
         }
         renderHeader();
@@ -95,30 +99,36 @@ public class DependencyUpdatesRenderer
         sink.text( ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() ) );
         sink.sectionTitle2_();
         ArtifactVersion[] versions = details.getAll();
-        if (versions.length == 0) {
+        if ( versions.length == 0 )
+        {
             sink.paragraph();
-            sink.text( getText( "report.noUpdatesAvailable" ));
+            sink.text( getText( "report.noUpdatesAvailable" ) );
             sink.paragraph_();
-        } else {
-            if (details.getNextIncremental() != null) {
+        }
+        else
+        {
+            if ( details.getNextIncremental() != null )
+            {
                 sink.paragraph();
-                sink.text( getText( "report.incrementalUpdatesAvailable" ));
+                sink.text( getText( "report.incrementalUpdatesAvailable" ) );
                 sink.paragraph_();
             }
-            if (details.getNextMinor() != null) {
+            if ( details.getNextMinor() != null )
+            {
                 sink.paragraph();
-                sink.text( getText( "report.minorUpdatesAvailable" ));
+                sink.text( getText( "report.minorUpdatesAvailable" ) );
                 sink.paragraph_();
             }
-            if (details.getNextMajor() != null) {
+            if ( details.getNextMajor() != null )
+            {
                 sink.paragraph();
-                sink.text( getText( "report.majorUpdatesAvailable" ));
+                sink.text( getText( "report.majorUpdatesAvailable" ) );
                 sink.paragraph_();
             }
         }
         sink.table();
         sink.tableRow();
-        sink.tableHeaderCell("20%");
+        sink.tableHeaderCell( "20%" );
         sink.text( getText( "report.groupId" ) );
         sink.tableHeaderCell_();
         sink.tableCell();
@@ -126,7 +136,7 @@ public class DependencyUpdatesRenderer
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell("20%");
+        sink.tableHeaderCell( "20%" );
         sink.text( getText( "report.artifactId" ) );
         sink.tableHeaderCell_();
         sink.tableCell();
@@ -134,41 +144,42 @@ public class DependencyUpdatesRenderer
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell("20%");
+        sink.tableHeaderCell( "20%" );
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
         sink.tableCell();
         sink.text( dependency.getVersion() );
         sink.tableCell_();
         sink.tableRow_();
-        if (versions.length > 0) {
-        sink.tableRow();
-        sink.tableHeaderCell("20%");
-        sink.text( getText( "report.updateVersions" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell();
-        for ( int i = 0; i < versions.length; i++ )
+        if ( versions.length > 0 )
         {
-            if ( i > 0 )
+            sink.tableRow();
+            sink.tableHeaderCell( "20%" );
+            sink.text( getText( "report.updateVersions" ) );
+            sink.tableHeaderCell_();
+            sink.tableCell();
+            for ( int i = 0; i < versions.length; i++ )
             {
-                sink.text( ", " );
+                if ( i > 0 )
+                {
+                    sink.text( ", " );
+                }
+                boolean bold = equals( versions[i], details.getNextIncremental() )
+                    || equals( versions[i], details.getLatestIncremental() )
+                    || equals( versions[i], details.getNextMinor() ) || equals( versions[i], details.getLatestMinor() )
+                    || equals( versions[i], details.getNextMajor() ) || equals( versions[i], details.getLatestMajor() );
+                if ( bold )
+                {
+                    sink.bold();
+                }
+                sink.text( versions[i].toString() );
+                if ( bold )
+                {
+                    sink.bold_();
+                }
             }
-            boolean bold = equals( versions[i], details.getNextIncremental() )
-                || equals( versions[i], details.getLatestIncremental() )
-                || equals( versions[i], details.getNextMinor() ) || equals( versions[i], details.getLatestMinor() )
-                || equals( versions[i], details.getNextMajor() ) || equals( versions[i], details.getLatestMajor() );
-            if ( bold )
-            {
-                sink.bold();
-            }
-            sink.text( versions[i].toString() );
-            if ( bold )
-            {
-                sink.bold_();
-            }
-        }
-        sink.tableCell_();
-        sink.tableRow_();
+            sink.tableCell_();
+            sink.tableRow_();
         }
         sink.table_();
         sink.section2_();

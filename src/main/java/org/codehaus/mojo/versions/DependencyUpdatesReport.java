@@ -103,29 +103,33 @@ public class DependencyUpdatesReport
             int segmentCount = versionComparator.getSegmentCount( current );
             ArtifactVersion nextIncremental = segmentCount < 3
                 ? null
-                : artifactVersions.getNextVersion( current, versionComparator.incrementSegment( current, 1 ),
-                                                   Boolean.TRUE.equals( getAllowSnapshots() ) );
+                : artifactVersions.getOldestVersion( current, versionComparator.incrementSegment( current, 1 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), false, false );
             ArtifactVersion latestIncremental = segmentCount < 3
                 ? null
                 : artifactVersions.getLatestVersion( current, versionComparator.incrementSegment( current, 1 ),
-                                                     Boolean.TRUE.equals( getAllowSnapshots() ) );
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), false, false );
             ArtifactVersion nextMinor = segmentCount < 2
                 ? null
-                : artifactVersions.getNextVersion( current, versionComparator.incrementSegment( current, 0 ),
-                                                   Boolean.TRUE.equals( getAllowSnapshots() ) );
+                : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 1 ),
+                                                     versionComparator.incrementSegment( current, 0 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
             ArtifactVersion latestMinor = segmentCount < 2
                 ? null
-                : artifactVersions.getLatestVersion( current, versionComparator.incrementSegment( current, 0 ),
-                                                     Boolean.TRUE.equals( getAllowSnapshots() ) );
+                : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 1 ),
+                                                     versionComparator.incrementSegment( current, 0 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
             ArtifactVersion nextMajor =
-                artifactVersions.getNextVersion( current, null, Boolean.TRUE.equals( getAllowSnapshots() ) );
+                artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 0 ), null,
+                                                   Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
             ArtifactVersion latestMajor =
-                artifactVersions.getLatestVersion( current, null, Boolean.TRUE.equals( getAllowSnapshots() ) );
-            
+                artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 0 ), null,
+                                                   Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
+
             dependencyUpdates.put( dependency,
                                    new ArtifactUpdatesDetails( artifact, nextIncremental, latestIncremental, nextMinor,
-                                                                latestMinor, nextMajor, latestMajor,
-                                                                artifactVersions.getNewerVersions( current ) ) );
+                                                               latestMinor, nextMajor, latestMajor,
+                                                               artifactVersions.getNewerVersions( current ) ) );
 
 
         }
