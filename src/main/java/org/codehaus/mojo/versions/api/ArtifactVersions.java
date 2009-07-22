@@ -271,7 +271,7 @@ public class ArtifactVersions
      * Returns the latest version newer than the specified current version, but less than the specified upper bound or
      * <code>null</code> if no such version exists.
      *
-     * @param lowerBound       the lower bound..
+     * @param lowerBound       the lower bound.
      * @param upperBound       the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower     <code>true</code> if the lower bound is inclusive.

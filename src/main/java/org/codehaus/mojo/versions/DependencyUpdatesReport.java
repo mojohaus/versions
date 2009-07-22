@@ -103,12 +103,14 @@ public class DependencyUpdatesReport
             int segmentCount = versionComparator.getSegmentCount( current );
             ArtifactVersion nextIncremental = segmentCount < 3
                 ? null
-                : artifactVersions.getOldestVersion( current, versionComparator.incrementSegment( current, 1 ),
-                                                     Boolean.TRUE.equals( getAllowSnapshots() ), false, false );
+                : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 2 ),
+                                                     versionComparator.incrementSegment( current, 1 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
             ArtifactVersion latestIncremental = segmentCount < 3
                 ? null
-                : artifactVersions.getLatestVersion( current, versionComparator.incrementSegment( current, 1 ),
-                                                     Boolean.TRUE.equals( getAllowSnapshots() ), false, false );
+                : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 2 ),
+                                                     versionComparator.incrementSegment( current, 1 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
             ArtifactVersion nextMinor = segmentCount < 2
                 ? null
                 : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 1 ),

@@ -223,7 +223,6 @@ public abstract class AbstractVersionsReport
     {
         if ( !Boolean.TRUE.equals( skip ) )
         {
-            getLog().info( getSink().toString() );
             try
             {
                 doGenerateReport( locale, getSink() );
