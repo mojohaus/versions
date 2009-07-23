@@ -25,9 +25,11 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
@@ -36,11 +38,17 @@ import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.i18n.I18N;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Base class for all versions reports.
@@ -355,5 +363,108 @@ public abstract class AbstractVersionsReport
     public I18N getI18n()
     {
         return i18n;
+    }
+
+    /**
+     * Creates an {@link org.codehaus.mojo.versions.ArtifactUpdatesDetails} instance from a dependency.
+     *
+     * @param dependency The dependency.
+     * @return The details of updates to the dependency.
+     * @throws MavenReportException when things go wrong.
+     * @since 1.0-beta-1
+     */
+    protected ArtifactUpdatesDetails lookupDependencyUpdates( Dependency dependency )
+        throws MavenReportException
+    {
+        try
+        {
+            String groupId = dependency.getGroupId();
+            String artifactId = dependency.getArtifactId();
+            String version = dependency.getVersion();
+            getLog().debug( "Checking " + groupId + ":" + artifactId + " for updates newer than " + version );
+
+            VersionRange versionRange = null;
+            try
+            {
+                versionRange = VersionRange.createFromVersionSpec( version );
+            }
+            catch ( InvalidVersionSpecificationException e )
+            {
+                throw new MavenReportException( "Invalid version range specification: " + version, e );
+            }
+
+            Artifact artifact =
+                artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, dependency.getType(),
+                                                          dependency.getClassifier(), dependency.getScope() );
+
+            ArtifactVersions artifactVersions =
+                getHelper().lookupArtifactVersions( artifact, Boolean.TRUE.equals( getAllowSnapshots() ) );
+
+            ArtifactVersion current = getHelper().createArtifactVersion( dependency.getVersion() );
+            VersionComparator versionComparator = artifactVersions.getVersionComparator();
+            int segmentCount = versionComparator.getSegmentCount( current );
+            ArtifactVersion nextVersion = segmentCount < 3
+                ? null
+                : artifactVersions.getOldestVersion( current, versionComparator.incrementSegment( current, 2 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), false, false );
+            ArtifactVersion nextIncremental = segmentCount < 3
+                ? null
+                : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 2 ),
+                                                     versionComparator.incrementSegment( current, 1 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
+            ArtifactVersion latestIncremental = segmentCount < 3
+                ? null
+                : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 2 ),
+                                                     versionComparator.incrementSegment( current, 1 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
+            ArtifactVersion nextMinor = segmentCount < 2
+                ? null
+                : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 1 ),
+                                                     versionComparator.incrementSegment( current, 0 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
+            ArtifactVersion latestMinor = segmentCount < 2
+                ? null
+                : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 1 ),
+                                                     versionComparator.incrementSegment( current, 0 ),
+                                                     Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
+            ArtifactVersion nextMajor =
+                artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 0 ), null,
+                                                   Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
+            ArtifactVersion latestMajor =
+                artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 0 ), null,
+                                                   Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
+
+            ArtifactUpdatesDetails details =
+                new ArtifactUpdatesDetails( artifact, nextVersion, nextIncremental, latestIncremental, nextMinor,
+                                            latestMinor, nextMajor, latestMajor,
+                                            artifactVersions.getNewerVersions( current ) );
+            return details;
+        }
+        catch ( MojoExecutionException e )
+        {
+            throw new MavenReportException( e.getMessage(), e );
+        }
+    }
+
+    /**
+     * Looks up the updates for a set of dependencies.
+     *
+     * @param dependencies The set of {@link Dependency} instances to look up.
+     * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.ArtifactUpdatesDetails}.
+     * @throws MavenReportException when things go wrong.
+     * @since 1.0-beta-1
+     */
+    protected Map/*<Dependency,DependencyUpdateDetails>*/ lookupDependenciesUpdates( Set dependencies )
+        throws MavenReportException
+    {
+        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates = new TreeMap( new DependencyComparator() );
+        Iterator i = dependencies.iterator();
+        while ( i.hasNext() )
+        {
+            Dependency dependency = (Dependency) i.next();
+            ArtifactUpdatesDetails details = lookupDependencyUpdates( dependency );
+            dependencyUpdates.put( dependency, details );
+        }
+        return dependencyUpdates;
     }
 }

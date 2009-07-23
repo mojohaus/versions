@@ -19,16 +19,9 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -37,7 +30,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -69,7 +61,7 @@ public class DependencyUpdatesReport
      * @param sink   the report formatting tool
      */
     protected void doGenerateReport( Locale locale, Sink sink )
-        throws MavenReportException, MojoExecutionException
+        throws MavenReportException
     {
         Set dependencyManagement = new TreeSet( new DependencyComparator() );
         dependencyManagement.addAll( getProject().getDependencyManagement() == null
@@ -78,97 +70,17 @@ public class DependencyUpdatesReport
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        dependencies = removeDependenciyManagment( dependencies, dependencyManagement );
+        dependencies = removeDependencyManagment( dependencies, dependencyManagement );
 
-        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates = findUpdates( dependencies );
-        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyManagementUpdates = findUpdates( dependencyManagement );
+        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates = lookupDependenciesUpdates( dependencies );
+        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyManagementUpdates = lookupDependenciesUpdates( dependencyManagement );
         DependencyUpdatesRenderer renderer =
             new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
                                            dependencyManagementUpdates );
         renderer.render();
     }
 
-    private Map/*<Dependency,DependencyUpdateDetails>*/ findUpdates( Set dependencies )
-        throws MavenReportException, MojoExecutionException
-    {
-        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates = new TreeMap( new DependencyComparator() );
-        Iterator i = dependencies.iterator();
-        while ( i.hasNext() )
-        {
-            Dependency dependency = (Dependency) i.next();
-            ArtifactUpdatesDetails details = newArtifactUpdateDetails( dependency );
-            dependencyUpdates.put( dependency, details );
-        }
-        return dependencyUpdates;
-    }
-
-    private ArtifactUpdatesDetails newArtifactUpdateDetails( Dependency dependency )
-        throws MavenReportException, MojoExecutionException
-    {
-        String groupId = dependency.getGroupId();
-        String artifactId = dependency.getArtifactId();
-        String version = dependency.getVersion();
-        getLog().debug( "Checking " + groupId + ":" + artifactId + " for updates newer than " + version );
-
-        VersionRange versionRange = null;
-        try
-        {
-            versionRange = VersionRange.createFromVersionSpec( version );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MavenReportException( "Invalid version range specification: " + version, e );
-        }
-
-        Artifact artifact =
-            artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, dependency.getType(),
-                                                      dependency.getClassifier(), dependency.getScope() );
-
-        ArtifactVersions artifactVersions =
-            getHelper().lookupArtifactVersions( artifact, Boolean.TRUE.equals( getAllowSnapshots() ) );
-
-        ArtifactVersion current = getHelper().createArtifactVersion( dependency.getVersion() );
-        VersionComparator versionComparator = artifactVersions.getVersionComparator();
-        int segmentCount = versionComparator.getSegmentCount( current );
-        ArtifactVersion nextVersion = segmentCount < 3
-            ? null
-            : artifactVersions.getOldestVersion( current,
-                                                 versionComparator.incrementSegment( current, 2 ),
-                                                 Boolean.TRUE.equals( getAllowSnapshots() ), false, false );
-        ArtifactVersion nextIncremental = segmentCount < 3
-            ? null
-            : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 2 ),
-                                                 versionComparator.incrementSegment( current, 1 ),
-                                                 Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
-        ArtifactVersion latestIncremental = segmentCount < 3
-            ? null
-            : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 2 ),
-                                                 versionComparator.incrementSegment( current, 1 ),
-                                                 Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
-        ArtifactVersion nextMinor = segmentCount < 2
-            ? null
-            : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 1 ),
-                                                 versionComparator.incrementSegment( current, 0 ),
-                                                 Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
-        ArtifactVersion latestMinor = segmentCount < 2
-            ? null
-            : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 1 ),
-                                                 versionComparator.incrementSegment( current, 0 ),
-                                                 Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
-        ArtifactVersion nextMajor =
-            artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 0 ), null,
-                                               Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
-        ArtifactVersion latestMajor =
-            artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 0 ), null,
-                                               Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
-
-        ArtifactUpdatesDetails details =
-            new ArtifactUpdatesDetails( artifact, nextVersion, nextIncremental, latestIncremental, nextMinor, latestMinor, nextMajor,
-                                        latestMajor, artifactVersions.getNewerVersions( current ) );
-        return details;
-    }
-
-    private Set removeDependenciyManagment( Set dependencies, Set dependencyManagement )
+    private Set removeDependencyManagment( Set dependencies, Set dependencyManagement )
     {
         Set result = new TreeSet( new DependencyComparator() );
         for ( Iterator i = dependencies.iterator(); i.hasNext(); )
