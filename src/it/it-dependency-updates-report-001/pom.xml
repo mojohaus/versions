@@ -6,6 +6,7 @@
     <version>1.0</version>
     <packaging>pom</packaging>
     <name>dependency-updates-report</name>
+  <url>http://localhost/</url>
     <dependencies>
         <dependency>
             <groupId>localhost</groupId>

@@ -130,6 +130,11 @@ public class DependencyUpdatesReport
         ArtifactVersion current = getHelper().createArtifactVersion( dependency.getVersion() );
         VersionComparator versionComparator = artifactVersions.getVersionComparator();
         int segmentCount = versionComparator.getSegmentCount( current );
+        ArtifactVersion nextVersion = segmentCount < 3
+            ? null
+            : artifactVersions.getOldestVersion( current,
+                                                 versionComparator.incrementSegment( current, 2 ),
+                                                 Boolean.TRUE.equals( getAllowSnapshots() ), false, false );
         ArtifactVersion nextIncremental = segmentCount < 3
             ? null
             : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 2 ),
@@ -158,7 +163,7 @@ public class DependencyUpdatesReport
                                                Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
 
         ArtifactUpdatesDetails details =
-            new ArtifactUpdatesDetails( artifact, nextIncremental, latestIncremental, nextMinor, latestMinor, nextMajor,
+            new ArtifactUpdatesDetails( artifact, nextVersion, nextIncremental, latestIncremental, nextMinor, latestMinor, nextMajor,
                                         latestMajor, artifactVersions.getNewerVersions( current ) );
         return details;
     }

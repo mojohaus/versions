@@ -24,11 +24,14 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 /**
  * Contains details of the available updates for an artifact.
+ *
  * @since 1.0-beta-1
  */
 public class ArtifactUpdatesDetails
 {
     private final Artifact artifact;
+
+    private final ArtifactVersion nextVersion;
 
     private final ArtifactVersion nextIncremental;
 
@@ -44,12 +47,13 @@ public class ArtifactUpdatesDetails
 
     private final ArtifactVersion[] all;
 
-    public ArtifactUpdatesDetails( Artifact artifact, ArtifactVersion nextIncremental,
-                                     ArtifactVersion latestIncremental, ArtifactVersion nextMinor,
-                                     ArtifactVersion latestMinor, ArtifactVersion nextMajor,
-                                     ArtifactVersion latestMajor, ArtifactVersion[] all )
+    public ArtifactUpdatesDetails( Artifact artifact, ArtifactVersion nextVersion, ArtifactVersion nextIncremental,
+                                   ArtifactVersion latestIncremental, ArtifactVersion nextMinor,
+                                   ArtifactVersion latestMinor, ArtifactVersion nextMajor, ArtifactVersion latestMajor,
+                                   ArtifactVersion[] all )
     {
         this.artifact = artifact;
+        this.nextVersion = nextVersion;
         this.nextIncremental = nextIncremental;
         this.latestIncremental = latestIncremental;
         this.nextMinor = nextMinor;
@@ -92,6 +96,11 @@ public class ArtifactUpdatesDetails
     public ArtifactVersion getLatestMajor()
     {
         return latestMajor;
+    }
+
+    public ArtifactVersion getNextVersion()
+    {
+        return nextVersion;
     }
 
     public ArtifactVersion[] getAll()

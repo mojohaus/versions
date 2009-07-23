@@ -23,8 +23,8 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
-import org.codehaus.plexus.i18n.I18N;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.plexus.i18n.I18N;
 
 import java.util.Iterator;
 import java.util.Locale;
@@ -51,10 +51,47 @@ public class DependencyUpdatesRenderer
         this.dependencyManagmentUpdates = dependencyManagementUpdates;
     }
 
-    
-    
+
     protected void renderBody()
     {
+        Map allUpdates = new TreeMap( new DependencyComparator() );
+        allUpdates.putAll( dependencyManagmentUpdates );
+        allUpdates.putAll( dependencyUpdates );
+
+        int numDeps = allUpdates.size();
+        int numInc = 0;
+        int numMin = 0;
+        int numMaj = 0;
+        int numAny = 0;
+        int numCur = 0;
+        for ( Iterator it = allUpdates.entrySet().iterator(); it.hasNext(); )
+        {
+            final Map.Entry/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ entry =
+                (Map.Entry) it.next();
+
+            Dependency dependency = (Dependency) entry.getKey();
+            ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) entry.getValue();
+            if ( details.getNextVersion() != null )
+            {
+                numAny++;
+            }
+            else if ( details.getNextIncremental() != null )
+            {
+                numInc++;
+            }
+            else if ( details.getNextMinor() != null )
+            {
+                numMin++;
+            }
+            else if ( details.getNextMajor() != null )
+            {
+                numMaj++;
+            }
+            else
+            {
+                numCur++;
+            }
+        }
         sink.section1();
         sink.sectionTitle1();
         sink.text( getText( "report.overview.title" ) );
@@ -62,6 +99,74 @@ public class DependencyUpdatesRenderer
         sink.paragraph();
         sink.text( getText( "report.overview.text" ) );
         sink.paragraph_();
+
+        sink.table();
+        sink.tableRow();
+        sink.tableCell();
+        sink.figure();
+        sink.figureGraphics( "images/icon_success_sml.gif" );
+        sink.figure_();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText("report.overview.numUpToDate") );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numCur ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableCell();
+        sink.figure();
+        sink.figureGraphics( "images/icon_warning_sml.gif" );
+        sink.figure_();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText("report.overview.numNewerVersionAvailable") );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numAny ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableCell();
+        sink.figure();
+        sink.figureGraphics( "images/icon_warning_sml.gif" );
+        sink.figure_();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText("report.overview.numNewerIncrementalAvailable") );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numInc ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableCell();
+        sink.figure();
+        sink.figureGraphics( "images/icon_warning_sml.gif" );
+        sink.figure_();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText("report.overview.numNewerMinorAvailable") );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numMin ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableCell();
+        sink.figure();
+        sink.figureGraphics( "images/icon_warning_sml.gif" );
+        sink.figure_();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText("report.overview.numNewerMajorAvailable") );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numMaj ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.table_();
 
         sink.section2();
         sink.sectionTitle2();
@@ -126,11 +231,7 @@ public class DependencyUpdatesRenderer
         sink.paragraph();
         sink.text( getText( "report.detail.text" ) );
         sink.paragraph_();
-        
-        Map allUpdates = new TreeMap(new DependencyComparator());
-        allUpdates.putAll( dependencyManagmentUpdates );
-        allUpdates.putAll( dependencyUpdates );
-        
+
         for ( Iterator it = allUpdates.entrySet().iterator(); it.hasNext(); )
         {
             final Map.Entry/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ entry =
@@ -155,13 +256,13 @@ public class DependencyUpdatesRenderer
         sink.tableHeaderCell_();
         sink.tableCell();
         ArtifactVersion[] versions = details.getAll();
-        if ( versions.length == 0 )
+        if ( details.getNextVersion() != null  )
         {
             sink.figure();
-            sink.figureGraphics( "images/icon_success_sml.gif" );
+            sink.figureGraphics( "images/icon_warning_sml.gif" );
             sink.figure_();
             sink.nonBreakingSpace();
-            sink.text( getText( "report.noUpdatesAvailable" ) );
+            sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
         else if ( details.getNextIncremental() != null )
         {
@@ -190,10 +291,10 @@ public class DependencyUpdatesRenderer
         else
         {
             sink.figure();
-            sink.figureGraphics( "images/icon_warning_sml.gif" );
+            sink.figureGraphics( "images/icon_success_sml.gif" );
             sink.figure_();
             sink.nonBreakingSpace();
-            sink.text( getText( "report.otherUpdatesAvailable" ) );
+            sink.text( getText( "report.noUpdatesAvailable" ) );
         }
         sink.tableCell_();
         sink.tableRow_();
@@ -258,7 +359,8 @@ public class DependencyUpdatesRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals( versions[i], details.getNextIncremental() )
+                boolean bold = equals( versions[i], details.getNextVersion() )
+                    || equals( versions[i], details.getNextIncremental() )
                     || equals( versions[i], details.getLatestIncremental() )
                     || equals( versions[i], details.getNextMinor() ) || equals( versions[i], details.getLatestMinor() )
                     || equals( versions[i], details.getNextMajor() ) || equals( versions[i], details.getLatestMajor() );
@@ -272,7 +374,11 @@ public class DependencyUpdatesRenderer
                     sink.bold_();
                     sink.nonBreakingSpace();
                     sink.italic();
-                    if ( equals( versions[i], details.getNextIncremental() ) )
+                    if ( equals( versions[i], details.getNextVersion() ) )
+                    {
+                        sink.text( getText( "report.nextVersion" ) );
+                    }
+                    else if ( equals( versions[i], details.getNextIncremental() ) )
                     {
                         sink.text( getText( "report.nextIncremental" ) );
                     }
@@ -341,6 +447,15 @@ public class DependencyUpdatesRenderer
         sink.tableCell_();
         sink.tableCell();
         sink.text( dependency.getType() );
+        sink.tableCell_();
+
+        sink.tableCell();
+        if ( details.getNextVersion() != null )
+        {
+            sink.bold();
+            sink.text( details.getNextVersion().toString() );
+            sink.bold_();
+        }
         sink.tableCell_();
 
         sink.tableCell();
@@ -447,6 +562,9 @@ public class DependencyUpdatesRenderer
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
         sink.text( getText( "report.type" ) );
+        sink.tableHeaderCell_();
+        sink.tableHeaderCell();
+        sink.text( getText( "report.nextVersion" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
         sink.text( getText( "report.nextIncremental" ) );
