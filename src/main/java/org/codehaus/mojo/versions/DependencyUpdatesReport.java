@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Created by IntelliJ IDEA.
+ * Generates a report of available updates for the dependencies of a project.
  *
  * @author Stephen Connolly
  * @goal dependency-updates-report
@@ -44,11 +44,17 @@ import java.util.TreeSet;
 public class DependencyUpdatesReport
     extends AbstractVersionsReport
 {
+    /**
+     * {@inheritDoc}
+     */
     public boolean isExternalReport()
     {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean canGenerateReport()
     {
         return true;
@@ -81,7 +87,17 @@ public class DependencyUpdatesReport
         renderer.render();
     }
 
-    private Set removeDependencyManagment( Set dependencies, Set dependencyManagement )
+    /**
+     * Returns a set of dependencies where the dependencies which are defined in the dependency management section have
+     * been filtered out.
+     *
+     * @param dependencies         The set of dependencies.
+     * @param dependencyManagement The set of dependencies from the dependency management section.
+     * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency
+     *         management dependencies.
+     * @since 1.0-beta-1
+     */
+    private static Set removeDependencyManagment( Set dependencies, Set dependencyManagement )
     {
         Set result = new TreeSet( new DependencyComparator() );
         for ( Iterator i = dependencies.iterator(); i.hasNext(); )
@@ -111,6 +127,9 @@ public class DependencyUpdatesReport
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String getOutputName()
     {
         return "dependency-updates-report";
