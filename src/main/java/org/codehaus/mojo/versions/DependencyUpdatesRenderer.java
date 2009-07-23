@@ -58,40 +58,6 @@ public class DependencyUpdatesRenderer
         allUpdates.putAll( dependencyManagmentUpdates );
         allUpdates.putAll( dependencyUpdates );
 
-        int numDeps = allUpdates.size();
-        int numInc = 0;
-        int numMin = 0;
-        int numMaj = 0;
-        int numAny = 0;
-        int numCur = 0;
-        for ( Iterator it = allUpdates.entrySet().iterator(); it.hasNext(); )
-        {
-            final Map.Entry/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ entry =
-                (Map.Entry) it.next();
-
-            Dependency dependency = (Dependency) entry.getKey();
-            ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) entry.getValue();
-            if ( details.getNextVersion() != null )
-            {
-                numAny++;
-            }
-            else if ( details.getNextIncremental() != null )
-            {
-                numInc++;
-            }
-            else if ( details.getNextMinor() != null )
-            {
-                numMin++;
-            }
-            else if ( details.getNextMajor() != null )
-            {
-                numMaj++;
-            }
-            else
-            {
-                numCur++;
-            }
-        }
         sink.section1();
         sink.sectionTitle1();
         sink.text( getText( "report.overview.title" ) );
@@ -100,128 +66,13 @@ public class DependencyUpdatesRenderer
         sink.text( getText( "report.overview.text" ) );
         sink.paragraph_();
 
-        sink.table();
-        sink.tableRow();
-        sink.tableCell();
-        sink.figure();
-        sink.figureGraphics( "images/icon_success_sml.gif" );
-        sink.figure_();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText("report.overview.numUpToDate") );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( numCur ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableCell();
-        sink.figure();
-        sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText("report.overview.numNewerVersionAvailable") );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( numAny ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableCell();
-        sink.figure();
-        sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText("report.overview.numNewerIncrementalAvailable") );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( numInc ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableCell();
-        sink.figure();
-        sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText("report.overview.numNewerMinorAvailable") );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( numMin ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableCell();
-        sink.figure();
-        sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText("report.overview.numNewerMajorAvailable") );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( numMaj ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.table_();
+        renderSummaryTotalsTable( allUpdates );
 
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text( getText( "report.overview.dependencyManagement" ) );
-        sink.sectionTitle2_();
+        renderSummaryTable( "report.overview.dependencyManagement", dependencyManagmentUpdates,
+                            "report.overview.noDependencyManagement" );
 
-        if ( dependencyManagmentUpdates.isEmpty() )
-        {
-            sink.paragraph();
-            sink.text( getText( "report.overview.noDependencyManagement" ) );
-            sink.paragraph_();
-        }
-        else
-        {
-            sink.table();
-            renderHeader();
-            for ( Iterator it = dependencyManagmentUpdates.entrySet().iterator(); it.hasNext(); )
-            {
-                final Map.Entry/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ entry =
-                    (Map.Entry) it.next();
-                Dependency dependency = (Dependency) entry.getKey();
-                ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) entry.getValue();
-                renderDependencySummary( dependency, details );
-            }
-            renderHeader();
-            sink.table_();
-        }
-        sink.section2_();
+        renderSummaryTable( "report.overview.dependency", dependencyUpdates, "report.overview.noDependency" );
 
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text( getText( "report.overview.dependency" ) );
-        sink.sectionTitle2_();
-        if ( dependencyUpdates.isEmpty() )
-        {
-            sink.paragraph();
-            sink.text( getText( "report.overview.noDependency" ) );
-            sink.paragraph_();
-        }
-        else
-        {
-            sink.table();
-            renderHeader();
-            for ( Iterator it = dependencyUpdates.entrySet().iterator(); it.hasNext(); )
-            {
-                final Map.Entry/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ entry =
-                    (Map.Entry) it.next();
-                Dependency dependency = (Dependency) entry.getKey();
-                ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) entry.getValue();
-                renderDependencySummary( dependency, details );
-            }
-            renderHeader();
-            sink.table_();
-        }
-        sink.section2_();
         sink.section1_();
 
         sink.section1();
@@ -243,6 +94,127 @@ public class DependencyUpdatesRenderer
         sink.section1_();
     }
 
+    private void renderSummaryTable( String titleKey, Map contents, String emptyKey )
+    {
+        sink.section2();
+        sink.sectionTitle2();
+        sink.text( getText( titleKey ) );
+        sink.sectionTitle2_();
+
+        if ( contents.isEmpty() )
+        {
+            sink.paragraph();
+            sink.text( getText( emptyKey ) );
+            sink.paragraph_();
+        }
+        else
+        {
+            sink.table();
+            renderSummaryTableHeader();
+            for ( Iterator it = contents.entrySet().iterator(); it.hasNext(); )
+            {
+                final Map.Entry/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ entry =
+                    (Map.Entry) it.next();
+                Dependency dependency = (Dependency) entry.getKey();
+                ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) entry.getValue();
+                renderDependencySummary( dependency, details );
+            }
+            renderSummaryTableHeader();
+            sink.table_();
+        }
+        sink.section2_();
+    }
+
+    private void renderSummaryTotalsTable( Map allUpdates )
+    {
+        int numInc = 0;
+        int numMin = 0;
+        int numMaj = 0;
+        int numAny = 0;
+        int numCur = 0;
+        for ( Iterator iterator = allUpdates.values().iterator(); iterator.hasNext(); )
+        {
+            ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) iterator.next();
+            if ( details.getNextVersion() != null )
+            {
+                numAny++;
+            }
+            else if ( details.getNextIncremental() != null )
+            {
+                numInc++;
+            }
+            else if ( details.getNextMinor() != null )
+            {
+                numMin++;
+            }
+            else if ( details.getNextMajor() != null )
+            {
+                numMaj++;
+            }
+            else
+            {
+                numCur++;
+            }
+        }
+        sink.table();
+        sink.tableRow();
+        sink.tableCell();
+        renderSuccessIcon();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText( "report.overview.numUpToDate" ) );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numCur ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableCell();
+        renderWarningIcon();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText( "report.overview.numNewerVersionAvailable" ) );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numAny ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableCell();
+        renderWarningIcon();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText( "report.overview.numNewerIncrementalAvailable" ) );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numInc ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableCell();
+        renderWarningIcon();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText( "report.overview.numNewerMinorAvailable" ) );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numMin ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableCell();
+        renderWarningIcon();
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText( "report.overview.numNewerMajorAvailable" ) );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( numMaj ) );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.table_();
+    }
+
     private void renderDependencyDetail( Dependency dependency, ArtifactUpdatesDetails details )
     {
         sink.section2();
@@ -256,43 +228,33 @@ public class DependencyUpdatesRenderer
         sink.tableHeaderCell_();
         sink.tableCell();
         ArtifactVersion[] versions = details.getAll();
-        if ( details.getNextVersion() != null  )
+        if ( details.getNextVersion() != null )
         {
-            sink.figure();
-            sink.figureGraphics( "images/icon_warning_sml.gif" );
-            sink.figure_();
+            renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
         else if ( details.getNextIncremental() != null )
         {
-            sink.figure();
-            sink.figureGraphics( "images/icon_warning_sml.gif" );
-            sink.figure_();
+            renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.incrementalUpdatesAvailable" ) );
         }
         else if ( details.getNextMinor() != null )
         {
-            sink.figure();
-            sink.figureGraphics( "images/icon_warning_sml.gif" );
-            sink.figure_();
+            renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.minorUpdatesAvailable" ) );
         }
         else if ( details.getNextMajor() != null )
         {
-            sink.figure();
-            sink.figureGraphics( "images/icon_warning_sml.gif" );
-            sink.figure_();
+            renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.majorUpdatesAvailable" ) );
         }
         else
         {
-            sink.figure();
-            sink.figureGraphics( "images/icon_success_sml.gif" );
-            sink.figure_();
+            renderSuccessIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.noUpdatesAvailable" ) );
         }
@@ -413,21 +375,24 @@ public class DependencyUpdatesRenderer
         sink.section2_();
     }
 
+    private void renderWarningIcon()
+    {
+        sink.figure();
+        sink.figureGraphics( "images/icon_warning_sml.gif" );
+        sink.figure_();
+    }
+
     private void renderDependencySummary( Dependency dependency, ArtifactUpdatesDetails details )
     {
         sink.tableRow();
         sink.tableCell();
         if ( details.getAll().length == 0 )
         {
-            sink.figure();
-            sink.figureGraphics( "images/icon_success_sml.gif" );
-            sink.figure_();
+            renderSuccessIcon();
         }
         else
         {
-            sink.figure();
-            sink.figureGraphics( "images/icon_warning_sml.gif" );
-            sink.figure_();
+            renderWarningIcon();
         }
         sink.tableCell_();
         sink.tableCell();
@@ -467,21 +432,6 @@ public class DependencyUpdatesRenderer
         }
         sink.tableCell_();
 
-//        sink.tableCell();
-//        if ( details.getLatestIncremental() != null )
-//        {
-//            if ( !equals( details.getLatestIncremental(), details.getNextIncremental() ) )
-//            {
-//                sink.bold();
-//            }
-//            sink.text( details.getLatestIncremental().toString() );
-//            if ( !equals( details.getLatestIncremental(), details.getNextIncremental() ) )
-//            {
-//                sink.bold_();
-//            }
-//        }
-//        sink.tableCell_();
-//
         sink.tableCell();
         if ( details.getNextMinor() != null )
         {
@@ -491,21 +441,6 @@ public class DependencyUpdatesRenderer
         }
         sink.tableCell_();
 
-//        sink.tableCell();
-//        if ( details.getLatestMinor() != null )
-//        {
-//            if ( !equals( details.getLatestMinor(), details.getNextMinor() ) )
-//            {
-//                sink.bold();
-//            }
-//            sink.text( details.getLatestMinor().toString() );
-//            if ( !equals( details.getLatestMinor(), details.getNextMinor() ) )
-//            {
-//                sink.bold_();
-//            }
-//        }
-//        sink.tableCell_();
-//
         sink.tableCell();
         if ( details.getNextMajor() != null )
         {
@@ -515,22 +450,14 @@ public class DependencyUpdatesRenderer
         }
         sink.tableCell_();
 
-//        sink.tableCell();
-//        if ( details.getLatestMajor() != null )
-//        {
-//            if ( !equals( details.getLatestMajor(), details.getNextMajor() ) )
-//            {
-//                sink.bold();
-//            }
-//            sink.text( details.getLatestMajor().toString() );
-//            if ( !equals( details.getLatestMajor(), details.getNextMajor() ) )
-//            {
-//                sink.bold_();
-//            }
-//        }
-//        sink.tableCell_();
-//
         sink.tableRow_();
+    }
+
+    private void renderSuccessIcon()
+    {
+        sink.figure();
+        sink.figureGraphics( "images/icon_success_sml.gif" );
+        sink.figure_();
     }
 
     private boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
@@ -539,7 +466,7 @@ public class DependencyUpdatesRenderer
             v2.toString() ) );
     }
 
-    private void renderHeader()
+    private void renderSummaryTableHeader()
     {
         sink.tableRow();
         sink.tableHeaderCell();
@@ -569,23 +496,13 @@ public class DependencyUpdatesRenderer
         sink.tableHeaderCell();
         sink.text( getText( "report.nextIncremental" ) );
         sink.tableHeaderCell_();
-//        sink.tableHeaderCell();
-//        sink.text( getText( "report.latestIncremental" ) );
-//        sink.tableHeaderCell_();
         sink.tableHeaderCell();
         sink.text( getText( "report.nextMinor" ) );
         sink.tableHeaderCell_();
-//        sink.tableHeaderCell();
-//        sink.text( getText( "report.latestMinor" ) );
-//        sink.tableHeaderCell_();
         sink.tableHeaderCell();
         sink.text( getText( "report.nextMajor" ) );
         sink.tableHeaderCell_();
-//        sink.tableHeaderCell();
-//        sink.text( getText( "report.latestMajor" ) );
-//        sink.tableHeaderCell_();
         sink.tableRow_();
     }
-
 
 }
