@@ -39,7 +39,7 @@ import java.util.TreeSet;
  * @goal dependency-updates-report
  * @requiresDependencyResolution runtime
  * @requiresProject true
- * @since 31-Jan-2009 10:32:10
+ * @since 1.0-beta-1
  */
 public class DependencyUpdatesReport
     extends AbstractVersionsReport
@@ -73,7 +73,8 @@ public class DependencyUpdatesReport
         dependencies = removeDependencyManagment( dependencies, dependencyManagement );
 
         Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates = lookupDependenciesUpdates( dependencies );
-        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyManagementUpdates = lookupDependenciesUpdates( dependencyManagement );
+        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyManagementUpdates =
+            lookupDependenciesUpdates( dependencyManagement );
         DependencyUpdatesRenderer renderer =
             new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
                                            dependencyManagementUpdates );
