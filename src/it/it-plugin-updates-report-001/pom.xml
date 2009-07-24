@@ -42,7 +42,7 @@
     </pluginManagement>
   </build>
   <reporting>
-    <plugins>
+    <plugins combine.children="replace">
       <plugin>
         <groupId>localhost</groupId>
         <artifactId>dummy-maven-plugin</artifactId>
