@@ -52,8 +52,8 @@
   </prerequisites>
 
   <properties>
-    <doxiaVersion>1.0-alpha-11</doxiaVersion>
-    <doxia-sitetoolsVersion>1.0-alpha-11</doxia-sitetoolsVersion>
+    <doxiaVersion>1.0</doxiaVersion>
+    <doxia-sitetoolsVersion>1.0</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
   </properties>
 
@@ -351,6 +351,18 @@
       <build>
         <defaultGoal>verify</defaultGoal>
         <plugins>
+          <!-- hackedy hackedy hack... needed if you are behind a proxy
+              the reports tests will fail if we don't have the same version of m-s-p and m-p-r-p resolved
+              into our local repo as these tests rely on... so lets force maven to download them for us
+          -->
+          <plugin>
+            <artifactId>maven-project-info-reports-plugin</artifactId>
+            <version>2.1</version>
+          </plugin>
+          <plugin>
+            <artifactId>maven-site-plugin</artifactId>
+            <version>2.0</version>
+          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
@@ -380,7 +392,7 @@
                     <pomInclude>dummy-*/pom.xml</pomInclude>
                   </pomIncludes>
                   <goals>
-                    <goal>verify</goal>
+                    <goal>install</goal>
                     <goal>org.apache.maven.plugins:maven-dependency-plugin:2.0:go-offline</goal>
                   </goals>
                   <invokerPropertiesFile>ignore</invokerPropertiesFile>

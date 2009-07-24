@@ -7,6 +7,7 @@
   <packaging>pom</packaging>
   <name>plugin-updates-report</name>
   <url>http://localhost/</url>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -36,16 +37,21 @@
         </plugin>
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
-          <version>2.0-beta-6</version>
+          <version>2.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>2.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
   </build>
+
   <reporting>
-    <plugins combine.children="replace">
+    <plugins>
       <plugin>
-        <groupId>localhost</groupId>
-        <artifactId>dummy-maven-plugin</artifactId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.1</version>
       </plugin>
       <plugin>
         <groupId>@project.groupId@</groupId>
@@ -61,4 +67,5 @@
       </plugin>
     </plugins>
   </reporting>
+
 </project>
