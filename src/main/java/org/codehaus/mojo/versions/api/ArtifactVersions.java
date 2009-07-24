@@ -516,4 +516,42 @@ public class ArtifactVersions
         return oldest;
     }
 
+    /**
+     * Returns all available versions within the specified bounds.
+     *
+     * @param lowerBound       the current version.
+     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @param includeLower     <code>true</code> if the lower bound is inclusive.
+     * @param includeUpper     <code>true> if the upper bound is inclusive.
+     * @return all available versions within the specified version range.
+     * @since 1.0-beta-1
+     */
+    public ArtifactVersion[] getVersions( DefaultArtifactVersion lowerBound, ArtifactVersion upperBound,
+                                          boolean includeSnapshots, boolean includeLower, boolean includeUpper )
+    {
+        Set/*<ArtifactVersion>*/ result;
+        result = new TreeSet( versionComparator );
+        Iterator i = versions.iterator();
+        while ( i.hasNext() )
+        {
+            ArtifactVersion candidate = (ArtifactVersion) i.next();
+            int lower = lowerBound == null ? -1 : versionComparator.compare( lowerBound, candidate );
+            int upper = upperBound == null ? +1 : versionComparator.compare( upperBound, candidate );
+            if ( lower > 0 || upper < 0 )
+            {
+                continue;
+            }
+            if ( ( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 ) )
+            {
+                continue;
+            }
+            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
+            {
+                continue;
+            }
+            result.add( candidate );
+        }
+        return (ArtifactVersion[]) result.toArray( new ArtifactVersion[result.size()] );
+    }
 }
