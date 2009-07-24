@@ -38,24 +38,24 @@ public class DependencyUpdatesRenderer
     extends AbstractVersionsReportRenderer
 {
 
-    private final Map/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ dependencyUpdates;
+    private final Map/*<Dependency,ArtifactUpdateDetails>*/ dependencyUpdates;
 
-    private final Map/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ dependencyManagmentUpdates;
+    private final Map/*<Dependency,ArtifactUpdateDetails>*/ dependencyManagementUpdates;
 
     public DependencyUpdatesRenderer( Sink sink, I18N i18n, String bundleName, Locale locale,
-                                      Map/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ dependencyUpdates,
-                                      Map dependencyManagementUpdates )
+                                      Map/*<Dependency,ArtifactUpdateDetails>*/ dependencyUpdates,
+                                      Map/*<Dependency,ArtifactUpdateDetails>*/ dependencyManagementUpdates )
     {
         super( sink, bundleName, i18n, locale );
         this.dependencyUpdates = dependencyUpdates;
-        this.dependencyManagmentUpdates = dependencyManagementUpdates;
+        this.dependencyManagementUpdates = dependencyManagementUpdates;
     }
 
 
     protected void renderBody()
     {
         Map allUpdates = new TreeMap( new DependencyComparator() );
-        allUpdates.putAll( dependencyManagmentUpdates );
+        allUpdates.putAll( dependencyManagementUpdates );
         allUpdates.putAll( dependencyUpdates );
 
         sink.section1();
@@ -68,7 +68,7 @@ public class DependencyUpdatesRenderer
 
         renderSummaryTotalsTable( allUpdates );
 
-        renderSummaryTable( "report.overview.dependencyManagement", dependencyManagmentUpdates,
+        renderSummaryTable( "report.overview.dependencyManagement", dependencyManagementUpdates,
                             "report.overview.noDependencyManagement" );
 
         renderSummaryTable( "report.overview.dependency", dependencyUpdates, "report.overview.noDependency" );
@@ -375,13 +375,6 @@ public class DependencyUpdatesRenderer
         sink.section2_();
     }
 
-    private void renderWarningIcon()
-    {
-        sink.figure();
-        sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
-    }
-
     private void renderDependencySummary( Dependency dependency, ArtifactUpdatesDetails details )
     {
         sink.tableRow();
@@ -451,19 +444,6 @@ public class DependencyUpdatesRenderer
         sink.tableCell_();
 
         sink.tableRow_();
-    }
-
-    private void renderSuccessIcon()
-    {
-        sink.figure();
-        sink.figureGraphics( "images/icon_success_sml.gif" );
-        sink.figure_();
-    }
-
-    private boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
-    {
-        return v1 == v2 || ( v1 != null && v1.equals( v2 ) ) || ( v1 != null && v2 != null && v1.toString().equals(
-            v2.toString() ) );
     }
 
     private void renderSummaryTableHeader()

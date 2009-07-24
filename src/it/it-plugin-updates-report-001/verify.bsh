@@ -1,0 +1,75 @@
+import java.io.*;
+
+try
+{
+    File file = new File( basedir, "target/site/plugin-updates-report.html" );
+    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+    StringBuilder buf = new StringBuilder();
+    String line = in.readLine();
+    while (line != null) {
+        buf.append(line);
+        buf.append(' ');
+        line = in.readLine();
+    }
+
+    String result = buf.toString()
+            .replaceAll( "<[^>]+>", " " )
+            .replaceAll( "&[^;]+;", " " )
+            .replaceAll( "\\s+", " " );
+	
+	if ( result.indexOf( "localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.1 1.2 2.0" ) < 0 ) 
+	{
+		System.out.println( "Did not generate summary correctly" );
+		System.out.println( "Result = \"" + result +"\"" );
+		return false;
+	}
+	if ( result.indexOf( "1.1.0-2 Next Version" ) < 0) 
+	{
+		System.out.println( "Did not identify next version" );
+		System.out.println( "Result = \"" + result +"\"" );
+		return false;
+	}
+	if ( result.indexOf( "1.1.1 Next Incremental" ) < 0) 
+	{ 
+		System.out.println( "Did not identify next incremental" );
+		System.out.println( "Result = \"" + result +"\"" );
+		return false;
+	}
+	if ( result.indexOf( "1.1.3 Latest Incremental" ) < 0) 
+	{ 
+		System.out.println( "Did not identify latest incremental" );
+		System.out.println( "Result = \"" + result +"\"" );
+		return false;
+	}
+	if ( result.indexOf( "1.2 Next Minor" ) < 0) 
+	{ 
+		System.out.println( "Did not identify next minor version" );
+		System.out.println( "Result = \"" + result +"\"" );
+		return false;
+	}
+	if ( result.indexOf( "1.3 Latest Minor" ) < 0) 
+	{ 
+		System.out.println( "Did not identify latest minor version" );
+		System.out.println( "Result = \"" + result +"\"" );
+		return false;
+	}
+	if ( result.indexOf( "2.0 Next Major" ) < 0) 
+	{ 
+		System.out.println( "Did not identify next major version" );
+		System.out.println( "Result = \"" + result +"\"" );
+		return false;
+	}
+	if ( result.indexOf( "3.0 Latest Major") < 0 ) 
+	{
+		System.out.println( "Did not identify latest major version" );
+		System.out.println( "Result = \"" + result +"\"" );
+		return false;
+	}
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;

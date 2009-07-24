@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.plexus.i18n.I18N;
 
 import java.util.Locale;
@@ -77,5 +78,25 @@ public abstract class AbstractVersionsReportRenderer
     public String getText( String key )
     {
         return i18n.getString( bundleName, locale, key );
+    }
+
+    protected void renderWarningIcon()
+    {
+        sink.figure();
+        sink.figureGraphics( "images/icon_warning_sml.gif" );
+        sink.figure_();
+    }
+
+    protected void renderSuccessIcon()
+    {
+        sink.figure();
+        sink.figureGraphics( "images/icon_success_sml.gif" );
+        sink.figure_();
+    }
+
+    protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
+    {
+        return v1 == v2 || ( v1 != null && v1.equals( v2 ) ) || ( v1 != null && v2 != null && v1.toString().equals(
+            v2.toString() ) );
     }
 }
