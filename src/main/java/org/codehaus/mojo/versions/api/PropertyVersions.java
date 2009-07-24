@@ -54,7 +54,7 @@ public class PropertyVersions
     /**
      * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.
      *
-     * @param profileId
+     * @param profileId The profileId.
      * @param name      The property name.
      * @param helper    The {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper}.
      */
