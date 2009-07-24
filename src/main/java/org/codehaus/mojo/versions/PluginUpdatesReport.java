@@ -99,7 +99,7 @@ public class PluginUpdatesReport
         Map/*<Plugin,PluginUpdateDetails>*/ pluginManagementUpdates = lookupPluginsUpdates( pluginManagement );
         PluginUpdatesRenderer renderer =
             new PluginUpdatesRenderer( sink, getI18n(), getOutputName(), locale, pluginUpdates,
-                                           pluginManagementUpdates );
+                                       pluginManagementUpdates );
         renderer.render();
     }
 
@@ -124,9 +124,8 @@ public class PluginUpdatesReport
             while ( !matched && j.hasNext() )
             {
                 Plugin t = (Plugin) j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
-                    && StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) && ( c.getVersion() == null
-                    || t.getVersion() == null || StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
+                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) && StringUtils.equals( t.getArtifactId(),
+                                                                                                 c.getArtifactId() ) )
                 {
                     matched = true;
                     break;

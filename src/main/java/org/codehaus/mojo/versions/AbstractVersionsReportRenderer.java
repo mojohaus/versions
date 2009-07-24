@@ -19,11 +19,15 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.maven.reporting.AbstractMavenReportRenderer;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.doxia.parser.Parser;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.reporting.AbstractMavenReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Base class for report renderers.
@@ -98,5 +102,340 @@ public abstract class AbstractVersionsReportRenderer
     {
         return v1 == v2 || ( v1 != null && v1.equals( v2 ) ) || ( v1 != null && v2 != null && v1.toString().equals(
             v2.toString() ) );
+    }
+
+    protected void renderDependencySummaryTableRow( Dependency dependency, ArtifactUpdatesDetails details )
+    {
+        renderDependencySummaryTableRow( dependency, details, true, true, true );
+    }
+
+    protected void renderDependencySummaryTableRow( Dependency dependency, ArtifactUpdatesDetails details,
+                                                    boolean includeScope, boolean includeClassifier,
+                                                    boolean includeType )
+    {
+        sink.tableRow();
+        sink.tableCell();
+        if ( details.getAll().length == 0 )
+        {
+            renderSuccessIcon();
+        }
+        else
+        {
+            renderWarningIcon();
+        }
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( dependency.getGroupId() );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( dependency.getArtifactId() );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( dependency.getVersion() );
+        sink.tableCell_();
+        if ( includeScope )
+        {
+            sink.tableCell();
+            sink.text( dependency.getScope() );
+            sink.tableCell_();
+        }
+        if ( includeClassifier )
+        {
+            sink.tableCell();
+            sink.text( dependency.getClassifier() );
+            sink.tableCell_();
+        }
+        if ( includeType )
+        {
+            sink.tableCell();
+            sink.text( dependency.getType() );
+            sink.tableCell_();
+        }
+
+        sink.tableCell();
+        if ( details.getNextVersion() != null )
+        {
+            sink.bold();
+            sink.text( details.getNextVersion().toString() );
+            sink.bold_();
+        }
+        sink.tableCell_();
+
+        sink.tableCell();
+        if ( details.getNextIncremental() != null )
+        {
+            sink.bold();
+            sink.text( details.getNextIncremental().toString() );
+            sink.bold_();
+        }
+        sink.tableCell_();
+
+        sink.tableCell();
+        if ( details.getNextMinor() != null )
+        {
+            sink.bold();
+            sink.text( details.getNextMinor().toString() );
+            sink.bold_();
+        }
+        sink.tableCell_();
+
+        sink.tableCell();
+        if ( details.getNextMajor() != null )
+        {
+            sink.bold();
+            sink.text( details.getNextMajor().toString() );
+            sink.bold_();
+        }
+        sink.tableCell_();
+
+        sink.tableRow_();
+    }
+
+    protected void renderDependencySummaryTableHeader()
+    {
+        renderDependencySummaryTableHeader( true, true, true );
+    }
+
+    protected void renderDependencySummaryTableHeader( boolean includeScope, boolean includeClassifier,
+                                                       boolean includeType )
+    {
+        sink.tableRow();
+        sink.tableHeaderCell();
+        sink.text( getText( "report.status" ) );
+        sink.tableHeaderCell_();
+        sink.tableHeaderCell();
+        sink.text( getText( "report.groupId" ) );
+        sink.tableHeaderCell_();
+        sink.tableHeaderCell();
+        sink.text( getText( "report.artifactId" ) );
+        sink.tableHeaderCell_();
+        sink.tableHeaderCell();
+        sink.text( getText( "report.currentVersion" ) );
+        sink.tableHeaderCell_();
+        if ( includeScope )
+        {
+            sink.tableHeaderCell();
+            sink.text( getText( "report.scope" ) );
+            sink.tableHeaderCell_();
+        }
+        if ( includeClassifier )
+        {
+            sink.tableHeaderCell();
+            sink.text( getText( "report.classifier" ) );
+            sink.tableHeaderCell_();
+        }
+        if ( includeType )
+        {
+            sink.tableHeaderCell();
+            sink.text( getText( "report.type" ) );
+            sink.tableHeaderCell_();
+        }
+        sink.tableHeaderCell();
+        sink.text( getText( "report.nextVersion" ) );
+        sink.tableHeaderCell_();
+        sink.tableHeaderCell();
+        sink.text( getText( "report.nextIncremental" ) );
+        sink.tableHeaderCell_();
+        sink.tableHeaderCell();
+        sink.text( getText( "report.nextMinor" ) );
+        sink.tableHeaderCell_();
+        sink.tableHeaderCell();
+        sink.text( getText( "report.nextMajor" ) );
+        sink.tableHeaderCell_();
+        sink.tableRow_();
+    }
+
+    protected void renderDependencyDetailTable( Dependency dependency, ArtifactUpdatesDetails details )
+    {
+        renderDependencyDetailTable( dependency, details, true, true, true );
+    }
+
+    protected void renderDependencyDetailTable( Dependency dependency, ArtifactUpdatesDetails details,
+                                                boolean includeScope, boolean includeClassifier, boolean includeType )
+    {
+        final String cellWidth = "80%";
+        final String headerWidth = "20%";
+        sink.table();
+        sink.tableRows( new int[]{Parser.JUSTIFY_RIGHT, Parser.JUSTIFY_LEFT}, false );
+        sink.tableRow();
+        sink.tableHeaderCell( headerWidth );
+        sink.text( getText( "report.status" ) );
+        sink.tableHeaderCell_();
+        sink.tableCell( cellWidth );
+        ArtifactVersion[] versions = details.getAll();
+        if ( details.getNextVersion() != null )
+        {
+            renderWarningIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.otherUpdatesAvailable" ) );
+        }
+        else if ( details.getNextIncremental() != null )
+        {
+            renderWarningIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.incrementalUpdatesAvailable" ) );
+        }
+        else if ( details.getNextMinor() != null )
+        {
+            renderWarningIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.minorUpdatesAvailable" ) );
+        }
+        else if ( details.getNextMajor() != null )
+        {
+            renderWarningIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.majorUpdatesAvailable" ) );
+        }
+        else
+        {
+            renderSuccessIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.noUpdatesAvailable" ) );
+        }
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableHeaderCell( headerWidth );
+        sink.text( getText( "report.groupId" ) );
+        sink.tableHeaderCell_();
+        sink.tableCell( cellWidth );
+        sink.text( dependency.getGroupId() );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableHeaderCell( headerWidth );
+        sink.text( getText( "report.artifactId" ) );
+        sink.tableHeaderCell_();
+        sink.tableCell( cellWidth );
+        sink.text( dependency.getArtifactId() );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableHeaderCell( headerWidth );
+        sink.text( getText( "report.currentVersion" ) );
+        sink.tableHeaderCell_();
+        sink.tableCell( cellWidth );
+        sink.text( dependency.getVersion() );
+        sink.tableCell_();
+        sink.tableRow_();
+        if ( includeScope )
+        {
+            sink.tableRow();
+            sink.tableHeaderCell( headerWidth );
+            sink.text( getText( "report.scope" ) );
+            sink.tableHeaderCell_();
+            sink.tableCell( cellWidth );
+            sink.text( dependency.getScope() );
+            sink.tableCell_();
+            sink.tableRow_();
+        }
+        if ( includeClassifier )
+        {
+            sink.tableRow();
+            sink.tableHeaderCell( headerWidth );
+            sink.text( getText( "report.classifier" ) );
+            sink.tableHeaderCell_();
+            sink.tableCell( cellWidth );
+            sink.text( dependency.getClassifier() );
+            sink.tableCell_();
+            sink.tableRow_();
+        }
+        if ( includeType )
+        {
+            sink.tableRow();
+            sink.tableHeaderCell( headerWidth );
+            sink.text( getText( "report.type" ) );
+            sink.tableHeaderCell_();
+            sink.tableCell( cellWidth );
+            sink.text( dependency.getType() );
+            sink.tableCell_();
+            sink.tableRow_();
+        }
+        if ( versions.length > 0 )
+        {
+            sink.tableRow();
+            sink.tableHeaderCell( headerWidth );
+            sink.text( getText( "report.updateVersions" ) );
+            sink.tableHeaderCell_();
+            sink.tableCell( cellWidth );
+            for ( int i = 0; i < versions.length; i++ )
+            {
+                if ( i > 0 )
+                {
+                    sink.lineBreak();
+                }
+                boolean bold = equals( versions[i], details.getNextVersion() )
+                    || equals( versions[i], details.getNextIncremental() )
+                    || equals( versions[i], details.getLatestIncremental() )
+                    || equals( versions[i], details.getNextMinor() ) || equals( versions[i], details.getLatestMinor() )
+                    || equals( versions[i], details.getNextMajor() ) || equals( versions[i], details.getLatestMajor() );
+                if ( bold )
+                {
+                    sink.bold();
+                }
+                sink.text( versions[i].toString() );
+                if ( bold )
+                {
+                    sink.bold_();
+                    sink.nonBreakingSpace();
+                    sink.italic();
+                    if ( equals( versions[i], details.getNextVersion() ) )
+                    {
+                        sink.text( getText( "report.nextVersion" ) );
+                    }
+                    else if ( equals( versions[i], details.getNextIncremental() ) )
+                    {
+                        sink.text( getText( "report.nextIncremental" ) );
+                    }
+                    else if ( equals( versions[i], details.getLatestIncremental() ) )
+                    {
+                        sink.text( getText( "report.latestIncremental" ) );
+                    }
+                    else if ( equals( versions[i], details.getNextMinor() ) )
+                    {
+                        sink.text( getText( "report.nextMinor" ) );
+                    }
+                    else if ( equals( versions[i], details.getLatestMinor() ) )
+                    {
+                        sink.text( getText( "report.latestMinor" ) );
+                    }
+                    else if ( equals( versions[i], details.getNextMajor() ) )
+                    {
+                        sink.text( getText( "report.nextMajor" ) );
+                    }
+                    else if ( equals( versions[i], details.getLatestMajor() ) )
+                    {
+                        sink.text( getText( "report.latestMajor" ) );
+                    }
+
+                    sink.italic_();
+                }
+            }
+            sink.tableCell_();
+            sink.tableRow_();
+        }
+        sink.tableRows_();
+        sink.table_();
+    }
+
+    protected void renderDependencySummaryTable( Map map )
+    {
+        renderDependencySummaryTable( map, true, true, true );
+    }
+
+    protected void renderDependencySummaryTable( Map map, boolean includeScope, boolean includeClassifier,
+                                                 boolean includeType )
+    {
+        sink.table();
+        renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );
+        for ( Iterator i = map.entrySet().iterator(); i.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) i.next();
+            renderDependencySummaryTableRow( (Dependency) entry.getKey(), (ArtifactUpdatesDetails) entry.getValue(),
+                                             includeScope, includeClassifier, includeType );
+        }
+        renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );
+        sink.table_();
     }
 }

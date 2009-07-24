@@ -19,11 +19,16 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.doxia.parser.Parser;
 import org.apache.maven.doxia.sink.Sink;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.i18n.I18N;
 
+import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -191,7 +196,7 @@ public class PluginUpdatesRenderer
         sink.text( getText( "report.overview.numNewerDependenciesAvailable" ) );
         sink.tableCell_();
         sink.tableCell();
-        sink.text( Integer.toString( numMaj ) );
+        sink.text( Integer.toString( numDep ) );
         sink.tableCell_();
         sink.tableRow_();
         sink.table_();
@@ -256,7 +261,7 @@ public class PluginUpdatesRenderer
         sink.text( getText( "report.nextMajor" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.hasDependencyUpdates" ) );
+        sink.text( getText( "report.dependencyStatus" ) );
         sink.tableHeaderCell_();
         sink.tableRow_();
     }
@@ -281,7 +286,15 @@ public class PluginUpdatesRenderer
         sink.text( plugin.getArtifactId() );
         sink.tableCell_();
         sink.tableCell();
+        if ( !details.isArtifactUpdateAvailable() )
+        {
+            sink.bold();
+        }
         sink.text( plugin.getVersion() );
+        if ( !details.isArtifactUpdateAvailable() )
+        {
+            sink.bold_();
+        }
         sink.tableCell_();
 
         sink.tableCell();
@@ -321,14 +334,192 @@ public class PluginUpdatesRenderer
         sink.tableCell_();
 
         sink.tableCell();
-        sink.text( details.isDependencyUpdateAvailable() ? getText( "report.yes" ) : getText( "report.no" ) );
+        if ( details.isDependencyUpdateAvailable() )
+        {
+            renderWarningIcon();
+        }
+        else
+        {
+            renderSuccessIcon();
+        }
         sink.tableCell_();
+
         sink.tableRow_();
     }
 
     private void renderPluginDetail( Plugin plugin, PluginUpdatesDetails details )
     {
-        //To change body of created methods use File | Settings | File Templates.
+        final String cellWidth = "80%";
+        final String headerWidth = "20%";
+        sink.section2();
+        sink.sectionTitle2();
+        sink.text( MessageFormat.format( getText( "report.plugin" ), new Object[]{
+            ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
+        sink.sectionTitle2_();
+        sink.table();
+        sink.tableRows( new int[]{Parser.JUSTIFY_RIGHT, Parser.JUSTIFY_LEFT}, false );
+        sink.tableRow();
+        sink.tableHeaderCell( headerWidth );
+        sink.text( getText( "report.status" ) );
+        sink.tableHeaderCell_();
+        sink.tableCell( cellWidth );
+        ArtifactVersion[] versions = details.getArtifactDetails().getAll();
+        if ( details.getArtifactDetails().getNextVersion() != null )
+        {
+            renderWarningIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.otherUpdatesAvailable" ) );
+        }
+        else if ( details.getArtifactDetails().getNextIncremental() != null )
+        {
+            renderWarningIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.incrementalUpdatesAvailable" ) );
+        }
+        else if ( details.getArtifactDetails().getNextMinor() != null )
+        {
+            renderWarningIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.minorUpdatesAvailable" ) );
+        }
+        else if ( details.getArtifactDetails().getNextMajor() != null )
+        {
+            renderWarningIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.majorUpdatesAvailable" ) );
+        }
+        else
+        {
+            renderSuccessIcon();
+            sink.nonBreakingSpace();
+            sink.text( getText( "report.noUpdatesAvailable" ) );
+        }
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableHeaderCell( headerWidth );
+        sink.text( getText( "report.groupId" ) );
+        sink.tableHeaderCell_();
+        sink.tableCell( cellWidth );
+        sink.text( plugin.getGroupId() );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableHeaderCell( headerWidth );
+        sink.text( getText( "report.artifactId" ) );
+        sink.tableHeaderCell_();
+        sink.tableCell( cellWidth );
+        sink.text( plugin.getArtifactId() );
+        sink.tableCell_();
+        sink.tableRow_();
+        sink.tableRow();
+        sink.tableHeaderCell( headerWidth );
+        sink.text( getText( "report.currentVersion" ) );
+        sink.tableHeaderCell_();
+        sink.tableCell( cellWidth );
+        sink.text( plugin.getVersion() );
+        sink.tableCell_();
+        sink.tableRow_();
+        if ( versions.length > 0 )
+        {
+            sink.tableRow();
+            sink.tableHeaderCell( headerWidth );
+            sink.text( getText( "report.updateVersions" ) );
+            sink.tableHeaderCell_();
+            sink.tableCell( cellWidth );
+            for ( int i = 0; i < versions.length; i++ )
+            {
+                if ( i > 0 )
+                {
+                    sink.lineBreak();
+                }
+                boolean bold = equals( versions[i], details.getArtifactDetails().getNextVersion() )
+                    || equals( versions[i], details.getArtifactDetails().getNextIncremental() )
+                    || equals( versions[i], details.getArtifactDetails().getLatestIncremental() )
+                    || equals( versions[i], details.getArtifactDetails().getNextMinor() )
+                    || equals( versions[i], details.getArtifactDetails().getLatestMinor() )
+                    || equals( versions[i], details.getArtifactDetails().getNextMajor() ) || equals( versions[i],
+                                                                                                     details.getArtifactDetails().getLatestMajor() )
+                    ;
+                if ( bold )
+                {
+                    sink.bold();
+                }
+                sink.text( versions[i].toString() );
+                if ( bold )
+                {
+                    sink.bold_();
+                    sink.nonBreakingSpace();
+                    sink.italic();
+                    if ( equals( versions[i], details.getArtifactDetails().getNextVersion() ) )
+                    {
+                        sink.text( getText( "report.nextVersion" ) );
+                    }
+                    else if ( equals( versions[i], details.getArtifactDetails().getNextIncremental() ) )
+                    {
+                        sink.text( getText( "report.nextIncremental" ) );
+                    }
+                    else if ( equals( versions[i], details.getArtifactDetails().getLatestIncremental() ) )
+                    {
+                        sink.text( getText( "report.latestIncremental" ) );
+                    }
+                    else if ( equals( versions[i], details.getArtifactDetails().getNextMinor() ) )
+                    {
+                        sink.text( getText( "report.nextMinor" ) );
+                    }
+                    else if ( equals( versions[i], details.getArtifactDetails().getLatestMinor() ) )
+                    {
+                        sink.text( getText( "report.latestMinor" ) );
+                    }
+                    else if ( equals( versions[i], details.getArtifactDetails().getNextMajor() ) )
+                    {
+                        sink.text( getText( "report.nextMajor" ) );
+                    }
+                    else if ( equals( versions[i], details.getArtifactDetails().getLatestMajor() ) )
+                    {
+                        sink.text( getText( "report.latestMajor" ) );
+                    }
+
+                    sink.italic_();
+                }
+            }
+            sink.tableCell_();
+            sink.tableRow_();
+        }
+        sink.tableRows_();
+        sink.table_();
+
+        if ( !details.getDependencyDetails().isEmpty() )
+        {
+            sink.section3();
+            sink.sectionTitle3();
+            sink.text( MessageFormat.format( getText( "report.pluginDependencies" ), new Object[]{
+                ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
+            sink.sectionTitle3_();
+
+            renderDependencySummaryTable( details.getDependencyDetails(), false, true, true );
+
+            sink.section3_();
+
+            for ( Iterator i = details.getDependencyDetails().entrySet().iterator(); i.hasNext(); )
+            {
+                Map.Entry entry = (Map.Entry) i.next();
+                renderDependencyDetail( (Dependency) entry.getKey(), (ArtifactUpdatesDetails) entry.getValue() );
+            }
+        }
+        sink.section2_();
     }
+
+    private void renderDependencyDetail( Dependency dependency, ArtifactUpdatesDetails details )
+    {
+        sink.section3();
+        sink.sectionTitle3();
+        sink.text( MessageFormat.format( getText( "report.pluginDependency" ), new Object[]{
+            ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )} ) );
+        sink.sectionTitle3_();
+        renderDependencyDetailTable( dependency, details, false, true, true );
+        sink.section3_();
+    }
+
 
 }
