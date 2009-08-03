@@ -104,18 +104,6 @@ public class Property
         this.version = null;
     }
 
-    protected Property( Property that )
-    {
-        this.name = that.name;
-        this.autoLinkDependencies = that.autoLinkDependencies;
-        this.dependencies = new Dependency[that.dependencies.length];
-        System.arraycopy( that.dependencies, 0, this.dependencies, 0, this.dependencies.length );
-        this.banSnapshots = that.banSnapshots;
-        this.searchReactor = that.searchReactor;
-        this.preferReactor = that.preferReactor;
-        this.version = that.version;
-    }
-
     public String getName()
     {
         return name;
