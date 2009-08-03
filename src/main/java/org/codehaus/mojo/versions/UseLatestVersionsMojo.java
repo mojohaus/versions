@@ -29,7 +29,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -94,8 +93,7 @@ public class UseLatestVersionsMojo
             }
 
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
-            ArtifactVersions versions =
-                getHelper().lookupArtifactVersions( artifact, Boolean.TRUE.equals( allowSnapshots ) );
+            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
             ArtifactVersion[] newer = versions.getNewerVersions( version, Boolean.TRUE.equals( allowSnapshots ) );
             if ( newer.length > 0 )
             {
