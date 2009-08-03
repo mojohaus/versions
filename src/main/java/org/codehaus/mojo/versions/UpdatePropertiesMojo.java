@@ -145,7 +145,7 @@ public class UpdatePropertiesMojo
                 if ( includeProperties.indexOf( property.getName() ) < 0 )
                 {
                     getLog().debug( "Skipping update of property ${" + property.getName() + "}" );
-                    continue;
+                    i.remove();
                 }
             }
 
@@ -154,10 +154,14 @@ public class UpdatePropertiesMojo
                 if ( excludeProperties.indexOf( property.getName() ) >= 0 )
                 {
                     getLog().debug( "Ignoring update of property ${" + property.getName() + "}" );
-                    continue;
+                    i.remove();
                 }
             }
-
+        }
+        i = properties.values().iterator();
+        while ( i.hasNext() )
+        {
+            Property property = (Property) i.next();
             getLog().debug( "Property ${" + property.getName() + "}" );
             PropertyVersions version = (PropertyVersions) versions.get( property.getName() );
             if ( version == null || !version.isAssociated() )

@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.api;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -30,6 +31,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -41,11 +43,15 @@ import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.codehaus.mojo.versions.ArtifactUpdatesDetails;
+import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.mojo.versions.utils.WagonUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -58,7 +64,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -151,16 +160,25 @@ public class DefaultVersionsHelper
         this.log = log;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ArtifactFactory getArtifactFactory()
     {
         return artifactFactory;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Log getLog()
     {
         return log;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
         throws MojoExecutionException
     {
@@ -191,16 +209,20 @@ public class DefaultVersionsHelper
         {
             throw new MojoExecutionException( "Could not retrieve metadata for " + artifact, e );
         }
-        return new ArtifactVersions( artifact, versions,
-                                     getVersionComparator( artifact ) );
+        return new ArtifactVersions( artifact, versions, getVersionComparator( artifact ) );
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     public VersionComparator getVersionComparator( Artifact artifact )
     {
         return getVersionComparator( artifact.getGroupId(), artifact.getArtifactId() );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public VersionComparator getVersionComparator( String groupId, String artifactId )
     {
         final List/*<Rule>*/ rules = ruleSet.getRules();
@@ -256,7 +278,6 @@ public class DefaultVersionsHelper
         return VersionComparators.getVersionComparator( comparisonMethod );
     }
 
-
     private static RuleSet getRuleSet( Wagon wagon, String remoteURI )
         throws IOException, AuthorizationException, TransferFailedException, ResourceDoesNotExistException
     {
@@ -305,7 +326,11 @@ public class DefaultVersionsHelper
         }
         finally
         {
-            tempFile.delete();
+            if ( !tempFile.delete() )
+            {
+                // maybe we can delete this later
+                tempFile.deleteOnExit();
+            }
         }
     }
 
@@ -407,11 +432,17 @@ public class DefaultVersionsHelper
         return ruleSet;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Artifact createPluginArtifact( String groupId, String artifactId, VersionRange versionRange )
     {
         return artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
                                               String classifier, String scope, boolean optional )
     {
@@ -419,6 +450,18 @@ public class DefaultVersionsHelper
                                                          optional );
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
+                                              String classifier, String scope )
+    {
+        return artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, type, classifier, scope );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Artifact createDependencyArtifact( Dependency dependency )
         throws InvalidVersionSpecificationException
     {
@@ -431,13 +474,7 @@ public class DefaultVersionsHelper
     }
 
     /**
-     * Takes a {@link java.util.List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a {@link java.util.Set} of {@link org.apache.maven.artifact.Artifact} instances.
-     *
-     * @param mavenProjects the {@link java.util.List} of {@link org.apache.maven.project.MavenProject} instances.
-     * @return a {@link java.util.Set} of {@link org.apache.maven.artifact.Artifact} instances.
-     * @throws org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
-     *          if any of the {@link org.apache.maven.project.MavenProject} versions are invalid (should never happen).
-     * @since 1.0-alpha-3
+     * {@inheritDoc}
      */
     public Set/*<Artifact>*/ extractArtifacts( Collection/*<MavenProject>*/ mavenProjects )
     {
@@ -456,8 +493,148 @@ public class DefaultVersionsHelper
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ArtifactVersion createArtifactVersion( String version )
     {
         return new DefaultArtifactVersion( version );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ArtifactUpdatesDetails lookupArtifactUpdates( Artifact artifact, ArtifactVersion current,
+                                                         Boolean allowSnapshots, boolean usePluginRepositories )
+        throws MojoExecutionException
+    {
+        ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
+
+        VersionComparator versionComparator = artifactVersions.getVersionComparator();
+        int segmentCount = versionComparator.getSegmentCount( current );
+        ArtifactVersion nextVersion = segmentCount < 3
+            ? null
+            : artifactVersions.getOldestVersion( current, versionComparator.incrementSegment( current, 2 ),
+                                                 Boolean.TRUE.equals( allowSnapshots ), false, false );
+        ArtifactVersion nextIncremental = segmentCount < 3
+            ? null
+            : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 2 ),
+                                                 versionComparator.incrementSegment( current, 1 ),
+                                                 Boolean.TRUE.equals( allowSnapshots ), true, false );
+        ArtifactVersion latestIncremental = segmentCount < 3
+            ? null
+            : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 2 ),
+                                                 versionComparator.incrementSegment( current, 1 ),
+                                                 Boolean.TRUE.equals( allowSnapshots ), true, false );
+        ArtifactVersion nextMinor = segmentCount < 2
+            ? null
+            : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 1 ),
+                                                 versionComparator.incrementSegment( current, 0 ),
+                                                 Boolean.TRUE.equals( allowSnapshots ), true, false );
+        ArtifactVersion latestMinor = segmentCount < 2
+            ? null
+            : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 1 ),
+                                                 versionComparator.incrementSegment( current, 0 ),
+                                                 Boolean.TRUE.equals( allowSnapshots ), true, false );
+        ArtifactVersion nextMajor =
+            artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 0 ), null,
+                                               Boolean.TRUE.equals( allowSnapshots ), true, false );
+        ArtifactVersion latestMajor =
+            artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 0 ), null,
+                                               Boolean.TRUE.equals( allowSnapshots ), true, false );
+
+        return new ArtifactUpdatesDetails( artifact, nextVersion, nextIncremental, latestIncremental, nextMinor,
+                                           latestMinor, nextMajor, latestMajor,
+                                           artifactVersions.getNewerVersions( current ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map/*<Dependency,ArtifactUpdatesDetails>*/ lookupDependenciesUpdates( Set dependencies,
+                                                                                 Boolean allowSnapshots,
+                                                                                 boolean usePluginRepositories )
+        throws MojoExecutionException
+    {
+        Map/*<Dependency,ArtifactUpdatesDetails>*/ dependencyUpdates = new TreeMap( new DependencyComparator() );
+        Iterator i = dependencies.iterator();
+        while ( i.hasNext() )
+        {
+            Dependency dependency = (Dependency) i.next();
+
+            ArtifactUpdatesDetails details =
+                lookupDependencyUpdates( dependency, allowSnapshots, usePluginRepositories );
+            dependencyUpdates.put( dependency, details );
+        }
+        return dependencyUpdates;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ArtifactUpdatesDetails lookupDependencyUpdates( Dependency dependency, Boolean allowSnapshots,
+                                                           boolean usePluginRepositories )
+        throws MojoExecutionException
+    {
+        getLog().debug(
+            "Checking " + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )
+                + " for updates newer than " + dependency.getVersion() );
+        VersionRange versionRange;
+        try
+        {
+            versionRange = VersionRange.createFromVersionSpec( dependency.getVersion() );
+        }
+        catch ( InvalidVersionSpecificationException e )
+        {
+            throw new MojoExecutionException( "Invalid version range specification: " + dependency.getVersion(), e );
+        }
+
+        return lookupArtifactUpdates(
+            createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(), versionRange,
+                                      dependency.getType(), dependency.getClassifier(), dependency.getScope() ),
+            createArtifactVersion( dependency.getVersion() ), allowSnapshots, usePluginRepositories );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map/*<Plugin,PluginUpdateDetails>*/ lookupPluginsUpdates( Set plugins, Boolean allowSnapshots )
+        throws MojoExecutionException
+    {
+        Map/*<Plugin,PluginUpdateDetails>*/ pluginUpdates = new TreeMap( new PluginComparator() );
+        Iterator i = plugins.iterator();
+        while ( i.hasNext() )
+        {
+            Plugin plugin = (Plugin) i.next();
+            PluginUpdatesDetails details = lookupPluginUpdates( plugin, allowSnapshots );
+            pluginUpdates.put( plugin, details );
+        }
+        return pluginUpdates;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots )
+        throws MojoExecutionException
+    {
+        getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
+            + " for updates newer than " + plugin.getVersion() );
+
+        VersionRange versionRange = VersionRange.createFromVersion( plugin.getVersion() );
+
+        final ArtifactUpdatesDetails pluginArtifactDetails =
+            lookupArtifactUpdates( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
+                                   createArtifactVersion( plugin.getVersion() ), allowSnapshots, true );
+
+        Set/*<Dependency>*/ pluginDependencies = new TreeSet( new DependencyComparator() );
+        if ( plugin.getDependencies() != null )
+        {
+            pluginDependencies.addAll( plugin.getDependencies() );
+        }
+        Map/*<Dependency,ArtifactUpdatesDetails>*/ pluginDependencyDetails =
+            lookupDependenciesUpdates( pluginDependencies, allowSnapshots, false );
+
+        return new PluginUpdatesDetails( pluginArtifactDetails, pluginDependencyDetails );
     }
 }

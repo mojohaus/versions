@@ -25,13 +25,18 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.codehaus.mojo.versions.ArtifactUpdatesDetails;
+import org.codehaus.mojo.versions.PluginUpdatesDetails;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -118,6 +123,20 @@ public interface VersionsHelper
                                        String classifier, String scope, boolean optional );
 
     /**
+     * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code>.
+     *
+     * @param groupId    The group id.
+     * @param artifactId The artifact id.
+     * @param versionRange    The version range.
+     * @param type       The type.
+     * @param classifier The classifier.
+     * @param scope      The scope.
+     * @return The corresponding dependency artifact.
+     * @since 1.0-beta-1
+     */
+    Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
+                                   String classifier, String scope );
+    /**
      * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code> which extracts the
      * parameters from the Dependency instance.
      *
@@ -131,7 +150,8 @@ public interface VersionsHelper
         throws InvalidVersionSpecificationException;
 
     /**
-     * Takes a {@link List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a {@link Set} of {@link Artifact} instances.
+     * Takes a {@link List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a 
+     * {@link Set} of {@link Artifact} instances.
      *
      * @param mavenProjects the {@link List} of {@link org.apache.maven.project.MavenProject} instances.
      * @return a {@link Set} of {@link Artifact} instances.
@@ -147,5 +167,71 @@ public interface VersionsHelper
      * @since 1.0-beta-1
      */
     ArtifactVersion createArtifactVersion( String version );
+
+    /**
+     * Looks up the updates of an artifact.
+     * @param artifact The artifact to look up
+     * @param current The current version.
+     * @param allowSnapshots Include snapshots in the list of updates.
+     * @param usePluginRepositories Search the plugin repositories.
+     * @return The artifact update details.
+     * @throws MojoExecutionException If things go wrong.
+     */
+    ArtifactUpdatesDetails lookupArtifactUpdates( Artifact artifact, ArtifactVersion current, Boolean allowSnapshots,
+                                                  boolean usePluginRepositories )
+        throws MojoExecutionException;
+    
+    /**
+     * Looks up the updates for a set of dependencies.
+     *
+     * @param dependencies The set of {@link Dependency} instances to look up.
+     * @param allowSnapshots Include snapshots in the list of updates.
+     * @param usePluginRepositories Search the plugin repositories.
+     * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.ArtifactUpdatesDetails}.
+     * @throws MojoExecutionException If things go wrong.
+     * @since 1.0-beta-1
+     */
+    Map/*<Dependency,ArtifactUpdatesDetails>*/ lookupDependenciesUpdates( Set dependencies, Boolean allowSnapshots,
+                                                                          boolean usePluginRepositories )
+        throws MojoExecutionException;
+    
+    /**
+     * Creates an {@link org.codehaus.mojo.versions.ArtifactUpdatesDetails} instance from a dependency.
+     *
+     * @param dependency The dependency.
+     * @param allowSnapshots Include snapshots in the list of updates.
+     * @param usePluginRepositories Search the plugin repositories.
+     * @return The details of updates to the dependency.
+     * @throws MojoExecutionException If things go wrong.
+     * @since 1.0-beta-1
+     */
+    ArtifactUpdatesDetails lookupDependencyUpdates( Dependency dependency, Boolean allowSnapshots,
+                                                    boolean usePluginRepositories )
+        throws MojoExecutionException;
+        
+    /**
+     * Looks up the updates for a set of plugins.
+     *
+     * @param plugins The set of {@link Plugin} instances to look up.
+     * @param allowSnapshots Include snapshots in the list of updates.
+     * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.PluginUpdatesDetails}.
+     * @throws MojoExecutionException If things go wrong.
+     * @since 1.0-beta-1
+     */
+    Map/*<Plugin,PluginUpdateDetails>*/ lookupPluginsUpdates( Set plugins, Boolean allowSnapshots )
+        throws MojoExecutionException;
+    
+    /**
+     * Looks up the updates for a plugin.
+     *
+     * @param plugin The {@link Plugin} instance to look up.
+     * @param allowSnapshots Include snapshots in the list of updates.
+     * @return The plugin update details.
+     * @throws MojoExecutionException If things go wrong.
+     * @since 1.0-beta-1
+     */
+    PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots)
+        throws MojoExecutionException;
+
 
 }
