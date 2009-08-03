@@ -28,15 +28,14 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ArtifactUpdatesDetails;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.

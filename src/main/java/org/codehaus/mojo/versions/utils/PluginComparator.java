@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 
 import java.util.Comparator;
