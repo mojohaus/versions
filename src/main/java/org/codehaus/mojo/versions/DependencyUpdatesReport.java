@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
@@ -78,13 +79,21 @@ public class DependencyUpdatesReport
         dependencies.addAll( getProject().getDependencies() );
         dependencies = removeDependencyManagment( dependencies, dependencyManagement );
 
-        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates = lookupDependenciesUpdates( dependencies );
-        Map/*<Dependency,DependencyUpdateDetails>*/ dependencyManagementUpdates =
-            lookupDependenciesUpdates( dependencyManagement );
-        DependencyUpdatesRenderer renderer =
-            new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
-                                           dependencyManagementUpdates );
-        renderer.render();
+        try
+        {
+            Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates =
+                getHelper().lookupDependenciesUpdates( dependencies, getAllowSnapshots(), false );
+            Map/*<Dependency,DependencyUpdateDetails>*/ dependencyManagementUpdates =
+                getHelper().lookupDependenciesUpdates( dependencyManagement, getAllowSnapshots(), false );
+            DependencyUpdatesRenderer renderer =
+                new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
+                                               dependencyManagementUpdates );
+            renderer.render();
+        }
+        catch ( MojoExecutionException e )
+        {
+            throw new MavenReportException( e.getMessage(), e );
+        }
     }
 
     /**

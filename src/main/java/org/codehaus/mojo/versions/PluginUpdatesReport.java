@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.util.StringUtils;
@@ -95,12 +96,21 @@ public class PluginUpdatesReport
         plugins.addAll( getProject().getDependencies() );
         plugins = removePluginManagment( plugins, pluginManagement );
 
-        Map/*<Plugin,PluginUpdateDetails>*/ pluginUpdates = lookupPluginsUpdates( plugins );
-        Map/*<Plugin,PluginUpdateDetails>*/ pluginManagementUpdates = lookupPluginsUpdates( pluginManagement );
-        PluginUpdatesRenderer renderer =
-            new PluginUpdatesRenderer( sink, getI18n(), getOutputName(), locale, pluginUpdates,
-                                       pluginManagementUpdates );
-        renderer.render();
+        try
+        {
+            Map/*<Plugin,PluginUpdateDetails>*/ pluginUpdates =
+                getHelper().lookupPluginsUpdates( plugins, getAllowSnapshots() );
+            Map/*<Plugin,PluginUpdateDetails>*/ pluginManagementUpdates =
+                getHelper().lookupPluginsUpdates( pluginManagement, getAllowSnapshots() );
+            PluginUpdatesRenderer renderer =
+                new PluginUpdatesRenderer( sink, getI18n(), getOutputName(), locale, pluginUpdates,
+                                           pluginManagementUpdates );
+            renderer.render();
+        }
+        catch ( MojoExecutionException e )
+        {
+            throw new MavenReportException( e.getMessage(), e );
+        }
     }
 
     /**

@@ -29,7 +29,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
@@ -43,8 +42,6 @@ import org.codehaus.plexus.i18n.I18N;
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Base class for all versions reports.
@@ -359,48 +356,6 @@ public abstract class AbstractVersionsReport
     public I18N getI18n()
     {
         return i18n;
-    }
-
-    /**
-     * Looks up the updates for a set of dependencies.
-     *
-     * @param dependencies The set of {@link Dependency} instances to look up.
-     * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.ArtifactUpdatesDetails}.
-     * @throws MavenReportException when things go wrong.
-     * @since 1.0-beta-1
-     */
-    protected Map/*<Dependency,ArtifactUpdatesDetails>*/ lookupDependenciesUpdates( Set dependencies )
-        throws MavenReportException
-    {
-        try
-        {
-            return getHelper().lookupDependenciesUpdates( dependencies, this.getAllowSnapshots(), false );
-        }
-        catch ( MojoExecutionException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
-    }
-
-    /**
-     * Looks up the updates for a set of dependencies.
-     *
-     * @param plugins The set of {@link Dependency} instances to look up.
-     * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.ArtifactUpdatesDetails}.
-     * @throws MavenReportException when things go wrong.
-     * @since 1.0-beta-1
-     */
-    protected Map/*<Plugin,PluginUpdateDetails>*/ lookupPluginsUpdates( Set plugins )
-        throws MavenReportException
-    {
-        try
-        {
-            return getHelper().lookupPluginsUpdates( plugins, getAllowSnapshots() );
-        }
-        catch ( MojoExecutionException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
     }
 
 }
