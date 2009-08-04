@@ -19,7 +19,6 @@ try
         System.out.println("Did not notice that clean plugin does not have a version specified");
         return false;
     }
-    System.out.println(m.group(0));
 }
 catch( Throwable t )
 {
