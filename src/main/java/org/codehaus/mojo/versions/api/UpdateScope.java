@@ -102,7 +102,7 @@ public abstract class UpdateScope
             throws ArtifactMetadataRetrievalException
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3
+            return versionComparator.getSegmentCount( currentVersion ) < 2
                 ? null
                 : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
                                                    versionComparator.incrementSegment( currentVersion, 0 ),
@@ -114,7 +114,7 @@ public abstract class UpdateScope
             throws ArtifactMetadataRetrievalException
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3
+            return versionComparator.getSegmentCount( currentVersion ) < 2
                 ? null
                 : versionDetails.getLatestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
                                                    versionComparator.incrementSegment( currentVersion, 0 ),
@@ -130,7 +130,7 @@ public abstract class UpdateScope
             throws ArtifactMetadataRetrievalException
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3
+            return versionComparator.getSegmentCount( currentVersion ) < 1
                 ? null
                 : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 0 ), null,
                                                    includeSnapshots, true, false );
@@ -141,10 +141,30 @@ public abstract class UpdateScope
             throws ArtifactMetadataRetrievalException
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3
+            return versionComparator.getSegmentCount( currentVersion ) < 1
                 ? null
                 : versionDetails.getLatestVersion( versionComparator.incrementSegment( currentVersion, 0 ), null,
                                                    includeSnapshots, true, false );
+        }
+
+    };
+
+    public static final UpdateScope ANY = new UpdateScope( "ANY", 4 )
+    {
+        public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                        boolean includeSnapshots )
+            throws ArtifactMetadataRetrievalException
+        {
+            VersionComparator versionComparator = versionDetails.getVersionComparator();
+            return versionDetails.getOldestVersion( currentVersion, null, includeSnapshots, false, false );
+        }
+
+        public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                          boolean includeSnapshots )
+            throws ArtifactMetadataRetrievalException
+        {
+            VersionComparator versionComparator = versionDetails.getVersionComparator();
+            return versionDetails.getLatestVersion( currentVersion, null, includeSnapshots, false, false );
         }
 
     };
