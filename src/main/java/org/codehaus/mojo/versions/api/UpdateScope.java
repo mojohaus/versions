@@ -33,14 +33,20 @@ import java.util.Map;
  * Scopes of version updates.
  *
  * @author connollys
- * @since Aug 4, 2009 4:29:44 PM
+ * @since 1.0-beta-1
  */
 public abstract class UpdateScope
     implements Comparable, Serializable
 {
 
+    /**
+     * Versions which are less than an incremental update.
+     *
+     * @since 1.0-beta-1
+     */
     public static final UpdateScope SUBINCREMENTAL = new UpdateScope( "SUBINCREMENTAL", 0 )
     {
+        /** {@inheritDoc} */
         public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                         boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
@@ -53,6 +59,7 @@ public abstract class UpdateScope
                                                    includeSnapshots, false, false );
         }
 
+        /** {@inheritDoc} */
         public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                           boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
@@ -67,8 +74,15 @@ public abstract class UpdateScope
 
     };
 
+    /**
+     * Incremental version updates, that is the third segment of the version number, for example <code>1.0.0.15</code>
+     * to <code>1.0.1.0</code>.
+     *
+     * @since 1.0-beta-1
+     */
     public static final UpdateScope INCREMENTAL = new UpdateScope( "INCREMENTAL", 1 )
     {
+        /** {@inheritDoc} */
         public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                         boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
@@ -81,6 +95,7 @@ public abstract class UpdateScope
                                                    includeSnapshots, true, false );
         }
 
+        /** {@inheritDoc} */
         public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                           boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
@@ -95,8 +110,15 @@ public abstract class UpdateScope
 
     };
 
+    /**
+     * Minor version updates, that is the second segment of the version number, for example <code>1.0.0.15</code>
+     * to <code>1.1.0.0</code>.
+     *
+     * @since 1.0-beta-1
+     */
     public static final UpdateScope MINOR = new UpdateScope( "MINOR", 2 )
     {
+        /** {@inheritDoc} */
         public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                         boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
@@ -109,6 +131,7 @@ public abstract class UpdateScope
                                                    includeSnapshots, true, false );
         }
 
+        /** {@inheritDoc} */
         public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                           boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
@@ -123,8 +146,15 @@ public abstract class UpdateScope
 
     };
 
+    /**
+     * Major version updates, that is the first segment of the version number, for example <code>1.0.0.15</code>
+     * to <code>2.0.0.0</code>.
+     *
+     * @since 1.0-beta-1
+     */
     public static final UpdateScope MAJOR = new UpdateScope( "MAJOR", 3 )
     {
+        /** {@inheritDoc} */
         public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                         boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
@@ -136,6 +166,7 @@ public abstract class UpdateScope
                                                    includeSnapshots, true, false );
         }
 
+        /** {@inheritDoc} */
         public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                           boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
@@ -149,30 +180,55 @@ public abstract class UpdateScope
 
     };
 
+    /**
+     * Any version updates.
+     *
+     * @since 1.0-beta-1
+     */
     public static final UpdateScope ANY = new UpdateScope( "ANY", 4 )
     {
+        /** {@inheritDoc} */
         public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                         boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
         {
-            VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionDetails.getOldestVersion( currentVersion, null, includeSnapshots, false, false );
         }
 
+        /** {@inheritDoc} */
         public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                           boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
         {
-            VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionDetails.getLatestVersion( currentVersion, null, includeSnapshots, false, false );
         }
 
     };
 
+    /**
+     * Returns the next version after the specified current version within this scope.
+     *
+     * @param versionDetails   The versions to select from.
+     * @param currentVersion   The current version.
+     * @param includeSnapshots Whether to include snapshots.
+     * @return The next version within this scope or <code>null</code> if there is no version within this scope.
+     * @throws ArtifactMetadataRetrievalException
+     *          if there was a problem retrieving the list of available versions.
+     */
     public abstract ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                              boolean includeSnapshots )
         throws ArtifactMetadataRetrievalException;
 
+    /**
+     * Returns the newest version after the specified current version within this scope.
+     *
+     * @param versionDetails   The versions to select from.
+     * @param currentVersion   The current version.
+     * @param includeSnapshots Whether to include snapshots.
+     * @return The newest version within this scope or <code>null</code> if there is no version within this scope.
+     * @throws ArtifactMetadataRetrievalException
+     *          if there was a problem retrieving the list of available versions.
+     */
     public abstract ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                boolean includeSnapshots )
         throws ArtifactMetadataRetrievalException;
@@ -201,8 +257,7 @@ public abstract class UpdateScope
      * The ordinal of this enumeration constant (its position in the enum declaration, where the initial constant is
      * assigned an ordinal of zero).
      * <p/>
-     * Most programmers will have no use for this field.  It is designed for use by sophisticated enum-based data
-     * structures, such as {@link java.util.EnumSet} and {@link java.util.EnumMap}.
+     * Most programmers will have no use for this field.
      */
     private final int ordinal;
 
@@ -210,8 +265,7 @@ public abstract class UpdateScope
      * Returns the ordinal of this enumeration constant (its position in its enum declaration, where the initial
      * constant is assigned an ordinal of zero).
      * <p/>
-     * Most programmers will have no use for this method.  It is designed for use by sophisticated enum-based data
-     * structures, such as {@link java.util.EnumSet} and {@link java.util.EnumMap}.
+     * Most programmers will have no use for this method.
      *
      * @return the ordinal of this enumeration constant
      */
