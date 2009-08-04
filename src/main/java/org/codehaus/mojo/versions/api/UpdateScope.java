@@ -32,7 +32,8 @@ import java.util.Map;
 /**
  * Scopes of version updates.
  *
- * @author connollys
+ * @author Stephen Connolly
+ * @todo convert this class to a Java 1.5 enum once we move to Java 1.5
  * @since 1.0-beta-1
  */
 public abstract class UpdateScope
@@ -380,18 +381,60 @@ public abstract class UpdateScope
 
     public static UpdateScope[] values()
     {
-        return new UpdateScope[]{SUBINCREMENTAL, INCREMENTAL, MINOR, MAJOR};
+        return new UpdateScope[]{SUBINCREMENTAL, INCREMENTAL, MINOR, MAJOR, ANY};
+    }
+
+    /**
+     * Classifies the type of update.
+     *
+     * @param comparator The version comparator to use for classifying.
+     * @param from       The first version.
+     * @param to         The second version.
+     * @return The update classification.
+     */
+    public static UpdateScope classifyUpdate( VersionComparator comparator, ArtifactVersion from, ArtifactVersion to )
+    {
+        if ( comparator.compare( from, to ) >= 0 )
+        {
+            throw new IllegalArgumentException( "From version must be less than to version" );
+        }
+        // the trick here is that incrementing from twice and to once, should give the same version
+        int matchSegment = 0;
+        for ( int segment = Math.min( comparator.getSegmentCount( from ), comparator.getSegmentCount( to ) );
+              segment > 0; segment-- )
+        {
+            ArtifactVersion f = comparator.incrementSegment( from, segment - 1 );
+            f = comparator.incrementSegment( f, segment - 1 );
+            ArtifactVersion t = comparator.incrementSegment( to, segment - 1 );
+            if ( f.toString().equals( t.toString() ) )
+            {
+                matchSegment = segment;
+                break;
+            }
+        }
+        switch ( matchSegment )
+        {
+            case 0:
+                return MAJOR;
+            case 1:
+                return MINOR;
+            case 2:
+                return INCREMENTAL;
+            default:
+                return SUBINCREMENTAL;
+        }
     }
 
     private static final Map levelConstants;
 
     static
     {
-        Map map = new HashMap( 4 );
+        Map map = new HashMap( 5 );
         map.put( SUBINCREMENTAL.name(), SUBINCREMENTAL );
         map.put( INCREMENTAL.name(), INCREMENTAL );
         map.put( MINOR.name(), MINOR );
         map.put( MAJOR.name(), MAJOR );
+        map.put( ANY.name(), ANY );
         levelConstants = map;
     }
 
@@ -428,6 +471,10 @@ public abstract class UpdateScope
         if ( ordinal == MAJOR.ordinal )
         {
             return MAJOR;
+        }
+        if ( ordinal == ANY.ordinal )
+        {
+            return ANY;
         }
         throw new StreamCorruptedException();
     }
