@@ -54,6 +54,7 @@ import org.apache.maven.project.interpolation.ModelInterpolator;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.ReflectionUtils;
 import org.codehaus.plexus.util.StringUtils;
@@ -66,7 +67,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -336,10 +336,14 @@ public class DisplayPluginUpdatesMojo
                 version = artifactVersion != null ? artifactVersion.toString() : null;
             }
 
-            if ( version == null && artifactVersion != null && !pluginsWithVersionsSpecified.contains( coords ) )
+            getLog().debug(""+version);
+            getLog().debug(""+artifactVersion);
+            getLog().debug(""+pluginsWithVersionsSpecified.contains( coords ));
+            if ( version == null && !pluginsWithVersionsSpecified.contains( coords ) )
             {
                 version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
-                newVersion = version != null ? version : artifactVersion.toString();
+                ;newVersion = version != null ? version : artifactVersion.toString();
+                newVersion = artifactVersion != null ? artifactVersion.toString() : version;
                 StringBuffer buf = new StringBuffer();
                 if ( PomHelper.APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
                 {
@@ -1114,6 +1118,8 @@ public class DisplayPluginUpdatesMojo
         {
             // guess there are no plugins here
         }
+        debugPluginMap( "after adding reporting plugins", plugins );
+        
         Iterator i = originalModel.getProfiles().iterator();
         while ( i.hasNext() )
         {
@@ -1364,49 +1370,5 @@ public class DisplayPluginUpdatesMojo
         // do nothing
     }
 
-// -------------------------- INNER CLASSES --------------------------
-
-    /**
-     * A comparator used to sort plugins by group id, artifact id and finally version.
-     *
-     * @since 1.0-alpha-1
-     */
-    private static class PluginComparator
-        implements Comparator
-    {
-
-        /**
-         * @param o1 the first object
-         * @param o2 the second object.
-         * @return the comparison result
-         * @see java.util.Comparator#compare(Object, Object)
-         * @since 1.0-alpha-1
-         */
-        public int compare( Object o1, Object o2 )
-        {
-            int r = getPluginGroupId( o1 ).compareTo( getPluginGroupId( o2 ) );
-            if ( r == 0 )
-            {
-                r = getPluginArtifactId( o1 ).compareTo( getPluginArtifactId( o2 ) );
-            }
-            if ( r == 0 )
-            {
-                String v1 = getPluginVersion( o1 );
-                String v2 = getPluginVersion( o2 );
-                if ( v1 == null )
-                {
-                    // hope I got the +1/-1 the right way around
-                    return v2 == null ? 0 : -1;
-                }
-                if ( v2 == null )
-                {
-                    return 1;
-                }
-                r = v1.compareTo( v2 );
-            }
-            return r;
-        }
-
-    }
 
 }
