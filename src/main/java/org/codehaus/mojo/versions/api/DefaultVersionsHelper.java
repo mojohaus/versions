@@ -530,41 +530,18 @@ public class DefaultVersionsHelper
     {
         ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
 
-        VersionComparator versionComparator = artifactVersions.getVersionComparator();
-        int segmentCount = versionComparator.getSegmentCount( current );
-        ArtifactVersion nextVersion = segmentCount < 3
-            ? null
-            : artifactVersions.getOldestVersion( current, versionComparator.incrementSegment( current, 2 ),
-                                                 Boolean.TRUE.equals( allowSnapshots ), false, false );
-        ArtifactVersion nextIncremental = segmentCount < 3
-            ? null
-            : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 2 ),
-                                                 versionComparator.incrementSegment( current, 1 ),
-                                                 Boolean.TRUE.equals( allowSnapshots ), true, false );
-        ArtifactVersion latestIncremental = segmentCount < 3
-            ? null
-            : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 2 ),
-                                                 versionComparator.incrementSegment( current, 1 ),
-                                                 Boolean.TRUE.equals( allowSnapshots ), true, false );
-        ArtifactVersion nextMinor = segmentCount < 2
-            ? null
-            : artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 1 ),
-                                                 versionComparator.incrementSegment( current, 0 ),
-                                                 Boolean.TRUE.equals( allowSnapshots ), true, false );
-        ArtifactVersion latestMinor = segmentCount < 2
-            ? null
-            : artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 1 ),
-                                                 versionComparator.incrementSegment( current, 0 ),
-                                                 Boolean.TRUE.equals( allowSnapshots ), true, false );
-        ArtifactVersion nextMajor =
-            artifactVersions.getOldestVersion( versionComparator.incrementSegment( current, 0 ), null,
-                                               Boolean.TRUE.equals( allowSnapshots ), true, false );
-        ArtifactVersion latestMajor =
-            artifactVersions.getLatestVersion( versionComparator.incrementSegment( current, 0 ), null,
-                                               Boolean.TRUE.equals( allowSnapshots ), true, false );
+        final boolean includeSnapshots = Boolean.TRUE.equals( allowSnapshots );
 
-        return new ArtifactUpdatesDetails( artifact, nextVersion, nextIncremental, latestIncremental, nextMinor,
-                                           latestMinor, nextMajor, latestMajor,
+        return new ArtifactUpdatesDetails( artifact, UpdateScope.SUBINCREMENTAL.getNext( artifactVersions, current,
+                                                                                         includeSnapshots ),
+                                           UpdateScope.INCREMENTAL.getNext( artifactVersions, current,
+                                                                            includeSnapshots ),
+                                           UpdateScope.INCREMENTAL.getLatest( artifactVersions, current,
+                                                                              includeSnapshots ),
+                                           UpdateScope.MINOR.getNext( artifactVersions, current, includeSnapshots ),
+                                           UpdateScope.MINOR.getLatest( artifactVersions, current, includeSnapshots ),
+                                           UpdateScope.MAJOR.getNext( artifactVersions, current, includeSnapshots ),
+                                           UpdateScope.MAJOR.getLatest( artifactVersions, current, includeSnapshots ),
                                            artifactVersions.getNewerVersions( current ) );
     }
 
