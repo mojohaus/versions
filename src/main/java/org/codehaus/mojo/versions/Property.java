@@ -25,7 +25,7 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 /**
  * Represents an association between properties and dependencies.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 public class Property

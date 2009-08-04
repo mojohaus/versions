@@ -41,7 +41,7 @@ import java.util.Map;
  * Scans the current projects child modules, updating the versions of any which use the current project to
  * the version of the current project.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @goal update-child-modules
  * @aggregator
  * @requiresProject true

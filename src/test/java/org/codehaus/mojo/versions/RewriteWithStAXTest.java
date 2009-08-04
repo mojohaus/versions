@@ -38,7 +38,7 @@ import java.util.Stack;
 /**
  * Basic tests for rewriting XML with a StAX (JSR-173) implementation.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  */
 public class RewriteWithStAXTest
     extends TestCase

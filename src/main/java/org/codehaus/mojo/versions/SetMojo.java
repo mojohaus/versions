@@ -43,7 +43,7 @@ import java.util.Set;
 /**
  * Sets the current projects version, updating the details of any child modules as necessary.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @goal set
  * @aggregator
  * @requiresProject true

@@ -38,7 +38,7 @@ import java.io.UnsupportedEncodingException;
  * <b>while</b> keeping all unchanged bytes in the file as is.  For example, the StAX API specifies that <code>CR</code>
  * characters will be stripped.  Current implementations do not keep &quot; and &apos; characters consistent.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  */
 public class ModifiedPomXMLEventReader
     implements XMLEventReader

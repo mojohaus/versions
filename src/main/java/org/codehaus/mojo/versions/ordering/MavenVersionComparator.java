@@ -26,7 +26,7 @@ import org.codehaus.plexus.util.StringUtils;
 /**
  * A comparator which uses Maven's version rules, i.e. 1.3.34 &gt; 1.3.9 but 1.3.4.3.2.34 &lt; 1.3.4.3.2.9.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 public class MavenVersionComparator

@@ -34,7 +34,7 @@ import javax.xml.stream.XMLStreamException;
 /**
  * Sets the parent version to the latest parent version.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @goal update-parent
  * @requiresProject true
  * @requiresDirectInvocation true

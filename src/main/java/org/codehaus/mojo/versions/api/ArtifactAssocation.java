@@ -24,7 +24,7 @@ import org.apache.maven.artifact.Artifact;
 /**
  * Created by IntelliJ IDEA.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 public interface ArtifactAssocation

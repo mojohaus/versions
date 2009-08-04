@@ -25,7 +25,7 @@ import org.codehaus.mojo.versions.ordering.NumericVersionComparator;
 /**
  * Basic tests for {@linkplain org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo}.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  */
 public class AbstractVersionsUpdaterMojoTest
     extends TestCase

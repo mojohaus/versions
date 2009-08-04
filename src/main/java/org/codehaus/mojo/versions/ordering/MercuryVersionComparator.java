@@ -28,7 +28,7 @@ import java.util.StringTokenizer;
 /**
  * A comparator which uses Mercury's version rules.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 public class MercuryVersionComparator

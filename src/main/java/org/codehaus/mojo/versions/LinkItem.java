@@ -22,7 +22,7 @@ package org.codehaus.mojo.versions;
 /**
  * LinkItem represents information specified for a linked artifact version manged through a property.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
 public class LinkItem

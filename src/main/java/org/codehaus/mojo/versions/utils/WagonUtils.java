@@ -35,7 +35,7 @@ import org.apache.maven.wagon.repository.Repository;
 /**
  * Utility methods to help with using {@link Wagon}s.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 public final class WagonUtils

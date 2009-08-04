@@ -58,7 +58,7 @@ import java.util.List;
 /**
  * Abstract base class for Versions Mojos.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  */
 public abstract class AbstractVersionsUpdaterMojo
     extends AbstractMojo

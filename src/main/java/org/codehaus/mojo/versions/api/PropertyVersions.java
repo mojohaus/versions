@@ -34,12 +34,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
  * Manages a property that is associated with one or more artifacts.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 public class PropertyVersions
@@ -52,6 +53,13 @@ public class PropertyVersions
     private final Set/*<ArtifactAssocation*/ associations;
 
     private final VersionsHelper helper;
+
+    /**
+     * The available versions.
+     *
+     * @since 1.0-beta-1
+     */
+    private SortedSet/*<ArtifactVersion>*/ versions;
 
     private PropertyVersions.PropertyVersionComparator comparator;
 
@@ -82,14 +90,16 @@ public class PropertyVersions
         return comparator;
     }
 
-    public void addAssociation( Artifact artifact, boolean usePluginRepositories )
+    public synchronized void addAssociation( Artifact artifact, boolean usePluginRepositories )
     {
         associations.add( new DefaultArtifactAssociation( artifact, usePluginRepositories ) );
+        versions = null;
     }
 
-    public void removeAssociation( Artifact artifact, boolean usePluginRepositories )
+    public synchronized void removeAssociation( Artifact artifact, boolean usePluginRepositories )
     {
         associations.remove( new DefaultArtifactAssociation( artifact, usePluginRepositories ) );
+        versions = null;
     }
 
     public ArtifactAssocation[] getAssociations()
@@ -194,49 +204,74 @@ public class PropertyVersions
      * @param includeSnapshots Whether to include snapshot versions in our search.
      * @return The (possibly empty) array of versions.
      */
-    public ArtifactVersion[] getVersions( boolean includeSnapshots )
+    public synchronized ArtifactVersion[] getVersions( boolean includeSnapshots )
         throws ArtifactMetadataRetrievalException
     {
-        List result = null;
-        Iterator i = associations.iterator();
-        while ( i.hasNext() )
+        if ( versions == null )
         {
-            ArtifactAssocation association = (ArtifactAssocation) i.next();
-            final ArtifactVersions versions =
-                helper.lookupArtifactVersions( association.getArtifact(), association.isUsePluginRepositories() );
-            if ( result != null )
+            SortedSet result = null;
+            Iterator i = associations.iterator();
+            while ( i.hasNext() )
             {
-                final ArtifactVersion[] artifactVersions = versions.getVersions( includeSnapshots );
-                // since ArtifactVersion does not override equals, we have to do this the hard way
-                // result.retainAll( Arrays.asList( artifactVersions ) );
-                Iterator j = result.iterator();
-                while ( j.hasNext() )
+                ArtifactAssocation association = (ArtifactAssocation) i.next();
+                final ArtifactVersions versions =
+                    helper.lookupArtifactVersions( association.getArtifact(), association.isUsePluginRepositories() );
+                if ( result != null )
                 {
-                    boolean contains = false;
-                    ArtifactVersion version = (ArtifactVersion) j.next();
-                    for ( int k = 0; k < artifactVersions.length; k++ )
+                    final ArtifactVersion[] artifactVersions = versions.getVersions( true );
+                    // since ArtifactVersion does not override equals, we have to do this the hard way
+                    // result.retainAll( Arrays.asList( artifactVersions ) );
+                    Iterator j = result.iterator();
+                    while ( j.hasNext() )
                     {
-                        if ( version.compareTo( artifactVersions[k] ) == 0 )
+                        boolean contains = false;
+                        ArtifactVersion version = (ArtifactVersion) j.next();
+                        for ( int k = 0; k < artifactVersions.length; k++ )
                         {
-                            contains = true;
-                            break;
+                            if ( version.compareTo( artifactVersions[k] ) == 0 )
+                            {
+                                contains = true;
+                                break;
+                            }
+                        }
+                        if ( !contains )
+                        {
+                            j.remove();
                         }
                     }
-                    if ( !contains )
-                    {
-                        j.remove();
-                    }
+                }
+                else
+                {
+                    result = new TreeSet( getVersionComparator() );
+                    result.addAll( Arrays.asList( versions.getVersions( includeSnapshots ) ) );
                 }
             }
-            else
+            versions = new TreeSet( getVersionComparator() );
+            versions.addAll( result );
+        }
+        Set/*<ArtifactVersion>*/ result;
+        if ( includeSnapshots )
+        {
+            result = versions;
+        }
+        else
+        {
+            result = new TreeSet( getVersionComparator() );
+            Iterator i = versions.iterator();
+            while ( i.hasNext() )
             {
-                result = new ArrayList( Arrays.asList( versions.getVersions( includeSnapshots ) ) );
+                ArtifactVersion candidate = (ArtifactVersion) i.next();
+                if ( ArtifactUtils.isSnapshot( candidate.toString() ) )
+                {
+                    continue;
+                }
+                result.add( candidate );
             }
         }
         return asArtifactVersionArray( result );
     }
 
-    private ArtifactVersion[] asArtifactVersionArray( List result )
+    private ArtifactVersion[] asArtifactVersionArray( Collection result )
     {
         if ( result == null || result.isEmpty() )
         {
@@ -290,16 +325,21 @@ public class PropertyVersions
             + '\'' + ", associations=" + associations + '}';
     }
 
-    public void clearAssociations()
+    public synchronized void clearAssociations()
     {
         associations.clear();
+        versions = null;
     }
 
     private final class PropertyVersionComparator
         implements VersionComparator
     {
         public int compare( ArtifactVersion v1, ArtifactVersion v2 )
-            throws MojoExecutionException
+        {
+            return innerCompare( v1, v2 );
+        }
+
+        private int innerCompare( ArtifactVersion v1, ArtifactVersion v2 )
         {
             if ( !isAssociated() )
             {
@@ -313,7 +353,7 @@ public class PropertyVersions
                 int alt = comparators[i].compare( v1, v2 );
                 if ( result != alt && ( result >= 0 && alt < 0 ) || ( result <= 0 && alt > 0 ) )
                 {
-                    throw new MojoExecutionException( "Property " + name + " is associated with multiple artifacts"
+                    throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts"
                         + " and these artifacts use different version sorting rules and these rules are effectively"
                         + " incompatible for the two of versions being compared.\nFirst rule says compare(\"" + v1
                         + "\", \"" + v2 + "\") = " + result + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2
@@ -325,7 +365,7 @@ public class PropertyVersions
 
         public int compare( Object o1, Object o2 )
         {
-            return compare( (ArtifactVersion) o1, (ArtifactVersions) o2 );
+            return innerCompare( (ArtifactVersion) o1, (ArtifactVersion) o2 );
         }
 
         public int getSegmentCount( ArtifactVersion v )

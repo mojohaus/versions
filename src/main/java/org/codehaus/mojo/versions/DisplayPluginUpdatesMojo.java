@@ -80,7 +80,7 @@ import java.util.regex.Pattern;
 /**
  * Displays all plugins that have newer versions available.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @goal display-plugin-updates
  * @requiresProject true
  * @requiresDirectInvocation false

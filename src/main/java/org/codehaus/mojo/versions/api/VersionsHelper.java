@@ -44,7 +44,7 @@ import java.util.Set;
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 public interface VersionsHelper

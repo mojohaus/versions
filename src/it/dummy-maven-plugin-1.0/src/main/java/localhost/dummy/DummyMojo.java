@@ -31,7 +31,7 @@ import java.io.IOException;
 /**
  * Abstract base class for Versions Mojos.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @goal dummy
  */
 public class DummyMojo

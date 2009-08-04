@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 /**
  * Utility.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 public final class VersionComparators

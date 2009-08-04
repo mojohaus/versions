@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Sets properties to the latest versions of specific artifacts.
  *
- * @author <a href="mailto:stephen.alan.connolly@gmail.com">Stephen Connolly</a>
+ * @author Stephen Connolly
  * @goal update-properties
  * @requiresProject true
  * @requiresDirectInvocation true
