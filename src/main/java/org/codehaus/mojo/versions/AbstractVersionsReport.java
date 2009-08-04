@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
@@ -29,13 +30,13 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
@@ -190,7 +191,7 @@ public abstract class AbstractVersionsReport
      * @parameter expression="${allowSnapshots}" default-value="false"
      * @since 1.0-alpha-3
      */
-    private Boolean allowSnapshots;
+    protected Boolean allowSnapshots;
 
     /**
      * Our versions helper.
@@ -198,7 +199,7 @@ public abstract class AbstractVersionsReport
     private VersionsHelper helper;
 
     /**
-     * The Maven Sessopm.
+     * The Maven Session.
      *
      * @parameter expression="${session}"
      * @required
@@ -223,7 +224,8 @@ public abstract class AbstractVersionsReport
             {
                 helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
                                                     remotePluginRepositories, localRepository, wagonManager, settings,
-                                                    serverId, rulesUri, comparisonMethod, getLog(), session, pathTranslator );
+                                                    serverId, rulesUri, comparisonMethod, getLog(), session,
+                                                    pathTranslator );
             }
             catch ( MojoExecutionException e )
             {
@@ -292,7 +294,7 @@ public abstract class AbstractVersionsReport
                 getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
             return artifactVersions.getLatestVersion( versionRange, includeSnapshots );
         }
-        catch ( MojoExecutionException e )
+        catch ( ArtifactMetadataRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }

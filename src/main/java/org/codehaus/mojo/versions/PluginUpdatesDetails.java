@@ -19,8 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Details of a plugin's updates.
@@ -48,22 +48,27 @@ public class PluginUpdatesDetails
     {
         return dependencyDetails;
     }
-    
-    public boolean isArtifactUpdateAvailable() {
+
+    public boolean isArtifactUpdateAvailable()
+    {
         return artifactDetails.getAll().length > 0;
     }
-    
-    public boolean isDependencyUpdateAvailable() {
-        for ( Iterator i = dependencyDetails.values().iterator(); i.hasNext(); ) {
+
+    public boolean isDependencyUpdateAvailable()
+    {
+        for ( Iterator i = dependencyDetails.values().iterator(); i.hasNext(); )
+        {
             ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) i.next();
-            if (details.getAll().length > 0) {
+            if ( details.getAll().length > 0 )
+            {
                 return true;
             }
         }
         return false;
     }
-    
-    public boolean isUpdateAvailable() {
+
+    public boolean isUpdateAvailable()
+    {
         return isArtifactUpdateAvailable() || isDependencyUpdateAvailable();
     }
 }

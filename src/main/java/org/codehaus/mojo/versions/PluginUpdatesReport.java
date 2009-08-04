@@ -19,9 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.util.StringUtils;
@@ -107,7 +108,11 @@ public class PluginUpdatesReport
                                            pluginManagementUpdates );
             renderer.render();
         }
-        catch ( MojoExecutionException e )
+        catch ( InvalidVersionSpecificationException e )
+        {
+            throw new MavenReportException( e.getMessage(), e );
+        }
+        catch ( ArtifactMetadataRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }

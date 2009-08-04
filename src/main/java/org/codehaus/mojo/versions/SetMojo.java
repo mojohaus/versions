@@ -29,7 +29,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -106,7 +105,8 @@ public class SetMojo
             final Map reactor = PomHelper.getReactorModels( project, getLog() );
 
             // now fake out the triggering change
-            final Model current = PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() );
+            final Model current = PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() )
+                ;
             current.setVersion( newVersion );
 
             final Set files = new LinkedHashSet();

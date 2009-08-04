@@ -1,18 +1,12 @@
 package org.codehaus.mojo.versions;
 
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.mojo.versions.api.ArtifactAssocation;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @since 1.0-beta-1
@@ -67,7 +61,7 @@ public class PropertyUpdateDetails
     public int compare( ArtifactVersion v1, ArtifactVersion v2 )
         throws MojoExecutionException
     {
-        return versions.compare( v1, v2 );
+        return versions.getVersionComparator().compare( v1, v2 );
     }
 
     /**
@@ -87,15 +81,14 @@ public class PropertyUpdateDetails
     }
 
     /**
-     * Uses the {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper} to find all available versions that match 
+     * Uses the {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper} to find all available versions that match
      * all the associations with this property.
      *
      * @param includeSnapshots Whether to include snapshot versions in our search.
      * @return The (possibly empty) array of versions.
-     * @throws MojoExecutionException
      */
     public ArtifactVersion[] getVersions( boolean includeSnapshots )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException
     {
         return versions.getVersions( includeSnapshots );
     }

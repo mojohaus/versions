@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -28,7 +29,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.regex.Matcher;
@@ -69,18 +69,25 @@ public class UseReleasesMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+        try
         {
-            useReleases( pom, getProject().getDependencyManagement().getDependencies() );
+            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+            {
+                useReleases( pom, getProject().getDependencyManagement().getDependencies() );
+            }
+            if ( isProcessingDependencies() )
+            {
+                useReleases( pom, getProject().getDependencies() );
+            }
         }
-        if ( isProcessingDependencies() )
+        catch ( ArtifactMetadataRetrievalException e )
         {
-            useReleases( pom, getProject().getDependencies() );
+            throw new MojoExecutionException( e.getMessage(), e );
         }
     }
 
     private void useReleases( ModifiedPomXMLEventReader pom, Collection dependencies )
-        throws XMLStreamException, MojoExecutionException
+        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         Iterator i = dependencies.iterator();
 

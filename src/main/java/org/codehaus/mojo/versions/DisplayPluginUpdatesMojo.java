@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.BuildFailureException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -61,7 +62,6 @@ import org.codehaus.plexus.util.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -301,12 +301,9 @@ public class DisplayPluginUpdatesMojo
             {
                 version = (String) parentPluginManagement.get( coords );
             }
-            getLog().debug( new StringBuffer()
-                .append( "Checking " )
-                .append( coords )
-                .append( " for updates newer than " )
-                .append( version )
-                .toString() );
+            getLog().debug(
+                new StringBuffer().append( "Checking " ).append( coords ).append( " for updates newer than " ).append(
+                    version ).toString() );
 
             VersionRange versionRange;
             try
@@ -320,7 +317,15 @@ public class DisplayPluginUpdatesMojo
 
             Artifact artifact = artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
 
-            ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null, true );
+            ArtifactVersion artifactVersion;
+            try
+            {
+                artifactVersion = findLatestVersion( artifact, versionRange, null, true );
+            }
+            catch ( ArtifactMetadataRetrievalException e )
+            {
+                throw new MojoExecutionException( e.getMessage(), e );
+            }
 
             String newVersion;
 
@@ -336,13 +341,14 @@ public class DisplayPluginUpdatesMojo
                 version = artifactVersion != null ? artifactVersion.toString() : null;
             }
 
-            getLog().debug(""+version);
-            getLog().debug(""+artifactVersion);
-            getLog().debug(""+pluginsWithVersionsSpecified.contains( coords ));
+            getLog().debug( "" + version );
+            getLog().debug( "" + artifactVersion );
+            getLog().debug( "" + pluginsWithVersionsSpecified.contains( coords ) );
             if ( version == null && !pluginsWithVersionsSpecified.contains( coords ) )
             {
                 version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
-                ;newVersion = version != null ? version : artifactVersion.toString();
+                ;
+                newVersion = version != null ? version : artifactVersion.toString();
                 newVersion = artifactVersion != null ? artifactVersion.toString() : version;
                 StringBuffer buf = new StringBuffer();
                 if ( PomHelper.APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
@@ -779,8 +785,9 @@ public class DisplayPluginUpdatesMojo
         String packaging = project.getPackaging();
         Map mappings = null;
 
-        LifecycleMapping m = (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging,
-                                                               session.getSettings(), session.getLocalRepository() );
+        LifecycleMapping m =
+            (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging, session.getSettings(),
+                                              session.getLocalRepository() );
         if ( m != null )
         {
             mappings = m.getPhases( lifecycle.getId() );
@@ -836,8 +843,9 @@ public class DisplayPluginUpdatesMojo
         String packaging = project.getPackaging();
         List optionalMojos = null;
 
-        LifecycleMapping m = (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging,
-                                                               session.getSettings(), session.getLocalRepository() );
+        LifecycleMapping m =
+            (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging, session.getSettings(),
+                                              session.getLocalRepository() );
 
         if ( m != null )
         {
@@ -853,8 +861,9 @@ public class DisplayPluginUpdatesMojo
             }
             catch ( ComponentLookupException e )
             {
-                getLog().debug( "Error looking up lifecycle mapping to retrieve optional mojos. Lifecycle ID: "
-                    + lifecycle.getId() + ". Error: " + e.getMessage(), e );
+                getLog().debug(
+                    "Error looking up lifecycle mapping to retrieve optional mojos. Lifecycle ID: " + lifecycle.getId()
+                        + ". Error: " + e.getMessage(), e );
             }
         }
 
@@ -1014,9 +1023,9 @@ public class DisplayPluginUpdatesMojo
                 if ( phaseToLifecycleMap.containsKey( phase ) )
                 {
                     Lifecycle prevLifecycle = (Lifecycle) phaseToLifecycleMap.get( phase );
-                    throw new LifecycleExecutionException( "Phase '" + phase
-                        + "' is defined in more than one lifecycle: '" + lifecycle.getId() + "' and '"
-                        + prevLifecycle.getId() + "'" );
+                    throw new LifecycleExecutionException(
+                        "Phase '" + phase + "' is defined in more than one lifecycle: '" + lifecycle.getId() + "' and '"
+                            + prevLifecycle.getId() + "'" );
                 }
                 else
                 {
@@ -1119,7 +1128,7 @@ public class DisplayPluginUpdatesMojo
             // guess there are no plugins here
         }
         debugPluginMap( "after adding reporting plugins", plugins );
-        
+
         Iterator i = originalModel.getProfiles().iterator();
         while ( i.hasNext() )
         {

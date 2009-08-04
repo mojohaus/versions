@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -29,7 +30,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.regex.Matcher;
@@ -68,7 +68,7 @@ public class UseNextReleasesMojo
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
@@ -81,7 +81,7 @@ public class UseNextReleasesMojo
     }
 
     private void useNextReleases( ModifiedPomXMLEventReader pom, Collection dependencies )
-        throws XMLStreamException, MojoExecutionException
+        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         Iterator i = dependencies.iterator();
 

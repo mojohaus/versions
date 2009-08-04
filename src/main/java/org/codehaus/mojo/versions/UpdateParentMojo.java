@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -100,7 +101,15 @@ public class UpdateParentMojo
                                                                       getProject().getParent().getArtifactId(),
                                                                       versionRange, "pom", null, null );
 
-        ArtifactVersion artifactVersion = findLatestVersion( artifact, versionRange, null, false );
+        ArtifactVersion artifactVersion;
+        try
+        {
+            artifactVersion = findLatestVersion( artifact, versionRange, null, false );
+        }
+        catch ( ArtifactMetadataRetrievalException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
 
         if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion ) )
         {

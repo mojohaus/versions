@@ -43,7 +43,6 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -676,9 +675,8 @@ public class PomHelper
     /**
      * Examines the project to find any properties which are associated with versions of artifacts in the project.
      *
-     * @param helper              Our versions helper.
-     * @param project             The project to examine.
-     * @param expressionEvaluator The expression evaluator to use when examining properties.
+     * @param helper  Our versions helper.
+     * @param project The project to examine.
      * @return An array of properties that are associated within the project.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      * @throws IOException                   if the project's pom file cannot be parsed.
@@ -1344,4 +1342,5 @@ public class PomHelper
             reader.close();
         }
     }
+
 }

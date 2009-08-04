@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
@@ -41,14 +42,11 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
-import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.stax2.XMLInputFactory2;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -91,7 +89,7 @@ public abstract class AbstractVersionsUpdaterMojo
     protected org.apache.maven.artifact.resolver.ArtifactResolver resolver;
 
     /**
-     * @component     allo
+     * @component allo
      * @since 1.0-alpha-1
      */
     protected MavenProjectBuilder projectBuilder;
@@ -220,7 +218,8 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
                                                 remotePluginRepositories, localRepository, wagonManager, settings,
-                                                serverId, rulesUri, comparisonMethod, getLog(), session, pathTranslator);
+                                                serverId, rulesUri, comparisonMethod, getLog(), session,
+                                                pathTranslator );
         }
         return helper;
     }
@@ -274,12 +273,13 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param usePluginRepositories
      * @return The latest version of the specified artifact that matches the specified version range or
      *         <code>null</code> if no matching version could be found.
-     * @throws MojoExecutionException If the artifact metadata could not be found.
+     * @throws ArtifactMetadataRetrievalException
+     *          If the artifact metadata could not be found.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException, MojoExecutionException
     {
         boolean includeSnapshots = Boolean.TRUE.equals( this.allowSnapshots );
         if ( Boolean.TRUE.equals( allowingSnapshots ) )
@@ -367,6 +367,10 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             getLog().error( e );
         }
+        catch ( ArtifactMetadataRetrievalException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
 
     }
 
@@ -418,7 +422,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException;
+        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
 
     /**
      * Returns <code>true</code> if the update should be applied.

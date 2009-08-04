@@ -63,18 +63,20 @@ public class Property
      * @since 1.0-alpha-3
      */
     private Dependency[] dependencies;
-    
+
     /**
      * Whether the reactor can be used as a source of artifact versions.
+     *
      * @parameter default-value="true"
      * @since 1.0-alpha-3
      */
     private boolean searchReactor;
-    
+
     /**
-     * When {@link #searchReactor} is <code>true</code> and a property version can be entirely satisfied from the 
-     * reactor and this setting is <code>true</code> then the reactor version will be specified irrespective of any 
+     * When {@link #searchReactor} is <code>true</code> and a property version can be entirely satisfied from the
+     * reactor and this setting is <code>true</code> then the reactor version will be specified irrespective of any
      * other settings (including {@link #banSnapshots}).
+     *
      * @parameter default-value="true"
      * @since 1.0-alpha-3
      */
@@ -82,6 +84,7 @@ public class Property
 
     /**
      * Whether the snapshot versions cannot be used as an artifact versions (unless {@link #preferReactor} applies).
+     *
      * @parameter default-value="false"
      * @since 1.0-alpha-3
      */

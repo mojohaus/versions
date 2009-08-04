@@ -30,6 +30,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -44,7 +45,6 @@ import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.ArtifactUpdatesDetails;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.Property;
@@ -56,26 +56,26 @@ import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.utils.RegexUtils;
-import org.codehaus.mojo.versions.utils.WagonUtils;
 import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.codehaus.mojo.versions.utils.WagonUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -138,14 +138,14 @@ public class DefaultVersionsHelper
 
     /**
      * The path translator.
-     * 
+     *
      * @since 1.0-beta-1
      */
     private final PathTranslator pathTranslator;
 
     /**
      * The maven session.
-     * 
+     *
      * @since 1.0-beta-1
      */
     private final MavenSession mavenSession;
@@ -172,8 +172,8 @@ public class DefaultVersionsHelper
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactMetadataSource artifactMetadataSource,
                                   List remoteArtifactRepositories, List remotePluginRepositories,
                                   ArtifactRepository localRepository, WagonManager wagonManager, Settings settings,
-                                  String serverId, String rulesUri, String comparisonMethod, Log log, 
-                                  MavenSession mavenSession, PathTranslator pathTranslator)
+                                  String serverId, String rulesUri, String comparisonMethod, Log log,
+                                  MavenSession mavenSession, PathTranslator pathTranslator )
         throws MojoExecutionException
     {
         this.artifactFactory = artifactFactory;
@@ -207,7 +207,7 @@ public class DefaultVersionsHelper
      * {@inheritDoc}
      */
     public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException
     {
         return lookupVersions( artifact,
                                usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories );
@@ -220,22 +220,15 @@ public class DefaultVersionsHelper
      * @param artifact           The artifact to lookup.
      * @param remoteRepositories The remote repositories to consult.
      * @return The ArtifactVersions with details of the available versions.
-     * @throws MojoExecutionException When things go wrong.
+     * @throws ArtifactMetadataRetrievalException
+     *          When things go wrong.
      * @since 1.0-alpha-3
      */
     private ArtifactVersions lookupVersions( Artifact artifact, List remoteRepositories )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException
     {
         final List versions;
-        try
-        {
-            versions =
-                artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
-        }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( "Could not retrieve metadata for " + artifact, e );
-        }
+        versions = artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
         return new ArtifactVersions( artifact, versions, getVersionComparator( artifact ) );
     }
 
@@ -533,7 +526,7 @@ public class DefaultVersionsHelper
      */
     public ArtifactUpdatesDetails lookupArtifactUpdates( Artifact artifact, ArtifactVersion current,
                                                          Boolean allowSnapshots, boolean usePluginRepositories )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException
     {
         ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
 
@@ -581,7 +574,7 @@ public class DefaultVersionsHelper
     public Map/*<Dependency,ArtifactUpdatesDetails>*/ lookupDependenciesUpdates( Set dependencies,
                                                                                  Boolean allowSnapshots,
                                                                                  boolean usePluginRepositories )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         Map/*<Dependency,ArtifactUpdatesDetails>*/ dependencyUpdates = new TreeMap( new DependencyComparator() );
         Iterator i = dependencies.iterator();
@@ -601,20 +594,12 @@ public class DefaultVersionsHelper
      */
     public ArtifactUpdatesDetails lookupDependencyUpdates( Dependency dependency, Boolean allowSnapshots,
                                                            boolean usePluginRepositories )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         getLog().debug(
             "Checking " + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )
                 + " for updates newer than " + dependency.getVersion() );
-        VersionRange versionRange;
-        try
-        {
-            versionRange = VersionRange.createFromVersionSpec( dependency.getVersion() );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( "Invalid version range specification: " + dependency.getVersion(), e );
-        }
+        VersionRange versionRange = VersionRange.createFromVersionSpec( dependency.getVersion() );
 
         return lookupArtifactUpdates(
             createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(), versionRange,
@@ -626,7 +611,7 @@ public class DefaultVersionsHelper
      * {@inheritDoc}
      */
     public Map/*<Plugin,PluginUpdateDetails>*/ lookupPluginsUpdates( Set plugins, Boolean allowSnapshots )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         Map/*<Plugin,PluginUpdateDetails>*/ pluginUpdates = new TreeMap( new PluginComparator() );
         Iterator i = plugins.iterator();
@@ -643,7 +628,7 @@ public class DefaultVersionsHelper
      * {@inheritDoc}
      */
     public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots )
-        throws MojoExecutionException
+        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
             + " for updates newer than " + plugin.getVersion() );
@@ -668,14 +653,18 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public ExpressionEvaluator getExpressionEvaluator(MavenProject project)
+    public ExpressionEvaluator getExpressionEvaluator( MavenProject project )
     {
         return new VersionsExpressionEvaluator( mavenSession, pathTranslator, project );
     }
 
-    public Map/*<Property,PropertyVersions>*/ getVersionProperties( MavenProject project, Property[] propertyDefinitions,
-                                                                    String includeProperties, String excludeProperties,
-                                                                    Boolean autoLinkItems )
+    /**
+     * {@inheritDoc}
+     */
+    public Map/*<Property,PropertyVersions>*/ getVersionPropertiesMap( MavenProject project,
+                                                                       Property[] propertyDefinitions,
+                                                                       String includeProperties,
+                                                                       String excludeProperties, boolean autoLinkItems )
         throws MojoExecutionException
     {
         Map properties = new HashMap();
@@ -687,7 +676,7 @@ public class DefaultVersionsHelper
             }
         }
         Map versions = new HashMap();
-        if ( autoLinkItems == null || Boolean.TRUE.equals( autoLinkItems ) )
+        if ( autoLinkItems )
         {
             final PropertyVersions[] propertyVersions;
             try

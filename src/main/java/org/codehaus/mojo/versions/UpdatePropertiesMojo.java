@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -26,6 +27,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -97,17 +99,26 @@ public class UpdatePropertiesMojo
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         Map propertyVersions =
-            this.getHelper().getVersionProperties( getProject(), properties, includeProperties, excludeProperties,
-                                                   autoLinkItems );
+            this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
+                                                      !Boolean.FALSE.equals( autoLinkItems ) );
         Iterator i = propertyVersions.entrySet().iterator();
         while ( i.hasNext() )
         {
             Map.Entry/*<Property,PropertyVersions>*/ entry = (Map.Entry/*<Property,PropertyVersions>*/) i.next();
             Property property = (Property) entry.getKey();
             PropertyVersions version = (PropertyVersions) entry.getValue();
+            VersionComparator comparator = version.getVersionComparator();
 
-            ArtifactVersion[] artifactVersions =
-                version.getVersions( !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots ) );
+            ArtifactVersion[] artifactVersions;
+            try
+            {
+                artifactVersions =
+                    version.getVersions( !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots ) );
+            }
+            catch ( ArtifactMetadataRetrievalException e )
+            {
+                throw new MojoExecutionException( e.getMessage(), e );
+            }
             getLog().debug(
                 "Property ${" + property.getName() + "}: Set of valid available versions is " + Arrays.asList(
                     artifactVersions ) );
@@ -187,7 +198,7 @@ public class UpdatePropertiesMojo
                             getLog().debug( "Property ${" + property.getName() + "}: Reactor has the only version" );
                             winner = fromReactor;
                         }
-                        else if ( version.compare( winner, fromReactor ) < 0 )
+                        else if ( comparator.compare( winner, fromReactor ) < 0 )
                         {
                             getLog().debug( "Property ${" + property.getName() + "}: Reactor has a newer version" );
                             winner = fromReactor;

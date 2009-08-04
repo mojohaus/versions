@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
@@ -95,18 +96,25 @@ public class UseNextSnapshotsMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+        try
         {
-            useNextReleases( pom, getProject().getDependencyManagement().getDependencies() );
+            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+            {
+                useNextReleases( pom, getProject().getDependencyManagement().getDependencies() );
+            }
+            if ( isProcessingDependencies() )
+            {
+                useNextReleases( pom, getProject().getDependencies() );
+            }
         }
-        if ( isProcessingDependencies() )
+        catch ( ArtifactMetadataRetrievalException e )
         {
-            useNextReleases( pom, getProject().getDependencies() );
+            throw new MojoExecutionException( e.getMessage(), e );
         }
     }
 
     private void useNextReleases( ModifiedPomXMLEventReader pom, Collection dependencies )
-        throws XMLStreamException, MojoExecutionException
+        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         int segment;
         if ( Boolean.TRUE.equals( allowMajorUpdates ) )
