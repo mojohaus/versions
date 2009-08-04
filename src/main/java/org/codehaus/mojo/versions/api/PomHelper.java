@@ -684,10 +684,10 @@ public class PomHelper
      * @throws IOException                   if the project's pom file cannot be parsed.
      * @since 1.0-alpha-3
      */
-    public static PropertyVersions[] getPropertyVersions( VersionsHelper helper, MavenProject project,
-                                                          ExpressionEvaluator expressionEvaluator )
+    public static PropertyVersions[] getPropertyVersions( VersionsHelper helper, MavenProject project )
         throws ExpressionEvaluationException, IOException
     {
+        ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator( project );
         Model model = getRawModel( project );
         Map/*<String,PropertyVersions>*/ result = new TreeMap();
 

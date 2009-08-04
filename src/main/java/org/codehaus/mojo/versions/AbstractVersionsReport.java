@@ -31,9 +31,11 @@ import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
@@ -195,6 +197,21 @@ public abstract class AbstractVersionsReport
      */
     private VersionsHelper helper;
 
+    /**
+     * The Maven Sessopm.
+     *
+     * @parameter expression="${session}"
+     * @required
+     * @readonly
+     * @since 1.0-beta-1
+     */
+    protected MavenSession session;
+
+    /**
+     * @component
+     */
+    protected PathTranslator pathTranslator;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     public VersionsHelper getHelper()
@@ -206,7 +223,7 @@ public abstract class AbstractVersionsReport
             {
                 helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
                                                     remotePluginRepositories, localRepository, wagonManager, settings,
-                                                    serverId, rulesUri, comparisonMethod, getLog() );
+                                                    serverId, rulesUri, comparisonMethod, getLog(), session, pathTranslator );
             }
             catch ( MojoExecutionException e )
             {

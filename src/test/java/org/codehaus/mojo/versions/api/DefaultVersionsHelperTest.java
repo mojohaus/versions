@@ -28,11 +28,13 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.artifact.MavenMetadataSource;
+import org.apache.maven.project.path.DefaultPathTranslator;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.file.FileWagon;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 
 import java.util.ArrayList;
@@ -95,11 +97,13 @@ public class DefaultVersionsHelperTest
             }
         };
 
+        final MavenSession mavenSession = null; // TODO create a mock/real maven session
         VersionsHelper helper =
             new DefaultVersionsHelper( new DefaultArtifactFactory(), new MavenMetadataSource(), new ArrayList(),
                                        new ArrayList(),
                                        new DefaultArtifactRepository( "", "", new DefaultRepositoryLayout() ),
-                                       wagonManager, new Settings(), "", rulesUri, null, new MockLog() );
+                                       wagonManager, new Settings(), "", rulesUri, null, new MockLog(), mavenSession, 
+                                       new DefaultPathTranslator());
         return helper;
     }
 

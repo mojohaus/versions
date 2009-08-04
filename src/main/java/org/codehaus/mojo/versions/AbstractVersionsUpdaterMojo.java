@@ -197,7 +197,7 @@ public abstract class AbstractVersionsUpdaterMojo
     private VersionsHelper helper;
 
     /**
-     * The Maven Project.
+     * The Maven Sessopm.
      *
      * @parameter expression="${session}"
      * @required
@@ -220,7 +220,7 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
                                                 remotePluginRepositories, localRepository, wagonManager, settings,
-                                                serverId, rulesUri, comparisonMethod, getLog() );
+                                                serverId, rulesUri, comparisonMethod, getLog(), session, pathTranslator);
         }
         return helper;
     }
@@ -463,8 +463,4 @@ public abstract class AbstractVersionsUpdaterMojo
         return true;
     }
 
-    protected ExpressionEvaluator getExpressionEvaluator()
-    {
-        return new VersionsExpressionEvaluator( session, pathTranslator, project );
-    }
 }

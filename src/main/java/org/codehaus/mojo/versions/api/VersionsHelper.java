@@ -28,9 +28,12 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.ArtifactUpdatesDetails;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 
 import java.util.Collection;
 import java.util.List;
@@ -232,5 +235,17 @@ public interface VersionsHelper
     PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots)
         throws MojoExecutionException;
 
+    /**
+     * Returns an {@link ExpressionEvaluator} for the specified project.
+     * @param project The project.
+     * @return an {@link ExpressionEvaluator} for the specified project.
+     * @since 1.0-beta-1
+     */
+    ExpressionEvaluator getExpressionEvaluator( MavenProject project);
 
+    Map/*<Property,PropertyVersions>*/ getVersionProperties( MavenProject project, Property[] propertyDefinitions,
+                                                             String includeProperties, String excludeProperties, Boolean autoLinkItems )
+        throws MojoExecutionException;
+    
+    
 }

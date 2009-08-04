@@ -22,20 +22,15 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 
 import javax.xml.stream.XMLStreamException;
-
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -101,97 +96,16 @@ public class UpdatePropertiesMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        final PropertyVersions[] propertyVersions;
-        try
-        {
-            propertyVersions = PomHelper.getPropertyVersions( getHelper(), getProject(), getExpressionEvaluator() );
-        }
-        catch ( ExpressionEvaluationException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-
-        Map properties = new HashMap();
-        if ( this.properties != null )
-        {
-            for ( int i = 0; i < this.properties.length; i++ )
-            {
-                properties.put( this.properties[i].getName(), this.properties[i] );
-            }
-        }
-        Map versions = new HashMap();
-        if ( autoLinkItems == null || Boolean.TRUE.equals( autoLinkItems ) )
-        {
-            for ( int i = 0; i < propertyVersions.length; i++ )
-            {
-                versions.put( propertyVersions[i].getName(), propertyVersions[i] );
-                if ( !properties.containsKey( propertyVersions[i].getName() ) )
-                {
-                    properties.put( propertyVersions[i].getName(), new Property( propertyVersions[i] ) );
-                }
-            }
-        }
-        getLog().info( "Searching for properties to update" );
-        Iterator i = properties.values().iterator();
+        Map propertyVersions =
+            this.getHelper().getVersionProperties( getProject(), properties, includeProperties, excludeProperties,
+                                                   autoLinkItems );
+        Iterator i = propertyVersions.entrySet().iterator();
         while ( i.hasNext() )
         {
-            Property property = (Property) i.next();
-            if ( includeProperties != null )
-            {
-                if ( includeProperties.indexOf( property.getName() ) < 0 )
-                {
-                    getLog().debug( "Skipping update of property ${" + property.getName() + "}" );
-                    i.remove();
-                }
-            }
+            Map.Entry/*<Property,PropertyVersions>*/ entry = (Map.Entry/*<Property,PropertyVersions>*/) i.next();
+            Property property = (Property) entry.getKey();
+            PropertyVersions version = (PropertyVersions) entry.getValue();
 
-            if ( excludeProperties != null )
-            {
-                if ( excludeProperties.indexOf( property.getName() ) >= 0 )
-                {
-                    getLog().debug( "Ignoring update of property ${" + property.getName() + "}" );
-                    i.remove();
-                }
-            }
-        }
-        i = properties.values().iterator();
-        while ( i.hasNext() )
-        {
-            Property property = (Property) i.next();
-            getLog().debug( "Property ${" + property.getName() + "}" );
-            PropertyVersions version = (PropertyVersions) versions.get( property.getName() );
-            if ( version == null || !version.isAssociated() )
-            {
-                getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not "
-                    + "associated with any dependency..." );
-                version = new PropertyVersions( null, property.getName(), getHelper() );
-            }
-            if ( !property.isAutoLinkDependencies() )
-            {
-                getLog().debug( "Property ${" + property.getName() + "}: Removing any autoLinkDependencies" );
-                version.clearAssociations();
-            }
-            Dependency[] dependencies = property.getDependencies();
-            if ( dependencies != null )
-            {
-                for ( int j = 0; j < dependencies.length; j++ )
-                {
-                    try
-                    {
-                        getLog().debug(
-                            "Property ${" + property.getName() + "}: Adding association to " + dependencies[j] );
-                        version.addAssociation( getHelper().createDependencyArtifact( dependencies[j] ), false );
-                    }
-                    catch ( InvalidVersionSpecificationException e )
-                    {
-                        throw new MojoExecutionException( e.getMessage(), e );
-                    }
-                }
-            }
             ArtifactVersion[] artifactVersions =
                 version.getVersions( !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots ) );
             getLog().debug(

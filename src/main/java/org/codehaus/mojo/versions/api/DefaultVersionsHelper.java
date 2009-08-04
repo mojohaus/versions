@@ -35,6 +35,7 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -43,8 +44,10 @@ import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.ArtifactUpdatesDetails;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
@@ -54,7 +57,10 @@ import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.mojo.versions.utils.WagonUtils;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -68,6 +74,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -129,6 +137,20 @@ public class DefaultVersionsHelper
     private final Log log;
 
     /**
+     * The path translator.
+     * 
+     * @since 1.0-beta-1
+     */
+    private final PathTranslator pathTranslator;
+
+    /**
+     * The maven session.
+     * 
+     * @since 1.0-beta-1
+     */
+    private final MavenSession mavenSession;
+
+    /**
      * Constructs a new {@link DefaultVersionsHelper}.
      *
      * @param artifactFactory            The artifact factory.
@@ -142,16 +164,21 @@ public class DefaultVersionsHelper
      * @param rulesUri                   The URL to retrieve the versioning rules from.
      * @param comparisonMethod           The default comparison method.
      * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to. @since 1.0-alpha-3
+     * @param mavenSession               The maven session information.
+     * @param pathTranslator             The path translator component.
      * @throws org.apache.maven.plugin.MojoExecutionException
      *          If things go wrong.
      */
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactMetadataSource artifactMetadataSource,
                                   List remoteArtifactRepositories, List remotePluginRepositories,
                                   ArtifactRepository localRepository, WagonManager wagonManager, Settings settings,
-                                  String serverId, String rulesUri, String comparisonMethod, Log log )
+                                  String serverId, String rulesUri, String comparisonMethod, Log log, 
+                                  MavenSession mavenSession, PathTranslator pathTranslator)
         throws MojoExecutionException
     {
         this.artifactFactory = artifactFactory;
+        this.mavenSession = mavenSession;
+        this.pathTranslator = pathTranslator;
         this.ruleSet = loadRuleSet( serverId, settings, wagonManager, rulesUri, comparisonMethod, log );
         this.artifactMetadataSource = artifactMetadataSource;
         this.localRepository = localRepository;
@@ -637,4 +664,110 @@ public class DefaultVersionsHelper
 
         return new PluginUpdatesDetails( pluginArtifactDetails, pluginDependencyDetails );
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ExpressionEvaluator getExpressionEvaluator(MavenProject project)
+    {
+        return new VersionsExpressionEvaluator( mavenSession, pathTranslator, project );
+    }
+
+    public Map/*<Property,PropertyVersions>*/ getVersionProperties( MavenProject project, Property[] propertyDefinitions,
+                                                                    String includeProperties, String excludeProperties,
+                                                                    Boolean autoLinkItems )
+        throws MojoExecutionException
+    {
+        Map properties = new HashMap();
+        if ( propertyDefinitions != null )
+        {
+            for ( int i = 0; i < propertyDefinitions.length; i++ )
+            {
+                properties.put( propertyDefinitions[i].getName(), propertyDefinitions[i] );
+            }
+        }
+        Map versions = new HashMap();
+        if ( autoLinkItems == null || Boolean.TRUE.equals( autoLinkItems ) )
+        {
+            final PropertyVersions[] propertyVersions;
+            try
+            {
+                propertyVersions = PomHelper.getPropertyVersions( this, project );
+            }
+            catch ( ExpressionEvaluationException e )
+            {
+                throw new MojoExecutionException( e.getMessage(), e );
+            }
+            catch ( IOException e )
+            {
+                throw new MojoExecutionException( e.getMessage(), e );
+            }
+
+            for ( int i = 0; i < propertyVersions.length; i++ )
+            {
+                versions.put( propertyVersions[i].getName(), propertyVersions[i] );
+                if ( !properties.containsKey( propertyVersions[i].getName() ) )
+                {
+                    properties.put( propertyVersions[i].getName(), new Property( propertyVersions[i] ) );
+                }
+            }
+        }
+        getLog().info( "Searching for properties to update" );
+        Iterator i = properties.values().iterator();
+        while ( i.hasNext() )
+        {
+            Property property = (Property) i.next();
+            if ( includeProperties != null && includeProperties.indexOf( property.getName() ) < 0 )
+            {
+                getLog().debug( "Skipping update of property ${" + property.getName() + "}" );
+                i.remove();
+            }
+
+            if ( excludeProperties != null && excludeProperties.indexOf( property.getName() ) >= 0 )
+            {
+                getLog().debug( "Ignoring update of property ${" + property.getName() + "}" );
+                i.remove();
+            }
+        }
+        i = properties.values().iterator();
+        Map/*<Property,PropertyVersions>*/ propertyVersions = new LinkedHashMap( properties.size() );
+        while ( i.hasNext() )
+        {
+            Property property = (Property) i.next();
+            getLog().debug( "Property ${" + property.getName() + "}" );
+            PropertyVersions version = (PropertyVersions) versions.get( property.getName() );
+            if ( version == null || !version.isAssociated() )
+            {
+                getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not "
+                    + "associated with any dependency..." );
+                version = new PropertyVersions( null, property.getName(), this );
+            }
+            if ( !property.isAutoLinkDependencies() )
+            {
+                getLog().debug( "Property ${" + property.getName() + "}: Removing any autoLinkDependencies" );
+                version.clearAssociations();
+            }
+            Dependency[] dependencies = property.getDependencies();
+            if ( dependencies != null )
+            {
+                for ( int j = 0; j < dependencies.length; j++ )
+                {
+                    try
+                    {
+                        getLog().debug(
+                            "Property ${" + property.getName() + "}: Adding association to " + dependencies[j] );
+                        version.addAssociation( this.createDependencyArtifact( dependencies[j] ), false );
+                    }
+                    catch ( InvalidVersionSpecificationException e )
+                    {
+                        throw new MojoExecutionException( e.getMessage(), e );
+                    }
+                }
+            }
+            propertyVersions.put( property, version );
+        }
+        return propertyVersions;
+    }
+
+
 }
