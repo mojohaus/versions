@@ -69,19 +69,6 @@ public class ArtifactVersions
      * @param versionComparator The version comparison rule.
      * @since 1.0-alpha-3
      */
-    public ArtifactVersions( Artifact artifact, ArtifactVersion[] versions, VersionComparator versionComparator )
-    {
-        this( artifact, Arrays.asList( versions ), versionComparator );
-    }
-
-    /**
-     * Creates a new {@link ArtifactVersions} instance.
-     *
-     * @param artifact          The artifact.
-     * @param versions          The versions.
-     * @param versionComparator The version comparison rule.
-     * @since 1.0-alpha-3
-     */
     public ArtifactVersions( Artifact artifact, List versions, VersionComparator versionComparator )
     {
         this.artifact = artifact;
