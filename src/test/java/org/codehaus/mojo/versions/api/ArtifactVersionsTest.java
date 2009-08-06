@@ -59,15 +59,15 @@ public class ArtifactVersionsTest
             new ArtifactVersion[]{new DefaultArtifactVersion( "1.0" ), new DefaultArtifactVersion( "1.0.1" ),
                 new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ),}, instance.getVersions() );
         assertArrayEquals( new ArtifactVersion[]{new DefaultArtifactVersion( "3.0" ),},
-                           instance.getNewerVersions( new DefaultArtifactVersion( "1.1" ) ) );
+                           instance.getVersions( new DefaultArtifactVersion( "1.1" ), null ) );
         assertArrayEquals(
             new ArtifactVersion[]{new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ),},
-            instance.getNewerVersions( new DefaultArtifactVersion( "1.0.1" ) ) );
+            instance.getVersions( new DefaultArtifactVersion( "1.0.1" ), null ) );
         assertEquals( new DefaultArtifactVersion( "1.1" ).toString(),
-                      instance.getLatestVersion( new DefaultArtifactVersion( "1.0" ),
+                      instance.getNewestVersion( new DefaultArtifactVersion( "1.0" ),
                                                  new DefaultArtifactVersion( "3.0" ) ).toString() );
         assertNull(
-            instance.getLatestVersion( new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ) ) );
+            instance.getNewestVersion( new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ) ) );
     }
 
     private static void assertArrayEquals( ArtifactVersion[] expected, ArtifactVersion[] actual )

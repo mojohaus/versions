@@ -138,7 +138,7 @@ public class PropertyUpdatesReport
                                                 Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
                 ArtifactVersion latestIncremental = segmentCount < 3
                     ? null
-                    : version.getLatestVersion( versionComparator.incrementSegment( current, 2 ),
+                    : version.getNewestVersion( versionComparator.incrementSegment( current, 2 ),
                                                 versionComparator.incrementSegment( current, 1 ),
                                                 Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
                 ArtifactVersion nextMinor = segmentCount < 2
@@ -148,14 +148,14 @@ public class PropertyUpdatesReport
                                                 Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
                 ArtifactVersion latestMinor = segmentCount < 2
                     ? null
-                    : version.getLatestVersion( versionComparator.incrementSegment( current, 1 ),
+                    : version.getNewestVersion( versionComparator.incrementSegment( current, 1 ),
                                                 versionComparator.incrementSegment( current, 0 ),
                                                 Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
                 ArtifactVersion nextMajor =
                     version.getOldestVersion( versionComparator.incrementSegment( current, 0 ), null,
                                               Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
                 ArtifactVersion latestMajor =
-                    version.getLatestVersion( versionComparator.incrementSegment( current, 0 ), null,
+                    version.getNewestVersion( versionComparator.incrementSegment( current, 0 ), null,
                                               Boolean.TRUE.equals( getAllowSnapshots() ), true, false );
 
                 getLog().debug(

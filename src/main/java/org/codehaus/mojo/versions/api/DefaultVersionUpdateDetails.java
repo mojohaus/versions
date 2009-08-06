@@ -36,7 +36,7 @@ public class DefaultVersionUpdateDetails
             nextUpdateMap.put( updateScope, updateScope.getNext( v, current, includeSnapshots ) );
             latestUpdateMap.put( updateScope, updateScope.getLatest( v, current, includeSnapshots ) );
         }
-        all = v.getNewerVersions( current, includeSnapshots );
+        all = v.getVersions( current, null, includeSnapshots );
         this.current = current;
     }
 

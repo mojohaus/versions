@@ -68,7 +68,7 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 3
                 ? null
-                : versionDetails.getLatestVersion( currentVersion,
+                : versionDetails.getNewestVersion( currentVersion,
                                                    versionComparator.incrementSegment( currentVersion, 2 ),
                                                    includeSnapshots, false, false );
         }
@@ -104,7 +104,7 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 3
                 ? null
-                : versionDetails.getLatestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
+                : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
                                                    versionComparator.incrementSegment( currentVersion, 1 ),
                                                    includeSnapshots, true, false );
         }
@@ -140,7 +140,7 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 2
                 ? null
-                : versionDetails.getLatestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
+                : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
                                                    versionComparator.incrementSegment( currentVersion, 0 ),
                                                    includeSnapshots, true, false );
         }
@@ -175,7 +175,7 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 1
                 ? null
-                : versionDetails.getLatestVersion( versionComparator.incrementSegment( currentVersion, 0 ), null,
+                : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 0 ), null,
                                                    includeSnapshots, true, false );
         }
 
@@ -201,7 +201,7 @@ public abstract class UpdateScope
                                           boolean includeSnapshots )
             throws ArtifactMetadataRetrievalException
         {
-            return versionDetails.getLatestVersion( currentVersion, null, includeSnapshots, false, false );
+            return versionDetails.getNewestVersion( currentVersion, null, includeSnapshots, false, false );
         }
 
     };

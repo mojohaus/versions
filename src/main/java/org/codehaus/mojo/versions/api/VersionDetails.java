@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
@@ -33,6 +32,26 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
  */
 public interface VersionDetails
 {
+    /**
+     * Returns <code>true</code> if the specific version is in the list of versions.
+     *
+     * @param version the specific version.
+     * @return <code>true</code> if the specific version is in the list of versions.
+     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
+     *          if the metadata cannot be retrieved.
+     * @since 1.0-beta-1
+     */
+    boolean containsVersion( String version )
+        throws ArtifactMetadataRetrievalException;
+
+    /**
+     * Gets the rule for version comparison of this artifact.
+     *
+     * @return the rule for version comparison of this artifact.
+     * @since 1.0-beta-1
+     */
+    VersionComparator getVersionComparator();
+
     /**
      * Returns all the available versions in increasing order.
      *
@@ -70,75 +89,93 @@ public interface VersionDetails
         throws ArtifactMetadataRetrievalException;
 
     /**
-     * Returns all the available versions newer than the provided version.
+     * Returns all available versions within the specified bounds.
      *
-     * @param version The lower (exclusive) bound.
-     * @return all the available versions newer than the provided version.
+     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @return all available versions within the specified version range.
      * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
      *          if the metadata cannot be retrieved.
-     * @since 1.0-alpha-3
+     * @since 1.0-beta-1
      */
-    ArtifactVersion[] getNewerVersions( ArtifactVersion version )
+    ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound )
         throws ArtifactMetadataRetrievalException;
 
     /**
-     * Returns all available versions within the specified version range.
+     * Returns all available versions within the specified bounds.
      *
-     * @param version          The lower (exclusive) bound.
+     * @param lowerBound       the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param upperBound       the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return all the available versions newer than the provided version.
+     * @return all available versions within the specified version range.
      * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
      *          if the metadata cannot be retrieved.
-     * @since 1.0-alpha-3
+     * @since 1.0-beta-1
      */
-    ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
+    ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots )
         throws ArtifactMetadataRetrievalException;
 
     /**
-     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
-     * <code>null</code> if no such version exists.
+     * Returns all available versions within the specified bounds.
      *
-     * @param currentVersion the current version.
-     * @param upperBound     the exclusive upper bound.
-     * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
-     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
-     *          if the metadata cannot be retrieved.
-     * @since 1.0-alpha-3
-     */
-    ArtifactVersion getLatestVersion( ArtifactVersion currentVersion, ArtifactVersion upperBound )
-        throws ArtifactMetadataRetrievalException;
-
-    /**
-     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
-     * <code>null</code> if no such version exists.
-     *
-     * @param currentVersion   the current version.
-     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
-     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
-     *          if the metadata cannot be retrieved.
-     * @since 1.0-alpha-3
-     */
-    ArtifactVersion getLatestVersion( ArtifactVersion currentVersion, ArtifactVersion upperBound,
-                                      boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException;
-
-    /**
-     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
-     * <code>null</code> if no such version exists.
-     *
-     * @param lowerBound       the lower bound.
+     * @param lowerBound       the lower bound or <code>null</code> if the lower limit is unbounded.
      * @param upperBound       the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower     <code>true</code> if the lower bound is inclusive.
      * @param includeUpper     <code>true> if the upper bound is inclusive.
+     * @return all available versions within the specified version range.
+     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
+     *          if the metadata cannot be retrieved.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots,
+                                   boolean includeLower, boolean includeUpper )
+        throws ArtifactMetadataRetrievalException;
+
+    /**
+     * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
+     * <code>null</code> if no such version exists.
+     *
+     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
+     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
+     *          if the metadata cannot be retrieved.
+     * @since 1.0-alpha-3
+     */
+    ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
+        throws ArtifactMetadataRetrievalException;
+
+    /**
+     * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
+     * <code>null</code> if no such version exists.
+     *
+     * @param lowerBound       the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param upperBound       the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
      * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
      *          if the metadata cannot be retrieved.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getLatestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots,
+    ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots )
+        throws ArtifactMetadataRetrievalException;
+
+    /**
+     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
+     * <code>null</code> if no such version exists.
+     *
+     * @param lowerBound       the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param upperBound       the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @param includeLower     <code>true</code> if the lower bound is inclusive.
+     * @param includeUpper     <code>true> if the upper bound is inclusive.
+     * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
+     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
+     *          if the metadata cannot be retrieved.
+     * @since 1.0-alpha-3
+     */
+    ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots,
                                       boolean includeLower, boolean includeUpper )
         throws ArtifactMetadataRetrievalException;
 
@@ -148,65 +185,20 @@ public interface VersionDetails
      *
      * @param versionRange     The version range within which the version must exist.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @return the latest version within the version range or <code>null</code> if no version is available.
      * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
      *          if the metadata cannot be retrieved.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getLatestVersion( VersionRange versionRange, boolean includeSnapshots )
+    ArtifactVersion getNewestVersion( VersionRange versionRange, boolean includeSnapshots )
         throws ArtifactMetadataRetrievalException;
 
     /**
-     * Returns <code>true</code> if the specific version is in the list of versions.
-     *
-     * @param version the specific version.
-     * @return <code>true</code> if the specific version is in the list of versions.
-     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
-     *          if the metadata cannot be retrieved.
-     * @since 1.0-beta-1
-     */
-    boolean containsVersion( String version )
-        throws ArtifactMetadataRetrievalException;
-
-    /**
-     * Returns all the available versions newer than the provided version.
-     *
-     * @param version The lower (exclusive) bound.
-     * @return all the available versions newer than the provided version.
-     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
-     *          if the metadata cannot be retrieved.
-     * @since 1.0-alpha-3
-     */
-    ArtifactVersion[] getNewerVersions( String version )
-        throws ArtifactMetadataRetrievalException;
-
-    /**
-     * Returns all available versions within the specified version range.
-     *
-     * @param version          The lower (exclusive) bound.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return all the available versions newer than the provided version.
-     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
-     *          if the metadata cannot be retrieved.
-     * @since 1.0-alpha-3
-     */
-    ArtifactVersion[] getNewerVersions( String version, boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException;
-
-    /**
-     * Gets the rule for version comparison of this artifact.
-     *
-     * @return the rule for version comparison of this artifact.
-     * @since 1.0-beta-1
-     */
-    VersionComparator getVersionComparator();
-
-    /**
-     * Returns the next version after the specified current version, but less than the specified upper bound or
+     * Returns the oldest version after the specified lowerBound, but less than the specified upper bound or
      * <code>null</code> if no such version exists.
      *
-     * @param lowerBound the inclusive lower bound.
-     * @param upperBound the exclusive upper bound.
+     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
      * @return the next version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
      *          if the metadata cannot be retrieved.
@@ -216,8 +208,7 @@ public interface VersionDetails
         throws ArtifactMetadataRetrievalException;
 
     /**
-     * Returns the oldest version within the specified version range or
-     * <code>null</code> if no such version exists.
+     * Returns the oldest version within the specified version range or <code>null</code> if no such version exists.
      *
      * @param versionRange     The version range within which the version must exist.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
@@ -230,11 +221,11 @@ public interface VersionDetails
         throws ArtifactMetadataRetrievalException;
 
     /**
-     * Returns the latest version newer than the specified current version, but less than the specified upper bound or
+     * Returns the oldest version newer than the specified lower bound, but less than the specified upper bound or
      * <code>null</code> if no such version exists.
      *
-     * @param lowerBound       the current version.
-     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param lowerBound       the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param upperBound       the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
      * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
@@ -247,12 +238,12 @@ public interface VersionDetails
     /**
      * Returns the oldest version within the specified bounds or <code>null</code> if no such version exists.
      *
-     * @param lowerBound       the current version.
-     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param lowerBound       the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param upperBound       the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower     <code>true</code> if the lower bound is inclusive.
      * @param includeUpper     <code>true> if the upper bound is inclusive.
-     * @return the oldest version between currentVersion and upperBound or <code>null</code> if no version is available.
+     * @return the oldest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
      *          if the metadata cannot be retrieved.
      * @since 1.0-beta-1
@@ -261,20 +252,4 @@ public interface VersionDetails
                                       boolean includeLower, boolean includeUpper )
         throws ArtifactMetadataRetrievalException;
 
-    /**
-     * Returns all available versions within the specified bounds.
-     *
-     * @param lowerBound       the current version.
-     * @param upperBound       the exclusive upper bound or <code>null</code> if the upper limit is unbounded.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @param includeLower     <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper     <code>true> if the upper bound is inclusive.
-     * @return all available versions within the specified version range.
-     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException
-     *          if the metadata cannot be retrieved.
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion[] getVersions( DefaultArtifactVersion lowerBound, ArtifactVersion upperBound,
-                                   boolean includeSnapshots, boolean includeLower, boolean includeUpper )
-        throws ArtifactMetadataRetrievalException;
 }

@@ -292,7 +292,7 @@ public abstract class AbstractVersionsReport
         {
             final ArtifactVersions artifactVersions =
                 getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
-            return artifactVersions.getLatestVersion( versionRange, includeSnapshots );
+            return artifactVersions.getNewestVersion( versionRange, includeSnapshots );
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
