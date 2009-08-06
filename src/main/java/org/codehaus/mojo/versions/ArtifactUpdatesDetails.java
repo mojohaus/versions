@@ -20,8 +20,15 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.codehaus.mojo.versions.api.VersionUpdateDetails;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.UpdateScope;
+import org.codehaus.mojo.versions.api.DefaultVersionUpdateDetails;
+import org.codehaus.mojo.versions.api.VersionDetails;
+
+import java.util.Iterator;
+import java.util.Arrays;
 
 /**
  * Contains details of the available updates for an artifact.
@@ -29,84 +36,20 @@ import org.codehaus.mojo.versions.api.VersionUpdateDetails;
  * @since 1.0-beta-1
  */
 public class ArtifactUpdatesDetails
-    implements VersionUpdateDetails
+    extends DefaultVersionUpdateDetails
 {
     private final Artifact artifact;
 
-    private final ArtifactVersion nextVersion;
-
-    private final ArtifactVersion nextIncremental;
-
-    private final ArtifactVersion latestIncremental;
-
-    private final ArtifactVersion nextMinor;
-
-    private final ArtifactVersion latestMinor;
-
-    private final ArtifactVersion nextMajor;
-
-    private final ArtifactVersion latestMajor;
-
-    private final ArtifactVersion[] all;
-
-    public ArtifactUpdatesDetails( Artifact artifact, ArtifactVersion nextVersion, ArtifactVersion nextIncremental,
-                                   ArtifactVersion latestIncremental, ArtifactVersion nextMinor,
-                                   ArtifactVersion latestMinor, ArtifactVersion nextMajor, ArtifactVersion latestMajor,
-                                   ArtifactVersion[] all )
+    public ArtifactUpdatesDetails( ArtifactVersions v, ArtifactVersion current, boolean includeSnapshots)
+        throws ArtifactMetadataRetrievalException
     {
-        this.artifact = artifact;
-        this.nextVersion = nextVersion;
-        this.nextIncremental = nextIncremental;
-        this.latestIncremental = latestIncremental;
-        this.nextMinor = nextMinor;
-        this.latestMinor = latestMinor;
-        this.nextMajor = nextMajor;
-        this.latestMajor = latestMajor;
-        this.all = all;
+        super( v, current, includeSnapshots );
+        this.artifact = v.getArtifact();
     }
-
+    
     public Artifact getArtifact()
     {
         return artifact;
     }
 
-    public ArtifactVersion getNextIncremental()
-    {
-        return nextIncremental;
-    }
-
-    public ArtifactVersion getLatestIncremental()
-    {
-        return latestIncremental;
-    }
-
-    public ArtifactVersion getNextMinor()
-    {
-        return nextMinor;
-    }
-
-    public ArtifactVersion getLatestMinor()
-    {
-        return latestMinor;
-    }
-
-    public ArtifactVersion getNextMajor()
-    {
-        return nextMajor;
-    }
-
-    public ArtifactVersion getLatestMajor()
-    {
-        return latestMajor;
-    }
-
-    public ArtifactVersion getNextVersion()
-    {
-        return nextVersion;
-    }
-
-    public ArtifactVersion[] getAll()
-    {
-        return all;
-    }
 }

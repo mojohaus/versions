@@ -532,17 +532,7 @@ public class DefaultVersionsHelper
 
         final boolean includeSnapshots = Boolean.TRUE.equals( allowSnapshots );
 
-        return new ArtifactUpdatesDetails( artifact, UpdateScope.SUBINCREMENTAL.getNext( artifactVersions, current,
-                                                                                         includeSnapshots ),
-                                           UpdateScope.INCREMENTAL.getNext( artifactVersions, current,
-                                                                            includeSnapshots ),
-                                           UpdateScope.INCREMENTAL.getLatest( artifactVersions, current,
-                                                                              includeSnapshots ),
-                                           UpdateScope.MINOR.getNext( artifactVersions, current, includeSnapshots ),
-                                           UpdateScope.MINOR.getLatest( artifactVersions, current, includeSnapshots ),
-                                           UpdateScope.MAJOR.getNext( artifactVersions, current, includeSnapshots ),
-                                           UpdateScope.MAJOR.getLatest( artifactVersions, current, includeSnapshots ),
-                                           artifactVersions.getNewerVersions( current ) );
+        return new ArtifactUpdatesDetails( artifactVersions, current, includeSnapshots);
     }
 
     /**

@@ -1,8 +1,13 @@
 package org.codehaus.mojo.versions;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.codehaus.mojo.versions.api.ArtifactAssocation;
 import org.codehaus.mojo.versions.api.VersionUpdateDetails;
+import org.codehaus.mojo.versions.api.UpdateScope;
+import org.codehaus.mojo.versions.api.DefaultVersionUpdateDetails;
+import org.codehaus.mojo.versions.api.VersionDetails;
+import org.codehaus.mojo.versions.api.PropertyVersions;
 
 /*
 * Licensed to the Apache Software Foundation (ASF) under one
@@ -29,51 +34,21 @@ import org.codehaus.mojo.versions.api.VersionUpdateDetails;
  * @since Jul 27, 2009 2:47:50 PM
  */
 public class PropertyUpdatesDetails
-    implements VersionUpdateDetails
+    extends DefaultVersionUpdateDetails
 {
     /**
      * The property name.
      */
     private final String name;
 
-    private final String currentVersion;
-
     private final ArtifactAssocation[] associations;
 
-    private final ArtifactVersion nextVersion;
-
-    private final ArtifactVersion nextIncremental;
-
-    private final ArtifactVersion latestIncremental;
-
-    private final ArtifactVersion nextMinor;
-
-    private final ArtifactVersion latestMinor;
-
-    private final ArtifactVersion nextMajor;
-
-    private final ArtifactVersion latestMajor;
-
-    private final ArtifactVersion[] all;
-
-
-    public PropertyUpdatesDetails( String name, String currentVersion, ArtifactAssocation[] associations,
-                                   ArtifactVersion nextVersion, ArtifactVersion nextIncremental,
-                                   ArtifactVersion latestIncremental, ArtifactVersion nextMinor,
-                                   ArtifactVersion latestMinor, ArtifactVersion nextMajor, ArtifactVersion latestMajor,
-                                   ArtifactVersion[] all )
+    public PropertyUpdatesDetails( String name, ArtifactAssocation[] associations, PropertyVersions v, ArtifactVersion current, boolean includeSnapshots )
+        throws ArtifactMetadataRetrievalException
     {
+        super( v, current, includeSnapshots );
         this.name = name;
-        this.currentVersion = currentVersion;
         this.associations = associations;
-        this.nextVersion = nextVersion;
-        this.nextIncremental = nextIncremental;
-        this.latestIncremental = latestIncremental;
-        this.nextMinor = nextMinor;
-        this.latestMinor = latestMinor;
-        this.nextMajor = nextMajor;
-        this.latestMajor = latestMajor;
-        this.all = all;
     }
 
     public String getName()
@@ -81,53 +56,9 @@ public class PropertyUpdatesDetails
         return name;
     }
 
-    public String getCurrentVersion()
-    {
-        return currentVersion;
-    }
-
     public ArtifactAssocation[] getAssociations()
     {
         return associations;
     }
 
-    public ArtifactVersion getNextVersion()
-    {
-        return nextVersion;
-    }
-
-    public ArtifactVersion getNextIncremental()
-    {
-        return nextIncremental;
-    }
-
-    public ArtifactVersion getLatestIncremental()
-    {
-        return latestIncremental;
-    }
-
-    public ArtifactVersion getNextMinor()
-    {
-        return nextMinor;
-    }
-
-    public ArtifactVersion getLatestMinor()
-    {
-        return latestMinor;
-    }
-
-    public ArtifactVersion getNextMajor()
-    {
-        return nextMajor;
-    }
-
-    public ArtifactVersion getLatestMajor()
-    {
-        return latestMajor;
-    }
-
-    public ArtifactVersion[] getAll()
-    {
-        return all;
-    }
 }
