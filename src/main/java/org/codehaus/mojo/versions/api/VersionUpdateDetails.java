@@ -35,11 +35,5 @@ public interface VersionUpdateDetails
 
     ArtifactVersion getLatest( UpdateScope updateScope );
 
-    ArtifactVersion getLatestIncremental();
-
-    ArtifactVersion getLatestMinor();
-
-    ArtifactVersion getLatestMajor();
-
     ArtifactVersion[] getAll();
 }

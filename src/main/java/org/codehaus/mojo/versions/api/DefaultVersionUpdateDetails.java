@@ -55,21 +55,6 @@ public class DefaultVersionUpdateDetails
         return (ArtifactVersion) latestUpdateMap.get( updateScope );
     }
 
-    public final ArtifactVersion getLatestIncremental()
-    {
-        return getLatest( UpdateScope.INCREMENTAL );
-    }
-
-    public final ArtifactVersion getLatestMinor()
-    {
-        return getLatest( UpdateScope.MINOR );
-    }
-
-    public final ArtifactVersion getLatestMajor()
-    {
-        return getLatest( UpdateScope.MAJOR );
-    }
-
     public final ArtifactVersion[] getAll()
     {
         return all;
