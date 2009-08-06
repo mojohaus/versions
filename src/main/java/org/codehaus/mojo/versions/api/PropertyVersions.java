@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Collections;
 
 /**
  * Manages a property that is associated with one or more artifacts.
@@ -59,24 +60,67 @@ public class PropertyVersions
      *
      * @since 1.0-beta-1
      */
-    private SortedSet/*<ArtifactVersion>*/ versions;
+    private final SortedSet/*<ArtifactVersion>*/ versions;
 
-    private PropertyVersions.PropertyVersionComparator comparator;
+    private final PropertyVersions.PropertyVersionComparator comparator;
 
-    /**
-     * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.
-     *
-     * @param profileId The profileId.
-     * @param name      The property name.
-     * @param helper    The {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper}.
-     */
-    public PropertyVersions( String profileId, String name, VersionsHelper helper )
+    PropertyVersions(String profileId, String name, VersionsHelper helper, Set/*<ArtifactAssociation>*/ associations)
+        throws ArtifactMetadataRetrievalException
     {
         this.profileId = profileId;
         this.name = name;
-        this.associations = new TreeSet();
         this.helper = helper;
+        this.associations = new TreeSet( associations );
         this.comparator = new PropertyVersionComparator();
+        this.versions = resolveAssociatedVersions( helper, associations, comparator );
+
+    }
+
+    private static SortedSet resolveAssociatedVersions( VersionsHelper helper, Set associations,
+                                                        VersionComparator versionComparator )
+        throws ArtifactMetadataRetrievalException
+    {
+        SortedSet versions = null;
+        Iterator i = associations.iterator();
+        while ( i.hasNext() )
+        {
+            ArtifactAssocation association = (ArtifactAssocation) i.next();
+            final ArtifactVersions associatedVersions =
+                helper.lookupArtifactVersions( association.getArtifact(), association.isUsePluginRepositories() );
+            if ( versions != null )
+            {
+                final ArtifactVersion[] artifactVersions = associatedVersions.getVersions( true );
+                // since ArtifactVersion does not override equals, we have to do this the hard way
+                // result.retainAll( Arrays.asList( artifactVersions ) );
+                Iterator j = versions.iterator();
+                while ( j.hasNext() )
+                {
+                    boolean contains = false;
+                    ArtifactVersion version = (ArtifactVersion) j.next();
+                    for ( int k = 0; k < artifactVersions.length; k++ )
+                    {
+                        if ( version.compareTo( artifactVersions[k] ) == 0 )
+                        {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if ( !contains )
+                    {
+                        j.remove();
+                    }
+                }
+            }
+            else
+            {
+                versions = new TreeSet( versionComparator );
+                versions.addAll( Arrays.asList( associatedVersions.getVersions( true ) ) );
+            }
+        }
+        if (versions == null) {
+            versions = new TreeSet( versionComparator );
+        }
+        return Collections.unmodifiableSortedSet( versions );
     }
 
     /**
@@ -88,18 +132,6 @@ public class PropertyVersions
     public VersionComparator getVersionComparator()
     {
         return comparator;
-    }
-
-    public synchronized void addAssociation( Artifact artifact, boolean usePluginRepositories )
-    {
-        associations.add( new DefaultArtifactAssociation( artifact, usePluginRepositories ) );
-        versions = null;
-    }
-
-    public synchronized void removeAssociation( Artifact artifact, boolean usePluginRepositories )
-    {
-        associations.remove( new DefaultArtifactAssociation( artifact, usePluginRepositories ) );
-        versions = null;
     }
 
     public ArtifactAssocation[] getAssociations()
@@ -205,50 +237,7 @@ public class PropertyVersions
      * @return The (possibly empty) array of versions.
      */
     public synchronized ArtifactVersion[] getVersions( boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
-        if ( versions == null )
-        {
-            SortedSet result = null;
-            Iterator i = associations.iterator();
-            while ( i.hasNext() )
-            {
-                ArtifactAssocation association = (ArtifactAssocation) i.next();
-                final ArtifactVersions versions =
-                    helper.lookupArtifactVersions( association.getArtifact(), association.isUsePluginRepositories() );
-                if ( result != null )
-                {
-                    final ArtifactVersion[] artifactVersions = versions.getVersions( true );
-                    // since ArtifactVersion does not override equals, we have to do this the hard way
-                    // result.retainAll( Arrays.asList( artifactVersions ) );
-                    Iterator j = result.iterator();
-                    while ( j.hasNext() )
-                    {
-                        boolean contains = false;
-                        ArtifactVersion version = (ArtifactVersion) j.next();
-                        for ( int k = 0; k < artifactVersions.length; k++ )
-                        {
-                            if ( version.compareTo( artifactVersions[k] ) == 0 )
-                            {
-                                contains = true;
-                                break;
-                            }
-                        }
-                        if ( !contains )
-                        {
-                            j.remove();
-                        }
-                    }
-                }
-                else
-                {
-                    result = new TreeSet( getVersionComparator() );
-                    result.addAll( Arrays.asList( versions.getVersions( includeSnapshots ) ) );
-                }
-            }
-            versions = new TreeSet( getVersionComparator() );
-            versions.addAll( result );
-        }
         Set/*<ArtifactVersion>*/ result;
         if ( includeSnapshots )
         {
@@ -323,12 +312,6 @@ public class PropertyVersions
     {
         return "PropertyVersions{" + ( profileId == null ? "" : "profileId='" + profileId + "', " ) + "name='" + name
             + '\'' + ", associations=" + associations + '}';
-    }
-
-    public synchronized void clearAssociations()
-    {
-        associations.clear();
-        versions = null;
     }
 
     private final class PropertyVersionComparator
@@ -416,112 +399,6 @@ public class PropertyVersions
         }
 
 
-    }
-
-    private static final class DefaultArtifactAssociation
-        implements Comparable, ArtifactAssocation
-    {
-        private final Artifact artifact;
-
-        private final boolean usePluginRepositories;
-
-        private DefaultArtifactAssociation( Artifact artifact, boolean usePluginRepositories )
-        {
-            artifact.getClass(); // throw NPE if null;
-            this.artifact = artifact;
-            this.usePluginRepositories = usePluginRepositories;
-        }
-
-        public String getGroupId()
-        {
-            return artifact.getGroupId();
-        }
-
-        public String getArtifactId()
-        {
-            return artifact.getArtifactId();
-        }
-
-        public Artifact getArtifact()
-        {
-            return artifact;
-        }
-
-        public boolean isUsePluginRepositories()
-        {
-            return usePluginRepositories;
-        }
-
-        public int compareTo( Object o )
-        {
-            if ( this == o )
-            {
-                return 0;
-            }
-            if ( o == null || getClass() != o.getClass() )
-            {
-                return 1;
-            }
-            DefaultArtifactAssociation that = (DefaultArtifactAssociation) o;
-
-            int rv = getGroupId().compareTo( that.getGroupId() );
-            if ( rv != 0 )
-            {
-                return rv;
-            }
-            rv = getArtifactId().compareTo( that.getArtifactId() );
-            if ( rv != 0 )
-            {
-                return rv;
-            }
-            if ( usePluginRepositories != that.usePluginRepositories )
-            {
-                return usePluginRepositories ? 1 : -1;
-            }
-            return 0;
-        }
-
-        public boolean equals( Object o )
-        {
-            if ( this == o )
-            {
-                return true;
-            }
-            if ( o == null || getClass() != o.getClass() )
-            {
-                return false;
-            }
-
-            DefaultArtifactAssociation that = (DefaultArtifactAssociation) o;
-
-            if ( usePluginRepositories != that.usePluginRepositories )
-            {
-                return false;
-            }
-            if ( !getArtifactId().equals( that.getArtifactId() ) )
-            {
-                return false;
-            }
-            if ( !getGroupId().equals( that.getGroupId() ) )
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public int hashCode()
-        {
-            int result = getGroupId().hashCode();
-            result = 31 * result + getArtifactId().hashCode();
-            result = 31 * result + ( usePluginRepositories ? 1 : 0 );
-            return result;
-        }
-
-        public String toString()
-        {
-            return ( usePluginRepositories ? "plugin:" : "artifact:" ) + ArtifactUtils.versionlessKey( artifact );
-        }
     }
 
 }

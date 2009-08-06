@@ -42,16 +42,13 @@ public abstract class AbstractVersionDetails
 {
 
     public final ArtifactVersion[] getVersions()
-        throws ArtifactMetadataRetrievalException
     {
         return getVersions( true );
     }
 
-    public abstract ArtifactVersion[] getVersions( boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException;
+    public abstract ArtifactVersion[] getVersions( boolean includeSnapshots );
 
     public final ArtifactVersion[] getVersions( VersionRange versionRange, boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
         Set/*<ArtifactVersion>*/ result;
         result = new TreeSet( getVersionComparator() );
@@ -74,33 +71,28 @@ public abstract class AbstractVersionDetails
     }
 
     public final ArtifactVersion[] getVersions( ArtifactVersion currentVersion, ArtifactVersion upperBound )
-        throws ArtifactMetadataRetrievalException
     {
         return getVersions( currentVersion, upperBound, false );
     }
 
     public final ArtifactVersion[] getVersions( ArtifactVersion currentVersion, ArtifactVersion upperBound,
                                                 boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
         return getVersions( currentVersion, upperBound, includeSnapshots, false, false );
     }
 
     private final ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
         return getVersions( version, null, includeSnapshots, false, true );
     }
 
     public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
-        throws ArtifactMetadataRetrievalException
     {
         return getNewestVersion( lowerBound, upperBound, true );
     }
 
     public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
                                                    boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
         return getNewestVersion( lowerBound, upperBound, includeSnapshots, false, false );
     }
@@ -108,7 +100,6 @@ public abstract class AbstractVersionDetails
     public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
                                                    boolean includeSnapshots, boolean includeLower,
                                                    boolean includeUpper )
-        throws ArtifactMetadataRetrievalException
     {
         ArtifactVersion latest = null;
         final VersionComparator versionComparator = getVersionComparator();
@@ -143,7 +134,6 @@ public abstract class AbstractVersionDetails
     }
 
     public final ArtifactVersion getNewestVersion( VersionRange versionRange, boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
         ArtifactVersion latest = null;
         final VersionComparator versionComparator = getVersionComparator();
@@ -172,7 +162,6 @@ public abstract class AbstractVersionDetails
     }
 
     public final boolean containsVersion( String version )
-        throws ArtifactMetadataRetrievalException
     {
         Iterator i = Arrays.asList( getVersions( true ) ).iterator();
         while ( i.hasNext() )
@@ -187,19 +176,16 @@ public abstract class AbstractVersionDetails
     }
 
     public final ArtifactVersion[] getNewerVersions( String version, boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
         return getNewerVersions( new DefaultArtifactVersion( version ), includeSnapshots );
     }
 
     public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
-        throws ArtifactMetadataRetrievalException
     {
         return getOldestVersion( lowerBound, upperBound, true );
     }
 
     public final ArtifactVersion getOldestVersion( VersionRange versionRange, boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
         ArtifactVersion oldest = null;
         final VersionComparator versionComparator = getVersionComparator();
@@ -229,7 +215,6 @@ public abstract class AbstractVersionDetails
 
     public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
                                                    boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
     {
         return getOldestVersion( lowerBound, upperBound, includeSnapshots, false, false );
     }
@@ -237,7 +222,6 @@ public abstract class AbstractVersionDetails
     public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
                                                    boolean includeSnapshots, boolean includeLower,
                                                    boolean includeUpper )
-        throws ArtifactMetadataRetrievalException
     {
         ArtifactVersion oldest = null;
         final VersionComparator versionComparator = getVersionComparator();
@@ -273,7 +257,6 @@ public abstract class AbstractVersionDetails
 
     public final ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound,
                                                 boolean includeSnapshots, boolean includeLower, boolean includeUpper )
-        throws ArtifactMetadataRetrievalException
     {
         Set/*<ArtifactVersion>*/ result;
         final VersionComparator versionComparator = getVersionComparator();

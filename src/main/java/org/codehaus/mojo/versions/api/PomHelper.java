@@ -682,12 +682,12 @@ public class PomHelper
      * @throws IOException                   if the project's pom file cannot be parsed.
      * @since 1.0-alpha-3
      */
-    public static PropertyVersions[] getPropertyVersions( VersionsHelper helper, MavenProject project )
+    public static PropertyVersionsBuilder[] getPropertyVersionsBuilders( VersionsHelper helper, MavenProject project )
         throws ExpressionEvaluationException, IOException
     {
         ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator( project );
         Model model = getRawModel( project );
-        Map/*<String,PropertyVersions>*/ result = new TreeMap();
+        Map/*<String,PropertyVersionsBuilder>*/ result = new TreeMap();
 
         Set/*<String*/ activeProfiles = new TreeSet();
         for ( Iterator i = project.getActiveProfiles().iterator(); i.hasNext(); )
@@ -751,7 +751,7 @@ public class PomHelper
         // finally, remove any properties without associations
         purgeProperties( result );
 
-        return (PropertyVersions[]) result.values().toArray( new PropertyVersions[result.values().size()] );
+        return (PropertyVersionsBuilder[]) result.values().toArray( new PropertyVersionsBuilder[result.values().size()] );
     }
 
     /**
@@ -760,7 +760,7 @@ public class PomHelper
      *
      * @param helper              Our helper.
      * @param expressionEvaluator Our expression evaluator.
-     * @param result              The map of {@link org.codehaus.mojo.versions.api.PropertyVersions} keyed by property name.
+     * @param result              The map of {@link org.codehaus.mojo.versions.api.PropertyVersionsBuilder} keyed by property name.
      * @param plugins             The list of {@link org.apache.maven.model.Plugin}.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      */
@@ -781,7 +781,7 @@ public class PomHelper
                 for ( Iterator j = result.values().iterator(); j.hasNext(); )
                 {
                     // any of these could be defined by a property
-                    PropertyVersions property = (PropertyVersions) j.next();
+                    PropertyVersionsBuilder property = (PropertyVersionsBuilder) j.next();
                     if ( version.indexOf( "${" + property.getName() + "}" ) != -1 )
                     {
                         String groupId = plugin.getGroupId();
@@ -832,7 +832,7 @@ public class PomHelper
             {
                 for ( Iterator j = result.values().iterator(); j.hasNext(); )
                 {
-                    PropertyVersions property = (PropertyVersions) j.next();
+                    PropertyVersionsBuilder property = (PropertyVersionsBuilder) j.next();
                     if ( version.indexOf( "${" + property.getName() + "}" ) != -1 )
                     {
                         // any of these could be defined by a property
@@ -883,7 +883,7 @@ public class PomHelper
             {
                 for ( Iterator j = result.values().iterator(); j.hasNext(); )
                 {
-                    PropertyVersions property = (PropertyVersions) j.next();
+                    PropertyVersionsBuilder property = (PropertyVersionsBuilder) j.next();
                     if ( version.indexOf( "${" + property.getName() + "}" ) != -1 )
                     {
                         // Any of these could be defined by a property
@@ -931,7 +931,7 @@ public class PomHelper
             String propertyName = (String) j.nextElement();
             if ( !result.containsKey( propertyName ) )
             {
-                result.put( propertyName, new PropertyVersions( profileId, propertyName, helper ) );
+                result.put( propertyName, new PropertyVersionsBuilder( profileId, propertyName, helper ) );
             }
         }
     }
@@ -940,7 +940,7 @@ public class PomHelper
     {
         for ( Iterator i = result.values().iterator(); i.hasNext(); )
         {
-            PropertyVersions versions = (PropertyVersions) i.next();
+            PropertyVersionsBuilder versions = (PropertyVersionsBuilder) i.next();
             if ( versions.getAssociations().length == 0 )
             {
                 i.remove();

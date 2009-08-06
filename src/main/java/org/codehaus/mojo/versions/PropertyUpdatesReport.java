@@ -168,10 +168,6 @@ public class PropertyUpdatesReport
         {
             throw new MavenReportException( e.getMessage(), e );
         }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
 //        Set plugins = new TreeSet( new PluginComparator() );
 //        if ( haveBuildPlugins() )
 //        {

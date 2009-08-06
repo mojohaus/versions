@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -110,15 +109,8 @@ public class UpdatePropertiesMojo
             VersionComparator comparator = version.getVersionComparator();
 
             ArtifactVersion[] artifactVersions;
-            try
-            {
-                artifactVersions =
-                    version.getVersions( !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots ) );
-            }
-            catch ( ArtifactMetadataRetrievalException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
+            artifactVersions =
+                version.getVersions( !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots ) );
             getLog().debug(
                 "Property ${" + property.getName() + "}: Set of valid available versions is " + Arrays.asList(
                     artifactVersions ) );

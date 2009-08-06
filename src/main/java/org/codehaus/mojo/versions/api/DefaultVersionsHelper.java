@@ -642,13 +642,13 @@ public class DefaultVersionsHelper
                 properties.put( propertyDefinitions[i].getName(), propertyDefinitions[i] );
             }
         }
-        Map versions = new HashMap();
+        Map/*<String,PropertyVersionsBuilder>*/ versions = new HashMap();
         if ( autoLinkItems )
         {
-            final PropertyVersions[] propertyVersions;
+            final PropertyVersionsBuilder[] propertyVersionsBuilders;
             try
             {
-                propertyVersions = PomHelper.getPropertyVersions( this, project );
+                propertyVersionsBuilders = PomHelper.getPropertyVersionsBuilders( this, project );
             }
             catch ( ExpressionEvaluationException e )
             {
@@ -659,12 +659,13 @@ public class DefaultVersionsHelper
                 throw new MojoExecutionException( e.getMessage(), e );
             }
 
-            for ( int i = 0; i < propertyVersions.length; i++ )
+            for ( int i = 0; i < propertyVersionsBuilders.length; i++ )
             {
-                versions.put( propertyVersions[i].getName(), propertyVersions[i] );
-                if ( !properties.containsKey( propertyVersions[i].getName() ) )
+                final String name = propertyVersionsBuilders[i].getName();
+                versions.put( name, propertyVersionsBuilders[i] );
+                if ( !properties.containsKey( name ) )
                 {
-                    properties.put( propertyVersions[i].getName(), new Property( propertyVersions[i] ) );
+                    properties.put( name, new Property( name ) );
                 }
             }
         }
@@ -691,12 +692,12 @@ public class DefaultVersionsHelper
         {
             Property property = (Property) i.next();
             getLog().debug( "Property ${" + property.getName() + "}" );
-            PropertyVersions version = (PropertyVersions) versions.get( property.getName() );
+            PropertyVersionsBuilder version = (PropertyVersionsBuilder) versions.get( property.getName() );
             if ( version == null || !version.isAssociated() )
             {
                 getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not "
                     + "associated with any dependency..." );
-                version = new PropertyVersions( null, property.getName(), this );
+                version = new PropertyVersionsBuilder( null, property.getName(), this );
             }
             if ( !property.isAutoLinkDependencies() )
             {
@@ -720,7 +721,14 @@ public class DefaultVersionsHelper
                     }
                 }
             }
-            propertyVersions.put( property, version );
+            try
+            {
+                propertyVersions.put( property, version.newPropertyVersions() );
+            }
+            catch ( ArtifactMetadataRetrievalException e )
+            {
+                throw new MojoExecutionException( e.getMessage(), e );
+            }
         }
         return propertyVersions;
     }

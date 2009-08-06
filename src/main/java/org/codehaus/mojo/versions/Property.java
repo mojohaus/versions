@@ -96,9 +96,9 @@ public class Property
     {
     }
 
-    public Property( PropertyVersions propertyVersions )
+    public Property( String name )
     {
-        this.name = propertyVersions.getName();
+        this.name = name;
         this.autoLinkDependencies = true;
         this.dependencies = EMPTY_DEPENDENCY_ARRAY;
         this.banSnapshots = false;
