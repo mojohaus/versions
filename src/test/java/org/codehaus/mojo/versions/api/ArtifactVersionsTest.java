@@ -31,11 +31,8 @@ import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import java.util.Arrays;
 
 /**
- * Created by IntelliJ IDEA.
- * User: user
- * Date: 10-Feb-2009
- * Time: 18:33:04
- * To change this template use File | Settings | File Templates.
+ * Created by IntelliJ IDEA. User: user Date: 10-Feb-2009 Time: 18:33:04 To change this template use File | Settings |
+ * File Templates.
  */
 public class ArtifactVersionsTest
     extends TestCase
@@ -51,8 +48,8 @@ public class ArtifactVersionsTest
         final DefaultArtifact artifact =
             new DefaultArtifact( "group", "artifact", VersionRange.createFromVersionSpec( "[1.0,3.0]" ), "foo", "bar",
                                  "jar", new DefaultArtifactHandler() );
-        ArtifactVersions instance = new ArtifactVersions( artifact, Arrays.asList( versions ), new MavenVersionComparator() )
-            ;
+        ArtifactVersions instance =
+            new ArtifactVersions( artifact, Arrays.asList( versions ), new MavenVersionComparator() );
         assertEquals( "artifact", instance.getArtifactId() );
         assertEquals( "group", instance.getGroupId() );
         System.out.println( Arrays.asList( instance.getVersions() ) );

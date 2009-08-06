@@ -301,6 +301,14 @@ public interface VersionDetails
     void setCurrentVersion( ArtifactVersion currentVersion );
 
     /**
+     * Sets the current version.
+     *
+     * @param currentVersion The new current version.
+     * @since 1.0-beta-1
+     */
+    void setCurrentVersion( String currentVersion );
+
+    /**
      * Retrieves the current version.
      *
      * @return The current version (may be <code>null</code>).

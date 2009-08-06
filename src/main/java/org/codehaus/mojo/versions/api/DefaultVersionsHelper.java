@@ -163,11 +163,12 @@ public class DefaultVersionsHelper
      * @param serverId                   The serverId hint for the wagon manager.
      * @param rulesUri                   The URL to retrieve the versioning rules from.
      * @param comparisonMethod           The default comparison method.
-     * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to. @since 1.0-alpha-3
+     * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
      * @param mavenSession               The maven session information.
      * @param pathTranslator             The path translator component.
      * @throws org.apache.maven.plugin.MojoExecutionException
      *          If things go wrong.
+     * @since 1.0-alpha-3
      */
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactMetadataSource artifactMetadataSource,
                                   List remoteArtifactRepositories, List remotePluginRepositories,
@@ -209,27 +210,11 @@ public class DefaultVersionsHelper
     public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
-        return lookupVersions( artifact,
-                               usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories );
-    }
-
-    /**
-     * Looks up the versions of the specified artifact that are available in either the local repository or the
-     * specified remote repositories.
-     *
-     * @param artifact           The artifact to lookup.
-     * @param remoteRepositories The remote repositories to consult.
-     * @return The ArtifactVersions with details of the available versions.
-     * @throws ArtifactMetadataRetrievalException
-     *          When things go wrong.
-     * @since 1.0-alpha-3
-     */
-    private ArtifactVersions lookupVersions( Artifact artifact, List remoteRepositories )
-        throws ArtifactMetadataRetrievalException
-    {
-        final List versions;
-        versions = artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
-        return new ArtifactVersions( artifact, versions, getVersionComparator( artifact ) );
+        List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
+        return new ArtifactVersions( artifact,
+                                     artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository,
+                                                                                       remoteRepositories ),
+                                     getVersionComparator( artifact ) );
     }
 
     /**

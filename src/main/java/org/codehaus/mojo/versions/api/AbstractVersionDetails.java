@@ -75,6 +75,11 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    public final void setCurrentVersion( String currentVersion )
+    {
+        setCurrentVersion( new DefaultArtifactVersion( currentVersion) );
+    }
+
     public final ArtifactVersion[] getVersions()
     {
         return getVersions( true );
