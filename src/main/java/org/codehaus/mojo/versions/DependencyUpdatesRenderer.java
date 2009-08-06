@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
+import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -121,19 +122,19 @@ public class DependencyUpdatesRenderer
         for ( Iterator iterator = allUpdates.values().iterator(); iterator.hasNext(); )
         {
             ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) iterator.next();
-            if ( details.getNextVersion() != null )
+            if ( details.getNext( UpdateScope.SUBINCREMENTAL ) != null )
             {
                 numAny++;
             }
-            else if ( details.getNextIncremental() != null )
+            else if ( details.getNext( UpdateScope.INCREMENTAL ) != null )
             {
                 numInc++;
             }
-            else if ( details.getNextMinor() != null )
+            else if ( details.getNext( UpdateScope.MINOR ) != null )
             {
                 numMin++;
             }
-            else if ( details.getNextMajor() != null )
+            else if ( details.getNext( UpdateScope.MAJOR ) != null )
             {
                 numMaj++;
             }

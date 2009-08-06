@@ -23,6 +23,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.parser.Parser;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
+import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.plexus.i18n.I18N;
 
 import java.util.Iterator;
@@ -153,37 +154,37 @@ public abstract class AbstractVersionsReportRenderer
         }
 
         sink.tableCell();
-        if ( details.getNextVersion() != null )
+        if ( details.getNext( UpdateScope.SUBINCREMENTAL ) != null )
         {
             sink.bold();
-            sink.text( details.getNextVersion().toString() );
+            sink.text( details.getNext( UpdateScope.SUBINCREMENTAL ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNextIncremental() != null )
+        if ( details.getNext( UpdateScope.INCREMENTAL ) != null )
         {
             sink.bold();
-            sink.text( details.getNextIncremental().toString() );
+            sink.text( details.getNext( UpdateScope.INCREMENTAL ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNextMinor() != null )
+        if ( details.getNext( UpdateScope.MINOR ) != null )
         {
             sink.bold();
-            sink.text( details.getNextMinor().toString() );
+            sink.text( details.getNext( UpdateScope.MINOR ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNextMajor() != null )
+        if ( details.getNext( UpdateScope.MAJOR ) != null )
         {
             sink.bold();
-            sink.text( details.getNextMajor().toString() );
+            sink.text( details.getNext( UpdateScope.MAJOR ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
@@ -263,25 +264,25 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableHeaderCell_();
         sink.tableCell( cellWidth );
         ArtifactVersion[] versions = details.getAll();
-        if ( details.getNextVersion() != null )
+        if ( details.getNext( UpdateScope.SUBINCREMENTAL ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
-        else if ( details.getNextIncremental() != null )
+        else if ( details.getNext( UpdateScope.INCREMENTAL ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.incrementalUpdatesAvailable" ) );
         }
-        else if ( details.getNextMinor() != null )
+        else if ( details.getNext( UpdateScope.MINOR ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.minorUpdatesAvailable" ) );
         }
-        else if ( details.getNextMajor() != null )
+        else if ( details.getNext( UpdateScope.MAJOR ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
@@ -365,11 +366,13 @@ public abstract class AbstractVersionsReportRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals( versions[i], details.getNextVersion() )
-                    || equals( versions[i], details.getNextIncremental() )
+                boolean bold = equals( versions[i], details.getNext( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( versions[i], details.getNext( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getLatestIncremental() )
-                    || equals( versions[i], details.getNextMinor() ) || equals( versions[i], details.getLatestMinor() )
-                    || equals( versions[i], details.getNextMajor() ) || equals( versions[i], details.getLatestMajor() );
+                    || equals( versions[i], details.getNext( UpdateScope.MINOR ) )
+                    || equals( versions[i], details.getLatestMinor() )
+                    || equals( versions[i], details.getNext( UpdateScope.MAJOR ) ) || equals( versions[i],
+                                                                                              details.getLatestMajor() );
                 if ( bold )
                 {
                     sink.bold();
@@ -380,11 +383,11 @@ public abstract class AbstractVersionsReportRenderer
                     sink.bold_();
                     sink.nonBreakingSpace();
                     sink.italic();
-                    if ( equals( versions[i], details.getNextVersion() ) )
+                    if ( equals( versions[i], details.getNext( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
                     }
-                    else if ( equals( versions[i], details.getNextIncremental() ) )
+                    else if ( equals( versions[i], details.getNext( UpdateScope.INCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextIncremental" ) );
                     }
@@ -392,7 +395,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.latestIncremental" ) );
                     }
-                    else if ( equals( versions[i], details.getNextMinor() ) )
+                    else if ( equals( versions[i], details.getNext( UpdateScope.MINOR ) ) )
                     {
                         sink.text( getText( "report.nextMinor" ) );
                     }
@@ -400,7 +403,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.latestMinor" ) );
                     }
-                    else if ( equals( versions[i], details.getNextMajor() ) )
+                    else if ( equals( versions[i], details.getNext( UpdateScope.MAJOR ) ) )
                     {
                         sink.text( getText( "report.nextMajor" ) );
                     }

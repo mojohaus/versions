@@ -532,7 +532,7 @@ public class DefaultVersionsHelper
 
         final boolean includeSnapshots = Boolean.TRUE.equals( allowSnapshots );
 
-        return new ArtifactUpdatesDetails( artifactVersions, current, includeSnapshots);
+        return new ArtifactUpdatesDetails( artifactVersions, current, includeSnapshots );
     }
 
     /**

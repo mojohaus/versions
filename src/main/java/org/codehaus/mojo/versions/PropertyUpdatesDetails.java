@@ -1,12 +1,9 @@
 package org.codehaus.mojo.versions;
 
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.ArtifactAssocation;
-import org.codehaus.mojo.versions.api.VersionUpdateDetails;
-import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.api.DefaultVersionUpdateDetails;
-import org.codehaus.mojo.versions.api.VersionDetails;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 
 /*
@@ -43,7 +40,8 @@ public class PropertyUpdatesDetails
 
     private final ArtifactAssocation[] associations;
 
-    public PropertyUpdatesDetails( String name, ArtifactAssocation[] associations, PropertyVersions v, ArtifactVersion current, boolean includeSnapshots )
+    public PropertyUpdatesDetails( String name, ArtifactAssocation[] associations, PropertyVersions v,
+                                   ArtifactVersion current, boolean includeSnapshots )
         throws ArtifactMetadataRetrievalException
     {
         super( v, current, includeSnapshots );

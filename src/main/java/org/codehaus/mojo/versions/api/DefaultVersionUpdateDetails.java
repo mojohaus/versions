@@ -23,7 +23,7 @@ public class DefaultVersionUpdateDetails
     private final Map/*<UpdateScope,ArtifactVersion>*/ latestUpdateMap = new HashMap();
 
     private final ArtifactVersion[] all;
-    
+
     private final ArtifactVersion current;
 
     public DefaultVersionUpdateDetails( VersionDetails v, ArtifactVersion current, boolean includeSnapshots )
@@ -55,19 +55,9 @@ public class DefaultVersionUpdateDetails
         return (ArtifactVersion) latestUpdateMap.get( updateScope );
     }
 
-    public final ArtifactVersion getNextIncremental()
-    {
-        return getNext(UpdateScope.INCREMENTAL );
-    }
-
     public final ArtifactVersion getLatestIncremental()
     {
         return getLatest( UpdateScope.INCREMENTAL );
-    }
-
-    public final ArtifactVersion getNextMinor()
-    {
-        return getNext(UpdateScope.MINOR );
     }
 
     public final ArtifactVersion getLatestMinor()
@@ -75,19 +65,9 @@ public class DefaultVersionUpdateDetails
         return getLatest( UpdateScope.MINOR );
     }
 
-    public final ArtifactVersion getNextMajor()
-    {
-        return getNext(UpdateScope.MAJOR );
-    }
-
     public final ArtifactVersion getLatestMajor()
     {
         return getLatest( UpdateScope.MAJOR );
-    }
-
-    public final ArtifactVersion getNextVersion()
-    {
-        return getNext(UpdateScope.SUBINCREMENTAL );
     }
 
     public final ArtifactVersion[] getAll()

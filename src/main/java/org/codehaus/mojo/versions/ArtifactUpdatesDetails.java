@@ -23,12 +23,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.api.DefaultVersionUpdateDetails;
-import org.codehaus.mojo.versions.api.VersionDetails;
-
-import java.util.Iterator;
-import java.util.Arrays;
 
 /**
  * Contains details of the available updates for an artifact.
@@ -40,13 +35,13 @@ public class ArtifactUpdatesDetails
 {
     private final Artifact artifact;
 
-    public ArtifactUpdatesDetails( ArtifactVersions v, ArtifactVersion current, boolean includeSnapshots)
+    public ArtifactUpdatesDetails( ArtifactVersions v, ArtifactVersion current, boolean includeSnapshots )
         throws ArtifactMetadataRetrievalException
     {
         super( v, current, includeSnapshots );
         this.artifact = v.getArtifact();
     }
-    
+
     public Artifact getArtifact()
     {
         return artifact;

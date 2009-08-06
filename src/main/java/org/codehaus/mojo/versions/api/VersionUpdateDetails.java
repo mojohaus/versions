@@ -30,24 +30,16 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 public interface VersionUpdateDetails
 {
     ArtifactVersion getCurrent();
-    
-    ArtifactVersion getNext(UpdateScope updateScope);
-    
-    ArtifactVersion getLatest(UpdateScope updateScope);
-    
-    ArtifactVersion getNextIncremental();
+
+    ArtifactVersion getNext( UpdateScope updateScope );
+
+    ArtifactVersion getLatest( UpdateScope updateScope );
 
     ArtifactVersion getLatestIncremental();
 
-    ArtifactVersion getNextMinor();
-
     ArtifactVersion getLatestMinor();
 
-    ArtifactVersion getNextMajor();
-
     ArtifactVersion getLatestMajor();
-
-    ArtifactVersion getNextVersion();
 
     ArtifactVersion[] getAll();
 }
