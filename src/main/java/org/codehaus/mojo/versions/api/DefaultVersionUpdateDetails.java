@@ -40,22 +40,22 @@ public class DefaultVersionUpdateDetails
         this.current = current;
     }
 
-    public final ArtifactVersion getCurrent()
+    public final ArtifactVersion getCurrentVersion()
     {
         return current;
     }
 
-    public final ArtifactVersion getNext( UpdateScope updateScope )
+    public final ArtifactVersion getOldestUpdate( UpdateScope updateScope )
     {
         return (ArtifactVersion) nextUpdateMap.get( updateScope );
     }
 
-    public final ArtifactVersion getLatest( UpdateScope updateScope )
+    public final ArtifactVersion getNewestUpdate( UpdateScope updateScope )
     {
         return (ArtifactVersion) latestUpdateMap.get( updateScope );
     }
 
-    public final ArtifactVersion[] getAll()
+    public final ArtifactVersion[] getAllUpdates()
     {
         return all;
     }

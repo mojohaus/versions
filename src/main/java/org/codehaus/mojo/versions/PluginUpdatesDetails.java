@@ -51,7 +51,7 @@ public class PluginUpdatesDetails
 
     public boolean isArtifactUpdateAvailable()
     {
-        return artifactDetails.getAll().length > 0;
+        return artifactDetails.getAllUpdates().length > 0;
     }
 
     public boolean isDependencyUpdateAvailable()
@@ -59,7 +59,7 @@ public class PluginUpdatesDetails
         for ( Iterator i = dependencyDetails.values().iterator(); i.hasNext(); )
         {
             ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) i.next();
-            if ( details.getAll().length > 0 )
+            if ( details.getAllUpdates().length > 0 )
             {
                 return true;
             }

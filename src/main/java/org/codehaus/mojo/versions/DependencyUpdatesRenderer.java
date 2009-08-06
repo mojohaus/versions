@@ -122,19 +122,19 @@ public class DependencyUpdatesRenderer
         for ( Iterator iterator = allUpdates.values().iterator(); iterator.hasNext(); )
         {
             ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) iterator.next();
-            if ( details.getNext( UpdateScope.SUBINCREMENTAL ) != null )
+            if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
             {
                 numAny++;
             }
-            else if ( details.getNext( UpdateScope.INCREMENTAL ) != null )
+            else if ( details.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
             {
                 numInc++;
             }
-            else if ( details.getNext( UpdateScope.MINOR ) != null )
+            else if ( details.getOldestUpdate( UpdateScope.MINOR ) != null )
             {
                 numMin++;
             }
-            else if ( details.getNext( UpdateScope.MAJOR ) != null )
+            else if ( details.getOldestUpdate( UpdateScope.MAJOR ) != null )
             {
                 numMaj++;
             }

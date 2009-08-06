@@ -116,7 +116,7 @@ public abstract class AbstractVersionsReportRenderer
     {
         sink.tableRow();
         sink.tableCell();
-        if ( details.getAll().length == 0 )
+        if ( details.getAllUpdates().length == 0 )
         {
             renderSuccessIcon();
         }
@@ -154,37 +154,37 @@ public abstract class AbstractVersionsReportRenderer
         }
 
         sink.tableCell();
-        if ( details.getNext( UpdateScope.SUBINCREMENTAL ) != null )
+        if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             sink.bold();
-            sink.text( details.getNext( UpdateScope.SUBINCREMENTAL ).toString() );
+            sink.text( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNext( UpdateScope.INCREMENTAL ) != null )
+        if ( details.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
             sink.bold();
-            sink.text( details.getNext( UpdateScope.INCREMENTAL ).toString() );
+            sink.text( details.getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNext( UpdateScope.MINOR ) != null )
+        if ( details.getOldestUpdate( UpdateScope.MINOR ) != null )
         {
             sink.bold();
-            sink.text( details.getNext( UpdateScope.MINOR ).toString() );
+            sink.text( details.getOldestUpdate( UpdateScope.MINOR ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNext( UpdateScope.MAJOR ) != null )
+        if ( details.getOldestUpdate( UpdateScope.MAJOR ) != null )
         {
             sink.bold();
-            sink.text( details.getNext( UpdateScope.MAJOR ).toString() );
+            sink.text( details.getOldestUpdate( UpdateScope.MAJOR ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
@@ -263,26 +263,26 @@ public abstract class AbstractVersionsReportRenderer
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellWidth );
-        ArtifactVersion[] versions = details.getAll();
-        if ( details.getNext( UpdateScope.SUBINCREMENTAL ) != null )
+        ArtifactVersion[] versions = details.getAllUpdates();
+        if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
-        else if ( details.getNext( UpdateScope.INCREMENTAL ) != null )
+        else if ( details.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.incrementalUpdatesAvailable" ) );
         }
-        else if ( details.getNext( UpdateScope.MINOR ) != null )
+        else if ( details.getOldestUpdate( UpdateScope.MINOR ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.minorUpdatesAvailable" ) );
         }
-        else if ( details.getNext( UpdateScope.MAJOR ) != null )
+        else if ( details.getOldestUpdate( UpdateScope.MAJOR ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
@@ -366,14 +366,15 @@ public abstract class AbstractVersionsReportRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals( versions[i], details.getNext( UpdateScope.SUBINCREMENTAL ) )
-                    || equals( versions[i], details.getNext( UpdateScope.INCREMENTAL ) )
-                    || equals( versions[i], details.getLatest( UpdateScope.INCREMENTAL ) )
-                    || equals( versions[i], details.getNext( UpdateScope.MINOR ) )
-                    || equals( versions[i], details.getLatest( UpdateScope.MINOR ) )
-                    || equals( versions[i], details.getNext( UpdateScope.MAJOR ) ) || equals( versions[i],
-                                                                                              details.getLatest(
-                                                                                                  UpdateScope.MAJOR ) );
+                boolean bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )
+                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) || equals( versions[i],
+                                                                                                      details.getNewestUpdate(
+                                                                                                          UpdateScope.MAJOR ) )
+                    ;
                 if ( bold )
                 {
                     sink.bold();
@@ -384,31 +385,31 @@ public abstract class AbstractVersionsReportRenderer
                     sink.bold_();
                     sink.nonBreakingSpace();
                     sink.italic();
-                    if ( equals( versions[i], details.getNext( UpdateScope.SUBINCREMENTAL ) ) )
+                    if ( equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
                     }
-                    else if ( equals( versions[i], details.getNext( UpdateScope.INCREMENTAL ) ) )
+                    else if ( equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextIncremental" ) );
                     }
-                    else if ( equals( versions[i], details.getLatest( UpdateScope.INCREMENTAL ) ) )
+                    else if ( equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.latestIncremental" ) );
                     }
-                    else if ( equals( versions[i], details.getNext( UpdateScope.MINOR ) ) )
+                    else if ( equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) ) )
                     {
                         sink.text( getText( "report.nextMinor" ) );
                     }
-                    else if ( equals( versions[i], details.getLatest( UpdateScope.MINOR ) ) )
+                    else if ( equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) ) )
                     {
                         sink.text( getText( "report.latestMinor" ) );
                     }
-                    else if ( equals( versions[i], details.getNext( UpdateScope.MAJOR ) ) )
+                    else if ( equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) )
                     {
                         sink.text( getText( "report.nextMajor" ) );
                     }
-                    else if ( equals( versions[i], details.getLatest( UpdateScope.MAJOR ) ) )
+                    else if ( equals( versions[i], details.getNewestUpdate( UpdateScope.MAJOR ) ) )
                     {
                         sink.text( getText( "report.latestMajor" ) );
                     }
