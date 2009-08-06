@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.codehaus.mojo.versions.api.UpdateScope;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -51,7 +53,7 @@ public class PluginUpdatesDetails
 
     public boolean isArtifactUpdateAvailable()
     {
-        return artifactDetails.getAllUpdates().length > 0;
+        return artifactDetails.getAllUpdates( UpdateScope.ANY ).length > 0;
     }
 
     public boolean isDependencyUpdateAvailable()
@@ -59,7 +61,7 @@ public class PluginUpdatesDetails
         for ( Iterator i = dependencyDetails.values().iterator(); i.hasNext(); )
         {
             ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) i.next();
-            if ( details.getAllUpdates().length > 0 )
+            if ( details.getAllUpdates( UpdateScope.ANY ).length > 0 )
             {
                 return true;
             }

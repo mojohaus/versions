@@ -1,42 +1,44 @@
 package org.codehaus.mojo.versions.api;
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+/*
+* Licensed to the Apache Software Foundation (ASF) under one
+* or more contributor license agreements.  See the NOTICE file
+* distributed with this work for additional information
+* regarding copyright ownership.  The ASF licenses this file
+* to you under the Apache License, Version 2.0 (the
+* "License"); you may not use this file except in compliance
+* with the License.  You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 /**
- * Created by IntelliJ IDEA.
- * User: user
- * Date: 06-Aug-2009
- * Time: 07:51:47
- * To change this template use File | Settings | File Templates.
+ * A default implementation of {@link org.codehaus.mojo.versions.api.VersionUpdateDetails}.
+ * @author Stephen Connolly
+ * @since 1.0-beta-1
  */
 public class DefaultVersionUpdateDetails
     implements VersionUpdateDetails
 {
-    private final Map/*<UpdateScope,ArtifactVersion>*/ nextUpdateMap = new HashMap();
-
-    private final Map/*<UpdateScope,ArtifactVersion>*/ latestUpdateMap = new HashMap();
-
-    private final ArtifactVersion[] all;
-
     private final ArtifactVersion current;
 
-    public DefaultVersionUpdateDetails( VersionDetails v, ArtifactVersion current, boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException
+    private final VersionDetails versionDetails;
+
+    private final boolean includeSnapshots;
+
+    public DefaultVersionUpdateDetails( VersionDetails versionDetails, ArtifactVersion current, boolean includeSnapshots )
     {
-        final Iterator i = Arrays.asList( UpdateScope.values() ).iterator();
-        while ( i.hasNext() )
-        {
-            final UpdateScope updateScope = (UpdateScope) i.next();
-            nextUpdateMap.put( updateScope, updateScope.getNext( v, current, includeSnapshots ) );
-            latestUpdateMap.put( updateScope, updateScope.getLatest( v, current, includeSnapshots ) );
-        }
-        all = v.getVersions( current, null, includeSnapshots );
+        this.includeSnapshots = includeSnapshots;
+        this.versionDetails = versionDetails;
         this.current = current;
     }
 
@@ -47,16 +49,16 @@ public class DefaultVersionUpdateDetails
 
     public final ArtifactVersion getOldestUpdate( UpdateScope updateScope )
     {
-        return (ArtifactVersion) nextUpdateMap.get( updateScope );
+        return versionDetails.getOldestUpdate( current, updateScope, includeSnapshots );
     }
 
     public final ArtifactVersion getNewestUpdate( UpdateScope updateScope )
     {
-        return (ArtifactVersion) latestUpdateMap.get( updateScope );
+        return versionDetails.getNewestUpdate( current, updateScope, includeSnapshots );
     }
 
-    public final ArtifactVersion[] getAllUpdates()
+    public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope )
     {
-        return all;
+        return versionDetails.getVersions( current, null, includeSnapshots, false, true );
     }
 }

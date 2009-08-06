@@ -364,7 +364,7 @@ public class PluginUpdatesRenderer
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellWidth );
-        ArtifactVersion[] versions = details.getArtifactDetails().getAllUpdates();
+        ArtifactVersion[] versions = details.getArtifactDetails().getAllUpdates( UpdateScope.ANY );
         if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             renderWarningIcon();

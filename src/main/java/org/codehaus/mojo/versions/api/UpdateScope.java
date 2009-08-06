@@ -48,9 +48,8 @@ public abstract class UpdateScope
     public static final UpdateScope SUBINCREMENTAL = new UpdateScope( "SUBINCREMENTAL", 0 )
     {
         /** {@inheritDoc} */
-        public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                        boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 3
@@ -61,9 +60,8 @@ public abstract class UpdateScope
         }
 
         /** {@inheritDoc} */
-        public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                          boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 3
@@ -71,6 +69,17 @@ public abstract class UpdateScope
                 : versionDetails.getNewestVersion( currentVersion,
                                                    versionComparator.incrementSegment( currentVersion, 2 ),
                                                    includeSnapshots, false, false );
+        }
+
+        /** {@inheritDoc} */
+        public ArtifactVersion[] getAllUpdates( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
+        {
+            VersionComparator versionComparator = versionDetails.getVersionComparator();
+            return versionComparator.getSegmentCount( currentVersion ) < 3
+                ? null
+                : versionDetails.getVersions( currentVersion, versionComparator.incrementSegment( currentVersion, 2 ),
+                                              includeSnapshots, false, false );
         }
 
     };
@@ -84,9 +93,8 @@ public abstract class UpdateScope
     public static final UpdateScope INCREMENTAL = new UpdateScope( "INCREMENTAL", 1 )
     {
         /** {@inheritDoc} */
-        public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                        boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 3
@@ -97,9 +105,8 @@ public abstract class UpdateScope
         }
 
         /** {@inheritDoc} */
-        public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                          boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 3
@@ -109,20 +116,31 @@ public abstract class UpdateScope
                                                    includeSnapshots, true, false );
         }
 
+        /** {@inheritDoc} */
+        public ArtifactVersion[] getAllUpdates( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
+        {
+            VersionComparator versionComparator = versionDetails.getVersionComparator();
+            return versionComparator.getSegmentCount( currentVersion ) < 3
+                ? null
+                : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 2 ),
+                                              versionComparator.incrementSegment( currentVersion, 1 ), includeSnapshots,
+                                              true, false );
+        }
+
     };
 
     /**
-     * Minor version updates, that is the second segment of the version number, for example <code>1.0.0.15</code>
-     * to <code>1.1.0.0</code>.
+     * Minor version updates, that is the second segment of the version number, for example <code>1.0.0.15</code> to
+     * <code>1.1.0.0</code>.
      *
      * @since 1.0-beta-1
      */
     public static final UpdateScope MINOR = new UpdateScope( "MINOR", 2 )
     {
         /** {@inheritDoc} */
-        public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                        boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 2
@@ -133,9 +151,8 @@ public abstract class UpdateScope
         }
 
         /** {@inheritDoc} */
-        public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                          boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 2
@@ -145,20 +162,31 @@ public abstract class UpdateScope
                                                    includeSnapshots, true, false );
         }
 
+        /** {@inheritDoc} */
+        public ArtifactVersion[] getAllUpdates( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
+        {
+            VersionComparator versionComparator = versionDetails.getVersionComparator();
+            return versionComparator.getSegmentCount( currentVersion ) < 2
+                ? null
+                : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 1 ),
+                                              versionComparator.incrementSegment( currentVersion, 0 ), includeSnapshots,
+                                              true, false );
+        }
+
     };
 
     /**
-     * Major version updates, that is the first segment of the version number, for example <code>1.0.0.15</code>
-     * to <code>2.0.0.0</code>.
+     * Major version updates, that is the first segment of the version number, for example <code>1.0.0.15</code> to
+     * <code>2.0.0.0</code>.
      *
      * @since 1.0-beta-1
      */
     public static final UpdateScope MAJOR = new UpdateScope( "MAJOR", 3 )
     {
         /** {@inheritDoc} */
-        public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                        boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 1
@@ -168,15 +196,25 @@ public abstract class UpdateScope
         }
 
         /** {@inheritDoc} */
-        public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                          boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             return versionComparator.getSegmentCount( currentVersion ) < 1
                 ? null
                 : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 0 ), null,
                                                    includeSnapshots, true, false );
+        }
+
+        /** {@inheritDoc} */
+        public ArtifactVersion[] getAllUpdates( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
+        {
+            VersionComparator versionComparator = versionDetails.getVersionComparator();
+            return versionComparator.getSegmentCount( currentVersion ) < 1
+                ? null
+                : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 0 ), null,
+                                              includeSnapshots, true, false );
         }
 
     };
@@ -189,19 +227,24 @@ public abstract class UpdateScope
     public static final UpdateScope ANY = new UpdateScope( "ANY", 4 )
     {
         /** {@inheritDoc} */
-        public ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                        boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             return versionDetails.getOldestVersion( currentVersion, null, includeSnapshots, false, false );
         }
 
         /** {@inheritDoc} */
-        public ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                          boolean includeSnapshots )
-            throws ArtifactMetadataRetrievalException
+        public ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
         {
             return versionDetails.getNewestVersion( currentVersion, null, includeSnapshots, false, false );
+        }
+
+        /** {@inheritDoc} */
+        public ArtifactVersion[] getAllUpdates( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                boolean includeSnapshots )
+        {
+            return versionDetails.getVersions( currentVersion, null, includeSnapshots, false, false );
         }
 
     };
@@ -216,9 +259,8 @@ public abstract class UpdateScope
      * @throws ArtifactMetadataRetrievalException
      *          if there was a problem retrieving the list of available versions.
      */
-    public abstract ArtifactVersion getNext( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                             boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException;
+    public abstract ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                     boolean includeSnapshots );
 
     /**
      * Returns the newest version after the specified current version within this scope.
@@ -227,12 +269,20 @@ public abstract class UpdateScope
      * @param currentVersion   The current version.
      * @param includeSnapshots Whether to include snapshots.
      * @return The newest version within this scope or <code>null</code> if there is no version within this scope.
-     * @throws ArtifactMetadataRetrievalException
-     *          if there was a problem retrieving the list of available versions.
      */
-    public abstract ArtifactVersion getLatest( VersionDetails versionDetails, ArtifactVersion currentVersion,
-                                               boolean includeSnapshots )
-        throws ArtifactMetadataRetrievalException;
+    public abstract ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                     boolean includeSnapshots );
+
+    /**
+     * Returns all versions newer than the specified current version within this scope.
+     *
+     * @param versionDetails   The versions to select from.
+     * @param currentVersion   The current version.
+     * @param includeSnapshots Whether to include snapshots.
+     * @return All newer versions within this scope.
+     */
+    public abstract ArtifactVersion[] getAllUpdates( VersionDetails versionDetails, ArtifactVersion currentVersion,
+                                                     boolean includeSnapshots );
 
     /**
      * The name of this constant, as declared in the declaration. Most programmers should use the {@link #toString}

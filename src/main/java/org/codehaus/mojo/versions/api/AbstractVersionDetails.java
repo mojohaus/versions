@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions.api;
 */
 
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -32,14 +31,49 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Created by IntelliJ IDEA.
+ * Base class for {@link org.codehaus.mojo.versions.api.VersionDetails}.
  *
- * @author connollys
- * @since Aug 4, 2009 11:04:36 AM
+ * @author Stephen Connolly
+ * @since 1.0-beta-1
  */
 public abstract class AbstractVersionDetails
     implements VersionDetails
 {
+
+    /**
+     * The current version.
+     * Guarded by {@link #currentVersionLock}.
+     * @since 1.0-beta-1
+     */
+    private ArtifactVersion currentVersion = null;
+
+    /**
+     * Not sure if we need to be thread safe, but there's no harm being careful, after all we could be invoked from an
+     * IDE.
+     * @since 1.0-beta-1
+     */
+    private final Object currentVersionLock = new Object();
+
+    public final boolean isCurrentVersionDefined()
+    {
+        return getCurrentVersion() != null;
+    }
+
+    public final ArtifactVersion getCurrentVersion()
+    {
+        synchronized ( currentVersionLock )
+        {
+            return currentVersion;
+        }
+    }
+
+    public final void setCurrentVersion( ArtifactVersion currentVersion )
+    {
+        synchronized ( currentVersionLock )
+        {
+            this.currentVersion = currentVersion;
+        }
+    }
 
     public final ArtifactVersion[] getVersions()
     {
@@ -282,5 +316,68 @@ public abstract class AbstractVersionDetails
             result.add( candidate );
         }
         return (ArtifactVersion[]) result.toArray( new ArtifactVersion[result.size()] );
+    }
+
+    public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
+    {
+        return getOldestUpdate( currentVersion, updateScope, false );
+    }
+
+    public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
+    {
+        return getNewestUpdate( currentVersion, updateScope, false );
+    }
+
+    public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope )
+    {
+        return getAllUpdates( currentVersion, updateScope, false );
+    }
+
+    public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
+                                            boolean includeSnapshots )
+    {
+        return updateScope.getOldestUpdate( this, currentVersion, includeSnapshots );
+    }
+
+    public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
+                                            boolean includeSnapshots )
+    {
+        return updateScope.getNewestUpdate( this, currentVersion, includeSnapshots );
+    }
+
+    public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope,
+                                            boolean includeSnapshots )
+    {
+        return updateScope.getAllUpdates( this, currentVersion, includeSnapshots );
+    }
+
+    public final ArtifactVersion getOldestUpdate( UpdateScope updateScope )
+    {
+        return getOldestUpdate( updateScope, false );
+    }
+
+    public final ArtifactVersion getNewestUpdate( UpdateScope updateScope )
+    {
+        return getNewestUpdate( updateScope, false );
+    }
+
+    public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope )
+    {
+        return getAllUpdates( updateScope, false );
+    }
+
+    public final ArtifactVersion getOldestUpdate( UpdateScope updateScope, boolean includeSnapshots )
+    {
+        return getOldestUpdate( getCurrentVersion(), updateScope, includeSnapshots );
+    }
+
+    public final ArtifactVersion getNewestUpdate( UpdateScope updateScope, boolean includeSnapshots )
+    {
+        return getNewestUpdate( getCurrentVersion(),updateScope,includeSnapshots );
+    }
+
+    public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope, boolean includeSnapshots )
+    {
+        return getAllUpdates( getCurrentVersion(), updateScope, includeSnapshots );
     }
 }

@@ -116,7 +116,7 @@ public abstract class AbstractVersionsReportRenderer
     {
         sink.tableRow();
         sink.tableCell();
-        if ( details.getAllUpdates().length == 0 )
+        if ( details.getAllUpdates( UpdateScope.ANY ).length == 0 )
         {
             renderSuccessIcon();
         }
@@ -263,7 +263,7 @@ public abstract class AbstractVersionsReportRenderer
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellWidth );
-        ArtifactVersion[] versions = details.getAllUpdates();
+        ArtifactVersion[] versions = details.getAllUpdates( UpdateScope.ANY );
         if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             renderWarningIcon();

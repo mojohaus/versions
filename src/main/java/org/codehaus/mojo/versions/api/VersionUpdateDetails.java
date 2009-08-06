@@ -35,5 +35,5 @@ public interface VersionUpdateDetails
 
     ArtifactVersion getNewestUpdate( UpdateScope updateScope );
 
-    ArtifactVersion[] getAllUpdates();
+    ArtifactVersion[] getAllUpdates( UpdateScope updateScope );
 }
