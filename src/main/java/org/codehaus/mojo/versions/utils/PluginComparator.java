@@ -20,11 +20,12 @@ package org.codehaus.mojo.versions.utils;
  */
 
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.ReportPlugin;
 
 import java.util.Comparator;
 
 /**
- * A comparator used to sort plugins by group id, artifact id and finally version.
+ * A comparator used to sort plugins and report plugins by group id, artifact id and finally version.
  *
  * @since 1.0-beta-1
  */
@@ -33,26 +34,38 @@ public class PluginComparator
 {
 
     /**
+     * Compares to {@link Plugin} or {@link ReportPlugin} instances.
+     *
      * @param o1 the first object
      * @param o2 the second object.
      * @return the comparison result
      * @see java.util.Comparator#compare(Object, Object)
-     * @since 1.0-alpha-1
+     * @since 1.0-beta-1
      */
     public int compare( Object o1, Object o2 )
     {
-        Plugin d1 = (Plugin) o1;
-        Plugin d2 = (Plugin) o2;
+        if ( !(o1 instanceof Plugin || o1 instanceof ReportPlugin) ) 
+        {
+            throw new IllegalArgumentException( "This comparator can only be used to compare Plugin and ReportPlugin instances" );
+        }
+        if ( !(o2 instanceof Plugin || o2 instanceof ReportPlugin) )
+        {
+            throw new IllegalArgumentException( "This comparator can only be used to compare Plugin and ReportPlugin instances" );
+        }
+        String g1 = o1 instanceof Plugin ? ((Plugin) o1).getGroupId() : ((ReportPlugin) o1).getGroupId();
+        String g2 = o2 instanceof Plugin ? ((Plugin) o2).getGroupId() : ((ReportPlugin) o2).getGroupId();
 
-        int r = d1.getGroupId().compareTo( d2.getGroupId() );
+        int r = g1.compareTo( g2 );
         if ( r == 0 )
         {
-            r = d1.getArtifactId().compareTo( d2.getArtifactId() );
+            String a1 = o1 instanceof Plugin ? ((Plugin) o1).getArtifactId() : ((ReportPlugin) o1).getArtifactId();
+            String a2 = o2 instanceof Plugin ? ((Plugin) o2).getArtifactId() : ((ReportPlugin) o2).getArtifactId();
+            r = a1.compareTo( a2 );
         }
         if ( r == 0 )
         {
-            String v1 = d1.getVersion();
-            String v2 = d2.getVersion();
+            String v1 = o1 instanceof Plugin ? ((Plugin) o1).getVersion() : ((ReportPlugin) o1).getVersion();
+            String v2 = o2 instanceof Plugin ? ((Plugin) o2).getVersion() : ((ReportPlugin) o2).getVersion();
             if ( v1 == null )
             {
                 // hope I got the +1/-1 the right way around
