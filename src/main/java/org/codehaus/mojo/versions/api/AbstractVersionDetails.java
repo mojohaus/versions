@@ -414,4 +414,34 @@ public abstract class AbstractVersionDetails
     {
         return getAllUpdates( getCurrentVersion(), updateScope, includeSnapshots );
     }
+
+    public final ArtifactVersion getOldestUpdate( VersionRange versionRange )
+    {
+        return getOldestUpdate( versionRange, isIncludeSnapshots() );
+    }
+
+    public final ArtifactVersion getNewestUpdate( VersionRange versionRange )
+    {
+        return getNewestUpdate( versionRange, isIncludeSnapshots() );
+    }
+
+    public final ArtifactVersion[] getAllUpdates( VersionRange versionRange )
+    {
+        return getAllUpdates( versionRange, isIncludeSnapshots() );
+    }
+
+    public ArtifactVersion getOldestUpdate( VersionRange versionRange, boolean includeSnapshots )
+    {
+        return getOldestVersion( versionRange, getCurrentVersion(), null, includeSnapshots, false, true );
+    }
+
+    public ArtifactVersion getNewestUpdate( VersionRange versionRange, boolean includeSnapshots )
+    {
+        return getNewestVersion( versionRange, getCurrentVersion(), null, includeSnapshots, false, true );
+    }
+
+    public ArtifactVersion[] getAllUpdates( VersionRange versionRange, boolean includeSnapshots )
+    {
+        return getVersions( versionRange, getCurrentVersion(), null, includeSnapshots, false, true );
+    }
 }

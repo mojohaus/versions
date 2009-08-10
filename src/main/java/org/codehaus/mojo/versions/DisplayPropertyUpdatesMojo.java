@@ -21,16 +21,16 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.PropertyVersions;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Sets properties to the latest versions of specific artifacts.
@@ -105,7 +105,6 @@ public class DisplayPropertyUpdatesMojo
             Map.Entry/*<Property,PropertyVersions>*/ entry = (Map.Entry/*<Property,PropertyVersions>*/) i.next();
             Property property = (Property) entry.getKey();
             PropertyVersions version = (PropertyVersions) entry.getValue();
-            VersionComparator comparator = version.getVersionComparator();
 
             final String currentVersion = getProject().getProperties().getProperty( property.getName() );
             if ( currentVersion == null )
@@ -113,84 +112,10 @@ public class DisplayPropertyUpdatesMojo
                 continue;
             }
 
-            final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
-            ArtifactVersion[] artifactVersions = version.getVersions( includeSnapshots );
-            getLog().debug(
-                "Property ${" + property.getName() + "}: Set of valid available versions is " + Arrays.asList(
-                    artifactVersions ) );
-            VersionRange range;
-            try
-            {
-                if ( property.getVersion() != null )
-                {
-                    range = VersionRange.createFromVersionSpec( property.getVersion() );
-                    getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
-                }
-                else
-                {
-                    range = null;
-                    getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
-                }
-            }
-            catch ( InvalidVersionSpecificationException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
             ArtifactVersion winner =
-                version.getNewestVersion( range, getHelper().createArtifactVersion( currentVersion ), null,
-                                          includeSnapshots, false, true );
-            getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + winner );
+                version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
+                                          this.getHelper() );
 
-            if ( property.isSearchReactor() )
-            {
-                getLog().debug( "Property ${" + property.getName() + "}: Searching reactor for a valid version..." );
-                Collection reactorArtifacts = getHelper().extractArtifacts( reactorProjects );
-                ArtifactVersion[] reactorVersions = version.getVersions( reactorArtifacts );
-                getLog().debug(
-                    "Property ${" + property.getName() + "}: Set of valid available versions from the reactor is "
-                        + Arrays.asList( reactorVersions ) );
-                ArtifactVersion fromReactor = null;
-                if ( reactorVersions.length > 0 )
-                {
-                    for ( int j = reactorVersions.length - 1; j >= 0; j-- )
-                    {
-                        if ( range == null || range.containsVersion( reactorVersions[j] ) )
-                        {
-                            fromReactor = reactorVersions[j];
-                            getLog().debug(
-                                "Property ${" + property.getName() + "}: Reactor has version " + fromReactor );
-                            break;
-                        }
-                    }
-                }
-                if ( fromReactor != null && ( winner != null || !currentVersion.equals( fromReactor.toString() ) ) )
-                {
-                    if ( property.isPreferReactor() )
-                    {
-                        getLog().debug(
-                            "Property ${" + property.getName() + "}: Reactor has a version and we prefer the reactor" );
-                        winner = fromReactor;
-                    }
-                    else
-                    {
-                        if ( winner == null )
-                        {
-                            getLog().debug( "Property ${" + property.getName() + "}: Reactor has the only version" );
-                            winner = fromReactor;
-                        }
-                        else if ( comparator.compare( winner, fromReactor ) < 0 )
-                        {
-                            getLog().debug( "Property ${" + property.getName() + "}: Reactor has a newer version" );
-                            winner = fromReactor;
-                        }
-                        else
-                        {
-                            getLog().debug(
-                                "Property ${" + property.getName() + "}: Reactor has the same or older version" );
-                        }
-                    }
-                }
-            }
             if ( winner != null && !currentVersion.equals( winner.toString() ) )
             {
                 StringBuffer buf = new StringBuffer();
@@ -226,6 +151,7 @@ public class DisplayPropertyUpdatesMojo
             }
 
         }
+
         getLog().info( "" );
         if ( !current.isEmpty() )
         {
