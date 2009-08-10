@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.i18n.I18N;
@@ -85,9 +86,8 @@ public class DependencyUpdatesRenderer
 
         for ( Iterator it = allUpdates.entrySet().iterator(); it.hasNext(); )
         {
-            final Map.Entry/*<Dependency,DependencyUpdatesReport.DependencyUpdateDetails>*/ entry =
-                (Map.Entry) it.next();
-            renderDependencyDetail( (Dependency) entry.getKey(), (ArtifactUpdatesDetails) entry.getValue() );
+            final Map.Entry/*<Dependency,ArtifactVersions>*/ entry = (Map.Entry) it.next();
+            renderDependencyDetail( (Dependency) entry.getKey(), (ArtifactVersions) entry.getValue() );
         }
         sink.section1_();
     }
@@ -121,7 +121,7 @@ public class DependencyUpdatesRenderer
         int numCur = 0;
         for ( Iterator iterator = allUpdates.values().iterator(); iterator.hasNext(); )
         {
-            ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) iterator.next();
+            ArtifactVersions details = (ArtifactVersions) iterator.next();
             if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
             {
                 numAny++;
@@ -202,7 +202,7 @@ public class DependencyUpdatesRenderer
         sink.table_();
     }
 
-    private void renderDependencyDetail( Dependency dependency, ArtifactUpdatesDetails details )
+    private void renderDependencyDetail( Dependency dependency, ArtifactVersions details )
     {
         sink.section2();
         sink.sectionTitle2();

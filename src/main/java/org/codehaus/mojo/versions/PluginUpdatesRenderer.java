@@ -26,6 +26,7 @@ import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.codehaus.mojo.versions.api.UpdateScope;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -107,7 +108,7 @@ public class PluginUpdatesRenderer
         for ( Iterator iterator = allUpdates.values().iterator(); iterator.hasNext(); )
         {
             PluginUpdatesDetails pluginDetails = (PluginUpdatesDetails) iterator.next();
-            ArtifactUpdatesDetails details = pluginDetails.getArtifactDetails();
+            ArtifactVersions details = pluginDetails.getArtifactVersions();
             if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
             {
                 numAny++;
@@ -299,37 +300,37 @@ public class PluginUpdatesRenderer
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
+        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             sink.bold();
-            sink.text( details.getArtifactDetails().getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
+            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
+        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
             sink.bold();
-            sink.text( details.getArtifactDetails().getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
+            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.MINOR ) != null )
+        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) != null )
         {
             sink.bold();
-            sink.text( details.getArtifactDetails().getOldestUpdate( UpdateScope.MINOR ).toString() );
+            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.MAJOR ) != null )
+        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) != null )
         {
             sink.bold();
-            sink.text( details.getArtifactDetails().getOldestUpdate( UpdateScope.MAJOR ).toString() );
+            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ).toString() );
             sink.bold_();
         }
         sink.tableCell_();
@@ -364,26 +365,26 @@ public class PluginUpdatesRenderer
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellWidth );
-        ArtifactVersion[] versions = details.getArtifactDetails().getAllUpdates( UpdateScope.ANY );
-        if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
+        ArtifactVersion[] versions = details.getArtifactVersions().getAllUpdates( UpdateScope.ANY );
+        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
-        else if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
+        else if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.incrementalUpdatesAvailable" ) );
         }
-        else if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.MINOR ) != null )
+        else if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.minorUpdatesAvailable" ) );
         }
-        else if ( details.getArtifactDetails().getOldestUpdate( UpdateScope.MAJOR ) != null )
+        else if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
@@ -435,15 +436,15 @@ public class PluginUpdatesRenderer
                     sink.lineBreak();
                 }
                 boolean bold =
-                    equals( versions[i], details.getArtifactDetails().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
                         || equals( versions[i],
-                                   details.getArtifactDetails().getOldestUpdate( UpdateScope.INCREMENTAL ) )
+                                   details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) )
                         || equals( versions[i],
-                                   details.getArtifactDetails().getNewestUpdate( UpdateScope.INCREMENTAL ) )
-                        || equals( versions[i], details.getArtifactDetails().getOldestUpdate( UpdateScope.MINOR ) )
-                        || equals( versions[i], details.getArtifactDetails().getNewestUpdate( UpdateScope.MINOR ) )
-                        || equals( versions[i], details.getArtifactDetails().getOldestUpdate( UpdateScope.MAJOR ) )
-                        || equals( versions[i], details.getArtifactDetails().getNewestUpdate( UpdateScope.MAJOR ) );
+                                   details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) )
+                        || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) )
+                        || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) )
+                        || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) )
+                        || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) );
                 if ( bold )
                 {
                     sink.bold();
@@ -455,33 +456,33 @@ public class PluginUpdatesRenderer
                     sink.nonBreakingSpace();
                     sink.italic();
                     if ( equals( versions[i],
-                                 details.getArtifactDetails().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
+                                 details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
                     }
                     else if ( equals( versions[i],
-                                      details.getArtifactDetails().getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
+                                      details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextIncremental" ) );
                     }
                     else if ( equals( versions[i],
-                                      details.getArtifactDetails().getNewestUpdate( UpdateScope.INCREMENTAL ) ) )
+                                      details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.latestIncremental" ) );
                     }
-                    else if ( equals( versions[i], details.getArtifactDetails().getOldestUpdate( UpdateScope.MINOR ) ) )
+                    else if ( equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) ) )
                     {
                         sink.text( getText( "report.nextMinor" ) );
                     }
-                    else if ( equals( versions[i], details.getArtifactDetails().getNewestUpdate( UpdateScope.MINOR ) ) )
+                    else if ( equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) ) )
                     {
                         sink.text( getText( "report.latestMinor" ) );
                     }
-                    else if ( equals( versions[i], details.getArtifactDetails().getOldestUpdate( UpdateScope.MAJOR ) ) )
+                    else if ( equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) ) )
                     {
                         sink.text( getText( "report.nextMajor" ) );
                     }
-                    else if ( equals( versions[i], details.getArtifactDetails().getNewestUpdate( UpdateScope.MAJOR ) ) )
+                    else if ( equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) ) )
                     {
                         sink.text( getText( "report.latestMajor" ) );
                     }
@@ -495,7 +496,7 @@ public class PluginUpdatesRenderer
         sink.tableRows_();
         sink.table_();
 
-        if ( !details.getDependencyDetails().isEmpty() )
+        if ( !details.getDependencyVersions().isEmpty() )
         {
             sink.section3();
             sink.sectionTitle3();
@@ -503,20 +504,20 @@ public class PluginUpdatesRenderer
                 ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
             sink.sectionTitle3_();
 
-            renderDependencySummaryTable( details.getDependencyDetails(), false, true, true );
+            renderDependencySummaryTable( details.getDependencyVersions(), false, true, true );
 
             sink.section3_();
 
-            for ( Iterator i = details.getDependencyDetails().entrySet().iterator(); i.hasNext(); )
+            for ( Iterator i = details.getDependencyVersions().entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry) i.next();
-                renderDependencyDetail( (Dependency) entry.getKey(), (ArtifactUpdatesDetails) entry.getValue() );
+                renderDependencyDetail( (Dependency) entry.getKey(), (ArtifactVersions) entry.getValue() );
             }
         }
         sink.section2_();
     }
 
-    private void renderDependencyDetail( Dependency dependency, ArtifactUpdatesDetails details )
+    private void renderDependencyDetail( Dependency dependency, ArtifactVersions details )
     {
         sink.section3();
         sink.sectionTitle3();

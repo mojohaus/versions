@@ -24,6 +24,7 @@ import org.apache.maven.doxia.parser.Parser;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
 import org.codehaus.mojo.versions.api.UpdateScope;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.plexus.i18n.I18N;
 
 import java.util.Iterator;
@@ -105,12 +106,12 @@ public abstract class AbstractVersionsReportRenderer
             v2.toString() ) );
     }
 
-    protected void renderDependencySummaryTableRow( Dependency dependency, ArtifactUpdatesDetails details )
+    protected void renderDependencySummaryTableRow( Dependency dependency, ArtifactVersions details )
     {
         renderDependencySummaryTableRow( dependency, details, true, true, true );
     }
 
-    protected void renderDependencySummaryTableRow( Dependency dependency, ArtifactUpdatesDetails details,
+    protected void renderDependencySummaryTableRow( Dependency dependency, ArtifactVersions details,
                                                     boolean includeScope, boolean includeClassifier,
                                                     boolean includeType )
     {
@@ -246,12 +247,12 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableRow_();
     }
 
-    protected void renderDependencyDetailTable( Dependency dependency, ArtifactUpdatesDetails details )
+    protected void renderDependencyDetailTable( Dependency dependency, ArtifactVersions details )
     {
         renderDependencyDetailTable( dependency, details, true, true, true );
     }
 
-    protected void renderDependencyDetailTable( Dependency dependency, ArtifactUpdatesDetails details,
+    protected void renderDependencyDetailTable( Dependency dependency, ArtifactVersions details,
                                                 boolean includeScope, boolean includeClassifier, boolean includeType )
     {
         final String cellWidth = "80%";
@@ -437,7 +438,7 @@ public abstract class AbstractVersionsReportRenderer
         for ( Iterator i = map.entrySet().iterator(); i.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) i.next();
-            renderDependencySummaryTableRow( (Dependency) entry.getKey(), (ArtifactUpdatesDetails) entry.getValue(),
+            renderDependencySummaryTableRow( (Dependency) entry.getKey(), (ArtifactVersions) entry.getValue(),
                                              includeScope, includeClassifier, includeType );
         }
         renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );

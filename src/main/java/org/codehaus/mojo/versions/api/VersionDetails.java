@@ -308,6 +308,10 @@ public interface VersionDetails
      */
     void setCurrentVersion( String currentVersion );
 
+    boolean isIncludeSnapshots();
+    
+    void setIncludeSnapshots(boolean includeSnapshots);
+    
     /**
      * Retrieves the current version.
      *

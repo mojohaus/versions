@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.codehaus.mojo.versions.api.UpdateScope;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -29,39 +30,42 @@ import java.util.Map;
  */
 public class PluginUpdatesDetails
 {
-    private final ArtifactUpdatesDetails artifactDetails;
+    private final ArtifactVersions artifactVersions;
 
-    private final Map dependencyDetails;
+    private final Map dependencyVersions;
+    
+    private final boolean includeSnapshots;
 
-    public PluginUpdatesDetails( ArtifactUpdatesDetails artifactDetails, Map dependencyDetails )
+    public PluginUpdatesDetails( ArtifactVersions artifactVersions, Map dependencyVersions, boolean includeSnapshots )
     {
-        artifactDetails.getClass(); // throw NPE if null
-        dependencyDetails.getClass(); // throw NPE if null
-        this.artifactDetails = artifactDetails;
-        this.dependencyDetails = dependencyDetails;
+        artifactVersions.getClass(); // throw NPE if null
+        dependencyVersions.getClass(); // throw NPE if null
+        this.artifactVersions = artifactVersions;
+        this.dependencyVersions = dependencyVersions;
+        this.includeSnapshots = includeSnapshots;
     }
 
-    public ArtifactUpdatesDetails getArtifactDetails()
+    public ArtifactVersions getArtifactVersions()
     {
-        return artifactDetails;
+        return artifactVersions;
     }
 
-    public Map getDependencyDetails()
+    public Map getDependencyVersions()
     {
-        return dependencyDetails;
+        return dependencyVersions;
     }
 
     public boolean isArtifactUpdateAvailable()
     {
-        return artifactDetails.getAllUpdates( UpdateScope.ANY ).length > 0;
+        return artifactVersions.getAllUpdates( UpdateScope.ANY, includeSnapshots ).length > 0;
     }
 
     public boolean isDependencyUpdateAvailable()
     {
-        for ( Iterator i = dependencyDetails.values().iterator(); i.hasNext(); )
+        for ( Iterator i = dependencyVersions.values().iterator(); i.hasNext(); )
         {
-            ArtifactUpdatesDetails details = (ArtifactUpdatesDetails) i.next();
-            if ( details.getAllUpdates( UpdateScope.ANY ).length > 0 )
+            ArtifactVersions versions = (ArtifactVersions) i.next();
+            if ( versions.getAllUpdates( UpdateScope.ANY, includeSnapshots ).length > 0 )
             {
                 return true;
             }

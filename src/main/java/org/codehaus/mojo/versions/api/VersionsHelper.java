@@ -30,7 +30,6 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.ArtifactUpdatesDetails;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
@@ -176,14 +175,13 @@ public interface VersionsHelper
      * Looks up the updates of an artifact.
      *
      * @param artifact              The artifact to look up
-     * @param current               The current version.
      * @param allowSnapshots        Include snapshots in the list of updates.
      * @param usePluginRepositories Search the plugin repositories.
      * @return The artifact update details.
      * @throws ArtifactMetadataRetrievalException
      *          When things go wrong.
      */
-    ArtifactUpdatesDetails lookupArtifactUpdates( Artifact artifact, ArtifactVersion current, Boolean allowSnapshots,
+    ArtifactVersions lookupArtifactUpdates( Artifact artifact, Boolean allowSnapshots,
                                                   boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException;
 
@@ -191,30 +189,26 @@ public interface VersionsHelper
      * Looks up the updates for a set of dependencies.
      *
      * @param dependencies          The set of {@link Dependency} instances to look up.
-     * @param allowSnapshots        Include snapshots in the list of updates.
      * @param usePluginRepositories Search the plugin repositories.
-     * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.ArtifactUpdatesDetails}.
+     * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.api.ArtifactVersions}.
      * @throws ArtifactMetadataRetrievalException
      *          When things go wrong.
      * @since 1.0-beta-1
      */
-    Map/*<Dependency,ArtifactUpdatesDetails>*/ lookupDependenciesUpdates( Set dependencies, Boolean allowSnapshots,
-                                                                          boolean usePluginRepositories )
+    Map/*<Dependency,ArtifactVersions>*/ lookupDependenciesUpdates( Set dependencies, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
-     * Creates an {@link org.codehaus.mojo.versions.ArtifactUpdatesDetails} instance from a dependency.
+     * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency.
      *
      * @param dependency            The dependency.
-     * @param allowSnapshots        Include snapshots in the list of updates.
      * @param usePluginRepositories Search the plugin repositories.
      * @return The details of updates to the dependency.
      * @throws ArtifactMetadataRetrievalException
      *          When things go wrong.
      * @since 1.0-beta-1
      */
-    ArtifactUpdatesDetails lookupDependencyUpdates( Dependency dependency, Boolean allowSnapshots,
-                                                    boolean usePluginRepositories )
+    ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**

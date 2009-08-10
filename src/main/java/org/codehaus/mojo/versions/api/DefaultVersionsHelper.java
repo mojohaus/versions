@@ -38,14 +38,9 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.UnsupportedProtocolException;
-import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.*;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.codehaus.mojo.versions.ArtifactUpdatesDetails;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.model.Rule;
@@ -53,10 +48,7 @@ import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
-import org.codehaus.mojo.versions.utils.DependencyComparator;
-import org.codehaus.mojo.versions.utils.PluginComparator;
-import org.codehaus.mojo.versions.utils.RegexUtils;
-import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
+import org.codehaus.mojo.versions.utils.*;
 import org.codehaus.mojo.versions.utils.WagonUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
@@ -66,16 +58,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -509,33 +492,31 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public ArtifactUpdatesDetails lookupArtifactUpdates( Artifact artifact, ArtifactVersion current,
-                                                         Boolean allowSnapshots, boolean usePluginRepositories )
+    public ArtifactVersions lookupArtifactUpdates( Artifact artifact, Boolean allowSnapshots,
+                                                         boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
         ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
 
-        final boolean includeSnapshots = Boolean.TRUE.equals( allowSnapshots );
+        artifactVersions.setIncludeSnapshots(Boolean.TRUE.equals( allowSnapshots ));
 
-        return new ArtifactUpdatesDetails( artifactVersions, current, includeSnapshots );
+        return artifactVersions;
     }
 
     /**
      * {@inheritDoc}
      */
-    public Map/*<Dependency,ArtifactUpdatesDetails>*/ lookupDependenciesUpdates( Set dependencies,
-                                                                                 Boolean allowSnapshots,
-                                                                                 boolean usePluginRepositories )
+    public Map/*<Dependency,ArtifactVersions>*/ lookupDependenciesUpdates( Set dependencies,
+                                                                           boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
-        Map/*<Dependency,ArtifactUpdatesDetails>*/ dependencyUpdates = new TreeMap( new DependencyComparator() );
+        Map/*<Dependency,ArtifactVersions>*/ dependencyUpdates = new TreeMap( new DependencyComparator() );
         Iterator i = dependencies.iterator();
         while ( i.hasNext() )
         {
             Dependency dependency = (Dependency) i.next();
 
-            ArtifactUpdatesDetails details =
-                lookupDependencyUpdates( dependency, allowSnapshots, usePluginRepositories );
+            ArtifactVersions details = lookupDependencyUpdates( dependency, usePluginRepositories );
             dependencyUpdates.put( dependency, details );
         }
         return dependencyUpdates;
@@ -544,8 +525,7 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public ArtifactUpdatesDetails lookupDependencyUpdates( Dependency dependency, Boolean allowSnapshots,
-                                                           boolean usePluginRepositories )
+    public ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         getLog().debug(
@@ -553,10 +533,10 @@ public class DefaultVersionsHelper
                 + " for updates newer than " + dependency.getVersion() );
         VersionRange versionRange = VersionRange.createFromVersionSpec( dependency.getVersion() );
 
-        return lookupArtifactUpdates(
+        return lookupArtifactVersions(
             createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(), versionRange,
                                       dependency.getType(), dependency.getClassifier(), dependency.getScope() ),
-            createArtifactVersion( dependency.getVersion() ), allowSnapshots, usePluginRepositories );
+            usePluginRepositories );
     }
 
     /**
@@ -587,19 +567,21 @@ public class DefaultVersionsHelper
 
         VersionRange versionRange = VersionRange.createFromVersion( plugin.getVersion() );
 
-        final ArtifactUpdatesDetails pluginArtifactDetails =
-            lookupArtifactUpdates( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
-                                   createArtifactVersion( plugin.getVersion() ), allowSnapshots, true );
+        final boolean includeSnapshots = Boolean.TRUE.equals( allowSnapshots );
+
+        final ArtifactVersions pluginArtifactVersions =
+            lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
+                                    true );
 
         Set/*<Dependency>*/ pluginDependencies = new TreeSet( new DependencyComparator() );
         if ( plugin.getDependencies() != null )
         {
             pluginDependencies.addAll( plugin.getDependencies() );
         }
-        Map/*<Dependency,ArtifactUpdatesDetails>*/ pluginDependencyDetails =
-            lookupDependenciesUpdates( pluginDependencies, allowSnapshots, false );
+        Map/*<Dependency,ArtifactVersions>*/ pluginDependencyDetails =
+            lookupDependenciesUpdates( pluginDependencies, false );
 
-        return new PluginUpdatesDetails( pluginArtifactDetails, pluginDependencyDetails );
+        return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, includeSnapshots );
     }
 
     /**

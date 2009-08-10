@@ -83,9 +83,9 @@ public class DependencyUpdatesReport
         try
         {
             Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates =
-                getHelper().lookupDependenciesUpdates( dependencies, getAllowSnapshots(), false );
+                getHelper().lookupDependenciesUpdates( dependencies, false );
             Map/*<Dependency,DependencyUpdateDetails>*/ dependencyManagementUpdates =
-                getHelper().lookupDependenciesUpdates( dependencyManagement, getAllowSnapshots(), false );
+                getHelper().lookupDependenciesUpdates( dependencyManagement, false );
             DependencyUpdatesRenderer renderer =
                 new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
                                                dependencyManagementUpdates );

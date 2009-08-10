@@ -43,13 +43,23 @@ public abstract class AbstractVersionDetails
     /**
      * The current version.
      * Guarded by {@link #currentVersionLock}.
+     *
      * @since 1.0-beta-1
      */
     private ArtifactVersion currentVersion = null;
 
     /**
+     * Do we want to include snapshots when snapshot inclusion is not specified.
+     * Guarded by {@link #currentVersionLock}.
+     *
+     * @since 1.0-beta-1
+     */
+    private boolean includeSnapshots = false;
+
+    /**
      * Not sure if we need to be thread safe, but there's no harm being careful, after all we could be invoked from an
      * IDE.
+     *
      * @since 1.0-beta-1
      */
     private final Object currentVersionLock = new Object();
@@ -77,12 +87,28 @@ public abstract class AbstractVersionDetails
 
     public final void setCurrentVersion( String currentVersion )
     {
-        setCurrentVersion( new DefaultArtifactVersion( currentVersion) );
+        setCurrentVersion( new DefaultArtifactVersion( currentVersion ) );
+    }
+
+    public final boolean isIncludeSnapshots()
+    {
+        synchronized ( currentVersionLock )
+        {
+            return includeSnapshots;
+        }
+    }
+
+    public final void setIncludeSnapshots( boolean includeSnapshots )
+    {
+        synchronized ( currentVersionLock )
+        {
+            this.includeSnapshots = includeSnapshots;
+        }
     }
 
     public final ArtifactVersion[] getVersions()
     {
-        return getVersions( true );
+        return getVersions( isIncludeSnapshots() );
     }
 
     public abstract ArtifactVersion[] getVersions( boolean includeSnapshots );
@@ -111,7 +137,7 @@ public abstract class AbstractVersionDetails
 
     public final ArtifactVersion[] getVersions( ArtifactVersion currentVersion, ArtifactVersion upperBound )
     {
-        return getVersions( currentVersion, upperBound, false );
+        return getVersions( currentVersion, upperBound, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion[] getVersions( ArtifactVersion currentVersion, ArtifactVersion upperBound,
@@ -127,7 +153,7 @@ public abstract class AbstractVersionDetails
 
     public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
     {
-        return getNewestVersion( lowerBound, upperBound, true );
+        return getNewestVersion( lowerBound, upperBound, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
@@ -325,50 +351,50 @@ public abstract class AbstractVersionDetails
 
     public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
     {
-        return getOldestUpdate( currentVersion, updateScope, false );
+        return getOldestUpdate( currentVersion, updateScope, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
     {
-        return getNewestUpdate( currentVersion, updateScope, false );
+        return getNewestUpdate( currentVersion, updateScope, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope )
     {
-        return getAllUpdates( currentVersion, updateScope, false );
+        return getAllUpdates( currentVersion, updateScope, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
-                                            boolean includeSnapshots )
+                                                  boolean includeSnapshots )
     {
         return updateScope.getOldestUpdate( this, currentVersion, includeSnapshots );
     }
 
     public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
-                                            boolean includeSnapshots )
+                                                  boolean includeSnapshots )
     {
         return updateScope.getNewestUpdate( this, currentVersion, includeSnapshots );
     }
 
     public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope,
-                                            boolean includeSnapshots )
+                                                  boolean includeSnapshots )
     {
         return updateScope.getAllUpdates( this, currentVersion, includeSnapshots );
     }
 
     public final ArtifactVersion getOldestUpdate( UpdateScope updateScope )
     {
-        return getOldestUpdate( updateScope, false );
+        return getOldestUpdate( updateScope, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion getNewestUpdate( UpdateScope updateScope )
     {
-        return getNewestUpdate( updateScope, false );
+        return getNewestUpdate( updateScope, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope )
     {
-        return getAllUpdates( updateScope, false );
+        return getAllUpdates( updateScope, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion getOldestUpdate( UpdateScope updateScope, boolean includeSnapshots )
@@ -378,7 +404,7 @@ public abstract class AbstractVersionDetails
 
     public final ArtifactVersion getNewestUpdate( UpdateScope updateScope, boolean includeSnapshots )
     {
-        return getNewestUpdate( getCurrentVersion(),updateScope,includeSnapshots );
+        return getNewestUpdate( getCurrentVersion(), updateScope, includeSnapshots );
     }
 
     public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope, boolean includeSnapshots )

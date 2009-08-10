@@ -29,36 +29,38 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 public class DefaultVersionUpdateDetails
     implements VersionUpdateDetails
 {
-    private final ArtifactVersion current;
 
     private final VersionDetails versionDetails;
 
     private final boolean includeSnapshots;
 
-    public DefaultVersionUpdateDetails( VersionDetails versionDetails, ArtifactVersion current, boolean includeSnapshots )
+    public DefaultVersionUpdateDetails(VersionDetails versionDetails, boolean includeSnapshots)
     {
         this.includeSnapshots = includeSnapshots;
         this.versionDetails = versionDetails;
-        this.current = current;
     }
 
     public final ArtifactVersion getCurrentVersion()
     {
-        return current;
+        return versionDetails.getCurrentVersion();
     }
 
     public final ArtifactVersion getOldestUpdate( UpdateScope updateScope )
     {
-        return versionDetails.getOldestUpdate( current, updateScope, includeSnapshots );
+        return versionDetails.getOldestUpdate( updateScope, includeSnapshots );
     }
 
     public final ArtifactVersion getNewestUpdate( UpdateScope updateScope )
     {
-        return versionDetails.getNewestUpdate( current, updateScope, includeSnapshots );
+        return versionDetails.getNewestUpdate( updateScope, includeSnapshots );
     }
 
     public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope )
     {
-        return versionDetails.getVersions( current, null, includeSnapshots, false, true );
+        return versionDetails.getAllUpdates(updateScope, includeSnapshots);
+    }
+    
+    protected final VersionDetails getVersionDetails() {
+        return versionDetails;
     }
 }
