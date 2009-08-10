@@ -126,15 +126,6 @@ public class DisplayPluginUpdatesMojo
     private ModelInterpolator modelInterpolator;
 
     /**
-     * The session.
-     *
-     * @readonly
-     * @parameter expression="${session}"
-     * @since 1.0-alpha-1
-     */
-    private MavenSession session;
-
-    /**
      * The plugin manager.
      *
      * @component
@@ -347,7 +338,7 @@ public class DisplayPluginUpdatesMojo
             if ( version == null && !pluginsWithVersionsSpecified.contains( coords ) )
             {
                 version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
-                ;
+
                 newVersion = version != null ? version : artifactVersion.toString();
                 newVersion = artifactVersion != null ? artifactVersion.toString() : version;
                 StringBuffer buf = new StringBuffer();

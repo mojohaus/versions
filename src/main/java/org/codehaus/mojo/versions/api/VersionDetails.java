@@ -285,6 +285,80 @@ public interface VersionDetails
                                      boolean includeSnapshots );
 
     /**
+     * Returns the oldest version newer than the specified current version, but within the the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param currentVersion the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param versionRange    the version range to include.
+     * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, VersionRange versionRange );
+
+    /**
+     * Returns the newest version newer than the specified current version, but within the the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param currentVersion the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param versionRange    the version range to include.
+     * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, VersionRange versionRange );
+
+    /**
+     * Returns the all versions newer than the specified current version, but within the the specified update scope.
+     *
+     * @param currentVersion the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param versionRange    the version range to include.
+     * @return the all versions after currentVersion within the specified update scope.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, VersionRange versionRange );
+
+    /**
+     * Returns the oldest version newer than the specified current version, but within the the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param currentVersion   the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param versionRange      the version range to include.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, VersionRange versionRange,
+                                     boolean includeSnapshots );
+
+    /**
+     * Returns the newest version newer than the specified current version, but within the the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param currentVersion   the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param versionRange      the version range to include.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, VersionRange versionRange,
+                                     boolean includeSnapshots );
+
+    /**
+     * Returns the all versions newer than the specified current version, but within the the specified update scope.
+     *
+     * @param currentVersion   the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param versionRange      the version range to include.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the all versions after currentVersion within the specified update scope.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, VersionRange versionRange,
+                                     boolean includeSnapshots );
+
+    /**
      * Returns <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
      *
      * @return <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
@@ -385,5 +459,70 @@ public interface VersionDetails
      */
     ArtifactVersion[] getAllUpdates( UpdateScope updateScope, boolean includeSnapshots );
 
+
+    /**
+     * Returns the oldest version newer than the current version, but within the the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param versionRange the version range to include.
+     * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getOldestUpdate( VersionRange versionRange );
+
+    /**
+     * Returns the newest version newer than the specified current version, but within the the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param versionRange the version range to include.
+     * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getNewestUpdate( VersionRange versionRange );
+
+    /**
+     * Returns the all versions newer than the specified current version, but within the the specified update scope.
+     *
+     * @param versionRange the version range to include.
+     * @return the all versions after currentVersion within the specified update scope.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion[] getAllUpdates( VersionRange versionRange );
+
+    /**
+     * Returns the oldest version newer than the specified current version, but within the the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param versionRange      the version range to include.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getOldestUpdate( VersionRange versionRange, boolean includeSnapshots );
+
+    /**
+     * Returns the newest version newer than the specified current version, but within the the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param versionRange      the version range to include.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getNewestUpdate( VersionRange versionRange, boolean includeSnapshots );
+
+    /**
+     * Returns the all versions newer than the specified current version, but within the the specified update scope.
+     *
+     * @param versionRange      the version range to include.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the all versions after currentVersion within the specified update scope.
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion[] getAllUpdates( VersionRange versionRange, boolean includeSnapshots );
 
 }

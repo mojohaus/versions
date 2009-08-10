@@ -121,7 +121,7 @@ public abstract class AbstractVersionDetails
         while ( i.hasNext() )
         {
             ArtifactVersion candidate = (ArtifactVersion) i.next();
-            if ( !versionRange.containsVersion( candidate ) )
+            if ( versionRange != null && !versionRange.containsVersion( candidate ) )
             {
                 continue;
             }
@@ -162,9 +162,9 @@ public abstract class AbstractVersionDetails
         return getNewestVersion( lowerBound, upperBound, includeSnapshots, false, false );
     }
 
-    public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
-                                                   boolean includeSnapshots, boolean includeLower,
-                                                   boolean includeUpper )
+    public final ArtifactVersion getNewestVersion( VersionRange versionRange, ArtifactVersion lowerBound, 
+                                                   ArtifactVersion upperBound, boolean includeSnapshots, 
+                                                   boolean includeLower, boolean includeUpper )
     {
         ArtifactVersion latest = null;
         final VersionComparator versionComparator = getVersionComparator();
@@ -172,6 +172,10 @@ public abstract class AbstractVersionDetails
         while ( i.hasNext() )
         {
             ArtifactVersion candidate = (ArtifactVersion) i.next();
+            if ( versionRange != null && !versionRange.containsVersion( candidate ) )
+            {
+                continue;
+            }
             int lower = lowerBound == null ? -1 : versionComparator.compare( lowerBound, candidate );
             int upper = upperBound == null ? +1 : versionComparator.compare( upperBound, candidate );
             if ( lower > 0 || upper < 0 )
@@ -198,32 +202,16 @@ public abstract class AbstractVersionDetails
         return latest;
     }
 
+    public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
+                                                   boolean includeSnapshots, boolean includeLower,
+                                                   boolean includeUpper )
+    {
+        return getNewestVersion( null, lowerBound, upperBound, includeSnapshots, includeLower, includeUpper );
+    }
+
     public final ArtifactVersion getNewestVersion( VersionRange versionRange, boolean includeSnapshots )
     {
-        ArtifactVersion latest = null;
-        final VersionComparator versionComparator = getVersionComparator();
-        Iterator i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
-        while ( i.hasNext() )
-        {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
-            if ( !versionRange.containsVersion( candidate ) )
-            {
-                continue;
-            }
-            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
-            {
-                continue;
-            }
-            if ( latest == null )
-            {
-                latest = candidate;
-            }
-            else if ( versionComparator.compare( latest, candidate ) < 0 )
-            {
-                latest = candidate;
-            }
-        }
-        return latest;
+        return getNewestVersion( versionRange, null, null, includeSnapshots, true, true );
     }
 
     public final boolean containsVersion( String version )
@@ -244,7 +232,7 @@ public abstract class AbstractVersionDetails
     {
         return getNewerVersions( new DefaultArtifactVersion( version ), includeSnapshots );
     }
-
+                                                          
     public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
     {
         return getOldestVersion( lowerBound, upperBound, true );
@@ -252,30 +240,7 @@ public abstract class AbstractVersionDetails
 
     public final ArtifactVersion getOldestVersion( VersionRange versionRange, boolean includeSnapshots )
     {
-        ArtifactVersion oldest = null;
-        final VersionComparator versionComparator = getVersionComparator();
-        Iterator i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
-        while ( i.hasNext() )
-        {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
-            if ( !versionRange.containsVersion( candidate ) )
-            {
-                continue;
-            }
-            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
-            {
-                continue;
-            }
-            if ( oldest == null )
-            {
-                oldest = candidate;
-            }
-            else if ( versionComparator.compare( oldest, candidate ) > 0 )
-            {
-                oldest = candidate;
-            }
-        }
-        return oldest;
+        return getOldestVersion( versionRange, null, null, includeSnapshots, true, true );
     }
 
     public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
@@ -288,12 +253,23 @@ public abstract class AbstractVersionDetails
                                                    boolean includeSnapshots, boolean includeLower,
                                                    boolean includeUpper )
     {
+        return getOldestVersion( null, lowerBound, upperBound, includeSnapshots, includeLower, includeUpper);
+    }
+
+    public final ArtifactVersion getOldestVersion( VersionRange versionRange, ArtifactVersion lowerBound, 
+                                                   ArtifactVersion upperBound, boolean includeSnapshots, 
+                                                   boolean includeLower, boolean includeUpper )
+    {
         ArtifactVersion oldest = null;
         final VersionComparator versionComparator = getVersionComparator();
         Iterator i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
         while ( i.hasNext() )
         {
             ArtifactVersion candidate = (ArtifactVersion) i.next();
+            if ( versionRange != null && !versionRange.containsVersion( candidate ) )
+            {
+                continue;
+            }
             int lower = lowerBound == null ? -1 : versionComparator.compare( lowerBound, candidate );
             int upper = upperBound == null ? +1 : versionComparator.compare( upperBound, candidate );
             if ( lower > 0 || upper < 0 )
@@ -364,6 +340,21 @@ public abstract class AbstractVersionDetails
         return getAllUpdates( currentVersion, updateScope, isIncludeSnapshots() );
     }
 
+    public ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, VersionRange versionRange )
+    {
+        return getOldestUpdate( currentVersion,  versionRange, isIncludeSnapshots());
+    }
+
+    public ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, VersionRange versionRange )
+    {
+        return getNewestUpdate( currentVersion,  versionRange, isIncludeSnapshots());
+    }
+
+    public ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, VersionRange versionRange )
+    {
+        return getAllUpdates( currentVersion,  versionRange, isIncludeSnapshots());
+    }
+
     public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
                                                   boolean includeSnapshots )
     {
@@ -380,6 +371,24 @@ public abstract class AbstractVersionDetails
                                                   boolean includeSnapshots )
     {
         return updateScope.getAllUpdates( this, currentVersion, includeSnapshots );
+    }
+
+    public ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, VersionRange versionRange,
+                                            boolean includeSnapshots )
+    {
+        return getOldestVersion( versionRange, includeSnapshots );
+    }
+
+    public ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, VersionRange versionRange,
+                                            boolean includeSnapshots )
+    {
+        return getNewestVersion( versionRange, includeSnapshots );
+    }
+
+    public ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, VersionRange versionRange,
+                                            boolean includeSnapshots )
+    {
+        return new ArtifactVersion[0];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public final ArtifactVersion getOldestUpdate( UpdateScope updateScope )

@@ -636,20 +636,20 @@ public class DefaultVersionsHelper
                 }
             }
         }
-        getLog().info( "Searching for properties to update" );
+        getLog().debug( "Searching for properties associated with versions" );
         Iterator i = properties.values().iterator();
         while ( i.hasNext() )
         {
             Property property = (Property) i.next();
             if ( includeProperties != null && includeProperties.indexOf( property.getName() ) < 0 )
             {
-                getLog().debug( "Skipping update of property ${" + property.getName() + "}" );
+                getLog().debug( "Skipping property ${" + property.getName() + "}" );
                 i.remove();
             }
 
             if ( excludeProperties != null && excludeProperties.indexOf( property.getName() ) >= 0 )
             {
-                getLog().debug( "Ignoring update of property ${" + property.getName() + "}" );
+                getLog().debug( "Ignoring property ${" + property.getName() + "}" );
                 i.remove();
             }
         }
