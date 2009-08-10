@@ -22,12 +22,7 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Parent;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.Profile;
-import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.*;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.profiles.ProfileManager;
@@ -43,24 +38,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -751,7 +730,8 @@ public class PomHelper
         // finally, remove any properties without associations
         purgeProperties( result );
 
-        return (PropertyVersionsBuilder[]) result.values().toArray( new PropertyVersionsBuilder[result.values().size()] );
+        return (PropertyVersionsBuilder[]) result.values().toArray(
+            new PropertyVersionsBuilder[result.values().size()] );
     }
 
     /**

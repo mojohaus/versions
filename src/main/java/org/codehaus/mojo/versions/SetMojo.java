@@ -31,14 +31,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Sets the current projects version, updating the details of any child modules as necessary.
@@ -105,8 +98,8 @@ public class SetMojo
             final Map reactor = PomHelper.getReactorModels( project, getLog() );
 
             // now fake out the triggering change
-            final Model current = PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() )
-                ;
+            final Model current =
+                PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() );
             current.setVersion( newVersion );
 
             final Set files = new LinkedHashSet();

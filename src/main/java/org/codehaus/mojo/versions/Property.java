@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.model.Dependency;
-import org.codehaus.mojo.versions.api.PropertyVersions;
 
 /**
  * Represents an association between properties and dependencies.

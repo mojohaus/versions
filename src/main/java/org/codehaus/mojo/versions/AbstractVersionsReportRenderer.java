@@ -23,8 +23,8 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.parser.Parser;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
-import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.plexus.i18n.I18N;
 
 import java.util.Iterator;
@@ -252,8 +252,8 @@ public abstract class AbstractVersionsReportRenderer
         renderDependencyDetailTable( dependency, details, true, true, true );
     }
 
-    protected void renderDependencyDetailTable( Dependency dependency, ArtifactVersions details,
-                                                boolean includeScope, boolean includeClassifier, boolean includeType )
+    protected void renderDependencyDetailTable( Dependency dependency, ArtifactVersions details, boolean includeScope,
+                                                boolean includeClassifier, boolean includeType )
     {
         final String cellWidth = "80%";
         final String headerWidth = "20%";
@@ -374,8 +374,7 @@ public abstract class AbstractVersionsReportRenderer
                     || equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) )
                     || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) || equals( versions[i],
                                                                                                       details.getNewestUpdate(
-                                                                                                          UpdateScope.MAJOR ) )
-                    ;
+                                                                                                          UpdateScope.MAJOR ) );
                 if ( bold )
                 {
                     sink.bold();

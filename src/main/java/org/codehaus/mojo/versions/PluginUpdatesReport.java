@@ -27,11 +27,7 @@ import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Generates a report of available updates for the dependencies of a project.

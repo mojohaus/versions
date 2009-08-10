@@ -493,12 +493,12 @@ public class DefaultVersionsHelper
      * {@inheritDoc}
      */
     public ArtifactVersions lookupArtifactUpdates( Artifact artifact, Boolean allowSnapshots,
-                                                         boolean usePluginRepositories )
+                                                   boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
         ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
 
-        artifactVersions.setIncludeSnapshots(Boolean.TRUE.equals( allowSnapshots ));
+        artifactVersions.setIncludeSnapshots( Boolean.TRUE.equals( allowSnapshots ) );
 
         return artifactVersions;
     }

@@ -5,10 +5,10 @@ import org.apache.maven.artifact.ArtifactUtils;
 
 /**
  * Created by IntelliJ IDEA.
-*
-* @author connollys
-* @since Aug 6, 2009 9:23:13 AM
-*/
+ *
+ * @author connollys
+ * @since Aug 6, 2009 9:23:13 AM
+ */
 final class DefaultArtifactAssociation
     implements Comparable, ArtifactAssocation
 {

@@ -19,8 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.UpdateScope;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -33,7 +33,7 @@ public class PluginUpdatesDetails
     private final ArtifactVersions artifactVersions;
 
     private final Map dependencyVersions;
-    
+
     private final boolean includeSnapshots;
 
     public PluginUpdatesDetails( ArtifactVersions artifactVersions, Map dependencyVersions, boolean includeSnapshots )

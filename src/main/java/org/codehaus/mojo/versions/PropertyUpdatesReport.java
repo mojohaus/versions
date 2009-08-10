@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions;
 * under the License.
 */
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
@@ -28,12 +27,7 @@ import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or

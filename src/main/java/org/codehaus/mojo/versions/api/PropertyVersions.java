@@ -27,16 +27,7 @@ import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * Manages a property that is associated with one or more artifacts.
@@ -64,7 +55,7 @@ public class PropertyVersions
 
     private final PropertyVersions.PropertyVersionComparator comparator;
 
-    PropertyVersions(String profileId, String name, VersionsHelper helper, Set/*<ArtifactAssociation>*/ associations)
+    PropertyVersions( String profileId, String name, VersionsHelper helper, Set/*<ArtifactAssociation>*/ associations )
         throws ArtifactMetadataRetrievalException
     {
         this.profileId = profileId;
@@ -117,7 +108,8 @@ public class PropertyVersions
                 versions.addAll( Arrays.asList( associatedVersions.getVersions( true ) ) );
             }
         }
-        if (versions == null) {
+        if ( versions == null )
+        {
             versions = new TreeSet( versionComparator );
         }
         return Collections.unmodifiableSortedSet( versions );

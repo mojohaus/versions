@@ -25,8 +25,8 @@ import org.apache.maven.doxia.parser.Parser;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
-import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -470,19 +470,23 @@ public class PluginUpdatesRenderer
                     {
                         sink.text( getText( "report.latestIncremental" ) );
                     }
-                    else if ( equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) ) )
+                    else if ( equals( versions[i],
+                                      details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) ) )
                     {
                         sink.text( getText( "report.nextMinor" ) );
                     }
-                    else if ( equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) ) )
+                    else if ( equals( versions[i],
+                                      details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) ) )
                     {
                         sink.text( getText( "report.latestMinor" ) );
                     }
-                    else if ( equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) ) )
+                    else if ( equals( versions[i],
+                                      details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) ) )
                     {
                         sink.text( getText( "report.nextMajor" ) );
                     }
-                    else if ( equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) ) )
+                    else if ( equals( versions[i],
+                                      details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) ) )
                     {
                         sink.text( getText( "report.latestMajor" ) );
                     }

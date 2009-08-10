@@ -108,9 +108,15 @@ public class UpdatePropertiesMojo
             PropertyVersions version = (PropertyVersions) entry.getValue();
             VersionComparator comparator = version.getVersionComparator();
 
-            ArtifactVersion[] artifactVersions;
-            artifactVersions =
-                version.getVersions( !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots ) );
+            final String currentVersion = getProject().getProperties().getProperty( property.getName() );
+            if ( currentVersion == null )
+            {
+                continue;
+            }
+
+            final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
+
+            ArtifactVersion[] artifactVersions = version.getVersions( includeSnapshots );
             getLog().debug(
                 "Property ${" + property.getName() + "}: Set of valid available versions is " + Arrays.asList(
                     artifactVersions ) );
@@ -132,26 +138,10 @@ public class UpdatePropertiesMojo
             {
                 throw new MojoExecutionException( e.getMessage(), e );
             }
-            final String currentVersion = getProject().getProperties().getProperty( property.getName() );
-            if ( currentVersion == null )
-            {
-                continue;
-            }
-            ArtifactVersion winner = null;
-            for ( int j = artifactVersions.length - 1; j >= 0; j-- )
-            {
-                if ( range == null || range.containsVersion( artifactVersions[j] ) )
-                {
-                    if ( currentVersion.equals( artifactVersions[j].toString() ) )
-                    {
-                        getLog().debug( "Property ${" + property.getName() + "}: No newer version" );
-                        break;
-                    }
-                    winner = artifactVersions[j];
-                    getLog().debug( "Property ${" + property.getName() + "}: Newest version is: " + winner );
-                    break;
-                }
-            }
+
+            ArtifactVersion winner =
+                version.getNewestVersion( range, getHelper().createArtifactVersion( currentVersion ), null,
+                                          includeSnapshots, false, true );
             getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + winner );
             if ( property.isSearchReactor() )
             {

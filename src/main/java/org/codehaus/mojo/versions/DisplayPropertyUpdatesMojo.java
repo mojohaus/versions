@@ -19,22 +19,18 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Sets properties to the latest versions of specific artifacts.
@@ -48,6 +44,13 @@ import java.util.Map;
 public class DisplayPropertyUpdatesMojo
     extends AbstractVersionsUpdaterMojo
 {
+
+    /**
+     * The width to pad info messages.
+     *
+     * @since 1.0-alpha-1
+     */
+    private static final int INFO_PAD_SIZE = 68;
 
 // ------------------------------ FIELDS ------------------------------
 
@@ -90,6 +93,9 @@ public class DisplayPropertyUpdatesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        List current = new ArrayList();
+        List updates = new ArrayList();
+
         Map propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
                                                       !Boolean.FALSE.equals( autoLinkItems ) );
@@ -100,6 +106,12 @@ public class DisplayPropertyUpdatesMojo
             Property property = (Property) entry.getKey();
             PropertyVersions version = (PropertyVersions) entry.getValue();
             VersionComparator comparator = version.getVersionComparator();
+
+            final String currentVersion = getProject().getProperties().getProperty( property.getName() );
+            if ( currentVersion == null )
+            {
+                continue;
+            }
 
             final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
             ArtifactVersion[] artifactVersions = version.getVersions( includeSnapshots );
@@ -124,27 +136,11 @@ public class DisplayPropertyUpdatesMojo
             {
                 throw new MojoExecutionException( e.getMessage(), e );
             }
-            final String currentVersion = getProject().getProperties().getProperty( property.getName() );
-            if ( currentVersion == null )
-            {
-                continue;
-            }
-            ArtifactVersion winner = null;
-            for ( int j = artifactVersions.length - 1; j >= 0; j-- )
-            {
-                if ( range == null || range.containsVersion( artifactVersions[j] ) )
-                {
-                    if ( currentVersion.equals( artifactVersions[j].toString() ) )
-                    {
-                        getLog().debug( "Property ${" + property.getName() + "}: No newer version" );
-                        break;
-                    }
-                    winner = artifactVersions[j];
-                    getLog().debug( "Property ${" + property.getName() + "}: Newest version is: " + winner );
-                    break;
-                }
-            }
+            ArtifactVersion winner =
+                version.getNewestVersion( range, getHelper().createArtifactVersion( currentVersion ), null,
+                                          includeSnapshots, false, true );
             getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + winner );
+
             if ( property.isSearchReactor() )
             {
                 getLog().debug( "Property ${" + property.getName() + "}: Searching reactor for a valid version..." );
@@ -195,16 +191,70 @@ public class DisplayPropertyUpdatesMojo
                     }
                 }
             }
-            if ( winner == null || currentVersion.equals( winner.toString() ) )
+            if ( winner != null && !currentVersion.equals( winner.toString() ) )
             {
-                getLog().info( "${" + property.getName() + "} = " + currentVersion);
+                StringBuffer buf = new StringBuffer();
+                buf.append( "${" );
+                buf.append( property.getName() );
+                buf.append( "} " );
+                final String newVersion = winner.toString();
+                int padding = INFO_PAD_SIZE - currentVersion.length() - newVersion.length() - 4;
+                while ( buf.length() < padding )
+                {
+                    buf.append( '.' );
+                }
+                buf.append( ' ' );
+                buf.append( currentVersion );
+                buf.append( " -> " );
+                buf.append( newVersion );
+                updates.add( buf.toString() );
             }
-            else 
+            else
             {
-                getLog().info( "${" + property.getName() + "} " + currentVersion + " -> " + winner );
+                StringBuffer buf = new StringBuffer();
+                buf.append( "${" );
+                buf.append( property.getName() );
+                buf.append( "} " );
+                int padding = INFO_PAD_SIZE - currentVersion.length();
+                while ( buf.length() < padding )
+                {
+                    buf.append( '.' );
+                }
+                buf.append( ' ' );
+                buf.append( currentVersion );
+                current.add( buf.toString() );
             }
 
         }
+        getLog().info( "" );
+        if ( !current.isEmpty() )
+        {
+            getLog().info( "The following version properties are referencing the newest available version:" );
+            i = updates.iterator();
+            while ( i.hasNext() )
+            {
+                getLog().info( "  " + i.next() );
+            }
+        }
+        if ( updates.isEmpty() && current.isEmpty() )
+        {
+            getLog().info( "This project does not have any properties associated with versions." );
+        }
+        else if ( updates.isEmpty() )
+        {
+            getLog().info( "All version properties are referencing the newest version available." );
+        }
+
+        if ( !updates.isEmpty() )
+        {
+            getLog().info( "The following version property updates are available:" );
+            i = updates.iterator();
+            while ( i.hasNext() )
+            {
+                getLog().info( "  " + i.next() );
+            }
+        }
+        getLog().info( "" );
     }
 
     protected void update( ModifiedPomXMLEventReader pom )

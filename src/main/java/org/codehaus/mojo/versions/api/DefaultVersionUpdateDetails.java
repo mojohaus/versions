@@ -23,6 +23,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 /**
  * A default implementation of {@link org.codehaus.mojo.versions.api.VersionUpdateDetails}.
+ *
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
@@ -34,7 +35,7 @@ public class DefaultVersionUpdateDetails
 
     private final boolean includeSnapshots;
 
-    public DefaultVersionUpdateDetails(VersionDetails versionDetails, boolean includeSnapshots)
+    public DefaultVersionUpdateDetails( VersionDetails versionDetails, boolean includeSnapshots )
     {
         this.includeSnapshots = includeSnapshots;
         this.versionDetails = versionDetails;
@@ -57,10 +58,11 @@ public class DefaultVersionUpdateDetails
 
     public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope )
     {
-        return versionDetails.getAllUpdates(updateScope, includeSnapshots);
+        return versionDetails.getAllUpdates( updateScope, includeSnapshots );
     }
-    
-    protected final VersionDetails getVersionDetails() {
+
+    protected final VersionDetails getVersionDetails()
+    {
         return versionDetails;
     }
 }

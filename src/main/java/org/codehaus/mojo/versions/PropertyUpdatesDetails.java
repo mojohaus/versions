@@ -32,7 +32,7 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 public class PropertyUpdatesDetails
     extends DefaultVersionUpdateDetails
 {
-    public PropertyUpdatesDetails(PropertyVersions v, boolean includeSnapshots)
+    public PropertyUpdatesDetails( PropertyVersions v, boolean includeSnapshots )
         throws ArtifactMetadataRetrievalException
     {
         super( v, includeSnapshots );
@@ -40,12 +40,12 @@ public class PropertyUpdatesDetails
 
     public String getName()
     {
-        return ((PropertyVersions)getVersionDetails()).getName();
+        return ( (PropertyVersions) getVersionDetails() ).getName();
     }
 
     public ArtifactAssocation[] getAssociations()
     {
-        return ((PropertyVersions)getVersionDetails()).getAssociations();
+        return ( (PropertyVersions) getVersionDetails() ).getAssociations();
     }
 
 }

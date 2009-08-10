@@ -181,8 +181,7 @@ public interface VersionsHelper
      * @throws ArtifactMetadataRetrievalException
      *          When things go wrong.
      */
-    ArtifactVersions lookupArtifactUpdates( Artifact artifact, Boolean allowSnapshots,
-                                                  boolean usePluginRepositories )
+    ArtifactVersions lookupArtifactUpdates( Artifact artifact, Boolean allowSnapshots, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException;
 
     /**
