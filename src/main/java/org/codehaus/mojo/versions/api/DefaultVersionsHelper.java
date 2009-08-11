@@ -52,6 +52,7 @@ import org.codehaus.mojo.versions.utils.*;
 import org.codehaus.mojo.versions.utils.WagonUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import java.io.BufferedInputStream;
@@ -609,7 +610,7 @@ public class DefaultVersionsHelper
                 properties.put( propertyDefinitions[i].getName(), propertyDefinitions[i] );
             }
         }
-        Map/*<String,PropertyVersionsBuilder>*/ versions = new HashMap();
+        Map/*<String,PropertyVersionsBuilder>*/ builders = new HashMap();
         if ( autoLinkItems )
         {
             final PropertyVersionsBuilder[] propertyVersionsBuilders;
@@ -629,14 +630,18 @@ public class DefaultVersionsHelper
             for ( int i = 0; i < propertyVersionsBuilders.length; i++ )
             {
                 final String name = propertyVersionsBuilders[i].getName();
-                versions.put( name, propertyVersionsBuilders[i] );
+                builders.put( name, propertyVersionsBuilders[i] );
                 if ( !properties.containsKey( name ) )
                 {
-                    properties.put( name, new Property( name ) );
+                    final Property value = new Property( name );
+                    getLog().info( "Property ${" + name + "}: Adding inferred version range of "
+                        + propertyVersionsBuilders[i].getVersionRange() );
+                    value.setVersion( propertyVersionsBuilders[i].getVersionRange());
+                    properties.put( name, value );
                 }
             }
         }
-        getLog().debug( "Searching for properties associated with versions" );
+        getLog().debug( "Searching for properties associated with builders" );
         Iterator i = properties.values().iterator();
         while ( i.hasNext() )
         {
@@ -659,17 +664,17 @@ public class DefaultVersionsHelper
         {
             Property property = (Property) i.next();
             getLog().debug( "Property ${" + property.getName() + "}" );
-            PropertyVersionsBuilder version = (PropertyVersionsBuilder) versions.get( property.getName() );
-            if ( version == null || !version.isAssociated() )
+            PropertyVersionsBuilder builder = (PropertyVersionsBuilder) builders.get( property.getName() );
+            if ( builder == null || !builder.isAssociated() )
             {
                 getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not "
                     + "associated with any dependency..." );
-                version = new PropertyVersionsBuilder( null, property.getName(), this );
+                builder = new PropertyVersionsBuilder( null, property.getName(), this );
             }
             if ( !property.isAutoLinkDependencies() )
             {
                 getLog().debug( "Property ${" + property.getName() + "}: Removing any autoLinkDependencies" );
-                version.clearAssociations();
+                builder.clearAssociations();
             }
             Dependency[] dependencies = property.getDependencies();
             if ( dependencies != null )
@@ -680,7 +685,7 @@ public class DefaultVersionsHelper
                     {
                         getLog().debug(
                             "Property ${" + property.getName() + "}: Adding association to " + dependencies[j] );
-                        version.addAssociation( this.createDependencyArtifact( dependencies[j] ), false );
+                        builder.addAssociation( this.createDependencyArtifact( dependencies[j] ), false );
                     }
                     catch ( InvalidVersionSpecificationException e )
                     {
@@ -690,7 +695,15 @@ public class DefaultVersionsHelper
             }
             try
             {
-                propertyVersions.put( property, version.newPropertyVersions() );
+                final PropertyVersions versions = builder.newPropertyVersions();
+                if ( property.isAutoLinkDependencies() && StringUtils.isEmpty( property.getVersion() )
+                    && !StringUtils.isEmpty( builder.getVersionRange() ) )
+                {
+                    getLog().info( "Property ${" + property.getName() + "}: Adding inferred version range of "
+                        + builder.getVersionRange() );
+                    property.setVersion( builder.getVersionRange() );
+                }
+                propertyVersions.put( property, versions );
             }
             catch ( ArtifactMetadataRetrievalException e )
             {

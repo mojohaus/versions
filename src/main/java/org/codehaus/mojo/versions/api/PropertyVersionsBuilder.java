@@ -21,9 +21,10 @@ package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Builds {@link org.codehaus.mojo.versions.api.PropertyVersions} instances.
@@ -40,6 +41,10 @@ class PropertyVersionsBuilder
     private final Set/*<ArtifactAssocation*/ associations;
 
     private final VersionsHelper helper;
+
+    private final Map/*<String,Boolean>*/ upperBounds = new LinkedHashMap();
+
+    private final Map/*<String,Boolean>*/ lowerBounds = new LinkedHashMap();
 
     /**
      * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.
@@ -91,4 +96,166 @@ class PropertyVersionsBuilder
     {
         return name;
     }
+
+    public String getVersionRange()
+    {
+        Comparator comparator = new PropertyVersionComparator();
+        if ( lowerBounds.isEmpty() && upperBounds.isEmpty() )
+        {
+            return null;
+        }
+        ArtifactVersion lowerBound = null;
+        boolean includeLower = true;
+        Iterator i = lowerBounds.entrySet().iterator();
+        while ( i.hasNext() )
+        {
+            Map.Entry/*<String,Boolean>*/ entry = (Map.Entry) i.next();
+            ArtifactVersion candidate = helper.createArtifactVersion( (String) entry.getKey() );
+            if ( lowerBound == null )
+            {
+                lowerBound = candidate;
+                includeLower = ( (Boolean) entry.getValue() ).booleanValue();
+            }
+            else
+            {
+                final int result = comparator.compare( lowerBound, candidate );
+                if ( result > 0 )
+                {
+                    lowerBound = candidate;
+                    includeLower = ( (Boolean) entry.getValue() ).booleanValue();
+                }
+                else if ( result == 0 )
+                {
+                    includeLower = includeLower && ( (Boolean) entry.getValue() ).booleanValue();
+                }
+            }
+        }
+        ArtifactVersion upperBound = null;
+        boolean includeUpper = true;
+        i = upperBounds.entrySet().iterator();
+        while ( i.hasNext() )
+        {
+            Map.Entry/*<String,Boolean>*/ entry = (Map.Entry) i.next();
+            ArtifactVersion candidate = helper.createArtifactVersion( (String) entry.getKey() );
+            if ( upperBound == null )
+            {
+                upperBound = candidate;
+                includeUpper = ( (Boolean) entry.getValue() ).booleanValue();
+            }
+            else
+            {
+                final int result = comparator.compare( upperBound, candidate );
+                if ( result < 0 )
+                {
+                    upperBound = candidate;
+                    includeUpper = ( (Boolean) entry.getValue() ).booleanValue();
+                }
+                else if ( result == 0 )
+                {
+                    includeUpper = includeUpper && ( (Boolean) entry.getValue() ).booleanValue();
+                }
+            }
+        }
+        StringBuffer buf = new StringBuffer();
+        if ( includeLower )
+        {
+            buf.append( '[' );
+        }
+        else
+        {
+            buf.append( '(' );
+        }
+        if ( lowerBound != null )
+        {
+            buf.append( lowerBound );
+        }
+        buf.append( ',' );
+        if ( upperBound != null )
+        {
+            buf.append( upperBound );
+        }
+        if ( includeUpper )
+        {
+            buf.append( ']' );
+        }
+        else
+        {
+            buf.append( ')' );
+        }
+        return buf.toString();
+    }
+
+    public void addLowerBound( String lowerBound, boolean includeLower )
+    {
+        Boolean value = (Boolean) lowerBounds.get( lowerBound );
+        if (value == null) {
+            value = Boolean.valueOf( includeLower ); 
+        } else {
+            value = Boolean.valueOf( includeLower && value.booleanValue() );
+        }
+        lowerBounds.put( lowerBound, value );
+    }
+
+    public void addUpperBound( String upperBound, boolean includeUpper )
+    {
+        Boolean value = (Boolean) upperBounds.get( upperBound );
+        if (value == null) {
+            value = Boolean.valueOf( includeUpper ); 
+        } else {
+            value = Boolean.valueOf( includeUpper && value.booleanValue() );
+        }
+        upperBounds.put( upperBound, value );
+    }
+    
+    private VersionComparator[] lookupComparators()
+    {
+        Set result = new HashSet();
+        Iterator i = associations.iterator();
+        while ( i.hasNext() )
+        {
+            ArtifactAssocation association = (ArtifactAssocation) i.next();
+            result.add( helper.getVersionComparator( association.getArtifact() ) );
+        }
+        return (VersionComparator[]) result.toArray( new VersionComparator[result.size()] );
+    }    
+    
+    private final class PropertyVersionComparator
+        implements Comparator
+    {
+        public int compare( ArtifactVersion v1, ArtifactVersion v2 )
+        {
+            return innerCompare( v1, v2 );
+        }
+
+        private int innerCompare( ArtifactVersion v1, ArtifactVersion v2 )
+        {
+            if ( !isAssociated() )
+            {
+                throw new IllegalStateException( "Cannot compare versions for a property with no associations" );
+            }
+            VersionComparator[] comparators = lookupComparators();
+            assert comparators.length >= 1 : "we have at least one association => at least one comparator";
+            int result = comparators[0].compare( v1, v2 );
+            for ( int i = 1; i < comparators.length; i++ )
+            {
+                int alt = comparators[i].compare( v1, v2 );
+                if ( result != alt && ( result >= 0 && alt < 0 ) || ( result <= 0 && alt > 0 ) )
+                {
+                    throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts"
+                        + " and these artifacts use different version sorting rules and these rules are effectively"
+                        + " incompatible for the two of versions being compared.\nFirst rule says compare(\"" + v1
+                        + "\", \"" + v2 + "\") = " + result + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2
+                        + "\") = " + alt );
+                }
+            }
+            return result;
+        }
+
+        public int compare( Object o1, Object o2 )
+        {
+            return innerCompare( (ArtifactVersion) o1, (ArtifactVersion) o2 );
+        }
+
+    }
+    
 }

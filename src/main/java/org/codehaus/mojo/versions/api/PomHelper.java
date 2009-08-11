@@ -40,6 +40,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -758,11 +759,13 @@ public class PomHelper
             String version = plugin.getVersion();
             if ( version != null && version.indexOf( "${" ) != -1 && version.indexOf( '}' ) != -1 )
             {
+                version = StringUtils.deleteWhitespace( version );
                 for ( Iterator j = result.values().iterator(); j.hasNext(); )
                 {
                     // any of these could be defined by a property
                     PropertyVersionsBuilder property = (PropertyVersionsBuilder) j.next();
-                    if ( version.indexOf( "${" + property.getName() + "}" ) != -1 )
+                    final String propertyRef = "${" + property.getName() + "}";
+                    if ( version.indexOf( propertyRef ) != -1 )
                     {
                         String groupId = plugin.getGroupId();
                         if ( groupId == null || groupId.trim().length() == 0 )
@@ -789,6 +792,10 @@ public class PomHelper
                             (String) expressionEvaluator.evaluate( plugin.getVersion() ) );
                         property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionRange ),
                                                  true );
+                        if ( !propertyRef.equals( version ) )
+                        {
+                            addBounds( property, version, propertyRef, versionRange.toString() );
+                        }
                     }
                 }
             }
@@ -810,10 +817,12 @@ public class PomHelper
             String version = plugin.getVersion();
             if ( version != null && version.indexOf( "${" ) != -1 && version.indexOf( '}' ) != -1 )
             {
+                version = StringUtils.deleteWhitespace( version );
                 for ( Iterator j = result.values().iterator(); j.hasNext(); )
                 {
                     PropertyVersionsBuilder property = (PropertyVersionsBuilder) j.next();
-                    if ( version.indexOf( "${" + property.getName() + "}" ) != -1 )
+                    final String propertyRef = "${" + property.getName() + "}";
+                    if ( version.indexOf( propertyRef ) != -1 )
                     {
                         // any of these could be defined by a property
                         String groupId = plugin.getGroupId();
@@ -841,6 +850,10 @@ public class PomHelper
                             (String) expressionEvaluator.evaluate( plugin.getVersion() ) );
                         property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionRange ),
                                                  true );
+                        if ( !propertyRef.equals( version ) )
+                        {
+                            addBounds( property, version, propertyRef, versionRange.toString() );
+                        }
                     }
                 }
             }
@@ -861,10 +874,12 @@ public class PomHelper
             String version = dependency.getVersion();
             if ( version != null && version.indexOf( "${" ) != -1 && version.indexOf( '}' ) != -1 )
             {
+                version = StringUtils.deleteWhitespace( version );
                 for ( Iterator j = result.values().iterator(); j.hasNext(); )
                 {
                     PropertyVersionsBuilder property = (PropertyVersionsBuilder) j.next();
-                    if ( version.indexOf( "${" + property.getName() + "}" ) != -1 )
+                    final String propertyRef = "${" + property.getName() + "}";
+                    if ( version.indexOf( propertyRef ) != -1 )
                     {
                         // Any of these could be defined by a property
                         String groupId = dependency.getGroupId();
@@ -894,8 +909,39 @@ public class PomHelper
                             helper.createDependencyArtifact( groupId, artifactId, versionRange, dependency.getType(),
                                                              dependency.getClassifier(), dependency.getScope(),
                                                              dependency.isOptional() ), usePluginRepositories );
+                        if ( !propertyRef.equals( version ) )
+                        {
+                            addBounds( property, version, propertyRef, versionRange.toString() );
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    private static void addBounds( PropertyVersionsBuilder builder, String rawVersionRange, String propertyRef,
+                                   String evaluatedVersionRange )
+    {
+        Pattern lowerBound = Pattern.compile( "([(\\[])([^,]*)," + RegexUtils.quote( propertyRef ) + "([)\\]])" );
+        Pattern upperBound = Pattern.compile( "([(\\[])" + RegexUtils.quote( propertyRef ) + ",([^,]*)([)\\]])" );
+        Matcher m = lowerBound.matcher( rawVersionRange );
+        if ( m.find() )
+        {
+            boolean includeLower = "[".equals( m.group( 1 ) );
+            String lowerLimit = m.group( 2 );
+            if ( StringUtils.isNotEmpty( lowerLimit ) )
+            {
+                builder.addLowerBound( lowerLimit, includeLower );
+            }
+        }
+        m = upperBound.matcher( rawVersionRange );
+        if ( m.find() )
+        {
+            boolean includeUpper = "[".equals( m.group( 3 ) );
+            String upperLimit = m.group( 2 );
+            if ( StringUtils.isNotEmpty( upperLimit ) )
+            {
+                builder.addUpperBound( upperLimit, includeUpper );
             }
         }
     }
