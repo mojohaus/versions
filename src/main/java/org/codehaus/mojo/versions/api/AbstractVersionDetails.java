@@ -97,7 +97,7 @@ public abstract class AbstractVersionDetails
 
     public final void setCurrentVersion( String currentVersion )
     {
-        setCurrentVersion( new DefaultArtifactVersion( currentVersion ) );
+        setCurrentVersion( currentVersion == null ? null : new DefaultArtifactVersion( currentVersion ) );
     }
 
     public final boolean isIncludeSnapshots()
