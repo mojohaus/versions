@@ -162,7 +162,6 @@ public class DefaultVersionsHelper
      * @param settings                   The settings  (used to provide proxy information to the wagon manager).
      * @param serverId                   The serverId hint for the wagon manager.
      * @param rulesUri                   The URL to retrieve the versioning rules from.
-     * @param comparisonMethod           The default comparison method.
      * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
      * @param mavenSession               The maven session information.
      * @param pathTranslator             The path translator component.
@@ -173,14 +172,14 @@ public class DefaultVersionsHelper
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactMetadataSource artifactMetadataSource,
                                   List remoteArtifactRepositories, List remotePluginRepositories,
                                   ArtifactRepository localRepository, WagonManager wagonManager, Settings settings,
-                                  String serverId, String rulesUri, String comparisonMethod, Log log,
-                                  MavenSession mavenSession, PathTranslator pathTranslator )
+                                  String serverId, String rulesUri, Log log, MavenSession mavenSession,
+                                  PathTranslator pathTranslator )
         throws MojoExecutionException
     {
         this.artifactFactory = artifactFactory;
         this.mavenSession = mavenSession;
         this.pathTranslator = pathTranslator;
-        this.ruleSet = loadRuleSet( serverId, settings, wagonManager, rulesUri, comparisonMethod, log );
+        this.ruleSet = loadRuleSet( serverId, settings, wagonManager, rulesUri, log );
         this.artifactMetadataSource = artifactMetadataSource;
         this.localRepository = localRepository;
         this.remoteArtifactRepositories = remoteArtifactRepositories;
@@ -352,14 +351,10 @@ public class DefaultVersionsHelper
     }
 
     private static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
-                                        String comparisonMethod, Log logger )
+                                        Log logger )
         throws MojoExecutionException
     {
         RuleSet ruleSet = new RuleSet();
-        if ( comparisonMethod != null )
-        {
-            ruleSet.setComparisonMethod( comparisonMethod );
-        }
         if ( rulesUri != null && rulesUri.trim().length() != 0 )
         {
             try

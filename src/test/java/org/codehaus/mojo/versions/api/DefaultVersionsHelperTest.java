@@ -102,7 +102,7 @@ public class DefaultVersionsHelperTest
             new DefaultVersionsHelper( new DefaultArtifactFactory(), new MavenMetadataSource(), new ArrayList(),
                                        new ArrayList(),
                                        new DefaultArtifactRepository( "", "", new DefaultRepositoryLayout() ),
-                                       wagonManager, new Settings(), "", rulesUri, null, new MockLog(), mavenSession, 
+                                       wagonManager, new Settings(), "", rulesUri, new MockLog(), mavenSession,
                                        new DefaultPathTranslator());
         return helper;
     }

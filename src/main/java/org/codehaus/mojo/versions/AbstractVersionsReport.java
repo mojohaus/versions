@@ -224,7 +224,7 @@ public abstract class AbstractVersionsReport
             {
                 helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
                                                     remotePluginRepositories, localRepository, wagonManager, settings,
-                                                    serverId, rulesUri, comparisonMethod, getLog(), session,
+                                                    serverId, rulesUri, getLog(), session,
                                                     pathTranslator );
             }
             catch ( MojoExecutionException e )

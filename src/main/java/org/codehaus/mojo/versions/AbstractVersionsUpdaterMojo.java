@@ -40,7 +40,6 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
-import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.stax2.XMLInputFactory2;
@@ -52,7 +51,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -172,16 +170,6 @@ public abstract class AbstractVersionsUpdaterMojo
     private Boolean generateBackupPoms;
 
     /**
-     * The versioning rule to use when comparing versions. Valid values are <code>maven</code>,
-     * <code>numeric</code> which will handle long version numbers provided all components are numeric, or
-     * <code>mercury</code> which will use the mercury version number comparison rules.
-     *
-     * @parameter expression="${comparisonMethod}"
-     * @since 1.0-alpha-1
-     */
-    protected String comparisonMethod;
-
-    /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
      *
      * @parameter expression="${allowSnapshots}" default-value="false"
@@ -218,7 +206,7 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
                                                 remotePluginRepositories, localRepository, wagonManager, settings,
-                                                serverId, rulesUri, comparisonMethod, getLog(), session,
+                                                serverId, rulesUri, getLog(), session,
                                                 pathTranslator );
         }
         return helper;
@@ -292,17 +280,6 @@ public abstract class AbstractVersionsUpdaterMojo
         }
         final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
         return artifactVersions.getNewestVersion( versionRange, includeSnapshots );
-    }
-
-    /**
-     * Returns the version comparator to use.
-     *
-     * @return the version comparator to use.
-     * @since 1.0-alpha-1
-     */
-    protected Comparator getVersionComparator()
-    {
-        return VersionComparators.getVersionComparator( comparisonMethod );
     }
 
     /**
