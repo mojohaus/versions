@@ -100,7 +100,7 @@ public abstract class AbstractVersionsReport
      * the command line. If the goal is run indirectly as part of a site generation, the output directory configured in
      * the Maven Site Plugin is used instead.
      *
-     * @parameter expression="${project.reporting.outputDirectory}"
+     * @parameter default-value="${project.reporting.outputDirectory}"
      * @required
      * @since 1.0-alpha-3
      */
