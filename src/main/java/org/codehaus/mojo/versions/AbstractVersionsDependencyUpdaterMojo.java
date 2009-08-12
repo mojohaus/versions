@@ -30,6 +30,7 @@ import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -51,21 +52,41 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     /**
      * A comma separated list of artifact patterns to include. Follows the pattern
-     * "groupId:artifactId:type:classifier:version".
+     * "groupId:artifactId:type:classifier:version". Designed to allow specifing the set of includes from the command
+     * line. When specifying includes from the pom, use the {@link #includes} property instead.
      *
      * @parameter expression="${includes}"
-     * @since 1.0-alpha-3
+     * @since 1.0-beta-1
      */
-    private String includes = null;
+    private String includesList = null;
 
     /**
      * A comma separated list of artifact patterns to exclude. Follows the pattern
-     * "groupId:artifactId:type:classifier:version".
+     * "groupId:artifactId:type:classifier:version". Designed to allow specifing the set of excludes from the command
+     * line. When specifying excludes from the pom, use the {@link #excludes} property instead.
      *
      * @parameter expression="${excludes}"
-     * @since 1.0-alpha-3
+     * @since 1.0-beta-1
      */
-    private String excludes = null;
+    private String excludesList = null;
+
+    /**
+     * A list of artifact patterns to include. Follows the pattern
+     * "groupId:artifactId:type:classifier:version".
+     *
+     * @parameter
+     * @since 1.0-beta-1
+     */
+    private String[] includes = null;
+
+    /**
+     * A list of artifact patterns to exclude. Follows the pattern
+     * "groupId:artifactId:type:classifier:version".
+     *
+     * @parameter
+     * @since 1.0-beta-1
+     */
+    private String[] excludes = null;
 
     /**
      * Whether to process the dependencies section of the project.
@@ -325,12 +346,38 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     private ArtifactFilter getIncludesArtifactFilter()
     {
-        if ( this.includesFilter == null && this.includes != null )
+        if ( includesFilter == null && ( includes != null || includesList != null ) )
         {
-            List patterns = separatePatterns( includes );
-            this.includesFilter = new PatternIncludesArtifactFilter( patterns );
+            List patterns = new ArrayList();
+            if ( includes != null )
+            {
+                patterns.addAll( Arrays.asList( includes ) );
+            }
+            if ( this.includesList != null )
+            {
+                patterns.addAll( separatePatterns( includesList ) );
+            }
+            includesFilter = new PatternIncludesArtifactFilter( patterns );
         }
-        return this.includesFilter;
+        return includesFilter;
+    }
+
+    private ArtifactFilter getExcludesArtifactFilter()
+    {
+        if ( excludesFilter == null && ( excludes != null || excludesList != null ) )
+        {
+            List patterns = new ArrayList();
+            if ( excludes != null )
+            {
+                patterns.addAll( Arrays.asList( excludes ) );
+            }
+            if ( excludesList != null )
+            {
+                patterns.addAll( separatePatterns( excludesList) );
+            }
+            excludesFilter = new PatternExcludesArtifactFilter( patterns );
+        }
+        return excludesFilter;
     }
 
     /**
@@ -403,13 +450,4 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         return nextRangeStartDelimiterIndex;
     }
 
-    private ArtifactFilter getExcludesArtifactFilter()
-    {
-        if ( this.excludesFilter == null && this.excludes != null )
-        {
-            List patterns = separatePatterns( excludes );
-            this.excludesFilter = new PatternExcludesArtifactFilter( patterns );
-        }
-        return this.excludesFilter;
-    }
 }
