@@ -634,7 +634,7 @@ public class DefaultVersionsHelper
                 if ( !properties.containsKey( name ) )
                 {
                     final Property value = new Property( name );
-                    getLog().info( "Property ${" + name + "}: Adding inferred version range of "
+                    getLog().debug( "Property ${" + name + "}: Adding inferred version range of "
                         + propertyVersionsBuilders[i].getVersionRange() );
                     value.setVersion( propertyVersionsBuilders[i].getVersionRange());
                     properties.put( name, value );
@@ -699,7 +699,7 @@ public class DefaultVersionsHelper
                 if ( property.isAutoLinkDependencies() && StringUtils.isEmpty( property.getVersion() )
                     && !StringUtils.isEmpty( builder.getVersionRange() ) )
                 {
-                    getLog().info( "Property ${" + property.getName() + "}: Adding inferred version range of "
+                    getLog().debug( "Property ${" + property.getName() + "}: Adding inferred version range of "
                         + builder.getVersionRange() );
                     property.setVersion( builder.getVersionRange() );
                 }
