@@ -53,7 +53,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * A comma separated list of artifact patterns to include. Follows the pattern
      * "groupId:artifactId:type:classifier:version". Designed to allow specifing the set of includes from the command
-     * line. When specifying includes from the pom, use the {@link #includes} property instead.
+     * line. When specifying includes from the pom, use the {@link #includes} configuration instead. If this property is
+     * specified then the {@link # include} configuration is ignored.
      *
      * @parameter expression="${includes}"
      * @since 1.0-beta-1
@@ -63,7 +64,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * A comma separated list of artifact patterns to exclude. Follows the pattern
      * "groupId:artifactId:type:classifier:version". Designed to allow specifing the set of excludes from the command
-     * line. When specifying excludes from the pom, use the {@link #excludes} property instead.
+     * line. When specifying excludes from the pom, use the {@link #excludes} configuration instead. If this property is
+     * specified then the {@link # exclude} configuration is ignored.
      *
      * @parameter expression="${excludes}"
      * @since 1.0-beta-1
@@ -72,7 +74,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     /**
      * A list of artifact patterns to include. Follows the pattern
-     * "groupId:artifactId:type:classifier:version".
+     * "groupId:artifactId:type:classifier:version". This configuration setting is ignored if {@link #includesList} is
+     * defined.
      *
      * @parameter
      * @since 1.0-beta-1
@@ -81,7 +84,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     /**
      * A list of artifact patterns to exclude. Follows the pattern
-     * "groupId:artifactId:type:classifier:version".
+     * "groupId:artifactId:type:classifier:version". This configuration setting is ignored if {@link #excludesList} is 
+     * defined.
      *
      * @parameter
      * @since 1.0-beta-1
@@ -349,13 +353,13 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         if ( includesFilter == null && ( includes != null || includesList != null ) )
         {
             List patterns = new ArrayList();
-            if ( includes != null )
-            {
-                patterns.addAll( Arrays.asList( includes ) );
-            }
             if ( this.includesList != null )
             {
                 patterns.addAll( separatePatterns( includesList ) );
+            }
+            else if ( includes != null )
+            {
+                patterns.addAll( Arrays.asList( includes ) );
             }
             includesFilter = new PatternIncludesArtifactFilter( patterns );
         }
@@ -367,13 +371,13 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         if ( excludesFilter == null && ( excludes != null || excludesList != null ) )
         {
             List patterns = new ArrayList();
-            if ( excludes != null )
-            {
-                patterns.addAll( Arrays.asList( excludes ) );
-            }
             if ( excludesList != null )
             {
-                patterns.addAll( separatePatterns( excludesList) );
+                patterns.addAll( separatePatterns( excludesList ) );
+            }
+            else if ( excludes != null )
+            {
+                patterns.addAll( Arrays.asList( excludes ) );
             }
             excludesFilter = new PatternExcludesArtifactFilter( patterns );
         }

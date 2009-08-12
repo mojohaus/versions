@@ -27,28 +27,94 @@ Advancing dependency versions
 
   There are a number of goals which can be used to advance dependency versions:
 
-  * {{{use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which
+  * {{{../use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which
   have been a newer release and replaces them with the next release version.
 
-  * {{{use-next-snapshots-mojo.html}versions:use-next-snapshots}} searches the pom for all non-SNAPSHOT versions which
+  * {{{../use-next-snapshots-mojo.html}versions:use-next-snapshots}} searches the pom for all non-SNAPSHOT versions which
   have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
 
-  * {{{use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which
+  * {{{../use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which
   have been a newer release and replaces them with the latest release version.
 
-  * {{{use-next-versions-mojo.html}versions:use-next-versions}} searches the pom for all versions which
+  * {{{../use-next-versions-mojo.html}versions:use-next-versions}} searches the pom for all versions which
   have been a newer version and replaces them with the next version.
 
-  * {{{use-latest-versions-mojo.html}versions:use-latest-versions}} searches the pom for all versions which
+  * {{{../use-latest-versions-mojo.html}versions:use-latest-versions}} searches the pom for all versions which
   have been a newer version and replaces them with the latest version.
 
   All of these goals share a common set of parameters.
 
 * Controlling which dependencies are processed
 
-  By default, these goals act on all dependencies in your project.  Often times you are only interested in processing
-  a few specific dependencies.
+  You can restrict which dependencies should be processed.  For example,
+  the following will only match dependencies that match the groupId "org.codehaus.plexus" and artifactId
+  "plexus-utils"
 
-  The
+---
+mvn versions:use-next-releases -Dincludes=org.codehaus.plexus:plexus-utils
+---
+
+  The <<<includes>>> and <<<excludes>>> parameters follow the format <<<groupId:artifactId:type:classifier>>>.
+  Use a comma separated separated list to specify multiple includes.  Wildcards (*) can also be used to match
+  multiple values.
+
+  This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and
+  artifactId matching "junit".
+
+---
+mvn versions:use-next-releases -Dincludes=org.codehaus.plexus:*,junit:junit
+---
+
+  You can pre-configure defaults for <<<includes>>> and <<<excludes>> in your <<<pom.xml>>> if there is a specific
+  set of dependencies that you need to track on a regular basis, e.g.
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
+        <configuration>
+          ...
+          <includes>
+            <include>org.codehaus.plexus:*</include>
+            <include>junit:junit</include>
+          </includes>
+          ...
+          <excludes>
+            <exclude>org.codehaus.plexus:plexus-utils</exclude>
+          </excludes>
+          ...
+        </configuration>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+  By default, both the <<<project/dependencyManagment>>> and <<<project/dependencies>>> sections will be processed.
+  You can use the <<<processDependencies>>> and <<<processDependencyManagement>>> parameters to control which sections
+  are processed.
+
+  This example will only process the <<<project/dependencyManagment>>> section of your pom:
+
+---
+mvn versions:use-next-releases -DprocessDependencies=false
+---
+
+  While this example will only process the <<<project/dependencies>>> section of your pom:
+
+---
+mvn versions:use-next-releases -DprocessDependencyManagement=false
+---
+
 
 
