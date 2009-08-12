@@ -70,6 +70,10 @@ public class ArtifactVersions
         this.versionComparator = versionComparator;
         this.versions = new TreeSet( versionComparator );
         this.versions.addAll( versions );
+        if ( artifact.getVersion() != null )
+        {
+            setCurrentVersion( artifact.getVersion() );
+        }
     }
 
     /**
