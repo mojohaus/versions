@@ -29,7 +29,8 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,7 +45,11 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     extends AbstractVersionsUpdaterMojo
 {
 
-    /**
+    private static final String END_RANGE_CHARS = "])";
+
+	private static final String START_RANGE_CHARS = "[(";
+
+	/**
      * A comma separated list of artifact patterns to include. Follows the pattern
      * "groupId:artifactId:type:classifier:version".
      *
@@ -322,17 +327,80 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     {
         if ( this.includesFilter == null && this.includes != null )
         {
-            List patterns = Arrays.asList( includes.split( "," ) );
+            List patterns = separatePatterns(includes);
             this.includesFilter = new PatternIncludesArtifactFilter( patterns );
         }
         return this.includesFilter;
     }
 
-    private ArtifactFilter getExcludesArtifactFilter()
+    /** 
+     * To handle multiple includes with version range like "group:artifact:jar:[1.0.0,2.2)", 
+     * we have to use a parsing a little bit more complex than split().  
+     * @param includeString the string to parse
+     * @return list of patterns
+     */
+    protected List separatePatterns(String includeString) 
+    {
+    	if(includeString==null) return Collections.EMPTY_LIST;
+    	
+    	List patterns = new ArrayList();
+    	int indexOf = nextCommaIndex(includeString);
+    	while(indexOf >= 0) 
+    	{
+    		patterns.add(includeString.substring(0, indexOf));
+    		includeString=includeString.substring(indexOf+1);
+    		indexOf = nextCommaIndex(includeString);
+    	}
+   		patterns.add(includeString);
+    	
+    	return patterns;
+	}
+
+	private int nextCommaIndex(final String includeString) 
+	{
+
+		int indexOfComma = includeString.indexOf(',');
+		int nextRangeStartDelimiterIndex = findFirstChar(includeString, START_RANGE_CHARS);
+		if (nextRangeStartDelimiterIndex >= 0) 
+		{
+			if ( ! (indexOfComma >=0 && indexOfComma<nextRangeStartDelimiterIndex)) 
+			{
+				int nextStopDelimiterIndex = findFirstChar(includeString, END_RANGE_CHARS);
+
+				// recursive call
+				int tmp = nextCommaIndex(includeString.substring(nextStopDelimiterIndex+1));
+				indexOfComma = (tmp>=0) ? nextStopDelimiterIndex+1+tmp : -1;
+			}
+		}
+		return indexOfComma;
+		
+	}
+
+	private int findFirstChar(final String includeString, final String chars) {
+		int nextRangeStartDelimiterIndex = -1;
+		
+		char[] delimiters = chars.toCharArray();
+		for (int i = 0; i < delimiters.length; i++) {
+			int index = includeString.indexOf(delimiters[i]);
+			if ( index >= 0 && nextRangeStartDelimiterIndex >= 0)
+			{
+				nextRangeStartDelimiterIndex = Math.min(index, nextRangeStartDelimiterIndex);
+			}else
+			{
+				if (index >= 0)
+				{
+					nextRangeStartDelimiterIndex = index;
+				}
+			}
+		}
+		return nextRangeStartDelimiterIndex;
+	}
+
+	private ArtifactFilter getExcludesArtifactFilter()
     {
         if ( this.excludesFilter == null && this.excludes != null )
         {
-            List patterns = Arrays.asList( excludes.split( "," ) );
+            List patterns = separatePatterns(excludes);
             this.excludesFilter = new PatternExcludesArtifactFilter( patterns );
         }
         return this.excludesFilter;
