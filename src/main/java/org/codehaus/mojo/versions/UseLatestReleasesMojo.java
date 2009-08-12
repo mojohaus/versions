@@ -33,7 +33,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -120,8 +119,8 @@ public class UseLatestReleasesMojo
 
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                ArtifactVersion[] newer = versions.getNewerVersions( version, false);
-                newer = filterVersionsWithIncludes(newer, artifact);
+                ArtifactVersion[] newer = versions.getNewerVersions( version, false );
+                newer = filterVersionsWithIncludes( newer, artifact );
                 if ( newer.length > 0 )
                 {
                     String newVersion = newer[newer.length - 1].toString();
@@ -135,18 +134,23 @@ public class UseLatestReleasesMojo
         }
     }
 
-	private ArtifactVersion[] filterVersionsWithIncludes(ArtifactVersion[] newer, Artifact artifact) {
-        List filteredNewer = new ArrayList(newer.length); 
-        for (int j = 0; j < newer.length; j++) {
-			ArtifactVersion artifactVersion = newer[j];
-			Artifact artefactWithNewVersion = new DefaultArtifact(artifact.getGroupId(), 
-					artifact.getArtifactId(), VersionRange.createFromVersion(artifactVersion.toString()), 
-					artifact.getScope(), artifact.getType(),null, new DefaultArtifactHandler(), false);
-			if (isIncluded(artefactWithNewVersion)) {
-				filteredNewer.add(artifactVersion);
-			}
-		}
-        return (ArtifactVersion[]) filteredNewer.toArray(new ArtifactVersion[filteredNewer.size()]);
-	}
+    private ArtifactVersion[] filterVersionsWithIncludes( ArtifactVersion[] newer, Artifact artifact )
+    {
+        List filteredNewer = new ArrayList( newer.length );
+        for ( int j = 0; j < newer.length; j++ )
+        {
+            ArtifactVersion artifactVersion = newer[j];
+            Artifact artefactWithNewVersion = new DefaultArtifact( artifact.getGroupId(), artifact.getArtifactId(),
+                                                                   VersionRange.createFromVersion(
+                                                                       artifactVersion.toString() ),
+                                                                   artifact.getScope(), artifact.getType(), null,
+                                                                   new DefaultArtifactHandler(), false );
+            if ( isIncluded( artefactWithNewVersion ) )
+            {
+                filteredNewer.add( artifactVersion );
+            }
+        }
+        return (ArtifactVersion[]) filteredNewer.toArray( new ArtifactVersion[filteredNewer.size()] );
+    }
 
 }

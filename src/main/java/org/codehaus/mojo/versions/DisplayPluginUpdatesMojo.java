@@ -38,7 +38,12 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
-import org.apache.maven.plugin.*;
+import org.apache.maven.plugin.InvalidPluginException;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.PluginManager;
+import org.apache.maven.plugin.PluginManagerException;
+import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.version.PluginVersionNotFoundException;
 import org.apache.maven.plugin.version.PluginVersionResolutionException;
@@ -58,7 +63,17 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -357,8 +372,8 @@ public class DisplayPluginUpdatesMojo
             {
                 newVersion = null;
             }
-            if ( version != null && artifactVersion != null && newVersion != null
-                && new DefaultArtifactVersion( version ).compareTo( new DefaultArtifactVersion( newVersion ) ) < 0 )
+            if ( version != null && artifactVersion != null && newVersion != null &&
+                new DefaultArtifactVersion( version ).compareTo( new DefaultArtifactVersion( newVersion ) ) < 0 )
             {
                 StringBuffer buf = new StringBuffer();
                 if ( PomHelper.APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
@@ -836,9 +851,8 @@ public class DisplayPluginUpdatesMojo
             }
             catch ( ComponentLookupException e )
             {
-                getLog().debug(
-                    "Error looking up lifecycle mapping to retrieve optional mojos. Lifecycle ID: " + lifecycle.getId()
-                        + ". Error: " + e.getMessage(), e );
+                getLog().debug( "Error looking up lifecycle mapping to retrieve optional mojos. Lifecycle ID: " +
+                    lifecycle.getId() + ". Error: " + e.getMessage(), e );
             }
         }
 
@@ -999,8 +1013,8 @@ public class DisplayPluginUpdatesMojo
                 {
                     Lifecycle prevLifecycle = (Lifecycle) phaseToLifecycleMap.get( phase );
                     throw new LifecycleExecutionException(
-                        "Phase '" + phase + "' is defined in more than one lifecycle: '" + lifecycle.getId() + "' and '"
-                            + prevLifecycle.getId() + "'" );
+                        "Phase '" + phase + "' is defined in more than one lifecycle: '" + lifecycle.getId() +
+                            "' and '" + prevLifecycle.getId() + "'" );
                 }
                 else
                 {

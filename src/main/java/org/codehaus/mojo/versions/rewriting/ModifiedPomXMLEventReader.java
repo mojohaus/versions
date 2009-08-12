@@ -366,8 +366,8 @@ public class ModifiedPomXMLEventReader
             {
                 if ( !next.isCharacters() )
                 {
-                    while ( nextStart < nextEnd && nextStart < pom.length() && ( c( nextStart ) == '\n'
-                        || c( nextStart ) == '\r' ) )
+                    while ( nextStart < nextEnd && nextStart < pom.length() &&
+                        ( c( nextStart ) == '\n' || c( nextStart ) == '\r' ) )
                     {
                         nextStart++;
                     }
@@ -431,8 +431,8 @@ public class ModifiedPomXMLEventReader
      */
     private boolean nextEndIncludesNextEvent()
     {
-        return nextEnd > nextStart + 1 && nextEnd - 2 < pom.length() && ( c( nextEnd - 1 ) == '<'
-            || c( nextEnd - 1 ) == '&' );
+        return nextEnd > nextStart + 1 && nextEnd - 2 < pom.length() &&
+            ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
     }
 
     /**

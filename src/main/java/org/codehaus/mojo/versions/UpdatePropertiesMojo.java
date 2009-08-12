@@ -20,18 +20,13 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -115,7 +110,7 @@ public class UpdatePropertiesMojo
 
             ArtifactVersion winner =
                 version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                this.getHelper() );
+                                          this.getHelper() );
 
             if ( winner == null || currentVersion.equals( winner.toString() ) )
             {

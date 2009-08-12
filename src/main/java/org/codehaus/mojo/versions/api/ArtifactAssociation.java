@@ -27,7 +27,7 @@ import org.apache.maven.artifact.Artifact;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public interface ArtifactAssocation
+public interface ArtifactAssociation
 {
     String getGroupId();
 

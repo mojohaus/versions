@@ -38,7 +38,11 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.wagon.*;
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.UnsupportedProtocolException;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
@@ -48,7 +52,10 @@ import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
-import org.codehaus.mojo.versions.utils.*;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.PluginComparator;
+import org.codehaus.mojo.versions.utils.RegexUtils;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.codehaus.mojo.versions.utils.WagonUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
@@ -59,7 +66,16 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -530,8 +546,8 @@ public class DefaultVersionsHelper
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         getLog().debug(
-            "Checking " + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )
-                + " for updates newer than " + dependency.getVersion() );
+            "Checking " + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() ) +
+                " for updates newer than " + dependency.getVersion() );
         VersionRange versionRange = VersionRange.createFromVersionSpec( dependency.getVersion() );
 
         return lookupArtifactVersions(
@@ -563,8 +579,8 @@ public class DefaultVersionsHelper
     public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
-        getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
-            + " for updates newer than " + plugin.getVersion() );
+        getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) +
+            " for updates newer than " + plugin.getVersion() );
 
         VersionRange versionRange = VersionRange.createFromVersion( plugin.getVersion() );
 
@@ -634,9 +650,9 @@ public class DefaultVersionsHelper
                 if ( !properties.containsKey( name ) )
                 {
                     final Property value = new Property( name );
-                    getLog().debug( "Property ${" + name + "}: Adding inferred version range of "
-                        + propertyVersionsBuilders[i].getVersionRange() );
-                    value.setVersion( propertyVersionsBuilders[i].getVersionRange());
+                    getLog().debug( "Property ${" + name + "}: Adding inferred version range of " +
+                        propertyVersionsBuilders[i].getVersionRange() );
+                    value.setVersion( propertyVersionsBuilders[i].getVersionRange() );
                     properties.put( name, value );
                 }
             }
@@ -667,8 +683,8 @@ public class DefaultVersionsHelper
             PropertyVersionsBuilder builder = (PropertyVersionsBuilder) builders.get( property.getName() );
             if ( builder == null || !builder.isAssociated() )
             {
-                getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not "
-                    + "associated with any dependency..." );
+                getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not " +
+                    "associated with any dependency..." );
                 builder = new PropertyVersionsBuilder( null, property.getName(), this );
             }
             if ( !property.isAutoLinkDependencies() )
@@ -696,13 +712,14 @@ public class DefaultVersionsHelper
             try
             {
                 final PropertyVersions versions = builder.newPropertyVersions();
-                if ( property.isAutoLinkDependencies() && StringUtils.isEmpty( property.getVersion() )
-                    && !StringUtils.isEmpty( builder.getVersionRange() ) )
+                if ( property.isAutoLinkDependencies() && StringUtils.isEmpty( property.getVersion() ) &&
+                    !StringUtils.isEmpty( builder.getVersionRange() ) )
                 {
-                    getLog().debug( "Property ${" + property.getName() + "}: Adding inferred version range of "
-                        + builder.getVersionRange() );
+                    getLog().debug( "Property ${" + property.getName() + "}: Adding inferred version range of " +
+                        builder.getVersionRange() );
                     property.setVersion( builder.getVersionRange() );
                 }
+                versions.setCurrentVersion( project.getProperties().getProperty( property.getName() ) );
                 propertyVersions.put( property, versions );
             }
             catch ( ArtifactMetadataRetrievalException e )

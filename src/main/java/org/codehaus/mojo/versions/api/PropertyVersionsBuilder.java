@@ -24,7 +24,13 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Builds {@link org.codehaus.mojo.versions.api.PropertyVersions} instances.
@@ -38,7 +44,7 @@ class PropertyVersionsBuilder
 
     private final String profileId;
 
-    private final Set/*<ArtifactAssocation*/ associations;
+    private final Set/*<ArtifactAssociation*/ associations;
 
     private final VersionsHelper helper;
 
@@ -81,9 +87,9 @@ class PropertyVersionsBuilder
         return !associations.isEmpty();
     }
 
-    public ArtifactAssocation[] getAssociations()
+    public ArtifactAssociation[] getAssociations()
     {
-        return (ArtifactAssocation[]) associations.toArray( new ArtifactAssocation[associations.size()] );
+        return (ArtifactAssociation[]) associations.toArray( new ArtifactAssociation[associations.size()] );
     }
 
     public PropertyVersions newPropertyVersions()
@@ -188,9 +194,12 @@ class PropertyVersionsBuilder
     public void addLowerBound( String lowerBound, boolean includeLower )
     {
         Boolean value = (Boolean) lowerBounds.get( lowerBound );
-        if (value == null) {
-            value = Boolean.valueOf( includeLower ); 
-        } else {
+        if ( value == null )
+        {
+            value = Boolean.valueOf( includeLower );
+        }
+        else
+        {
             value = Boolean.valueOf( includeLower && value.booleanValue() );
         }
         lowerBounds.put( lowerBound, value );
@@ -199,26 +208,29 @@ class PropertyVersionsBuilder
     public void addUpperBound( String upperBound, boolean includeUpper )
     {
         Boolean value = (Boolean) upperBounds.get( upperBound );
-        if (value == null) {
-            value = Boolean.valueOf( includeUpper ); 
-        } else {
+        if ( value == null )
+        {
+            value = Boolean.valueOf( includeUpper );
+        }
+        else
+        {
             value = Boolean.valueOf( includeUpper && value.booleanValue() );
         }
         upperBounds.put( upperBound, value );
     }
-    
+
     private VersionComparator[] lookupComparators()
     {
         Set result = new HashSet();
         Iterator i = associations.iterator();
         while ( i.hasNext() )
         {
-            ArtifactAssocation association = (ArtifactAssocation) i.next();
+            ArtifactAssociation association = (ArtifactAssociation) i.next();
             result.add( helper.getVersionComparator( association.getArtifact() ) );
         }
         return (VersionComparator[]) result.toArray( new VersionComparator[result.size()] );
-    }    
-    
+    }
+
     private final class PropertyVersionComparator
         implements Comparator
     {
@@ -241,11 +253,11 @@ class PropertyVersionsBuilder
                 int alt = comparators[i].compare( v1, v2 );
                 if ( result != alt && ( result >= 0 && alt < 0 ) || ( result <= 0 && alt > 0 ) )
                 {
-                    throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts"
-                        + " and these artifacts use different version sorting rules and these rules are effectively"
-                        + " incompatible for the two of versions being compared.\nFirst rule says compare(\"" + v1
-                        + "\", \"" + v2 + "\") = " + result + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2
-                        + "\") = " + alt );
+                    throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts" +
+                        " and these artifacts use different version sorting rules and these rules are effectively" +
+                        " incompatible for the two of versions being compared.\nFirst rule says compare(\"" + v1 +
+                        "\", \"" + v2 + "\") = " + result + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2 +
+                        "\") = " + alt );
                 }
             }
             return result;
@@ -257,5 +269,5 @@ class PropertyVersionsBuilder
         }
 
     }
-    
+
 }

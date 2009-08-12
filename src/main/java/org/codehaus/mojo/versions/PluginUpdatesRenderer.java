@@ -435,16 +435,14 @@ public class PluginUpdatesRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold =
-                    equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
-                        || equals( versions[i],
-                                   details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) )
-                        || equals( versions[i],
-                                   details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) )
-                        || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) )
-                        || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) )
-                        || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) )
-                        || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) );
+                boolean bold = equals( versions[i],
+                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) ||
+                    equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) ) ||
+                    equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) ) ||
+                    equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) ) ||
+                    equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) ) ||
+                    equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) ) ||
+                    equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) );
                 if ( bold )
                 {
                     sink.bold();

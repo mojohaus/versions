@@ -27,7 +27,12 @@ import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Generates a report of available updates for the dependencies of a project.
@@ -117,12 +122,12 @@ public class DependencyUpdatesReport
             while ( !matched && j.hasNext() )
             {
                 Dependency t = (Dependency) j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
-                    && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
-                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )
-                    && ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) ) && (
-                    c.getVersion() == null || t.getVersion() == null || StringUtils.equals( t.getVersion(),
-                                                                                            c.getVersion() ) ) )
+                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) &&
+                    StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) &&
+                    ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) ) &&
+                    ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) ) &&
+                    ( c.getVersion() == null || t.getVersion() == null ||
+                        StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
                 {
                     matched = true;
                     break;

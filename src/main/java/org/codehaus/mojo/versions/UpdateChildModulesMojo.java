@@ -30,7 +30,12 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Scans the current projects child modules, updating the versions of any which use the current project to
@@ -129,8 +134,8 @@ public class UpdateChildModulesMojo
                         continue;
                     }
 
-                    getLog().debug( "Looking for modules which use "
-                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
+                    getLog().debug( "Looking for modules which use " +
+                        ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
 
                     Iterator j =
                         PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
@@ -159,19 +164,18 @@ public class UpdateChildModulesMojo
                         final Parent parent = targetModel.getParent();
                         if ( sourceVersion.equals( parent.getVersion() ) )
                         {
-                            getLog().debug( "Module: " + targetPath + " parent is "
-                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                + sourceVersion );
+                            getLog().debug( "Module: " + targetPath + " parent is " +
+                                ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + sourceVersion );
                         }
                         else
                         {
                             getLog().info( "Module: " + targetPath );
                             getLog().info(
-                                "    parent was " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                                    + ":" + parent.getVersion() );
+                                "    parent was " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) +
+                                    ":" + parent.getVersion() );
                             getLog().info(
-                                "    updated to " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                                    + ":" + sourceVersion );
+                                "    updated to " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) +
+                                    ":" + sourceVersion );
                             process( moduleProjectFile );
                             // don't forget to update the cached model
                             targetModel.setVersion( sourceVersion );

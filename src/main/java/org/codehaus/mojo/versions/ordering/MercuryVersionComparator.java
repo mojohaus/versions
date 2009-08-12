@@ -104,8 +104,8 @@ public class MercuryVersionComparator
                     {
                         newToken = "ga";
                     }
-                    else if ( "final".equalsIgnoreCase( token ) || "ga".equalsIgnoreCase( token )
-                        || "".equalsIgnoreCase( token ) )
+                    else if ( "final".equalsIgnoreCase( token ) || "ga".equalsIgnoreCase( token ) ||
+                        "".equalsIgnoreCase( token ) )
                     {
                         newToken = "sp";
                     }

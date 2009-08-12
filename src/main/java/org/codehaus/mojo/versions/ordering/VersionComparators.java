@@ -144,7 +144,7 @@ public final class VersionComparators
 
     static boolean isSnapshot( ArtifactVersion v )
     {
-        return SNAPSHOT_PATTERN.matcher( v.toString() ).find();
+        return v != null && SNAPSHOT_PATTERN.matcher( v.toString() ).find();
     }
 
     static ArtifactVersion stripSnapshot( ArtifactVersion v )

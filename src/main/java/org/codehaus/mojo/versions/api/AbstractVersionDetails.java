@@ -64,6 +64,16 @@ public abstract class AbstractVersionDetails
      */
     private final Object currentVersionLock = new Object();
 
+    protected AbstractVersionDetails()
+    {
+    }
+
+    protected AbstractVersionDetails( ArtifactVersion currentVersion, boolean includeSnapshots )
+    {
+        this.currentVersion = currentVersion;
+        this.includeSnapshots = includeSnapshots;
+    }
+
     public final boolean isCurrentVersionDefined()
     {
         return getCurrentVersion() != null;

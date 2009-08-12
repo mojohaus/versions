@@ -27,7 +27,11 @@ import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Generates a report of available updates for the dependencies of a project.
@@ -59,15 +63,15 @@ public class PluginUpdatesReport
 
     private boolean haveBuildPluginManagementPlugins()
     {
-        return getProject().getBuild() != null && getProject().getBuild().getPluginManagement() != null
-            && getProject().getBuild().getPluginManagement().getPlugins() != null
-            && !getProject().getBuild().getPluginManagement().getPlugins().isEmpty();
+        return getProject().getBuild() != null && getProject().getBuild().getPluginManagement() != null &&
+            getProject().getBuild().getPluginManagement().getPlugins() != null &&
+            !getProject().getBuild().getPluginManagement().getPlugins().isEmpty();
     }
 
     private boolean haveBuildPlugins()
     {
-        return getProject().getBuild() != null && getProject().getBuild().getPlugins() != null
-            && !getProject().getBuild().getPlugins().isEmpty();
+        return getProject().getBuild() != null && getProject().getBuild().getPlugins() != null &&
+            !getProject().getBuild().getPlugins().isEmpty();
     }
 
     /**
@@ -135,8 +139,8 @@ public class PluginUpdatesReport
             while ( !matched && j.hasNext() )
             {
                 Plugin t = (Plugin) j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) && StringUtils.equals( t.getArtifactId(),
-                                                                                                 c.getArtifactId() ) )
+                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) &&
+                    StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) )
                 {
                     matched = true;
                     break;

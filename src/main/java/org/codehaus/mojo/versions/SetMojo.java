@@ -31,7 +31,14 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Sets the current projects version, updating the details of any child modules as necessary.
@@ -98,8 +105,8 @@ public class SetMojo
             final Map reactor = PomHelper.getReactorModels( project, getLog() );
 
             // now fake out the triggering change
-            final Model current =
-                PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() );
+            final Model current = PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() )
+                ;
             current.setVersion( newVersion );
 
             final Set files = new LinkedHashSet();
@@ -155,8 +162,8 @@ public class SetMojo
                 files.add( moduleProjectFile );
 
                 getLog().debug(
-                    "Looking for modules which use " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                        + " as their parent" );
+                    "Looking for modules which use " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) +
+                        " as their parent" );
 
                 final Iterator j =
                     PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
@@ -169,18 +176,18 @@ public class SetMojo
                     final Parent parent = targetModel.getParent();
                     if ( sourceVersion.equals( parent.getVersion() ) )
                     {
-                        getLog().debug( "Module: " + targetPath + " parent is "
-                            + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + sourceVersion );
+                        getLog().debug( "Module: " + targetPath + " parent is " +
+                            ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + sourceVersion );
                     }
                     else
                     {
                         getLog().debug( "Module: " + targetPath );
                         getLog().debug(
-                            "    parent was " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                + parent.getVersion() );
+                            "    parent was " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" +
+                                parent.getVersion() );
                         getLog().debug(
-                            "    updating to " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                + sourceVersion );
+                            "    updating to " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" +
+                                sourceVersion );
                         addChange( PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ),
                                    PomHelper.getVersion( targetModel ), sourceVersion );
                         targetModel.setVersion( sourceVersion );
@@ -224,16 +231,15 @@ public class SetMojo
             while ( i.hasNext() )
             {
                 Change change = (Change) i.next();
-                if ( change.getGroupId().equals( PomHelper.getGroupId( model ) ) && change.getArtifactId().equals(
-                    PomHelper.getArtifactId( model ) ) )
+                if ( change.getGroupId().equals( PomHelper.getGroupId( model ) ) &&
+                    change.getArtifactId().equals( PomHelper.getArtifactId( model ) ) )
                 {
                     if ( PomHelper.setProjectVersion( pom, change.getNewVersion() ) )
                     {
                         if ( !gaveInfo )
                         {
-                            getLog().info(
-                                "Processing " + PomHelper.getGroupId( model ) + ":" + PomHelper.getArtifactId(
-                                    model ) );
+                            getLog().info( "Processing " + PomHelper.getGroupId( model ) + ":" +
+                                PomHelper.getArtifactId( model ) );
                             gaveInfo = true;
                         }
                         getLog().info( "    Updating project " + change.getGroupId() + ":" + change.getArtifactId() );
@@ -241,16 +247,15 @@ public class SetMojo
                             "        from version " + change.getOldVersion() + " to " + change.getNewVersion() );
                     }
                 }
-                else if ( model.getParent() != null && change.getGroupId().equals( model.getParent().getGroupId() )
-                    && change.getArtifactId().equals( model.getParent().getArtifactId() ) )
+                else if ( model.getParent() != null && change.getGroupId().equals( model.getParent().getGroupId() ) &&
+                    change.getArtifactId().equals( model.getParent().getArtifactId() ) )
                 {
                     if ( PomHelper.setProjectParentVersion( pom, change.getNewVersion() ) )
                     {
                         if ( !gaveInfo )
                         {
-                            getLog().info(
-                                "Processing " + PomHelper.getGroupId( model ) + ":" + PomHelper.getArtifactId(
-                                    model ) );
+                            getLog().info( "Processing " + PomHelper.getGroupId( model ) + ":" +
+                                PomHelper.getArtifactId( model ) );
                             gaveInfo = true;
                         }
                         getLog().info( "    Updating parent " + change.getGroupId() + ":" + change.getArtifactId() );

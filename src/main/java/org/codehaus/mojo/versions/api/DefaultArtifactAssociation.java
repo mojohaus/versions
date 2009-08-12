@@ -10,7 +10,7 @@ import org.apache.maven.artifact.ArtifactUtils;
  * @since Aug 6, 2009 9:23:13 AM
  */
 final class DefaultArtifactAssociation
-    implements Comparable, ArtifactAssocation
+    implements Comparable, ArtifactAssociation
 {
     private final Artifact artifact;
 

@@ -22,7 +22,12 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.model.*;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Profile;
+import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.profiles.ProfileManager;
@@ -38,8 +43,24 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -470,12 +491,12 @@ public class PomHelper
         boolean haveArtifactId = false;
         boolean haveOldVersion = false;
 
-        matchScopeRegex = Pattern.compile( "/project" + "(/profiles/profile)?"
-            + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?" + "/dependencies/dependency" );
+        matchScopeRegex = Pattern.compile( "/project" + "(/profiles/profile)?" +
+            "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?" + "/dependencies/dependency" );
 
-        matchTargetRegex = Pattern.compile( "/project" + "(/profiles/profile)?"
-            + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?" + "/dependencies/dependency"
-            + "((/groupId)|(/artifactId)|(/version))" );
+        matchTargetRegex = Pattern.compile( "/project" + "(/profiles/profile)?" +
+            "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?" + "/dependencies/dependency" +
+            "((/groupId)|(/artifactId)|(/version))" );
 
         pom.rewind();
 
@@ -520,8 +541,8 @@ public class PomHelper
             }
             if ( event.isEndElement() )
             {
-                if ( matchTargetRegex.matcher( path ).matches() && "version".equals(
-                    event.asEndElement().getName().getLocalPart() ) )
+                if ( matchTargetRegex.matcher( path ).matches() &&
+                    "version".equals( event.asEndElement().getName().getLocalPart() ) )
                 {
                     pom.mark( 1 );
                     String compressedPomVersion = StringUtils.deleteWhitespace( pom.getBetween( 0, 1 ).trim() );
@@ -530,8 +551,8 @@ public class PomHelper
                 }
                 else if ( matchScopeRegex.matcher( path ).matches() )
                 {
-                    if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) && haveGroupId && haveArtifactId
-                        && haveOldVersion )
+                    if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) && haveGroupId && haveArtifactId &&
+                        haveOldVersion )
                     {
                         pom.replaceBetween( 0, 1, newVersion );
                         madeReplacement = true;
@@ -579,8 +600,8 @@ public class PomHelper
             "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin" );
 
         matchTargetRegex = Pattern.compile(
-            "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin"
-                + "((/groupId)|(/artifactId)|(/version))" );
+            "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin" +
+                "((/groupId)|(/artifactId)|(/version))" );
 
         pom.rewind();
 
@@ -625,16 +646,16 @@ public class PomHelper
             }
             if ( event.isEndElement() )
             {
-                if ( matchTargetRegex.matcher( path ).matches() && "version".equals(
-                    event.asEndElement().getName().getLocalPart() ) )
+                if ( matchTargetRegex.matcher( path ).matches() &&
+                    "version".equals( event.asEndElement().getName().getLocalPart() ) )
                 {
                     pom.mark( 1 );
                     haveOldVersion = oldVersion.equals( pom.getBetween( 0, 1 ).trim() );
                 }
                 else if ( matchScopeRegex.matcher( path ).matches() )
                 {
-                    if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) && ( haveGroupId || !needGroupId )
-                        && haveArtifactId && haveOldVersion )
+                    if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) && ( haveGroupId || !needGroupId ) &&
+                        haveArtifactId && haveOldVersion )
                     {
                         pom.replaceBetween( 0, 1, newVersion );
                         madeReplacement = true;
@@ -1314,8 +1335,8 @@ public class PomHelper
             final String path = (String) entry.getKey();
             final Model model = (Model) entry.getValue();
             final Parent parent = model.getParent();
-            if ( parent != null && groupId.equals( parent.getGroupId() ) && artifactId.equals(
-                parent.getArtifactId() ) )
+            if ( parent != null && groupId.equals( parent.getGroupId() ) &&
+                artifactId.equals( parent.getArtifactId() ) )
             {
                 result.put( path, model );
             }

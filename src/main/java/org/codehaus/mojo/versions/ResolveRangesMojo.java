@@ -68,9 +68,9 @@ public class ResolveRangesMojo
     {
         // Note we have to get the dependencies from the model because the dependencies in the 
         // project may have already had their range resolved [MNG-4138]
-        if ( getProject().getModel().getDependencyManagement() != null
-            && getProject().getModel().getDependencyManagement().getDependencies() != null
-            && isProcessingDependencyManagement() )
+        if ( getProject().getModel().getDependencyManagement() != null &&
+            getProject().getModel().getDependencyManagement().getDependencies() != null &&
+            isProcessingDependencyManagement() )
         {
             resolveRanges( pom, getProject().getModel().getDependencyManagement().getDependencies() );
         }

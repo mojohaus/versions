@@ -54,8 +54,8 @@ public class MavenVersionComparator
             // have to have four segments
             return 4;
         }
-        if ( ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0 )
-            && v.getQualifier() != null )
+        if ( ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0 ) &&
+            v.getQualifier() != null )
         {
             // the version was successfully parsed, and we have a qualifier
             // have to have four segments
@@ -196,8 +196,8 @@ public class MavenVersionComparator
         {
             return qualifier.substring( 0, 8 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 8 ) );
         }
-        if ( qualifier.toLowerCase().startsWith( "cr" ) || qualifier.toLowerCase().startsWith( "rc" )
-            || qualifier.toLowerCase().startsWith( "sp" ) )
+        if ( qualifier.toLowerCase().startsWith( "cr" ) || qualifier.toLowerCase().startsWith( "rc" ) ||
+            qualifier.toLowerCase().startsWith( "sp" ) )
         {
             return qualifier.substring( 0, 2 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 2 ) );
         }

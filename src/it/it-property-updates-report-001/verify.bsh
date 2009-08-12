@@ -1,0 +1,75 @@
+import java.io.*;
+
+try
+{
+    File file = new File( basedir, "target/site/property-updates-report.html" );
+    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+    StringBuilder buf = new StringBuilder();
+    String line = in.readLine();
+    while (line != null) {
+        buf.append(line);
+        buf.append(' ');
+        line = in.readLine();
+    }
+
+    String result = buf.toString()
+            .replaceAll( "<[^>]+>", " " )
+            .replaceAll( "&[^;]+;", " " )
+            .replaceAll( "\\s+", " " );
+
+    if ( result.indexOf( "# of properties using the latest version available 1" ) < 0 )
+    {
+        System.out.println( "Did not generate using current version totals correctly" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( result.indexOf( "# of properties where the next version available is smaller than an incremental version update 0" ) < 0 )
+    {
+        System.out.println( "Did not generate with subincrermental totals correctly" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( result.indexOf( "# of properties where the next version available is an incremental version update 1" ) < 0 )
+    {
+        System.out.println( "Did not generate with incremental totals correctly" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( result.indexOf( "# of properties where the next version available is a minor version update 1" ) < 0 )
+    {
+        System.out.println( "Did not generate with minor totals correctly" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( result.indexOf( "# of properties where the next version available is a major version update 0" ) < 0 )
+    {
+        System.out.println( "Did not generate with major totals correctly" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( result.indexOf( "${impl-version} 2.0 2.1" ) < 0 )
+    {
+        System.out.println( "Did not generate summary for ${impl-version} correctly" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( result.indexOf( "${api-version} 1.0 1.0.1 1.1 2.0" ) < 0 )
+    {
+        System.out.println( "Did not generate summary for ${api-version} correctly" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( result.indexOf( "${plugin-version} 3.0" ) < 0 )
+    {
+        System.out.println( "Did not generate summary for ${plugin-version} correctly" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;
