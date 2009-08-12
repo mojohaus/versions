@@ -728,6 +728,35 @@ public class PomHelper
             addReportPluginAssociations( helper, expressionEvaluator, result, model.getReporting().getPlugins() );
         }
 
+        // third, we add any associations from the active profiles
+        for ( Iterator i = model.getProfiles().iterator(); i.hasNext(); )
+        {
+            Profile profile = (Profile) i.next();
+            if ( !activeProfiles.contains( profile.getId() ) )
+            {
+                continue;
+            }
+            if ( profile.getDependencyManagement() != null )
+            {
+                addDependencyAssocations( helper, expressionEvaluator, result,
+                                          profile.getDependencyManagement().getDependencies(), false );
+            }
+            addDependencyAssocations( helper, expressionEvaluator, result, profile.getDependencies(), false );
+            if ( profile.getBuild() != null )
+            {
+                if ( profile.getBuild().getPluginManagement() != null )
+                {
+                    addPluginAssociations( helper, expressionEvaluator, result,
+                                           profile.getBuild().getPluginManagement().getPlugins() );
+                }
+                addPluginAssociations( helper, expressionEvaluator, result, profile.getBuild().getPlugins() );
+            }
+            if ( profile.getReporting() != null )
+            {
+                addReportPluginAssociations( helper, expressionEvaluator, result, profile.getReporting().getPlugins() );
+            }
+        }
+
         // finally, remove any properties without associations
         purgeProperties( result );
 

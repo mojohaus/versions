@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>localhost</groupId>
-  <artifactId>it-005</artifactId>
+  <artifactId>it-update-properties-005</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <name>update-properties with one property auto-linked in a profile</name>
+  <name>update-properties with one property auto-linked in an active profile</name>
 
   <properties>
     <api>2.1</api>
