@@ -131,8 +131,7 @@ public class DisplayDependencyUpdatesMojo
 
         try
         {
-            logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
-                        "Dependency Management" );
+            logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ), "Dependency Management" );
             logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
         }
         catch ( InvalidVersionSpecificationException e )
@@ -153,7 +152,7 @@ public class DisplayDependencyUpdatesMojo
         while ( i.hasNext() )
         {
             ArtifactVersions versions = (ArtifactVersions) i.next();
-            String left = ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
+            String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
             final ArtifactVersion current = versions.getCurrentVersion();
             final ArtifactVersion latest = versions.getNewestUpdate( UpdateScope.ANY );
             String right =
@@ -170,26 +169,27 @@ public class DisplayDependencyUpdatesMojo
                 t.add( StringUtils.rightPad( left, INFO_PAD_SIZE - right.length(), "." ) + right );
             }
         }
-        if ( usingCurrent.isEmpty() && !withUpdates.isEmpty())
+        if ( usingCurrent.isEmpty() && !withUpdates.isEmpty() )
         {
             getLog().info( "No dependencies in " + section + " are using the newst version." );
+            getLog().info( "" );
         }
-        else
-        if ( !usingCurrent.isEmpty() )
-                {
+        else if ( !usingCurrent.isEmpty() )
+        {
             getLog().info( "The following dependencies in " + section + " are using the newst version:" );
             i = usingCurrent.iterator();
             while ( i.hasNext() )
             {
                 getLog().info( (String) i.next() );
             }
+            getLog().info( "" );
         }
-        getLog().info( "" );
-        if ( withUpdates.isEmpty() && !usingCurrent.isEmpty())
+        if ( withUpdates.isEmpty() && !usingCurrent.isEmpty() )
         {
             getLog().info( "No dependencies in " + section + " have newer versions." );
+            getLog().info( "" );
         }
-        else if (!withUpdates.isEmpty())
+        else if ( !withUpdates.isEmpty() )
         {
             getLog().info( "The following dependencies in " + section + " have newer versions:" );
             i = withUpdates.iterator();
@@ -197,8 +197,8 @@ public class DisplayDependencyUpdatesMojo
             {
                 getLog().info( (String) i.next() );
             }
+            getLog().info( "" );
         }
-        getLog().info( "" );
     }
 
 
