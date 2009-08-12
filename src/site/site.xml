@@ -8,8 +8,10 @@
       <item name="Version number rules" href="version-rules.html"/>
     </menu>
     <menu name="Examples">
+      <item name="Advancing dependency versions" href="examples/advancing-dependency-versions.html"/>
       <item name="Checking for new dependency updates" href="examples/display-dependency-updates.html"/>
       <item name="Checking for new plugin updates" href="examples/display-plugin-updates.html"/>
+      <item name="Checking for new property-linked updates" href="examples/display-property-updates.html"/>
       <item name="Updating the Parent version" href="examples/update-parent.html"/>
       <item name="Updating a version specified in a property" href="examples/update-properties.html"/>
       <item name="Fixing a multi-module build" href="examples/update-child-modules.html"/>

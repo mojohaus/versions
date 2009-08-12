@@ -30,9 +30,12 @@ Usage
 
 * Basic Usage
 
-  Maven 2.0 does not currently support re-reading modifications of the <<<pom.xml>>> within one invocation of Maven.
+  Maven 2.0, 2.1 and 2.2 do not currently support re-reading modifications of the <<<pom.xml>>> within one invocation
+  of Maven.
 
   The following goals:
+
+    * {{{set-mojo.html}versions:set}}
 
     * {{{lock-snapshots-mojo.html}versions:lock-snapshots}}
 
@@ -46,9 +49,17 @@ Usage
 
     * {{{update-properties-mojo.html}versions:update-properties}}
 
-    * {{{use-releases-mojo.html}versions:use-releases}}
+    * {{{use-latest-releases-mojo.html}versions:use-latest-releases}}
 
-    * {{{set-mojo.html}versions:set}}
+    * {{{use-latest-versions-mojo.html}versions:use-latest-versions}}
+
+    * {{{use-next-releases-mojo.html}versions:use-next-releases}}
+
+    * {{{use-next-snapshots-mojo.html}versions:use-next-snapshots}}
+
+    * {{{use-next-versions-mojo.html}versions:use-next-versions}}
+
+    * {{{use-releases-mojo.html}versions:use-releases}}
 
   modify the <<<pom.xml>>> file, you need to run these goals separately from any other goals or life-cycle phases.
 
@@ -57,7 +68,12 @@ Usage
   {{{accept-mojo.html}versions:commit}} goal will remove the backup copy, while the
   {{{revert-mojo.html}versions:revert}} goal will restore the backup copy. It is best practice
   to use a Source Code Management system and not rely on the <<<pom.xml.versionsBackup>>> files created by the
-  versions-maven-plugin. The {{{accept-mojo.html}versions:commit}} and {{{revert-mojo.html}versions:revert}} goals are only a "Poor Man's SCM".
+  versions-maven-plugin. The {{{accept-mojo.html}versions:commit}} and {{{revert-mojo.html}versions:revert}} goals are
+  only a "Poor Man's SCM".
+
+* Goals that modify the <<<pom.xml>>>
+
+  Executing any of the following goals may modify your <<<pom.xml>>> file.
 
 ** Reverting modifications to the <<<pom.xml>>> files (Note: modifies <<<pom.xml>>> files)
 
@@ -96,8 +112,8 @@ mvn versions:update-parent
   If you have a multi-module build where the aggregator pom (i.e. the one with packaging of <<<pom>>> and the
   <<<modules>>> section) is also the parent referenced by its child modules, and the aggregator version does not
   match the version specified in the parent section of the child modules, Maven will not let you build the project.
-  To fix all the child modules, use the {{{update-child-modules-mojo.html}versions:update-child-modules}} goal and invoke
-  Maven in non-recursive mode.
+  To fix all the child modules, use the {{{update-child-modules-mojo.html}versions:update-child-modules}} goal and
+  invoke Maven in non-recursive mode.
 
 ---
 mvn -N versions:update-child-modules
@@ -105,33 +121,17 @@ mvn -N versions:update-child-modules
 
   {{{examples/update-child-modules.html} A more detailed example of the <<<update-child-modules>>> goal}}.
 
-
-** Checking for new versions of plugins
-
-  To get information about newer versions of plugins that you are using in your build, just invoke the
-  <<<display-plugin-updates>>> goal.
-
----
-mvn versions:display-plugin-updates
----
-
-  {{{examples/display-plugin-updates.html} A more detailed example of the <<<display-plugin-updates>>> goal}}.
-
-** Checking for new versions of dependencies
-
-  To get information about newer versions of dependencies that you are using in your build, just invoke the
-  <<<display-dependency-updates>>> goal.
-
----
-mvn versions:display-dependency-updates
----
-
-  {{{examples/display-dependency-updates.html} A more detailed example of the <<<display-dependency-updates>>> goal}}.
-
 ** Updating versions specified by properties (Note: modifies <<<pom.xml>>> files)
 
   This goal helps when you use properties to define versions.  Please see the
   {{{examples/update-properties.html}<<<update-properties>>> example}}.
+
+** Updating versions of dependencies (Note: modifies <<<pom.xml>>> files)
+
+  There are a set of goals to help with advancing dependency versions: <<<use-latest-releases>>>,
+  <<<use-latest-versions>>>, <<<use-next-releases>>>, <<<use-next-snapshots>>>, <<<use-next-versions>>>.
+
+  Please see the {{{examples/advancing-dependency-versions.html}advancing dependency versions example}}.
 
 ** Resolving version ranges (Note: modifies <<<pom.xml>>> files)
 
@@ -198,14 +198,51 @@ mvn versions:set -DnewVersion=1.0.1-SNAPSHOT
 
   More examples of the {{{examples/set.html} <<<set>>>}} goal.
 
+* Goals that do not modify the <<<pom.xml>>>
+
+  Executing any of the following goals will not modify your <<<pom.xml>>> file.
+
+** Checking for new versions of plugins
+
+  To get information about newer versions of plugins that you are using in your build, just invoke the
+  <<<display-plugin-updates>>> goal.
+
+---
+mvn versions:display-plugin-updates
+---
+
+  {{{examples/display-plugin-updates.html} A more detailed example of the <<<display-plugin-updates>>> goal}}.
+
+** Checking for new versions of dependencies
+
+  To get information about newer versions of dependencies that you are using in your build, just invoke the
+  <<<display-dependency-updates>>> goal.
+
+---
+mvn versions:display-dependency-updates
+---
+
+  {{{examples/display-dependency-updates.html} A more detailed example of the <<<display-dependency-updates>>> goal}}.
+
+** Checking for new versions of specified by properties
+
+  To get information about newer versions of dependencies that you are using in your build, just invoke the
+  <<<display-property-updates>>> goal.
+
+---
+mvn versions:display-property-updates
+---
+
+  {{{examples/display-property-updates.html} A more detailed example of the <<<display-property-updates>>> goal}}.
+
 * Report Usage
 
-  The plugin also offers a reporting view; it makes no changes to your project,
+  The plugin also offers some reporting views; these make no changes to your project,
   but makes it easy for reviewers to survey available updates without even having
   to launch Maven themselves. Updates are further categorized as major, minor, and
   incremental, to make it easier to decide which updates to take.
 
-  To add this report to your project's site, add the following snippet to your POM:
+  To add these reports to your project's site, add the following snippet to your POM:
 
 +---+
 <reporting>
@@ -214,6 +251,15 @@ mvn versions:set -DnewVersion=1.0.1-SNAPSHOT
       <groupId>org.codehaus.mojo</groupId>
       <artifactId>versions-maven-plugin</artifactId>
       <version>${pluginVersion}</version>
+      <reportSets>
+        <reportSet>
+          <reports>
+            <report>dependency-updates-report</report>
+            <report>plugin-updates-report</report>
+            <report>property-updates-report</report>
+          </reports>
+        </reportSet>
+      </reportSets>
     </plugin>
   </plugins>
 </reporting>

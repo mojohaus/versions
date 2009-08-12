@@ -38,6 +38,9 @@ Versions Maven Plugin
   * {{{display-plugin-updates-mojo.html}versions:display-plugin-updates}} scans a project's plugins and produces a
   report of those plugins which have newer versions available.
 
+  * {{{display-property-updates-mojo.html}versions:display-property-updates}} scans a projectand produces a report of
+  those properties which are used to control artifact versions and which properies have newer versions available.
+
   * {{{update-parent-mojo.html}versions:update-parent}} updates the parent section of a project so that it references the
   newest available version.  For example, if you use a corporate root POM, this goal can be helpful if you need
   to ensure you are using the latest version of the corporate root POM.
@@ -66,10 +69,13 @@ Versions Maven Plugin
   * {{{use-releases-mojo.html}versions:use-releases}} searches the pom for all -SNAPSHOT versions which have been 
   released and replaces them with the corresponding release version. 
   
-  * {{{use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which 
-  have been a newer release and replaces them with the next release version. 
-  
-  * {{{use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which 
+  * {{{use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which
+  have been a newer release and replaces them with the next release version.
+
+  * {{{use-next-snapshots-mojo.html}versions:use-next-snapshots}} searches the pom for all non-SNAPSHOT versions which
+  have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
+
+  * {{{use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which
   have been a newer release and replaces them with the latest release version. 
   
   * {{{use-next-versions-mojo.html}versions:use-next-versions}} searches the pom for all versions which 
@@ -83,7 +89,20 @@ Versions Maven Plugin
   
   * {{{revert-mojo.html}versions:revert}} restores the <<<pom.xml>>> files from the <<<pom.xml.versionsBackup>>> files. 
   Forms one half of the built-in "Poor Man's SCM". 
-  
+
+* Reporting goals overview
+
+  The Versions Plugin has the following reporting goals.
+
+  * {{{dependency-updates-report-mojo.html}versions:dependency-updates-report}} produces a report of those
+  project dependencies which have newer versions available.
+
+  * {{{plugin-updates-report-mojo.html}versions:plugin-updates-report}} produces a report of those plugins which have
+  newer versions available.
+
+  * {{{property-updates-report-mojo.html}versions:property-updates-report}} produces a report of
+  those properties which are used to control artifact versions and which properies have newer versions available.
+
 * Usage
 
   General instructions on how to use the Versions Plugin can be found on the {{{usage.html}usage page}}. Some more
