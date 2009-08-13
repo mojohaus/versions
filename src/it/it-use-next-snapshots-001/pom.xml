@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>localhost</groupId>
-  <artifactId>it-use-next-releases-001</artifactId>
+  <artifactId>it-use-next-snapshots-001</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <name>Update a dependency to the next release version</name>
+  <name>Update a release dependency to the next snapshot version</name>
 
   <dependencies>
         
