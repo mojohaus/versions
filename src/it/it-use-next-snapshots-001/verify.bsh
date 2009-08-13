@@ -11,9 +11,9 @@ try
         buf.append("\n");
         line = in.readLine();
     }
-    if ( !buf.toString().contains("<version>1.1.2</version>") )
+    if ( !buf.toString().contains("<version>1.1.2-SNAPSHOT</version>") )
     {
-        System.err.println( "Version of dummy-api not bumped to 1.1.2" );
+        System.err.println( "Version of dummy-api not bumped to 1.1.2-SNAPSHOT" );
         return false;
     }
 }
