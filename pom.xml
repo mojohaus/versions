@@ -47,17 +47,45 @@
       </releases>
     </repository>
   </repositories>
-  
+
   <developers>
     <developer>
       <name>Stephen Connolly</name>
-      <email>stephen.alan.connolly@gmail.com</email>
+      <email>stephenconnolly at codehaus</email>
       <roles>
         <role>Lead Developer</role>
       </roles>
       <timezone>0</timezone>
     </developer>
+    <developer>
+      <name>Paul Gier</name>
+      <email>pgier at redhat</email>
+      <roles>
+        <role>Developer</role>
+      </roles>
+    </developer>
+    <developer>
+      <name>Arnaud Heritier</name>
+      <email>aheritier at apache</email>
+      <roles>
+        <role>Developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
+
+  <contributors>
+    <contributor>
+      <name>Benoit Lafontaine</name>
+      <timezone>+1</timezone>
+    </contributor>
+    <contributor>
+      <name>Martin Franklin</name>
+    </contributor>
+    <contributor>
+      <name>Tom Folga</name>
+    </contributor>
+  </contributors>
 
   <prerequisites>
     <maven>2.0.6</maven>
