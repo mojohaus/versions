@@ -30,11 +30,14 @@ Advancing dependency versions
   * {{{../use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which
   have been a newer release and replaces them with the next release version.
 
-  * {{{../use-next-snapshots-mojo.html}versions:use-next-snapshots}} searches the pom for all non-SNAPSHOT versions which
-  have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
+  * {{{../use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions 
+  which have been a newer release and replaces them with the latest release version.
 
-  * {{{../use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which
-  have been a newer release and replaces them with the latest release version.
+  * {{{../use-next-snapshots-mojo.html}versions:use-next-snapshots}} searches the pom for all non-SNAPSHOT versions 
+  which have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
+
+  * {{{../use-latest-snapshots-mojo.html}versions:use-latest-snapshots}} searches the pom for all non-SNAPSHOT versions 
+  which have been a newer -SNAPSHOT version and replaces them with the latest -SNAPSHOT version.
 
   * {{{../use-next-versions-mojo.html}versions:use-next-versions}} searches the pom for all versions which
   have been a newer version and replaces them with the next version.

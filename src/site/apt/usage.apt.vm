@@ -51,6 +51,8 @@ Usage
 
     * {{{use-latest-releases-mojo.html}versions:use-latest-releases}}
 
+    * {{{use-latest-snapshots-mojo.html}versions:use-latest-snapshots}}
+
     * {{{use-latest-versions-mojo.html}versions:use-latest-versions}}
 
     * {{{use-next-releases-mojo.html}versions:use-next-releases}}
@@ -128,8 +130,9 @@ mvn -N versions:update-child-modules
 
 ** Updating versions of dependencies (Note: modifies <<<pom.xml>>> files)
 
-  There are a set of goals to help with advancing dependency versions: <<<use-latest-releases>>>,
-  <<<use-latest-versions>>>, <<<use-next-releases>>>, <<<use-next-snapshots>>>, <<<use-next-versions>>>.
+  There are a set of goals to help with advancing dependency versions: <<<use-latest-releases>>>, 
+  <<<use-latest-snapshots>>>, <<<use-latest-versions>>>, <<<use-next-releases>>>, <<<use-next-snapshots>>>, and
+  <<<use-next-versions>>>.
 
   Please see the {{{examples/advancing-dependency-versions.html}advancing dependency versions example}}.
 

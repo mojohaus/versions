@@ -38,15 +38,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Replaces any release versions with the next snapshot version (if it has been deployed).
+ * Replaces any release versions with the latest snapshot version (if it has been deployed).
  *
  * @author Stephen Connolly
- * @goal use-next-snapshots
+ * @goal use-latest-snapshots
  * @requiresProject true
  * @requiresDirectInvocation true
  * @since 1.0-beta-1
  */
-public class UseNextSnapshotsMojo
+public class UseLatestSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
 
@@ -91,7 +91,7 @@ public class UseNextSnapshotsMojo
      *          when things go wrong in a very bad way
      * @throws javax.xml.stream.XMLStreamException
      *          when things go wrong with XML streaming
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
@@ -100,11 +100,11 @@ public class UseNextSnapshotsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                useNextSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
+                useLatestSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
             }
             if ( isProcessingDependencies() )
             {
-                useNextSnapshots( pom, getProject().getDependencies() );
+                useLatestSnapshots( pom, getProject().getDependencies() );
             }
         }
         catch ( ArtifactMetadataRetrievalException e )
@@ -113,7 +113,7 @@ public class UseNextSnapshotsMojo
         }
     }
 
-    private void useNextSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
+    private void useLatestSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         int segment;
@@ -150,7 +150,7 @@ public class UseNextSnapshotsMojo
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( !versionMatcher.matches() )
             {
-                getLog().debug( "Looking for next snapshot of " + toString( dep ) );
+                getLog().debug( "Looking for latest snapshot of " + toString( dep ) );
                 Artifact artifact = this.toArtifact( dep );
                 if ( !isIncluded( artifact ) )
                 {
@@ -168,17 +168,21 @@ public class UseNextSnapshotsMojo
                 ArtifactVersion upperBound = versionComparator.incrementSegment( lowerBound, segment );
                 upperBound = versionComparator.incrementSegment( upperBound, segment );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
+                String latestVersion = null;
                 for ( int j = 0; j < newer.length; j++ )
                 {
                     String newVersion = newer[0].toString();
                     if ( matchSnapshotRegex.matcher( newVersion ).matches() )
                     {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             newVersion ) )
-                        {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
-                        }
-                        break;
+                        latestVersion = newVersion;
+                    }
+                }
+                if ( latestVersion != null )
+                {
+                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                                         latestVersion ) )
+                    {
+                        getLog().info( "Updated " + toString( dep ) + " to version " + latestVersion );
                     }
                 }
             }
