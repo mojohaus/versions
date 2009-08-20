@@ -34,6 +34,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,19 +120,23 @@ public class UseLatestSnapshotsMojo
         int segment;
         if ( Boolean.TRUE.equals( allowMajorUpdates ) )
         {
-            segment = 0;
+            segment = -1;
+            getLog().info( "Major version changes allowed" );
         }
         else if ( Boolean.TRUE.equals( allowMinorUpdates ) )
         {
-            segment = 1;
+            segment = 0;
+            getLog().info( "Minor version changes allowed" );
         }
         else if ( Boolean.TRUE.equals( allowIncrementalUpdates ) )
         {
-            segment = 2;
+            segment = 1;
+            getLog().info( "Incremental version changes allowed" );
         }
         else
         {
-            segment = 3;
+            segment = 2;
+            getLog().info( "Subincremental version changes allowed" );
         }
 
         Iterator i = dependencies.iterator();
@@ -165,13 +170,14 @@ public class UseLatestSnapshotsMojo
                     getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
                     continue;
                 }
-                ArtifactVersion upperBound = versionComparator.incrementSegment( lowerBound, segment );
-                upperBound = versionComparator.incrementSegment( upperBound, segment );
+                ArtifactVersion upperBound = segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
+                upperBound = segment >= 0 ? versionComparator.incrementSegment( upperBound, segment ) : null;
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
+                getLog().debug( "Candidate versions " + Arrays.asList(newer));
                 String latestVersion = null;
                 for ( int j = 0; j < newer.length; j++ )
                 {
-                    String newVersion = newer[0].toString();
+                    String newVersion = newer[j].toString();
                     if ( matchSnapshotRegex.matcher( newVersion ).matches() )
                     {
                         latestVersion = newVersion;
