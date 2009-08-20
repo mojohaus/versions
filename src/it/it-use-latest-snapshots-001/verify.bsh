@@ -1,0 +1,26 @@
+import java.io.*;
+
+try
+{
+    File file = new File( basedir, "pom.xml" );
+    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+    StringBuilder buf = new StringBuilder();
+    String line = in.readLine();
+    while (line != null) {
+        buf.append(line);
+        buf.append("\n");
+        line = in.readLine();
+    }
+    if ( !buf.toString().contains("<version>1.1.2-SNAPSHOT</version>") )
+    {
+        System.err.println( "Version of dummy-api not bumped to 1.1.2-SNAPSHOT" );
+        return false;
+    }
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;
