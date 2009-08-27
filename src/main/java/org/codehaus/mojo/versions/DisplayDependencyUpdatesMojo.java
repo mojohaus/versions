@@ -171,12 +171,12 @@ public class DisplayDependencyUpdatesMojo
         }
         if ( usingCurrent.isEmpty() && !withUpdates.isEmpty() )
         {
-            getLog().info( "No dependencies in " + section + " are using the newst version." );
+            getLog().info( "No dependencies in " + section + " are using the newest version." );
             getLog().info( "" );
         }
         else if ( !usingCurrent.isEmpty() )
         {
-            getLog().info( "The following dependencies in " + section + " are using the newst version:" );
+            getLog().info( "The following dependencies in " + section + " are using the newest version:" );
             i = usingCurrent.iterator();
             while ( i.hasNext() )
             {
