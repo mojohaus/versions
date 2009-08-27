@@ -94,7 +94,7 @@ public class PluginUpdatesReport
         {
             plugins.addAll( getProject().getBuild().getPlugins() );
         }
-        plugins.addAll( getProject().getDependencies() );
+
         plugins = removePluginManagment( plugins, pluginManagement );
 
         try
