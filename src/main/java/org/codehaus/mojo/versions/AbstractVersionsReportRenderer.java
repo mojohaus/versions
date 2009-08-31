@@ -33,11 +33,7 @@ import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.plexus.i18n.I18N;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Base class for report renderers.
@@ -110,8 +106,8 @@ public abstract class AbstractVersionsReportRenderer
 
     protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
     {
-        return v1 == v2 || ( v1 != null && v1.equals( v2 ) ) ||
-            ( v1 != null && v2 != null && v1.toString().equals( v2.toString() ) );
+        return v1 == v2 || ( v1 != null && v1.equals( v2 ) ) || ( v1 != null && v2 != null && v1.toString().equals(
+            v2.toString() ) );
     }
 
     protected void renderDependencySummaryTableRow( Dependency dependency, ArtifactVersions details )
@@ -165,40 +161,88 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableCell();
         if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( details.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( details.getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( details.getOldestUpdate( UpdateScope.MINOR ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( details.getOldestUpdate( UpdateScope.MINOR ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( details.getOldestUpdate( UpdateScope.MAJOR ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( details.getOldestUpdate( UpdateScope.MAJOR ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableRow_();
+    }
+
+    protected void safeBold()
+    {
+        try
+        {
+            sink.bold();
+        }
+        catch ( NoSuchMethodError e )
+        {
+            // ignore Maven 2.1.0
+        }
+    }
+
+    protected void safeBold_()
+    {
+        try
+        {
+            sink.bold_();
+        }
+        catch ( NoSuchMethodError e )
+        {
+            // ignore Maven 2.1.0
+        }
+    }
+
+    protected void safeItalic()
+    {
+        try
+        {
+            sink.italic();
+        }
+        catch ( NoSuchMethodError e )
+        {
+            // ignore Maven 2.1.0
+        }
+    }
+
+    protected void safeItalic_()
+    {
+        try
+        {
+            sink.italic_();
+        }
+        catch ( NoSuchMethodError e )
+        {
+            // ignore Maven 2.1.0
+        }
     }
 
     protected void renderDependencySummaryTableHeader()
@@ -375,23 +419,24 @@ public abstract class AbstractVersionsReportRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) ||
-                    equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) ) ||
-                    equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) ) ||
-                    equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) ) ||
-                    equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) ) ||
-                    equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) ||
-                    equals( versions[i], details.getNewestUpdate( UpdateScope.MAJOR ) );
+                boolean bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )
+                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) || equals( versions[i],
+                                                                                                      details.getNewestUpdate(
+                                                                                                          UpdateScope.MAJOR ) );
                 if ( bold )
                 {
-                    sink.bold();
+                    safeBold();
                 }
                 sink.text( versions[i].toString() );
                 if ( bold )
                 {
-                    sink.bold_();
+                    safeBold_();
                     sink.nonBreakingSpace();
-                    sink.italic();
+                    safeItalic();
                     if ( equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
@@ -421,7 +466,7 @@ public abstract class AbstractVersionsReportRenderer
                         sink.text( getText( "report.latestMajor" ) );
                     }
 
-                    sink.italic_();
+                    safeItalic_();
                 }
             }
             sink.tableCell_();
@@ -487,36 +532,36 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableCell();
         if ( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( versions.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( versions.getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( versions.getOldestUpdate( UpdateScope.MINOR ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( versions.getOldestUpdate( UpdateScope.MINOR ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( versions.getOldestUpdate( UpdateScope.MAJOR ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( versions.getOldestUpdate( UpdateScope.MAJOR ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
@@ -645,13 +690,13 @@ public abstract class AbstractVersionsReportRenderer
                     sink.lineBreak();
                 }
                 boolean allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );
-                boolean bold = equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) ||
-                    equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) ) ||
-                    equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) ) ||
-                    equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) ) ||
-                    equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) ) ||
-                    equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) ) ||
-                    equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );
+                boolean bold = equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) )
+                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) )
+                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) ) || equals(
+                    artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );
                 if ( !allowed )
                 {
                     sink.text( "* " );
@@ -659,17 +704,17 @@ public abstract class AbstractVersionsReportRenderer
                 }
                 if ( allowed && bold )
                 {
-                    sink.bold();
+                    safeBold();
                 }
                 sink.text( artifactVersions[i].toString() );
                 if ( bold )
                 {
                     if ( allowed )
                     {
-                        sink.bold_();
+                        safeBold_();
                     }
                     sink.nonBreakingSpace();
-                    sink.italic();
+                    safeItalic();
                     if ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
@@ -699,7 +744,7 @@ public abstract class AbstractVersionsReportRenderer
                         sink.text( getText( "report.latestMajor" ) );
                     }
 
-                    sink.italic_();
+                    safeItalic_();
                 }
             }
             if ( someNotAllowed )
@@ -707,9 +752,9 @@ public abstract class AbstractVersionsReportRenderer
                 sink.lineBreak();
                 sink.lineBreak();
                 sink.text( "* " );
-                sink.italic();
+                safeItalic();
                 sink.text( getText( "report.excludedVersion" ) );
-                sink.italic_();
+                safeItalic_();
             }
             sink.tableCell_();
             sink.tableRow_();

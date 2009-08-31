@@ -290,48 +290,48 @@ public class PluginUpdatesRenderer
         sink.tableCell();
         if ( !details.isArtifactUpdateAvailable() )
         {
-            sink.bold();
+            safeBold();
         }
         sink.text( plugin.getVersion() );
         if ( !details.isArtifactUpdateAvailable() )
         {
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
         if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) != null )
         {
-            sink.bold();
+            safeBold();
             sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ).toString() );
-            sink.bold_();
+            safeBold_();
         }
         sink.tableCell_();
 
@@ -445,14 +445,14 @@ public class PluginUpdatesRenderer
                     equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) );
                 if ( bold )
                 {
-                    sink.bold();
+                    safeBold();
                 }
                 sink.text( versions[i].toString() );
                 if ( bold )
                 {
-                    sink.bold_();
+                    safeBold_();
                     sink.nonBreakingSpace();
-                    sink.italic();
+                    safeItalic();
                     if ( equals( versions[i],
                                  details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
@@ -489,7 +489,7 @@ public class PluginUpdatesRenderer
                         sink.text( getText( "report.latestMajor" ) );
                     }
 
-                    sink.italic_();
+                    safeItalic_();
                 }
             }
             sink.tableCell_();
