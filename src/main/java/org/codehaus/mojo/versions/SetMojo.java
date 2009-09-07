@@ -27,6 +27,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.plexus.util.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -174,23 +175,38 @@ public class SetMojo
                     final String targetPath = (String) target.getKey();
                     final Model targetModel = (Model) target.getValue();
                     final Parent parent = targetModel.getParent();
+                    getLog().debug( "Module: " + targetPath );
                     if ( sourceVersion.equals( parent.getVersion() ) )
                     {
-                        getLog().debug( "Module: " + targetPath + " parent is " +
+                        getLog().debug( "    parent already is " +
                             ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + sourceVersion );
                     }
                     else
                     {
-                        getLog().debug( "Module: " + targetPath );
                         getLog().debug(
-                            "    parent was " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" +
+                            "    parent is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" +
                                 parent.getVersion() );
                         getLog().debug(
-                            "    updating to " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" +
+                            "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" +
                                 sourceVersion );
+                    }
+                    if ( StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
+                    {
+                        getLog().debug( "    module is " + ArtifactUtils.versionlessKey(
+                            PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ) ) + ":"
+                            + PomHelper.getVersion( targetModel ) );
+                        getLog().debug( "    will become " + ArtifactUtils.versionlessKey(
+                            PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ) ) + ":"
+                            + sourceVersion );
                         addChange( PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ),
                                    PomHelper.getVersion( targetModel ), sourceVersion );
                         targetModel.setVersion( sourceVersion );
+                    }
+                    else
+                    {
+                        getLog().debug( "    module is " + ArtifactUtils.versionlessKey(
+                            PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ) ) + ":"
+                            + PomHelper.getVersion( targetModel ) );
                     }
                 }
             }
