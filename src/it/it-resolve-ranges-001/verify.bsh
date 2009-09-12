@@ -4,22 +4,22 @@ try
 {
     File file = new File( basedir, "pom.xml" );
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    StringBuilder buf = new StringBuilder();
+    StringBuffer buf = new StringBuffer();
     String line = in.readLine();
     while (line != null) {
         buf.append(line);
         buf.append("\n");
         line = in.readLine();
     }
-    if ( ! ( buf.toString().contains("<version>2.0.6</version>") 
-            || buf.toString().contains("<version>2.0.7</version>")
-            || buf.toString().contains("<version>2.0.8</version>") )
+    if ( ( 0 > buf.indexOf("<version>2.0.6</version>") )
+            && ( 0 > buf.indexOf("<version>2.0.7</version>") )
+            && ( 0 > buf.indexOf("<version>2.0.8</version>") ) )
        )
     {
         System.err.println( "Version of maven-project not resolved to 2.0.6, 2.0.7, or 2.0.8" );
         return false;
     }
-    if ( !buf.toString().contains("<version>1.5.1</version>") )
+    if ( 0 > buf.indexOf("<version>1.5.1</version>") )
     {
         System.err.println( "Version of plexus not resolved to 1.5.1" );
         return false;

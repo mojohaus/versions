@@ -4,14 +4,14 @@ try
 {
     File file = new File( basedir, "pom.xml" );
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    StringBuilder buf = new StringBuilder();
+    StringBuffer buf = new StringBuffer();
     String line = in.readLine();
     while (line != null) {
         buf.append(line);
         buf.append("\n");
         line = in.readLine();
     }
-    if ( !buf.toString().contains("<api>2.0</api>") )
+    if ( 0 > buf.indexOf("<api>2.0</api>") )
     {
         System.err.println( "Version not updated to 2.0" );
         return false;

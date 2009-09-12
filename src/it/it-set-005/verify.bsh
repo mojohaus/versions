@@ -5,7 +5,7 @@ try
 {
     File file = new File( basedir, "pom.xml" );
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    StringBuilder buf = new StringBuilder();
+    StringBuffer buf = new StringBuffer();
     String line = in.readLine();
     while (line != null) {
         buf.append(line);
@@ -21,7 +21,7 @@ try
     }
     file = new File( basedir, "module-a1/pom.xml" );
     in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    buf = new StringBuilder();
+    buf = new StringBuffer();
     line = in.readLine();
     while (line != null) {
         buf.append(line);
@@ -45,7 +45,7 @@ try
 
     file = new File( basedir, "module-a2/pom.xml" );
     in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    buf = new StringBuilder();
+    buf = new StringBuffer();
     line = in.readLine();
     while (line != null) {
         buf.append(line);

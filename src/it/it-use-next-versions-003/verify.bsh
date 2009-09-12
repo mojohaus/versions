@@ -4,14 +4,14 @@ try
 {
     File file = new File( basedir, "pom.xml" );
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    StringBuilder buf = new StringBuilder();
+    StringBuffer buf = new StringBuffer();
     String line = in.readLine();
     while (line != null) {
         buf.append(line);
         buf.append("\n");
         line = in.readLine();
     }
-    if ( !buf.toString().contains("<version>1.1.2</version>") )
+    if ( 0 > buf.indexOf("<version>1.1.2</version>") )
     {
         System.err.println( "Version of dummy-api was not bumped" );
         return false;

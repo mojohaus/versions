@@ -4,20 +4,20 @@ try
 {
     File file = new File( basedir, "pom.xml" );
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    StringBuilder buf = new StringBuilder();
+    StringBuffer buf = new StringBuffer();
     String line = in.readLine();
     while (line != null) {
         buf.append(line);
         buf.append("\n");
         line = in.readLine();
     }
-    String pom = buf.toString();
-    if ( !pom.contains("<api>3.0</api>") )
+
+    if ( 0 > buf.indexOf("<api>3.0</api>") )
     {
         System.err.println( "${api} version not updated to 3.0" );
         return false;
     }
-    if ( !pom.contains("<impl>2.2</impl>") )
+    if ( 0 > buf.indexOf("<impl>2.2</impl>") )
     {
         System.err.println( "${impl} version not updated to 2.2" );
         return false;

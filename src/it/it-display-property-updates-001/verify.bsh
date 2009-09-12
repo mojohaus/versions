@@ -5,7 +5,7 @@ try
 {
     File file = new File( basedir, "build.log" );
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-    StringBuilder buf = new StringBuilder();
+    StringBuffer buf = new StringBuffer();
     String line = in.readLine();
     while (line != null)
     {
