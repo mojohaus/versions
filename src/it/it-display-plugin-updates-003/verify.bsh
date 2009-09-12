@@ -1,17 +1,12 @@
 import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
 import java.util.regex.*;
 
 try
 {
     File file = new File( basedir, "build.log" );
-    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-    StringBuffer buf = new StringBuffer();
-    String line = in.readLine();
-    while (line != null) {
-        buf.append(line);
-        buf.append("\n");
-        line = in.readLine();
-    }
+    String buf = FileUtils.fileRead( file );
+
     Pattern p = Pattern.compile("\\Qlocalhost:dummy-maven-plugin\\E\\s*\\.*\\s*1\\.0\\s+->\\s+3\\.0");
     Matcher m = p.matcher(buf.toString());
     if ( !m.find() )

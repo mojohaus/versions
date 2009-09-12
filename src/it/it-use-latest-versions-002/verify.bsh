@@ -1,16 +1,11 @@
 import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
 
 try
 {
     File file = new File( basedir, "pom.xml" );
-    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    StringBuffer buf = new StringBuffer();
-    String line = in.readLine();
-    while (line != null) {
-        buf.append(line);
-        buf.append("\n");
-        line = in.readLine();
-    }
+    String buf = FileUtils.fileRead( file, "UTF-8" );
+
     if ( 0 > buf.indexOf("<version>3.0</version>") )
     {
         System.err.println( "Version of dummy-api not bumped to 3.0" );

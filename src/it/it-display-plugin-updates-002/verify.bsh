@@ -1,19 +1,14 @@
 import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
 import java.util.regex.Pattern;
 
 try
 {
     File file = new File( basedir, "build.log" );
-    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-    StringBuffer buf = new StringBuffer();
-    String line = in.readLine();
-    while (line != null) {
-        buf.append(line);
-        buf.append("\n");
-        line = in.readLine();
-    }
+    String buf = FileUtils.fileRead( file );
+
     if (Pattern.compile("\\Qlocalhost:dummy-maven-plugin\\E\\s*\\.*\\s*+3\\.0\\s+->\\s+[0-9\\.]+")
-            .matcher(buf.toString()).find() ) 
+            .matcher(buf.toString()).find() )
     {
         System.out.println("Suggested updating dummy-maven-plugin from version 3.0");
         return false;

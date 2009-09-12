@@ -1,9 +1,11 @@
 import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
 import java.util.regex.*;
 
 try
 {
     File file = new File( basedir, "pom.xml" );
+
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
     StringBuffer buf = new StringBuffer();
     String line = in.readLine();
@@ -12,14 +14,17 @@ try
         buf.append(" ");
         line = in.readLine();
     }
+
     Pattern p = Pattern.compile("\\Q<version>\\E\\s*1\\.2\\.1-SNAPSHOT\\s*\\Q</version>\\E");
     Matcher m = p.matcher(buf.toString());
-    if ( !m.find() ) 
+    if ( !m.find() )
     {
         System.out.println("Did not set new version in parent pom");
         return false;
     }
+
     file = new File( basedir, "module-a1/pom.xml" );
+
     in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
     buf = new StringBuffer();
     line = in.readLine();
@@ -28,6 +33,7 @@ try
         buf.append(" ");
         line = in.readLine();
     }
+
     p = Pattern.compile("\\Q<parent>\\E.*\\Q<version>\\E\\s*1\\.2\\.1-SNAPSHOT\\s*\\Q</version>\\E.*\\Q</parent>\\E");
     m = p.matcher(buf.toString());
     if ( !m.find() )
@@ -44,6 +50,7 @@ try
     }
 
     file = new File( basedir, "module-a2/pom.xml" );
+
     in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
     buf = new StringBuffer();
     line = in.readLine();
@@ -52,6 +59,7 @@ try
         buf.append(" ");
         line = in.readLine();
     }
+
     p = Pattern.compile("\\Q<parent>\\E.*\\Q<version>\\E\\s*1\\.2\\.1-SNAPSHOT\\s*\\Q</version>\\E.*\\Q</parent>\\E");
     m = p.matcher(buf.toString());
     if ( !m.find() )

@@ -4,6 +4,7 @@ import java.util.regex.*;
 try
 {
     File file = new File( basedir, "pom.xml" );
+
     BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
     StringBuffer buf = new StringBuffer();
     String line = in.readLine();
@@ -12,9 +13,10 @@ try
         buf.append(" ");
         line = in.readLine();
     }
+
     Pattern p = Pattern.compile("\\Q<parent>\\E.*\\Q<version>\\E\\s*3\\.0\\s*\\Q</version>\\E.*\\Q</parent>\\E");
     Matcher m = p.matcher(buf.toString());
-    if ( !m.find() ) 
+    if ( !m.find() )
     {
         System.out.println("Did not update parent to version 3.0");
         return false;
