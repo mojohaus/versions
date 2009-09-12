@@ -5,20 +5,21 @@ try
 {
     File file = new File( basedir, "pom.xml" );
 
-    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+    BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     StringBuffer buf = new StringBuffer();
     String line = in.readLine();
-    while (line != null) {
-        buf.append(line);
-        buf.append(" ");
+    while ( line != null )
+    {
+        buf.append( line );
+        buf.append( " " );
         line = in.readLine();
     }
 
-    Pattern p = Pattern.compile("\\Q<version>\\E\\s*2\\.0\\s*\\Q</version>\\E");
-    Matcher m = p.matcher(buf.toString());
+    Pattern p = Pattern.compile( "\\Q<version>\\E\\s*2\\.0\\s*\\Q</version>\\E" );
+    Matcher m = p.matcher( buf.toString() );
     if ( !m.find() )
     {
-        System.out.println("Setting new version");
+        System.out.println( "Setting new version" );
         return false;
     }
 }

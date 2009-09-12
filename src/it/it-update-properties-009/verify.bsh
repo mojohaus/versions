@@ -6,7 +6,7 @@ try
     File file = new File( basedir, "pom.xml" );
     String buf = FileUtils.fileRead( file, "UTF-8" );
 
-    if ( 0 > buf.indexOf("<api>2.1</api>") )
+    if ( buf.indexOf( "<api>2.1</api>" ) < 0 )
     {
         System.err.println( "Version has been changed" );
         return false;

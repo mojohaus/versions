@@ -6,7 +6,7 @@ try
     File file = new File( basedir, "pom.xml" );
     String buf = FileUtils.fileRead( file, "UTF-8" );
 
-    if ( 0 > buf.indexOf("<version>1.1.1</version>") )
+    if ( buf.indexOf( "<version>1.1.1</version>" ) < 0 )
     {
         System.err.println( "Version of dummy-api was not bumped" );
         return false;

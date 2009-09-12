@@ -7,14 +7,14 @@ try
     File file = new File( basedir, "build.log" );
     String buf = FileUtils.fileRead( file );
 
-    Pattern p = Pattern.compile("\\Qlocalhost:dummy-api\\E\\s*\\.*\\s*1\\.1\\s+->\\s+3\\.0");
-    Matcher m = p.matcher(buf.toString());
+    Pattern p = Pattern.compile( "\\Qlocalhost:dummy-api\\E\\s*\\.*\\s*1\\.1\\s+->\\s+3\\.0" );
+    Matcher m = p.matcher( buf.toString() );
     if ( !m.find() )
     {
-        System.out.println("Did not suggest updating dummy-api to version 3.0");
+        System.out.println( "Did not suggest updating dummy-api to version 3.0" );
         return false;
     }
-    System.out.println(m.group(0));
+    System.out.println( m.group( 0 ) );
 }
 catch( Throwable t )
 {

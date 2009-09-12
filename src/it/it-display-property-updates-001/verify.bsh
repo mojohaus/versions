@@ -7,14 +7,14 @@ try
     File file = new File( basedir, "build.log" );
     String buf = FileUtils.fileRead( file );
 
-    Pattern p = Pattern.compile("\\Q${api}\\E\\s*\\.*\\s*1\\.0\\s+->\\s+2\\.0");
-    Matcher m = p.matcher(buf.toString());
+    Pattern p = Pattern.compile( "\\Q${api}\\E\\s*\\.*\\s*1\\.0\\s+->\\s+2\\.0" );
+    Matcher m = p.matcher( buf.toString() );
     if ( !m.find() )
     {
-        System.out.println("Did not suggest updating ${api} to version 2.0");
+        System.out.println( "Did not suggest updating ${api} to version 2.0" );
         return false;
     }
-    System.out.println(m.group(0));
+    System.out.println( m.group( 0 ) );
 }
 catch( Throwable t )
 {

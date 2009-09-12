@@ -7,11 +7,11 @@ try
     File file = new File( basedir, "build.log" );
     String buf = FileUtils.fileRead( file );
 
-    Pattern p = Pattern.compile("\\QAll plugins have a version specified.\\E");
-    Matcher m = p.matcher(buf.toString());
+    Pattern p = Pattern.compile( "\\QAll plugins have a version specified.\\E" );
+    Matcher m = p.matcher( buf.toString() );
     if ( m.find() )
     {
-        System.out.println("Did not notice that clean plugin does not have a version specified");
+        System.out.println( "Did not notice that clean plugin does not have a version specified" );
         return false;
     }
 }

@@ -53,7 +53,7 @@ try
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
-    if ( result.indexOf( "3.0 Latest Major") < 0 )
+    if ( result.indexOf( "3.0 Latest Major" ) < 0 )
     {
         System.out.println( "Did not identify latest major version" );
         System.out.println( "Result = \"" + result +"\"" );

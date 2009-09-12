@@ -7,12 +7,12 @@ try
     String buf = FileUtils.fileRead( file, "UTF-8" );
 
 
-    if ( 0 > buf.indexOf("<api>3.0</api>") )
+    if ( buf.indexOf( "<api>3.0</api>" ) < 0 )
     {
         System.err.println( "${api} version not updated to 3.0" );
         return false;
     }
-    if ( 0 > buf.indexOf("<impl>2.2</impl>") )
+    if ( buf.indexOf( "<impl>2.2</impl>" ) < 0 )
     {
         System.err.println( "${impl} version not updated to 2.2" );
         return false;
