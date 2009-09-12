@@ -1,0 +1,26 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+try
+{
+    File file = new File( basedir, "pom.xml" );
+    String buf = FileUtils.fileRead( file, "ISO-8859-15" );
+
+    if ( 0 > buf.indexOf("<version>2.0</version>") )
+    { // if pom.xml has not been modified, the test is not useful...
+        System.err.println( "Version not changed to 2.0" );
+        return false;
+    }
+    if ( 0 > buf.indexOf("<name>Modify a POM stored with ISO-8859-15 encoding (check euro symbol: \u20AC)</name>") )
+    {
+        System.err.println( "Encoding not preserved while modifying pom.xml" );
+        return false;
+    }
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;

@@ -146,26 +146,19 @@ public class ModifiedPomXMLEventReader
     public void rewind()
         throws XMLStreamException
     {
-        try
+        backing = factory.createXMLEventReader( new StringReader( pom.toString() ) );
+        nextEnd = 0;
+        nextDelta = 0;
+        for ( int i = 0; i < MAX_MARKS; i++ )
         {
-            backing = factory.createXMLEventReader( new ByteArrayInputStream( pom.toString().getBytes( "utf-8" ) ) );
-            nextEnd = 0;
-            nextDelta = 0;
-            for ( int i = 0; i < MAX_MARKS; i++ )
-            {
-                markStart[i] = -1;
-                markEnd[i] = -1;
-                markDelta[i] = 0;
-            }
-            lastStart = -1;
-            lastEnd = -1;
-            lastDelta = 0;
-            next = null;
+            markStart[i] = -1;
+            markEnd[i] = -1;
+            markDelta[i] = 0;
         }
-        catch ( UnsupportedEncodingException e )
-        {
-            throw new XMLStreamException( e );
-        }
+        lastStart = -1;
+        lastEnd = -1;
+        lastDelta = 0;
+        next = null;
     }
 
 // --------------------- GETTER / SETTER METHODS ---------------------

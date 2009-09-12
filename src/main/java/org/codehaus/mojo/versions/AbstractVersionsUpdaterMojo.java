@@ -42,15 +42,15 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.Writer;
 import java.util.List;
 
 /**
@@ -309,7 +309,7 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         try
         {
-            StringBuffer input = PomHelper.readFile( outFile );
+            StringBuffer input = PomHelper.readXmlFile( outFile );
             ModifiedPomXMLEventReader newPom = newModifiedPomXER( input );
 
             update( newPom );
@@ -383,9 +383,15 @@ public abstract class AbstractVersionsUpdaterMojo
     protected final void writeFile( File outFile, StringBuffer input )
         throws IOException
     {
-        OutputStream out = new BufferedOutputStream( new FileOutputStream( outFile ) );
-        out.write( input.toString().getBytes( PomHelper.POM_ENCODING ) );
-        out.close();
+        Writer writer = WriterFactory.newXmlWriter( outFile );
+        try
+        {
+            IOUtil.copy( input.toString(), writer );
+        }
+        finally
+        {
+            IOUtil.close( writer );
+        }
     }
 
     /**

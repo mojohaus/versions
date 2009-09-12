@@ -462,7 +462,7 @@ public class DisplayPluginUpdatesMojo
         throws IOException, XMLStreamException
     {
         Set result = new HashSet();
-        ModifiedPomXMLEventReader pom = newModifiedPomXER( PomHelper.readFile( project.getFile() ) );
+        ModifiedPomXMLEventReader pom = newModifiedPomXER( PomHelper.readXmlFile( project.getFile() ) );
 
         Pattern pathRegex = Pattern.compile(
             "/project(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );

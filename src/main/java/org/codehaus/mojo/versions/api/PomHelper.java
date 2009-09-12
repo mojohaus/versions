@@ -38,17 +38,18 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -72,13 +73,6 @@ import java.util.regex.Pattern;
  */
 public class PomHelper
 {
-    /**
-     * The encoding used for the pom file.
-     *
-     * @since 1.0-alpha-3
-     */
-    public static final String POM_ENCODING = "UTF-8";
-
     public static final String APACHE_MAVEN_PLUGINS_GROUPID = "org.apache.maven.plugins";
 
     /**
@@ -1392,30 +1386,24 @@ public class PomHelper
     }
 
     /**
-     * Reads a file into a StringBuffer.
+     * Reads a file into a String.
      *
      * @param outFile The file to read.
-     * @return StringBuffer The contents of the file.
+     * @return String The content of the file.
      * @throws java.io.IOException when things go wrong.
      */
-    public static StringBuffer readFile( File outFile )
+    public static StringBuffer readXmlFile( File outFile )
         throws IOException
     {
-        StringBuffer input;
-        BufferedInputStream reader;
-        reader = new BufferedInputStream( new FileInputStream( outFile ) );
+        Reader reader = ReaderFactory.newXmlReader( outFile );
 
-        byte[] content = new byte[(int) outFile.length()];
-        input = new StringBuffer( content.length );
         try
         {
-            int length = reader.read( content, 0, content.length );
-            input.append( new String( content, 0, length, POM_ENCODING ) );
-            return input;
+            return new StringBuffer( IOUtil.toString( reader ) );
         }
         finally
         {
-            reader.close();
+            IOUtil.close( reader );
         }
     }
 

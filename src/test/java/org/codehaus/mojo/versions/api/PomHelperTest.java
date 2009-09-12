@@ -24,7 +24,7 @@ public class PomHelperTest
         throws Exception
     {
         URL url = getClass().getResource( "PomHelperTest.testLongProperties.pom.xml" );
-        StringBuffer input = PomHelper.readFile( new File( url.getPath() ) );
+        StringBuffer input = PomHelper.readXmlFile( new File( url.getPath() ) );
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
