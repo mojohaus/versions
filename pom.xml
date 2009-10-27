@@ -338,9 +338,17 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changelog-plugin</artifactId>
         <version>2.1</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <version>1.5</version>
+        <reportSets>
+          <reportSet>
+            <repoert>report</report>
+          </reportSet>
+        </reposrtSets>
       </plugin>
     </plugins>
   </reporting>
