@@ -6,7 +6,39 @@
     </author>
   </properties>
   <body>
-    <release version="1.0-beta-1-SNAPSHOT" date="2009-04-23" description="First beta release">
+    <release version="1.1-SNAPSHOT" description="Second GA release">
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-66">Fixed reports when running on maven 2.1.0</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-73">Added matrix to advancing dependency versions page</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-67">Fixed plugin comparators to handle reporting plugins</action>
+      <action dev="stephenconnolly" due-to="Julien Henry" type="fix" issue="MVERSIONS-80">Fixed update-properties when version specified in config</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-71">Fixed versions:set to only update parent refs when the child has a different version</action>
+      <action dev="hboutemy" type="fix" issue="MVERSIONS-72">Fixed encoding issues with pom.xml parsing</action>
+      <action dev="olamy" type="fix" issue="MVERSIONS-75">Fixed some typos and spelling mistakes</action>
+    </release>
+    <release version="1.0" date="2009-08-23" description="First GA release">
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-50">Removed the display-dependency-updates-report and replaced with dependency-updates-report</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-59">Fixed versions:display-plugin-updates</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-46">Fixed it-display-dependency-updates-report-001</action>
+      <action dev="aheritier" type="fix" issue="MVERSIONS-47">Fixed it-display-plugin-updates-004</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-48">Fixed it-update-properties-004</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-60">Fixed NPE in versions:dependency-updates-report</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-61">Fixed it-dependency-updates-report-001</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-62">Fixed it-plugin-updates-report-001</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-63">Fixed it-update-properties-005</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-39">Fixed NPE in update-properties if a property is configured for updating but is not defined in the pom</action>
+      <action dev="stephenconnolly" due-to="Tom Folga" type="fix" issue="MVERSIONS-45">Fixed use-latest-version to follow allowSnapshots</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-44">Fixed versions:set for Projects with No Dependencies</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-38">Fixed Rulessets loading from http uri's</action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-65">Updated site documentation to reflect new mojos and reports</action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-43">Added versions:set</action>
+      <action dev="aheritier" due-to="Benoit Lafontaine" type="add" issue="MVERSIONS-52">Added support for version ranges in includes/excludes filters</action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-9">Added dependency-updates-report</action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-29">Added use-next-snapshots</action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-64">Added display-property-updates</action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-53">Added plugin-updates-report</action>
+      <action dev="stephenconnolly" type="add" issue="MVERSIONS-56">Added property-updates-report</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-57">Refactored display-dependency-updates to use common code with reports</action>
+      <action dev="stephenconnolly" type="fix" issue="MVERSIONS-40">Added recurse support to update-child-modules</action>
     </release>
     <release version="1.0-alpha-3" date="2009-04-23" description="Third alpha release">
       <action dev="pgier" type="add" issue="MVERSIONS-24">
