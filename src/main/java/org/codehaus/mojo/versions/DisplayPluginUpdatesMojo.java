@@ -338,8 +338,7 @@ public class DisplayPluginUpdatesMojo
             {
                 version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
 
-                newVersion = version != null ? version : artifactVersion.toString();
-                newVersion = artifactVersion != null ? artifactVersion.toString() : version;
+                newVersion = artifactVersion != null ? artifactVersion.toString() : ( version != null ? version : "(unknown)" );
                 StringBuffer buf = new StringBuffer();
                 if ( PomHelper.APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
                 {
