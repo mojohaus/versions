@@ -44,8 +44,52 @@ Advancing dependency versions
 
   * {{{../use-latest-versions-mojo.html}versions:use-latest-versions}} searches the pom for all versions which
   have been a newer version and replaces them with the latest version.
+  
+  []
 
   All of these goals share a common set of parameters.
+
+* Deciding which goal to use
+
+  The following matrix should help decide which goal(s) to use:
+
+*----------------------*-------------------------------*---------------------------------*--------------------*--------------------------*------------*--------------*
+| Goal                 | Modifies Release dependencies | Modifies -SNAPSHOT dependencies | Considers releases | Considers -SNAPSHOTs     | Picks Next | Picks Latest |
+*----------------------*-------------------------------*---------------------------------*--------------------*--------------------------*------------*--------------*
+| use-next-releases    |                               | Yes                             | Yes                |                          | Yes        |              |
+*----------------------*-------------------------------*---------------------------------*--------------------*--------------------------*------------*--------------*
+| use-latest-releases  |                               | Yes                             | Yes                |                          |            | Yes          |
+*----------------------*-------------------------------*---------------------------------*--------------------*--------------------------*------------*--------------*
+| use-next-snapshots   | Yes                           |                                 |                    | Yes                      | Yes        |              |
+*----------------------*-------------------------------*---------------------------------*--------------------*--------------------------*------------*--------------*
+| use-latest-snapshots | Yes                           |                                 |                    | Yes                      |            | Yes          |
+*----------------------*-------------------------------*---------------------------------*--------------------*--------------------------*------------*--------------*
+| use-next-versions    | Yes                           | Yes                             | Yes                | If -DallowSnapshots=true | Yes        |              |
+*----------------------*-------------------------------*---------------------------------*--------------------*--------------------------*------------*--------------*
+| use-latest-versions  | Yes                           | Yes                             | Yes                | If -DallowSnapshots=true |            | Yes          |
+*----------------------*-------------------------------*---------------------------------*--------------------*--------------------------*------------*--------------*
+Goal Matrix
+
+  The columns in the above goal matrix are as follows:
+
+  * <Modified Release dependencies> when scanning the <<<pom.xml>>> for depenendency to update, include those dependencies which 
+    are for release versions (i.e. non-SNAPSHOT versions).
+
+  * <Modified -SNAPSHOT dependencies> when scanning the <<<pom.xml>>> for depenendency to update, include those dependencies which 
+    are for -SNAPSHOT versions.
+
+  * <Condsiders releases> when building the list of newer versions of a dependency, include release versions (i.e. non-SNAPSHOT
+    versions) in the list.
+
+  * <Condsiders releases> when building the list of newer versions of a dependency, include -SNAPSHOT versions in the list.
+
+  * <Picks Next> when the list of newer versions is sorted in increasing order, pick the first newer version in the list, i.e.
+    the oldest newer version available, also known as the "next" version.
+
+  * <Picks Latest> when the list of newer versions is sorted in increasing order, pick the last newer version in the list, i.e.
+    the newest version available, also known as the "latest" version.
+
+  []
 
 * Controlling which dependencies are processed
 
