@@ -1,0 +1,24 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+import java.util.regex.*;
+
+try
+{
+    File file = new File( basedir, "build.log" );
+    String buf = FileUtils.fileRead( file );
+
+    Pattern p = Pattern.compile( "\\QThe following plugins do not have their version specified\\E" );
+    Matcher m = p.matcher( buf.toString() );
+    if ( !m.find() )
+    {
+        System.out.println( "Did not notice that dummy plugin does not have a version specified" );
+        return false;
+    }
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;
