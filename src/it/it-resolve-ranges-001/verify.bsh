@@ -14,9 +14,9 @@ try
         System.err.println( "Version of maven-project not resolved to 2.0.6, 2.0.7, or 2.0.8" );
         return false;
     }
-    if ( buf.indexOf( "<version>1.5.1</version>" ) < 0 )
+    if ( buf.indexOf( "<version>1.5.15</version>" ) < 0 )
     {
-        System.err.println( "Version of plexus not resolved to 1.5.1" );
+        System.err.println( "Version of plexus not resolved to 1.5.15" );
         return false;
     }
 }
