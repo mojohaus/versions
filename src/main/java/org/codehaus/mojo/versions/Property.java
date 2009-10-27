@@ -93,6 +93,7 @@ public class Property
 
     public Property()
     {
+        this.autoLinkDependencies = true;
     }
 
     public Property( String name )
