@@ -322,6 +322,12 @@
   <reporting>
     <plugins>
       <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>1.4</source>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-changes-plugin</artifactId>
         <version>2.1</version>
         <reportSets>
