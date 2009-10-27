@@ -346,7 +346,9 @@
         <version>1.5</version>
         <reportSets>
           <reportSet>
-            <report>report</report>
+            <reports>
+              <report>report</report>
+            </reports>
           </reportSet>
         </reportSets>
       </plugin>
