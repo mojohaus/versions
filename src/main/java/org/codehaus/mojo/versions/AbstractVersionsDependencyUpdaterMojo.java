@@ -341,7 +341,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
         if ( excludesFilter != null )
         {
-            result = excludesFilter.include( artifact );
+            result = result && excludesFilter.include( artifact );
         }
 
         return result;
