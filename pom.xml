@@ -348,7 +348,7 @@
           <reportSet>
             <report>report</report>
           </reportSet>
-        </reposrtSets>
+        </reportSets>
       </plugin>
     </plugins>
   </reporting>
