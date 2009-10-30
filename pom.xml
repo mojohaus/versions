@@ -9,7 +9,7 @@
 
   <groupId>org.codehaus.mojo</groupId>
   <artifactId>versions-maven-plugin</artifactId>
-  <version>1.1</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
@@ -31,9 +31,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/mojo/tags/versions-maven-plugin-1.1</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/tags/versions-maven-plugin-1.1</developerConnection>
-    <url>http://fisheye.codehaus.org/browse/mojo/tags/versions-maven-plugin-1.1</url>
+    <connection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</developerConnection>
+    <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/versions-maven-plugin</url>
   </scm>
   
   <developers>
