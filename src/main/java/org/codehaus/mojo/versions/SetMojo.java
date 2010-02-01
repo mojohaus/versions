@@ -65,6 +65,30 @@ public class SetMojo
     private String newVersion;
 
     /**
+     * The groupId of the dependency/module to update.
+     *
+     * @parameter expression="${groupId}" default-value="${project.groupId}"
+     * @since 1.2
+     */ 
+    private String groupId;
+
+    /**
+     * The artifactId of the dependecy/module to update.
+     *
+     * @parameter expression="${artifactId}" default-value="${project.artifactId}"
+     * @since 1.2
+     */ 
+    private String artifactId;
+
+    /**
+     * The version of the dependency/module to update.
+     *
+     * @parameter expression="${oldVersion}" default-value="${project.version}"
+     * @since 1.2
+     */
+    private String oldVersion;
+
+    /**
      * The changes to module coordinates. Guarded by this.
      */
     private final transient List sourceChanges = new ArrayList();
@@ -95,7 +119,7 @@ public class SetMojo
         }
 
         // this is the triggering change
-        addChange( getProject().getGroupId(), getProject().getArtifactId(), getProject().getVersion(), newVersion );
+        addChange( groupId, artifactId, oldVersion, newVersion );
 
         try
         {
