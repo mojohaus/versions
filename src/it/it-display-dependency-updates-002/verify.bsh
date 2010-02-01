@@ -1,0 +1,25 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+import java.util.regex.*;
+
+try
+{
+    File file = new File( basedir, "build.log" );
+    String buf = FileUtils.fileRead( file );
+
+    Pattern p = Pattern.compile( "\\Qlocalhost:dummy-api\\E\\s*\\.*\\s*\\Q[1.1,5.0)\\E\\s+->\\s+3\\.0" );
+    Matcher m = p.matcher( buf.toString() );
+    if ( !m.find() )
+    {
+        System.out.println( "Did not suggest updating dummy-api from range [1.1,5.0) to version 3.0" );
+        return false;
+    }
+    System.out.println( m.group( 0 ) );
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;

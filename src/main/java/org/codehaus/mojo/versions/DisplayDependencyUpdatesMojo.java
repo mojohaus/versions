@@ -153,10 +153,11 @@ public class DisplayDependencyUpdatesMojo
         {
             ArtifactVersions versions = (ArtifactVersions) i.next();
             String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
-            final ArtifactVersion current = versions.getCurrentVersion();
+            final String current = versions.isCurrentVersionDefined() 
+                    ? versions.getCurrentVersion().toString() 
+                    : versions.getArtifact().getVersionRange().toString();
             final ArtifactVersion latest = versions.getNewestUpdate( UpdateScope.ANY );
-            String right =
-                " " + ( latest == null ? current.toString() : current.toString() + " -> " + latest.toString() );
+            String right = " " + ( latest == null ? current : current + " -> " + latest.toString() );
             List t = latest == null ? usingCurrent : withUpdates;
             if ( right.length() + left.length() + 3 > INFO_PAD_SIZE )
             {
