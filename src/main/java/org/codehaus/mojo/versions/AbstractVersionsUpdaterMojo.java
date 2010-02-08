@@ -450,4 +450,40 @@ public abstract class AbstractVersionsUpdaterMojo
         return true;
     }
 
+    /**
+     * Based on the passed flags, determines which segment is unchangable. This
+     * can be used when determining an upper bound for the "latest" version.
+     * @param allowMajorUpdates
+     * @param allowMinorUpdates
+     * @param allowIncrementalUpdates
+     * @return Returns the segment that is unchangable. If any segment
+     * can change, returns -1.
+     */
+    protected int determineUnchangedSegment(Boolean allowMajorUpdates, Boolean allowMinorUpdates,
+            Boolean allowIncrementalUpdates)
+    {
+        int segment;
+        if ( Boolean.TRUE.equals( allowMajorUpdates ) )
+        {
+            segment = -1;
+            getLog().info( "Major version changes allowed" );
+        }
+        else if ( Boolean.TRUE.equals( allowMinorUpdates ) )
+        {
+            segment = 0;
+            getLog().info( "Minor version changes allowed" );
+        }
+        else if ( Boolean.TRUE.equals( allowIncrementalUpdates ) )
+        {
+            segment = 1;
+            getLog().info( "Incremental version changes allowed" );
+        }
+        else
+        {
+            segment = 2;
+            getLog().info( "Subincremental version changes allowed" );
+        }
+
+        return segment;
+    }
 }

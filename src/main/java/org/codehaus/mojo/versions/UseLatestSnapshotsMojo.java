@@ -52,25 +52,22 @@ public class UseLatestSnapshotsMojo
 {
 
     /**
-     * Whether to allow snapshots when searching for the latest version of an artifact.
-     *
+     * Whether to allow the major version number to be changed.
      * @parameter expression="${allowMajorUpdates}" default-value="false"
      * @since 1.0-beta-1
      */
     protected Boolean allowMajorUpdates;
 
     /**
-     * Whether to allow snapshots when searching for the latest version of an artifact.
-     *
-     * @parameter expression="${allowMajorUpdates}" default-value="false"
+     * Whether to allow the minor version number to be changed.
+     * @parameter expression="${allowMinorUpdates}" default-value="false"
      * @since 1.0-beta-1
      */
     protected Boolean allowMinorUpdates;
 
     /**
-     * Whether to allow snapshots when searching for the latest version of an artifact.
-     *
-     * @parameter expression="${allowMajorUpdates}" default-value="true"
+     * Whether to allow the incremental version number to be changed.
+     * @parameter expression="${allowIncrementalUpdates}" default-value="true"
      * @since 1.0-beta-1
      */
     protected Boolean allowIncrementalUpdates;
@@ -117,27 +114,8 @@ public class UseLatestSnapshotsMojo
     private void useLatestSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        int segment;
-        if ( Boolean.TRUE.equals( allowMajorUpdates ) )
-        {
-            segment = -1;
-            getLog().info( "Major version changes allowed" );
-        }
-        else if ( Boolean.TRUE.equals( allowMinorUpdates ) )
-        {
-            segment = 0;
-            getLog().info( "Minor version changes allowed" );
-        }
-        else if ( Boolean.TRUE.equals( allowIncrementalUpdates ) )
-        {
-            segment = 1;
-            getLog().info( "Incremental version changes allowed" );
-        }
-        else
-        {
-            segment = 2;
-            getLog().info( "Subincremental version changes allowed" );
-        }
+        int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates,
+                allowIncrementalUpdates);
 
         Iterator i = dependencies.iterator();
 
@@ -171,7 +149,7 @@ public class UseLatestSnapshotsMojo
                     continue;
                 }
                 ArtifactVersion upperBound = segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
-                upperBound = segment >= 0 ? versionComparator.incrementSegment( upperBound, segment ) : null;
+                getLog().info("Upper bound: " + upperBound.toString());
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
                 getLog().debug( "Candidate versions " + Arrays.asList(newer));
                 String latestVersion = null;
