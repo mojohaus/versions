@@ -63,6 +63,18 @@ public class DisplayDependencyUpdatesMojo
      */
     private static final int INFO_PAD_SIZE = 72;
 
+    /**
+     * @parameter expression="${processDependencyManagement}" defaultValue="true"
+     * @since 1.2
+     */
+    protected Boolean processDependencyManagement = Boolean.TRUE;
+    
+    /**
+     * @parameter expression="${processDependencies}" defaultValue="true"
+     * @since 1.2
+     */
+    protected Boolean processDependencies = Boolean.TRUE;
+    
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
@@ -105,6 +117,18 @@ public class DisplayDependencyUpdatesMojo
         return result;
     }
 
+    public boolean isProcessingDependencyManagement()
+    {
+        // true if true or null
+        return !Boolean.FALSE.equals( processDependencyManagement );
+    }
+    
+    public boolean isProcessingDependencies()
+    {
+        // true if true or null
+        return !Boolean.FALSE.equals( processDependencies);
+    }
+    
 // ------------------------ INTERFACE METHODS ------------------------
 
 // --------------------- Interface Mojo ---------------------
@@ -127,12 +151,18 @@ public class DisplayDependencyUpdatesMojo
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+        if (!Boolean.FALSE.equals(processDependencyManagement)) {
+        	dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+        }
 
         try
         {
-            logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ), "Dependency Management" );
-            logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
+        	if (!Boolean.FALSE.equals(processDependencyManagement)) {
+        		logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ), "Dependency Management" );
+        	}
+        	if (!Boolean.FALSE.equals(processDependencies)) {
+        		logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
+        	}
         }
         catch ( InvalidVersionSpecificationException e )
         {
