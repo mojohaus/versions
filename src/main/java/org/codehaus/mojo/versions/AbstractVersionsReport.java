@@ -92,7 +92,7 @@ public abstract class AbstractVersionsReport
      * @component
      * @since 1.0-alpha-3
      */
-    private org.apache.maven.artifact.resolver.ArtifactResolver resolver;
+    private ArtifactResolver resolver;
 
 
     /**
