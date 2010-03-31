@@ -7,7 +7,7 @@ try
     File file = new File( basedir, "build.log" );
     String buf = FileUtils.fileRead( file );
 
-    Pattern p = Pattern.compile( "\\Qlocalhost:dummy-api\\E\\s*\\.*\\s*\\Q[1.1,5.0)\\E\\s+->\\s+3\\.0" );
+    Pattern p = Pattern.compile( "\\Qlocalhost:dummy-api\\E\\s*\\.*\\s*\\Q[1.1,3.0)\\E\\s+->\\s+3\\.0" );
     Matcher m = p.matcher( buf.toString() );
     if ( !m.find() )
     {

@@ -186,8 +186,13 @@ public class DisplayDependencyUpdatesMojo
             final String current = versions.isCurrentVersionDefined() 
                     ? versions.getCurrentVersion().toString() 
                     : versions.getArtifact().getVersionRange().toString();
-            final ArtifactVersion latest = versions.getNewestUpdate( UpdateScope.ANY, 
+            ArtifactVersion latest = versions.getNewestUpdate( UpdateScope.ANY, 
                     Boolean.TRUE.equals( allowSnapshots ) );
+            if (latest != null && !versions.isCurrentVersionDefined()) {
+            	if (versions.getArtifact().getVersionRange().containsVersion(latest)) {
+            		latest = null;
+            	}
+            }
             String right = " " + ( latest == null ? current : current + " -> " + latest.toString() );
             List t = latest == null ? usingCurrent : withUpdates;
             if ( right.length() + left.length() + 3 > INFO_PAD_SIZE )
