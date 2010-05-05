@@ -1093,9 +1093,16 @@ public class DisplayPluginUpdatesMojo
         }
         debugPluginMap( "after adding local pluginManagement", plugins );
 
-        addProjectPlugins( plugins, getLifecyclePlugins( getProject() ).values(), parentPluginManagement );
+        try 
+        {
+            addProjectPlugins( plugins, getLifecyclePlugins( getProject() ).values(), parentPluginManagement );
 
-        debugPluginMap( "after adding lifecycle plugins", plugins );
+            debugPluginMap( "after adding lifecycle plugins", plugins );
+        } 
+        catch ( NullPointerException e ) 
+        {
+            // using maven 3.x or newer
+        }
 
         try
         {
