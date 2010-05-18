@@ -412,17 +412,29 @@ public abstract class AbstractVersionDetails
 
     public final ArtifactVersion getOldestUpdate( UpdateScope updateScope, boolean includeSnapshots )
     {
-        return getOldestUpdate( getCurrentVersion(), updateScope, includeSnapshots );
+        if ( isCurrentVersionDefined() )
+        {
+            return getOldestUpdate( getCurrentVersion(), updateScope, includeSnapshots );
+        }
+        return null;
     }
 
     public final ArtifactVersion getNewestUpdate( UpdateScope updateScope, boolean includeSnapshots )
     {
-        return getNewestUpdate( getCurrentVersion(), updateScope, includeSnapshots );
+        if ( isCurrentVersionDefined() )
+        {
+            return getNewestUpdate( getCurrentVersion(), updateScope, includeSnapshots );
+        }
+        return null;
     }
 
     public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope, boolean includeSnapshots )
     {
-        return getAllUpdates( getCurrentVersion(), updateScope, includeSnapshots );
+        if ( isCurrentVersionDefined() )
+        {
+            return getAllUpdates( getCurrentVersion(), updateScope, includeSnapshots );
+        }
+        return null;
     }
 
     public final ArtifactVersion getOldestUpdate( VersionRange versionRange )

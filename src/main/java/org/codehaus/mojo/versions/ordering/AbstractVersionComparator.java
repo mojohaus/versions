@@ -20,6 +20,10 @@ public abstract class AbstractVersionComparator
      */
     public final int getSegmentCount( ArtifactVersion v )
     {
+        if ( v == null )
+        {
+            return 0;
+        }
         if ( VersionComparators.isSnapshot( v ) )
         {
             return innerGetSegmentCount( VersionComparators.stripSnapshot( v ) );
