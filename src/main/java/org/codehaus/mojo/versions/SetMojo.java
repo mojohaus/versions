@@ -27,6 +27,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.plexus.components.interactivity.Prompter;
+import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
@@ -59,7 +61,6 @@ public class SetMojo
      * The new version number to set.
      *
      * @parameter expression="${newVersion}"
-     * @required
      * @since 1.0-beta-1
      */
     private String newVersion;
@@ -69,7 +70,7 @@ public class SetMojo
      *
      * @parameter expression="${groupId}" default-value="${project.groupId}"
      * @since 1.2
-     */ 
+     */
     private String groupId;
 
     /**
@@ -77,7 +78,7 @@ public class SetMojo
      *
      * @parameter expression="${artifactId}" default-value="${project.artifactId}"
      * @since 1.2
-     */ 
+     */
     private String artifactId;
 
     /**
@@ -87,6 +88,13 @@ public class SetMojo
      * @since 1.2
      */
     private String oldVersion;
+
+    /**
+     * Component used to prompt for input
+     *
+     * @component
+     */
+    private Prompter prompter;
 
     /**
      * The changes to module coordinates. Guarded by this.
@@ -112,10 +120,35 @@ public class SetMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-
         if ( getProject().getOriginalModel().getVersion() == null )
         {
             throw new MojoExecutionException( "Project version is inherited from parent." );
+        }
+
+        if ( StringUtils.isEmpty(newVersion) )
+        {
+            if ( settings.isInteractiveMode() )
+            {
+                try
+                {
+                    newVersion = prompter.prompt( "Enter the new version to set",
+                            getProject().getOriginalModel().getVersion() );
+                }
+                catch (PrompterException e)
+                {
+                    throw new MojoExecutionException(e.getMessage(), e);
+                }
+            }
+            else
+            {
+                throw new MojoExecutionException( "You must specify the new version, either by using the newVersion " +
+                        "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+            }
+        }
+        if ( StringUtils.isEmpty(newVersion) )
+        {
+            throw new MojoExecutionException("You must specify the new version, either by using the newVersion " +
+                    "property (that is -DnewVersion=... on the command line) or run in interactive mode");
         }
 
         // this is the triggering change

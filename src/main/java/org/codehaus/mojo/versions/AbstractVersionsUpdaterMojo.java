@@ -142,7 +142,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @readonly
      * @since 1.0-alpha-3
      */
-    private Settings settings;
+    protected Settings settings;
 
     /**
      * settings.xml's server id for the URL.
@@ -183,7 +183,7 @@ public abstract class AbstractVersionsUpdaterMojo
     private VersionsHelper helper;
 
     /**
-     * The Maven Sessopm.
+     * The Maven Session.
      *
      * @parameter expression="${session}"
      * @required
