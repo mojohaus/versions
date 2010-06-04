@@ -139,6 +139,29 @@ public abstract class AbstractVersionDetails
         return getVersions( currentVersion, upperBound, includeSnapshots, false, false );
     }
 
+    /**
+     * Gets newer versions of the specified artifact version.
+     * @param version The current version of the artifact.
+     * @param upperBoundFixedSegment Indicates the segment in the version number
+     * that cannot be changed. For example, a value of 0 indicates that the major
+     * version number cannot be changed. A value of -1 indicates any segment
+     * value can be changed.
+     * @param includeSnapshots Whether to include snapshot versions.
+     * @return Returns the newer artifact versions. 
+     */
+    private final ArtifactVersion[] getNewerVersions( ArtifactVersion version, int upperBoundFixedSegment, boolean includeSnapshots )
+    {
+        ArtifactVersion lowerBound = version;
+        ArtifactVersion upperBound = null;
+
+        if (upperBoundFixedSegment != -1)
+        {
+            upperBound = getVersionComparator().incrementSegment(lowerBound, upperBoundFixedSegment);
+        }
+
+        return getVersions( version, upperBound, includeSnapshots, false, false );
+    }
+
     private final ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
     {
         return getVersions( version, null, includeSnapshots, false, true );
@@ -224,6 +247,11 @@ public abstract class AbstractVersionDetails
     public final ArtifactVersion[] getNewerVersions( String version, boolean includeSnapshots )
     {
         return getNewerVersions( new DefaultArtifactVersion( version ), includeSnapshots );
+    }
+
+    public final ArtifactVersion[] getNewerVersions( String version, int upperBoundSegment, boolean includeSnapshots )
+    {
+        return getNewerVersions( new DefaultArtifactVersion( version ), upperBoundSegment, includeSnapshots );
     }
 
     public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )

@@ -60,6 +60,27 @@ public class UseLatestReleasesMojo
      */
     public final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
 
+    /**
+     * Whether to allow the major version number to be changed.
+     * @parameter expression="${allowMajorUpdates}" default-value="true"
+     * @since 1.2
+     */
+    protected Boolean allowMajorUpdates;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     * @parameter expression="${allowMinorUpdates}" default-value="true"
+     * @since 1.2
+     */
+    protected Boolean allowMinorUpdates;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     * @parameter expression="${allowIncrementalUpdates}" default-value="true"
+     * @since 1.2
+     */
+    protected Boolean allowIncrementalUpdates;
+
     // ------------------------------ METHODS --------------------------
 
     /**
@@ -95,6 +116,9 @@ public class UseLatestReleasesMojo
     private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
+        int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates,
+                allowIncrementalUpdates);
+
         Iterator i = dependencies.iterator();
 
         while ( i.hasNext() )
@@ -119,7 +143,7 @@ public class UseLatestReleasesMojo
 
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                ArtifactVersion[] newer = versions.getNewerVersions( version, false );
+                ArtifactVersion[] newer = versions.getNewerVersions( version, segment, false );
                 newer = filterVersionsWithIncludes( newer, artifact );
                 if ( newer.length > 0 )
                 {
