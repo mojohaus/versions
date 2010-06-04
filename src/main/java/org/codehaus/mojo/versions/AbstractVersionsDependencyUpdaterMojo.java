@@ -93,7 +93,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private String[] excludes = null;
 
     /**
-     * Whether to process the dependencies section of the project.
+     * Whether to process the dependencies section of the project. If not
+     * set will default to true.
      *
      * @parameter expression="${processDependencies}" defaultValue="true"
      * @since 1.0-alpha-3
@@ -101,7 +102,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private Boolean processDependencies;
 
     /**
-     * Whether to process the dependencyManagement section of the project.
+     * Whether to process the dependencyManagement section of the project. If not
+     * set will default to true.
      *
      * @parameter expression="${processDependencyManagement}" defaultValue="true"
      * @since 1.0-alpha-3

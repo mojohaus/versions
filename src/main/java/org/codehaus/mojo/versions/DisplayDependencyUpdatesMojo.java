@@ -64,12 +64,16 @@ public class DisplayDependencyUpdatesMojo
     private static final int INFO_PAD_SIZE = 72;
 
     /**
+     * Whether to process the dependencyManagement section of the project. If not 
+     * set will default to true.
      * @parameter expression="${processDependencyManagement}" defaultValue="true"
      * @since 1.2
      */
     protected Boolean processDependencyManagement = Boolean.TRUE;
     
     /**
+     * Whether to process the dependencies section of the project. If not 
+     * set will default to true.
      * @parameter expression="${processDependencies}" defaultValue="true"
      * @since 1.2
      */
