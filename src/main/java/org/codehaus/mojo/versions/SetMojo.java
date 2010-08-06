@@ -90,6 +90,14 @@ public class SetMojo
     private String oldVersion;
 
     /**
+     * Whether matching versions explicitly specified (as /project/version) in child modules should be updated.
+     *
+     * @parameter expression="${updateMatchingVersions}" default-value="true"
+     * @since 1.3
+     */
+    private Boolean updateMatchingVersions;
+
+    /**
      * Component used to prompt for input
      *
      * @component
@@ -120,6 +128,11 @@ public class SetMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        if ( updateMatchingVersions == null )
+        {
+            updateMatchingVersions = Boolean.TRUE;
+        }
+
         if ( getProject().getOriginalModel().getVersion() == null )
         {
             throw new MojoExecutionException( "Project version is inherited from parent." );
@@ -247,7 +260,9 @@ public class SetMojo
                             "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" +
                                 sourceVersion );
                     }
-                    if ( StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
+                    final boolean targetExplicit = PomHelper.isExplicitVersion(targetModel);
+                    if ( ( updateMatchingVersions.booleanValue() || !targetExplicit ) &&
+                            StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
                     {
                         getLog().debug( "    module is " + ArtifactUtils.versionlessKey(
                             PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ) ) + ":"

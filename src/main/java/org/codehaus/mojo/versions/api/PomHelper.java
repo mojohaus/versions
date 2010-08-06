@@ -1146,6 +1146,16 @@ public class PomHelper
     }
 
     /**
+     * Checks to see if the model contains an explicitly specified version.
+     * @param model The model.
+     * @return {@code true} if the model explicitly specifies the project version, i.e. /project/version
+     */
+    public static boolean isExplicitVersion( Model model )
+    {
+        return model.getVersion() != null;
+    }
+
+    /**
      * Extracts the artifactId from a raw model, interpolating from the parent if necessary.
      *
      * @param model The model.
