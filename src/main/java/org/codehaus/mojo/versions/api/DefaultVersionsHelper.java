@@ -574,10 +574,12 @@ public class DefaultVersionsHelper
     public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
+        String version = plugin.getVersion();
+        version = version == null ? "LATEST" : version;
         getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) +
-            " for updates newer than " + plugin.getVersion() );
+            " for updates newer than " + version);
 
-        VersionRange versionRange = VersionRange.createFromVersion( plugin.getVersion() );
+        VersionRange versionRange = VersionRange.createFromVersion(version);
 
         final boolean includeSnapshots = Boolean.TRUE.equals( allowSnapshots );
 
