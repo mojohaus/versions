@@ -228,19 +228,15 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             buf.append( ':' );
             buf.append( d.getType() );
-            if ( d.getType() != null && d.getType().length() > 0 )
-            {
-                buf.append( ':' );
-                buf.append( d.getClassifier() );
-            }
         }
         else
         {
-            if ( d.getClassifier() != null && d.getClassifier().length() > 0 )
-            {
-                buf.append( ":jar:" );
-                buf.append( d.getClassifier() );
-            }
+            buf.append( ":jar" );
+        }
+        if ( d.getClassifier() != null && d.getClassifier().length() > 0 )
+        {
+            buf.append( ':' );
+            buf.append( d.getClassifier() );
         }
         if ( d.getVersion() != null && d.getVersion().length() > 0 )
         {
