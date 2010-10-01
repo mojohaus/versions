@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.metadata.SnapshotArtifactRepositoryMetadata;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -133,51 +132,14 @@ public class LockSnapshotsMojo
         try
         {
             resolver.resolve( depArtifact, getProject().getRemoteArtifactRepositories(), localRepository );
-            Iterator metadataIter = depArtifact.getMetadataList().iterator();
-            while ( metadataIter.hasNext() )
-            {
-                Object obj = metadataIter.next();
 
-                if ( obj instanceof SnapshotArtifactRepositoryMetadata )
-                {
-                    SnapshotArtifactRepositoryMetadata metadata = (SnapshotArtifactRepositoryMetadata) obj;
-                    String baseVersion = metadata.getBaseVersion();
-                    baseVersion = removeSnapshotQualifier( baseVersion );
-
-                    String timestamp = metadata.getMetadata().getVersioning().getSnapshot().getTimestamp();
-                    int buildNumber = metadata.getMetadata().getVersioning().getSnapshot().getBuildNumber();
-
-                    // Only change the version string if the timestamp is available.
-                    if ( timestamp != null )
-                    {
-                        lockedVersion = baseVersion + "-" + timestamp + "-" + buildNumber;
-                    }
-
-                }
-            }
+            lockedVersion = depArtifact.getVersion();
         }
         catch ( Exception e )
         {
             getLog().error( e );
         }
         return lockedVersion;
-    }
-
-    /**
-     * Remove the "-SNAPSHOT" qualifier from the version number.  If the given string does not contain
-     * "-SNAPSHOT" then the original string is returned.
-     *
-     * @param version The snapshot version
-     * @return The version without the "-SNAPSHOT".
-     */
-    private String removeSnapshotQualifier( String version )
-    {
-        int index = version.lastIndexOf( "-SNAPSHOT" );
-        if ( index != -1 )
-        {
-            version = version.substring( 0, index );
-        }
-        return version;
     }
 
 }
