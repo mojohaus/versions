@@ -32,6 +32,9 @@ Versions Maven Plugin
 
   The Versions Plugin has the following goals.
 
+  * {{{compare-dependencies-mojo.html}versions:compare-dependencies}} compares the dependency versions of the current
+  project to the dependency management section of a remote project.
+
   * {{{display-dependency-updates-mojo.html}versions:display-dependency-updates}} scans a project's dependencies and
   produces a report of those dependencies which have newer versions available.
 
@@ -132,6 +135,8 @@ Versions Maven Plugin
   you can take a look into the following examples:
 
   * {{{examples/advancing-dependency-versions.html}Advancing dependency versions}}
+
+  * {{{examples/compare-dependencies.html}Compare project dependencies to a remote project}}
 
   * {{{examples/display-dependency-updates.html}Checking for new dependency updates}}
 

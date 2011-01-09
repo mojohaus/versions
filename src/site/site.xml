@@ -9,6 +9,7 @@
     </menu>
     <menu name="Examples">
       <item name="Advancing dependency versions" href="examples/advancing-dependency-versions.html"/>
+      <item name="Comparing remote dependencies" href="examples/compare-dependencies.html"/>
       <item name="Checking for new dependency updates" href="examples/display-dependency-updates.html"/>
       <item name="Checking for new plugin updates" href="examples/display-plugin-updates.html"/>
       <item name="Checking for new property-linked updates" href="examples/display-property-updates.html"/>
