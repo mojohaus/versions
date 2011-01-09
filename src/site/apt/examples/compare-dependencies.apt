@@ -32,21 +32,21 @@ Compare dependency versions
   should be compared, for example
 
 +---+
-mvn versions:compare-dependencies -DgroupId=org.foo -DartifactId=bom-pom -Dversion=1.0
+mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0
 +---+
 
   By default the list of dependency differences will be output to the command line.  This can be 
   written to a file using the "reportOutputFile" parameter.
 
 +---+
-mvn versions:compare-dependencies -DgroupId=org.foo -DartifactId=bom-pom -Dversion=1.0 -DreportOutputFile=${project.build.directory}/depDiffs.txt
+mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -DreportOutputFile=${project.build.directory}/depDiffs.txt
 +---+
 
   The plugin can also automatically update the dependencies of the current project to match
   the remote project using the "updateDependencies" parameter.  By default this is turned off.
   
 +---+
-mvn versions:compare-dependencies -DgroupId=org.foo -DartifactId=bom-pom -Dversion=1.0 -DupdateDependencies=true
+mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -DupdateDependencies=true
 +---+
 
       

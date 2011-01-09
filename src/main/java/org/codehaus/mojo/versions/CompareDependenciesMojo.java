@@ -63,28 +63,13 @@ public class CompareDependenciesMojo
     private static final int INFO_PAD_SIZE = 68;
 
     /**
-     * The groupId of the remote project (POM) that we are comparing.
+     * The groupId, artifactId, and version of the remote project (POM) to which we are comparing.  This
+     * should be in the form "groupId:artifactId:version"
      * 
-     * @parameter expression="${groupId}"
+     * @parameter expression="${remotePom}"
      * @required true
      */
-    protected String groupId;
-
-    /**
-     * The artifactId of the remote project (POM) that we are comparing.
-     * 
-     * @parameter expression="${artifactId}"
-     * @required true
-     */
-    protected String artifactId;
-
-    /**
-     * The version of the remote project (POM) that we are comparing.
-     * 
-     * @parameter expression="${version}"
-     * @required true
-     */
-    protected String version;
+    protected String remotePom;
 
     /**
      * Ignore the list of remote dependencies and only compare the remote dependencyManagement
@@ -159,10 +144,19 @@ public class CompareDependenciesMojo
             reportMode = false;
         }
 
+        String [] remotePomParts = this.remotePom.split( ":" );
+        if ( remotePomParts.length != 3 )
+        {
+            throw new MojoFailureException(" Invalid format for remotePom: " + remotePom );
+        }
+        String rGroupId = remotePomParts[0];
+        String rArtifactId = remotePomParts[1];
+        String rVersion = remotePomParts[2];
+
         Dependency remoteDependency = new Dependency();
-        remoteDependency.setGroupId( groupId );
-        remoteDependency.setArtifactId( artifactId );
-        remoteDependency.setVersion( version );
+        remoteDependency.setGroupId( rGroupId );
+        remoteDependency.setArtifactId( rArtifactId );
+        remoteDependency.setVersion( rVersion );
 
         Artifact remoteArtifact = this.toArtifact( remoteDependency );
         MavenProject remoteMavenProject = null;
@@ -326,7 +320,7 @@ public class CompareDependenciesMojo
         buf.append( dep.getGroupId() ).append( ':' );
         buf.append( dep.getArtifactId() );
         buf.append( ' ' );
-        int padding = INFO_PAD_SIZE - version.length() - remoteVersion.length() - 4;
+        int padding = INFO_PAD_SIZE - dep.getVersion().length() - remoteVersion.length() - 4;
         while ( buf.length() < padding )
         {
             buf.append( '.' );
