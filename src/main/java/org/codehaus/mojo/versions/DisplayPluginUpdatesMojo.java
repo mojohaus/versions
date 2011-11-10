@@ -332,14 +332,12 @@ public class DisplayPluginUpdatesMojo
                 ArtifactVersion[] newerVersions =
                     artifactVersions.getNewerVersions( artifactVersions.getCurrentVersion().toString(),
                                                        Boolean.TRUE.equals( this.allowSnapshots ) );
-                getLog().info( "Plugin " + coords + " version " + version + " = " + Arrays.asList( newerVersions ) );
                 for ( int j = newerVersions.length - 1; j >= 0; j-- )
                 {
                     Artifact probe = artifactFactory.createDependencyArtifact( groupId, artifactId,
                                                                                VersionRange.createFromVersion(
                                                                                    newerVersions[j].toString() ), "pom",
                                                                                null, "runtime" );
-                    getLog().info( "Resolving plugin " + coords + " version " + newerVersions[j].toString()  );
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
