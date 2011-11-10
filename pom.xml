@@ -25,17 +25,6 @@
     </license>
   </licenses>
 
-  <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/MVERSIONS</url>
-  </issueManagement>
-
-  <scm>
-    <connection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</developerConnection>
-    <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/versions-maven-plugin</url>
-  </scm>
-  
   <developers>
     <developer>
       <name>Stephen Connolly</name>
@@ -61,7 +50,6 @@
       <timezone>+1</timezone>
     </developer>
   </developers>
-
   <contributors>
     <contributor>
       <name>Benoit Lafontaine</name>
@@ -79,6 +67,16 @@
     <maven>2.0.9</maven>
   </prerequisites>
 
+  <scm>
+    <connection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</developerConnection>
+    <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/versions-maven-plugin</url>
+  </scm>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/MVERSIONS</url>
+  </issueManagement>
+
   <properties>
     <mavenVersion>2.0.9</mavenVersion>
     <doxiaVersion>1.0</doxiaVersion>
@@ -87,6 +85,32 @@
     <sitePluginVersion>2.0</sitePluginVersion>
     <enforcer.skip>true</enforcer.skip><!-- until mrm-maven-plugin is released -->
   </properties>
+
+  <!-- until mrm-maven-plugin is released -->
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>codehaus-snapshots</id>
+      <url>http://nexus.codehaus.org/snapshots</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>codehaus-snapshots</id>
+      <url>http://nexus.codehaus.org/snapshots</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencies>
     <dependency>
