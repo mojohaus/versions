@@ -110,7 +110,7 @@ mvn versions:display-plugin-updates
 </project>
 ---
 
-  produces the following output:
+  produces the following output (when run using Maven 2.0.9):
 
 ---
 [INFO] ------------------------------------------------------------------------
@@ -120,19 +120,18 @@ mvn versions:display-plugin-updates
 [INFO] [versions:display-plugin-updates]
 [INFO]
 [INFO] The following plugin updates are available:
-[INFO]   maven-checkstyle-plugin .................................. 2.1 -> 2.2
-[INFO]   maven-clean-plugin ....................................... 2.1 -> 2.2
-[INFO]   maven-deploy-plugin ...................................... 2.3 -> 2.4
-[INFO]   maven-javadoc-plugin ..................................... 2.4 -> 2.5
-[INFO]   maven-site-plugin .......................... 2.0-beta-6 -> 2.0-beta-7
+[INFO]   maven-checkstyle-plugin .................................. 2.1 -> 2.8
+[INFO]   maven-clean-plugin ..................................... 2.2 -> 2.4.1
+[INFO]   maven-deploy-plugin ...................................... 2.3 -> 2.7
+[INFO]   maven-install-plugin ................................... 2.2 -> 2.3.1
+[INFO]   maven-site-plugin ............................... 2.0-beta-6 -> 2.0.1
+[INFO]                                                    -> (Maven 2.2.0) 3.0
 [INFO]
 [WARNING] The following plugins do not have their version specified:
-[WARNING]   maven-compiler-plugin ..................... (from super-pom) 2.0.2
-[WARNING]   maven-deploy-plugin ......................... (from super-pom) 2.3
-[WARNING]   maven-install-plugin ........................ (from super-pom) 2.2
-[WARNING]   maven-javadoc-plugin ........................ (from super-pom) 2.4
-[WARNING]   maven-site-plugin .................... (from super-pom) 2.0-beta-6
-[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.2
+[WARNING]   maven-deploy-plugin ......................... (from super-pom) 2.7
+[WARNING]   maven-install-plugin ...................... (from super-pom) 2.3.1
+[WARNING]   maven-site-plugin ......................... (from super-pom) 2.0.1
+[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.7
 [INFO]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESSFUL
@@ -142,6 +141,11 @@ mvn versions:display-plugin-updates
 [INFO] Final Memory: 6M/104M
 [INFO] ------------------------------------------------------------------------
 ---
+
+  Note: there are two newer versions reported for the maven-site-plugin. The first version is the highest
+  version that claims compatibility with the current version of Maven (i.e. 2.0.1 in this case)
+  while the second version is the most recent version (i.e. 3.0 in this case) and the minimum version of Maven that it
+  requires. (i.e. Maven 2.2.0 in this case)
 
   And the following POM:
 
