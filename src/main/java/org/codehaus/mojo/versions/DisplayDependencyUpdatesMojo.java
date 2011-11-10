@@ -187,15 +187,22 @@ public class DisplayDependencyUpdatesMojo
         {
             ArtifactVersions versions = (ArtifactVersions) i.next();
             String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
-            final String current = versions.isCurrentVersionDefined() 
-                    ? versions.getCurrentVersion().toString() 
-                    : versions.getArtifact().getVersionRange().toString();
-            ArtifactVersion latest = versions.getNewestUpdate( UpdateScope.ANY, 
-                    Boolean.TRUE.equals( allowSnapshots ) );
-            if (latest != null && !versions.isCurrentVersionDefined()) {
-            	if (versions.getArtifact().getVersionRange().containsVersion(latest)) {
-            		latest = null;
-            	}
+            final String current;
+            ArtifactVersion latest;
+            if ( versions.isCurrentVersionDefined() )
+            {
+                current = versions.getCurrentVersion().toString();
+                latest = versions.getNewestUpdate( UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );
+            }
+            else
+            {
+                ArtifactVersion newestVersion = versions.getNewestVersion( versions.getArtifact().getVersionRange(),
+                                                                           Boolean.TRUE.equals( allowSnapshots ) );
+                current = versions.getArtifact().getVersionRange().toString();
+                latest = newestVersion == null ? null : versions.getNewestUpdate( newestVersion, UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );
+                if (latest != null && versions.getArtifact().getVersionRange().containsVersion(latest)) {
+                    latest = null;
+                }
             }
             String right = " " + ( latest == null ? current : current + " -> " + latest.toString() );
             List t = latest == null ? usingCurrent : withUpdates;
