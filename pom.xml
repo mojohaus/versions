@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>24</version>
+    <version>28</version>
   </parent>
 
   <groupId>org.codehaus.mojo</groupId>
@@ -76,14 +76,16 @@
   </contributors>
 
   <prerequisites>
-    <maven>2.0.6</maven>
+    <maven>2.0.9</maven>
   </prerequisites>
 
   <properties>
-    <mavenVersion>2.0.6</mavenVersion>
+    <mavenVersion>2.0.9</mavenVersion>
     <doxiaVersion>1.0</doxiaVersion>
     <doxia-sitetoolsVersion>1.0</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
+    <sitePluginVersion>2.0</sitePluginVersion>
+    <enforcer.skip>true</enforcer.skip><!-- until mrm-maven-plugin is released -->
   </properties>
 
   <dependencies>
@@ -299,6 +301,26 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>mrm-maven-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>start</goal>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <propertyName>repository.proxy.url</propertyName>
+          <repositories>
+            <mock>src/it-repo</mock>
+            <proxy/>
+          </repositories>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
         <configuration>
@@ -308,13 +330,14 @@
           <settingsFile>src/it/settings.xml</settingsFile>
           <showErrors>true</showErrors>
           <streamLogs>true</streamLogs>
-          <setupIncludes>
-            <setupInclude>dummy-*/pom.xml</setupInclude>
-          </setupIncludes>
           <pomIncludes>
             <pomInclude>*/pom.xml</pomInclude>
           </pomIncludes>
           <postBuildHookScript>verify.bsh</postBuildHookScript>
+          <filterProperties>
+            <repository.proxy.url>${repository.proxy.url}</repository.proxy.url>
+          </filterProperties>
+          <mavenOpts>-Xmx256m</mavenOpts>
         </configuration>
       </plugin>
     </plugins>
@@ -387,9 +410,6 @@
           you may want to run mvn -Pprep-its first
       -->
       <id>run-its</id>
-      <properties>
-        <sitePluginVersion>2.0</sitePluginVersion>
-      </properties>
       <build>
         <defaultGoal>verify</defaultGoal>
         <plugins>
@@ -429,68 +449,6 @@
       </reporting>
     </profile>
     <profile>
-      <!-- prepare the local repository
-          if you are building on a really clean system, not all the required
-          plugins are in your local repository... this execution ensures they
-          are resolved so that the integration tests can run
-
-          to use this profile:
-          mvn -Pprep-its
-      -->
-      <id>prep-its</id>
-      <build>
-        <defaultGoal>verify</defaultGoal>
-        <plugins>
-          <!-- hackedy hackedy hack... needed if you are behind a proxy
-              the reports tests will fail if we don't have the same version of m-s-p and m-p-r-p resolved
-              into our local repo as these tests rely on... so lets force maven to download them for us
-          -->
-          <plugin>
-            <artifactId>maven-project-info-reports-plugin</artifactId>
-            <version>2.1</version>
-          </plugin>
-          <plugin>
-            <artifactId>maven-site-plugin</artifactId>
-            <version>2.0</version>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-invoker-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>pre-integration-test</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <projectsDirectory>src/it</projectsDirectory>
-                  <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-                  <localRepositoryPath>${settings.localRepository}</localRepositoryPath>
-                  <settingsFile>src/it/prep-settings.xml</settingsFile>
-                  <showErrors>false</showErrors>
-                  <streamLogs>false</streamLogs>
-                  <noLog>true</noLog>
-                  <suppressSummaries>true</suppressSummaries>
-                  <setupIncludes childMergeOverride="true">
-                  </setupIncludes>
-                  <pomIncludes>
-                    <pomInclude>dummy-*/pom.xml</pomInclude>
-                  </pomIncludes>
-                  <goals>
-                    <goal>install</goal>
-                    <goal>org.apache.maven.plugins:maven-dependency-plugin:2.0:go-offline</goal>
-                  </goals>
-                  <invokerPropertiesFile>ignore</invokerPropertiesFile>
-                  <ignoreFailures>true</ignoreFailures>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
       <id>maven-3</id>
       <activation>
         <file>
@@ -499,7 +457,7 @@
         </file>
       </activation>
       <properties>
-        <sitePluginVersion>3.0-beta-1-SNAPSHOT</sitePluginVersion>
+        <sitePluginVersion>3.0</sitePluginVersion>
       </properties>
     </profile>
   </profiles>
