@@ -213,6 +213,11 @@ public abstract class AbstractVersionsReport
      */
     protected PathTranslator pathTranslator;
 
+    /**
+     * @component
+     */
+    protected ArtifactResolver artifactResolver;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     public VersionsHelper getHelper()
@@ -222,7 +227,7 @@ public abstract class AbstractVersionsReport
         {
             try
             {
-                helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
+                helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource, remoteArtifactRepositories,
                                                     remotePluginRepositories, localRepository, wagonManager, settings,
                                                     serverId, rulesUri, getLog(), session,
                                                     pathTranslator );

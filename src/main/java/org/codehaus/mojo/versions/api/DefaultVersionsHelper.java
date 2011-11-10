@@ -26,6 +26,9 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -151,10 +154,19 @@ public class DefaultVersionsHelper
     private final MavenSession mavenSession;
 
     /**
+     * The artifact resolver.
+     *
+     * @since 1.3
+     */
+    private final ArtifactResolver artifactResolver;
+
+    /**
      * Constructs a new {@link DefaultVersionsHelper}.
      *
+     *
      * @param artifactFactory            The artifact factory.
-     * @param artifactMetadataSource     The artifact metadata source to use.
+     * @param artifactResolver
+     *@param artifactMetadataSource     The artifact metadata source to use.
      * @param remoteArtifactRepositories The remote artifact repositories to consult.
      * @param remotePluginRepositories   The remote plugin repositories to consult.
      * @param localRepository            The local repository to consult.
@@ -164,19 +176,18 @@ public class DefaultVersionsHelper
      * @param rulesUri                   The URL to retrieve the versioning rules from.
      * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
      * @param mavenSession               The maven session information.
-     * @param pathTranslator             The path translator component.
-     * @throws org.apache.maven.plugin.MojoExecutionException
+     * @param pathTranslator             The path translator component.            @throws org.apache.maven.plugin.MojoExecutionException
      *          If things go wrong.
      * @since 1.0-alpha-3
      */
-    public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactMetadataSource artifactMetadataSource,
-                                  List remoteArtifactRepositories, List remotePluginRepositories,
+    public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
+                                  ArtifactMetadataSource artifactMetadataSource, List remoteArtifactRepositories, List remotePluginRepositories,
                                   ArtifactRepository localRepository, WagonManager wagonManager, Settings settings,
-                                  String serverId, String rulesUri, Log log, MavenSession mavenSession,
-                                  PathTranslator pathTranslator )
+                                  String serverId, String rulesUri, Log log, MavenSession mavenSession, PathTranslator pathTranslator )
         throws MojoExecutionException
     {
         this.artifactFactory = artifactFactory;
+        this.artifactResolver = artifactResolver;
         this.mavenSession = mavenSession;
         this.pathTranslator = pathTranslator;
         this.ruleSet = loadRuleSet( serverId, settings, wagonManager, rulesUri, log );
@@ -214,6 +225,13 @@ public class DefaultVersionsHelper
                                      artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository,
                                                                                        remoteRepositories ),
                                      getVersionComparator( artifact ) );
+    }
+
+    public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
+        throws ArtifactResolutionException, ArtifactNotFoundException
+    {
+        List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
+        artifactResolver.resolve(artifact, remoteRepositories, localRepository);
     }
 
     /**

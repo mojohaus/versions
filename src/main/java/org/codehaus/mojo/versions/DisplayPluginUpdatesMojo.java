@@ -30,6 +30,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.execution.RuntimeInformation;
 import org.apache.maven.lifecycle.Lifecycle;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.lifecycle.LifecycleExecutor;
@@ -38,12 +39,14 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.InvalidPluginException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.plugin.PluginManagerException;
 import org.apache.maven.plugin.PluginNotFoundException;
+import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.version.PluginVersionNotFoundException;
 import org.apache.maven.plugin.version.PluginVersionResolutionException;
@@ -52,18 +55,25 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.interpolation.ModelInterpolationException;
 import org.apache.maven.project.interpolation.ModelInterpolator;
 import org.apache.maven.settings.Settings;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReflectionUtils;
 import org.codehaus.plexus.util.StringUtils;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -131,6 +141,12 @@ public class DisplayPluginUpdatesMojo
      * @since 1.0-alpha-1
      */
     private PluginManager pluginManager;
+
+    /**
+     * @component
+     * @since 1.3
+     */
+    private RuntimeInformation runtimeInformation;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -307,10 +323,49 @@ public class DisplayPluginUpdatesMojo
 
             Artifact artifact = artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
 
-            ArtifactVersion artifactVersion;
+            ArtifactVersion artifactVersion = null;
+            String upgradeVersion = null;
             try
             {
-                artifactVersion = findLatestVersion( artifact, versionRange, null, true );
+                // now we want to find the newest version that is compatible with the invoking version of Maven
+                ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, true );
+                ArtifactVersion[] newerVersions =
+                    artifactVersions.getNewerVersions( artifactVersions.getCurrentVersion().toString(),
+                                                       Boolean.TRUE.equals( this.allowSnapshots ) );
+                getLog().info( "Plugin " + coords + " version " + version + " = " + Arrays.asList( newerVersions ) );
+                for ( int j = newerVersions.length - 1; j >= 0; j-- )
+                {
+                    Artifact probe = artifactFactory.createDependencyArtifact( groupId, artifactId,
+                                                                               VersionRange.createFromVersion(
+                                                                                   newerVersions[j].toString() ), "pom",
+                                                                               null, "runtime" );
+                    getLog().info( "Resolving plugin " + coords + " version " + newerVersions[j].toString()  );
+                    try
+                    {
+                        getHelper().resolveArtifact( probe, true );
+                        MavenProject mavenProject =
+                            projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
+                        ArtifactVersion requires = new DefaultArtifactVersion( mavenProject.getPrerequisites().getMaven() );
+                        if (runtimeInformation.getApplicationVersion().compareTo( requires ) >= 0) {
+                            artifactVersion = newerVersions[j];
+                            break;
+                        } else if (upgradeVersion == null) {
+                            upgradeVersion = "(Maven " + requires.toString() + ") " + newerVersions[j] ;
+                        }
+                    }
+                    catch ( ArtifactResolutionException e )
+                    {
+                        // ignore bad version
+                    }
+                    catch ( ArtifactNotFoundException e )
+                    {
+                        // ignore bad version
+                    }
+                    catch ( ProjectBuildingException e )
+                    {
+                        // ignore bad version
+                    }
+                }
             }
             catch ( ArtifactMetadataRetrievalException e )
             {
@@ -395,6 +450,40 @@ public class DisplayPluginUpdatesMojo
                 buf.append( " -> " );
                 buf.append( newVersion );
                 updates.add( buf.toString() );
+                if (upgradeVersion != null) {
+                    buf.setLength( 0 );
+                    padding = INFO_PAD_SIZE - upgradeVersion.length() - 2;
+                    while ( buf.length() < padding )
+                    {
+                        buf.append( ' ' );
+                    }
+                    buf.append( "-> " );
+                    buf.append( upgradeVersion );
+                    updates.add( buf.toString());
+                }
+            } else if (upgradeVersion != null) {
+                StringBuffer buf = new StringBuffer();
+                if ( PomHelper.APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId ) )
+                {
+                    // a core plugin... group id is not needed
+                }
+                else
+                {
+                    buf.append( groupId ).append( ':' );
+                }
+                buf.append( artifactId );
+                buf.append( ' ' );
+                int padding = INFO_PAD_SIZE - version.length() - upgradeVersion.length() - 4;
+                while ( buf.length() < padding )
+                {
+                    buf.append( '.' );
+                }
+                buf.append( ' ' );
+                buf.append( version );
+                buf.append( " -> " );
+                buf.append( upgradeVersion );
+                updates.add( buf.toString() );
+
             }
         }
         getLog().info( "" );

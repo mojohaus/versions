@@ -25,6 +25,7 @@ import org.apache.maven.artifact.manager.DefaultWagonManager;
 import org.apache.maven.artifact.manager.WagonConfigurationException;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.artifact.MavenMetadataSource;
@@ -99,7 +100,7 @@ public class DefaultVersionsHelperTest
 
         final MavenSession mavenSession = null; // TODO create a mock/real maven session
         VersionsHelper helper =
-            new DefaultVersionsHelper( new DefaultArtifactFactory(), new MavenMetadataSource(), new ArrayList(),
+            new DefaultVersionsHelper( new DefaultArtifactFactory(), new DefaultArtifactResolver(), new MavenMetadataSource(), new ArrayList(),
                                        new ArrayList(),
                                        new DefaultArtifactRepository( "", "", new DefaultRepositoryLayout() ),
                                        wagonManager, new Settings(), "", rulesUri, new MockLog(), mavenSession,

@@ -22,6 +22,8 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -264,5 +266,13 @@ public interface VersionsHelper
                                                                 boolean autoLinkItems )
         throws MojoExecutionException;
 
-
+    /**
+     * Attempts to resolve the artifact.
+     *
+     * @param artifact              The artifact to resolve.
+     * @param usePluginRepositories whether to resolve from the plugin repositories or the regular repositories.
+     * @since 1.3
+     */
+    void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
+        throws ArtifactResolutionException, ArtifactNotFoundException;
 }

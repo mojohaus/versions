@@ -26,6 +26,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
@@ -197,6 +198,11 @@ public abstract class AbstractVersionsUpdaterMojo
      */
     protected PathTranslator pathTranslator;
 
+    /**
+     * @component
+     */
+    protected ArtifactResolver artifactResolver;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     public VersionsHelper getHelper()
@@ -204,7 +210,7 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         if ( helper == null )
         {
-            helper = new DefaultVersionsHelper( artifactFactory, artifactMetadataSource, remoteArtifactRepositories,
+            helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource, remoteArtifactRepositories,
                                                 remotePluginRepositories, localRepository, wagonManager, settings,
                                                 serverId, rulesUri, getLog(), session,
                                                 pathTranslator );
