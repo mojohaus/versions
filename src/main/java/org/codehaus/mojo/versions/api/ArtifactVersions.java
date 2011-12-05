@@ -22,6 +22,8 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.Restriction;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import java.util.Iterator;
@@ -78,6 +80,40 @@ public class ArtifactVersions
         {
             setCurrentVersion( artifact.getVersion() );
         }
+    }
+
+    /**
+     * Checks if the version is in the range (and ensures that the range respects the <code>-!</code> syntax
+     * to rule out any qualifiers from range boundaries).
+     *
+     * @param version the version to check.
+     * @param range the range to check.
+     * @return <code>true</code> if and only if the version is in the range.
+     * @since 1.3
+     */
+    public static boolean isVersionInRange( ArtifactVersion version, VersionRange range )
+    {
+        if (!range.containsVersion( version ) ) return false;
+        Iterator i = range.getRestrictions().iterator();
+        while (i.hasNext()) {
+            Restriction r = (Restriction) i.next();
+            if (r.containsVersion( version )) {
+                // check for the -! syntax
+                if (!r.isLowerBoundInclusive() && r.getLowerBound() != null) {
+                    String s = r.getLowerBound().toString();
+                    if (s.endsWith( "-!" ) && version.toString().startsWith( s.substring( 0, s.length() - 2 ) )) {
+                        return false;
+                    }
+                }
+                if (!r.isUpperBoundInclusive() && r.getUpperBound() != null) {
+                    String s = r.getUpperBound().toString();
+                    if (s.endsWith( "-!" ) && version.toString().startsWith( s.substring( 0, s.length() - 2 ) )) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -142,4 +178,17 @@ public class ArtifactVersions
         return versionComparator;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public String toString()
+    {
+        final StringBuilder sb = new StringBuilder();
+        sb.append( "ArtifactVersions" );
+        sb.append( "{artifact=" ).append( artifact );
+        sb.append( ", versions=" ).append( versions );
+        sb.append( ", versionComparator=" ).append( versionComparator );
+        sb.append( '}' );
+        return sb.toString();
+    }
 }

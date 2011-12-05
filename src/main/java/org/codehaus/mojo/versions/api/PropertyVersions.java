@@ -363,7 +363,7 @@ public class PropertyVersions
             {
                 for ( int j = reactorVersions.length - 1; j >= 0; j-- )
                 {
-                    if ( range == null || range.containsVersion( reactorVersions[j] ) )
+                    if ( range == null || ArtifactVersions.isVersionInRange( reactorVersions[j], range ) )
                     {
                         fromReactor = reactorVersions[j];
                         helper.getLog().debug(

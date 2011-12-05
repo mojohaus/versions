@@ -188,7 +188,7 @@ public abstract class AbstractVersionDetails
         while ( i.hasNext() )
         {
             ArtifactVersion candidate = (ArtifactVersion) i.next();
-            if ( versionRange != null && !versionRange.containsVersion( candidate ) )
+            if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
             }
@@ -287,7 +287,7 @@ public abstract class AbstractVersionDetails
         while ( i.hasNext() )
         {
             ArtifactVersion candidate = (ArtifactVersion) i.next();
-            if ( versionRange != null && !versionRange.containsVersion( candidate ) )
+            if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
             }
@@ -334,7 +334,7 @@ public abstract class AbstractVersionDetails
         while ( i.hasNext() )
         {
             ArtifactVersion candidate = (ArtifactVersion) i.next();
-            if ( versionRange != null && !versionRange.containsVersion( candidate ) )
+            if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
             }

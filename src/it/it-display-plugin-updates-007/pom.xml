@@ -10,7 +10,7 @@
   <description>MVERSIONS-10 integration test</description>
 
   <prerequisites>
-    <maven>2.0.6</maven>
+    <maven>2.0.9</maven>
   </prerequisites>
 
   <properties>

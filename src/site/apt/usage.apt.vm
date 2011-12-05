@@ -30,8 +30,8 @@ Usage
 
 * Basic Usage
 
-  Maven 2.0, 2.1 and 2.2 do not currently support re-reading modifications of the <<<pom.xml>>> within one invocation
-  of Maven.
+  Maven 2.0, 2.1, 2.2 and 3.0 do not currently support re-reading modifications of the <<<pom.xml>>> within one
+  invocation of Maven.
 
   The following goals:
 

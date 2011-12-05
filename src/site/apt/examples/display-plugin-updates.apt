@@ -46,16 +46,42 @@ mvn versions:display-plugin-updates
 [INFO] [versions:display-plugin-updates]
 [INFO]
 [INFO] The following plugin updates are available:
-[INFO]   maven-checkstyle-plugin .................................. 2.1 -> 2.2
+[INFO]   maven-checkstyle-plugin .................................. 2.6 -> 2.8
+[INFO]   maven-deploy-plugin ...................................... 2.5 -> 2.7
+[INFO]   maven-jar-plugin ..................................... 2.3.1 -> 2.3.2
+[INFO]   maven-plugin-plugin ...................................... 2.7 -> 2.9
+[INFO]   maven-resources-plugin ................................. 2.4.3 -> 2.5
+[INFO]   maven-site-plugin ..................... ${sitePluginVersion} -> 2.0.1
 [INFO]
 [INFO] All plugins have a version specified.
+[INFO]
+[INFO] Project defines minimum Maven version as: 2.0.6
+[INFO] Plugins require minimum Maven version of: 2.2.1
+[INFO]
+[WARNING] Project (which is a Maven Plugin) targets Maven 2.0.6 or newer
+[WARNING] but requires Maven 2.2.1 or newer to build.
+[WARNING] This may or may not be a problem. A Maven Enforcer rule can help
+[WARNING] enforce that the correct version of Maven is used to build this plugin.
+[INFO]
+[INFO] Require Maven 2.0.9 to use the following plugin updates:
+[INFO]   maven-compiler-plugin ......................................... 2.3.2
+[INFO]   maven-surefire-plugin .......................................... 2.10
+[INFO]
+[INFO] Require Maven 2.1.0 to use the following plugin updates:
+[INFO]   maven-site-plugin ............................................. 2.1.1
+[INFO]
+[INFO] Require Maven 2.2.0 to use the following plugin updates:
+[INFO]   maven-site-plugin ............................................... 3.0
+[INFO]
+[INFO] Require Maven 2.2.1 to use the following plugin updates:
+[INFO]   maven-changes-plugin ............................................ 2.5
 [INFO]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESSFUL
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: < 1 second
-[INFO] Finished at: Mon Sep 01 15:49:10 IST 2008
-[INFO] Final Memory: 10M/167M
+[INFO] Total time: 6 seconds
+[INFO] Finished at: Wed Nov 30 21:59:36 GMT 2011
+[INFO] Final Memory: 21M/81M
 [INFO] ------------------------------------------------------------------------
 ---
 
@@ -110,7 +136,81 @@ mvn versions:display-plugin-updates
 </project>
 ---
 
-  produces the following output (when run using Maven 2.0.9):
+  produces the following output (when run using Maven 2.0.6):
+
+---
+[INFO] ----------------------------------------------------------------------------
+[INFO] Building Unnamed - org.codehaus.mojo.versions-maven-plugin.it:parent:pom:2.0
+[INFO]    task-segment: [versions:display-plugin-updates]
+[INFO] ----------------------------------------------------------------------------
+[INFO] [versions:display-plugin-updates]
+[INFO]
+[INFO] The following plugin updates are available:
+[INFO]   maven-clean-plugin ....................................... 2.1 -> 2.2
+[INFO]
+[WARNING] The following plugins do not have their version specified:
+[WARNING]   maven-compiler-plugin ...................................... 2.0.2
+[WARNING]   maven-deploy-plugin .......................................... 2.4
+[WARNING]   maven-install-plugin ......................................... 2.2
+[WARNING]   maven-javadoc-plugin ......................................... 2.0
+[WARNING]   maven-site-plugin ..................................... 2.0-beta-4
+[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.0
+[INFO]
+[WARNING] Project does not define minimum Maven version, default is: 2.0
+[INFO] Plugins require minimum Maven version of: 2.0.6
+[INFO]
+[ERROR] Project does not define required minimum version of Maven.
+[ERROR] Update the pom.xml to contain
+[ERROR]     <prerequisites>
+[ERROR]       <maven>2.0.6</maven>
+[ERROR]     </prerequisites>
+[INFO]
+[INFO] Require Maven 2.0.2 to use the following plugin updates:
+[INFO]   maven-checkstyle-plugin ......................................... 2.1
+[INFO]   maven-javadoc-plugin ............................................ 2.2
+[INFO]   maven-site-plugin ........................................ 2.0-beta-7
+[INFO]   org.codehaus.mojo:build-helper-maven-plugin ..................... 1.5
+[INFO]
+[INFO] Require Maven 2.0.6 to use the following plugin updates:
+[INFO]   maven-checkstyle-plugin ......................................... 2.8
+[INFO]   maven-clean-plugin ............................................ 2.4.1
+[INFO]   maven-deploy-plugin ............................................. 2.7
+[INFO]   maven-install-plugin .......................................... 2.3.1
+[INFO]   maven-javadoc-plugin ............................................ 2.3
+[INFO]   maven-site-plugin ............................................. 2.0.1
+[INFO]   org.codehaus.mojo:build-helper-maven-plugin ..................... 1.7
+[INFO]   org.codehaus.mojo:versions-maven-plugin ......................... 1.2
+[INFO]
+[INFO] Require Maven 2.0.8 to use the following plugin updates:
+[INFO]   maven-javadoc-plugin ............................................ 2.4
+[INFO]
+[INFO] Require Maven 2.0.9 to use the following plugin updates:
+[INFO]   maven-compiler-plugin ......................................... 2.3.2
+[INFO]   maven-javadoc-plugin ............................................ 2.8
+[INFO]
+[INFO] Require Maven 2.1.0 to use the following plugin updates:
+[INFO]   maven-site-plugin ............................................. 2.1.1
+[INFO]
+[INFO] Require Maven 2.2.0 to use the following plugin updates:
+[INFO]   maven-site-plugin ............................................... 3.0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 3 seconds
+[INFO] Finished at: Wed Nov 30 22:02:14 GMT 2011
+[INFO] Final Memory: 26M/81M
+[INFO] ------------------------------------------------------------------------
+---
+
+  Note: that because the POM does not specify versions for some plugins, Maven
+  defaults to using the latest compatible version (Maven 3 complains about the
+  version not being specified), and hence the reported minimum required Maven
+  version tends to be the same as the version of Maven that is running the mojo
+
+  When run with Maven 2.0.9 (which defines versions of core plugins in the
+  super-pom, and removes some plugin from the lifecycle for the pom lifecycle),
+  we get the following output:
 
 ---
 [INFO] ------------------------------------------------------------------------
@@ -119,33 +219,51 @@ mvn versions:display-plugin-updates
 [INFO] ------------------------------------------------------------------------
 [INFO] [versions:display-plugin-updates]
 [INFO]
-[INFO] The following plugin updates are available:
-[INFO]   maven-checkstyle-plugin .................................. 2.1 -> 2.8
-[INFO]   maven-clean-plugin ..................................... 2.2 -> 2.4.1
-[INFO]   maven-deploy-plugin ...................................... 2.3 -> 2.7
-[INFO]   maven-install-plugin ................................... 2.2 -> 2.3.1
-[INFO]   maven-site-plugin ............................... 2.0-beta-6 -> 2.0.1
-[INFO]                                                    -> (Maven 2.2.0) 3.0
+[INFO] All plugins with a version specified are using the latest versions.
 [INFO]
 [WARNING] The following plugins do not have their version specified:
-[WARNING]   maven-deploy-plugin ......................... (from super-pom) 2.7
-[WARNING]   maven-install-plugin ...................... (from super-pom) 2.3.1
-[WARNING]   maven-site-plugin ......................... (from super-pom) 2.0.1
-[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.7
+[WARNING]   maven-deploy-plugin ......................... (from super-pom) 2.4
+[WARNING]   maven-install-plugin ........................ (from super-pom) 2.2
+[WARNING]   maven-site-plugin .................... (from super-pom) 2.0-beta-4
+[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.0
+[INFO]
+[WARNING] Project does not define minimum Maven version, default is: 2.0
+[INFO] Plugins require minimum Maven version of: 2.0.6
+[INFO]
+[ERROR] Project does not define required minimum version of Maven.
+[ERROR] Update the pom.xml to contain
+[ERROR]     <prerequisites>
+[ERROR]       <maven>2.0.6</maven>
+[ERROR]     </prerequisites>
+[INFO]
+[INFO] Require Maven 2.0.2 to use the following plugin updates:
+[INFO]   maven-checkstyle-plugin ......................................... 2.1
+[INFO]   maven-site-plugin ........................................ 2.0-beta-7
+[INFO]   org.codehaus.mojo:build-helper-maven-plugin ..................... 1.5
+[INFO]
+[INFO] Require Maven 2.0.6 to use the following plugin updates:
+[INFO]   maven-checkstyle-plugin ......................................... 2.8
+[INFO]   maven-clean-plugin ............................................ 2.4.1
+[INFO]   maven-deploy-plugin ............................................. 2.7
+[INFO]   maven-install-plugin .......................................... 2.3.1
+[INFO]   maven-site-plugin ............................................. 2.0.1
+[INFO]   org.codehaus.mojo:build-helper-maven-plugin ..................... 1.7
+[INFO]   org.codehaus.mojo:versions-maven-plugin ......................... 1.2
+[INFO]
+[INFO] Require Maven 2.1.0 to use the following plugin updates:
+[INFO]   maven-site-plugin ............................................. 2.1.1
+[INFO]
+[INFO] Require Maven 2.2.0 to use the following plugin updates:
+[INFO]   maven-site-plugin ............................................... 3.0
 [INFO]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESSFUL
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: < 1 second
-[INFO] Finished at: Mon Sep 01 15:55:18 IST 2008
-[INFO] Final Memory: 6M/104M
+[INFO] Total time: 5 seconds
+[INFO] Finished at: Wed Nov 30 22:09:59 GMT 2011
+[INFO] Final Memory: 20M/81M
 [INFO] ------------------------------------------------------------------------
 ---
-
-  Note: there are two newer versions reported for the maven-site-plugin. The first version is the highest
-  version that claims compatibility with the current version of Maven (i.e. 2.0.1 in this case)
-  while the second version is the most recent version (i.e. 3.0 in this case) and the minimum version of Maven that it
-  requires. (i.e. Maven 2.2.0 in this case)
 
   And the following POM:
 
@@ -161,7 +279,11 @@ mvn versions:display-plugin-updates
   </parent>
 
   <artifactId>child</artifactId>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
+
+  <prerequisites>
+    <maven>2.0.2</maven>
+  </prerequisites>
 
   <build>
     <pluginManagement>
@@ -201,25 +323,31 @@ mvn versions:display-plugin-updates
 [INFO] [versions:display-plugin-updates]
 [INFO]
 [INFO] The following plugin updates are available:
-[INFO]   maven-checkstyle-plugin .................................. 2.0 -> 2.2
-[INFO]   maven-clean-plugin ....................................... 2.1 -> 2.2
-[INFO]   maven-deploy-plugin ...................................... 2.3 -> 2.4
-[INFO]   maven-javadoc-plugin ..................................... 2.4 -> 2.5
-[INFO]   maven-site-plugin .......................... 2.0-beta-6 -> 2.0-beta-7
+[INFO]   maven-checkstyle-plugin .................................. 2.0 -> 2.8
+[INFO]   maven-clean-plugin ..................................... 2.1 -> 2.4.1
 [INFO]
 [WARNING] The following plugins do not have their version specified:
-[WARNING]   maven-compiler-plugin ..................... (from super-pom) 2.0.2
-[WARNING]   maven-deploy-plugin ......................... (from super-pom) 2.3
-[WARNING]   maven-install-plugin ........................ (from super-pom) 2.2
-[WARNING]   maven-javadoc-plugin ........................ (from super-pom) 2.4
-[WARNING]   maven-site-plugin .................... (from super-pom) 2.0-beta-6
-[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.2
+[WARNING]   org.codehaus.mojo:build-helper-maven-plugin .................. 1.7
+[INFO]
+[INFO] Project defines minimum Maven version as: 2.0.8
+[INFO] Plugins require minimum Maven version of: 2.0.8
+[INFO]
+[INFO] No plugins require a newer version of Maven than specified by the pom.
+[INFO]
+[INFO] Require Maven 2.0.9 to use the following plugin updates:
+[INFO]   maven-javadoc-plugin ............................................ 2.8
+[INFO]
+[INFO] Require Maven 2.1.0 to use the following plugin updates:
+[INFO]   maven-site-plugin ............................................. 2.1.1
+[INFO]
+[INFO] Require Maven 2.2.0 to use the following plugin updates:
+[INFO]   maven-site-plugin ............................................... 3.0
 [INFO]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESSFUL
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: < 1 second
-[INFO] Finished at: Mon Sep 01 15:57:04 IST 2008
-[INFO] Final Memory: 6M/104M
+[INFO] Total time: 4 seconds
+[INFO] Finished at: Fri Nov 25 18:28:34 GMT 2011
+[INFO] Final Memory: 17M/81M
 [INFO] ------------------------------------------------------------------------
 ---

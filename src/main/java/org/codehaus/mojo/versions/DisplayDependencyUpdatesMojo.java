@@ -200,7 +200,8 @@ public class DisplayDependencyUpdatesMojo
                                                                            Boolean.TRUE.equals( allowSnapshots ) );
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null ? null : versions.getNewestUpdate( newestVersion, UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );
-                if (latest != null && versions.getArtifact().getVersionRange().containsVersion(latest)) {
+                if (latest != null && ArtifactVersions.isVersionInRange( latest,
+                                                                         versions.getArtifact().getVersionRange() )) {
                     latest = null;
                 }
             }

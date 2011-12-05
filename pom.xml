@@ -64,7 +64,7 @@
   </contributors>
 
   <prerequisites>
-    <maven>2.0.9</maven>
+    <maven>2.0</maven>
   </prerequisites>
 
   <scm>
@@ -78,7 +78,7 @@
   </issueManagement>
 
   <properties>
-    <mavenVersion>2.0.9</mavenVersion>
+    <mavenVersion>2.0.6</mavenVersion>
     <doxiaVersion>1.0</doxiaVersion>
     <doxia-sitetoolsVersion>1.0</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
@@ -327,7 +327,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>mrm-maven-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-alpha-1</version>
         <executions>
           <execution>
             <goals>
@@ -339,8 +339,10 @@
         <configuration>
           <propertyName>repository.proxy.url</propertyName>
           <repositories>
-            <mock>src/it-repo</mock>
-            <proxy/>
+            <mockRepo>
+              <source>src/it-repo</source>
+            </mockRepo>
+            <proxyRepo/>
           </repositories>
         </configuration>
       </plugin>
