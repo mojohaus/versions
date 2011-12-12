@@ -40,6 +40,7 @@ import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.plexus.util.FileUtils;
@@ -491,5 +492,24 @@ public abstract class AbstractVersionsUpdaterMojo
         }
 
         return segment;
+    }
+
+    protected void updatePropertyToNewestVersion(
+            ModifiedPomXMLEventReader pom, Property property, PropertyVersions version, String currentVersion)
+            throws MojoExecutionException, XMLStreamException
+    {
+        ArtifactVersion winner =
+            version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
+                                      this.getHelper() );
+
+        if ( winner == null || currentVersion.equals( winner.toString() ) )
+        {
+            getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
+        }
+        else if ( PomHelper.setPropertyVersion(pom, version.getProfileId(), property.getName(),
+                winner.toString()) )
+        {
+            getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
+        }
     }
 }

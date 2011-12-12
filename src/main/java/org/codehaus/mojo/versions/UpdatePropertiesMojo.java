@@ -19,10 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -108,19 +106,7 @@ public class UpdatePropertiesMojo
                 continue;
             }
 
-            ArtifactVersion winner =
-                version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                          this.getHelper() );
-
-            if ( winner == null || currentVersion.equals( winner.toString() ) )
-            {
-                getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
-            }
-            else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(),
-                                                    winner.toString() ) )
-            {
-                getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
-            }
+            updatePropertyToNewestVersion( pom, property, version, currentVersion );
 
         }
     }

@@ -24,11 +24,13 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,6 +48,30 @@ import java.util.regex.Pattern;
 public class ResolveRangesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
+    /**
+     * Whether to process the properties section of the project. If not
+     * set will default to true.
+     *
+     * @parameter expression="${processProperties}" defaultValue="true"
+     * @since 1.3
+     */
+    private Boolean processProperties;
+
+    /**
+     * A comma separated list of properties to update if they contain version-ranges.
+     *
+     * @parameter expression="${includeProperties}"
+     * @since 1.3
+     */
+    private String includeProperties = null;
+
+    /**
+     * A comma separated list of properties to not update even if they contain version-ranges.
+     *
+     * @parameter expression="${excludeProperties}"
+     * @since 1.3
+     */
+    private String excludeProperties = null;
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -55,6 +81,18 @@ public class ResolveRangesMojo
     public final Pattern matchRangeRegex = Pattern.compile( "," );
 
     // ------------------------------ METHODS --------------------------
+
+    /**
+     * Should the project/properties section of the pom be processed.
+     *
+     * @return returns <code>true if the project/properties section of the pom should be processed.
+     * @since 1.3
+     */
+    public boolean isProcessingProperties()
+    {
+        // true if true or null
+        return !Boolean.FALSE.equals( processProperties );
+    }
 
     /**
      * @param pom the pom to update.
@@ -77,6 +115,10 @@ public class ResolveRangesMojo
         if ( isProcessingDependencies() )
         {
             resolveRanges( pom, getProject().getModel().getDependencies() );
+        }
+        if ( isProcessingProperties() )
+        {
+            resolvePropertyRanges( pom );
         }
     }
 
@@ -112,6 +154,31 @@ public class ResolveRangesMojo
                     }
                 }
             }
+        }
+    }
+
+    private void resolvePropertyRanges( ModifiedPomXMLEventReader pom )
+        throws XMLStreamException, MojoExecutionException
+    {
+
+        Map propertyVersions =
+            this.getHelper().getVersionPropertiesMap( getProject(), null, includeProperties, excludeProperties, true);
+        Iterator i = propertyVersions.entrySet().iterator();
+        while ( i.hasNext() )
+        {
+            Map.Entry/*<Property,PropertyVersions>*/ entry = (Map.Entry/*<Property,PropertyVersions>*/) i.next();
+            Property property = (Property) entry.getKey();
+            PropertyVersions version = (PropertyVersions) entry.getValue();
+
+            final String currentVersion = getProject().getProperties().getProperty(property.getName());
+            if ( currentVersion == null || !matchRangeRegex.matcher( currentVersion ).find() )
+            {
+                continue;
+            }
+
+            property.setVersion(currentVersion);
+            updatePropertyToNewestVersion(pom, property, version, currentVersion);
+
         }
     }
 
