@@ -28,6 +28,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.project.path.DefaultPathTranslator;
 import org.apache.maven.settings.Settings;
@@ -36,9 +37,11 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.file.FileWagon;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.execution.MavenSession;
+import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Test {@link DefaultVersionsHelper}
@@ -74,6 +77,21 @@ public class DefaultVersionsHelperTest
                       helper.getVersionComparator( "com.mycompany.maven", "new-maven-plugin" ) );
         assertEquals( VersionComparators.getVersionComparator( "mercury" ),
                       helper.getVersionComparator( "com.mycompany.maven", "old-maven-plugin" ) );
+    }
+
+
+    public void testMVERSIONS159_ExcludedAndNotIncluded()
+        throws MojoExecutionException
+    {
+        VersionsHelper helper = createHelper();
+        MavenProject project = null;
+
+        Property[] propertyDefinitions = new Property[] {
+            new Property( "bar.version" )
+        };
+        // should not throw an IllegalStateException
+        Map result = helper.getVersionPropertiesMap( project, propertyDefinitions, "foo.version", "bar.version", false );
+        assertTrue( result.isEmpty() );
     }
 
 

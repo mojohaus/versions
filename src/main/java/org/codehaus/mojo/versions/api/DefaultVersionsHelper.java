@@ -682,8 +682,7 @@ public class DefaultVersionsHelper
                 getLog().debug( "Skipping property ${" + property.getName() + "}" );
                 i.remove();
             }
-
-            if ( excludeProperties != null && excludeProperties.indexOf( property.getName() ) >= 0 )
+            else if ( excludeProperties != null && excludeProperties.indexOf( property.getName() ) >= 0 )
             {
                 getLog().debug( "Ignoring property ${" + property.getName() + "}" );
                 i.remove();
