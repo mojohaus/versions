@@ -1,0 +1,24 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>localhost</groupId>
+    <artifactId>it-resolve-ranges-003</artifactId>
+    <version>1.0</version>
+  </parent>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-resolve-ranges-003-child</artifactId>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    <!-- make sure that an inter-module dependency doesn't stop resolve-ranges from working without doing a mvn package -->
+    <dependency>
+      <groupId>localhost</groupId>
+      <artifactId>it-resolve-ranges-003-child2</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>

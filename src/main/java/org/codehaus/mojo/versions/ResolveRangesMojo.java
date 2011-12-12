@@ -20,6 +20,8 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -42,7 +44,6 @@ import java.util.regex.Pattern;
  * @goal resolve-ranges
  * @requiresProject true
  * @requiresDirectInvocation true
- * @requiresDependencyResolution test
  * @since 1.0-alpha-3
  */
 public class ResolveRangesMojo
@@ -102,7 +103,7 @@ public class ResolveRangesMojo
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
         // Note we have to get the dependencies from the model because the dependencies in the 
         // project may have already had their range resolved [MNG-4138]
@@ -123,7 +124,7 @@ public class ResolveRangesMojo
     }
 
     private void resolveRanges( ModifiedPomXMLEventReader pom, Collection dependencies )
-        throws XMLStreamException, MojoExecutionException
+            throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
 
         Iterator iter = dependencies.iterator();
@@ -147,10 +148,28 @@ public class ResolveRangesMojo
                 {
                     getLog().debug( "Resolving version range for dependency: " + artifact );
 
-                    if ( PomHelper.setDependencyVersion( pom, artifact.getGroupId(), artifact.getArtifactId(),
-                                                         dep.getVersion(), artifact.getVersion() ) )
+                    String artifactVersion = artifact.getVersion();
+                    if ( artifactVersion == null )
                     {
-                        getLog().debug( "Version set to " + artifact.getVersion() + " for dependency: " + artifact );
+                        ArtifactVersion latestVersion = findLatestVersion( artifact, artifact.getVersionRange(), null, false );
+
+                        if ( latestVersion != null )
+                        {
+                            artifactVersion = latestVersion.toString();
+                        }
+                        else
+                        {
+                            getLog().warn( "Not updating version: could not resolve any versions" );
+                        }
+                    }
+
+                    if ( artifactVersion != null )
+                    {
+                        if ( PomHelper.setDependencyVersion( pom, artifact.getGroupId(), artifact.getArtifactId(),
+                                                             dep.getVersion(), artifactVersion ) )
+                        {
+                            getLog().debug( "Version set to " + artifactVersion + " for dependency: " + artifact );
+                        }
                     }
                 }
             }
