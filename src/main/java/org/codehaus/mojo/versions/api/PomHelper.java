@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -541,7 +542,16 @@ public class PomHelper
                     pom.mark( 1 );
                     String compressedPomVersion = StringUtils.deleteWhitespace( pom.getBetween( 0, 1 ).trim() );
                     String compressedOldVersion = StringUtils.deleteWhitespace( oldVersion );
-                    haveOldVersion = compressedOldVersion.equals( compressedPomVersion );
+
+                    try
+                    {
+                        haveOldVersion = isVersionOverlap( compressedOldVersion, compressedPomVersion );
+                    }
+                    catch ( InvalidVersionSpecificationException e )
+                    {
+                        // fall back to string comparison
+                        haveOldVersion = compressedOldVersion.equals( compressedPomVersion );
+                    }
                 }
                 else if ( matchScopeRegex.matcher( path ).matches() )
                 {
@@ -562,6 +572,43 @@ public class PomHelper
             }
         }
         return madeReplacement;
+    }
+
+    /**
+     * Checks if two versions or ranges have an overlap.
+     * @param leftVersionOrRange the 1st version number or range to test
+     * @param rightVersionOrRange the 2nd version number or range to test
+     * @return true if both versions have an overlap
+     * @throws InvalidVersionSpecificationException if the versions can't be parsed to a range
+     */
+    public static boolean isVersionOverlap( String leftVersionOrRange, String rightVersionOrRange )
+        throws InvalidVersionSpecificationException
+    {
+        VersionRange pomVersionRange = createVersionRange( leftVersionOrRange );
+        if ( !pomVersionRange.hasRestrictions() )
+        {
+            return true;
+        }
+
+        VersionRange oldVersionRange = createVersionRange( rightVersionOrRange );
+        if ( !oldVersionRange.hasRestrictions() )
+        {
+            return true;
+        }
+
+        VersionRange result = oldVersionRange.restrict( pomVersionRange );
+        return result.hasRestrictions();
+    }
+
+    private static VersionRange createVersionRange( String versionOrRange )
+        throws InvalidVersionSpecificationException
+    {
+        VersionRange versionRange = VersionRange.createFromVersionSpec( versionOrRange );
+        if ( versionRange.getRecommendedVersion() != null )
+        {
+            versionRange = VersionRange.createFromVersionSpec( "[" + versionOrRange + "]" );
+        }
+        return versionRange;
     }
 
     /**
@@ -644,7 +691,16 @@ public class PomHelper
                     "version".equals( event.asEndElement().getName().getLocalPart() ) )
                 {
                     pom.mark( 1 );
-                    haveOldVersion = oldVersion.equals( pom.getBetween( 0, 1 ).trim() );
+
+                    try
+                    {
+                        haveOldVersion = isVersionOverlap( oldVersion, pom.getBetween( 0, 1 ).trim() );
+                    }
+                    catch ( InvalidVersionSpecificationException e )
+                    {
+                        // fall back to string comparison
+                        haveOldVersion = oldVersion.equals( pom.getBetween( 0, 1 ).trim() );
+                    }
                 }
                 else if ( matchScopeRegex.matcher( path ).matches() )
                 {

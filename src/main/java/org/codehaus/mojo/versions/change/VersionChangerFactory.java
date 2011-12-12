@@ -18,6 +18,9 @@ package org.codehaus.mojo.versions.change;
 * under the License.
 */
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -99,12 +102,46 @@ public class VersionChangerFactory
         checkState();
         return new ProjectVersionChanger( model, pom, log );
     }
+    
+    public synchronized VersionChanger newParentVersionChanger()
+    {
+        checkState();
+        return new ParentVersionChanger( model, pom, log );
+    }
 
     public synchronized VersionChanger newVersionChanger()
     {
         checkState();
         VersionChanger[] delegates =
-            new VersionChanger[]{newProjectVersionChanger(), newDependencyVersionChanger(), newPluginVersionChanger()};
+            new VersionChanger[] { newParentVersionChanger(), newProjectVersionChanger(),
+                newDependencyVersionChanger(), newPluginVersionChanger() };
+        return new CompositeVersionChanger( delegates );
+    }
+
+    public synchronized VersionChanger newVersionChanger( boolean processParent, boolean processProject,
+                                                          boolean processDependencies, boolean processPlugins )
+    {
+        checkState();
+
+        List/* <VersionChanger */delegates = new ArrayList/* <VersionChanger */();
+
+        if ( processParent )
+        {
+            delegates.add( newParentVersionChanger() );
+        }
+        if ( processProject )
+        {
+            delegates.add( newProjectVersionChanger() );
+        }
+        if ( processDependencies )
+        {
+            delegates.add( newDependencyVersionChanger() );
+        }
+        if ( processPlugins )
+        {
+            delegates.add( newPluginVersionChanger() );
+        }
+
         return new CompositeVersionChanger( delegates );
     }
 }

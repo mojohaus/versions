@@ -101,7 +101,39 @@ public class SetMojo
      * @since 1.3
      */
     private Boolean updateMatchingVersions;
-
+    
+    /**
+     * Whether to process the parent of the project. If not set will default to true.
+     *
+     * @parameter expression="${processParent}" default-value="true"
+     * @since 1.3
+     */
+    private boolean processParent;
+    
+    /**
+     * Whether to process the project version. If not set will default to true.
+     *
+     * @parameter expression="${processProject}" default-value="true"
+     * @since 1.3
+     */
+    private boolean processProject;
+    
+    /**
+     * Whether to process the dependencies section of the project. If not set will default to true.
+     *
+     * @parameter expression="${processDependencies}" default-value="true"
+     * @since 1.3
+     */
+    private boolean processDependencies;
+    
+    /**
+     * Whether to process the plugins section of the project. If not set will default to true.
+     *
+     * @parameter expression="${processPlugins}" default-value="true"
+     * @since 1.3
+     */
+    private boolean processPlugins;
+    
     /**
      * Component used to prompt for input
      *
@@ -331,7 +363,9 @@ public class SetMojo
             versionChangerFactory.setLog( log );
             versionChangerFactory.setModel( model );
 
-            VersionChanger changer = versionChangerFactory.newVersionChanger();
+            VersionChanger changer =
+                versionChangerFactory.newVersionChanger( processParent, processProject, processDependencies,
+                                                         processPlugins );
 
             Iterator i = sourceChanges.iterator();
             while ( i.hasNext() )

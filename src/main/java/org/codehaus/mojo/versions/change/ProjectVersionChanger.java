@@ -53,16 +53,5 @@ public class ProjectVersionChanger
                     "        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion() );
             }
         }
-        else if ( getModel().getParent() != null
-            && versionChange.getGroupId().equals( getModel().getParent().getGroupId() )
-            && versionChange.getArtifactId().equals( getModel().getParent().getArtifactId() ) )
-        {
-            if ( PomHelper.setProjectParentVersion( getPom(), versionChange.getNewVersion() ) )
-            {
-                info( "    Updating parent " + versionChange.getGroupId() + ":" + versionChange.getArtifactId() );
-                info(
-                    "        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion() );
-            }
-        }
     }
 }

@@ -42,4 +42,80 @@ public class PomHelperTest
         assertNotSame( oldVersion, newVersion );
     }
 
+    public void test_Version_Version_Equal()
+        throws Exception
+    {
+        assertTrue( PomHelper.isVersionOverlap( "1.0.8", "1.0.8" ) );
+    }
+
+    public void test_Version_Version_Differ()
+        throws Exception
+    {
+        assertFalse( PomHelper.isVersionOverlap( "1.0.8", "1.0.0" ) );
+    }
+
+    public void test_Version_Range_Intersect()
+        throws Exception
+    {
+        assertTrue( PomHelper.isVersionOverlap( "1.0.8", "[1.0.3,1.1.0]" ) );
+    }
+
+    public void test_Version_Range_Disjoint()
+        throws Exception
+    {
+        assertFalse( PomHelper.isVersionOverlap( "1.0.8", "[0.0.1,1.0.0]" ) );
+    }
+
+    public void test_Version_LeftOpenRange_Disjoint()
+        throws Exception
+    {
+        assertFalse( PomHelper.isVersionOverlap( "1.0.8", "[,1.0.0]" ) );
+    }
+
+    public void test_Version_RightOpenRange_Disjoint()
+        throws Exception
+    {
+        assertFalse( PomHelper.isVersionOverlap( "1.0.8", "[1.1.0,)" ) );
+    }
+
+    public void test_Empty_Range()
+        throws Exception
+    {
+        assertTrue( PomHelper.isVersionOverlap( "1.0.8", "" ) );
+    }
+
+    public void test_Range_Empty()
+        throws Exception
+    {
+        assertTrue( PomHelper.isVersionOverlap( "[1.0.5,1.0.8]", "" ) );
+    }
+
+    public void test_Range_Range_Intersect()
+        throws Exception
+    {
+        assertTrue( PomHelper.isVersionOverlap( "[1.0.5,1.0.8]", "[1.0.7,1.1.0]" ) );
+
+    }
+
+    public void test_Range_Range_Disjoint()
+        throws Exception
+    {
+        assertFalse( PomHelper.isVersionOverlap( "[1.0.5,1.0.6]", "[1.0.7,1.1.0]" ) );
+
+    }
+
+    public void test_Range_Version_Disjoint()
+        throws Exception
+    {
+        assertFalse( PomHelper.isVersionOverlap( "[1.0.5,1.0.6]", "1.0.8" ) );
+
+    }
+
+    public void test_Range_Version_Intersect()
+        throws Exception
+    {
+        assertTrue( PomHelper.isVersionOverlap( "[1.0.0,2.0.0]", "1.0.8" ) );
+
+    }
+
 }
