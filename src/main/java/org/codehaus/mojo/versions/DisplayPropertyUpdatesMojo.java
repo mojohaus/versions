@@ -156,7 +156,7 @@ public class DisplayPropertyUpdatesMojo
         if ( !current.isEmpty() )
         {
             getLog().info( "The following version properties are referencing the newest available version:" );
-            i = updates.iterator();
+            i = current.iterator();
             while ( i.hasNext() )
             {
                 getLog().info( "  " + i.next() );
