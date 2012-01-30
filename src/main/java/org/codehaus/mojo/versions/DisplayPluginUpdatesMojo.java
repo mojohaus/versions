@@ -716,7 +716,7 @@ public class DisplayPluginUpdatesMojo
         {
             getLog().warn( "Project does not define minimum Maven version, default is: 2.0" );
         }
-        else if (noExplicitMavenMinVersion)
+        else if ( noExplicitMavenMinVersion )
         {
             getLog().info( "Project inherits minimum Maven version as: " + specMavenVersion );
         }
@@ -839,9 +839,11 @@ public class DisplayPluginUpdatesMojo
         {
             final Prerequisites prerequisites = mavenProject.getPrerequisites();
             final String mavenVersion = prerequisites == null ? null : prerequisites.getMaven();
-            if (mavenVersion != null) {
+            if ( mavenVersion != null )
+            {
                 final ArtifactVersion v = new DefaultArtifactVersion( mavenVersion );
-                if (requiredMavenVersion == null || requiredMavenVersion.compareTo( v ) < 0) {
+                if ( requiredMavenVersion == null || requiredMavenVersion.compareTo( v ) < 0 )
+                {
                     requiredMavenVersion = v;
                 }
             }
@@ -1601,7 +1603,27 @@ public class DisplayPluginUpdatesMojo
 
         try
         {
-            addProjectPlugins( plugins, getLifecyclePlugins( getProject() ).values(), parentPluginManagement );
+            List lifecyclePlugins = new ArrayList( getLifecyclePlugins( getProject() ).values() );
+            for ( Iterator i = lifecyclePlugins.iterator(); i.hasNext(); )
+            {
+                Object lifecyclePlugin = i.next();
+                if ( getPluginVersion( lifecyclePlugin ) != null )
+                {
+                    // version comes from lifecycle, therefore cannot modify
+                    i.remove();
+                }
+                else
+                {
+                    // lifecycle leaves version open
+                    String parentVersion = (String) parentPluginManagement.get( getPluginCoords( lifecyclePlugin ) );
+                    if ( parentVersion != null )
+                    {
+                        // parent controls version
+                        i.remove();
+                    }
+                }
+            }
+            addProjectPlugins( plugins, lifecyclePlugins, parentPluginManagement );
 
             debugPluginMap( "after adding lifecycle plugins", plugins );
         }
@@ -1687,7 +1709,16 @@ public class DisplayPluginUpdatesMojo
             String coord = getPluginCoords( plugin );
             String version = getPluginVersion( plugin );
             String parentVersion = (String) parentDefinitions.get( coord );
-            if ( parentVersion == null || !parentVersion.equals( version ) )
+            if ( version == null && ( !plugins.containsKey( coord )
+                || getPluginVersion( plugins.get( coord ) ) == null ) && parentVersion != null )
+            {
+                Plugin parentPlugin = new Plugin();
+                parentPlugin.setGroupId( getPluginGroupId( plugin ) );
+                parentPlugin.setArtifactId( getPluginArtifactId( plugin ) );
+                parentPlugin.setVersion( parentVersion );
+                plugins.put( coord, parentPlugin );
+            }
+            else if ( parentVersion == null || !parentVersion.equals( version ) )
             {
                 if ( !plugins.containsKey( coord ) || getPluginVersion( plugins.get( coord ) ) == null )
                 {
