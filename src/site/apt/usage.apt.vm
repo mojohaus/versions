@@ -35,42 +35,42 @@ Usage
 
   The following goals:
 
-    * {{{set-mojo.html}versions:set}}
+    * {{{./set-mojo.html}versions:set}}
 
-    * {{{lock-snapshots-mojo.html}versions:lock-snapshots}}
+    * {{{./lock-snapshots-mojo.html}versions:lock-snapshots}}
 
-    * {{{resolve-ranges-mojo.html}versions:resolve-ranges}}
+    * {{{./resolve-ranges-mojo.html}versions:resolve-ranges}}
 
-    * {{{unlock-snapshots-mojo.html}versions:unlock-snapshots}}
+    * {{{./unlock-snapshots-mojo.html}versions:unlock-snapshots}}
 
-    * {{{update-child-modules-mojo.html}versions:update-child-modules}}
+    * {{{./update-child-modules-mojo.html}versions:update-child-modules}}
 
-    * {{{update-parent-mojo.html}versions:update-parent}}
+    * {{{./update-parent-mojo.html}versions:update-parent}}
 
-    * {{{update-properties-mojo.html}versions:update-properties}}
+    * {{{./update-properties-mojo.html}versions:update-properties}}
 
-    * {{{use-latest-releases-mojo.html}versions:use-latest-releases}}
+    * {{{./use-latest-releases-mojo.html}versions:use-latest-releases}}
 
-    * {{{use-latest-snapshots-mojo.html}versions:use-latest-snapshots}}
+    * {{{./use-latest-snapshots-mojo.html}versions:use-latest-snapshots}}
 
-    * {{{use-latest-versions-mojo.html}versions:use-latest-versions}}
+    * {{{./use-latest-versions-mojo.html}versions:use-latest-versions}}
 
-    * {{{use-next-releases-mojo.html}versions:use-next-releases}}
+    * {{{./use-next-releases-mojo.html}versions:use-next-releases}}
 
-    * {{{use-next-snapshots-mojo.html}versions:use-next-snapshots}}
+    * {{{./use-next-snapshots-mojo.html}versions:use-next-snapshots}}
 
-    * {{{use-next-versions-mojo.html}versions:use-next-versions}}
+    * {{{./use-next-versions-mojo.html}versions:use-next-versions}}
 
-    * {{{use-releases-mojo.html}versions:use-releases}}
+    * {{{./use-releases-mojo.html}versions:use-releases}}
 
   modify the <<<pom.xml>>> file, you need to run these goals separately from any other goals or life-cycle phases.
 
   Note: The first time any of the goals that modify the <<<pom.xml>>> file run, they will create a local backup copy
   <<<pom.xml.versionsBackup>>>. Subsequent modifications will leave this backup unchanged.  The
-  {{{accept-mojo.html}versions:commit}} goal will remove the backup copy, while the
-  {{{revert-mojo.html}versions:revert}} goal will restore the backup copy. It is best practice
+  {{{./accept-mojo.html}versions:commit}} goal will remove the backup copy, while the
+  {{{./revert-mojo.html}versions:revert}} goal will restore the backup copy. It is best practice
   to use a Source Code Management system and not rely on the <<<pom.xml.versionsBackup>>> files created by the
-  versions-maven-plugin. The {{{accept-mojo.html}versions:commit}} and {{{revert-mojo.html}versions:revert}} goals are
+  versions-maven-plugin. The {{{./accept-mojo.html}versions:commit}} and {{{./revert-mojo.html}versions:revert}} goals are
   only a "Poor Man's SCM".
 
 * Goals that modify the <<<pom.xml>>>
@@ -107,26 +107,26 @@ mvn versions:commit
 mvn versions:update-parent
 ---
 
-  {{{examples/update-parent.html} A more detailed example of the <<<update-parent>>> goal}}.
+  {{{./examples/update-parent.html} A more detailed example of the <<<update-parent>>> goal}}.
 
 ** Fixing a multi-module build (Note: modifies <<<pom.xml>>> files)
 
   If you have a multi-module build where the aggregator pom (i.e. the one with packaging of <<<pom>>> and the
   <<<modules>>> section) is also the parent referenced by its child modules, and the aggregator version does not
   match the version specified in the parent section of the child modules, Maven will not let you build the project.
-  To fix all the child modules, use the {{{update-child-modules-mojo.html}versions:update-child-modules}} goal and
+  To fix all the child modules, use the {{{./update-child-modules-mojo.html}versions:update-child-modules}} goal and
   invoke Maven in non-recursive mode.
 
 ---
 mvn -N versions:update-child-modules
 ---
 
-  {{{examples/update-child-modules.html} A more detailed example of the <<<update-child-modules>>> goal}}.
+  {{{./examples/update-child-modules.html} A more detailed example of the <<<update-child-modules>>> goal}}.
 
 ** Updating versions specified by properties (Note: modifies <<<pom.xml>>> files)
 
   This goal helps when you use properties to define versions.  Please see the
-  {{{examples/update-properties.html}<<<update-properties>>> example}}.
+  {{{./examples/update-properties.html}<<<update-properties>>> example}}.
 
 ** Updating versions of dependencies (Note: modifies <<<pom.xml>>> files)
 
@@ -134,7 +134,7 @@ mvn -N versions:update-child-modules
   <<<use-latest-snapshots>>>, <<<use-latest-versions>>>, <<<use-next-releases>>>, <<<use-next-snapshots>>>, and
   <<<use-next-versions>>>.
 
-  Please see the {{{examples/advancing-dependency-versions.html}advancing dependency versions example}}.
+  Please see the {{{./examples/advancing-dependency-versions.html}advancing dependency versions example}}.
 
 ** Resolving version ranges (Note: modifies <<<pom.xml>>> files)
 
@@ -145,7 +145,7 @@ mvn -N versions:update-child-modules
 mvn versions:resolve-ranges
 ---
 
-  More examples of the {{{examples/resolve-ranges.html} <<<resolve-ranges>>>}} goal.
+  More examples of the {{{./examples/resolve-ranges.html} <<<resolve-ranges>>>}} goal.
 
 ** Locking and unlocking -SNAPSHOT versions (Note: modifies <<<pom.xml>>> files)
 
@@ -162,7 +162,7 @@ mvn versions:resolve-ranges
 mvn versions:lock-snapshots
 ---
 
-  More examples of the {{{examples/lock-snapshots.html} <<<lock-snapshots>>>}} goal.
+  More examples of the {{{./examples/lock-snapshots.html} <<<lock-snapshots>>>}} goal.
 
   To return to regular -SNAPSHOT dependencies, i.e. replace 1.9.6-20090103.152537-3 with 1.9.6-SNAPSHOT, just invoke
   the <<<unlock-snapshots>>> goal.
@@ -171,7 +171,7 @@ mvn versions:lock-snapshots
 mvn versions:unlock-snapshots
 ---
 
-  More examples of the {{{examples/unlock-snapshots.html} <<<unlock-snapshots>>>}} goal.
+  More examples of the {{{./examples/unlock-snapshots.html} <<<unlock-snapshots>>>}} goal.
 
 ** Picking up releases of -SNAPSHOT dependencies (Note: modifies <<<pom.xml>>> files)
 
@@ -189,7 +189,7 @@ mvn versions:unlock-snapshots
 mvn versions:use-releases
 ---
 
-  More examples of the {{{examples/use-releases.html} <<<lock-snapshots>>>}} goal.
+  More examples of the {{{./examples/use-releases.html} <<<lock-snapshots>>>}} goal.
 
 ** Setting the project version
 
@@ -199,7 +199,7 @@ mvn versions:use-releases
 mvn versions:set -DnewVersion=1.0.1-SNAPSHOT
 ---
 
-  More examples of the {{{examples/set.html} <<<set>>>}} goal.
+  More examples of the {{{./examples/set.html} <<<set>>>}} goal.
 
 * Goals that do not modify the <<<pom.xml>>>
 
@@ -214,7 +214,7 @@ mvn versions:set -DnewVersion=1.0.1-SNAPSHOT
 mvn versions:display-plugin-updates
 ---
 
-  {{{examples/display-plugin-updates.html} A more detailed example of the <<<display-plugin-updates>>> goal}}.
+  {{{./examples/display-plugin-updates.html} A more detailed example of the <<<display-plugin-updates>>> goal}}.
 
 ** Checking for new versions of dependencies
 
@@ -225,7 +225,7 @@ mvn versions:display-plugin-updates
 mvn versions:display-dependency-updates
 ---
 
-  {{{examples/display-dependency-updates.html} A more detailed example of the <<<display-dependency-updates>>> goal}}.
+  {{{./examples/display-dependency-updates.html} A more detailed example of the <<<display-dependency-updates>>> goal}}.
 
 ** Checking for new versions of specified by properties
 
@@ -236,7 +236,7 @@ mvn versions:display-dependency-updates
 mvn versions:display-property-updates
 ---
 
-  {{{examples/display-property-updates.html} A more detailed example of the <<<display-property-updates>>> goal}}.
+  {{{./examples/display-property-updates.html} A more detailed example of the <<<display-property-updates>>> goal}}.
 
 * Report Usage
 

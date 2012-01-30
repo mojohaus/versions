@@ -32,101 +32,101 @@ Versions Maven Plugin
 
   The Versions Plugin has the following goals.
 
-  * {{{compare-dependencies-mojo.html}versions:compare-dependencies}} compares the dependency versions of the current
+  * {{{./compare-dependencies-mojo.html}versions:compare-dependencies}} compares the dependency versions of the current
   project to the dependency management section of a remote project.
 
-  * {{{display-dependency-updates-mojo.html}versions:display-dependency-updates}} scans a project's dependencies and
+  * {{{./display-dependency-updates-mojo.html}versions:display-dependency-updates}} scans a project's dependencies and
   produces a report of those dependencies which have newer versions available.
 
-  * {{{display-plugin-updates-mojo.html}versions:display-plugin-updates}} scans a project's plugins and produces a
+  * {{{./display-plugin-updates-mojo.html}versions:display-plugin-updates}} scans a project's plugins and produces a
   report of those plugins which have newer versions available.
 
-  * {{{display-property-updates-mojo.html}versions:display-property-updates}} scans a projectand produces a report of
+  * {{{./display-property-updates-mojo.html}versions:display-property-updates}} scans a projectand produces a report of
   those properties which are used to control artifact versions and which properies have newer versions available.
 
-  * {{{update-parent-mojo.html}versions:update-parent}} updates the parent section of a project so that it references the
+  * {{{./update-parent-mojo.html}versions:update-parent}} updates the parent section of a project so that it references the
   newest available version.  For example, if you use a corporate root POM, this goal can be helpful if you need
   to ensure you are using the latest version of the corporate root POM.
 
-  * {{{update-properties-mojo.html}versions:update-properties}} updates properties defined in a project so that they
+  * {{{./update-properties-mojo.html}versions:update-properties}} updates properties defined in a project so that they
   correspond to the latest available version of specific dependencies.  This can be useful if a suite of dependencies
   must all be locked to one version.
 
-  * {{{update-child-modules-mojo.html}versions:update-child-modules}} updates the parent section of the child modules
+  * {{{./update-child-modules-mojo.html}versions:update-child-modules}} updates the parent section of the child modules
   of a project so the version matches the version of the current project. For example, if you have an aggregator pom
   that is also the parent for the projects that it aggregates and the children and parent versions get out of sync, this
   mojo can help fix the versions of the child modules. (Note you may need to invoke Maven with the -N option in order to
   run this goal if your project is broken so badly that it cannot build because of the version mis-match).
 
-  * {{{lock-snapshots-mojo.html}versions:lock-snapshots}} searches the pom for all -SNAPSHOT versions and replaces them
+  * {{{./lock-snapshots-mojo.html}versions:lock-snapshots}} searches the pom for all -SNAPSHOT versions and replaces them
   with the current timestamp version of that -SNAPSHOT, e.g. -20090327.172306-4 
 
-  * {{{unlock-snapshots-mojo.html}versions:unlock-snapshots}} searches the pom for all timestamp locked snapshot versions 
+  * {{{./unlock-snapshots-mojo.html}versions:unlock-snapshots}} searches the pom for all timestamp locked snapshot versions
   and replaces them with -SNAPSHOT. 
 
-  * {{{resolve-ranges-mojo.html}versions:resolve-ranges}} finds dependencies using version ranges and resolves the range
+  * {{{./resolve-ranges-mojo.html}versions:resolve-ranges}} finds dependencies using version ranges and resolves the range
   to the specific version being used. 
 
-  * {{{set-mojo.html}versions:set}} can be used to set the project version from the command line.
+  * {{{./set-mojo.html}versions:set}} can be used to set the project version from the command line.
 
-  * {{{use-releases-mojo.html}versions:use-releases}} searches the pom for all -SNAPSHOT versions which have been 
+  * {{{./use-releases-mojo.html}versions:use-releases}} searches the pom for all -SNAPSHOT versions which have been
   released and replaces them with the corresponding release version. 
   
-  * {{{use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which
+  * {{{./use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which
   have been a newer release and replaces them with the next release version.
 
-  * {{{use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which
+  * {{{./use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which
   have been a newer release and replaces them with the latest release version. 
   
-  * {{{use-next-snapshots-mojo.html}versions:use-next-snapshots}} searches the pom for all non-SNAPSHOT versions which
+  * {{{./use-next-snapshots-mojo.html}versions:use-next-snapshots}} searches the pom for all non-SNAPSHOT versions which
   have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
 
-  * {{{use-latest-snapshots-mojo.html}versions:use-latest-snapshots}} searches the pom for all non-SNAPSHOT versions 
+  * {{{./use-latest-snapshots-mojo.html}versions:use-latest-snapshots}} searches the pom for all non-SNAPSHOT versions
   which have been a newer -SNAPSHOT version and replaces them with the latest -SNAPSHOT version.
 
-  * {{{use-next-versions-mojo.html}versions:use-next-versions}} searches the pom for all versions which 
+  * {{{./use-next-versions-mojo.html}versions:use-next-versions}} searches the pom for all versions which
   have been a newer version and replaces them with the next version. 
   
-  * {{{use-latest-versions-mojo.html}versions:use-latest-versions}} searches the pom for all versions which 
+  * {{{./use-latest-versions-mojo.html}versions:use-latest-versions}} searches the pom for all versions which
   have been a newer version and replaces them with the latest version. 
   
-  * {{{commit-mojo.html}versions:commit}} removes the <<<pom.xml.versionsBackup>>> files. Forms one half of the 
+  * {{{./commit-mojo.html}versions:commit}} removes the <<<pom.xml.versionsBackup>>> files. Forms one half of the
   built-in "Poor Man's SCM". 
   
-  * {{{revert-mojo.html}versions:revert}} restores the <<<pom.xml>>> files from the <<<pom.xml.versionsBackup>>> files. 
+  * {{{./revert-mojo.html}versions:revert}} restores the <<<pom.xml>>> files from the <<<pom.xml.versionsBackup>>> files.
   Forms one half of the built-in "Poor Man's SCM". 
 
 * Reporting goals overview
 
   The Versions Plugin has the following reporting goals.
 
-  * {{{dependency-updates-report-mojo.html}versions:dependency-updates-report}} produces a report of those
+  * {{{./dependency-updates-report-mojo.html}versions:dependency-updates-report}} produces a report of those
   project dependencies which have newer versions available.
 
-  * {{{plugin-updates-report-mojo.html}versions:plugin-updates-report}} produces a report of those plugins which have
+  * {{{./plugin-updates-report-mojo.html}versions:plugin-updates-report}} produces a report of those plugins which have
   newer versions available.
 
-  * {{{property-updates-report-mojo.html}versions:property-updates-report}} produces a report of
+  * {{{./property-updates-report-mojo.html}versions:property-updates-report}} produces a report of
   those properties which are used to control artifact versions and which properies have newer versions available.
 
 * Usage
 
-  General instructions on how to use the Versions Plugin can be found on the {{{usage.html}usage page}}. Some more
+  General instructions on how to use the Versions Plugin can be found on the {{{./usage.html}usage page}}. Some more
   specific use cases are described in the examples given below. Last but not least, users occasionally contribute
   additional examples, tips or errata to the
   {{{http://docs.codehaus.org/display/MAVENUSER/Versions+Plugin}plugin's wiki page}}.
 
-  In case you still have questions regarding the plugin's usage, please have a look at the {{{faq.html}FAQ}} and feel
-  free to contact the {{{mail-lists.html}user mailing list}}. The posts to the mailing list are archived and could
+  In case you still have questions regarding the plugin's usage, please have a look at the {{{./faq.html}FAQ}} and feel
+  free to contact the {{{./mail-lists.html}user mailing list}}. The posts to the mailing list are archived and could
   already contain the answer to your question as part of an older thread. Hence, it is also worth browsing/searching
-  the {{{mail-lists.html}mail archive}}.
+  the {{{./mail-lists.html}mail archive}}.
 
   If you feel like the plugin is missing a feature or has a defect, you can fill a feature request or bug report in our
-  {{{issue-tracking.html}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
+  {{{./issue-tracking.html}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
   concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this reason,
   entire debug logs, POMs or most preferably little demo projects attached to the issue are very much appreciated.
   Of course, patches are welcome, too. Contributors can check out the project from our
-  {{{source-repository.html}source repository}} and will find supplementary information in the
+  {{{./source-repository.html}source repository}} and will find supplementary information in the
   {{{http://maven.apache.org/guides/development/guide-helping.html}guide to helping with Maven}}.
 
 * Examples
@@ -134,29 +134,29 @@ Versions Maven Plugin
   To provide you with better understanding of some usages of the Plugin Name,
   you can take a look into the following examples:
 
-  * {{{examples/advancing-dependency-versions.html}Advancing dependency versions}}
+  * {{{./examples/advancing-dependency-versions.html}Advancing dependency versions}}
 
-  * {{{examples/compare-dependencies.html}Compare project dependencies to a remote project}}
+  * {{{./examples/compare-dependencies.html}Compare project dependencies to a remote project}}
 
-  * {{{examples/display-dependency-updates.html}Checking for new dependency updates}}
+  * {{{./examples/display-dependency-updates.html}Checking for new dependency updates}}
 
-  * {{{examples/display-plugin-updates.html}Checking for new plugin updates}}
+  * {{{./examples/display-plugin-updates.html}Checking for new plugin updates}}
 
-  * {{{examples/display-property-updates.html}Checking for new property-linked updates}}
+  * {{{./examples/display-property-updates.html}Checking for new property-linked updates}}
 
-  * {{{examples/update-parent.html}Updating the Parent version}}
+  * {{{./examples/update-parent.html}Updating the Parent version}}
 
-  * {{{examples/update-properties.html}Updating a version specified in a property}}
+  * {{{./examples/update-properties.html}Updating a version specified in a property}}
 
-  * {{{examples/update-child-modules.html}Fixing a multi-module build}}
+  * {{{./examples/update-child-modules.html}Fixing a multi-module build}}
 
-  * {{{examples/resolve-ranges.html}Resolve version ranges}}
+  * {{{./examples/resolve-ranges.html}Resolve version ranges}}
 
-  * {{{examples/lock-snapshots.html}Locking snapshot dependencies}}
+  * {{{./examples/lock-snapshots.html}Locking snapshot dependencies}}
 
-  * {{{examples/unlock-snapshots.html}Unlocking snapshot dependencies}}
+  * {{{./examples/unlock-snapshots.html}Unlocking snapshot dependencies}}
 
-  * {{{examples/use-releases.html}Replacing -SNAPSHOT versions with their corresponding releases}}
+  * {{{./examples/use-releases.html}Replacing -SNAPSHOT versions with their corresponding releases}}
 
-  * {{{examples/set.html}Changing the project version}}
+  * {{{./examples/set.html}Changing the project version}}
 
