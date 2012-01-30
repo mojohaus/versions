@@ -1634,7 +1634,21 @@ public class DisplayPluginUpdatesMojo
 
         try
         {
-            addProjectPlugins( plugins, originalModel.getBuild().getPlugins(), parentBuildPlugins );
+            List buildPlugins = new ArrayList( originalModel.getBuild().getPlugins() );
+            for ( Iterator i = buildPlugins.iterator(); i.hasNext(); )
+            {
+                Object buildPlugin = i.next();
+                if ( getPluginVersion( buildPlugin ) == null )
+                {
+                    String parentVersion = (String) parentPluginManagement.get( getPluginCoords( buildPlugin ) );
+                    if ( parentVersion != null )
+                    {
+                        // parent controls version
+                        i.remove();
+                    }
+                }
+            }
+            addProjectPlugins( plugins, buildPlugins, parentBuildPlugins );
         }
         catch ( NullPointerException e )
         {
@@ -1644,7 +1658,21 @@ public class DisplayPluginUpdatesMojo
 
         try
         {
-            addProjectPlugins( plugins, originalModel.getReporting().getPlugins(), parentReportPlugins );
+            List reportPlugins = new ArrayList( originalModel.getReporting().getPlugins() );
+            for ( Iterator i = reportPlugins.iterator(); i.hasNext(); )
+            {
+                Object reportPlugin = i.next();
+                if ( getPluginVersion( reportPlugin ) == null )
+                {
+                    String parentVersion = (String) parentPluginManagement.get( getPluginCoords( reportPlugin ) );
+                    if ( parentVersion != null )
+                    {
+                        // parent controls version
+                        i.remove();
+                    }
+                }
+            }
+            addProjectPlugins( plugins, reportPlugins, parentReportPlugins );
         }
         catch ( NullPointerException e )
         {
