@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>28</version>
+    <version>29</version>
   </parent>
 
   <groupId>org.codehaus.mojo</groupId>
@@ -288,11 +288,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
           <version>1.5</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
