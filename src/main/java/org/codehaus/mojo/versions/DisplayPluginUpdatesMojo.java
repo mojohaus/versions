@@ -722,7 +722,17 @@ public class DisplayPluginUpdatesMojo
         }
         else
         {
-            getLog().info( "Project defines minimum Maven version as: " + specMavenVersion );
+            ArtifactVersion explicitMavenVersion =
+                new DefaultArtifactVersion( getProject().getPrerequisites().getMaven() );
+            if ( explicitMavenVersion.compareTo( specMavenVersion ) < 0 )
+            {
+                getLog().error( "Project's effective minimum Maven (from parent) is: " + specMavenVersion );
+                getLog().error( "Project defines minimum Maven version as: " + explicitMavenVersion );
+            }
+            else
+            {
+                getLog().info( "Project defines minimum Maven version as: " + specMavenVersion );
+            }
         }
         getLog().info( "Plugins require minimum Maven version of: " + minMavenVersion );
         if ( superPomDrivingMinVersion )
