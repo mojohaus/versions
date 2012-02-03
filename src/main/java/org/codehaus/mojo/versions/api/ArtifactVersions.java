@@ -56,7 +56,7 @@ public class ArtifactVersions
     private final SortedSet/*<ArtifactVersion>*/ versions;
 
     /**
-     * The cversion comparison rule that is used for this artifact.
+     * The version comparison rule that is used for this artifact.
      *
      * @since 1.0-alpha-3
      */
@@ -183,7 +183,7 @@ public class ArtifactVersions
      */
     public String toString()
     {
-        final StringBuilder sb = new StringBuilder();
+        final StringBuffer sb = new StringBuffer();
         sb.append( "ArtifactVersions" );
         sb.append( "{artifact=" ).append( artifact );
         sb.append( ", versions=" ).append( versions );
