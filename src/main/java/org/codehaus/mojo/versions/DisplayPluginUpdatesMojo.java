@@ -754,7 +754,7 @@ public class DisplayPluginUpdatesMojo
                 getLog().warn( "To build this plugin you need at least Maven " + minMavenVersion );
                 getLog().warn( "A Maven Enforcer rule can be used to enforce this if you have not already set one up" );
             }
-            else if ( specMavenVersion.compareTo( minMavenVersion ) < 0 )
+            else if ( minMavenVersion != null && specMavenVersion.compareTo( minMavenVersion ) < 0 )
             {
                 getLog().warn( "Project (which is a Maven Plugin) targets Maven " + specMavenVersion + " or newer" );
                 getLog().warn( "but requires Maven " + minMavenVersion + " or newer to build." );
@@ -776,7 +776,7 @@ public class DisplayPluginUpdatesMojo
                 getLog().error( "      <maven>" + minMavenVersion + "</maven>" );
                 getLog().error( "    </prerequisites>" );
             }
-            else if ( specMavenVersion.compareTo( minMavenVersion ) < 0 )
+            else if ( minMavenVersion != null && specMavenVersion.compareTo( minMavenVersion ) < 0 )
             {
                 getLog().error( "Project requires an incorrect minimum version of Maven." );
                 getLog().error( "Either change plugin versions to those compatible with " + specMavenVersion );
