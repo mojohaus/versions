@@ -42,7 +42,7 @@ public class NumericVersionComparator
     /**
      * {@inheritDoc}
      */
-    public int compare( Object o1, Object o2 )
+    public int compare( ArtifactVersion o1, ArtifactVersion o2 )
     {
         String v1 = o1.toString();
         String v2 = o2.toString();
@@ -168,7 +168,7 @@ public class NumericVersionComparator
             throw new IllegalArgumentException( "Invalid segment" );
         }
         final String version = v.toString();
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         StringTokenizer tok = new StringTokenizer( version, "." );
         boolean first = true;
         while ( segment >= 0 && tok.hasMoreTokens() )

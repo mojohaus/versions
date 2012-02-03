@@ -141,22 +141,24 @@ public abstract class AbstractVersionDetails
 
     /**
      * Gets newer versions of the specified artifact version.
-     * @param version The current version of the artifact.
+     *
+     * @param version                The current version of the artifact.
      * @param upperBoundFixedSegment Indicates the segment in the version number
-     * that cannot be changed. For example, a value of 0 indicates that the major
-     * version number cannot be changed. A value of -1 indicates any segment
-     * value can be changed.
-     * @param includeSnapshots Whether to include snapshot versions.
-     * @return Returns the newer artifact versions. 
+     *                               that cannot be changed. For example, a value of 0 indicates that the major
+     *                               version number cannot be changed. A value of -1 indicates any segment
+     *                               value can be changed.
+     * @param includeSnapshots       Whether to include snapshot versions.
+     * @return Returns the newer artifact versions.
      */
-    private final ArtifactVersion[] getNewerVersions( ArtifactVersion version, int upperBoundFixedSegment, boolean includeSnapshots )
+    private final ArtifactVersion[] getNewerVersions( ArtifactVersion version, int upperBoundFixedSegment,
+                                                      boolean includeSnapshots )
     {
         ArtifactVersion lowerBound = version;
         ArtifactVersion upperBound = null;
 
-        if (upperBoundFixedSegment != -1)
+        if ( upperBoundFixedSegment != -1 )
         {
-            upperBound = getVersionComparator().incrementSegment(lowerBound, upperBoundFixedSegment);
+            upperBound = getVersionComparator().incrementSegment( lowerBound, upperBoundFixedSegment );
         }
 
         return getVersions( version, upperBound, includeSnapshots, false, false );
@@ -327,13 +329,11 @@ public abstract class AbstractVersionDetails
                                                 ArtifactVersion upperBound, boolean includeSnapshots,
                                                 boolean includeLower, boolean includeUpper )
     {
-        Set/*<ArtifactVersion>*/ result;
+        Set<ArtifactVersion> result;
         final VersionComparator versionComparator = getVersionComparator();
-        result = new TreeSet( versionComparator );
-        Iterator i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
-        while ( i.hasNext() )
+        result = new TreeSet<ArtifactVersion>( versionComparator );
+        for ( ArtifactVersion candidate : Arrays.asList( getVersions( includeSnapshots ) ) )
         {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
@@ -354,7 +354,7 @@ public abstract class AbstractVersionDetails
             }
             result.add( candidate );
         }
-        return (ArtifactVersion[]) result.toArray( new ArtifactVersion[result.size()] );
+        return result.toArray( new ArtifactVersion[result.size()] );
     }
 
     public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )

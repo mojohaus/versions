@@ -32,9 +32,9 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +53,7 @@ public class UseLatestSnapshotsMojo
 
     /**
      * Whether to allow the major version number to be changed.
+     *
      * @parameter expression="${allowMajorUpdates}" default-value="false"
      * @since 1.0-beta-1
      */
@@ -60,6 +61,7 @@ public class UseLatestSnapshotsMojo
 
     /**
      * Whether to allow the minor version number to be changed.
+     *
      * @parameter expression="${allowMinorUpdates}" default-value="false"
      * @since 1.0-beta-1
      */
@@ -67,6 +69,7 @@ public class UseLatestSnapshotsMojo
 
     /**
      * Whether to allow the incremental version number to be changed.
+     *
      * @parameter expression="${allowIncrementalUpdates}" default-value="true"
      * @since 1.0-beta-1
      */
@@ -114,8 +117,7 @@ public class UseLatestSnapshotsMojo
     private void useLatestSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates);
+        int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         Iterator i = dependencies.iterator();
 
@@ -148,10 +150,11 @@ public class UseLatestSnapshotsMojo
                     getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
                     continue;
                 }
-                ArtifactVersion upperBound = segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
-                getLog().info("Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
+                ArtifactVersion upperBound =
+                    segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
+                getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
-                getLog().debug( "Candidate versions " + Arrays.asList(newer));
+                getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
                 String latestVersion = null;
                 for ( int j = 0; j < newer.length; j++ )
                 {

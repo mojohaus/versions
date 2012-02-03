@@ -211,9 +211,9 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         if ( helper == null )
         {
-            helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource, remoteArtifactRepositories,
-                                                remotePluginRepositories, localRepository, wagonManager, settings,
-                                                serverId, rulesUri, getLog(), session,
+            helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource,
+                                                remoteArtifactRepositories, remotePluginRepositories, localRepository,
+                                                wagonManager, settings, serverId, rulesUri, getLog(), session,
                                                 pathTranslator );
         }
         return helper;
@@ -298,7 +298,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return The value as defined in the pom or <code>null</code> if not defined.
      * @since 1.0-alpha-1
      */
-    protected String getPropertyValue( StringBuffer pom, String property )
+    protected String getPropertyValue( StringBuilder pom, String property )
     {
         return project.getProperties().getProperty( property );
     }
@@ -316,7 +316,7 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         try
         {
-            StringBuffer input = PomHelper.readXmlFile( outFile );
+            StringBuilder input = PomHelper.readXmlFile( outFile );
             ModifiedPomXMLEventReader newPom = newModifiedPomXER( input );
 
             update( newPom );
@@ -359,12 +359,12 @@ public abstract class AbstractVersionsUpdaterMojo
     }
 
     /**
-     * Creates a {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader} from a StringBuffer.
+     * Creates a {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader} from a StringBuilder.
      *
      * @param input The XML to read and modify.
      * @return The {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader}.
      */
-    protected final ModifiedPomXMLEventReader newModifiedPomXER( StringBuffer input )
+    protected final ModifiedPomXMLEventReader newModifiedPomXER( StringBuilder input )
     {
         ModifiedPomXMLEventReader newPom = null;
         try
@@ -381,13 +381,13 @@ public abstract class AbstractVersionsUpdaterMojo
     }
 
     /**
-     * Writes a StringBuffer into a file.
+     * Writes a StringBuilder into a file.
      *
      * @param outFile The file to read.
      * @param input   The contents of the file.
      * @throws IOException when things go wrong.
      */
-    protected final void writeFile( File outFile, StringBuffer input )
+    protected final void writeFile( File outFile, StringBuilder input )
         throws IOException
     {
         Writer writer = WriterFactory.newXmlWriter( outFile );
@@ -460,14 +460,15 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Based on the passed flags, determines which segment is unchangable. This
      * can be used when determining an upper bound for the "latest" version.
+     *
      * @param allowMajorUpdates
      * @param allowMinorUpdates
      * @param allowIncrementalUpdates
      * @return Returns the segment that is unchangable. If any segment
-     * can change, returns -1.
+     *         can change, returns -1.
      */
-    protected int determineUnchangedSegment(Boolean allowMajorUpdates, Boolean allowMinorUpdates,
-            Boolean allowIncrementalUpdates)
+    protected int determineUnchangedSegment( Boolean allowMajorUpdates, Boolean allowMinorUpdates,
+                                             Boolean allowIncrementalUpdates )
     {
         int segment;
         if ( Boolean.TRUE.equals( allowMajorUpdates ) )
@@ -494,9 +495,9 @@ public abstract class AbstractVersionsUpdaterMojo
         return segment;
     }
 
-    protected void updatePropertyToNewestVersion(
-            ModifiedPomXMLEventReader pom, Property property, PropertyVersions version, String currentVersion)
-            throws MojoExecutionException, XMLStreamException
+    protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
+                                                  PropertyVersions version, String currentVersion )
+        throws MojoExecutionException, XMLStreamException
     {
         ArtifactVersion winner =
             version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
@@ -506,8 +507,7 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
         }
-        else if ( PomHelper.setPropertyVersion(pom, version.getProfileId(), property.getName(),
-                winner.toString()) )
+        else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
         {
             getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
         }

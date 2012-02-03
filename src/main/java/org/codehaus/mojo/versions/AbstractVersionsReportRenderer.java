@@ -23,7 +23,9 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.doxia.parser.Parser;
+import org.apache.maven.doxia.sink.Sink;
+import org.apache.maven.doxia.sink.SinkEventAttributeSet;
+import org.apache.maven.doxia.sink.SinkEventAttributes;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
@@ -33,7 +35,10 @@ import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.plexus.i18n.I18N;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Base class for report renderers.
@@ -308,15 +313,17 @@ public abstract class AbstractVersionsReportRenderer
     protected void renderDependencyDetailTable( Dependency dependency, ArtifactVersions details, boolean includeScope,
                                                 boolean includeClassifier, boolean includeType )
     {
-        final String cellWidth = "80%";
-        final String headerWidth = "20%";
+        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "20%" );
+        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "80%" );
         sink.table();
-        sink.tableRows( new int[]{Parser.JUSTIFY_RIGHT, Parser.JUSTIFY_LEFT}, false );
+        sink.tableRows( new int[]{ Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         ArtifactVersion[] versions = details.getAllUpdates( UpdateScope.ANY );
         if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
@@ -351,36 +358,36 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.groupId" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( dependency.getGroupId() );
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.artifactId" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( dependency.getArtifactId() );
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( dependency.getVersion() );
         sink.tableCell_();
         sink.tableRow_();
         if ( includeScope )
         {
             sink.tableRow();
-            sink.tableHeaderCell( headerWidth );
+            sink.tableHeaderCell( headerAttributes );
             sink.text( getText( "report.scope" ) );
             sink.tableHeaderCell_();
-            sink.tableCell( cellWidth );
+            sink.tableCell( cellAttributes );
             sink.text( dependency.getScope() );
             sink.tableCell_();
             sink.tableRow_();
@@ -388,10 +395,10 @@ public abstract class AbstractVersionsReportRenderer
         if ( includeClassifier )
         {
             sink.tableRow();
-            sink.tableHeaderCell( headerWidth );
+            sink.tableHeaderCell( headerAttributes );
             sink.text( getText( "report.classifier" ) );
             sink.tableHeaderCell_();
-            sink.tableCell( cellWidth );
+            sink.tableCell( cellAttributes );
             sink.text( dependency.getClassifier() );
             sink.tableCell_();
             sink.tableRow_();
@@ -399,10 +406,10 @@ public abstract class AbstractVersionsReportRenderer
         if ( includeType )
         {
             sink.tableRow();
-            sink.tableHeaderCell( headerWidth );
+            sink.tableHeaderCell( headerAttributes );
             sink.text( getText( "report.type" ) );
             sink.tableHeaderCell_();
-            sink.tableCell( cellWidth );
+            sink.tableCell( cellAttributes );
             sink.text( dependency.getType() );
             sink.tableCell_();
             sink.tableRow_();
@@ -410,24 +417,27 @@ public abstract class AbstractVersionsReportRenderer
         if ( versions != null && versions.length > 0 )
         {
             sink.tableRow();
-            sink.tableHeaderCell( headerWidth );
+            sink.tableHeaderCell( headerAttributes );
             sink.text( getText( "report.updateVersions" ) );
             sink.tableHeaderCell_();
-            sink.tableCell( cellWidth );
+            sink.tableCell( cellAttributes );
             for ( int i = 0; i < versions.length; i++ )
             {
                 if ( i > 0 )
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
-                    || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )
-                    || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) )
-                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )
-                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) )
-                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) || equals( versions[i],
-                                                                                                      details.getNewestUpdate(
-                                                                                                          UpdateScope.MAJOR ) );
+                boolean bold =
+                    equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) || equals( versions[i],
+                                                                                                            details.getOldestUpdate(
+                                                                                                                UpdateScope.INCREMENTAL ) )
+                        || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) ) || equals(
+                        versions[i], details.getOldestUpdate( UpdateScope.MINOR ) ) || equals( versions[i],
+                                                                                               details.getNewestUpdate(
+                                                                                                   UpdateScope.MINOR ) )
+                        || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) || equals( versions[i],
+                                                                                                          details.getNewestUpdate(
+                                                                                                              UpdateScope.MAJOR ) );
                 if ( bold )
                 {
                     safeBold();
@@ -482,29 +492,27 @@ public abstract class AbstractVersionsReportRenderer
         renderDependencySummaryTable( map, true, true, true );
     }
 
-    protected void renderDependencySummaryTable( Map map, boolean includeScope, boolean includeClassifier,
-                                                 boolean includeType )
+    protected void renderDependencySummaryTable( Map<Dependency, ArtifactVersions> map, boolean includeScope,
+                                                 boolean includeClassifier, boolean includeType )
     {
         sink.table();
         renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );
-        for ( Iterator i = map.entrySet().iterator(); i.hasNext(); )
+        for ( Map.Entry<Dependency, ArtifactVersions> entry : map.entrySet() )
         {
-            Map.Entry entry = (Map.Entry) i.next();
-            renderDependencySummaryTableRow( (Dependency) entry.getKey(), (ArtifactVersions) entry.getValue(),
-                                             includeScope, includeClassifier, includeType );
+            renderDependencySummaryTableRow( entry.getKey(), entry.getValue(), includeScope, includeClassifier,
+                                             includeType );
         }
         renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );
         sink.table_();
     }
 
-    protected void renderPropertySummaryTable( Map map )
+    protected void renderPropertySummaryTable( Map<Property, PropertyVersions> map )
     {
         sink.table();
         renderPropertySummaryTableHeader();
-        for ( Iterator i = map.entrySet().iterator(); i.hasNext(); )
+        for ( Map.Entry<Property, PropertyVersions> entry : map.entrySet() )
         {
-            Map.Entry entry = (Map.Entry) i.next();
-            renderPropertySummaryTableRow( (Property) entry.getKey(), (PropertyVersions) entry.getValue() );
+            renderPropertySummaryTableRow( entry.getKey(), entry.getValue() );
         }
         renderPropertySummaryTableHeader();
         sink.table_();
@@ -598,18 +606,20 @@ public abstract class AbstractVersionsReportRenderer
 
     protected void renderPropertyDetailTable( Property property, PropertyVersions versions )
     {
-        final String cellWidth = "80%";
-        final String headerWidth = "20%";
+        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "20%" );
+        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "80%" );
         sink.table();
-        sink.tableRows( new int[]{Parser.JUSTIFY_RIGHT, Parser.JUSTIFY_LEFT}, false );
+        sink.tableRows( new int[]{ Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         VersionRange range = null;
         ArtifactVersion[] artifactVersions = versions.getAllUpdates( UpdateScope.ANY );
-        Set/*<String>*/ rangeVersions = getVersionsInRange( property, versions, artifactVersions );
+        Set<String> rangeVersions = getVersionsInRange( property, versions, artifactVersions );
         if ( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             renderWarningIcon();
@@ -643,19 +653,19 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.property" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( "${" + property.getName() + "}" );
         sink.tableCell_();
         sink.tableRow_();
 
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.associations" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         ArtifactAssociation[] associations = versions.getAssociations();
         for ( int i = 0; i < associations.length; i++ )
         {
@@ -669,20 +679,20 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableRow_();
 
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( versions.getCurrentVersion().toString() );
         sink.tableCell_();
         sink.tableRow_();
         if ( artifactVersions.length > 0 )
         {
             sink.tableRow();
-            sink.tableHeaderCell( headerWidth );
+            sink.tableHeaderCell( headerAttributes );
             sink.text( getText( "report.updateVersions" ) );
             sink.tableHeaderCell_();
-            sink.tableCell( cellWidth );
+            sink.tableCell( cellAttributes );
             boolean someNotAllowed = false;
             for ( int i = 0; i < artifactVersions.length; i++ )
             {
@@ -691,13 +701,14 @@ public abstract class AbstractVersionsReportRenderer
                     sink.lineBreak();
                 }
                 boolean allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );
-                boolean bold = equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
-                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) )
-                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) )
-                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) ) || equals(
-                    artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );
+                boolean bold =
+                    equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) || equals(
+                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) ) || equals(
+                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) ) || equals(
+                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) ) || equals(
+                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) ) || equals(
+                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) ) || equals(
+                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );
                 if ( !allowed )
                 {
                     sink.text( "* " );
@@ -761,42 +772,42 @@ public abstract class AbstractVersionsReportRenderer
             sink.tableRow_();
         }
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.versionRange" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( StringUtils.isEmpty( property.getVersion() ) ? "[,)" : property.getVersion() );
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.autoLinkDependencies" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( property.isAutoLinkDependencies() ? getText( "report.yes" ) : getText( "report.no" ) );
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.banSnapshots" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( property.isBanSnapshots() ? getText( "report.yes" ) : getText( "report.no" ) );
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.searchReactor" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( property.isSearchReactor() ? getText( "report.yes" ) : getText( "report.no" ) );
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
-        sink.tableHeaderCell( headerWidth );
+        sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.preferReactor" ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellWidth );
+        sink.tableCell( cellAttributes );
         sink.text( property.isPreferReactor() ? getText( "report.yes" ) : getText( "report.no" ) );
         sink.tableCell_();
         sink.tableRow_();
@@ -805,10 +816,11 @@ public abstract class AbstractVersionsReportRenderer
         sink.table_();
     }
 
-    private Set getVersionsInRange( Property property, PropertyVersions versions, ArtifactVersion[] artifactVersions )
+    private Set<String> getVersionsInRange( Property property, PropertyVersions versions,
+                                            ArtifactVersion[] artifactVersions )
     {
         VersionRange range;
-        Set/*<String>*/ rangeVersions = new HashSet();
+        Set<String> rangeVersions = new HashSet<String>();
         ArtifactVersion[] tmp;
         if ( property.getVersion() != null )
         {

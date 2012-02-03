@@ -97,7 +97,7 @@ under the License.
           <code><![CDATA[
     public String toString()
     {
-        StringBuffer buf = new StringBuffer( 128 );
+        StringBuilder buf = new StringBuilder( 128 );
         buf.append( "Rule[groupId = \"" );
         buf.append( groupId );
         buf.append( "\", artifactId = \"" );
@@ -155,7 +155,7 @@ under the License.
           <code><![CDATA[
     public String toString()
     {
-        StringBuffer buf = new StringBuffer( 128 );
+        StringBuilder buf = new StringBuilder( 128 );
         buf.append( "RuleSet[rules = " );
         buf.append( rules );
         buf.append( ", comparisonMethod = \"" );

@@ -39,7 +39,7 @@ public class MercuryVersionComparator
     /**
      * {@inheritDoc}
      */
-    public int compare( Object o1, Object o2 )
+    public int compare( ArtifactVersion o1, ArtifactVersion o2 )
     {
         return new ComparableVersion( o1.toString() ).compareTo( new ComparableVersion( o2.toString() ) );
     }
@@ -58,7 +58,7 @@ public class MercuryVersionComparator
             throw new IllegalArgumentException( "Invalid segment" );
         }
         final String version = v.toString();
-        StringBuffer result = new StringBuffer( version.length() + 10 );
+        StringBuilder result = new StringBuilder( version.length() + 10 );
         StringTokenizer tok = new StringTokenizer( version, ".-" );
         int index = 0;
         while ( tok.hasMoreTokens() && segment > 0 )

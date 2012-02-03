@@ -26,7 +26,6 @@ import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -53,7 +52,7 @@ public class ArtifactVersions
      *
      * @since 1.0-alpha-3
      */
-    private final SortedSet/*<ArtifactVersion>*/ versions;
+    private final SortedSet<ArtifactVersion> versions;
 
     /**
      * The version comparison rule that is used for this artifact.
@@ -70,11 +69,11 @@ public class ArtifactVersions
      * @param versionComparator The version comparison rule.
      * @since 1.0-alpha-3
      */
-    public ArtifactVersions( Artifact artifact, List versions, VersionComparator versionComparator )
+    public ArtifactVersions( Artifact artifact, List<ArtifactVersion> versions, VersionComparator versionComparator )
     {
         this.artifact = artifact;
         this.versionComparator = versionComparator;
-        this.versions = new TreeSet( versionComparator );
+        this.versions = new TreeSet<ArtifactVersion>( versionComparator );
         this.versions.addAll( versions );
         if ( artifact.getVersion() != null )
         {
@@ -87,27 +86,34 @@ public class ArtifactVersions
      * to rule out any qualifiers from range boundaries).
      *
      * @param version the version to check.
-     * @param range the range to check.
+     * @param range   the range to check.
      * @return <code>true</code> if and only if the version is in the range.
      * @since 1.3
      */
     public static boolean isVersionInRange( ArtifactVersion version, VersionRange range )
     {
-        if (!range.containsVersion( version ) ) return false;
-        Iterator i = range.getRestrictions().iterator();
-        while (i.hasNext()) {
-            Restriction r = (Restriction) i.next();
-            if (r.containsVersion( version )) {
+        if ( !range.containsVersion( version ) )
+        {
+            return false;
+        }
+        for ( Restriction r : ( (List<Restriction>) range.getRestrictions() ) )
+        {
+            if ( r.containsVersion( version ) )
+            {
                 // check for the -! syntax
-                if (!r.isLowerBoundInclusive() && r.getLowerBound() != null) {
+                if ( !r.isLowerBoundInclusive() && r.getLowerBound() != null )
+                {
                     String s = r.getLowerBound().toString();
-                    if (s.endsWith( "-!" ) && version.toString().startsWith( s.substring( 0, s.length() - 2 ) )) {
+                    if ( s.endsWith( "-!" ) && version.toString().startsWith( s.substring( 0, s.length() - 2 ) ) )
+                    {
                         return false;
                     }
                 }
-                if (!r.isUpperBoundInclusive() && r.getUpperBound() != null) {
+                if ( !r.isUpperBoundInclusive() && r.getUpperBound() != null )
+                {
                     String s = r.getUpperBound().toString();
-                    if (s.endsWith( "-!" ) && version.toString().startsWith( s.substring( 0, s.length() - 2 ) )) {
+                    if ( s.endsWith( "-!" ) && version.toString().startsWith( s.substring( 0, s.length() - 2 ) ) )
+                    {
                         return false;
                     }
                 }
@@ -151,18 +157,16 @@ public class ArtifactVersions
 
     public ArtifactVersion[] getVersions( boolean includeSnapshots )
     {
-        Set/*<ArtifactVersion>*/ result;
+        Set<ArtifactVersion> result;
         if ( includeSnapshots )
         {
             result = versions;
         }
         else
         {
-            result = new TreeSet( versionComparator );
-            Iterator i = versions.iterator();
-            while ( i.hasNext() )
+            result = new TreeSet<ArtifactVersion>( versionComparator );
+            for ( ArtifactVersion candidate : versions )
             {
-                ArtifactVersion candidate = (ArtifactVersion) i.next();
                 if ( ArtifactUtils.isSnapshot( candidate.toString() ) )
                 {
                     continue;
@@ -170,7 +174,7 @@ public class ArtifactVersions
                 result.add( candidate );
             }
         }
-        return (ArtifactVersion[]) result.toArray( new ArtifactVersion[result.size()] );
+        return result.toArray( new ArtifactVersion[result.size()] );
     }
 
     public VersionComparator getVersionComparator()
@@ -183,7 +187,7 @@ public class ArtifactVersions
      */
     public String toString()
     {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         sb.append( "ArtifactVersions" );
         sb.append( "{artifact=" ).append( artifact );
         sb.append( ", versions=" ).append( versions );

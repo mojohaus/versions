@@ -18,12 +18,12 @@ package org.codehaus.mojo.versions.change;
 * under the License.
 */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -102,7 +102,7 @@ public class VersionChangerFactory
         checkState();
         return new ProjectVersionChanger( model, pom, log );
     }
-    
+
     public synchronized VersionChanger newParentVersionChanger()
     {
         checkState();
@@ -113,8 +113,8 @@ public class VersionChangerFactory
     {
         checkState();
         VersionChanger[] delegates =
-            new VersionChanger[] { newParentVersionChanger(), newProjectVersionChanger(),
-                newDependencyVersionChanger(), newPluginVersionChanger() };
+            new VersionChanger[]{ newParentVersionChanger(), newProjectVersionChanger(), newDependencyVersionChanger(),
+                newPluginVersionChanger() };
         return new CompositeVersionChanger( delegates );
     }
 

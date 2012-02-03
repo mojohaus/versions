@@ -25,7 +25,6 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -90,15 +89,13 @@ public class UpdatePropertiesMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        Map propertyVersions =
+        Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
                                                       !Boolean.FALSE.equals( autoLinkItems ) );
-        Iterator i = propertyVersions.entrySet().iterator();
-        while ( i.hasNext() )
+        for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
-            Map.Entry/*<Property,PropertyVersions>*/ entry = (Map.Entry/*<Property,PropertyVersions>*/) i.next();
-            Property property = (Property) entry.getKey();
-            PropertyVersions version = (PropertyVersions) entry.getValue();
+            Property property = entry.getKey();
+            PropertyVersions version = entry.getValue();
 
             final String currentVersion = getProject().getProperties().getProperty( property.getName() );
             if ( currentVersion == null )

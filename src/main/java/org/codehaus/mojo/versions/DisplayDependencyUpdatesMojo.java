@@ -64,21 +64,23 @@ public class DisplayDependencyUpdatesMojo
     private static final int INFO_PAD_SIZE = 72;
 
     /**
-     * Whether to process the dependencyManagement section of the project. If not 
+     * Whether to process the dependencyManagement section of the project. If not
      * set will default to true.
+     *
      * @parameter expression="${processDependencyManagement}" defaultValue="true"
      * @since 1.2
      */
     protected Boolean processDependencyManagement = Boolean.TRUE;
-    
+
     /**
-     * Whether to process the dependencies section of the project. If not 
+     * Whether to process the dependencies section of the project. If not
      * set will default to true.
+     *
      * @parameter expression="${processDependencies}" defaultValue="true"
      * @since 1.2
      */
     protected Boolean processDependencies = Boolean.TRUE;
-    
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
@@ -126,13 +128,13 @@ public class DisplayDependencyUpdatesMojo
         // true if true or null
         return !Boolean.FALSE.equals( processDependencyManagement );
     }
-    
+
     public boolean isProcessingDependencies()
     {
         // true if true or null
-        return !Boolean.FALSE.equals( processDependencies);
+        return !Boolean.FALSE.equals( processDependencies );
     }
-    
+
 // ------------------------ INTERFACE METHODS ------------------------
 
 // --------------------- Interface Mojo ---------------------
@@ -150,23 +152,27 @@ public class DisplayDependencyUpdatesMojo
     {
         Set dependencyManagement = new TreeSet( new DependencyComparator() );
         dependencyManagement.addAll( getProject().getDependencyManagement() == null
-            ? Collections.EMPTY_LIST
-            : getProject().getDependencyManagement().getDependencies() );
+                                         ? Collections.EMPTY_LIST
+                                         : getProject().getDependencyManagement().getDependencies() );
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        if (!Boolean.FALSE.equals(processDependencyManagement)) {
-        	dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+        if ( !Boolean.FALSE.equals( processDependencyManagement ) )
+        {
+            dependencies = removeDependencyManagment( dependencies, dependencyManagement );
         }
 
         try
         {
-        	if (!Boolean.FALSE.equals(processDependencyManagement)) {
-        		logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ), "Dependency Management" );
-        	}
-        	if (!Boolean.FALSE.equals(processDependencies)) {
-        		logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
-        	}
+            if ( !Boolean.FALSE.equals( processDependencyManagement ) )
+            {
+                logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
+                            "Dependency Management" );
+            }
+            if ( !Boolean.FALSE.equals( processDependencies ) )
+            {
+                logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
+            }
         }
         catch ( InvalidVersionSpecificationException e )
         {
@@ -199,9 +205,12 @@ public class DisplayDependencyUpdatesMojo
                 ArtifactVersion newestVersion = versions.getNewestVersion( versions.getArtifact().getVersionRange(),
                                                                            Boolean.TRUE.equals( allowSnapshots ) );
                 current = versions.getArtifact().getVersionRange().toString();
-                latest = newestVersion == null ? null : versions.getNewestUpdate( newestVersion, UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );
-                if (latest != null && ArtifactVersions.isVersionInRange( latest,
-                                                                         versions.getArtifact().getVersionRange() )) {
+                latest = newestVersion == null
+                    ? null
+                    : versions.getNewestUpdate( newestVersion, UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );
+                if ( latest != null && ArtifactVersions.isVersionInRange( latest,
+                                                                          versions.getArtifact().getVersionRange() ) )
+                {
                     latest = null;
                 }
             }

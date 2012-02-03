@@ -227,10 +227,10 @@ public abstract class AbstractVersionsReport
         {
             try
             {
-                helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource, remoteArtifactRepositories,
-                                                    remotePluginRepositories, localRepository, wagonManager, settings,
-                                                    serverId, rulesUri, getLog(), session,
-                                                    pathTranslator );
+                helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource,
+                                                    remoteArtifactRepositories, remotePluginRepositories,
+                                                    localRepository, wagonManager, settings, serverId, rulesUri,
+                                                    getLog(), session, pathTranslator );
             }
             catch ( MojoExecutionException e )
             {

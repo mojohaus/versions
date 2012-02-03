@@ -37,10 +37,10 @@ public class PropertyUpdatesRenderer
     extends AbstractVersionsReportRenderer
 {
 
-    private final Map/*<Property,PropertyVersions>*/ propertyUpdates;
+    private final Map<Property, PropertyVersions> propertyUpdates;
 
     public PropertyUpdatesRenderer( Sink sink, I18N i18n, String bundleName, Locale locale,
-                                    Map/*<Property,PropertyVersions>*/ propertyUpdates )
+                                    Map<Property, PropertyVersions> propertyUpdates )
     {
         super( sink, bundleName, i18n, locale );
         this.propertyUpdates = propertyUpdates;
@@ -49,7 +49,8 @@ public class PropertyUpdatesRenderer
 
     protected void renderBody()
     {
-        Map allUpdates = new TreeMap( new PropertyComparator() );
+        Map<Property, PropertyVersions> allUpdates =
+            new TreeMap<Property, PropertyVersions>( new PropertyComparator() );
         allUpdates.putAll( propertyUpdates );
 
         sink.section1();
@@ -74,10 +75,9 @@ public class PropertyUpdatesRenderer
         sink.text( getText( "report.detail.text" ) );
         sink.paragraph_();
 
-        for ( Iterator it = allUpdates.entrySet().iterator(); it.hasNext(); )
+        for ( final Map.Entry<Property, PropertyVersions> entry : allUpdates.entrySet() )
         {
-            final Map.Entry/*<Property,PropertyVersions>*/ entry = (Map.Entry) it.next();
-            renderPropertyDetail( (Property) entry.getKey(), (PropertyVersions) entry.getValue() );
+            renderPropertyDetail( entry.getKey(), entry.getValue() );
         }
         sink.section1_();
     }

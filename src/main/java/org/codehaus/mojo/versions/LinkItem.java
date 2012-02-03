@@ -205,7 +205,7 @@ public class LinkItem
      */
     public String toString()
     {
-        StringBuffer buf = new StringBuffer( "${" );
+        StringBuilder buf = new StringBuilder( "${" );
         buf.append( property );
         buf.append( "} = " );
         buf.append( groupId );

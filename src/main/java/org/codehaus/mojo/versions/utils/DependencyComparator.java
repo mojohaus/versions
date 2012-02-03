@@ -29,21 +29,18 @@ import java.util.Comparator;
  * @since 1.0-alpha-1
  */
 public class DependencyComparator
-    implements Comparator
+    implements Comparator<Dependency>
 {
 
     /**
-     * @param o1 the first object
-     * @param o2 the second object.
+     * @param d1 the first dependency
+     * @param d2 the second dependency.
      * @return the comparison result
      * @see java.util.Comparator#compare(Object, Object)
      * @since 1.0-alpha-1
      */
-    public int compare( Object o1, Object o2 )
+    public int compare( Dependency d1, Dependency d2 )
     {
-        Dependency d1 = (Dependency) o1;
-        Dependency d2 = (Dependency) o2;
-
         int r = d1.getGroupId().compareTo( d2.getGroupId() );
         if ( r == 0 )
         {

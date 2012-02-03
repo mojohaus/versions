@@ -84,7 +84,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     /**
      * A list of artifact patterns to exclude. Follows the pattern
-     * "groupId:artifactId:type:classifier:version". This configuration setting is ignored if {@link #excludesList} is 
+     * "groupId:artifactId:type:classifier:version". This configuration setting is ignored if {@link #excludesList} is
      * defined.
      *
      * @parameter
@@ -220,7 +220,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     protected String toString( Dependency d )
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append( d.getGroupId() );
         buf.append( ':' );
         buf.append( d.getArtifactId() );

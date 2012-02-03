@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import junit.framework.TestCase;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.codehaus.mojo.versions.ordering.NumericVersionComparator;
 
 /**
@@ -33,6 +34,10 @@ public class AbstractVersionsUpdaterMojoTest
 
     private NumericVersionComparator instance = new NumericVersionComparator();
 
+    private int instanceCompare(String v1, String v2) {
+        return instance.compare( new DefaultArtifactVersion( v1 ), new DefaultArtifactVersion( v2 ) );
+    }
+    
     /**
      * Basic test.
      *
@@ -41,13 +46,13 @@ public class AbstractVersionsUpdaterMojoTest
     public void testBasic()
         throws Exception
     {
-        assertEquals( 0, instance.compare( "1", "1" ) );
-        assertTrue( instance.compare( "1", "2" ) < 0 );
-        assertTrue( instance.compare( "2", "1" ) > 0 );
-        assertTrue( instance.compare( "1", "1-SNAPSHOT" ) > 0 );
-        assertTrue( instance.compare( "1", "1.0" ) > 0 );
-        assertTrue( instance.compare( "1.1", "1" ) > 0 );
-        assertTrue( instance.compare( "5.1.0.0.24", "5.1.0.0.9" ) > 0 );
-        assertTrue( instance.compare( "5.1.0.0.2a4", "5.1.0.0.9" ) < 0 );
+        assertEquals( 0, instanceCompare( "1", "1" ) );
+        assertTrue( instanceCompare( "1", "2" ) < 0 );
+        assertTrue( instanceCompare( "2", "1" ) > 0 );
+        assertTrue( instanceCompare( "1", "1-SNAPSHOT" ) > 0 );
+        assertTrue( instanceCompare( "1", "1.0" ) > 0 );
+        assertTrue( instanceCompare( "1.1", "1" ) > 0 );
+        assertTrue( instanceCompare( "5.1.0.0.24", "5.1.0.0.9" ) > 0 );
+        assertTrue( instanceCompare( "5.1.0.0.2a4", "5.1.0.0.9" ) < 0 );
     }
 }

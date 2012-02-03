@@ -29,29 +29,19 @@ import java.util.Comparator;
  * @since 1.0-beta-1
  */
 public class PropertyComparator
-    implements Comparator
+    implements Comparator<Property>
 {
     /**
      * Compares to {@link Property} instances.
      *
-     * @param o1 the first object
-     * @param o2 the second object.
+     * @param p1 the first object
+     * @param p2 the second object.
      * @return the comparison result
      * @see java.util.Comparator#compare(Object, Object)
      * @since 1.0-beta-1
      */
-    public int compare( Object o1, Object o2 )
+    public int compare( Property p1, Property p2 )
     {
-        if ( !( o1 instanceof Property ) )
-        {
-            throw new IllegalArgumentException( "This comparator can only be used to compare Property instances" );
-        }
-        if ( !( o2 instanceof Property ) )
-        {
-            throw new IllegalArgumentException( "This comparator can only be used to compare Property instances" );
-        }
-        Property p1 = (Property) o1;
-        Property p2 = (Property) o2;
         return p1.getName().compareTo( p2.getName() );
     }
 }

@@ -27,7 +27,6 @@ import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -83,13 +82,13 @@ public class PluginUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        Set pluginManagement = new TreeSet( new PluginComparator() );
+        Set<Plugin> pluginManagement = new TreeSet<Plugin>( new PluginComparator() );
         if ( haveBuildPluginManagementPlugins() )
         {
             pluginManagement.addAll( getProject().getBuild().getPluginManagement().getPlugins() );
         }
 
-        Set plugins = new TreeSet( new PluginComparator() );
+        Set<Plugin> plugins = new TreeSet<Plugin>( new PluginComparator() );
         if ( haveBuildPlugins() )
         {
             plugins.addAll( getProject().getBuild().getPlugins() );
@@ -99,9 +98,9 @@ public class PluginUpdatesReport
 
         try
         {
-            Map/*<Plugin,PluginUpdateDetails>*/ pluginUpdates =
+            Map<Plugin, PluginUpdatesDetails> pluginUpdates =
                 getHelper().lookupPluginsUpdates( plugins, getAllowSnapshots() );
-            Map/*<Plugin,PluginUpdateDetails>*/ pluginManagementUpdates =
+            Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates =
                 getHelper().lookupPluginsUpdates( pluginManagement, getAllowSnapshots() );
             PluginUpdatesRenderer renderer =
                 new PluginUpdatesRenderer( sink, getI18n(), getOutputName(), locale, pluginUpdates,
@@ -128,19 +127,16 @@ public class PluginUpdatesReport
      *         management dependencies.
      * @since 1.0-beta-1
      */
-    private static Set removePluginManagment( Set plugins, Set pluginManagement )
+    private static Set<Plugin> removePluginManagment( Set<Plugin> plugins, Set<Plugin> pluginManagement )
     {
-        Set result = new TreeSet( new PluginComparator() );
-        for ( Iterator i = plugins.iterator(); i.hasNext(); )
+        Set<Plugin> result = new TreeSet<Plugin>( new PluginComparator() );
+        for ( Plugin c : plugins )
         {
-            Plugin c = (Plugin) i.next();
             boolean matched = false;
-            Iterator j = pluginManagement.iterator();
-            while ( !matched && j.hasNext() )
+            for ( Plugin t : pluginManagement )
             {
-                Plugin t = (Plugin) j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) &&
-                    StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) )
+                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) && StringUtils.equals( t.getArtifactId(),
+                                                                                                 c.getArtifactId() ) )
                 {
                     matched = true;
                     break;

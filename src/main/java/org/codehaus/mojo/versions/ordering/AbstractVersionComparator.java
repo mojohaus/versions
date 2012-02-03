@@ -13,7 +13,7 @@ public abstract class AbstractVersionComparator
     /**
      * {@inheritDoc}
      */
-    public abstract int compare( Object o1, Object o2 );
+    public abstract int compare( ArtifactVersion o1, ArtifactVersion o2 );
 
     /**
      * {@inheritDoc}

@@ -110,8 +110,8 @@ public class UpdateChildModulesMojo
                 Model sourceModel = (Model) reactor.get( sourcePath );
 
                 getLog().debug( sourcePath.length() == 0
-                    ? "Processing root module as parent"
-                    : "Processing " + sourcePath + " as a parent." );
+                                    ? "Processing root module as parent"
+                                    : "Processing " + sourcePath + " as a parent." );
 
                 synchronized ( this )
                 {
@@ -135,7 +135,8 @@ public class UpdateChildModulesMojo
                     }
 
                     getLog().debug( "Looking for modules which use " +
-                        ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
+                                        ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
+                                        + " as their parent" );
 
                     Iterator j =
                         PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
@@ -165,7 +166,8 @@ public class UpdateChildModulesMojo
                         if ( sourceVersion.equals( parent.getVersion() ) )
                         {
                             getLog().debug( "Module: " + targetPath + " parent is " +
-                                ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + sourceVersion );
+                                                ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                                                + sourceVersion );
                         }
                         else
                         {

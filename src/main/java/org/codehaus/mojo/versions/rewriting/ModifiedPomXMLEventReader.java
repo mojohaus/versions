@@ -52,7 +52,7 @@ public class ModifiedPomXMLEventReader
     /**
      * Field pom
      */
-    private final StringBuffer pom;
+    private final StringBuilder pom;
 
     /**
      * Field modified
@@ -124,11 +124,11 @@ public class ModifiedPomXMLEventReader
     /**
      * Constructor ModifiedPomXMLEventReader creates a new ModifiedPomXMLEventReader instance.
      *
-     * @param pom     of type StringBuffer
+     * @param pom     of type StringBuilder
      * @param factory of type XMLInputFactory
      * @throws XMLStreamException when
      */
-    public ModifiedPomXMLEventReader( StringBuffer pom, XMLInputFactory factory )
+    public ModifiedPomXMLEventReader( StringBuilder pom, XMLInputFactory factory )
         throws XMLStreamException
     {
         this.pom = pom;
@@ -285,9 +285,9 @@ public class ModifiedPomXMLEventReader
      *
      * @return a copy of the backing string buffer.
      */
-    public StringBuffer asStringBuffer()
+    public StringBuilder asStringBuilder()
     {
-        return new StringBuffer( pom.toString() );
+        return new StringBuilder( pom.toString() );
     }
 
     /**

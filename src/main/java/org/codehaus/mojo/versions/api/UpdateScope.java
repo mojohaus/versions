@@ -431,7 +431,7 @@ public abstract class UpdateScope
 
     public static UpdateScope[] values()
     {
-        return new UpdateScope[]{SUBINCREMENTAL, INCREMENTAL, MINOR, MAJOR, ANY};
+        return new UpdateScope[]{ SUBINCREMENTAL, INCREMENTAL, MINOR, MAJOR, ANY };
     }
 
     /**

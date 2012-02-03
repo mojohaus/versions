@@ -19,17 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
@@ -47,6 +36,17 @@ import org.codehaus.mojo.versions.utils.DelegatingContextualLog;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.StringUtils;
+
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Sets the current projects version, updating the details of any child modules as necessary.
@@ -101,7 +101,7 @@ public class SetMojo
      * @since 1.3
      */
     private Boolean updateMatchingVersions;
-    
+
     /**
      * Whether to process the parent of the project. If not set will default to true.
      *
@@ -109,7 +109,7 @@ public class SetMojo
      * @since 1.3
      */
     private boolean processParent;
-    
+
     /**
      * Whether to process the project version. If not set will default to true.
      *
@@ -117,7 +117,7 @@ public class SetMojo
      * @since 1.3
      */
     private boolean processProject;
-    
+
     /**
      * Whether to process the dependencies section of the project. If not set will default to true.
      *
@@ -125,7 +125,7 @@ public class SetMojo
      * @since 1.3
      */
     private boolean processDependencies;
-    
+
     /**
      * Whether to process the plugins section of the project. If not set will default to true.
      *
@@ -133,7 +133,7 @@ public class SetMojo
      * @since 1.3
      */
     private boolean processPlugins;
-    
+
     /**
      * Component used to prompt for input
      *
@@ -192,13 +192,13 @@ public class SetMojo
             else
             {
                 throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
-                    + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+                                                      + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
             }
         }
         if ( StringUtils.isEmpty( newVersion ) )
         {
             throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
-                + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+                                                  + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
         }
 
         // this is the triggering change
@@ -210,17 +210,17 @@ public class SetMojo
                 PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
-            final Map reactor = PomHelper.getReactorModels( project, getLog() );
+            final Map<String, Model> reactor = PomHelper.getReactorModels( project, getLog() );
 
             // now fake out the triggering change
             final Model current =
                 PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() );
             current.setVersion( newVersion );
 
-            final Set files = new LinkedHashSet();
+            final Set<File> files = new LinkedHashSet<File>();
             files.add( getProject().getFile() );
 
-            final List order = new ArrayList( reactor.keySet() );
+            final List<String> order = new ArrayList<String>( reactor.keySet() );
             Collections.sort( order, new ReactorDepthComparator( reactor ) );
 
             final Iterator i = order.iterator();
@@ -230,8 +230,8 @@ public class SetMojo
                 final Model sourceModel = (Model) reactor.get( sourcePath );
 
                 getLog().debug( sourcePath.length() == 0
-                    ? "Processing root module as parent"
-                    : "Processing " + sourcePath + " as a parent." );
+                                    ? "Processing root module as parent"
+                                    : "Processing " + sourcePath + " as a parent." );
 
                 final String sourceGroupId = PomHelper.getGroupId( sourceModel );
                 if ( sourceGroupId == null )
@@ -302,24 +302,24 @@ public class SetMojo
                     if ( ( updateMatchingVersions.booleanValue() || !targetExplicit ) && StringUtils.equals(
                         parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
                     {
-                        getLog().debug( "    module is "
-                            + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                            PomHelper.getArtifactId( targetModel ) ) + ":"
-                            + PomHelper.getVersion( targetModel ) );
-                        getLog().debug( "    will become "
-                            + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                            PomHelper.getArtifactId( targetModel ) ) + ":"
-                            + sourceVersion );
+                        getLog().debug(
+                            "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                             PomHelper.getArtifactId( targetModel ) )
+                                + ":" + PomHelper.getVersion( targetModel ) );
+                        getLog().debug(
+                            "    will become " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                               PomHelper.getArtifactId( targetModel ) )
+                                + ":" + sourceVersion );
                         addChange( PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ),
                                    PomHelper.getVersion( targetModel ), sourceVersion );
                         targetModel.setVersion( sourceVersion );
                     }
                     else
                     {
-                        getLog().debug( "    module is "
-                            + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                            PomHelper.getArtifactId( targetModel ) ) + ":"
-                            + PomHelper.getVersion( targetModel ) );
+                        getLog().debug(
+                            "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                             PomHelper.getArtifactId( targetModel ) )
+                                + ":" + PomHelper.getVersion( targetModel ) );
                     }
                 }
             }

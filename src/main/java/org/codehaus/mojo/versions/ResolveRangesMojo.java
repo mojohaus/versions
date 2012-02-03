@@ -124,7 +124,7 @@ public class ResolveRangesMojo
     }
 
     private void resolveRanges( ModifiedPomXMLEventReader pom, Collection dependencies )
-            throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
 
         Iterator iter = dependencies.iterator();
@@ -151,7 +151,8 @@ public class ResolveRangesMojo
                     String artifactVersion = artifact.getVersion();
                     if ( artifactVersion == null )
                     {
-                        ArtifactVersion latestVersion = findLatestVersion( artifact, artifact.getVersionRange(), null, false );
+                        ArtifactVersion latestVersion =
+                            findLatestVersion( artifact, artifact.getVersionRange(), null, false );
 
                         if ( latestVersion != null )
                         {
@@ -180,23 +181,21 @@ public class ResolveRangesMojo
         throws XMLStreamException, MojoExecutionException
     {
 
-        Map propertyVersions =
-            this.getHelper().getVersionPropertiesMap( getProject(), null, includeProperties, excludeProperties, true);
-        Iterator i = propertyVersions.entrySet().iterator();
-        while ( i.hasNext() )
+        Map<Property, PropertyVersions> propertyVersions =
+            this.getHelper().getVersionPropertiesMap( getProject(), null, includeProperties, excludeProperties, true );
+        for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
-            Map.Entry/*<Property,PropertyVersions>*/ entry = (Map.Entry/*<Property,PropertyVersions>*/) i.next();
-            Property property = (Property) entry.getKey();
-            PropertyVersions version = (PropertyVersions) entry.getValue();
+            Property property = entry.getKey();
+            PropertyVersions version = entry.getValue();
 
-            final String currentVersion = getProject().getProperties().getProperty(property.getName());
+            final String currentVersion = getProject().getProperties().getProperty( property.getName() );
             if ( currentVersion == null || !matchRangeRegex.matcher( currentVersion ).find() )
             {
                 continue;
             }
 
-            property.setVersion(currentVersion);
-            updatePropertyToNewestVersion(pom, property, version, currentVersion);
+            property.setVersion( currentVersion );
+            updatePropertyToNewestVersion( pom, property, version, currentVersion );
 
         }
     }

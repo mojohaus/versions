@@ -147,7 +147,7 @@ public interface VersionsHelper
      * @return a {@link Set} of {@link Artifact} instances.
      * @since 1.0-alpha-3
      */
-    Set/*<Artifact>*/ extractArtifacts( Collection/*<MavenProject>*/ mavenProjects );
+    Set<Artifact> extractArtifacts( Collection<MavenProject> mavenProjects );
 
     /**
      * Creates an {@link ArtifactVersion} instance from a string.
@@ -196,7 +196,7 @@ public interface VersionsHelper
      *          When things go wrong.
      * @since 1.0-beta-1
      */
-    Map/*<Dependency,ArtifactVersions>*/ lookupDependenciesUpdates( Set dependencies, boolean usePluginRepositories )
+    Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
@@ -222,7 +222,7 @@ public interface VersionsHelper
      *          When things go wrong.
      * @since 1.0-beta-1
      */
-    Map/*<Plugin,PluginUpdateDetails>*/ lookupPluginsUpdates( Set plugins, Boolean allowSnapshots )
+    Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, Boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
@@ -233,6 +233,8 @@ public interface VersionsHelper
      * @return The plugin update details.
      * @throws ArtifactMetadataRetrievalException
      *          When things go wrong.
+     * @throws InvalidVersionSpecificationException
+     *          if a version is invalid.
      * @since 1.0-beta-1
      */
     PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots )
@@ -261,9 +263,9 @@ public interface VersionsHelper
      *         {@link org.codehaus.mojo.versions.Property} instances.
      * @throws MojoExecutionException if something goes wrong.
      */
-    Map/*<Property,PropertyVersions>*/ getVersionPropertiesMap( MavenProject project, Property[] propertyDefinitions,
-                                                                String includeProperties, String excludeProperties,
-                                                                boolean autoLinkItems )
+    Map<Property, PropertyVersions> getVersionPropertiesMap( MavenProject project, Property[] propertyDefinitions,
+                                                             String includeProperties, String excludeProperties,
+                                                             boolean autoLinkItems )
         throws MojoExecutionException;
 
     /**

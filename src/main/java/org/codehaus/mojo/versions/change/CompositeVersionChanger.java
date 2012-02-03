@@ -18,11 +18,10 @@ package org.codehaus.mojo.versions.change;
 * under the License.
 */
 
+import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,25 +32,23 @@ import javax.xml.stream.XMLStreamException;
 public class CompositeVersionChanger
     implements VersionChanger
 {
-    private final List/*<VersionChanger>*/ composites;
+    private final List<VersionChanger> composites;
 
     public CompositeVersionChanger( VersionChanger[] composites )
     {
-        this.composites = new ArrayList( Arrays.asList( composites ) );
+        this.composites = new ArrayList<VersionChanger>( Arrays.asList( composites ) );
     }
 
-    public CompositeVersionChanger( List/*<VersionChanger>*/ composites )
+    public CompositeVersionChanger( List<VersionChanger> composites )
     {
-        this.composites = new ArrayList( composites );
+        this.composites = new ArrayList<VersionChanger>( composites );
     }
 
     public void apply( VersionChange versionChange )
         throws XMLStreamException
     {
-        Iterator/*<VersionChanger>*/ i = composites.iterator();
-        while ( i.hasNext() )
+        for ( VersionChanger delegate : composites )
         {
-            VersionChanger delegate = (VersionChanger) i.next();
             delegate.apply( versionChange );
         }
     }

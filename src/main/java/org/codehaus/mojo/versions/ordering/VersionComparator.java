@@ -27,7 +27,7 @@ import java.util.Comparator;
  * A rule for comparing and manipulating versions.
  */
 public interface VersionComparator
-    extends Comparator
+    extends Comparator<ArtifactVersion>
 {
     /**
      * Returns the number of segments specified or specifiable in the supplied artifact version.

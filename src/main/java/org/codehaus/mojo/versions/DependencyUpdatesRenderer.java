@@ -27,7 +27,6 @@ import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.i18n.I18N;
 
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,13 +38,13 @@ public class DependencyUpdatesRenderer
     extends AbstractVersionsReportRenderer
 {
 
-    private final Map/*<Dependency,ArtifactUpdateDetails>*/ dependencyUpdates;
+    private final Map<Dependency, ArtifactVersions> dependencyUpdates;
 
-    private final Map/*<Dependency,ArtifactUpdateDetails>*/ dependencyManagementUpdates;
+    private final Map<Dependency, ArtifactVersions> dependencyManagementUpdates;
 
     public DependencyUpdatesRenderer( Sink sink, I18N i18n, String bundleName, Locale locale,
-                                      Map/*<Dependency,ArtifactUpdateDetails>*/ dependencyUpdates,
-                                      Map/*<Dependency,ArtifactUpdateDetails>*/ dependencyManagementUpdates )
+                                      Map<Dependency, ArtifactVersions> dependencyUpdates,
+                                      Map<Dependency, ArtifactVersions> dependencyManagementUpdates )
     {
         super( sink, bundleName, i18n, locale );
         this.dependencyUpdates = dependencyUpdates;
@@ -55,7 +54,8 @@ public class DependencyUpdatesRenderer
 
     protected void renderBody()
     {
-        Map allUpdates = new TreeMap( new DependencyComparator() );
+        Map<Dependency, ArtifactVersions> allUpdates =
+            new TreeMap<Dependency, ArtifactVersions>( new DependencyComparator() );
         allUpdates.putAll( dependencyManagementUpdates );
         allUpdates.putAll( dependencyUpdates );
 
@@ -84,15 +84,14 @@ public class DependencyUpdatesRenderer
         sink.text( getText( "report.detail.text" ) );
         sink.paragraph_();
 
-        for ( Iterator it = allUpdates.entrySet().iterator(); it.hasNext(); )
+        for ( Map.Entry<Dependency, ArtifactVersions> entry : allUpdates.entrySet() )
         {
-            final Map.Entry/*<Dependency,ArtifactVersions>*/ entry = (Map.Entry) it.next();
-            renderDependencyDetail( (Dependency) entry.getKey(), (ArtifactVersions) entry.getValue() );
+            renderDependencyDetail( entry.getKey(), entry.getValue() );
         }
         sink.section1_();
     }
 
-    private void renderSummaryTable( String titleKey, Map contents, String emptyKey )
+    private void renderSummaryTable( String titleKey, Map<Dependency, ArtifactVersions> contents, String emptyKey )
     {
         sink.section2();
         sink.sectionTitle2();
@@ -112,16 +111,15 @@ public class DependencyUpdatesRenderer
         sink.section2_();
     }
 
-    private void renderSummaryTotalsTable( Map allUpdates )
+    private void renderSummaryTotalsTable( Map<Dependency, ArtifactVersions> allUpdates )
     {
         int numInc = 0;
         int numMin = 0;
         int numMaj = 0;
         int numAny = 0;
         int numCur = 0;
-        for ( Iterator iterator = allUpdates.values().iterator(); iterator.hasNext(); )
+        for ( ArtifactVersions details : allUpdates.values() )
         {
-            ArtifactVersions details = (ArtifactVersions) iterator.next();
             if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
             {
                 numAny++;

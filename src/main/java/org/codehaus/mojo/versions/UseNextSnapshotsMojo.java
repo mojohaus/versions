@@ -32,9 +32,9 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,8 +117,7 @@ public class UseNextSnapshotsMojo
     private void useNextSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates);
+        int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         Iterator i = dependencies.iterator();
 
@@ -151,10 +150,11 @@ public class UseNextSnapshotsMojo
                     getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
                     continue;
                 }
-                ArtifactVersion upperBound = segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
-                getLog().info("Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
+                ArtifactVersion upperBound =
+                    segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
+                getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
-                getLog().debug( "Candidate versions " + Arrays.asList(newer));
+                getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
                 for ( int j = 0; j < newer.length; j++ )
                 {
                     String newVersion = newer[j].toString();

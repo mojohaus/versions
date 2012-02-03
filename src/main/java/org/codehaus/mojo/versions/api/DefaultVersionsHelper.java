@@ -163,10 +163,9 @@ public class DefaultVersionsHelper
     /**
      * Constructs a new {@link DefaultVersionsHelper}.
      *
-     *
      * @param artifactFactory            The artifact factory.
      * @param artifactResolver
-     *@param artifactMetadataSource     The artifact metadata source to use.
+     * @param artifactMetadataSource     The artifact metadata source to use.
      * @param remoteArtifactRepositories The remote artifact repositories to consult.
      * @param remotePluginRepositories   The remote plugin repositories to consult.
      * @param localRepository            The local repository to consult.
@@ -177,13 +176,14 @@ public class DefaultVersionsHelper
      * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
      * @param mavenSession               The maven session information.
      * @param pathTranslator             The path translator component.            @throws org.apache.maven.plugin.MojoExecutionException
-     *          If things go wrong.
+     *                                   If things go wrong.
      * @since 1.0-alpha-3
      */
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
-                                  ArtifactMetadataSource artifactMetadataSource, List remoteArtifactRepositories, List remotePluginRepositories,
-                                  ArtifactRepository localRepository, WagonManager wagonManager, Settings settings,
-                                  String serverId, String rulesUri, Log log, MavenSession mavenSession, PathTranslator pathTranslator )
+                                  ArtifactMetadataSource artifactMetadataSource, List remoteArtifactRepositories,
+                                  List remotePluginRepositories, ArtifactRepository localRepository,
+                                  WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
+                                  Log log, MavenSession mavenSession, PathTranslator pathTranslator )
         throws MojoExecutionException
     {
         this.artifactFactory = artifactFactory;
@@ -231,7 +231,7 @@ public class DefaultVersionsHelper
         throws ArtifactResolutionException, ArtifactNotFoundException
     {
         List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
-        artifactResolver.resolve(artifact, remoteRepositories, localRepository);
+        artifactResolver.resolve( artifact, remoteRepositories, localRepository );
     }
 
     /**
@@ -247,15 +247,14 @@ public class DefaultVersionsHelper
      */
     public VersionComparator getVersionComparator( String groupId, String artifactId )
     {
-        final List/*<Rule>*/ rules = ruleSet.getRules();
+        final List<Rule> rules = ruleSet.getRules();
         String comparisonMethod = ruleSet.getComparisonMethod();
         int bestGroupIdScore = Integer.MAX_VALUE;
         int bestArtifactIdScore = Integer.MAX_VALUE;
         boolean exactGroupId = false;
         boolean exactArtifactId = false;
-        for ( Iterator i = rules.iterator(); i.hasNext(); )
+        for ( Rule rule : rules )
         {
-            Rule rule = (Rule) i.next();
             int groupIdScore = RegexUtils.getWildcardScore( rule.getGroupId() );
             if ( groupIdScore > bestGroupIdScore )
             {
@@ -494,18 +493,12 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public Set/*<Artifact>*/ extractArtifacts( Collection/*<MavenProject>*/ mavenProjects )
+    public Set<Artifact> extractArtifacts( Collection<MavenProject> mavenProjects )
     {
-        Set/*<Artifact>*/ result = new HashSet();
-        Iterator i = mavenProjects.iterator();
-        while ( i.hasNext() )
+        Set<Artifact> result = new HashSet<Artifact>();
+        for ( MavenProject project : mavenProjects )
         {
-            Object next = i.next();
-            if ( next instanceof MavenProject )
-            {
-                MavenProject project = (MavenProject) next;
-                result.add( project.getArtifact() );
-            }
+            result.add( project.getArtifact() );
         }
 
         return result;
@@ -536,15 +529,15 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public Map/*<Dependency,ArtifactVersions>*/ lookupDependenciesUpdates( Set dependencies,
-                                                                           boolean usePluginRepositories )
+    public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies,
+                                                                        boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
-        Map/*<Dependency,ArtifactVersions>*/ dependencyUpdates = new TreeMap( new DependencyComparator() );
-        Iterator i = dependencies.iterator();
-        while ( i.hasNext() )
+        Map<Dependency, ArtifactVersions> dependencyUpdates =
+            new TreeMap<Dependency, ArtifactVersions>( new DependencyComparator() );
+        for ( Object dependency1 : dependencies )
         {
-            Dependency dependency = (Dependency) i.next();
+            Dependency dependency = (Dependency) dependency1;
 
             ArtifactVersions details = lookupDependencyUpdates( dependency, usePluginRepositories );
             dependencyUpdates.put( dependency, details );
@@ -572,14 +565,13 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public Map/*<Plugin,PluginUpdateDetails>*/ lookupPluginsUpdates( Set plugins, Boolean allowSnapshots )
+    public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, Boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
-        Map/*<Plugin,PluginUpdateDetails>*/ pluginUpdates = new TreeMap( new PluginComparator() );
-        Iterator i = plugins.iterator();
-        while ( i.hasNext() )
+        Map<Plugin, PluginUpdatesDetails> pluginUpdates =
+            new TreeMap<Plugin, PluginUpdatesDetails>( new PluginComparator() );
+        for ( Plugin plugin : plugins )
         {
-            Plugin plugin = (Plugin) i.next();
             PluginUpdatesDetails details = lookupPluginUpdates( plugin, allowSnapshots );
             pluginUpdates.put( plugin, details );
         }
@@ -595,9 +587,9 @@ public class DefaultVersionsHelper
         String version = plugin.getVersion();
         version = version == null ? "LATEST" : version;
         getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) +
-            " for updates newer than " + version);
+                            " for updates newer than " + version );
 
-        VersionRange versionRange = VersionRange.createFromVersion(version);
+        VersionRange versionRange = VersionRange.createFromVersion( version );
 
         final boolean includeSnapshots = Boolean.TRUE.equals( allowSnapshots );
 
@@ -605,12 +597,12 @@ public class DefaultVersionsHelper
             lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
                                     true );
 
-        Set/*<Dependency>*/ pluginDependencies = new TreeSet( new DependencyComparator() );
+        Set<Dependency> pluginDependencies = new TreeSet<Dependency>( new DependencyComparator() );
         if ( plugin.getDependencies() != null )
         {
             pluginDependencies.addAll( plugin.getDependencies() );
         }
-        Map/*<Dependency,ArtifactVersions>*/ pluginDependencyDetails =
+        Map<Dependency, ArtifactVersions> pluginDependencyDetails =
             lookupDependenciesUpdates( pluginDependencies, false );
 
         return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, includeSnapshots );
@@ -627,21 +619,21 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public Map/*<Property,PropertyVersions>*/ getVersionPropertiesMap( MavenProject project,
-                                                                       Property[] propertyDefinitions,
-                                                                       String includeProperties,
-                                                                       String excludeProperties, boolean autoLinkItems )
+    public Map<Property, PropertyVersions> getVersionPropertiesMap( MavenProject project,
+                                                                    Property[] propertyDefinitions,
+                                                                    String includeProperties, String excludeProperties,
+                                                                    boolean autoLinkItems )
         throws MojoExecutionException
     {
-        Map properties = new HashMap();
+        Map<String, Property> properties = new HashMap<String, Property>();
         if ( propertyDefinitions != null )
         {
-            for ( int i = 0; i < propertyDefinitions.length; i++ )
+            for ( Property propertyDefinition : propertyDefinitions )
             {
-                properties.put( propertyDefinitions[i].getName(), propertyDefinitions[i] );
+                properties.put( propertyDefinition.getName(), propertyDefinition );
             }
         }
-        Map/*<String,PropertyVersionsBuilder>*/ builders = new HashMap();
+        Map<String, PropertyVersionsBuilder> builders = new HashMap<String, PropertyVersionsBuilder>();
         if ( autoLinkItems )
         {
             final PropertyVersionsBuilder[] propertyVersionsBuilders;
@@ -658,47 +650,48 @@ public class DefaultVersionsHelper
                 throw new MojoExecutionException( e.getMessage(), e );
             }
 
-            for ( int i = 0; i < propertyVersionsBuilders.length; i++ )
+            for ( PropertyVersionsBuilder propertyVersionsBuilder : propertyVersionsBuilders )
             {
-                final String name = propertyVersionsBuilders[i].getName();
-                builders.put( name, propertyVersionsBuilders[i] );
+                final String name = propertyVersionsBuilder.getName();
+                builders.put( name, propertyVersionsBuilder );
                 if ( !properties.containsKey( name ) )
                 {
                     final Property value = new Property( name );
                     getLog().debug( "Property ${" + name + "}: Adding inferred version range of " +
-                        propertyVersionsBuilders[i].getVersionRange() );
-                    value.setVersion( propertyVersionsBuilders[i].getVersionRange() );
+                                        propertyVersionsBuilder.getVersionRange() );
+                    value.setVersion( propertyVersionsBuilder.getVersionRange() );
                     properties.put( name, value );
                 }
             }
         }
         getLog().debug( "Searching for properties associated with builders" );
-        Iterator i = properties.values().iterator();
+        Iterator<Property> i = properties.values().iterator();
         while ( i.hasNext() )
         {
-            Property property = (Property) i.next();
-            if ( includeProperties != null && includeProperties.indexOf( property.getName() ) < 0 )
+            Property property = i.next();
+            if ( includeProperties != null && !includeProperties.contains( property.getName() ) )
             {
                 getLog().debug( "Skipping property ${" + property.getName() + "}" );
                 i.remove();
             }
-            else if ( excludeProperties != null && excludeProperties.indexOf( property.getName() ) >= 0 )
+            else if ( excludeProperties != null && excludeProperties.contains( property.getName() ) )
             {
                 getLog().debug( "Ignoring property ${" + property.getName() + "}" );
                 i.remove();
             }
         }
         i = properties.values().iterator();
-        Map/*<Property,PropertyVersions>*/ propertyVersions = new LinkedHashMap( properties.size() );
+        Map<Property, PropertyVersions> propertyVersions =
+            new LinkedHashMap<Property, PropertyVersions>( properties.size() );
         while ( i.hasNext() )
         {
-            Property property = (Property) i.next();
+            Property property = i.next();
             getLog().debug( "Property ${" + property.getName() + "}" );
-            PropertyVersionsBuilder builder = (PropertyVersionsBuilder) builders.get( property.getName() );
+            PropertyVersionsBuilder builder = builders.get( property.getName() );
             if ( builder == null || !builder.isAssociated() )
             {
                 getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not " +
-                    "associated with any dependency..." );
+                                    "associated with any dependency..." );
                 builder = new PropertyVersionsBuilder( null, property.getName(), this );
             }
             if ( !property.isAutoLinkDependencies() )
@@ -709,13 +702,12 @@ public class DefaultVersionsHelper
             Dependency[] dependencies = property.getDependencies();
             if ( dependencies != null )
             {
-                for ( int j = 0; j < dependencies.length; j++ )
+                for ( Dependency dependency : dependencies )
                 {
                     try
                     {
-                        getLog().debug(
-                            "Property ${" + property.getName() + "}: Adding association to " + dependencies[j] );
-                        builder.addAssociation( this.createDependencyArtifact( dependencies[j] ), false );
+                        getLog().debug( "Property ${" + property.getName() + "}: Adding association to " + dependency );
+                        builder.addAssociation( this.createDependencyArtifact( dependency ), false );
                     }
                     catch ( InvalidVersionSpecificationException e )
                     {
@@ -730,7 +722,7 @@ public class DefaultVersionsHelper
                     !StringUtils.isEmpty( builder.getVersionRange() ) )
                 {
                     getLog().debug( "Property ${" + property.getName() + "}: Adding inferred version range of " +
-                        builder.getVersionRange() );
+                                        builder.getVersionRange() );
                     property.setVersion( builder.getVersionRange() );
                 }
                 versions.setCurrentVersion( project.getProperties().getProperty( property.getName() ) );

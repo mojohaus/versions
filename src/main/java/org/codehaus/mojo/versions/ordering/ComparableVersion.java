@@ -123,7 +123,7 @@ public class ComparableVersion
     private static class StringItem
         implements Item
     {
-        private final static String[] QUALIFIERS = {"snapshot", "alpha", "beta", "milestone", "rc", "", "sp"};
+        private final static String[] QUALIFIERS = { "snapshot", "alpha", "beta", "milestone", "rc", "", "sp" };
 
         private final static List _QUALIFIERS = Arrays.asList( QUALIFIERS );
 
@@ -305,7 +305,7 @@ public class ComparableVersion
 
         public String toString()
         {
-            StringBuffer buffer = new StringBuffer( "(" );
+            StringBuilder buffer = new StringBuilder( "(" );
             for ( Iterator iter = iterator(); iter.hasNext(); )
             {
                 buffer.append( iter.next() );

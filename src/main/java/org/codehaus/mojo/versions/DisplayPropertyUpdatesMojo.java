@@ -28,7 +28,6 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -93,18 +92,16 @@ public class DisplayPropertyUpdatesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        List current = new ArrayList();
-        List updates = new ArrayList();
+        List<String> current = new ArrayList<String>();
+        List<String> updates = new ArrayList<String>();
 
-        Map propertyVersions =
+        Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
                                                       !Boolean.FALSE.equals( autoLinkItems ) );
-        Iterator i = propertyVersions.entrySet().iterator();
-        while ( i.hasNext() )
+        for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
-            Map.Entry/*<Property,PropertyVersions>*/ entry = (Map.Entry/*<Property,PropertyVersions>*/) i.next();
-            Property property = (Property) entry.getKey();
-            PropertyVersions version = (PropertyVersions) entry.getValue();
+            Property property = entry.getKey();
+            PropertyVersions version = entry.getValue();
 
             final String currentVersion = getProject().getProperties().getProperty( property.getName() );
             if ( currentVersion == null )
@@ -118,7 +115,7 @@ public class DisplayPropertyUpdatesMojo
 
             if ( winner != null && !currentVersion.equals( winner.toString() ) )
             {
-                StringBuffer buf = new StringBuffer();
+                StringBuilder buf = new StringBuilder();
                 buf.append( "${" );
                 buf.append( property.getName() );
                 buf.append( "} " );
@@ -136,7 +133,7 @@ public class DisplayPropertyUpdatesMojo
             }
             else
             {
-                StringBuffer buf = new StringBuffer();
+                StringBuilder buf = new StringBuilder();
                 buf.append( "${" );
                 buf.append( property.getName() );
                 buf.append( "} " );
@@ -156,10 +153,9 @@ public class DisplayPropertyUpdatesMojo
         if ( !current.isEmpty() )
         {
             getLog().info( "The following version properties are referencing the newest available version:" );
-            i = current.iterator();
-            while ( i.hasNext() )
+            for ( String s : current )
             {
-                getLog().info( "  " + i.next() );
+                getLog().info( "  " + s );
             }
         }
         if ( updates.isEmpty() && current.isEmpty() )
@@ -174,10 +170,9 @@ public class DisplayPropertyUpdatesMojo
         if ( !updates.isEmpty() )
         {
             getLog().info( "The following version property updates are available:" );
-            i = updates.iterator();
-            while ( i.hasNext() )
+            for ( String update : updates )
             {
-                getLog().info( "  " + i.next() );
+                getLog().info( "  " + update );
             }
         }
         getLog().info( "" );

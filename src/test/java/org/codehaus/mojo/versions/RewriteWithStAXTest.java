@@ -80,7 +80,7 @@ public class RewriteWithStAXTest
             "    <groupId xmlns='foo'>org.codehaus.mojo</groupId>\n" + "    <artifactId>my-artifact</artifactId>\n" +
             "    <version>5-SNAPSHOT</version>\r" + "  </parent>\r" + "<build/></project>";
 
-        StringBuffer output = new StringBuffer( input );
+        StringBuilder output = new StringBuilder( input );
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
@@ -200,13 +200,13 @@ public class RewriteWithStAXTest
                 "          <goalPrefix>versions</goalPrefix>\n" + "        </configuration>\n" + "      </plugin>\n" +
                 "    </plugins>\n" + "  </build>\n" + "\n" + "</project>";
 
-        StringBuffer output = new StringBuffer( input );
+        StringBuilder output = new StringBuilder( input );
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
         ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
 
-        Stack stack = new Stack();
+        Stack<String> stack = new Stack<String>();
         String path = "";
 
         while ( eventReader.hasNext() )
@@ -232,7 +232,7 @@ public class RewriteWithStAXTest
                         eventReader.replaceBetween( 0, 1, "4" );
                     }
                 }
-                path = (String) stack.pop();
+                path = stack.pop();
             }
         }
 

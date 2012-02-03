@@ -47,6 +47,7 @@ public class UseLatestVersionsMojo
 {
     /**
      * Whether to allow the major version number to be changed.
+     *
      * @parameter expression="${allowMajorUpdates}" default-value="true"
      * @since 1.2
      */
@@ -54,6 +55,7 @@ public class UseLatestVersionsMojo
 
     /**
      * Whether to allow the minor version number to be changed.
+     *
      * @parameter expression="${allowMinorUpdates}" default-value="true"
      * @since 1.2
      */
@@ -61,11 +63,11 @@ public class UseLatestVersionsMojo
 
     /**
      * Whether to allow the incremental version number to be changed.
+     *
      * @parameter expression="${allowIncrementalUpdates}" default-value="true"
      * @since 1.2
      */
     protected Boolean allowIncrementalUpdates;
-
 
     // ------------------------------ METHODS --------------------------
 
@@ -102,8 +104,7 @@ public class UseLatestVersionsMojo
     private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates);
+        int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         Iterator i = dependencies.iterator();
 
         while ( i.hasNext() )
@@ -125,7 +126,8 @@ public class UseLatestVersionsMojo
 
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-            ArtifactVersion[] newer = versions.getNewerVersions( version, segment, Boolean.TRUE.equals( allowSnapshots ) );
+            ArtifactVersion[] newer =
+                versions.getNewerVersions( version, segment, Boolean.TRUE.equals( allowSnapshots ) );
             if ( newer.length > 0 )
             {
                 String newVersion = newer[newer.length - 1].toString();

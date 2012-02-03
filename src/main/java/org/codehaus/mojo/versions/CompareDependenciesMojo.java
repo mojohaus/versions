@@ -30,7 +30,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -44,7 +43,7 @@ import java.util.Map;
 /**
  * Compare dependency versions of the current project to dependencies or dependency management of a remote repository
  * project.
- * 
+ *
  * @author Paul Gier
  * @goal compare-dependencies
  * @requiresProject true
@@ -57,7 +56,7 @@ public class CompareDependenciesMojo
 
     /**
      * The width to pad info messages.
-     * 
+     *
      * @since 1.0-alpha-1
      */
     private static final int INFO_PAD_SIZE = 68;
@@ -65,7 +64,7 @@ public class CompareDependenciesMojo
     /**
      * The groupId, artifactId, and version of the remote project (POM) to which we are comparing.  This
      * should be in the form "groupId:artifactId:version"
-     * 
+     *
      * @parameter expression="${remotePom}"
      * @required true
      */
@@ -73,28 +72,28 @@ public class CompareDependenciesMojo
 
     /**
      * Ignore the list of remote dependencies and only compare the remote dependencyManagement
-     * 
+     *
      * @parameter defaul-value="false" expression="${ignoreRemoteDependencies}"
      */
     protected boolean ignoreRemoteDependencies;
 
     /**
      * Ignore the remote dependency management and only check against the actual dependencies of the remote project
-     * 
+     *
      * @parameter default-value="false" expression="${ignoreRemoteDependencyManagement}"
      */
     protected boolean ignoreRemoteDependencyManagement;
 
     /**
      * Update dependency versions in the current POM.
-     * 
+     *
      * @parameter default-value="false" expression="${updateDependencies}"
      */
     protected boolean updateDependencies;
 
     /**
      * Update dependency versions stored in properties
-     * 
+     *
      * @parameter default-value="false" expression="${updatePropertyVersions}"
      */
     protected boolean updatePropertyVersions;
@@ -102,21 +101,21 @@ public class CompareDependenciesMojo
     /**
      * Display the dependency version differences on the command line, but do not update the versions in the current
      * pom. If updateDependencies is set to "true" this will automatically be set to false.
-     * 
+     *
      * @parameter default-value="true" expression="${reportMode}"
      */
     protected boolean reportMode;
 
     /**
      * If the output file is set, the diff report will be written to this file.
-     * 
+     *
      * @parameter default-value="null" expression="${reportOutputFile}"
      */
     protected File reportOutputFile;
 
     /**
      * The project builder used to initialize the remote project.
-     * 
+     *
      * @component
      */
     protected MavenProjectBuilder mavenProjectBuilder;
@@ -125,9 +124,12 @@ public class CompareDependenciesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the plugin itself
-     * @throws org.apache.maven.plugin.MojoFailureException The plugin detected an error in the build
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoExecutionException
+     *          Something wrong with the plugin itself
+     * @throws org.apache.maven.plugin.MojoFailureException
+     *          The plugin detected an error in the build
+     * @throws javax.xml.stream.XMLStreamException
+     *          when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -136,7 +138,7 @@ public class CompareDependenciesMojo
         if ( this.ignoreRemoteDependencies && this.ignoreRemoteDependencyManagement )
         {
             throw new MojoFailureException( " ignoreRemoteDependencies and ignoreRemoteDependencyManagement"
-                + "are both set to true.  At least one of these needs to be false " );
+                                                + "are both set to true.  At least one of these needs to be false " );
         }
 
         if ( updateDependencies )
@@ -144,10 +146,10 @@ public class CompareDependenciesMojo
             reportMode = false;
         }
 
-        String [] remotePomParts = this.remotePom.split( ":" );
+        String[] remotePomParts = this.remotePom.split( ":" );
         if ( remotePomParts.length != 3 )
         {
-            throw new MojoFailureException(" Invalid format for remotePom: " + remotePom );
+            throw new MojoFailureException( " Invalid format for remotePom: " + remotePom );
         }
         String rGroupId = remotePomParts[0];
         String rArtifactId = remotePomParts[1];
@@ -185,7 +187,8 @@ public class CompareDependenciesMojo
         List totalDiffs = new ArrayList();
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
-            List depManDiffs = compareVersions( pom, getProject().getDependencyManagement().getDependencies(), remoteDepsMap );
+            List depManDiffs =
+                compareVersions( pom, getProject().getDependencyManagement().getDependencies(), remoteDepsMap );
             totalDiffs.addAll( depManDiffs );
         }
         if ( isProcessingDependencies() )
@@ -193,7 +196,7 @@ public class CompareDependenciesMojo
             List depDiffs = compareVersions( pom, getProject().getDependencies(), remoteDepsMap );
             totalDiffs.addAll( depDiffs );
         }
-        
+
         if ( reportMode )
         {
             getLog().info( "The following differences were found:" );
@@ -208,12 +211,12 @@ public class CompareDependenciesMojo
         {
             writeReportFile( totalDiffs );
         }
-        
+
     }
 
     /**
      * Compare the dependency versions of the current project with the dependency versions of a remote project
-     * 
+     *
      * @throws XMLStreamException
      */
     private List compareVersions( ModifiedPomXMLEventReader pom, List dependencies, Map remoteDependencies )
@@ -238,7 +241,7 @@ public class CompareDependenciesMojo
 
                 if ( !dep.getVersion().equals( remoteVersion ) )
                 {
-                    StringBuffer buf = writeDependencyDiffMessage( dep, remoteVersion );
+                    StringBuilder buf = writeDependencyDiffMessage( dep, remoteVersion );
                     updates.add( buf.toString() );
                     if ( !reportMode )
                     {
@@ -253,7 +256,7 @@ public class CompareDependenciesMojo
 
             }
         }
-        
+
         return updates;
 
     }
@@ -309,14 +312,14 @@ public class CompareDependenciesMojo
 
     /**
      * Create a simple message describing the version diff
-     * 
+     *
      * @param dep
      * @param remoteVersion
      * @return The message
      */
-    private StringBuffer writeDependencyDiffMessage( Dependency dep, String remoteVersion )
+    private StringBuilder writeDependencyDiffMessage( Dependency dep, String remoteVersion )
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append( dep.getGroupId() ).append( ':' );
         buf.append( dep.getArtifactId() );
         buf.append( ' ' );
@@ -334,7 +337,7 @@ public class CompareDependenciesMojo
 
     /**
      * Add a list of dependencies to a Map for easy access
-     * 
+     *
      * @param map
      * @param deps
      */

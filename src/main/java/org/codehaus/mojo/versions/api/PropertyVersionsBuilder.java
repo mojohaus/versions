@@ -26,7 +26,6 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -44,13 +43,13 @@ class PropertyVersionsBuilder
 
     private final String profileId;
 
-    private final Set/*<ArtifactAssociation*/ associations;
+    private final Set<ArtifactAssociation> associations;
 
     private final VersionsHelper helper;
 
-    private final Map/*<String,Boolean>*/ upperBounds = new LinkedHashMap();
+    private final Map<String, Boolean> upperBounds = new LinkedHashMap<String, Boolean>();
 
-    private final Map/*<String,Boolean>*/ lowerBounds = new LinkedHashMap();
+    private final Map<String, Boolean> lowerBounds = new LinkedHashMap<String, Boolean>();
 
     /**
      * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.
@@ -63,7 +62,7 @@ class PropertyVersionsBuilder
     {
         this.profileId = profileId;
         this.name = name;
-        this.associations = new TreeSet();
+        this.associations = new TreeSet<ArtifactAssociation>();
         this.helper = helper;
     }
 
@@ -89,7 +88,7 @@ class PropertyVersionsBuilder
 
     public ArtifactAssociation[] getAssociations()
     {
-        return (ArtifactAssociation[]) associations.toArray( new ArtifactAssociation[associations.size()] );
+        return associations.toArray( new ArtifactAssociation[associations.size()] );
     }
 
     public PropertyVersions newPropertyVersions()
@@ -105,22 +104,20 @@ class PropertyVersionsBuilder
 
     public String getVersionRange()
     {
-        Comparator comparator = new PropertyVersionComparator();
+        Comparator<ArtifactVersion> comparator = new PropertyVersionComparator();
         if ( lowerBounds.isEmpty() && upperBounds.isEmpty() )
         {
             return null;
         }
         ArtifactVersion lowerBound = null;
         boolean includeLower = true;
-        Iterator i = lowerBounds.entrySet().iterator();
-        while ( i.hasNext() )
+        for ( Map.Entry<String, Boolean> entry : lowerBounds.entrySet() )
         {
-            Map.Entry/*<String,Boolean>*/ entry = (Map.Entry) i.next();
-            ArtifactVersion candidate = helper.createArtifactVersion( (String) entry.getKey() );
+            ArtifactVersion candidate = helper.createArtifactVersion( entry.getKey() );
             if ( lowerBound == null )
             {
                 lowerBound = candidate;
-                includeLower = ( (Boolean) entry.getValue() ).booleanValue();
+                includeLower = entry.getValue();
             }
             else
             {
@@ -128,25 +125,23 @@ class PropertyVersionsBuilder
                 if ( result > 0 )
                 {
                     lowerBound = candidate;
-                    includeLower = ( (Boolean) entry.getValue() ).booleanValue();
+                    includeLower = entry.getValue();
                 }
                 else if ( result == 0 )
                 {
-                    includeLower = includeLower && ( (Boolean) entry.getValue() ).booleanValue();
+                    includeLower = includeLower && entry.getValue();
                 }
             }
         }
         ArtifactVersion upperBound = null;
         boolean includeUpper = true;
-        i = upperBounds.entrySet().iterator();
-        while ( i.hasNext() )
+        for ( Map.Entry<String, Boolean> entry : upperBounds.entrySet() )
         {
-            Map.Entry/*<String,Boolean>*/ entry = (Map.Entry) i.next();
-            ArtifactVersion candidate = helper.createArtifactVersion( (String) entry.getKey() );
+            ArtifactVersion candidate = helper.createArtifactVersion( entry.getKey() );
             if ( upperBound == null )
             {
                 upperBound = candidate;
-                includeUpper = ( (Boolean) entry.getValue() ).booleanValue();
+                includeUpper = entry.getValue();
             }
             else
             {
@@ -154,15 +149,15 @@ class PropertyVersionsBuilder
                 if ( result < 0 )
                 {
                     upperBound = candidate;
-                    includeUpper = ( (Boolean) entry.getValue() ).booleanValue();
+                    includeUpper = entry.getValue();
                 }
                 else if ( result == 0 )
                 {
-                    includeUpper = includeUpper && ( (Boolean) entry.getValue() ).booleanValue();
+                    includeUpper = includeUpper && entry.getValue();
                 }
             }
         }
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         if ( includeLower )
         {
             buf.append( '[' );
@@ -193,46 +188,44 @@ class PropertyVersionsBuilder
 
     public void addLowerBound( String lowerBound, boolean includeLower )
     {
-        Boolean value = (Boolean) lowerBounds.get( lowerBound );
+        Boolean value = lowerBounds.get( lowerBound );
         if ( value == null )
         {
-            value = Boolean.valueOf( includeLower );
+            value = includeLower;
         }
         else
         {
-            value = Boolean.valueOf( includeLower && value.booleanValue() );
+            value = includeLower && value;
         }
         lowerBounds.put( lowerBound, value );
     }
 
     public void addUpperBound( String upperBound, boolean includeUpper )
     {
-        Boolean value = (Boolean) upperBounds.get( upperBound );
+        Boolean value = upperBounds.get( upperBound );
         if ( value == null )
         {
-            value = Boolean.valueOf( includeUpper );
+            value = includeUpper;
         }
         else
         {
-            value = Boolean.valueOf( includeUpper && value.booleanValue() );
+            value = includeUpper && value;
         }
         upperBounds.put( upperBound, value );
     }
 
     private VersionComparator[] lookupComparators()
     {
-        Set result = new HashSet();
-        Iterator i = associations.iterator();
-        while ( i.hasNext() )
+        Set<VersionComparator> result = new HashSet<VersionComparator>();
+        for ( ArtifactAssociation association : associations )
         {
-            ArtifactAssociation association = (ArtifactAssociation) i.next();
             result.add( helper.getVersionComparator( association.getArtifact() ) );
         }
-        return (VersionComparator[]) result.toArray( new VersionComparator[result.size()] );
+        return result.toArray( new VersionComparator[result.size()] );
     }
 
     private final class PropertyVersionComparator
-        implements Comparator
+        implements Comparator<ArtifactVersion>
     {
         public int compare( ArtifactVersion v1, ArtifactVersion v2 )
         {
@@ -254,18 +247,16 @@ class PropertyVersionsBuilder
                 if ( result != alt && ( result >= 0 && alt < 0 ) || ( result <= 0 && alt > 0 ) )
                 {
                     throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts" +
-                        " and these artifacts use different version sorting rules and these rules are effectively" +
-                        " incompatible for the two of versions being compared.\nFirst rule says compare(\"" + v1 +
-                        "\", \"" + v2 + "\") = " + result + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2 +
-                        "\") = " + alt );
+                                                         " and these artifacts use different version sorting rules and these rules are effectively"
+                                                         +
+                                                         " incompatible for the two of versions being compared.\nFirst rule says compare(\""
+                                                         + v1 +
+                                                         "\", \"" + v2 + "\") = " + result
+                                                         + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2 +
+                                                         "\") = " + alt );
                 }
             }
             return result;
-        }
-
-        public int compare( Object o1, Object o2 )
-        {
-            return innerCompare( (ArtifactVersion) o1, (ArtifactVersion) o2 );
         }
 
     }

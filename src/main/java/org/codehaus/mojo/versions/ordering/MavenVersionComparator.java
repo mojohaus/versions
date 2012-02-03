@@ -36,9 +36,9 @@ public class MavenVersionComparator
     /**
      * {@inheritDoc}
      */
-    public int compare( Object o1, Object o2 )
+    public int compare( ArtifactVersion o1, ArtifactVersion o2 )
     {
-        return ( (ArtifactVersion) o1 ).compareTo( (ArtifactVersion) o2 );
+        return o1.compareTo( o2 );
     }
 
     /**
@@ -54,8 +54,8 @@ public class MavenVersionComparator
             // have to have four segments
             return 4;
         }
-        if ( ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0 ) &&
-            v.getQualifier() != null )
+        if ( ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0 )
+            && v.getQualifier() != null )
         {
             // the version was successfully parsed, and we have a qualifier
             // have to have four segments
@@ -156,7 +156,7 @@ public class MavenVersionComparator
                     }
                     break;
             }
-            StringBuffer result = new StringBuffer();
+            StringBuilder result = new StringBuilder();
             result.append( major );
             if ( haveMinor || minor > 0 || incremental > 0 )
             {

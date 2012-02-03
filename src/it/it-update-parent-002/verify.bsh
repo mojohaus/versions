@@ -6,7 +6,7 @@ try
     File file = new File( basedir, "pom.xml" );
 
     BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     String line = in.readLine();
     while ( line != null )
     {

@@ -19,15 +19,15 @@ package org.codehaus.mojo.versions.change;
  * under the License.
  */
 
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
+import javax.xml.stream.XMLStreamException;
+
 /**
- * 
+ *
  */
 public class ParentVersionChanger
     extends AbstractVersionChanger
@@ -47,7 +47,8 @@ public class ParentVersionChanger
             if ( PomHelper.setProjectParentVersion( getPom(), versionChange.getNewVersion() ) )
             {
                 info( "    Updating parent " + versionChange.getGroupId() + ":" + versionChange.getArtifactId() );
-                info( "        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion() );
+                info(
+                    "        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion() );
             }
         }
     }

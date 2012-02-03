@@ -70,7 +70,7 @@ public final class RegexUtils
         }
 
         // damn there's at least one \E in the string
-        StringBuffer sb = new StringBuffer( s.length() + 32 );
+        StringBuilder sb = new StringBuilder( s.length() + 32 );
         // each escape-escape takes 10 chars...
         // hope there's less than 4 of them
 
@@ -122,7 +122,7 @@ public final class RegexUtils
      */
     public static String convertWildcardsToRegex( String wildcardRule, boolean exactMatch )
     {
-        StringBuffer regex = new StringBuffer();
+        StringBuilder regex = new StringBuilder();
         int index = 0;
         final int len = wildcardRule.length();
         while ( index < len )

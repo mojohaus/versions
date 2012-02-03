@@ -24,6 +24,7 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -73,8 +74,8 @@ public class DependencyUpdatesReport
     {
         Set dependencyManagement = new TreeSet( new DependencyComparator() );
         dependencyManagement.addAll( getProject().getDependencyManagement() == null
-            ? Collections.EMPTY_LIST
-            : getProject().getDependencyManagement().getDependencies() );
+                                         ? Collections.EMPTY_LIST
+                                         : getProject().getDependencyManagement().getDependencies() );
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
@@ -82,9 +83,9 @@ public class DependencyUpdatesReport
 
         try
         {
-            Map/*<Dependency,DependencyUpdateDetails>*/ dependencyUpdates =
+            Map<Dependency, ArtifactVersions> dependencyUpdates =
                 getHelper().lookupDependenciesUpdates( dependencies, false );
-            Map/*<Dependency,DependencyUpdateDetails>*/ dependencyManagementUpdates =
+            Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
                 getHelper().lookupDependenciesUpdates( dependencyManagement, false );
             DependencyUpdatesRenderer renderer =
                 new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
