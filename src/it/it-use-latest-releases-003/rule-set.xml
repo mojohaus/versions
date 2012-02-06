@@ -1,0 +1,5 @@
+<ruleset comparisonMethod="maven">
+<rules>
+<rule groupId="localhost" artifactId="version-rules" comparisonMethod="mercury"/>
+</rules>
+</ruleset>
