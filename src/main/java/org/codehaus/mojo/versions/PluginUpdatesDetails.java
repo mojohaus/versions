@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 
@@ -65,7 +66,8 @@ public class PluginUpdatesDetails
         for ( Iterator i = dependencyVersions.values().iterator(); i.hasNext(); )
         {
             ArtifactVersions versions = (ArtifactVersions) i.next();
-            if ( versions.getAllUpdates( UpdateScope.ANY, includeSnapshots ).length > 0 )
+            ArtifactVersion[] dependencyUpdates = versions.getAllUpdates( UpdateScope.ANY, includeSnapshots );
+            if ( dependencyUpdates != null && dependencyUpdates.length > 0 )
             {
                 return true;
             }
