@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Generates a report of available updates for the dependencies of a project.
+ * Generates a report of available updates for the plugins of a project.
  *
  * @author Stephen Connolly
  * @goal plugin-updates-report
