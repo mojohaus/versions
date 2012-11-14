@@ -62,7 +62,9 @@ Version number rules
   To specify the version schemes to use, you must define a {{{./rule.html}rule-set xml file}}, for example:
 
 ---
-<ruleset comparisonMethod="maven">
+<ruleset comparisonMethod="maven"
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-1.0.0.xsd">
   <rules>
     <rule groupId="*.maven" comparisonMethod="mercury"/>
     <rule groupId="com.mycompany" comparisonMethod="numeric"/>
