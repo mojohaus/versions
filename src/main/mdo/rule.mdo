@@ -21,8 +21,8 @@ under the License.
 
 <model xmlns="http://modello.codehaus.org/MODELLO/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://modello.codehaus.org/MODELLO/1.1.0 http://modello.codehaus.org/xsd/modello-1.1.0.xsd"
-       xsd.namespace="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0"
-       xsd.targetNamespace="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0">
+       xsd.namespace="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0"
+       xsd.targetNamespace="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0">
   <id>rule</id>
   <name>Rule</name>
   <description>
@@ -45,6 +45,17 @@ under the License.
       </description>
       <version>1.0+</version>
       <fields>
+        <field xml.attributes="false">
+          <name>ignoreVersions</name>
+          <version>2.0+</version>
+          <required>false</required>
+          <type>List</type>
+          <description>Version patterns to ignore for this rule.</description>
+          <association>
+            <type>String</type>
+            <multiplicity>*</multiplicity>
+          </association>
+        </field>
         <field xml.attribute="true">
           <name>groupId</name>
           <version>1.0+</version>
@@ -104,6 +115,8 @@ under the License.
         buf.append( artifactId );
         buf.append( "\", comparisonMethod = \"" );
         buf.append( comparisonMethod );
+        buf.append( "\", ignoreVersions = \"" );
+        buf.append( ignoreVersions );
         buf.append( "\"]" );
         return buf.toString();
     }
@@ -118,6 +131,17 @@ under the License.
       </description>
       <version>1.0+</version>
       <fields>
+        <field xml.attributes="false">
+          <name>ignoreVersions</name>
+          <version>2.0+</version>
+          <required>false</required>
+          <type>List</type>
+          <description>Version patterns to ignore for all artifacts.</description>
+          <association>
+            <type>String</type>
+            <multiplicity>*</multiplicity>
+          </association>
+        </field>
         <field>
           <name>rules</name>
           <required>true</required>

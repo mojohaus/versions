@@ -1,10 +1,19 @@
 <ruleset comparisonMethod="maven"
-         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-1.0.0.xsd">
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+  <ignoreVersions>
+    <ignoreVersion>.*-alpha</ignoreVersion>
+    <ignoreVersion>.*-beta</ignoreVersion>
+  </ignoreVersions>
   <rules>
     <rule groupId="*.maven" comparisonMethod="mercury"/>
     <rule groupId="com.mycompany" comparisonMethod="numeric"/>
-    <rule groupId="com.mycompany.maven" comparisonMethod="maven"/>
+    <rule groupId="com.mycompany.maven" comparisonMethod="maven">
+      <ignoreVersions>
+        <ignoreVersion>one</ignoreVersion>
+        <ignoreVersion>two</ignoreVersion>
+      </ignoreVersions>
+    </rule>
     <rule groupId="com.mycompany.maven" artifactId="old-maven-plugin" comparisonMethod="mercury"/>
   </rules>
 </ruleset>

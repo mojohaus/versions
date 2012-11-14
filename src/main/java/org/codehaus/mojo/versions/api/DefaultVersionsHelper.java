@@ -69,6 +69,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -221,10 +222,64 @@ public class DefaultVersionsHelper
         throws ArtifactMetadataRetrievalException
     {
         List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
-        return new ArtifactVersions( artifact,
-                                     artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository,
-                                                                                       remoteRepositories ),
-                                     getVersionComparator( artifact ) );
+        final List<ArtifactVersion> versions = artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository,
+                                                                                                 remoteRepositories );
+        final List<Pattern> ignoredVersions = getIgnoredVersions( artifact );
+        if ( !ignoredVersions.isEmpty() )
+        {
+            if ( getLog().isDebugEnabled() )
+            {
+                getLog().debug( "Found ignore patterns " + ignoredVersions );
+            }
+            
+            final Iterator<ArtifactVersion> i = versions.iterator();
+            while ( i.hasNext() )
+            {
+                final String version = i.next().toString();
+                for ( final Pattern p : ignoredVersions )
+                {
+                    if ( p.matcher( version ).matches() )
+                    {
+                        if ( getLog().isDebugEnabled() )
+                        {
+                            getLog().debug( "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list." );
+                        }
+                        i.remove();
+                        break;
+                    }
+                }
+            }
+        }
+        return new ArtifactVersions( artifact, versions, getVersionComparator( artifact ) );
+    }
+
+    /**
+     * Returns a list of versions which should not be considered when looking
+     * for updates.
+     *
+     * @param artifact The artifact
+     * @return List of patterns for versions to ignore
+     */
+    private List<Pattern> getIgnoredVersions( Artifact artifact )
+    {
+        final List<Pattern> ret = new ArrayList<Pattern>();
+        
+        for ( final String ignoreVersion : ruleSet.getIgnoreVersions() )
+        {
+            ret.add( Pattern.compile( ignoreVersion ) );
+        }
+        
+        final Rule rule = getBestFitRule( artifact.getGroupId(), artifact.getArtifactId() );
+
+        if ( rule != null )
+        {
+            for ( String ignoreVersion : rule.getIgnoreVersions() )
+            {
+                ret.add( Pattern.compile( ignoreVersion ) );
+            }
+        }
+        
+        return ret;
     }
 
     public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
@@ -247,8 +302,22 @@ public class DefaultVersionsHelper
      */
     public VersionComparator getVersionComparator( String groupId, String artifactId )
     {
+        Rule rule = getBestFitRule( groupId, artifactId );
+        final String comparisonMethod = rule == null ? ruleSet.getComparisonMethod() : rule.getComparisonMethod();
+        return VersionComparators.getVersionComparator( comparisonMethod );
+    }
+        
+    /**
+     * Find the rule, if any, which best fits the artifact details given.
+     *
+     * @param groupId Group id of the artifact
+     * @param artifactId Artifact id of the artifact
+     * @return Rule which best describes the given artifact
+     */
+    protected Rule getBestFitRule( String groupId, String artifactId )
+    {
+        Rule bestFit = null;
         final List<Rule> rules = ruleSet.getRules();
-        String comparisonMethod = ruleSet.getComparisonMethod();
         int bestGroupIdScore = Integer.MAX_VALUE;
         int bestArtifactIdScore = Integer.MAX_VALUE;
         boolean exactGroupId = false;
@@ -294,9 +363,9 @@ public class DefaultVersionsHelper
             {
                 exactArtifactId = true;
             }
-            comparisonMethod = rule.getComparisonMethod();
+            bestFit = rule;
         }
-        return VersionComparators.getVersionComparator( comparisonMethod );
+        return bestFit;
     }
 
     private static RuleSet getRuleSet( Wagon wagon, String remoteURI )
@@ -395,7 +464,9 @@ public class DefaultVersionsHelper
                     try
                     {
                         logger.debug( "Trying to load ruleset from file \"" + fileUri + "\" in " + baseUri );
-                        ruleSet.setRules( getRuleSet( wagon, fileUri ).getRules() );
+                        final RuleSet loaded = getRuleSet( wagon, fileUri );
+                        ruleSet.setRules( loaded.getRules() );
+                        ruleSet.setIgnoreVersions( loaded.getIgnoreVersions() );
                         logger.debug( "Rule set loaded" );
                     }
                     finally

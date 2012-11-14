@@ -20,7 +20,7 @@
  -----
  Stephen Connolly
  ------
- 2009-04-20
+ 2012-11-14
  ------
 
 Version number rules
@@ -63,8 +63,8 @@ Version number rules
 
 ---
 <ruleset comparisonMethod="maven"
-         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/1.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-1.0.0.xsd">
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
   <rules>
     <rule groupId="*.maven" comparisonMethod="mercury"/>
     <rule groupId="com.mycompany" comparisonMethod="numeric"/>
@@ -74,13 +74,37 @@ Version number rules
 </ruleset>
 ---
 
-  The rule-set files must match the {{{./xsd/rule-1.0.0.xsd}XSD schema}}.
+  The rule-set files must match the {{{./xsd/rule-2.0.0.xsd}XSD schema}}.
 
   You can then use the <<<rulesUri>>> parameter to specify the rule-set to be used by the
   <<<versions-maven-plugin>>>.
 
   Note: the <<<groupId>>> attribute in the <<<rule>>> elements has a lazy <<<.*>>> at the end, such that
   <<<com.mycompany>>> will match <<<com.mycompany>>>, <<<com.mycompany.foo>>>, <<<com.mycompany.foo.bar>>>, etc.
+  
+** Ignoring certain versions
+
+  It is possible to ignore versions on a global and on a per-rule basis.
+
+---
+<ruleset comparisonMethod="maven"
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+  <ignoreVersions>
+    <ignoreVersion>.*-beta</ignoreVersion>
+  </ignoreVersions>
+  <rules>
+    <rule groupId="com.mycompany.maven" comparisonMethod="maven">
+      <ignoreVersions>
+        <ignoreVersion>.*-RELEASE</ignoreVersion>
+        <ignoreVersion>2.1.0</ignoreVersion>
+      </ignoreVersions>
+    </rule>
+  </rules>
+</ruleset>
+---
+
+  Note: it is possible to ignore versions using regular expressions.
 
   If you have your ruleset xml file hosted at, for example, http://www.mycompany.com/maven-version-rules.xml
   then the following configuration in your corporate pom would ensure that all projects use this rule set.
@@ -98,11 +122,7 @@ Version number rules
         <version>${pluginVersion}</version>
         <configuration>
           ...
-          <properties>
-            ...
-            <rulesUri>http://www.mycompany.com/maven-version-rules.xml</rulesUri>
-            ...
-          </properties>
+          <rulesUri>http://www.mycompany.com/maven-version-rules.xml</rulesUri>
           ...
         </configuration>
       </plugin>
@@ -113,5 +133,3 @@ Version number rules
   ...
 </project>
 ---
-
-  
