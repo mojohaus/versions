@@ -83,6 +83,8 @@ public class DefaultVersionsHelperTest
         artifactVersions.add( three );
         final ArtifactVersion oneTwoHundred = new DefaultArtifactVersion( "1.200" );
         artifactVersions.add( oneTwoHundred );
+        final ArtifactVersion illegal = new DefaultArtifactVersion( "illegalVersion" );
+        artifactVersions.add( illegal );
 
         when( metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) ).thenReturn( artifactVersions );
         
@@ -92,10 +94,8 @@ public class DefaultVersionsHelperTest
         
         final List<ArtifactVersion> actual = asList( versions.getVersions( true ) );
         
-        assertEquals( 2, actual.size() );
-        assertThat( actual, hasItem( three ) );
-        assertThat( actual, hasItem( oneTwoHundred ) );
-
+        assertEquals( 3, actual.size() );
+        assertThat( actual, hasItems( three, oneTwoHundred, illegal ) );
     }
     
     public void testGlobalRuleVersionsIgnored() throws Exception
@@ -115,7 +115,9 @@ public class DefaultVersionsHelperTest
         artifactVersions.add( new DefaultArtifactVersion( "three-alpha" ) );
         artifactVersions.add( new DefaultArtifactVersion( "three-beta" ) );
         artifactVersions.add( three );
-        
+        final ArtifactVersion illegal = new DefaultArtifactVersion( "illegalVersion" );
+        artifactVersions.add( illegal );
+
         when(metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) ).thenReturn( artifactVersions );
         
         VersionsHelper helper = createHelper( metadataSource );
@@ -124,8 +126,8 @@ public class DefaultVersionsHelperTest
         
         final List<ArtifactVersion> actual = asList( versions.getVersions( true ) );
         
-        assertEquals( 3, actual.size() );
-        assertThat( actual, hasItems( one, two, three ) );
+        assertEquals( 4, actual.size() );
+        assertThat( actual, hasItems( one, two, three, illegal ) );
     }
     
     public void testWildcardMatching()

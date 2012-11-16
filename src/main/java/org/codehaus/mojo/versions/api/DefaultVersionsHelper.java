@@ -92,6 +92,9 @@ import java.util.regex.Pattern;
 public class DefaultVersionsHelper
     implements VersionsHelper
 {
+    private static final String TYPE_EXACT = "exact";
+    private static final String TYPE_REGEX = "regex";
+
     /**
      * The artifact comparison rules to use.
      *
@@ -239,7 +242,7 @@ public class DefaultVersionsHelper
                 final String version = i.next().toString();
                 for ( final IgnoreVersion ignoreVersion : ignoredVersions )
                 {
-                    if( "regex".equals( ignoreVersion.getType() ) )
+                    if ( TYPE_REGEX.equals( ignoreVersion.getType() ) )
                     {
                         Pattern p = Pattern.compile( ignoreVersion.getVersion() );
                         if ( p.matcher( version ).matches() )
@@ -252,7 +255,7 @@ public class DefaultVersionsHelper
                             break;
                         }
                     }
-                    else
+                    else if( TYPE_EXACT.equals( ignoreVersion.getType() ) )
                     {
                         if ( version.equals( ignoreVersion.getVersion() ) )
                         {
@@ -283,7 +286,16 @@ public class DefaultVersionsHelper
         
         for ( final IgnoreVersion ignoreVersion : ruleSet.getIgnoreVersions() )
         {
-            ret.add( ignoreVersion );
+            if ( !TYPE_EXACT.equals( ignoreVersion.getType() )
+                    && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
+            {
+                getLog().warn( "The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion[" + ignoreVersion + "] is not valid."
+                        + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
+            }
+            else
+            {
+                ret.add( ignoreVersion );
+            }
         }
         
         final Rule rule = getBestFitRule( artifact.getGroupId(), artifact.getArtifactId() );
@@ -292,7 +304,16 @@ public class DefaultVersionsHelper
         {
             for ( IgnoreVersion ignoreVersion : rule.getIgnoreVersions() )
             {
-                ret.add( ignoreVersion );
+                if ( !TYPE_EXACT.equals( ignoreVersion.getType() )
+                        && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
+                {
+                    getLog().warn( "The type attribute '" + ignoreVersion.getType() + "' for " + rule + " is not valid."
+                            + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
+                }
+                else
+                {
+                    ret.add( ignoreVersion );
+                }
             }
         }
         
