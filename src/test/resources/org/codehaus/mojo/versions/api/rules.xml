@@ -2,8 +2,8 @@
          xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
   <ignoreVersions>
-    <ignoreVersion>.*-alpha</ignoreVersion>
-    <ignoreVersion>.*-beta</ignoreVersion>
+    <ignoreVersion type="regex">.*-alpha</ignoreVersion>
+    <ignoreVersion type="regex">.*-beta</ignoreVersion>
   </ignoreVersions>
   <rules>
     <rule groupId="*.maven" comparisonMethod="mercury"/>
@@ -12,6 +12,7 @@
       <ignoreVersions>
         <ignoreVersion>one</ignoreVersion>
         <ignoreVersion>two</ignoreVersion>
+        <ignoreVersion>1.2.0</ignoreVersion>
       </ignoreVersions>
     </rule>
     <rule groupId="com.mycompany.maven" artifactId="old-maven-plugin" comparisonMethod="mercury"/>

@@ -81,7 +81,9 @@ public class DefaultVersionsHelperTest
         artifactVersions.add( new DefaultArtifactVersion( "two" ) );
         final ArtifactVersion three = new DefaultArtifactVersion( "three" );
         artifactVersions.add( three );
-        
+        final ArtifactVersion oneTwoHundred = new DefaultArtifactVersion( "1.200" );
+        artifactVersions.add( oneTwoHundred );
+
         when( metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) ).thenReturn( artifactVersions );
         
         VersionsHelper helper = createHelper( metadataSource );
@@ -90,9 +92,10 @@ public class DefaultVersionsHelperTest
         
         final List<ArtifactVersion> actual = asList( versions.getVersions( true ) );
         
-        assertEquals( 1, actual.size() );
+        assertEquals( 2, actual.size() );
         assertThat( actual, hasItem( three ) );
-        
+        assertThat( actual, hasItem( oneTwoHundred ) );
+
     }
     
     public void testGlobalRuleVersionsIgnored() throws Exception

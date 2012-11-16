@@ -52,7 +52,7 @@ under the License.
           <type>List</type>
           <description>Version patterns to ignore for this rule.</description>
           <association>
-            <type>String</type>
+            <type>IgnoreVersion</type>
             <multiplicity>*</multiplicity>
           </association>
         </field>
@@ -138,7 +138,7 @@ under the License.
           <type>List</type>
           <description>Version patterns to ignore for all artifacts.</description>
           <association>
-            <type>String</type>
+            <type>IgnoreVersion</type>
             <multiplicity>*</multiplicity>
           </association>
         </field>
@@ -188,6 +188,40 @@ under the License.
         return buf.toString();
     }
           ]]></code>
+        </codeSegment>
+      </codeSegments>
+    </class>
+    <class xsd.compositor="sequence">
+      <name>IgnoreVersion</name>
+      <version>2.0+</version>
+      <description>A version to ignore.</description>
+      <fields>
+        <field xml.content="true">
+          <name>version</name>
+          <version>2.0+</version>
+          <type>String</type>
+          <description>A version number or a regular expression for version numbers that should be ignored.</description>
+        </field>
+        <field xml.attribute="true">
+          <name>type</name>
+          <version>2.0+</version>
+          <type>String</type>
+          <description>The type of ignore mechanism to use. Allowed values are 'exact' and 'regex'.</description>
+          <defaultValue>exact</defaultValue>
+        </field>
+      </fields>
+      <codeSegments>
+        <codeSegment>
+          <version>2.0+</version>
+          <code><![CDATA[public String toString()
+    {
+        StringBuilder buf = new StringBuilder( 128 );
+        buf.append( version );
+        buf.append( " (" );
+        buf.append( type );
+        buf.append( ")" );
+        return buf.toString();
+    }]]></code>
         </codeSegment>
       </codeSegments>
     </class>

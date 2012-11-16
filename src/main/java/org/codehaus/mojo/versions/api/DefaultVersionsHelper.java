@@ -50,6 +50,7 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.model.IgnoreVersion;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
@@ -224,28 +225,44 @@ public class DefaultVersionsHelper
         List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
         final List<ArtifactVersion> versions = artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository,
                                                                                                  remoteRepositories );
-        final List<Pattern> ignoredVersions = getIgnoredVersions( artifact );
+        final List<IgnoreVersion> ignoredVersions = getIgnoredVersions( artifact );
         if ( !ignoredVersions.isEmpty() )
         {
             if ( getLog().isDebugEnabled() )
             {
-                getLog().debug( "Found ignore patterns " + ignoredVersions );
+                getLog().debug( "Found ignored versions: " + showIgnoredVersions( ignoredVersions ) );
             }
             
             final Iterator<ArtifactVersion> i = versions.iterator();
             while ( i.hasNext() )
             {
                 final String version = i.next().toString();
-                for ( final Pattern p : ignoredVersions )
+                for ( final IgnoreVersion ignoreVersion : ignoredVersions )
                 {
-                    if ( p.matcher( version ).matches() )
+                    if( "regex".equals( ignoreVersion.getType() ) )
                     {
-                        if ( getLog().isDebugEnabled() )
+                        Pattern p = Pattern.compile( ignoreVersion.getVersion() );
+                        if ( p.matcher( version ).matches() )
                         {
-                            getLog().debug( "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list." );
+                            if ( getLog().isDebugEnabled() )
+                            {
+                                getLog().debug( "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list: " + ignoreVersion );
+                            }
+                            i.remove();
+                            break;
                         }
-                        i.remove();
-                        break;
+                    }
+                    else
+                    {
+                        if ( version.equals( ignoreVersion.getVersion() ) )
+                        {
+                            if ( getLog().isDebugEnabled() )
+                            {
+                                getLog().debug( "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list: " + ignoreVersion );
+                            }
+                            i.remove();
+                            break;
+                        }
                     }
                 }
             }
@@ -258,28 +275,50 @@ public class DefaultVersionsHelper
      * for updates.
      *
      * @param artifact The artifact
-     * @return List of patterns for versions to ignore
+     * @return List of ignored version
      */
-    private List<Pattern> getIgnoredVersions( Artifact artifact )
+    private List<IgnoreVersion> getIgnoredVersions( Artifact artifact )
     {
-        final List<Pattern> ret = new ArrayList<Pattern>();
+        final List<IgnoreVersion> ret = new ArrayList<IgnoreVersion>();
         
-        for ( final String ignoreVersion : ruleSet.getIgnoreVersions() )
+        for ( final IgnoreVersion ignoreVersion : ruleSet.getIgnoreVersions() )
         {
-            ret.add( Pattern.compile( ignoreVersion ) );
+            ret.add( ignoreVersion );
         }
         
         final Rule rule = getBestFitRule( artifact.getGroupId(), artifact.getArtifactId() );
 
         if ( rule != null )
         {
-            for ( String ignoreVersion : rule.getIgnoreVersions() )
+            for ( IgnoreVersion ignoreVersion : rule.getIgnoreVersions() )
             {
-                ret.add( Pattern.compile( ignoreVersion ) );
+                ret.add( ignoreVersion );
             }
         }
         
         return ret;
+    }
+
+    /**
+     * Pretty print a list of ignored versions.
+     *
+     * @param ignoredVersions A list of ignored versions
+     * @return A String representation of the list
+     */
+    private String showIgnoredVersions( List<IgnoreVersion> ignoredVersions )
+    {
+        StringBuilder buf = new StringBuilder();
+        Iterator<IgnoreVersion> iterator = ignoredVersions.iterator();
+        while ( iterator.hasNext() )
+        {
+            IgnoreVersion ignoreVersion = iterator.next();
+            buf.append( ignoreVersion );
+            if ( iterator.hasNext() )
+            {
+               buf.append( ", " );
+            }
+        }
+        return buf.toString();
     }
 
     public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
