@@ -31,7 +31,6 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -123,16 +122,12 @@ public class ResolveRangesMojo
         }
     }
 
-    private void resolveRanges( ModifiedPomXMLEventReader pom, Collection dependencies )
+    private void resolveRanges( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
 
-        Iterator iter = dependencies.iterator();
-
-        while ( iter.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = (Dependency) iter.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 continue;
@@ -160,7 +155,7 @@ public class ResolveRangesMojo
                         }
                         else
                         {
-                            getLog().warn( "Not updating version: could not resolve any versions" );
+                            getLog().warn( "Not updating version " + artifact + " : could not resolve any versions" );
                         }
                     }
 
@@ -170,6 +165,11 @@ public class ResolveRangesMojo
                                                              dep.getVersion(), artifactVersion ) )
                         {
                             getLog().debug( "Version set to " + artifactVersion + " for dependency: " + artifact );
+                        }
+                        else
+                        {
+                            getLog().warn( "Could not find the dependency " + artifact + " so unable to set version to "
+                                               + artifactVersion );
                         }
                     }
                 }
