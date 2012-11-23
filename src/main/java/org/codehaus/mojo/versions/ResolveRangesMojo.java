@@ -142,7 +142,7 @@ public class ResolveRangesMojo
 
             if ( versionMatcher.find() )
             {
-                Artifact artifact = this.findArtifact( dep );
+                Artifact artifact = this.toArtifact( dep );
 
                 if ( artifact != null && isIncluded( artifact ) )
                 {
