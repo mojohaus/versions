@@ -52,8 +52,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -201,8 +204,7 @@ public class PomHelper
             if ( event.isStartElement() )
             {
                 stack.push( path );
-                path = new StringBuilder().append( path ).append( "/" ).append(
-                    event.asStartElement().getName().getLocalPart() ).toString();
+                path = path + "/" + event.asStartElement().getName().getLocalPart();
 
                 if ( propertyRegex.matcher( path ).matches() )
                 {
@@ -272,8 +274,7 @@ public class PomHelper
             if ( event.isStartElement() )
             {
                 stack.push( path );
-                path = new StringBuilder().append( path ).append( "/" ).append(
-                    event.asStartElement().getName().getLocalPart() ).toString();
+                path = path + "/" + event.asStartElement().getName().getLocalPart();
 
                 if ( matchScopeRegex.matcher( path ).matches() )
                 {
@@ -321,8 +322,7 @@ public class PomHelper
             if ( event.isStartElement() )
             {
                 stack.push( path );
-                path = new StringBuilder().append( path ).append( "/" ).append(
-                    event.asStartElement().getName().getLocalPart() ).toString();
+                path = path + "/" + event.asStartElement().getName().getLocalPart();
 
                 if ( matchScopeRegex.matcher( path ).matches() )
                 {
@@ -372,8 +372,7 @@ public class PomHelper
             if ( event.isStartElement() )
             {
                 stack.push( path );
-                path = new StringBuilder().append( path ).append( "/" ).append(
-                    event.asStartElement().getName().getLocalPart() ).toString();
+                path = path + "/" + event.asStartElement().getName().getLocalPart();
 
                 if ( matchScopeRegex.matcher( path ).matches() )
                 {
@@ -426,7 +425,7 @@ public class PomHelper
             {
                 stack.push( path );
                 final String elementName = event.asStartElement().getName().getLocalPart();
-                path = new StringBuilder().append( path ).append( "/" ).append( elementName ).toString();
+                path = path + "/" + elementName;
 
                 if ( matchScopeRegex.matcher( path ).matches() )
                 {
@@ -478,22 +477,76 @@ public class PomHelper
     {
         Stack<String> stack = new Stack<String>();
         String path = "";
-        final Pattern matchScopeRegex;
-        final Pattern matchTargetRegex;
+
+        Set<String> implicitPaths = new HashSet<String>(
+            Arrays.<String>asList( "/project/parent/groupId", "/project/parent/artifactId", "/project/parent/version",
+                                   "/project/groupId", "/project/artifactId", "/project/version" ) );
+        Map<String, String> implicitProperties = new HashMap<String, String>();
+
+        pom.rewind();
+
+        while ( pom.hasNext() )
+        {
+            while ( pom.hasNext() )
+            {
+                XMLEvent event = pom.nextEvent();
+                if ( event.isStartElement() )
+                {
+                    stack.push( path );
+                    final String elementName = event.asStartElement().getName().getLocalPart();
+                    path = path + "/" + elementName;
+
+                    if ( implicitPaths.contains( path ) )
+                    {
+                        final String elementText = pom.getElementText().trim();
+                        implicitProperties.put( path.substring( 1 ).replace( '/', '.' ), elementText );
+                        path = stack.pop();
+                    }
+                }
+                if ( event.isEndElement() )
+                {
+                    path = stack.pop();
+                }
+            }
+        }
+
+        boolean modified = true;
+        while ( modified )
+        {
+            modified = false;
+            for ( Map.Entry<String, String> entry : implicitProperties.entrySet() )
+            {
+                if ( entry.getKey().contains( ".parent" ) )
+                {
+                    String child = entry.getKey().replace( ".parent", "" );
+                    if ( !implicitProperties.containsKey( child ) )
+                    {
+                        implicitProperties.put( child, entry.getValue() );
+                        modified = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        System.out.println( "Props: " + implicitProperties );
+
+        stack = new Stack<String>();
+        path = "";
         boolean inMatchScope = false;
         boolean madeReplacement = false;
         boolean haveGroupId = false;
         boolean haveArtifactId = false;
         boolean haveOldVersion = false;
 
-        matchScopeRegex = Pattern.compile( "/project" + "(/profiles/profile)?" +
-                                               "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
-                                               + "/dependencies/dependency" );
+        final Pattern matchScopeRegex = Pattern.compile( "/project" + "(/profiles/profile)?" +
+                                                             "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
+                                                             + "/dependencies/dependency" );
 
-        matchTargetRegex = Pattern.compile( "/project" + "(/profiles/profile)?" +
-                                                "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
-                                                + "/dependencies/dependency" +
-                                                "((/groupId)|(/artifactId)|(/version))" );
+        final Pattern matchTargetRegex = Pattern.compile( "/project" + "(/profiles/profile)?" +
+                                                              "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
+                                                              + "/dependencies/dependency" +
+                                                              "((/groupId)|(/artifactId)|(/version))" );
 
         pom.rewind();
 
@@ -504,7 +557,7 @@ public class PomHelper
             {
                 stack.push( path );
                 final String elementName = event.asStartElement().getName().getLocalPart();
-                path = new StringBuilder().append( path ).append( "/" ).append( elementName ).toString();
+                path = path + "/" + elementName;
 
                 if ( matchScopeRegex.matcher( path ).matches() )
                 {
@@ -522,12 +575,13 @@ public class PomHelper
                 {
                     if ( "groupId".equals( elementName ) )
                     {
-                        haveGroupId = groupId.equals( pom.getElementText().trim() );
+                        haveGroupId = groupId.equals( evaluate( pom.getElementText().trim(), implicitProperties ) );
                         path = stack.pop();
                     }
                     else if ( "artifactId".equals( elementName ) )
                     {
-                        haveArtifactId = artifactId.equals( pom.getElementText().trim() );
+                        haveArtifactId =
+                            artifactId.equals( evaluate( pom.getElementText().trim(), implicitProperties ) );
                         path = stack.pop();
                     }
                     else if ( "version".equals( elementName ) )
@@ -575,6 +629,92 @@ public class PomHelper
         }
         return madeReplacement;
     }
+
+    /**
+     * A lightweight expression evaluation function.
+     *
+     * @param expr       The expression to evaluate.
+     * @param properties The properties to substitute.
+     * @return The evaluated expression.
+     */
+    public static String evaluate( String expr, Map<String, String> properties )
+    {
+        if ( expr == null )
+        {
+            return null;
+        }
+
+        String expression = stripTokens( expr );
+        if ( expression.equals( expr ) )
+        {
+            int index = expr.indexOf( "${" );
+            if ( index >= 0 )
+            {
+                int lastIndex = expr.indexOf( "}", index );
+                if ( lastIndex >= 0 )
+                {
+                    String retVal = expr.substring( 0, index );
+
+                    if ( index > 0 && expr.charAt( index - 1 ) == '$' )
+                    {
+                        retVal += expr.substring( index + 1, lastIndex + 1 );
+                    }
+                    else
+                    {
+                        retVal += evaluate( expr.substring( index, lastIndex + 1 ), properties );
+                    }
+
+                    retVal += evaluate( expr.substring( lastIndex + 1 ), properties );
+                    return retVal;
+                }
+            }
+
+            // Was not an expression
+            if ( expression.contains( "$$" ) )
+            {
+                return expression.replaceAll( "\\$\\$", "\\$" );
+            }
+            else
+            {
+                return expression;
+            }
+        }
+
+        String value = properties.get( expression );
+
+        int exprStartDelimiter = value.indexOf( "${" );
+
+        if ( exprStartDelimiter >= 0 )
+        {
+            if ( exprStartDelimiter > 0 )
+            {
+                value = value.substring( 0, exprStartDelimiter ) + evaluate( value.substring( exprStartDelimiter ),
+                                                                             properties );
+            }
+            else
+            {
+                value = evaluate( value.substring( exprStartDelimiter ), properties );
+            }
+        }
+
+        return value == null ? expr : value;
+    }
+
+    /**
+     * Strips the expression token markers from the start and end of the string.
+     *
+     * @param expr the string (perhaps with token markers)
+     * @return the string (definately without token markers)
+     */
+    private static String stripTokens( String expr )
+    {
+        if ( expr.startsWith( "${" ) && expr.indexOf( "}" ) == expr.length() - 1 )
+        {
+            expr = expr.substring( 2, expr.length() - 1 );
+        }
+        return expr;
+    }
+
 
     /**
      * Checks if two versions or ranges have an overlap.
@@ -657,7 +797,7 @@ public class PomHelper
             {
                 stack.push( path );
                 final String elementName = event.asStartElement().getName().getLocalPart();
-                path = new StringBuilder().append( path ).append( "/" ).append( elementName ).toString();
+                path = path + "/" + elementName;
 
                 if ( matchScopeRegex.matcher( path ).matches() )
                 {
@@ -1245,7 +1385,7 @@ public class PomHelper
      * @param project              The project to find the local root for.
      * @param localRepository      the local repo.
      * @param globalProfileManager the global profile manager.
-     * @param logger
+     * @param logger               The logger to log to.
      * @return The local root (note this may be the project passed as an argument).
      */
     public static MavenProject getLocalRoot( MavenProjectBuilder builder, MavenProject project,
