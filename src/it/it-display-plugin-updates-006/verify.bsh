@@ -13,6 +13,14 @@ try
         System.out.println( "cannot find The following plugin updates are available" ); 
         return false;
     }
+
+    p = Pattern.compile( "\\Qmaven-deploy-plugin ...................................... 2.3 ->\\E" );
+    m = p.matcher( buf.toString() );
+    if ( !m.find() )
+    {
+        System.out.println( "cannot update of deploy plugin");
+        return false;
+    }   
 }
 catch( Throwable t )
 {
