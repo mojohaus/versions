@@ -630,27 +630,30 @@ public class DisplayPluginUpdatesMojo
             if ( version == null || !pluginsWithVersionsSpecified.contains( coords ) )
             {
                 version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
+                Boolean fromSuperPom = (version != null); 
                 getLog().debug( "[" + coords + "].superPom.version=" + version );
 
                 newVersion = artifactVersion != null
                     ? artifactVersion.toString()
-                    : ( version != null ? version : ( effectiveVersion != null ? effectiveVersion : "(unknown)" ) );
-                StringBuilder buf = new StringBuilder( compactKey( groupId, artifactId ) );
-                buf.append( ' ' );
-                int padding =
-                    WARN_PAD_SIZE - effectiveVersion.length() - ( version != null ? FROM_SUPER_POM.length() : 0 );
-                while ( buf.length() < padding )
-                {
-                    buf.append( '.' );
+                    : ( fromSuperPom ? version : ( effectiveVersion != null ? effectiveVersion : "(unknown)" ) );
+                if ( fromSuperPom || "(unknown)".equals(newVersion) ) {
+                    StringBuilder buf = new StringBuilder( compactKey( groupId, artifactId ) );
+                    buf.append( ' ' );
+                    int padding =
+                        WARN_PAD_SIZE - effectiveVersion.length() - ( fromSuperPom ? FROM_SUPER_POM.length() : 0 );
+                    while ( buf.length() < padding )
+                    {
+                        buf.append( '.' );
+                    }
+                    buf.append( ' ' );
+                    if ( fromSuperPom )
+                    {
+                        buf.append( FROM_SUPER_POM );
+                        superPomDrivingMinVersion = true;
+                    }
+                    buf.append( effectiveVersion );
+                    lockdowns.add( buf.toString() );
                 }
-                buf.append( ' ' );
-                if ( version != null )
-                {
-                    buf.append( FROM_SUPER_POM );
-                    superPomDrivingMinVersion = true;
-                }
-                buf.append( effectiveVersion );
-                lockdowns.add( buf.toString() );
             }
             else if ( artifactVersion != null )
             {
