@@ -6,12 +6,11 @@ try
 {
     File file = new File( basedir, "build.log" );
     String buf = FileUtils.fileRead( file );
-
-    Pattern p = Pattern.compile( "\\QThe following plugins do not have their version specified\\E" );
+    Pattern p = Pattern.compile( "\\QThe following plugin updates are available\\E" );
     Matcher m = p.matcher( buf.toString() );
     if ( !m.find() )
     {
-        System.out.println( "Did not notice that dummy plugin does not have a version specified" );
+        System.out.println( "cannot find The following plugin updates are available" ); 
         return false;
     }
 }
