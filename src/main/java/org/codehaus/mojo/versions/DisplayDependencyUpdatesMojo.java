@@ -81,6 +81,15 @@ public class DisplayDependencyUpdatesMojo
      */
     protected Boolean processDependencies = Boolean.TRUE;
 
+    /**
+     * Whether to show additional information such as dependencies that
+     * do not need updating.  Defaults to false.
+     *
+     * @parameter expression="${verbose}" defaultValue="false"
+     * @since 3.0
+     */
+    protected Boolean verbose = Boolean.FALSE;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
@@ -135,6 +144,12 @@ public class DisplayDependencyUpdatesMojo
         return !Boolean.FALSE.equals( processDependencies );
     }
 
+    public boolean isVerbose()
+    {
+        // true if true or null
+        return !Boolean.FALSE.equals( verbose );
+    }
+    
 // ------------------------ INTERFACE METHODS ------------------------
 
 // --------------------- Interface Mojo ---------------------
@@ -157,19 +172,19 @@ public class DisplayDependencyUpdatesMojo
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        if ( !Boolean.FALSE.equals( processDependencyManagement ) )
+        if ( isProcessingDependencyManagement() )
         {
             dependencies = removeDependencyManagment( dependencies, dependencyManagement );
         }
 
         try
         {
-            if ( !Boolean.FALSE.equals( processDependencyManagement ) )
+            if ( isProcessingDependencyManagement() )
             {
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
                             "Dependency Management" );
             }
-            if ( !Boolean.FALSE.equals( processDependencies ) )
+            if ( isProcessingDependencies() )
             {
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
             }
@@ -227,12 +242,12 @@ public class DisplayDependencyUpdatesMojo
                 t.add( StringUtils.rightPad( left, INFO_PAD_SIZE - right.length(), "." ) + right );
             }
         }
-        if ( usingCurrent.isEmpty() && !withUpdates.isEmpty() )
+        if ( isVerbose() && usingCurrent.isEmpty() && !withUpdates.isEmpty() )
         {
             getLog().info( "No dependencies in " + section + " are using the newest version." );
             getLog().info( "" );
         }
-        else if ( !usingCurrent.isEmpty() )
+        else if ( isVerbose() && !usingCurrent.isEmpty() )
         {
             getLog().info( "The following dependencies in " + section + " are using the newest version:" );
             i = usingCurrent.iterator();
