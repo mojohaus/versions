@@ -701,7 +701,7 @@ public class PomHelper
         } else
         {
             // TODO find a way to log that !!
-            System.out.println( "expression: " + expression + " no value " );
+            //System.out.println( "expression: " + expression + " no value " );
         }
         return value == null ? expr : value;
     }
