@@ -682,21 +682,27 @@ public class PomHelper
 
         String value = properties.get( expression );
 
-        int exprStartDelimiter = value.indexOf( "${" );
-
-        if ( exprStartDelimiter >= 0 )
+        if ( value != null )
         {
-            if ( exprStartDelimiter > 0 )
-            {
-                value = value.substring( 0, exprStartDelimiter ) + evaluate( value.substring( exprStartDelimiter ),
-                                                                             properties );
-            }
-            else
-            {
-                value = evaluate( value.substring( exprStartDelimiter ), properties );
-            }
-        }
+            int exprStartDelimiter = value.indexOf( "${" );
 
+            if ( exprStartDelimiter >= 0 )
+            {
+                if ( exprStartDelimiter > 0 )
+                {
+                    value = value.substring( 0, exprStartDelimiter ) + evaluate( value.substring( exprStartDelimiter ),
+                                                                                 properties );
+                }
+                else
+                {
+                    value = evaluate( value.substring( exprStartDelimiter ), properties );
+                }
+            }
+        } else
+        {
+            // TODO find a way to log that !!
+            System.out.println( "expression: " + expression + " no value " );
+        }
         return value == null ? expr : value;
     }
 
