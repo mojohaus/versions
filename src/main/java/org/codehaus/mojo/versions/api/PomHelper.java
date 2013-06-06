@@ -700,8 +700,9 @@ public class PomHelper
             }
         } else
         {
-            // TODO find a way to log that !!
-            //System.out.println( "expression: " + expression + " no value " );
+            // TODO find a way to log that and not use this System.out!!
+            // this class could be a component with logger injected !!
+            System.out.println( "expression: " + expression + " no value " );
         }
         return value == null ? expr : value;
     }
