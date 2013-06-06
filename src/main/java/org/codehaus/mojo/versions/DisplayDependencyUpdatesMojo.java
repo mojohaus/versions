@@ -86,7 +86,7 @@ public class DisplayDependencyUpdatesMojo
      * do not need updating.  Defaults to false.
      *
      * @parameter expression="${verbose}" defaultValue="false"
-     * @since 3.0
+     * @since 2.1
      */
     protected Boolean verbose = Boolean.FALSE;
 
