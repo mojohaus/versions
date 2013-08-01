@@ -42,8 +42,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -212,15 +210,22 @@ public class SetMojo
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
-            final SortedMap<String, Model> reactor = new TreeMap<String, Model>( new ReactorDepthComparator(reactorModels) );
+            final SortedMap<String, Model> reactor =
+                new TreeMap<String, Model>( new ReactorDepthComparator( reactorModels ) );
             reactor.putAll( reactorModels );
 
             // set of files to update
             final Set<File> files = new LinkedHashSet<File>();
 
-            Pattern groupIdRegex = Pattern.compile( RegexUtils.convertWildcardsToRegex( groupId, true ) );
-            Pattern artifactIdRegex = Pattern.compile( RegexUtils.convertWildcardsToRegex( artifactId, true ) );
-            Pattern oldVersionIdRegex = Pattern.compile( RegexUtils.convertWildcardsToRegex( oldVersion, true ) );
+            getLog().info(
+                "Processing change of " + groupId + ":" + artifactId + ":" + oldVersion + " -> " + newVersion );
+            Pattern groupIdRegex =
+                Pattern.compile( RegexUtils.convertWildcardsToRegex( fixNullOrEmpty( groupId, "*" ), true ) );
+            Pattern artifactIdRegex =
+                Pattern.compile( RegexUtils.convertWildcardsToRegex( fixNullOrEmpty( artifactId, "*" ), true ) );
+            Pattern oldVersionIdRegex =
+                Pattern.compile( RegexUtils.convertWildcardsToRegex( fixNullOrEmpty( oldVersion, "*" ), true ) );
+            boolean found = false;
             for ( Model m : reactor.values() )
             {
                 final String mGroupId = PomHelper.getGroupId( m );
@@ -229,9 +234,15 @@ public class SetMojo
                 if ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId ).matches()
                     && oldVersionIdRegex.matcher( mVersion ).matches() && !newVersion.equals( mVersion ) )
                 {
+                    found = true;
                     // if the change is not one we have swept up already
-                    applyChange( project, reactor, files, m.getGroupId(), m.getArtifactId(), m.getVersion() );
+                    applyChange( project, reactor, files, m.getGroupId(), m.getArtifactId(),
+                                 StringUtils.isBlank( oldVersion ) || "*".equals( oldVersion ) ? "" : m.getVersion() );
                 }
+            }
+            if ( !found )
+            {
+                applyChange( project, reactor, files, groupId, artifactId, oldVersion );
             }
 
             // now process all the updates
@@ -247,21 +258,26 @@ public class SetMojo
         }
     }
 
+    private static String fixNullOrEmpty( String value, String defaultValue )
+    {
+        return StringUtils.isBlank( value ) ? defaultValue : value;
+    }
+
     private void applyChange( MavenProject project, SortedMap<String, Model> reactor, Set<File> files, String groupId,
                               String artifactId, String oldVersion )
     {
 
-        getLog().debug( "Triggering change " + groupId + ":" + artifactId + ":" + oldVersion + "->" + newVersion );
+        getLog().debug( "Applying change " + groupId + ":" + artifactId + ":" + oldVersion + " -> " + newVersion );
         // this is a triggering change
         addChange( groupId, artifactId, oldVersion, newVersion );
         // now fake out the triggering change
 
-        final Map.Entry<String,Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
+        final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
         current.getValue().setVersion( newVersion );
 
         addFile( files, getProject(), current.getKey() );
 
-        for ( Map.Entry<String,Model> sourceEntry : reactor.entrySet() )
+        for ( Map.Entry<String, Model> sourceEntry : reactor.entrySet() )
         {
             final String sourcePath = sourceEntry.getKey();
             final Model sourceModel = sourceEntry.getValue();
@@ -319,8 +335,9 @@ public class SetMojo
                             + sourceVersion );
                 }
                 final boolean targetExplicit = PomHelper.isExplicitVersion( targetModel );
-                if ( ( updateMatchingVersions || !targetExplicit ) && StringUtils.equals(
-                    parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
+                if ( ( updateMatchingVersions || !targetExplicit ) && StringUtils.equals( parent.getVersion(),
+                                                                                          PomHelper.getVersion(
+                                                                                              targetModel ) ) )
                 {
                     getLog().debug(
                         "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
