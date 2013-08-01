@@ -250,6 +250,8 @@ public class SetMojo
     private void applyChange( MavenProject project, SortedMap<String, Model> reactor, Set<File> files, String groupId,
                               String artifactId, String oldVersion )
     {
+
+        getLog().debug( "Triggering change " + groupId + ":" + artifactId + ":" + oldVersion + "->" + newVersion );
         // this is a triggering change
         addChange( groupId, artifactId, oldVersion, newVersion );
         // now fake out the triggering change
@@ -257,7 +259,7 @@ public class SetMojo
         final Map.Entry<String,Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
         current.getValue().setVersion( newVersion );
 
-        files.add( new File(getProject().getBasedir(), current.getKey()) );
+        addFile( files, getProject(), current.getKey() );
 
         for ( Map.Entry<String,Model> sourceEntry : reactor.entrySet() )
         {
@@ -287,22 +289,7 @@ public class SetMojo
                 continue;
             }
 
-            final File moduleDir = new File( project.getBasedir(), sourcePath );
-
-            final File moduleProjectFile;
-
-            if ( moduleDir.isDirectory() )
-            {
-                moduleProjectFile = new File( moduleDir, "pom.xml" );
-            }
-            else
-            {
-                // i don't think this should ever happen... but just in case
-                // the module references the file-name
-                moduleProjectFile = moduleDir;
-            }
-
-            files.add( moduleProjectFile );
+            addFile( files, project, sourcePath );
 
             getLog().debug(
                 "Looking for modules which use " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
@@ -356,6 +343,26 @@ public class SetMojo
                 }
             }
         }
+    }
+
+    private void addFile( Set<File> files, MavenProject project, String relativePath )
+    {
+        final File moduleDir = new File( project.getBasedir(), relativePath );
+
+        final File moduleProjectFile;
+
+        if ( moduleDir.isDirectory() )
+        {
+            moduleProjectFile = new File( moduleDir, "pom.xml" );
+        }
+        else
+        {
+            // i don't think this should ever happen... but just in case
+            // the module references the file-name
+            moduleProjectFile = moduleDir;
+        }
+
+        files.add( moduleProjectFile );
     }
 
     /**
