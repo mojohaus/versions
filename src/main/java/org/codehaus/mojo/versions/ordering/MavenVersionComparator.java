@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.ordering;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.util.StringUtils;
 
 /**
@@ -93,11 +94,12 @@ public class MavenVersionComparator
      * {@inheritDoc}
      */
     protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
+        throws InvalidSegmentException
     {
         int segmentCount = innerGetSegmentCount( v );
         if ( segment < 0 || segment >= segmentCount )
         {
-            throw new IllegalArgumentException( "Invalid segment" );
+            throw new InvalidSegmentException( segment, segmentCount, v.toString() );
         }
         String version = v.toString();
         if ( segmentCount == 1 )

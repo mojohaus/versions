@@ -46,5 +46,6 @@ public interface VersionComparator
      * @return An artifact version with the specified segment incremented.
      * @since 1.0-beta-1
      */
-    ArtifactVersion incrementSegment( ArtifactVersion artifactVersion, int segment );
+    ArtifactVersion incrementSegment( ArtifactVersion artifactVersion, int segment )
+        throws InvalidSegmentException;
 }
