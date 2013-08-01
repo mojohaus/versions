@@ -254,7 +254,7 @@ public class SetMojo
         addChange( groupId, artifactId, oldVersion, newVersion );
         // now fake out the triggering change
 
-        final Map.Entry<String,Model> current = PomHelper.getModelEntry( reactor, this.groupId, this.artifactId );
+        final Map.Entry<String,Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
         current.getValue().setVersion( newVersion );
 
         files.add( new File(getProject().getBasedir(), current.getKey()) );
