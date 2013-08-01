@@ -698,7 +698,8 @@ public class PomHelper
                     value = evaluate( value.substring( exprStartDelimiter ), properties );
                 }
             }
-        } else
+        }
+        else
         {
             // TODO find a way to log that and not use this System.out!!
             // this class could be a component with logger injected !!
@@ -1551,11 +1552,27 @@ public class PomHelper
      */
     public static Model getModel( Map<String, Model> reactor, String groupId, String artifactId )
     {
-        for ( Model model : reactor.values() )
+        Map.Entry<String, Model> entry = getModelEntry( reactor, groupId, artifactId );
+        return entry == null ? null : entry.getValue();
+    }
+
+    /**
+     * Returns the model that has the specified groupId and artifactId or <code>null</code> if no such model exists.
+     *
+     * @param reactor    The map of models keyed by path.
+     * @param groupId    The groupId to match.
+     * @param artifactId The artifactId to match.
+     * @return The model entry or <code>null</code> if the model was not in the reactor.
+     */
+    public static Map.Entry<String, Model> getModelEntry( Map<String, Model> reactor, String groupId,
+                                                          String artifactId )
+    {
+        for ( Map.Entry<String, Model> entry : reactor.entrySet() )
         {
+            Model model = entry.getValue();
             if ( groupId.equals( getGroupId( model ) ) && artifactId.equals( getArtifactId( model ) ) )
             {
-                return model;
+                return entry;
             }
         }
         return null;

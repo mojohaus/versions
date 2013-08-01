@@ -33,6 +33,7 @@ import org.codehaus.mojo.versions.ordering.ReactorDepthComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.ContextualLog;
 import org.codehaus.mojo.versions.utils.DelegatingContextualLog;
+import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.StringUtils;
@@ -47,6 +48,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 /**
  * Sets the current projects version, updating the details of any child modules as necessary.
@@ -144,7 +148,7 @@ public class SetMojo
     /**
      * The changes to module coordinates. Guarded by this.
      */
-    private final transient List sourceChanges = new ArrayList();
+    private final transient List<VersionChange> sourceChanges = new ArrayList<VersionChange>();
 
     private synchronized void addChange( String groupId, String artifactId, String oldVersion, String newVersion )
     {
@@ -201,140 +205,156 @@ public class SetMojo
                                                   + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
         }
 
-        // this is the triggering change
-        addChange( groupId, artifactId, oldVersion, newVersion );
-
         try
         {
             final MavenProject project =
                 PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
-            final Map<String, Model> reactor = PomHelper.getReactorModels( project, getLog() );
+            Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
+            final SortedMap<String, Model> reactor = new TreeMap<String, Model>( new ReactorDepthComparator(reactorModels) );
+            reactor.putAll( reactorModels );
 
-            // now fake out the triggering change
-            final Model current =
-                PomHelper.getModel( reactor, getProject().getGroupId(), getProject().getArtifactId() );
-            current.setVersion( newVersion );
-
+            // set of files to update
             final Set<File> files = new LinkedHashSet<File>();
-            files.add( getProject().getFile() );
 
-            final List<String> order = new ArrayList<String>( reactor.keySet() );
-            Collections.sort( order, new ReactorDepthComparator( reactor ) );
-
-            final Iterator i = order.iterator();
-            while ( i.hasNext() )
+            Pattern groupIdRegex = Pattern.compile( RegexUtils.convertWildcardsToRegex( groupId, true ) );
+            Pattern artifactIdRegex = Pattern.compile( RegexUtils.convertWildcardsToRegex( artifactId, true ) );
+            Pattern oldVersionIdRegex = Pattern.compile( RegexUtils.convertWildcardsToRegex( oldVersion, true ) );
+            for ( Model m : reactor.values() )
             {
-                final String sourcePath = (String) i.next();
-                final Model sourceModel = (Model) reactor.get( sourcePath );
-
-                getLog().debug( sourcePath.length() == 0
-                                    ? "Processing root module as parent"
-                                    : "Processing " + sourcePath + " as a parent." );
-
-                final String sourceGroupId = PomHelper.getGroupId( sourceModel );
-                if ( sourceGroupId == null )
+                final String mGroupId = PomHelper.getGroupId( m );
+                final String mArtifactId = PomHelper.getArtifactId( m );
+                final String mVersion = PomHelper.getVersion( m );
+                if ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId ).matches()
+                    && oldVersionIdRegex.matcher( mVersion ).matches() && !newVersion.equals( mVersion ) )
                 {
-                    getLog().warn( "Module " + sourcePath + " is missing a groupId." );
-                    continue;
-                }
-                final String sourceArtifactId = PomHelper.getArtifactId( sourceModel );
-                if ( sourceArtifactId == null )
-                {
-                    getLog().warn( "Module " + sourcePath + " is missing an artifactId." );
-                    continue;
-                }
-                final String sourceVersion = PomHelper.getVersion( sourceModel );
-                if ( sourceVersion == null )
-                {
-                    getLog().warn( "Module " + sourcePath + " is missing a version." );
-                    continue;
-                }
-
-                final File moduleDir = new File( project.getBasedir(), sourcePath );
-
-                final File moduleProjectFile;
-
-                if ( moduleDir.isDirectory() )
-                {
-                    moduleProjectFile = new File( moduleDir, "pom.xml" );
-                }
-                else
-                {
-                    // i don't think this should ever happen... but just in case
-                    // the module references the file-name
-                    moduleProjectFile = moduleDir;
-                }
-
-                files.add( moduleProjectFile );
-
-                getLog().debug(
-                    "Looking for modules which use " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                        + " as their parent" );
-
-                final Iterator j =
-                    PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
-
-                while ( j.hasNext() )
-                {
-                    final Map.Entry target = (Map.Entry) j.next();
-                    final String targetPath = (String) target.getKey();
-                    final Model targetModel = (Model) target.getValue();
-                    final Parent parent = targetModel.getParent();
-                    getLog().debug( "Module: " + targetPath );
-                    if ( sourceVersion.equals( parent.getVersion() ) )
-                    {
-                        getLog().debug(
-                            "    parent already is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                                + ":" + sourceVersion );
-                    }
-                    else
-                    {
-                        getLog().debug(
-                            "    parent is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                + parent.getVersion() );
-                        getLog().debug(
-                            "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                + sourceVersion );
-                    }
-                    final boolean targetExplicit = PomHelper.isExplicitVersion( targetModel );
-                    if ( ( updateMatchingVersions.booleanValue() || !targetExplicit ) && StringUtils.equals(
-                        parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
-                    {
-                        getLog().debug(
-                            "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                                             PomHelper.getArtifactId( targetModel ) )
-                                + ":" + PomHelper.getVersion( targetModel ) );
-                        getLog().debug(
-                            "    will become " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                                               PomHelper.getArtifactId( targetModel ) )
-                                + ":" + sourceVersion );
-                        addChange( PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ),
-                                   PomHelper.getVersion( targetModel ), sourceVersion );
-                        targetModel.setVersion( sourceVersion );
-                    }
-                    else
-                    {
-                        getLog().debug(
-                            "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                                             PomHelper.getArtifactId( targetModel ) )
-                                + ":" + PomHelper.getVersion( targetModel ) );
-                    }
+                    // if the change is not one we have swept up already
+                    applyChange( project, reactor, files, m.getGroupId(), m.getArtifactId(), m.getVersion() );
                 }
             }
 
             // now process all the updates
-            final Iterator k = files.iterator();
-            while ( k.hasNext() )
+            for ( File file : files )
             {
-                process( (File) k.next() );
+                process( file );
             }
 
         }
         catch ( IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
+        }
+    }
+
+    private void applyChange( MavenProject project, SortedMap<String, Model> reactor, Set<File> files, String groupId,
+                              String artifactId, String oldVersion )
+    {
+        // this is a triggering change
+        addChange( groupId, artifactId, oldVersion, newVersion );
+        // now fake out the triggering change
+
+        final Map.Entry<String,Model> current = PomHelper.getModelEntry( reactor, this.groupId, this.artifactId );
+        current.getValue().setVersion( newVersion );
+
+        files.add( new File(getProject().getBasedir(), current.getKey()) );
+
+        for ( Map.Entry<String,Model> sourceEntry : reactor.entrySet() )
+        {
+            final String sourcePath = sourceEntry.getKey();
+            final Model sourceModel = sourceEntry.getValue();
+
+            getLog().debug( sourcePath.length() == 0
+                                ? "Processing root module as parent"
+                                : "Processing " + sourcePath + " as a parent." );
+
+            final String sourceGroupId = PomHelper.getGroupId( sourceModel );
+            if ( sourceGroupId == null )
+            {
+                getLog().warn( "Module " + sourcePath + " is missing a groupId." );
+                continue;
+            }
+            final String sourceArtifactId = PomHelper.getArtifactId( sourceModel );
+            if ( sourceArtifactId == null )
+            {
+                getLog().warn( "Module " + sourcePath + " is missing an artifactId." );
+                continue;
+            }
+            final String sourceVersion = PomHelper.getVersion( sourceModel );
+            if ( sourceVersion == null )
+            {
+                getLog().warn( "Module " + sourcePath + " is missing a version." );
+                continue;
+            }
+
+            final File moduleDir = new File( project.getBasedir(), sourcePath );
+
+            final File moduleProjectFile;
+
+            if ( moduleDir.isDirectory() )
+            {
+                moduleProjectFile = new File( moduleDir, "pom.xml" );
+            }
+            else
+            {
+                // i don't think this should ever happen... but just in case
+                // the module references the file-name
+                moduleProjectFile = moduleDir;
+            }
+
+            files.add( moduleProjectFile );
+
+            getLog().debug(
+                "Looking for modules which use " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
+                    + " as their parent" );
+
+            for ( Map.Entry<String, Model> stringModelEntry : PomHelper.getChildModels( reactor, sourceGroupId,
+                                                                                        sourceArtifactId ).entrySet() )
+            {
+                final Map.Entry target = (Map.Entry) stringModelEntry;
+                final String targetPath = (String) target.getKey();
+                final Model targetModel = (Model) target.getValue();
+                final Parent parent = targetModel.getParent();
+                getLog().debug( "Module: " + targetPath );
+                if ( sourceVersion.equals( parent.getVersion() ) )
+                {
+                    getLog().debug(
+                        "    parent already is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                            + sourceVersion );
+                }
+                else
+                {
+                    getLog().debug(
+                        "    parent is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                            + parent.getVersion() );
+                    getLog().debug(
+                        "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                            + sourceVersion );
+                }
+                final boolean targetExplicit = PomHelper.isExplicitVersion( targetModel );
+                if ( ( updateMatchingVersions || !targetExplicit ) && StringUtils.equals(
+                    parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
+                {
+                    getLog().debug(
+                        "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                         PomHelper.getArtifactId( targetModel ) ) + ":"
+                            + PomHelper.getVersion( targetModel ) );
+                    getLog().debug(
+                        "    will become " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                           PomHelper.getArtifactId( targetModel ) )
+                            + ":" + sourceVersion );
+                    addChange( PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ),
+                               PomHelper.getVersion( targetModel ), sourceVersion );
+                    targetModel.setVersion( sourceVersion );
+                }
+                else
+                {
+                    getLog().debug(
+                        "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                         PomHelper.getArtifactId( targetModel ) ) + ":"
+                            + PomHelper.getVersion( targetModel ) );
+                }
+            }
         }
     }
 
@@ -367,10 +387,8 @@ public class SetMojo
                 versionChangerFactory.newVersionChanger( processParent, processProject, processDependencies,
                                                          processPlugins );
 
-            Iterator i = sourceChanges.iterator();
-            while ( i.hasNext() )
+            for ( VersionChange versionChange : sourceChanges )
             {
-                VersionChange versionChange = (VersionChange) i.next();
                 changer.apply( versionChange );
             }
         }
