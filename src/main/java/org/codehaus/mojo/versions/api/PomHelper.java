@@ -529,8 +529,6 @@ public class PomHelper
             }
         }
 
-        System.out.println( "Props: " + implicitProperties );
-
         stack = new Stack<String>();
         path = "";
         boolean inMatchScope = false;
@@ -1624,4 +1622,14 @@ public class PomHelper
         }
     }
 
+    /**
+     * Returns the GAV coordinates of a model.
+     *
+     * @param model the model.
+     * @return the GAV coordinates of a model.
+     */
+    public static String getGAV( Model model )
+    {
+        return getGroupId( model ) + ":" + getArtifactId( model ) + ":" + getVersion( model );
+    }
 }
