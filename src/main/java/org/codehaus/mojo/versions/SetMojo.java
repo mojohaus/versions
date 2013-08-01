@@ -51,7 +51,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
- * Sets the current projects version, updating the details of any child modules as necessary.
+ * Sets the current project's version and based on that change propagates that change onto any child modules as necessary.
  *
  * @author Stephen Connolly
  * @goal set

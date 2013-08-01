@@ -171,4 +171,14 @@ mvn versions:set -DnewVersion=2.1.0-SNAPSHOT -f enforcer/enforcer-api/pom.xml
   In this case it has updated the version of enforcer-api, it has found that enforcer-api is part of an aggregator
   build in the local filesystem, and it has updated all references to enforcer-api in the aggregator build to
   reference the new version.
+
+Widening the scope of the change
+
+  You can increase or change the scope of the change by specifying the <<<groupId>>> or <<<artifactId>>> or
+  <<<oldVersion>>> on the command line directly. These can also support wildcards to help match multiple modules
+  which will become origins of change.
+
++---+
+mvn versions:set -DgroupId=org.apache.maven.* -DartifactId=* -DoldVersion=2.* -DnewVersion=2.1.0-SNAPSHOT
++---+
   
