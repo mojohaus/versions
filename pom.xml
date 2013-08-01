@@ -393,7 +393,7 @@
           <pomIncludes>
             <pomInclude>*/pom.xml</pomInclude>
           </pomIncludes>
-          <postBuildHookScript>verify.bsh</postBuildHookScript>
+          <postBuildHookScript>verify</postBuildHookScript>
           <filterProperties>
             <repository.proxy.url>${repository.proxy.url}</repository.proxy.url>
           </filterProperties>
