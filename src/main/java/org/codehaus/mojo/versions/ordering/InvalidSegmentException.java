@@ -20,7 +20,7 @@ package org.codehaus.mojo.versions.ordering;
  * Represents an invalid segment being identified within a version.
  */
 public class InvalidSegmentException
-    extends Exception
+    extends RuntimeException
 {
     /**
      * Constructs a new exception.

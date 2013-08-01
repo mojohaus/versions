@@ -53,7 +53,6 @@ public class MercuryVersionComparator
     }
 
     protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
-        throws InvalidSegmentException
     {
         final int segmentCount = getSegmentCount( v );
         if ( segment < 0 || segment > segmentCount )

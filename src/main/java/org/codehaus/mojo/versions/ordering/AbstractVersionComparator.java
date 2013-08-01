@@ -38,7 +38,6 @@ public abstract class AbstractVersionComparator
      * {@inheritDoc}
      */
     public final ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
-        throws InvalidSegmentException
     {
         if ( VersionComparators.isSnapshot( v ) )
         {
@@ -48,8 +47,7 @@ public abstract class AbstractVersionComparator
         return innerIncrementSegment( v, segment );
     }
 
-    protected abstract ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
-        throws InvalidSegmentException;
+    protected abstract ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment );
 
     /**
      * Returns a hash code value for the comparator class.

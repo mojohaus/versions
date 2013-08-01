@@ -163,7 +163,6 @@ public class NumericVersionComparator
      * {@inheritDoc}
      */
     protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
-        throws InvalidSegmentException
     {
         final int segmentCount = innerGetSegmentCount( v );
         if ( segment < 0 || segment > segmentCount )
