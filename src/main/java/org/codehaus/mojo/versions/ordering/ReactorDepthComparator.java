@@ -54,6 +54,6 @@ public class ReactorDepthComparator
         {
             return 1;
         }
-        return 0;
+        return PomHelper.getGAV(m1).compareTo(PomHelper.getGAV(m2));
     }
 }
