@@ -95,7 +95,7 @@ Reason: Cannot find parent: com.foo.bar:bar for project: com.foo.bar:bar-child:j
   In order to fix the project, you need to either update the version of the child-module, or roll-back the version of
   the parent module. When there is only one child module, this is easiest to do by hand. When there are many modules,
   some referencing the new version and some referencing old versions of the parent, this is easiest to do using the
-  {{{./update-child-modules-mojo.html}versions:update-child-modules}} goal.
+  {{{../update-child-modules-mojo.html}versions:update-child-modules}} goal.
 
   Note: it is essential in this situation to run Maven with the <<<-N>>> option, as otherwise Maven will be unable
   to run the goal.
@@ -125,5 +125,5 @@ mvn -N versions:update-child-modules
 ---
 
   If you have several layers of projects, and the versions are really out of whack, you may have to change directory
-  into the child aggregator projects and re-run the {{{./update-child-modules-mojo.html}versions:update-child-modules}}
+  into the child aggregator projects and re-run the {{{../update-child-modules-mojo.html}versions:update-child-modules}}
   goal in order to finish fixing the project.
