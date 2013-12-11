@@ -67,7 +67,7 @@ public class SetMojo
     /**
      * The new version number to set.
      *
-     * @parameter expression="${newVersion}"
+     * @parameter property="newVersion"
      * @since 1.0-beta-1
      */
     private String newVersion;
@@ -75,15 +75,15 @@ public class SetMojo
     /**
      * The groupId of the dependency/module to update.
      *
-     * @parameter expression="${groupId}" default-value="${project.groupId}"
+     * @parameter property="groupId" default-value="${project.groupId}"
      * @since 1.2
      */
     private String groupId;
 
     /**
-     * The artifactId of the dependecy/module to update.
+     * The artifactId of the dependency/module to update.
      *
-     * @parameter expression="${artifactId}" default-value="${project.artifactId}"
+     * @parameter property="artifactId" default-value="${project.artifactId}"
      * @since 1.2
      */
     private String artifactId;
@@ -91,7 +91,7 @@ public class SetMojo
     /**
      * The version of the dependency/module to update.
      *
-     * @parameter expression="${oldVersion}" default-value="${project.version}"
+     * @parameter property="oldVersion" default-value="${project.version}"
      * @since 1.2
      */
     private String oldVersion;
@@ -99,7 +99,7 @@ public class SetMojo
     /**
      * Whether matching versions explicitly specified (as /project/version) in child modules should be updated.
      *
-     * @parameter expression="${updateMatchingVersions}" default-value="true"
+     * @parameter property="updateMatchingVersions" default-value="true"
      * @since 1.3
      */
     private Boolean updateMatchingVersions;
@@ -107,7 +107,7 @@ public class SetMojo
     /**
      * Whether to process the parent of the project. If not set will default to true.
      *
-     * @parameter expression="${processParent}" default-value="true"
+     * @parameter property="processParent" default-value="true"
      * @since 1.3
      */
     private boolean processParent;
@@ -115,7 +115,7 @@ public class SetMojo
     /**
      * Whether to process the project version. If not set will default to true.
      *
-     * @parameter expression="${processProject}" default-value="true"
+     * @parameter property="processProject" default-value="true"
      * @since 1.3
      */
     private boolean processProject;
@@ -123,7 +123,7 @@ public class SetMojo
     /**
      * Whether to process the dependencies section of the project. If not set will default to true.
      *
-     * @parameter expression="${processDependencies}" default-value="true"
+     * @parameter property="processDependencies" default-value="true"
      * @since 1.3
      */
     private boolean processDependencies;
@@ -131,7 +131,7 @@ public class SetMojo
     /**
      * Whether to process the plugins section of the project. If not set will default to true.
      *
-     * @parameter expression="${processPlugins}" default-value="true"
+     * @parameter property="processPlugins" default-value="true"
      * @since 1.3
      */
     private boolean processPlugins;

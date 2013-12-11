@@ -69,7 +69,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * The Maven Project.
      *
-     * @parameter expression="${project}"
+     * @parameter property="project"
      * @required
      * @readonly
      * @since 1.0-alpha-1
@@ -95,7 +95,7 @@ public abstract class AbstractVersionsUpdaterMojo
     protected MavenProjectBuilder projectBuilder;
 
     /**
-     * @parameter expression="${reactorProjects}"
+     * @parameter property="reactorProjects"
      * @required
      * @readonly
      * @since 1.0-alpha-1
@@ -113,21 +113,21 @@ public abstract class AbstractVersionsUpdaterMojo
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
-     * @parameter expression="${project.remoteArtifactRepositories}"
+     * @parameter property="project.remoteArtifactRepositories"
      * @readonly
      * @since 1.0-alpha-3
      */
     protected List remoteArtifactRepositories;
 
     /**
-     * @parameter expression="${project.pluginArtifactRepositories}"
+     * @parameter property="project.pluginArtifactRepositories"
      * @readonly
      * @since 1.0-alpha-3
      */
     protected List remotePluginRepositories;
 
     /**
-     * @parameter expression="${localRepository}"
+     * @parameter property="localRepository"
      * @readonly
      * @since 1.0-alpha-1
      */
@@ -140,7 +140,7 @@ public abstract class AbstractVersionsUpdaterMojo
     private WagonManager wagonManager;
 
     /**
-     * @parameter expression="${settings}"
+     * @parameter property="settings"
      * @readonly
      * @since 1.0-alpha-3
      */
@@ -150,7 +150,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * settings.xml's server id for the URL.
      * This is used when wagon needs extra authentication information.
      *
-     * @parameter expression="${maven.version.rules.serverId}" default-value="serverId";
+     * @parameter property="maven.version.rules.serverId" default-value="serverId";
      * @since 1.0-alpha-3
      */
     private String serverId;
@@ -158,7 +158,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * The Wagon URI of a ruleSet file containing the rules that control how to compare version numbers.
      *
-     * @parameter expression="${maven.version.rules}"
+     * @parameter property="maven.version.rules"
      * @since 1.0-alpha-3
      */
     private String rulesUri;
@@ -166,7 +166,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Controls whether a backup pom should be created (default is true).
      *
-     * @parameter expression="${generateBackupPoms}"
+     * @parameter property="generateBackupPoms"
      * @since 1.0-alpha-3
      */
     private Boolean generateBackupPoms;
@@ -174,7 +174,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
      *
-     * @parameter expression="${allowSnapshots}" default-value="false"
+     * @parameter property="allowSnapshots" default-value="false"
      * @since 1.0-alpha-1
      */
     protected Boolean allowSnapshots;
@@ -187,7 +187,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * The Maven Session.
      *
-     * @parameter expression="${session}"
+     * @parameter property="session"
      * @required
      * @readonly
      * @since 1.0-alpha-1

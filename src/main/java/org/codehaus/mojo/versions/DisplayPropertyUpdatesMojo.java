@@ -64,7 +64,7 @@ public class DisplayPropertyUpdatesMojo
     /**
      * A comma separated list of properties to update.
      *
-     * @parameter expression="${includeProperties}"
+     * @parameter property="includeProperties"
      * @since 1.0-alpha-1
      */
     private String includeProperties = null;
@@ -72,7 +72,7 @@ public class DisplayPropertyUpdatesMojo
     /**
      * A comma separated list of properties to not update.
      *
-     * @parameter expression="${excludeProperties}"
+     * @parameter property="excludeProperties"
      * @since 1.0-alpha-1
      */
     private String excludeProperties = null;
@@ -80,7 +80,7 @@ public class DisplayPropertyUpdatesMojo
     /**
      * Whether properties linking versions should be auto-detected or not.
      *
-     * @parameter expression="${autoLinkItems}" defaultValue="true"
+     * @parameter property="autoLinkItems" defaultValue="true"
      * @since 1.0-alpha-2
      */
     private Boolean autoLinkItems;

@@ -75,7 +75,7 @@ public abstract class AbstractVersionsReport
     /**
      * The Maven Project.
      *
-     * @parameter expression="${project}"
+     * @parameter property="project"
      * @required
      * @readonly
      * @since 1.0-alpha-3
@@ -109,7 +109,7 @@ public abstract class AbstractVersionsReport
     /**
      * Skip entire check.
      *
-     * @parameter expression="${versions.skip}"
+     * @parameter property="versions.skip"
      * @since 1.0-alpha-3
      */
     private Boolean skip;
@@ -125,21 +125,21 @@ public abstract class AbstractVersionsReport
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
-     * @parameter expression="${project.remoteArtifactRepositories}"
+     * @parameter property="project.remoteArtifactRepositories"
      * @readonly
      * @since 1.0-alpha-3
      */
     protected List remoteArtifactRepositories;
 
     /**
-     * @parameter expression="${project.pluginArtifactRepositories}"
+     * @parameter property="project.pluginArtifactRepositories"
      * @readonly
      * @since 1.0-alpha-3
      */
     protected List remotePluginRepositories;
 
     /**
-     * @parameter expression="${localRepository}"
+     * @parameter property="localRepository"
      * @readonly
      * @since 1.0-alpha-1
      */
@@ -152,7 +152,7 @@ public abstract class AbstractVersionsReport
     private WagonManager wagonManager;
 
     /**
-     * @parameter expression="${settings}"
+     * @parameter property="settings"
      * @readonly
      * @since 1.0-alpha-3
      */
@@ -162,7 +162,7 @@ public abstract class AbstractVersionsReport
      * settings.xml's server id for the URL.
      * This is used when wagon needs extra authentication information.
      *
-     * @parameter expression="${maven.version.rules.serverId}" default-value="serverId";
+     * @parameter property="maven.version.rules.serverId" default-value="serverId";
      * @since 1.0-alpha-3
      */
     private String serverId;
@@ -170,7 +170,7 @@ public abstract class AbstractVersionsReport
     /**
      * The Wagon URI of a ruleSet file containing the rules that control how to compare version numbers.
      *
-     * @parameter expression="${maven.version.rules}"
+     * @parameter property="maven.version.rules"
      * @since 1.0-alpha-3
      */
     private String rulesUri;
@@ -180,7 +180,7 @@ public abstract class AbstractVersionsReport
      * <code>numeric</code> which will handle long version numbers provided all components are numeric, or
      * <code>mercury</code> which will use the mercury version number comparison rules.
      *
-     * @parameter expression="${comparisonMethod}"
+     * @parameter property="comparisonMethod"
      * @since 1.0-alpha-1
      */
     protected String comparisonMethod;
@@ -188,7 +188,7 @@ public abstract class AbstractVersionsReport
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
      *
-     * @parameter expression="${allowSnapshots}" default-value="false"
+     * @parameter property="allowSnapshots" default-value="false"
      * @since 1.0-alpha-3
      */
     protected Boolean allowSnapshots;
@@ -201,7 +201,7 @@ public abstract class AbstractVersionsReport
     /**
      * The Maven Session.
      *
-     * @parameter expression="${session}"
+     * @parameter property="session"
      * @required
      * @readonly
      * @since 1.0-beta-1

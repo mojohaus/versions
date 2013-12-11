@@ -65,7 +65,7 @@ public class CompareDependenciesMojo
      * The groupId, artifactId, and version of the remote project (POM) to which we are comparing.  This
      * should be in the form "groupId:artifactId:version"
      *
-     * @parameter expression="${remotePom}"
+     * @parameter property="remotePom"
      * @required true
      */
     protected String remotePom;
@@ -73,28 +73,28 @@ public class CompareDependenciesMojo
     /**
      * Ignore the list of remote dependencies and only compare the remote dependencyManagement
      *
-     * @parameter defaul-value="false" expression="${ignoreRemoteDependencies}"
+     * @parameter property="ignoreRemoteDependencies" default-value="false"
      */
     protected boolean ignoreRemoteDependencies;
 
     /**
      * Ignore the remote dependency management and only check against the actual dependencies of the remote project
      *
-     * @parameter default-value="false" expression="${ignoreRemoteDependencyManagement}"
+     * @parameter property="ignoreRemoteDependencyManagement" default-value="false"
      */
     protected boolean ignoreRemoteDependencyManagement;
 
     /**
      * Update dependency versions in the current POM.
      *
-     * @parameter default-value="false" expression="${updateDependencies}"
+     * @parameter property="updateDependencies" default-value="false"
      */
     protected boolean updateDependencies;
 
     /**
      * Update dependency versions stored in properties
      *
-     * @parameter default-value="false" expression="${updatePropertyVersions}"
+     * @parameter property="updatePropertyVersions" default-value="false"
      */
     protected boolean updatePropertyVersions;
 
@@ -102,14 +102,14 @@ public class CompareDependenciesMojo
      * Display the dependency version differences on the command line, but do not update the versions in the current
      * pom. If updateDependencies is set to "true" this will automatically be set to false.
      *
-     * @parameter default-value="true" expression="${reportMode}"
+     * @parameter property="reportMode" default-value="true"
      */
     protected boolean reportMode;
 
     /**
      * If the output file is set, the diff report will be written to this file.
      *
-     * @parameter default-value="null" expression="${reportOutputFile}"
+     * @parameter property="reportOutputFile" default-value="null"
      */
     protected File reportOutputFile;
 

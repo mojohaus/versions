@@ -67,7 +67,7 @@ public class DisplayDependencyUpdatesMojo
      * Whether to process the dependencyManagement section of the project. If not
      * set will default to true.
      *
-     * @parameter expression="${processDependencyManagement}" defaultValue="true"
+     * @parameter property="processDependencyManagement" defaultValue="true"
      * @since 1.2
      */
     protected Boolean processDependencyManagement = Boolean.TRUE;
@@ -76,7 +76,7 @@ public class DisplayDependencyUpdatesMojo
      * Whether to process the dependencies section of the project. If not
      * set will default to true.
      *
-     * @parameter expression="${processDependencies}" defaultValue="true"
+     * @parameter property="processDependencies" defaultValue="true"
      * @since 1.2
      */
     protected Boolean processDependencies = Boolean.TRUE;
@@ -85,7 +85,7 @@ public class DisplayDependencyUpdatesMojo
      * Whether to show additional information such as dependencies that
      * do not need updating.  Defaults to false.
      *
-     * @parameter expression="${verbose}" defaultValue="false"
+     * @parameter property="verbose" defaultValue="false"
      * @since 2.1
      */
     protected Boolean verbose = Boolean.FALSE;

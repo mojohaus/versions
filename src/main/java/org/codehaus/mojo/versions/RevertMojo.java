@@ -44,7 +44,7 @@ public class RevertMojo
     /**
      * The Maven Project.
      *
-     * @parameter expression="${project}"
+     * @parameter property="project"
      * @required
      * @readonly
      * @since 1.0-alpha-1

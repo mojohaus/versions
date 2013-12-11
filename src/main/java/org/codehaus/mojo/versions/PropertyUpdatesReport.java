@@ -52,7 +52,7 @@ public class PropertyUpdatesReport
     /**
      * A comma separated list of properties to include in the report.
      *
-     * @parameter expression="${includeProperties}"
+     * @parameter property="includeProperties"
      * @since 1.0-beta-1
      */
     private String includeProperties = null;
@@ -60,7 +60,7 @@ public class PropertyUpdatesReport
     /**
      * A comma separated list of properties to not include in the report.
      *
-     * @parameter expression="${excludeProperties}"
+     * @parameter property="excludeProperties"
      * @since 1.0-beta-1
      */
     private String excludeProperties = null;
@@ -68,7 +68,7 @@ public class PropertyUpdatesReport
     /**
      * Whether properties linking versions should be auto-detected or not.
      *
-     * @parameter expression="${autoLinkItems}" defaultValue="true"
+     * @parameter property="autoLinkItems" defaultValue="true"
      * @since 1.0-beta-1
      */
     private Boolean autoLinkItems;

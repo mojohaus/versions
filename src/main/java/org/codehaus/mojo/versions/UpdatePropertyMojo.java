@@ -45,7 +45,7 @@ public class UpdatePropertyMojo
     /**
      * A property to update.
      *
-     * @parameter expression="${property}"
+     * @parameter property="property"
      * @since 1.3
      */
     private String property = null;
@@ -53,7 +53,7 @@ public class UpdatePropertyMojo
     /**
      * The new version to set the property to (can be a version range to find a version within).
      *
-     * @parameter expression="${newVersion}"
+     * @parameter property="newVersion"
      * @since 1.3
      */
     private String newVersion = null;
@@ -61,7 +61,7 @@ public class UpdatePropertyMojo
     /**
      * Whether properties linking versions should be auto-detected or not.
      *
-     * @parameter expression="${autoLinkItems}" defaultValue="true"
+     * @parameter property="autoLinkItems" defaultValue="true"
      * @since 1.0-alpha-2
      */
     private Boolean autoLinkItems;

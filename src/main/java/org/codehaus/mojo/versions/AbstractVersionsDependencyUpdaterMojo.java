@@ -56,7 +56,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * line. When specifying includes from the pom, use the {@link #includes} configuration instead. If this property is
      * specified then the {@link # include} configuration is ignored.
      *
-     * @parameter expression="${includes}"
+     * @parameter property="includes"
      * @since 1.0-beta-1
      */
     private String includesList = null;
@@ -67,7 +67,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * line. When specifying excludes from the pom, use the {@link #excludes} configuration instead. If this property is
      * specified then the {@link # exclude} configuration is ignored.
      *
-     * @parameter expression="${excludes}"
+     * @parameter property="excludes"
      * @since 1.0-beta-1
      */
     private String excludesList = null;
@@ -96,7 +96,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * Whether to process the dependencies section of the project. If not
      * set will default to true.
      *
-     * @parameter expression="${processDependencies}" defaultValue="true"
+     * @parameter property="processDependencies" defaultValue="true"
      * @since 1.0-alpha-3
      */
     private Boolean processDependencies;
@@ -105,7 +105,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * Whether to process the dependencyManagement section of the project. If not
      * set will default to true.
      *
-     * @parameter expression="${processDependencyManagement}" defaultValue="true"
+     * @parameter property="processDependencyManagement" defaultValue="true"
      * @since 1.0-alpha-3
      */
     private Boolean processDependencyManagement;
@@ -127,7 +127,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Whether to skip processing dependencies that are produced as part of the current reactor.
      *
-     * @parameter expression="${excludeReactor}" defaultValue="true"
+     * @parameter property="excludeReactor" defaultValue="true"
      * @since 1.0-alpha-3
      */
     private Boolean excludeReactor;

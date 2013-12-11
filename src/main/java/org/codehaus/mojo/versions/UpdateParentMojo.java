@@ -49,7 +49,7 @@ public class UpdateParentMojo
     /**
      * Version specification to control artifact resolution.
      *
-     * @parameter expression="${parentVersion}"
+     * @parameter property="parentVersion"
      * @since 1.0-alpha-1
      */
     protected String parentVersion = null;

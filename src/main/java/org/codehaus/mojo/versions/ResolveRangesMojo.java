@@ -52,7 +52,7 @@ public class ResolveRangesMojo
      * Whether to process the properties section of the project. If not
      * set will default to true.
      *
-     * @parameter expression="${processProperties}" defaultValue="true"
+     * @parameter property="processProperties" defaultValue="true"
      * @since 1.3
      */
     private Boolean processProperties;
@@ -60,7 +60,7 @@ public class ResolveRangesMojo
     /**
      * A comma separated list of properties to update if they contain version-ranges.
      *
-     * @parameter expression="${includeProperties}"
+     * @parameter property="includeProperties"
      * @since 1.3
      */
     private String includeProperties = null;
@@ -68,7 +68,7 @@ public class ResolveRangesMojo
     /**
      * A comma separated list of properties to not update even if they contain version-ranges.
      *
-     * @parameter expression="${excludeProperties}"
+     * @parameter property="excludeProperties"
      * @since 1.3
      */
     private String excludeProperties = null;

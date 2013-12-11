@@ -196,7 +196,7 @@ public class PropertyUpdatesRenderer
     {
         sink.section2();
         sink.sectionTitle2();
-        sink.text( "${" + property.getName() + "}" );
+        sink.text( "${" + property.getName() + "" );
         sink.sectionTitle2_();
         renderPropertyDetailTable( property, versions );
         sink.section2_();
