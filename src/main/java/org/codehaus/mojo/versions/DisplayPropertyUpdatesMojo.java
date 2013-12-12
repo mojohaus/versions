@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Sets properties to the latest versions of specific artifacts.
+ * Displays properties that are linked to artifact versions and have updates available.
  *
  * @author Stephen Connolly
  * @goal display-property-updates
