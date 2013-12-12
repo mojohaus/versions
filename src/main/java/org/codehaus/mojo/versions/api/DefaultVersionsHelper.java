@@ -81,6 +81,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 /**
@@ -95,6 +100,8 @@ public class DefaultVersionsHelper
     private static final String TYPE_EXACT = "exact";
 
     private static final String TYPE_REGEX = "regex";
+
+    private static final int LOOKUP_PARALLEL_THREADS = 5;
 
     /**
      * The artifact comparison rules to use.
@@ -202,6 +209,158 @@ public class DefaultVersionsHelper
         this.remoteArtifactRepositories = remoteArtifactRepositories;
         this.remotePluginRepositories = remotePluginRepositories;
         this.log = log;
+    }
+
+    private static RuleSet getRuleSet( Wagon wagon, String remoteURI )
+        throws IOException, AuthorizationException, TransferFailedException, ResourceDoesNotExistException
+    {
+        File tempFile = File.createTempFile( "ruleset", ".xml" );
+        try
+        {
+            wagon.get( remoteURI, tempFile );
+            RuleXpp3Reader reader = new RuleXpp3Reader();
+            FileInputStream fis = new FileInputStream( tempFile );
+            try
+            {
+                BufferedInputStream bis = new BufferedInputStream( fis );
+                try
+                {
+                    return reader.read( bis );
+                }
+                catch ( XmlPullParserException e )
+                {
+                    final IOException ioe = new IOException();
+                    ioe.initCause( e );
+                    throw ioe;
+                }
+                finally
+                {
+                    try
+                    {
+                        bis.close();
+                    }
+                    catch ( IOException e )
+                    {
+                        // ignore
+                    }
+                }
+            }
+            finally
+            {
+                try
+                {
+                    fis.close();
+                }
+                catch ( IOException e )
+                {
+                    // ignore
+                }
+            }
+        }
+        finally
+        {
+            if ( !tempFile.delete() )
+            {
+                // maybe we can delete this later
+                tempFile.deleteOnExit();
+            }
+        }
+    }
+
+    static boolean exactMatch( String wildcardRule, String value )
+    {
+        Pattern p = Pattern.compile( RegexUtils.convertWildcardsToRegex( wildcardRule, true ) );
+        return p.matcher( value ).matches();
+    }
+
+    static boolean match( String wildcardRule, String value )
+    {
+        Pattern p = Pattern.compile( RegexUtils.convertWildcardsToRegex( wildcardRule, false ) );
+        return p.matcher( value ).matches();
+    }
+
+    private static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
+                                        Log logger )
+        throws MojoExecutionException
+    {
+        RuleSet ruleSet = new RuleSet();
+        if ( rulesUri != null && rulesUri.trim().length() != 0 )
+        {
+            try
+            {
+                int split = rulesUri.lastIndexOf( '/' );
+                String baseUri;
+                String fileUri;
+                if ( split != -1 )
+                {
+                    baseUri = rulesUri.substring( 0, split ) + '/';
+                    fileUri = split + 1 < rulesUri.length() ? rulesUri.substring( split + 1 ) : "";
+                }
+                else
+                {
+                    baseUri = rulesUri;
+                    fileUri = "";
+                }
+                try
+                {
+                    Wagon wagon = WagonUtils.createWagon( serverId, baseUri, wagonManager, settings, logger );
+                    try
+                    {
+                        logger.debug( "Trying to load ruleset from file \"" + fileUri + "\" in " + baseUri );
+                        final RuleSet loaded = getRuleSet( wagon, fileUri );
+                        ruleSet.setRules( loaded.getRules() );
+                        ruleSet.setIgnoreVersions( loaded.getIgnoreVersions() );
+                        logger.debug( "Rule set loaded" );
+                    }
+                    finally
+                    {
+                        if ( wagon != null )
+                        {
+                            try
+                            {
+                                wagon.disconnect();
+                            }
+                            catch ( ConnectionException e )
+                            {
+                                logger.warn( "Could not disconnect wagon!", e );
+                            }
+                        }
+
+                    }
+                }
+                catch ( TransferFailedException e )
+                {
+                    throw new MojoExecutionException( "Could not transfer rules from " + rulesUri, e );
+                }
+                catch ( AuthorizationException e )
+                {
+                    throw new MojoExecutionException( "Authorization failure trying to load rules from " + rulesUri,
+                                                      e );
+                }
+                catch ( ResourceDoesNotExistException e )
+                {
+                    throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
+                }
+                catch ( AuthenticationException e )
+                {
+                    throw new MojoExecutionException( "Authentication failure trying to load rules from " + rulesUri,
+                                                      e );
+                }
+                catch ( UnsupportedProtocolException e )
+                {
+                    throw new MojoExecutionException( "Unsupported protocol for " + rulesUri, e );
+                }
+                catch ( ConnectionException e )
+                {
+                    throw new MojoExecutionException( "Could not establish connection to " + rulesUri, e );
+                }
+            }
+            catch ( IOException e )
+            {
+                throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
+            }
+        }
+        return ruleSet;
     }
 
     /**
@@ -432,158 +591,6 @@ public class DefaultVersionsHelper
         return bestFit;
     }
 
-    private static RuleSet getRuleSet( Wagon wagon, String remoteURI )
-        throws IOException, AuthorizationException, TransferFailedException, ResourceDoesNotExistException
-    {
-        File tempFile = File.createTempFile( "ruleset", ".xml" );
-        try
-        {
-            wagon.get( remoteURI, tempFile );
-            RuleXpp3Reader reader = new RuleXpp3Reader();
-            FileInputStream fis = new FileInputStream( tempFile );
-            try
-            {
-                BufferedInputStream bis = new BufferedInputStream( fis );
-                try
-                {
-                    return reader.read( bis );
-                }
-                catch ( XmlPullParserException e )
-                {
-                    final IOException ioe = new IOException();
-                    ioe.initCause( e );
-                    throw ioe;
-                }
-                finally
-                {
-                    try
-                    {
-                        bis.close();
-                    }
-                    catch ( IOException e )
-                    {
-                        // ignore
-                    }
-                }
-            }
-            finally
-            {
-                try
-                {
-                    fis.close();
-                }
-                catch ( IOException e )
-                {
-                    // ignore
-                }
-            }
-        }
-        finally
-        {
-            if ( !tempFile.delete() )
-            {
-                // maybe we can delete this later
-                tempFile.deleteOnExit();
-            }
-        }
-    }
-
-    static boolean exactMatch( String wildcardRule, String value )
-    {
-        Pattern p = Pattern.compile( RegexUtils.convertWildcardsToRegex( wildcardRule, true ) );
-        return p.matcher( value ).matches();
-    }
-
-    static boolean match( String wildcardRule, String value )
-    {
-        Pattern p = Pattern.compile( RegexUtils.convertWildcardsToRegex( wildcardRule, false ) );
-        return p.matcher( value ).matches();
-    }
-
-    private static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
-                                        Log logger )
-        throws MojoExecutionException
-    {
-        RuleSet ruleSet = new RuleSet();
-        if ( rulesUri != null && rulesUri.trim().length() != 0 )
-        {
-            try
-            {
-                int split = rulesUri.lastIndexOf( '/' );
-                String baseUri;
-                String fileUri;
-                if ( split != -1 )
-                {
-                    baseUri = rulesUri.substring( 0, split ) + '/';
-                    fileUri = split + 1 < rulesUri.length() ? rulesUri.substring( split + 1 ) : "";
-                }
-                else
-                {
-                    baseUri = rulesUri;
-                    fileUri = "";
-                }
-                try
-                {
-                    Wagon wagon = WagonUtils.createWagon( serverId, baseUri, wagonManager, settings, logger );
-                    try
-                    {
-                        logger.debug( "Trying to load ruleset from file \"" + fileUri + "\" in " + baseUri );
-                        final RuleSet loaded = getRuleSet( wagon, fileUri );
-                        ruleSet.setRules( loaded.getRules() );
-                        ruleSet.setIgnoreVersions( loaded.getIgnoreVersions() );
-                        logger.debug( "Rule set loaded" );
-                    }
-                    finally
-                    {
-                        if ( wagon != null )
-                        {
-                            try
-                            {
-                                wagon.disconnect();
-                            }
-                            catch ( ConnectionException e )
-                            {
-                                logger.warn( "Could not disconnect wagon!", e );
-                            }
-                        }
-
-                    }
-                }
-                catch ( TransferFailedException e )
-                {
-                    throw new MojoExecutionException( "Could not transfer rules from " + rulesUri, e );
-                }
-                catch ( AuthorizationException e )
-                {
-                    throw new MojoExecutionException( "Authorization failure trying to load rules from " + rulesUri,
-                                                      e );
-                }
-                catch ( ResourceDoesNotExistException e )
-                {
-                    throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
-                }
-                catch ( AuthenticationException e )
-                {
-                    throw new MojoExecutionException( "Authentication failure trying to load rules from " + rulesUri,
-                                                      e );
-                }
-                catch ( UnsupportedProtocolException e )
-                {
-                    throw new MojoExecutionException( "Unsupported protocol for " + rulesUri, e );
-                }
-                catch ( ConnectionException e )
-                {
-                    throw new MojoExecutionException( "Could not establish connection to " + rulesUri, e );
-                }
-            }
-            catch ( IOException e )
-            {
-                throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
-            }
-        }
-        return ruleSet;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -668,14 +675,45 @@ public class DefaultVersionsHelper
                                                                         boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
-        Map<Dependency, ArtifactVersions> dependencyUpdates =
-            new TreeMap<Dependency, ArtifactVersions>( new DependencyComparator() );
-        for ( Object dependency1 : dependencies )
+        // Create the request for details collection for parallel lookup...
+        final List<Callable<DependencyArtifactVersions>> requestsForDetails =
+            new ArrayList<Callable<DependencyArtifactVersions>>( dependencies.size() );
+        for ( final Object dependency1 : dependencies )
         {
-            Dependency dependency = (Dependency) dependency1;
+            final Dependency dependency = (Dependency) dependency1;
+            requestsForDetails.add( new DependencyLookup( dependency, usePluginRepositories ) );
+        }
 
-            ArtifactVersions details = lookupDependencyUpdates( dependency, usePluginRepositories );
-            dependencyUpdates.put( dependency, details );
+        final Map<Dependency, ArtifactVersions> dependencyUpdates =
+            new TreeMap<Dependency, ArtifactVersions>( new DependencyComparator() );
+
+        // Lookup details in parallel...
+        final ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
+        try
+        {
+            final List<Future<DependencyArtifactVersions>> responseForDetails =
+                executor.invokeAll( requestsForDetails );
+
+            // Construct the final results...
+            for ( final Future<DependencyArtifactVersions> details : responseForDetails )
+            {
+                final DependencyArtifactVersions dav = details.get();
+                dependencyUpdates.put( dav.getDependency(), dav.getArtifactVersions() );
+            }
+        }
+        catch ( final ExecutionException ee )
+        {
+            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " +
+                                                              dependencies + ": " + ee.getMessage(), ee );
+        }
+        catch ( final InterruptedException ie )
+        {
+            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " +
+                                                              dependencies + ": " + ie.getMessage(), ie );
+        }
+        finally
+        {
+            executor.shutdownNow();
         }
         return dependencyUpdates;
     }
@@ -703,12 +741,44 @@ public class DefaultVersionsHelper
     public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, Boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
-        Map<Plugin, PluginUpdatesDetails> pluginUpdates =
-            new TreeMap<Plugin, PluginUpdatesDetails>( new PluginComparator() );
-        for ( Plugin plugin : plugins )
+        // Create the request for details collection for parallel lookup...
+        final List<Callable<PluginPluginUpdatesDetails>> requestsForDetails =
+            new ArrayList<Callable<PluginPluginUpdatesDetails>>( plugins.size() );
+        for ( final Plugin plugin : plugins )
         {
-            PluginUpdatesDetails details = lookupPluginUpdates( plugin, allowSnapshots );
-            pluginUpdates.put( plugin, details );
+            requestsForDetails.add( new PluginLookup( plugin, allowSnapshots ) );
+        }
+
+        final Map<Plugin, PluginUpdatesDetails> pluginUpdates =
+            new TreeMap<Plugin, PluginUpdatesDetails>( new PluginComparator() );
+
+        // Lookup details in parallel...
+        final ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
+        try
+        {
+            final List<Future<PluginPluginUpdatesDetails>> responseForDetails =
+                executor.invokeAll( requestsForDetails );
+
+            // Construct the final results...
+            for ( final Future<PluginPluginUpdatesDetails> details : responseForDetails )
+            {
+                final PluginPluginUpdatesDetails pud = details.get();
+                pluginUpdates.put( pud.getPlugin(), pud.getPluginUpdatesDetails() );
+            }
+        }
+        catch ( final ExecutionException ee )
+        {
+            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " +
+                                                              plugins + ": " + ee.getMessage(), ee );
+        }
+        catch ( final InterruptedException ie )
+        {
+            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " +
+                                                              plugins + ": " + ie.getMessage(), ie );
+        }
+        finally
+        {
+            executor.shutdownNow();
         }
         return pluginUpdates;
     }
@@ -869,6 +939,97 @@ public class DefaultVersionsHelper
             }
         }
         return propertyVersions;
+    }
+
+    // This is a data container to hold the result of a Dependency lookup to its ArtifactVersions.
+    private static class DependencyArtifactVersions
+    {
+        private final Dependency dependency;
+
+        private final ArtifactVersions artifactVersions;
+
+        public DependencyArtifactVersions( final Dependency dependency, final ArtifactVersions artifactVersions )
+        {
+            this.dependency = dependency;
+            this.artifactVersions = artifactVersions;
+        }
+
+        public Dependency getDependency()
+        {
+            return dependency;
+        }
+
+        public ArtifactVersions getArtifactVersions()
+        {
+            return artifactVersions;
+        }
+    }
+
+    // This is a data container to hold the result of a Dependency lookup to its ArtifactVersions.
+    private static class PluginPluginUpdatesDetails
+    {
+        private final Plugin plugin;
+
+        private final PluginUpdatesDetails pluginUpdatesDetails;
+
+        public PluginPluginUpdatesDetails( final Plugin plugin, final PluginUpdatesDetails pluginUpdatesDetails )
+        {
+            this.plugin = plugin;
+            this.pluginUpdatesDetails = pluginUpdatesDetails;
+        }
+
+        public Plugin getPlugin()
+        {
+            return plugin;
+        }
+
+        public PluginUpdatesDetails getPluginUpdatesDetails()
+        {
+            return pluginUpdatesDetails;
+        }
+    }
+
+    // This Callable wraps lookupDependencyUpdates so that it can be run in parallel.
+    private class DependencyLookup
+        implements Callable<DependencyArtifactVersions>
+    {
+        private final Dependency dependency;
+
+        private final boolean usePluginRepositories;
+
+        public DependencyLookup( final Dependency dependency, final boolean usePluginRepositories )
+        {
+            this.dependency = dependency;
+            this.usePluginRepositories = usePluginRepositories;
+        }
+
+        public DependencyArtifactVersions call()
+            throws Exception
+        {
+            return new DependencyArtifactVersions( dependency,
+                                                   lookupDependencyUpdates( dependency, usePluginRepositories ) );
+        }
+    }
+
+    // This Callable wraps lookupPluginUpdates so that it can be run in parallel.
+    private class PluginLookup
+        implements Callable<PluginPluginUpdatesDetails>
+    {
+        private final Plugin plugin;
+
+        private final boolean allowSnapshots;
+
+        public PluginLookup( final Plugin plugin, final Boolean allowSnapshots )
+        {
+            this.plugin = plugin;
+            this.allowSnapshots = allowSnapshots;
+        }
+
+        public PluginPluginUpdatesDetails call()
+            throws Exception
+        {
+            return new PluginPluginUpdatesDetails( plugin, lookupPluginUpdates( plugin, allowSnapshots ) );
+        }
     }
 
 
