@@ -51,7 +51,7 @@ import java.util.TreeSet;
  * @since 1.0-alpha-1
  */
 public class DisplayDependencyUpdatesMojo
-    extends AbstractVersionsUpdaterMojo
+    extends AbstractVersionsDisplayMojo
 {
 
 // ------------------------------ FIELDS ------------------------------
@@ -165,6 +165,7 @@ public class DisplayDependencyUpdatesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        logInit();
         Set dependencyManagement = new TreeSet( new DependencyComparator() );
         dependencyManagement.addAll( getProject().getDependencyManagement() == null
                                          ? Collections.EMPTY_LIST
@@ -244,33 +245,33 @@ public class DisplayDependencyUpdatesMojo
         }
         if ( isVerbose() && usingCurrent.isEmpty() && !withUpdates.isEmpty() )
         {
-            getLog().info( "No dependencies in " + section + " are using the newest version." );
-            getLog().info( "" );
+            logLine( false, "No dependencies in " + section + " are using the newest version." );
+            logLine( false, "" );
         }
         else if ( isVerbose() && !usingCurrent.isEmpty() )
         {
-            getLog().info( "The following dependencies in " + section + " are using the newest version:" );
+            logLine( false, "The following dependencies in " + section + " are using the newest version:" );
             i = usingCurrent.iterator();
             while ( i.hasNext() )
             {
-                getLog().info( (String) i.next() );
+                logLine( false, (String) i.next() );
             }
-            getLog().info( "" );
+            logLine( false, "" );
         }
         if ( withUpdates.isEmpty() && !usingCurrent.isEmpty() )
         {
-            getLog().info( "No dependencies in " + section + " have newer versions." );
-            getLog().info( "" );
+            logLine( false, "No dependencies in " + section + " have newer versions." );
+            logLine( false, "" );
         }
         else if ( !withUpdates.isEmpty() )
         {
-            getLog().info( "The following dependencies in " + section + " have newer versions:" );
+            logLine( false, "The following dependencies in " + section + " have newer versions:" );
             i = withUpdates.iterator();
             while ( i.hasNext() )
             {
-                getLog().info( (String) i.next() );
+                logLine( false, (String) i.next() );
             }
-            getLog().info( "" );
+            logLine( false, "" );
         }
     }
 

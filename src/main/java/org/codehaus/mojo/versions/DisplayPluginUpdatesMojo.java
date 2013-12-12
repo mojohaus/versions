@@ -103,7 +103,7 @@ import java.util.regex.Pattern;
  * @since 1.0-alpha-1
  */
 public class DisplayPluginUpdatesMojo
-    extends AbstractVersionsUpdaterMojo
+    extends AbstractVersionsDisplayMojo
 {
 
 // ------------------------------ FIELDS ------------------------------
@@ -371,6 +371,7 @@ public class DisplayPluginUpdatesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        logInit();
         Set<String> pluginsWithVersionsSpecified;
         try
         {
@@ -678,23 +679,23 @@ public class DisplayPluginUpdatesMojo
                 updates.add( buf.toString() );
             }
         }
-        getLog().info( "" );
+        logLine( false, "" );
         if ( updates.isEmpty() )
         {
-            getLog().info( "All plugins with a version specified are using the latest versions." );
+            logLine( false, "All plugins with a version specified are using the latest versions." );
         }
         else
         {
-            getLog().info( "The following plugin updates are available:" );
+            logLine( false, "The following plugin updates are available:" );
             for ( String update : updates )
             {
-                getLog().info( "  " + update );
+                logLine( false, "  " + update );
             }
         }
-        getLog().info( "" );
+        logLine( false, "" );
         if ( lockdowns.isEmpty() )
         {
-            getLog().info( "All plugins have a version specified." );
+            logLine( false, "All plugins have a version specified." );
         }
         else
         {
@@ -704,7 +705,7 @@ public class DisplayPluginUpdatesMojo
                 getLog().warn( "  " + lockdown );
             }
         }
-        getLog().info( "" );
+        logLine( false, "" );
         boolean noMavenMinVersion = getRequiredMavenVersion( getProject(), null ) == null;
         boolean noExplicitMavenMinVersion =
             getProject().getPrerequisites() == null || getProject().getPrerequisites().getMaven() == null;
@@ -714,7 +715,7 @@ public class DisplayPluginUpdatesMojo
         }
         else if ( noExplicitMavenMinVersion )
         {
-            getLog().info( "Project inherits minimum Maven version as: " + specMavenVersion );
+            logLine( false, "Project inherits minimum Maven version as: " + specMavenVersion );
         }
         else
         {
@@ -722,22 +723,22 @@ public class DisplayPluginUpdatesMojo
                 new DefaultArtifactVersion( getProject().getPrerequisites().getMaven() );
             if ( explicitMavenVersion.compareTo( specMavenVersion ) < 0 )
             {
-                getLog().error( "Project's effective minimum Maven (from parent) is: " + specMavenVersion );
-                getLog().error( "Project defines minimum Maven version as: " + explicitMavenVersion );
+                logLine( true, "Project's effective minimum Maven (from parent) is: " + specMavenVersion );
+                logLine( true, "Project defines minimum Maven version as: " + explicitMavenVersion );
             }
             else
             {
-                getLog().info( "Project defines minimum Maven version as: " + specMavenVersion );
+                logLine( false, "Project defines minimum Maven version as: " + specMavenVersion );
             }
         }
-        getLog().info( "Plugins require minimum Maven version of: " + minMavenVersion );
+        logLine( false, "Plugins require minimum Maven version of: " + minMavenVersion );
         if ( superPomDrivingMinVersion )
         {
-            getLog().info( "Note: the super-pom from Maven " + curMavenVersion + " defines some of the plugin" );
-            getLog().info( "      versions and may be influencing the plugins required minimum Maven" );
-            getLog().info( "      version." );
+            logLine( false, "Note: the super-pom from Maven " + curMavenVersion + " defines some of the plugin" );
+            logLine( false, "      versions and may be influencing the plugins required minimum Maven" );
+            logLine( false, "      version." );
         }
-        getLog().info( "" );
+        logLine( false, "" );
         if ( "maven-plugin".equals( getProject().getPackaging() ) )
         {
             if ( noMavenMinVersion )
@@ -759,31 +760,31 @@ public class DisplayPluginUpdatesMojo
             }
             else
             {
-                getLog().info( "No plugins require a newer version of Maven than specified by the pom." );
+                logLine( false, "No plugins require a newer version of Maven than specified by the pom." );
             }
         }
         else
         {
             if ( noMavenMinVersion )
             {
-                getLog().error( "Project does not define required minimum version of Maven." );
-                getLog().error( "Update the pom.xml to contain" );
-                getLog().error( "    <prerequisites>" );
-                getLog().error( "      <maven>" + minMavenVersion + "</maven>" );
-                getLog().error( "    </prerequisites>" );
+                logLine( true, "Project does not define required minimum version of Maven." );
+                logLine( true, "Update the pom.xml to contain" );
+                logLine( true, "    <prerequisites>" );
+                logLine( true, "      <maven>" + minMavenVersion + "</maven>" );
+                logLine( true, "    </prerequisites>" );
             }
             else if ( minMavenVersion != null && specMavenVersion.compareTo( minMavenVersion ) < 0 )
             {
-                getLog().error( "Project requires an incorrect minimum version of Maven." );
-                getLog().error( "Either change plugin versions to those compatible with " + specMavenVersion );
-                getLog().error( "or update the pom.xml to contain" );
-                getLog().error( "    <prerequisites>" );
-                getLog().error( "      <maven>" + minMavenVersion + "</maven>" );
-                getLog().error( "    </prerequisites>" );
+                logLine( true, "Project requires an incorrect minimum version of Maven." );
+                logLine( true, "Either change plugin versions to those compatible with " + specMavenVersion );
+                logLine( true, "or update the pom.xml to contain" );
+                logLine( true, "    <prerequisites>" );
+                logLine( true, "      <maven>" + minMavenVersion + "</maven>" );
+                logLine( true, "    </prerequisites>" );
             }
             else
             {
-                getLog().info( "No plugins require a newer version of Maven than specified by the pom." );
+                logLine( false, "No plugins require a newer version of Maven than specified by the pom." );
             }
         }
         for ( Map.Entry<ArtifactVersion, Map<String, String>> mavenUpgrade : upgrades.entrySet() )
@@ -794,8 +795,8 @@ public class DisplayPluginUpdatesMojo
             {
                 continue;
             }
-            getLog().info( "" );
-            getLog().info( "Require Maven " + mavenUpgradeVersion + " to use the following plugin updates:" );
+            logLine( false, "" );
+            logLine( false, "Require Maven " + mavenUpgradeVersion + " to use the following plugin updates:" );
             for ( Map.Entry<String, String> entry : upgradePlugins.entrySet() )
             {
                 StringBuilder buf = new StringBuilder( "  " );
@@ -809,10 +810,10 @@ public class DisplayPluginUpdatesMojo
                 }
                 buf.append( ' ' );
                 buf.append( s );
-                getLog().info( buf.toString() );
+                logLine( false, buf.toString() );
             }
         }
-        getLog().info( "" );
+        logLine( false, "" );
     }
 
     private String compactKey( String groupId, String artifactId )

@@ -41,7 +41,7 @@ import java.util.Map;
  * @since 1.0-beta-1
  */
 public class DisplayPropertyUpdatesMojo
-    extends AbstractVersionsUpdaterMojo
+    extends AbstractVersionsDisplayMojo
 {
 
     /**
@@ -92,6 +92,7 @@ public class DisplayPropertyUpdatesMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        logInit();
         List<String> current = new ArrayList<String>();
         List<String> updates = new ArrayList<String>();
 
@@ -149,33 +150,33 @@ public class DisplayPropertyUpdatesMojo
 
         }
 
-        getLog().info( "" );
+        logLine( false, "" );
         if ( !current.isEmpty() )
         {
-            getLog().info( "The following version properties are referencing the newest available version:" );
+            logLine( false, "The following version properties are referencing the newest available version:" );
             for ( String s : current )
             {
-                getLog().info( "  " + s );
+                logLine( false, "  " + s );
             }
         }
         if ( updates.isEmpty() && current.isEmpty() )
         {
-            getLog().info( "This project does not have any properties associated with versions." );
+            logLine( false, "This project does not have any properties associated with versions." );
         }
         else if ( updates.isEmpty() )
         {
-            getLog().info( "All version properties are referencing the newest version available." );
+            logLine( false, "All version properties are referencing the newest version available." );
         }
 
         if ( !updates.isEmpty() )
         {
-            getLog().info( "The following version property updates are available:" );
+            logLine( false, "The following version property updates are available:" );
             for ( String update : updates )
             {
-                getLog().info( "  " + update );
+                logLine( false, "  " + update );
             }
         }
-        getLog().info( "" );
+        logLine( false, "" );
     }
 
     protected void update( ModifiedPomXMLEventReader pom )
