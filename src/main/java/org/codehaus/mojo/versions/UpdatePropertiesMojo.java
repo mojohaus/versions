@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -37,7 +38,7 @@ import java.util.Map;
  * @since 1.0-alpha-1
  */
 public class UpdatePropertiesMojo
-    extends AbstractVersionsUpdaterMojo
+    extends AbstractVersionsDependencyUpdaterMojo
 {
 
 // ------------------------------ FIELDS ------------------------------
@@ -102,8 +103,25 @@ public class UpdatePropertiesMojo
             {
                 continue;
             }
+            boolean canUpdateProperty = true;
+            for ( ArtifactAssociation association : version.getAssociations() )
+            {
+                if ( !( isIncluded( association.getArtifact() ) ) )
+                {
+                    getLog().info(
+                        "Not updating the property ${" + property.getName() + "} because it is used by artifact " +
+                            association.getArtifact().toString() + " and that artifact is not included in the list of "
+                            +
+                            " allowed artifacts to be updated." );
+                    canUpdateProperty = false;
+                    break;
+                }
+            }
 
-            updatePropertyToNewestVersion( pom, property, version, currentVersion );
+            if ( canUpdateProperty )
+            {
+                updatePropertyToNewestVersion( pom, property, version, currentVersion );
+            }
 
         }
     }

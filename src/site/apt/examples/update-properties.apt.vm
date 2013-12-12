@@ -329,3 +329,75 @@ Update Properties
 </project>
 ---
 
+* Restricting the properties to be updated using includes / excludes
+
+  The <<includes>> and <<excludes>>> parameters follow the format <<<groupId:artifactId:type:classifier>>>.
+  Use a comma separated separated list to specify multiple includes.  Wildcards (*) can also be used to match
+  multiple values.
+
+  This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and
+  artifactId matching "junit".
+
+  Only properties that map to artifacts that are allowed by the inclusion and exclusion patterns will be updated.
+
+  With a project that looks like this:
+
+---
+<project>
+  ...
+  <dependencies>
+    ...
+    <dependency>
+      <groupId>com.foo.bar</groupId>
+      <artifactId>manchu-core</artifactId>
+      <version>[${manchu.version}]</version>
+    </dependency>
+    ...
+    <dependency>
+      <groupId>com.foo.bar</groupId>
+      <artifactId>manchu-extra</artifactId>
+      <version>[${manchu.version}]</version>
+    </dependency>
+    ...
+    <dependency>
+      <groupId>org.blarg</groupId>
+      <artifactId>blarg-framework</artifactId>
+      <version>[${blarg.version}]</version>
+    </dependency>
+    ...
+  </dependencies>
+  ...
+  <properties>
+    ...
+    <manchu.version>1.5.0</manchu.version>
+    <blarg.version>3.1.0.RELEASE</blarg.version>
+    ...
+  </properties>
+  ...
+</project>
+---
+
+  To update the property for only the "com.foo.bar" dependencies, you can run:
+
++---+
+mvn versions:use-releases -Dincludes=com.foo.bar:*
++---+
+
+  Would result in the property for the manchu.version being updated, but not the blarg.version property.
+
+  In the above example, you could achieve the same result using:
+
++---+
+mvn versions:use-releases -Dexcludes=org.blarg:*
++---+
+
+  If a property is used by artifacts that are not allowed by the set of specified <<includes>> and <<excludes>> then the property
+  will not be updated.
+
+
+
+
+
+
+
+
