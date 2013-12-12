@@ -153,13 +153,6 @@
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-impl</artifactId>
       <version>2.2</version>
-      <!-- groupId changed to org.apache.xerces -->
-      <exclusions>
-          <exclusion>
-              <groupId>xml-apis</groupId>
-              <artifactId>xml-apis</artifactId>
-          </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
@@ -259,11 +252,6 @@
       <artifactId>stax-api</artifactId>
       <version>1.0.1</version>
     </dependency-->
-    <dependency>
-      <groupId>org.apache.xerces</groupId>
-      <artifactId>xml-apis</artifactId>
-      <version>2.9.1</version>
-    </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
