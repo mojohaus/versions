@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions.ordering;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.plugin.logging.Log;
 
 import java.math.BigInteger;
 import java.util.StringTokenizer;

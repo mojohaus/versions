@@ -149,7 +149,7 @@ public class DisplayDependencyUpdatesMojo
         // true if true or null
         return !Boolean.FALSE.equals( verbose );
     }
-    
+
 // ------------------------ INTERFACE METHODS ------------------------
 
 // --------------------- Interface Mojo ---------------------
@@ -274,7 +274,6 @@ public class DisplayDependencyUpdatesMojo
         }
     }
 
-
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException
@@ -291,6 +290,5 @@ public class DisplayDependencyUpdatesMojo
     {
         // do nothing
     }
-
 
 }

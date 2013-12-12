@@ -93,6 +93,7 @@ public class DefaultVersionsHelper
     implements VersionsHelper
 {
     private static final String TYPE_EXACT = "exact";
+
     private static final String TYPE_REGEX = "regex";
 
     /**
@@ -226,8 +227,8 @@ public class DefaultVersionsHelper
         throws ArtifactMetadataRetrievalException
     {
         List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
-        final List<ArtifactVersion> versions = artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository,
-                                                                                                 remoteRepositories );
+        final List<ArtifactVersion> versions =
+            artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
         final List<IgnoreVersion> ignoredVersions = getIgnoredVersions( artifact );
         if ( !ignoredVersions.isEmpty() )
         {
@@ -235,7 +236,7 @@ public class DefaultVersionsHelper
             {
                 getLog().debug( "Found ignored versions: " + showIgnoredVersions( ignoredVersions ) );
             }
-            
+
             final Iterator<ArtifactVersion> i = versions.iterator();
             while ( i.hasNext() )
             {
@@ -249,19 +250,23 @@ public class DefaultVersionsHelper
                         {
                             if ( getLog().isDebugEnabled() )
                             {
-                                getLog().debug( "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list: " + ignoreVersion );
+                                getLog().debug(
+                                    "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact )
+                                        + " found on ignore list: " + ignoreVersion );
                             }
                             i.remove();
                             break;
                         }
                     }
-                    else if( TYPE_EXACT.equals( ignoreVersion.getType() ) )
+                    else if ( TYPE_EXACT.equals( ignoreVersion.getType() ) )
                     {
                         if ( version.equals( ignoreVersion.getVersion() ) )
                         {
                             if ( getLog().isDebugEnabled() )
                             {
-                                getLog().debug( "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list: " + ignoreVersion );
+                                getLog().debug(
+                                    "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact )
+                                        + " found on ignore list: " + ignoreVersion );
                             }
                             i.remove();
                             break;
@@ -283,32 +288,31 @@ public class DefaultVersionsHelper
     private List<IgnoreVersion> getIgnoredVersions( Artifact artifact )
     {
         final List<IgnoreVersion> ret = new ArrayList<IgnoreVersion>();
-        
+
         for ( final IgnoreVersion ignoreVersion : ruleSet.getIgnoreVersions() )
         {
-            if ( !TYPE_EXACT.equals( ignoreVersion.getType() )
-                    && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
+            if ( !TYPE_EXACT.equals( ignoreVersion.getType() ) && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
             {
-                getLog().warn( "The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion[" + ignoreVersion + "] is not valid."
-                        + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
+                getLog().warn(
+                    "The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion[" + ignoreVersion
+                        + "] is not valid." + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
             }
             else
             {
                 ret.add( ignoreVersion );
             }
         }
-        
+
         final Rule rule = getBestFitRule( artifact.getGroupId(), artifact.getArtifactId() );
 
         if ( rule != null )
         {
             for ( IgnoreVersion ignoreVersion : rule.getIgnoreVersions() )
             {
-                if ( !TYPE_EXACT.equals( ignoreVersion.getType() )
-                        && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
+                if ( !TYPE_EXACT.equals( ignoreVersion.getType() ) && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
                 {
                     getLog().warn( "The type attribute '" + ignoreVersion.getType() + "' for " + rule + " is not valid."
-                            + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
+                                       + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
                 }
                 else
                 {
@@ -316,7 +320,7 @@ public class DefaultVersionsHelper
                 }
             }
         }
-        
+
         return ret;
     }
 
@@ -336,7 +340,7 @@ public class DefaultVersionsHelper
             buf.append( ignoreVersion );
             if ( iterator.hasNext() )
             {
-               buf.append( ", " );
+                buf.append( ", " );
             }
         }
         return buf.toString();
@@ -366,11 +370,11 @@ public class DefaultVersionsHelper
         final String comparisonMethod = rule == null ? ruleSet.getComparisonMethod() : rule.getComparisonMethod();
         return VersionComparators.getVersionComparator( comparisonMethod );
     }
-        
+
     /**
      * Find the rule, if any, which best fits the artifact details given.
      *
-     * @param groupId Group id of the artifact
+     * @param groupId    Group id of the artifact
      * @param artifactId Artifact id of the artifact
      * @return Rule which best describes the given artifact
      */
