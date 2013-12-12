@@ -639,7 +639,7 @@ public class DisplayPluginUpdatesMojo
                 StringBuilder buf = new StringBuilder( compactKey( groupId, artifactId ) );
                 buf.append( ' ' );
                 int padding =
-                    WARN_PAD_SIZE - effectiveVersion.length() - ( version != null ? FROM_SUPER_POM.length() : 0 );
+                    WARN_PAD_SIZE - newVersion.length() - ( version != null ? FROM_SUPER_POM.length() : 0 );
                 while ( buf.length() < padding )
                 {
                     buf.append( '.' );
@@ -650,7 +650,7 @@ public class DisplayPluginUpdatesMojo
                     buf.append( FROM_SUPER_POM );
                     superPomDrivingMinVersion = true;
                 }
-                buf.append( effectiveVersion );
+                buf.append( newVersion );
                 lockdowns.add( buf.toString() );
             }
             else if ( artifactVersion != null )
@@ -661,7 +661,7 @@ public class DisplayPluginUpdatesMojo
             {
                 newVersion = null;
             }
-            if ( version != null && artifactVersion != null && newVersion != null &&
+            if ( version != null && artifactVersion != null && newVersion != null && effectiveVersion != null &&
                 new DefaultArtifactVersion( effectiveVersion ).compareTo( new DefaultArtifactVersion( newVersion ) )
                     < 0 )
             {
