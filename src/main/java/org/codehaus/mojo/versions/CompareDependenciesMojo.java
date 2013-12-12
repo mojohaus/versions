@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -172,38 +171,39 @@ public class CompareDependenciesMojo
             throw new MojoExecutionException( "Unable to build remote project " + remoteArtifact, e );
         }
 
-        Map remoteDepsMap = new HashMap();
+        Map<String, Dependency> remoteDepsMap = new HashMap<String, Dependency>();
         if ( !ignoreRemoteDependencyManagement )
         {
-            List remoteProjectDepMgmtDeps = remoteMavenProject.getDependencyManagement().getDependencies();
+            List<Dependency> remoteProjectDepMgmtDeps = ( remoteMavenProject.getDependencyManagement() == null )
+                ? null
+                : remoteMavenProject.getDependencyManagement().getDependencies();
             mapDependencies( remoteDepsMap, remoteProjectDepMgmtDeps );
         }
         if ( !ignoreRemoteDependencies )
         {
-            List remoteProjectDeps = remoteMavenProject.getDependencies();
+            List<Dependency> remoteProjectDeps = remoteMavenProject.getDependencies();
             mapDependencies( remoteDepsMap, remoteProjectDeps );
         }
 
-        List totalDiffs = new ArrayList();
+        List<String> totalDiffs = new ArrayList<String>();
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
-            List depManDiffs =
+            List<String> depManDiffs =
                 compareVersions( pom, getProject().getDependencyManagement().getDependencies(), remoteDepsMap );
             totalDiffs.addAll( depManDiffs );
         }
         if ( isProcessingDependencies() )
         {
-            List depDiffs = compareVersions( pom, getProject().getDependencies(), remoteDepsMap );
+            List<String> depDiffs = compareVersions( pom, getProject().getDependencies(), remoteDepsMap );
             totalDiffs.addAll( depDiffs );
         }
 
         if ( reportMode )
         {
             getLog().info( "The following differences were found:" );
-            Iterator iter = totalDiffs.iterator();
-            while ( iter.hasNext() )
+            for ( String totalDiff : totalDiffs )
             {
-                getLog().info( "  " + iter.next() );
+                getLog().info( "  " + totalDiff );
             }
         }
 
@@ -219,22 +219,20 @@ public class CompareDependenciesMojo
      *
      * @throws XMLStreamException
      */
-    private List compareVersions( ModifiedPomXMLEventReader pom, List dependencies, Map remoteDependencies )
+    private List<String> compareVersions( ModifiedPomXMLEventReader pom, List<Dependency> dependencies,
+                                          Map<String, Dependency> remoteDependencies )
         throws MojoExecutionException, XMLStreamException
     {
-        List updates = new ArrayList();
-        Iterator iter = dependencies.iterator();
-        while ( iter.hasNext() )
+        List<String> updates = new ArrayList<String>();
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = (Dependency) iter.next();
-
             Artifact artifact = this.toArtifact( dep );
             if ( !isIncluded( artifact ) )
             {
                 continue;
             }
 
-            Dependency remoteDep = (Dependency) remoteDependencies.get( dep.getManagementKey() );
+            Dependency remoteDep = remoteDependencies.get( dep.getManagementKey() );
             if ( remoteDep != null )
             {
                 String remoteVersion = remoteDep.getVersion();
@@ -261,7 +259,7 @@ public class CompareDependenciesMojo
 
     }
 
-    private void writeReportFile( List updates )
+    private void writeReportFile( List<String> updates )
         throws MojoExecutionException
     {
         if ( !reportOutputFile.getParentFile().exists() )
@@ -275,12 +273,11 @@ public class CompareDependenciesMojo
         {
             fw = new FileWriter( reportOutputFile );
             pw = new PrintWriter( fw );
-            Iterator iter = updates.iterator();
             pw.println( "The following differences were found:" );
             pw.println();
-            while ( iter.hasNext() )
+            for ( String update : updates )
             {
-                pw.println( "  " + iter.next() );
+                pw.println( "  " + update );
             }
             pw.close();
             fw.close();
@@ -341,13 +338,14 @@ public class CompareDependenciesMojo
      * @param map
      * @param deps
      */
-    private void mapDependencies( Map map, List deps )
+    private void mapDependencies( Map<String, Dependency> map, List<Dependency> deps )
     {
-        Iterator iter = deps.iterator();
-        while ( iter.hasNext() )
+        if ( deps != null )
         {
-            Dependency nextDep = (Dependency) iter.next();
-            map.put( nextDep.getManagementKey(), nextDep );
+            for ( Dependency nextDep : deps )
+            {
+                map.put( nextDep.getManagementKey(), nextDep );
+            }
         }
     }
 }
