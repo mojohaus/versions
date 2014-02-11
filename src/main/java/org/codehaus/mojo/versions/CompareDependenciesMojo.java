@@ -304,15 +304,18 @@ public class CompareDependenciesMojo
             PropertyVersions version = entry.getValue();
 
             String candidateVersion = computeCandidateVersion( remoteDependencies, property, version );
-            String originalVersion = version.getAssociations()[0].getArtifact().getVersion(); // Yekes
-
             if ( candidateVersion != null )
             {
-                result.add( writeDiffMessage( property.getName(), originalVersion, candidateVersion ).toString() );
-                if ( !reportMode && PomHelper.setPropertyVersion( pom, null, property.getName(), candidateVersion ) )
+                String originalVersion = version.getAssociations()[0].getArtifact().getVersion(); // Yekes
+                if ( !candidateVersion.equals( originalVersion ) ) // Update needed
                 {
-                    getLog().info(
-                        "Updated ${" + property.getName() + "} from " + originalVersion + " to " + candidateVersion );
+                    result.add( writeDiffMessage( property.getName(), originalVersion, candidateVersion ).toString() );
+                    if ( !reportMode && PomHelper.setPropertyVersion( pom, null, property.getName(),
+                                                                      candidateVersion ) )
+                    {
+                        getLog().info( "Updated ${" + property.getName() + "} from " + originalVersion + " to "
+                                           + candidateVersion );
+                    }
                 }
             }
         }
