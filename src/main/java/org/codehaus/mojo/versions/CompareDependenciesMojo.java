@@ -110,7 +110,7 @@ public class CompareDependenciesMojo
     /**
      * If the output file is set, the diff report will be written to this file.
      *
-     * @parameter property="reportOutputFile" default-value="null"
+     * @parameter property="reportOutputFile"
      */
     protected File reportOutputFile;
 
