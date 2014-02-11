@@ -49,4 +49,15 @@ mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -DreportOutput
 mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -DupdateDependencies=true
 +---+
 
+  In addition to that, any property defined in the current project that represent the version
+  of one of several artifacts can be updated to match the remote project using the "updatePropertyVersions"
+  parameter. By default this is turned off.
+
++---+
+mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -updatePropertyVersions=true
++---+
+
+  Such update will only occur if the dependencies linked to that version exist in the remote project
+  and all these dependencies have a single version. In any other case, the property is not updated.
+
       

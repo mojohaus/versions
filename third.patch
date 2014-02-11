@@ -1,0 +1,259 @@
+Index: src/it/it-compare-dependencies-004/invoker.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/it/it-compare-dependencies-004/invoker.properties	(revision 19385)
++++ src/it/it-compare-dependencies-004/invoker.properties	(revision 19385)
+@@ -0,0 +1,2 @@
++invoker.goals=${project.groupId}:${project.artifactId}:${project.version}:compare-dependencies
++invoker.systemPropertiesFile = test.properties
+Index: src/it/it-compare-dependencies-004/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/it/it-compare-dependencies-004/pom.xml	(revision 19385)
++++ src/it/it-compare-dependencies-004/pom.xml	(revision 19385)
+@@ -0,0 +1,33 @@
++<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++  <modelVersion>4.0.0</modelVersion>
++
++  <groupId>localhost</groupId>
++  <artifactId>it-compare-dependencies-002</artifactId>
++  <version>1.0</version>
++  <packaging>pom</packaging>
++  <name>compare dependency versions</name>
++
++  <properties>
++    <junit.version>4.8</junit.version>
++    <another.property>1</another.property>
++  </properties>
++
++  <dependencyManagement>
++    <dependencies>
++
++      <dependency>
++        <groupId>org.apache.maven</groupId>
++        <artifactId>maven-artifact</artifactId>
++        <version>2.0.10</version>
++      </dependency>
++      <dependency>
++        <groupId>junit</groupId>
++        <artifactId>junit</artifactId>
++        <version>${junit.version}</version>
++      </dependency>
++
++    </dependencies>
++  </dependencyManagement>
++
++</project>
+Index: src/it/it-compare-dependencies-004/test.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/it/it-compare-dependencies-004/test.properties	(revision 19385)
++++ src/it/it-compare-dependencies-004/test.properties	(revision 19385)
+@@ -0,0 +1,4 @@
++remotePom=localhost:dummy-bom-pom:1.0
++reportOutputFile=target/depDiffs.txt
++reportMode=true
++updatePropertyVersions=true
+\ No newline at end of file
+Index: src/main/java/org/codehaus/mojo/versions/CompareDependenciesMojo.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/org/codehaus/mojo/versions/CompareDependenciesMojo.java	(revision 19384)
++++ src/main/java/org/codehaus/mojo/versions/CompareDependenciesMojo.java	(revision 19385)
+@@ -43,7 +43,7 @@
+ 
+ /**
+  * Compare dependency versions of the current project to dependencies or dependency management of a remote repository
+- * project.
++ * project. Can optionally update locally the project instead of reporting the comparison
+  *
+  * @author Paul Gier
+  * @goal compare-dependencies
+@@ -188,6 +188,7 @@
+         }
+ 
+         List<String> totalDiffs = new ArrayList<String>();
++        List<String> propertyDiffs = new ArrayList<String>();
+         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+         {
+             List<String> depManDiffs =
+@@ -199,25 +200,45 @@
+             List<String> depDiffs = compareVersions( pom, getProject().getDependencies(), remoteDepsMap );
+             totalDiffs.addAll( depDiffs );
+         }
+-        if ( !reportMode && updatePropertyVersions )
++        if ( updatePropertyVersions )
+         {
+             Map<Property, PropertyVersions> versionProperties =
+                 this.getHelper().getVersionPropertiesMap( getProject(), null, null, null, true );
+-            updatePropertyVersions( pom, versionProperties, remoteDepsMap );
++            List<String> diff = updatePropertyVersions( pom, versionProperties, remoteDepsMap );
++            propertyDiffs.addAll( diff );
+         }
+ 
+         if ( reportMode )
+         {
+             getLog().info( "The following differences were found:" );
++            if ( totalDiffs.size() == 0 )
++            {
++                getLog().info( "  none" );
++            }
++            else
++            {
+-            for ( String totalDiff : totalDiffs )
+-            {
+-                getLog().info( "  " + totalDiff );
+-            }
+-        }
++                for ( String totalDiff : totalDiffs )
++                {
++                    getLog().info( "  " + totalDiff );
++                }
++            }
++            getLog().info( "The following property differences were found:" );
++            if ( propertyDiffs.size() == 0 )
++            {
++                getLog().info( "  none" );
++            }
++            else
++            {
++                for ( String propertyDiff : propertyDiffs )
++                {
++                    getLog().info( "  " + propertyDiff );
++                }
++            }
++        }
+ 
+         if ( reportOutputFile != null )
+         {
+-            writeReportFile( totalDiffs );
++            writeReportFile( totalDiffs, propertyDiffs );
+         }
+ 
+     }
+@@ -271,26 +292,32 @@
+     /**
+      * Updates the properties holding a version if necessary.
+      */
+-    private void updatePropertyVersions( ModifiedPomXMLEventReader pom,
++    private List<String> updatePropertyVersions( ModifiedPomXMLEventReader pom,
+-                                         Map<Property, PropertyVersions> versionProperties,
+-                                         Map<String, Dependency> remoteDependencies )
++                                                 Map<Property, PropertyVersions> versionProperties,
++                                                 Map<String, Dependency> remoteDependencies )
+         throws XMLStreamException
+     {
++        List<String> result = new ArrayList<String>();
+         for ( Map.Entry<Property, PropertyVersions> entry : versionProperties.entrySet() )
+         {
+             Property property = entry.getKey();
+             PropertyVersions version = entry.getValue();
+ 
+             String candidateVersion = computeCandidateVersion( remoteDependencies, property, version );
++            String originalVersion = version.getAssociations()[0].getArtifact().getVersion(); // Yekes
+ 
+-            if ( candidateVersion != null && PomHelper.setPropertyVersion( pom, null, property.getName(),
+-                                                                           candidateVersion ) )
++            if ( candidateVersion != null )
+             {
+-                getLog().info( "Updated ${" + property.getName() + "} to " + candidateVersion );
++                result.add( writeDiffMessage( property.getName(), originalVersion, candidateVersion ).toString() );
++                if ( !reportMode && PomHelper.setPropertyVersion( pom, null, property.getName(), candidateVersion ) )
++                {
++                    getLog().info(
++                        "Updated ${" + property.getName() + "} from " + originalVersion + " to " + candidateVersion );
+-            }
+-        }
++                }
++            }
+-
+-    }
++        }
++        return result;
++    }
+ 
+     /**
+      * Returns the candidate version to use for the specified property.
+@@ -334,7 +361,7 @@
+         return candidateVersion;
+     }
+ 
+-    private void writeReportFile( List<String> updates )
++    private void writeReportFile( List<String> dependenciesUpdate, List<String> propertiesUpdate )
+         throws MojoExecutionException
+     {
+         if ( !reportOutputFile.getParentFile().exists() )
+@@ -350,10 +377,31 @@
+             pw = new PrintWriter( fw );
+             pw.println( "The following differences were found:" );
+             pw.println();
+-            for ( String update : updates )
++            if ( dependenciesUpdate.size() == 0 )
+             {
+-                pw.println( "  " + update );
++                pw.println( "  none" );
+             }
++            else
++            {
++                for ( String dependencyUpdate : dependenciesUpdate )
++                {
++                    pw.println( "  " + dependencyUpdate );
++                }
++            }
++            pw.println();
++            pw.println( "The following property differences were found:" );
++            pw.println();
++            if ( propertiesUpdate.size() == 0 )
++            {
++                pw.println( "  none" );
++            }
++            else
++            {
++                for ( String propertyUpdate : propertiesUpdate )
++                {
++                    pw.println( "  " + propertyUpdate );
++                }
++            }
+             pw.close();
+             fw.close();
+         }
+@@ -391,19 +439,24 @@
+      */
+     private StringBuilder writeDependencyDiffMessage( Dependency dep, String remoteVersion )
+     {
++        String id = dep.getGroupId() + ":" + dep.getArtifactId();
++        return writeDiffMessage( id, dep.getVersion(), remoteVersion );
++    }
++
++    private StringBuilder writeDiffMessage( String id, String originalVersion, String targetVersion )
++    {
+         StringBuilder buf = new StringBuilder();
+-        buf.append( dep.getGroupId() ).append( ':' );
+-        buf.append( dep.getArtifactId() );
++        buf.append( id );
+         buf.append( ' ' );
+-        int padding = INFO_PAD_SIZE - dep.getVersion().length() - remoteVersion.length() - 4;
++        int padding = INFO_PAD_SIZE - originalVersion.length() - targetVersion.length() - 4;
+         while ( buf.length() < padding )
+         {
+             buf.append( '.' );
+         }
+         buf.append( ' ' );
+-        buf.append( dep.getVersion() );
++        buf.append( originalVersion );
+         buf.append( " -> " );
+-        buf.append( remoteVersion );
++        buf.append( targetVersion );
+         return buf;
+     }
+ 
+\ No newline at end of file

@@ -26,7 +26,9 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -41,7 +43,7 @@ import java.util.Map;
 
 /**
  * Compare dependency versions of the current project to dependencies or dependency management of a remote repository
- * project.
+ * project. Can optionally update locally the project instead of reporting the comparison
  *
  * @author Paul Gier
  * @goal compare-dependencies
@@ -186,6 +188,7 @@ public class CompareDependenciesMojo
         }
 
         List<String> totalDiffs = new ArrayList<String>();
+        List<String> propertyDiffs = new ArrayList<String>();
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
             List<String> depManDiffs =
@@ -197,19 +200,45 @@ public class CompareDependenciesMojo
             List<String> depDiffs = compareVersions( pom, getProject().getDependencies(), remoteDepsMap );
             totalDiffs.addAll( depDiffs );
         }
+        if ( updatePropertyVersions )
+        {
+            Map<Property, PropertyVersions> versionProperties =
+                this.getHelper().getVersionPropertiesMap( getProject(), null, null, null, true );
+            List<String> diff = updatePropertyVersions( pom, versionProperties, remoteDepsMap );
+            propertyDiffs.addAll( diff );
+        }
 
         if ( reportMode )
         {
             getLog().info( "The following differences were found:" );
-            for ( String totalDiff : totalDiffs )
+            if ( totalDiffs.size() == 0 )
             {
-                getLog().info( "  " + totalDiff );
+                getLog().info( "  none" );
+            }
+            else
+            {
+                for ( String totalDiff : totalDiffs )
+                {
+                    getLog().info( "  " + totalDiff );
+                }
+            }
+            getLog().info( "The following property differences were found:" );
+            if ( propertyDiffs.size() == 0 )
+            {
+                getLog().info( "  none" );
+            }
+            else
+            {
+                for ( String propertyDiff : propertyDiffs )
+                {
+                    getLog().info( "  " + propertyDiff );
+                }
             }
         }
 
         if ( reportOutputFile != null )
         {
-            writeReportFile( totalDiffs );
+            writeReportFile( totalDiffs, propertyDiffs );
         }
 
     }
@@ -259,7 +288,80 @@ public class CompareDependenciesMojo
 
     }
 
-    private void writeReportFile( List<String> updates )
+
+    /**
+     * Updates the properties holding a version if necessary.
+     */
+    private List<String> updatePropertyVersions( ModifiedPomXMLEventReader pom,
+                                                 Map<Property, PropertyVersions> versionProperties,
+                                                 Map<String, Dependency> remoteDependencies )
+        throws XMLStreamException
+    {
+        List<String> result = new ArrayList<String>();
+        for ( Map.Entry<Property, PropertyVersions> entry : versionProperties.entrySet() )
+        {
+            Property property = entry.getKey();
+            PropertyVersions version = entry.getValue();
+
+            String candidateVersion = computeCandidateVersion( remoteDependencies, property, version );
+            String originalVersion = version.getAssociations()[0].getArtifact().getVersion(); // Yekes
+
+            if ( candidateVersion != null )
+            {
+                result.add( writeDiffMessage( property.getName(), originalVersion, candidateVersion ).toString() );
+                if ( !reportMode && PomHelper.setPropertyVersion( pom, null, property.getName(), candidateVersion ) )
+                {
+                    getLog().info(
+                        "Updated ${" + property.getName() + "} from " + originalVersion + " to " + candidateVersion );
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the candidate version to use for the specified property.
+     * <p/>
+     * The dependencies currently linked to the property must all be defined by the remote
+     * POM and they should refer to the same version. If that's the case, that same version
+     * is returned. Otherwise, <tt>null</tt> is returned indicating that there is no
+     * candidate.
+     *
+     * @param remoteDependencies the remote dependencies
+     * @param property           the property to update
+     * @param propertyVersions   the association
+     * @return the candidate version or <tt>null</tt> if there isn't any
+     */
+    private String computeCandidateVersion( Map<String, Dependency> remoteDependencies, Property property,
+                                            PropertyVersions propertyVersions )
+    {
+        String candidateVersion = null;
+        for ( ArtifactAssociation artifactAssociation : propertyVersions.getAssociations() )
+        {
+            String id = generateId( artifactAssociation.getArtifact() );
+            Dependency dependency = remoteDependencies.get( id );
+            if ( dependency == null )
+            {
+                getLog().info( "Not updating ${" + property.getName() + "}: no info for " + id );
+                return null;
+            }
+            else
+            {
+                if ( candidateVersion == null )
+                {
+                    candidateVersion = dependency.getVersion();
+                }
+                else if ( !candidateVersion.equals( dependency.getVersion() ) )
+                {
+                    getLog().warn( "Could not update ${" + property.getName() + "}: version mismatch" );
+                    return null;
+                }
+            }
+        }
+        return candidateVersion;
+    }
+
+    private void writeReportFile( List<String> dependenciesUpdate, List<String> propertiesUpdate )
         throws MojoExecutionException
     {
         if ( !reportOutputFile.getParentFile().exists() )
@@ -275,9 +377,30 @@ public class CompareDependenciesMojo
             pw = new PrintWriter( fw );
             pw.println( "The following differences were found:" );
             pw.println();
-            for ( String update : updates )
+            if ( dependenciesUpdate.size() == 0 )
             {
-                pw.println( "  " + update );
+                pw.println( "  none" );
+            }
+            else
+            {
+                for ( String dependencyUpdate : dependenciesUpdate )
+                {
+                    pw.println( "  " + dependencyUpdate );
+                }
+            }
+            pw.println();
+            pw.println( "The following property differences were found:" );
+            pw.println();
+            if ( propertiesUpdate.size() == 0 )
+            {
+                pw.println( "  none" );
+            }
+            else
+            {
+                for ( String propertyUpdate : propertiesUpdate )
+                {
+                    pw.println( "  " + propertyUpdate );
+                }
             }
             pw.close();
             fw.close();
@@ -316,19 +439,24 @@ public class CompareDependenciesMojo
      */
     private StringBuilder writeDependencyDiffMessage( Dependency dep, String remoteVersion )
     {
+        String id = dep.getGroupId() + ":" + dep.getArtifactId();
+        return writeDiffMessage( id, dep.getVersion(), remoteVersion );
+    }
+
+    private StringBuilder writeDiffMessage( String id, String originalVersion, String targetVersion )
+    {
         StringBuilder buf = new StringBuilder();
-        buf.append( dep.getGroupId() ).append( ':' );
-        buf.append( dep.getArtifactId() );
+        buf.append( id );
         buf.append( ' ' );
-        int padding = INFO_PAD_SIZE - dep.getVersion().length() - remoteVersion.length() - 4;
+        int padding = INFO_PAD_SIZE - originalVersion.length() - targetVersion.length() - 4;
         while ( buf.length() < padding )
         {
             buf.append( '.' );
         }
         buf.append( ' ' );
-        buf.append( dep.getVersion() );
+        buf.append( originalVersion );
         buf.append( " -> " );
-        buf.append( remoteVersion );
+        buf.append( targetVersion );
         return buf;
     }
 
@@ -348,4 +476,21 @@ public class CompareDependenciesMojo
             }
         }
     }
+
+    /**
+     * Creates a key that is similar to what {@link Dependency#getManagementKey()} generates
+     * for a dependency.
+     */
+    private static String generateId( Artifact artifact )
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append( artifact.getGroupId() ).append( ":" ).append( artifact.getArtifactId() ).append( ":" ).append(
+            artifact.getType() );
+        if ( artifact.getClassifier() != null )
+        {
+            sb.append( ":" ).append( artifact.getClassifier() );
+        }
+        return sb.toString();
+    }
+
 }
