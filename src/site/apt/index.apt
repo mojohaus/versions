@@ -51,6 +51,9 @@ Versions Maven Plugin
   * {{{./update-properties-mojo.html}versions:update-properties}} updates properties defined in a project so that they
   correspond to the latest available version of specific dependencies.  This can be useful if a suite of dependencies
   must all be locked to one version.
+  
+  * {{{./update-property-mojo.html}versions:update-property}} Sets a property to the latest version in a given range of 
+  associated artifacts.
 
   * {{{./update-child-modules-mojo.html}versions:update-child-modules}} updates the parent section of the child modules
   of a project so the version matches the version of the current project. For example, if you have an aggregator pom
