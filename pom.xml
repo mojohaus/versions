@@ -279,6 +279,11 @@
           <artifactId>modello-maven-plugin</artifactId>
           <version>1.8.1</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg--plugin</artifactId>
+          <version>1.6</version>
+        </plugin>
         <!--
           ! Use the most uptodate version.
         -->
