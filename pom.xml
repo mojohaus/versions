@@ -279,15 +279,13 @@
           <artifactId>modello-maven-plugin</artifactId>
           <version>1.8.1</version>
         </plugin>
+        <!--
+          ! Use the most uptodate version.
+        -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
-          <version>1.8</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>2.4.2</version>
+          <version>1.10</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
