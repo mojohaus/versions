@@ -79,9 +79,9 @@
   </prerequisites>
 
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin</developerConnection>
-    <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/versions-maven-plugin</url>
+    <connection>scm:git:git@github.com:mojohaus/versions-maven-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:mojohaus/versions-maven-plugin.git</developerConnection>
+    <url>https://github.com/mojohaus/versions-maven-plugin</url>
   </scm>
   <issueManagement>
     <system>github</system>
