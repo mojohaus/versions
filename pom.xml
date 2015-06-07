@@ -84,8 +84,8 @@
     <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/versions-maven-plugin</url>
   </scm>
   <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/MVERSIONS</url>
+    <system>github</system>
+    <url>https://github.com/mojohaus/versions-maven-plugin/issues/</url>
   </issueManagement>
 
   <properties>
