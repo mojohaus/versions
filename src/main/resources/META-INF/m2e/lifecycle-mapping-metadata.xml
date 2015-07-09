@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE lifecycleMappingMetadata>
+<!-- the presence of this file fixes the m2eclipse problem "Plugin execution 
+	not covered by lifecycle configuration..." -->
+<lifecycleMappingMetadata>
+	<pluginExecutions>
+		<pluginExecution>
+			<pluginExecutionFilter>
+				<goals>
+					<goal>commit</goal>
+					<goal>compare-dependencies</goal>
+					<goal>dependency-updates-report</goal>
+					<goal>display-dependency-updates</goal>
+					<goal>display-parent-updates</goal>
+					<goal>display-plugin-updates</goal>
+					<goal>display-property-updates</goal>
+					<goal>force-releases</goal>
+					<goal>lock-snapshots</goal>
+					<goal>plugin-updates-report</goal>
+					<goal>property-updates-report</goal>
+					<goal>resolve-ranges</goal>
+					<goal>revert</goal>
+					<goal>set</goal>
+					<goal>unlock-snapshots</goal>
+					<goal>update-child-modules</goal>
+					<goal>use-latest-releases</goal>
+					<goal>use-latest-snapshots</goal>
+					<goal>use-latest-versions</goal>
+					<goal>use-next-releases</goal>
+					<goal>use-next-snapshots</goal>
+					<goal>use-next-versions</goal>
+					<goal>use-reactor</goal>
+					<goal>use-releases</goal>
+				</goals>
+			</pluginExecutionFilter>
+			<action>
+				<ignore />
+			</action>
+		</pluginExecution>
+		<pluginExecution>
+			<pluginExecutionFilter>
+				<goals>
+					<goal>update-child-modules</goal>
+					<goal>update-parent</goal>
+					<goal>update-properties</goal>
+					<goal>update-property</goal>
+				</goals>
+			</pluginExecutionFilter>
+			<action>
+				<execute>
+					<runOnIncremental>false</runOnIncremental>
+				</execute>
+			</action>
+		</pluginExecution>
+	</pluginExecutions>
+</lifecycleMappingMetadata>
