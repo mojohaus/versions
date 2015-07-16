@@ -236,7 +236,7 @@ public class SetMojo
                 {
                     found = true;
                     // if the change is not one we have swept up already
-                    applyChange( project, reactor, files, m.getGroupId(), m.getArtifactId(),
+                    applyChange( project, reactor, files, mGroupId, m.getArtifactId(),
                                  StringUtils.isBlank( oldVersion ) || "*".equals( oldVersion ) ? "" : m.getVersion() );
                 }
             }

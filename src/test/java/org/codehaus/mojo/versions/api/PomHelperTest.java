@@ -1,11 +1,14 @@
 package org.codehaus.mojo.versions.api;
 
 import junit.framework.TestCase;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
 
 import javax.xml.stream.XMLInputFactory;
 import java.io.File;
+import java.io.StringReader;
 import java.net.URL;
 
 /**
@@ -40,6 +43,17 @@ public class PomHelperTest
         assertEquals( newVersion, PomHelper.getProjectVersion( pom ) );
 
         assertNotSame( oldVersion, newVersion );
+    }
+
+    public void testGroupIdNotOnChildPom()
+            throws Exception
+    {
+        URL url = getClass().getResource( "PomHelperTest.noGroupIdOnChild.pom.xml" );
+        StringBuilder input = PomHelper.readXmlFile( new File( url.getPath() ) );
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        Model model = reader.read(new StringReader(input.toString()));
+
+        assertEquals("org.myorg", PomHelper.getGroupId(model));
     }
 
     public void test_Version_Version_Equal()
