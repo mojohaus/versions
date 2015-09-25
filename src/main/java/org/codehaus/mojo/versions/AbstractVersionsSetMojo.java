@@ -76,6 +76,14 @@ public abstract class AbstractVersionsSetMojo
     private String artifactId;
 
     /**
+     * The version of the dependency/module to update.
+     *
+     * @parameter property="oldVersion" default-value="${project.version}"
+     * @since 1.2
+     */
+    private String oldVersion;
+
+    /**
      * Whether matching versions explicitly specified (as /project/version) in child modules should be updated.
      *
      * @parameter property="updateMatchingVersions" default-value="true"
@@ -140,9 +148,9 @@ public abstract class AbstractVersionsSetMojo
             throws MojoExecutionException, MojoFailureException {
         if (getProject().getOriginalModel().getVersion() == null) {
             throw new MojoExecutionException("Project version is inherited from parent.");
-        } else {
-            setOldVersion(getProject().getOriginalModel().getVersion());
         }
+
+        storeFirstOldVersion(oldVersion);
 
         // obtain new version to set
         String newVersion = null;
@@ -220,7 +228,7 @@ public abstract class AbstractVersionsSetMojo
         }
 
         // store newVersion for another possible goal
-        VersionStore.setVersion(newVersion);
+        storeOldVersion(newVersion);
     }
 
     private static String fixNullOrEmpty( String value, String defaultValue )
@@ -344,7 +352,7 @@ public abstract class AbstractVersionsSetMojo
             moduleProjectFile = moduleDir;
         }
 
-        files.add( moduleProjectFile );
+        files.add(moduleProjectFile);
     }
 
     /**
@@ -389,18 +397,15 @@ public abstract class AbstractVersionsSetMojo
     }
 
 
-    /**
-     * The version of the dependency/module to update.
-     *
-     * @parameter property="oldVersion" default-value="${project.version}"
-     * @since 1.2
-     */
-    public void setOldVersion(String oldVersion) {
-//        VersionStore.setVersionIfEmpty(oldVersion);
-        VersionStore.setVersion(oldVersion);
+    protected void storeFirstOldVersion(String oldVersion) {
+        VersionStore.setVersionIfEmpty(artifactId, oldVersion);
     }
 
-    public String getOldVersion() {
-        return VersionStore.getVersion();
+    protected void storeOldVersion(String oldVersion) {
+        VersionStore.setVersion(artifactId, oldVersion);
+    }
+
+    protected String getOldVersion() {
+        return VersionStore.getVersion(artifactId);
     }
 }
