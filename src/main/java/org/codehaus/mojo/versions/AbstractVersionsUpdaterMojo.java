@@ -180,6 +180,15 @@ public abstract class AbstractVersionsUpdaterMojo
     protected Boolean allowSnapshots;
 
     /**
+     * Resolve versions defined as LATEST (or RELEASE) to a specific version during updates. Does not work with update-parent goal. Ignored by
+     * reporting goals.
+     *
+     * @parameter property="resolveLatest" default-value="true"
+     * @since 1.4
+     */
+    protected Boolean resolveLatest;
+
+    /**
      * Our versions helper.
      */
     private VersionsHelper helper;
@@ -501,7 +510,7 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         ArtifactVersion winner =
             version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                      this.getHelper() );
+                                      this.getHelper(), this.resolveLatest);
 
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {

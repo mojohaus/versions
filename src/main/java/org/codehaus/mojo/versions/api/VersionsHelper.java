@@ -277,4 +277,14 @@ public interface VersionsHelper
      */
     void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactResolutionException, ArtifactNotFoundException;
+
+    /**
+     * Parse a version string into a {@link VersionRange} with support for LATEST and RELEASE versions.
+     *
+     * @param version unparsed version (range). E.g. 1.0, LATEST, [1.0,2.0).
+     * @return null if input was null.
+     * @throws MojoExecutionException if something goes wrong.
+     */
+    VersionRange createVersionRange( String version )
+        throws MojoExecutionException;
 }

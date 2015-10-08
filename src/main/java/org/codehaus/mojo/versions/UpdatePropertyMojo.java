@@ -52,6 +52,8 @@ public class UpdatePropertyMojo
 
     /**
      * Constrain the possible new versions by given Maven version range. To force a specific version you must use [1.0].
+     * To set as the special version LATEST (or RELEASE) you should use (plain) LATEST and additionally set
+     * resolveLatest to false.
      *
      * @parameter property="newVersion"
      * @since 1.3

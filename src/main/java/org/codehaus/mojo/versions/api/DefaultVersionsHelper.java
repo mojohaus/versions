@@ -941,6 +941,29 @@ public class DefaultVersionsHelper
         return propertyVersions;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public VersionRange createVersionRange( String version ) throws MojoExecutionException
+    {
+        if ( "RELEASE".equals( version ) || "LATEST".equals( version ) )
+        {
+            return VersionRange.createFromVersion( version );
+        }
+        else if ( version != null )
+        {
+            try
+            {
+                return VersionRange.createFromVersionSpec( version );
+            }
+            catch ( InvalidVersionSpecificationException e )
+            {
+                throw new MojoExecutionException( e.getMessage(), e );
+            }
+        }
+        return null;
+    }
+
     // This is a data container to hold the result of a Dependency lookup to its ArtifactVersions.
     private static class DependencyArtifactVersions
     {

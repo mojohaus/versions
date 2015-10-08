@@ -23,7 +23,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -315,33 +314,21 @@ public class PropertyVersions
     }
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper )
+                                            List reactorProjects, VersionsHelper helper, Boolean resolveLatest )
         throws MojoExecutionException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
         helper.getLog().debug( "Property ${" + property.getName() + "}: Set of valid available versions is " +
                                    Arrays.asList( getVersions( includeSnapshots ) ) );
-        VersionRange range;
-        try
+        VersionRange range = helper.createVersionRange( property.getVersion() );
+        if ( range!=null )
         {
-            if ( property.getVersion() != null )
-            {
-                range = VersionRange.createFromVersionSpec( property.getVersion() );
-                helper.getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
-            }
-            else
-            {
-                range = null;
-                helper.getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
-            }
+            helper.getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
         }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+
         ArtifactVersion result =
             getNewestVersion( range, helper.createArtifactVersion( currentVersion ), null, includeSnapshots, false,
-                              true );
+                              true, resolveLatest );
         helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
 
         if ( property.isSearchReactor() )
