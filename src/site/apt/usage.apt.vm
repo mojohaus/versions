@@ -128,6 +128,16 @@ mvn -N versions:update-child-modules
   This goal helps when you use properties to define versions.  Please see the
   {{{./examples/update-properties.html}<<<update-properties>>> example}}.
 
+---
+mvn versions:update-properties -Dincludes=com.my.groupId
+---
+
+  Individual properties can be updated by name and can be set to specific versions.
+
+---
+mvn versions:update-property -Dproperty=junit.version -DnewVersion=[4.11]
+---
+
 ** Updating versions of dependencies (Note: modifies <<<pom.xml>>> files)
 
   There are a set of goals to help with advancing dependency versions: <<<use-latest-releases>>>, 

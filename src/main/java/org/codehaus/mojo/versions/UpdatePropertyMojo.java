@@ -51,7 +51,7 @@ public class UpdatePropertyMojo
     private String property = null;
 
     /**
-     * The new version to set the property to (can be a version range to find a version within).
+     * Constrain the possible new versions by given Maven version range. To force a specific version you must use [1.0].
      *
      * @parameter property="newVersion"
      * @since 1.3
