@@ -143,6 +143,19 @@ Version selection
   Inclusion of snapshots can be controlled with the <<<allowSnapshots>>> parameter as can inclusion of other reactor
   projects (<<<excludeReactor>>>).
 
+* Working with LATEST or RELEASE
+
+  Maven dependencies can be specified as <<<RELEASE>>> or <<<LATEST>>> (includes snapshots). By default, updating
+  properties resolves these labels to specific versions when it encounters them. This behaviour can be disabled through
+  the <<<resolveLatest>>> parameter. If disabled, these labels will count as newer than any specific version so will not
+  get changed (i.e. updating a property set to <<<LATEST>>> will not change it to a specific version).
+
+  You can also assign these labels to a property with:
+
+---
+mvn versions:update-property -Dproperty=bom.version -DnewVersion=LATEST
+---
+
 * Property-specific versioning rules
 
   Some general parameters can be overridden for individual properties via the plugin's configuration
