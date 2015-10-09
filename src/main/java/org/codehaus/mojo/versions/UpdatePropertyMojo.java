@@ -43,9 +43,10 @@ public class UpdatePropertyMojo
 // ------------------------------ FIELDS ------------------------------
 
     /**
-     * A property to update.
+     * The property to update.
      *
      * @parameter property="property"
+     * @required
      * @since 1.3
      */
     private String property = null;
