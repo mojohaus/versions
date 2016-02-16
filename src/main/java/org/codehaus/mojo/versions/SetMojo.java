@@ -144,6 +144,22 @@ public class SetMojo
     private Prompter prompter;
 
     /**
+     * Whether to remove -SNAPSHOT from the existing version. If not set will default to false.
+     *
+     * @parameter property="removeSnapshot" default-value="false"
+     * @since 2.10
+     */
+    private boolean removeSnapshot;
+
+    /**
+     * Whether to add next version number and -SNAPSHOT to the existing version. If not set will default to false.
+     *
+     * @parameter property="nextSnapshot" default-value="false"
+     * @since 2.10
+     */
+    private boolean nextSnapshot;
+
+    /**
      * The changes to module coordinates. Guarded by this.
      */
     private final transient List<VersionChange> sourceChanges = new ArrayList<VersionChange>();
@@ -175,6 +191,35 @@ public class SetMojo
         if ( getProject().getOriginalModel().getVersion() == null )
         {
             throw new MojoExecutionException( "Project version is inherited from parent." );
+        }
+
+        if ( removeSnapshot == true && nextSnapshot == false ) {
+            String version = getVersion();
+            String release = version;
+            if (version.indexOf("-SNAPSHOT") > -1) {
+                release = version.substring(0, version.indexOf(
+                        "-SNAPSHOT"));
+                newVersion = release;
+                getLog().info("SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion);
+            }
+        }
+
+        if ( removeSnapshot == false && nextSnapshot == true ) {
+            String version = getVersion();
+            String subversion = version.substring(0, version.length()-3);
+            String release = version;
+            if (version.indexOf("-SNAPSHOT") < 0) {
+                // 1.0-b1-002
+                String currentVersionStr = version.substring(version.length() - 3);
+                System.out.println("VER: " + currentVersionStr);
+                int currentVersion = Integer.parseInt(currentVersionStr);
+                int nextVersion = currentVersion + 1;
+                String nextVersionStr = ("000" + nextVersion);
+                nextVersionStr = nextVersionStr.substring( nextVersionStr.length() - 3);
+                release = subversion + nextVersionStr + "-SNAPSHOT";
+                newVersion = release;
+                getLog().info("SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion);
+            }
         }
 
         if ( StringUtils.isEmpty( newVersion ) )
