@@ -196,7 +196,7 @@ public class SetMojo
             if (version.indexOf("-SNAPSHOT") > -1) {
                 versionWithoutSnapshot = version.substring(0, version.indexOf("-SNAPSHOT"));
             }
-            String subversion = version.substring(0, version.length() - 3);
+            String subversion = versionWithoutSnapshot.substring(0, versionWithoutSnapshot.length() - 3);
 
             // 1.0-b1-002
             String currentVersionStr = versionWithoutSnapshot.substring(versionWithoutSnapshot.length() - 3);
