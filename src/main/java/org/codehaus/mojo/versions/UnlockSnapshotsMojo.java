@@ -19,9 +19,11 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -75,6 +77,10 @@ public class UnlockSnapshotsMojo
         {
             unlockSnapshots( pom, getProject().getDependencies() );
         }
+	if ( isProcessingParent() )
+	{
+	    unlockParentSnapshot( pom, getProject().getParent() );
+	}
     }
 
     private void unlockSnapshots( ModifiedPomXMLEventReader pom, List dependencies )
@@ -106,6 +112,35 @@ public class UnlockSnapshotsMojo
                 {
                     getLog().info( "Unlocked " + toString( dep ) + " to version " + unlockedVersion );
                 }
+            }
+        }
+    }
+
+    private void unlockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent )
+        throws XMLStreamException, MojoExecutionException
+    {
+        if ( parent == null )
+        {
+            getLog().info( "Project does not have a parent" );
+            return;
+        }
+
+        if ( reactorProjects.contains( parent ) )
+        {
+            getLog().info( "Project's parent is part of the reactor" );
+            return;
+        }
+
+	Artifact parentArtifact = parent.getArtifact();
+        String parentVersion = parentArtifact.getVersion();
+
+        Matcher versionMatcher = matchSnapshotRegex.matcher( parentVersion );
+        if ( versionMatcher.find() && versionMatcher.end() == parentVersion.length() )
+        {
+            String unlockedParentVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
+            if ( PomHelper.setProjectParentVersion( pom, unlockedParentVersion ) )
+            {
+                getLog().info( "Unlocked parent " + parentArtifact.toString() + " to version " + unlockedParentVersion );
             }
         }
     }

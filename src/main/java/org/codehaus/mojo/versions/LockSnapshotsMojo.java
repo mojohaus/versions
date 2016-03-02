@@ -23,6 +23,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -75,6 +76,10 @@ public class LockSnapshotsMojo
         {
             lockSnapshots( pom, getProject().getDependencies() );
         }
+	if ( isProcessingParent() )
+	{
+	    lockParentSnapshot( pom, getProject().getParent() );
+	}
     }
 
     private void lockSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
@@ -112,6 +117,63 @@ public class LockSnapshotsMojo
                 }
             }
         }
+    }
+
+    private void lockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent )
+        throws XMLStreamException, MojoExecutionException
+    {
+        if ( parent == null )
+        {
+            getLog().info( "Project does not have a parent" );
+            return;
+        }
+
+        if ( reactorProjects.contains( parent ) )
+        {
+            getLog().info( "Project's parent is part of the reactor" );
+            return;
+        }
+
+	Artifact parentArtifact = parent.getArtifact();
+        String parentVersion = parentArtifact.getVersion();
+
+        Matcher versionMatcher = matchSnapshotRegex.matcher( parentVersion );
+        if ( versionMatcher.find() && versionMatcher.end() == parentVersion.length() )
+        {
+            String lockedParentVersion = resolveSnapshotVersion( parentArtifact );
+            if ( !parentVersion.equals( lockedParentVersion ) )
+            {
+                if ( PomHelper.setProjectParentVersion( pom, lockedParentVersion ) )
+                {
+                    getLog().info( "Locked parent " + parentArtifact.toString() + " to version " + lockedParentVersion );
+                }
+            }
+        }
+    }
+
+    /**
+     * Determine the timestamp version of the snapshot artifact used in the build.
+     *
+     * @param artifact
+     * @return The timestamp version if exists, otherwise the original snapshot artifact version is returned.
+     */
+    private String resolveSnapshotVersion( Artifact artifact )
+    {
+        getLog().debug( "Resolving snapshot version for artifact: " + artifact );
+
+        String lockedVersion = artifact.getVersion();
+
+        try
+        {
+            resolver.resolve( artifact, getProject().getRemoteArtifactRepositories(), localRepository );
+
+            lockedVersion = artifact.getVersion();
+        }
+        catch ( Exception e )
+        {
+            getLog().error( e );
+        }
+        return lockedVersion;
     }
 
     /**
