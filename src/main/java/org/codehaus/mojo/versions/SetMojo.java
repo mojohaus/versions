@@ -365,10 +365,15 @@ public class SetMojo
     private void addFile( Set<File> files, MavenProject project, String relativePath )
     {
         final File moduleDir = new File( project.getBasedir(), relativePath );
+        final File projectBaseDir = project.getBasedir();
 
         final File moduleProjectFile;
 
-        if ( moduleDir.isDirectory() )
+        if ( projectBaseDir.equals(moduleDir) )
+        {
+            moduleProjectFile = project.getFile();
+        }
+        else if ( moduleDir.isDirectory() )
         {
             moduleProjectFile = new File( moduleDir, "pom.xml" );
         }
