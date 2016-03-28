@@ -111,6 +111,15 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private Boolean processDependencyManagement;
 
     /**
+     * Whether to process the parent section of the project. If not
+     * set will default to false.
+     *
+     * @parameter property="processParent" defaultValue="false"
+     * @since 2.3
+     */
+    private Boolean processParent = false;
+
+    /**
      * Artifact filter to determine if artifact should be included
      *
      * @since 1.0-alpha-3
@@ -154,6 +163,18 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     {
         // true if true or null
         return !Boolean.FALSE.equals( processDependencyManagement );
+    }
+
+    /**
+     * Should the project/parent section of the pom be processed.
+     *
+     * @return returns <code>true if the project/parent section of the pom should be processed.
+     * @since 2.3
+     */
+    public boolean isProcessingParent()
+    {
+        // true if true or null
+        return !Boolean.FALSE.equals( processParent );
     }
 
     /**
