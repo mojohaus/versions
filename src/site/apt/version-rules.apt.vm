@@ -50,9 +50,7 @@ Version number rules
 
     [<<<maven>>>] The standard Maven 2.x version numbering scheme.
 
-    [<<<mercury>>>] The "new" version numbering scheme used by the {{{http://maven.apache.org/mercury/index.html}Maven Mercury}}.
-
-    [<<<numeric>>>] An alternative version numbering scheme, similar to <<<mercury>>> but with no "special" qualifiers.
+    [<<<numeric>>>] An alternative version numbering scheme with no "special" qualifiers.
     
   The <<<versions-maven-plugin>>> will assume that all version numbers follow the <<<maven>>> scheme unless you tell
   it otherwise.
