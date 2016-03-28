@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>34</version>
+    <version>38</version>
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
@@ -79,8 +79,8 @@
   </prerequisites>
 
   <scm>
-    <connection>scm:git:git@github.com:mojohaus/versions-maven-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:mojohaus/versions-maven-plugin.git</developerConnection>
+    <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
     <url>https://github.com/mojohaus/versions-maven-plugin</url>
   </scm>
   <issueManagement>
