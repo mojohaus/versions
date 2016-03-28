@@ -370,7 +370,7 @@ public class SetMojo
 
         if ( moduleDir.isDirectory() )
         {
-            moduleProjectFile = new File( moduleDir, "pom.xml" );
+            moduleProjectFile = project.getFile();
         }
         else
         {
