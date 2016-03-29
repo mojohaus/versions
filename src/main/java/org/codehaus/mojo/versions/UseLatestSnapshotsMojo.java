@@ -153,7 +153,7 @@ public class UseLatestSnapshotsMojo
                 ArtifactVersion upperBound =
                     segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
                 getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
-                ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
+                ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false, resolveLatest );
                 getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
                 String latestVersion = null;
                 for ( int j = 0; j < newer.length; j++ )

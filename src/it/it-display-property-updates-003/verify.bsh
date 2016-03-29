@@ -1,0 +1,21 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+try
+{
+    File file = new File( basedir, "build.log" );
+    String buf = FileUtils.fileRead( file, "UTF-8" );
+
+    if ( buf.indexOf( "All version properties are referencing the newest version available" ) < 0 )
+    {
+        System.err.println( "Should not have suggested updating ${api} from LATEST" );
+        return false;
+    }
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;

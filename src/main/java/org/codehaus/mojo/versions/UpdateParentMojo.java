@@ -87,15 +87,7 @@ public class UpdateParentMojo
             version = parentVersion;
         }
 
-        VersionRange versionRange;
-        try
-        {
-            versionRange = VersionRange.createFromVersionSpec( version );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( "Invalid version range specification: " + version, e );
-        }
+        VersionRange versionRange = getHelper().createVersionRange( version );
 
         Artifact artifact = artifactFactory.createDependencyArtifact( getProject().getParent().getGroupId(),
                                                                       getProject().getParent().getArtifactId(),

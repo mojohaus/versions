@@ -107,7 +107,7 @@ public class UseNextReleasesMojo
                 }
 
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                ArtifactVersion[] newer = versions.getNewerVersions( version, false );
+                ArtifactVersion[] newer = versions.getNewerVersions( version, false, Boolean.TRUE.equals( resolveLatest ) );
                 if ( newer.length > 0 )
                 {
                     String newVersion = newer[0].toString();

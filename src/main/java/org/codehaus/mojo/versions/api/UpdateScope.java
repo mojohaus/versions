@@ -40,6 +40,8 @@ public abstract class UpdateScope
     implements Comparable, Serializable
 {
 
+    static final boolean RESOLVE_LATEST = true; // Being fixed means this reports will over-report possible updates
+
     /**
      * Versions which are less than an incremental update.
      *
@@ -68,7 +70,7 @@ public abstract class UpdateScope
                 ? null
                 : versionDetails.getNewestVersion( currentVersion,
                                                    versionComparator.incrementSegment( currentVersion, 2 ),
-                                                   includeSnapshots, false, false );
+                                                   includeSnapshots, false, false, RESOLVE_LATEST );
         }
 
         /** {@inheritDoc} */
@@ -79,7 +81,7 @@ public abstract class UpdateScope
             return versionComparator.getSegmentCount( currentVersion ) < 3
                 ? null
                 : versionDetails.getVersions( currentVersion, versionComparator.incrementSegment( currentVersion, 2 ),
-                                              includeSnapshots, false, false );
+                                              includeSnapshots, false, false, RESOLVE_LATEST );
         }
 
     };
@@ -113,7 +115,7 @@ public abstract class UpdateScope
                 ? null
                 : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
                                                    versionComparator.incrementSegment( currentVersion, 1 ),
-                                                   includeSnapshots, true, false );
+                                                   includeSnapshots, true, false, RESOLVE_LATEST );
         }
 
         /** {@inheritDoc} */
@@ -125,7 +127,7 @@ public abstract class UpdateScope
                 ? null
                 : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 2 ),
                                               versionComparator.incrementSegment( currentVersion, 1 ), includeSnapshots,
-                                              true, false );
+                                              true, false, RESOLVE_LATEST );
         }
 
     };
@@ -159,7 +161,7 @@ public abstract class UpdateScope
                 ? null
                 : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
                                                    versionComparator.incrementSegment( currentVersion, 0 ),
-                                                   includeSnapshots, true, false );
+                                                   includeSnapshots, true, false, RESOLVE_LATEST );
         }
 
         /** {@inheritDoc} */
@@ -171,7 +173,7 @@ public abstract class UpdateScope
                 ? null
                 : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 1 ),
                                               versionComparator.incrementSegment( currentVersion, 0 ), includeSnapshots,
-                                              true, false );
+                                              true, false, RESOLVE_LATEST );
         }
 
     };
@@ -203,7 +205,7 @@ public abstract class UpdateScope
             return versionComparator.getSegmentCount( currentVersion ) < 1
                 ? null
                 : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 0 ), null,
-                                                   includeSnapshots, true, false );
+                                                   includeSnapshots, true, false, RESOLVE_LATEST );
         }
 
         /** {@inheritDoc} */
@@ -214,7 +216,7 @@ public abstract class UpdateScope
             return versionComparator.getSegmentCount( currentVersion ) < 1
                 ? null
                 : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 0 ), null,
-                                              includeSnapshots, true, false );
+                                              includeSnapshots, true, false, RESOLVE_LATEST );
         }
 
     };
@@ -237,14 +239,14 @@ public abstract class UpdateScope
         public ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
         {
-            return versionDetails.getNewestVersion( currentVersion, null, includeSnapshots, false, false );
+            return versionDetails.getNewestVersion( currentVersion, null, includeSnapshots, false, false, RESOLVE_LATEST );
         }
 
         /** {@inheritDoc} */
         public ArtifactVersion[] getAllUpdates( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
         {
-            return versionDetails.getVersions( currentVersion, null, includeSnapshots, false, false );
+            return versionDetails.getVersions( currentVersion, null, includeSnapshots, false, false, RESOLVE_LATEST );
         }
 
     };

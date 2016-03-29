@@ -145,7 +145,7 @@ public class UseLatestReleasesMojo
 
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                ArtifactVersion[] newer = versions.getNewerVersions( version, segment, false );
+                ArtifactVersion[] newer = versions.getNewerVersions( version, segment, false, Boolean.TRUE.equals( resolveLatest ) );
                 newer = filterVersionsWithIncludes( newer, artifact );
                 if ( newer.length > 0 )
                 {

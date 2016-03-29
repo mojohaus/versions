@@ -43,15 +43,27 @@ public class UpdatePropertyMojo
 // ------------------------------ FIELDS ------------------------------
 
     /**
-     * A property to update.
+     * Any restrictions that apply to specific properties. Note only the designated property will be changed and the
+     * value of newVersion supercedes anything from the plugin configuration.
+     *
+     * @parameter
+     * @since 2.3
+     */
+    private Property[] properties = new Property[0];
+
+    /**
+     * The property to update.
      *
      * @parameter property="property"
+     * @required
      * @since 1.3
      */
     private String property = null;
 
     /**
-     * The new version to set the property to (can be a version range to find a version within).
+     * Constrain the possible new versions by given Maven version range. To force a specific version you must use [1.0].
+     * To set as the special version LATEST (or RELEASE) you should use (plain) LATEST and additionally set
+     * resolveLatest to false.
      *
      * @parameter property="newVersion"
      * @since 1.3
@@ -68,6 +80,18 @@ public class UpdatePropertyMojo
 
 // -------------------------- STATIC METHODS --------------------------
 
+    private static Property findProperty( String propertyName, Property... properties )
+    {
+        for ( Property property : properties )
+        {
+            if ( propertyName.equals( property.getName() ) )
+            {
+                return property;
+            }
+        }
+        return new Property( propertyName );
+    }
+
     // -------------------------- OTHER METHODS --------------------------
 
     /**
@@ -81,8 +105,12 @@ public class UpdatePropertyMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        Property propertyConfig = new Property( property );
-        propertyConfig.setVersion( newVersion );
+        Property propertyConfig = findProperty( property, properties );
+        if (newVersion!=null)
+        {
+            propertyConfig.setVersion( newVersion );
+        }
+
         Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), new Property[]{ propertyConfig }, property, "",
                                                       !Boolean.FALSE.equals( autoLinkItems ) );

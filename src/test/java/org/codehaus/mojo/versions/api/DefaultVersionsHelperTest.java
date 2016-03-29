@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions.api;
  */
 
 import junit.framework.TestCase;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.manager.DefaultWagonManager;
@@ -32,6 +31,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -42,24 +42,18 @@ import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.file.FileWagon;
 import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.hasToString;
 import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.junit.matchers.JUnitMatchers.hasItems;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.*;
 
 /**
  * Test {@link DefaultVersionsHelper}
@@ -175,6 +169,16 @@ public class DefaultVersionsHelperTest
         assertTrue( result.isEmpty() );
     }
 
+    public void testVersionRange()
+        throws MojoExecutionException
+    {
+        VersionsHelper helper = createHelper();
+
+        assertThat( helper.createVersionRange( "1.0" ), hasToString( "1.0" ) );
+        assertThat( helper.createVersionRange( "[1.0,2.0)" ), hasToString( "[1.0,2.0)" ) );
+        assertThat( helper.createVersionRange( "LATEST" ), hasToString( "LATEST" ) );
+        assertThat( helper.createVersionRange( "RELEASE" ), hasToString( "RELEASE" ) );
+    }
 
     private VersionsHelper createHelper()
         throws MojoExecutionException
