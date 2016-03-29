@@ -3,6 +3,9 @@ jdk:
   - openjdk6
   - oraclejdk7
   - oraclejdk8
+# We don't need an install before
+# we run the unit and integration tests.
+install: true
 script: "mvn --show-version --errors --batch-mode -Prun-its clean verify"
 cache:
     directories:
