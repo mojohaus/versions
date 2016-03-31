@@ -1,23 +1,23 @@
 package org.codehaus.mojo.versions.api;
 
 /*
-* Licensed to the Apache Software Foundation (ASF) under one
-* or more contributor license agreements.  See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership.  The ASF licenses this file
-* to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License.  You may obtain a copy of the License at
-*
-*  http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -41,16 +41,14 @@ public abstract class AbstractVersionDetails
 {
 
     /**
-     * The current version.
-     * Guarded by {@link #currentVersionLock}.
+     * The current version. Guarded by {@link #currentVersionLock}.
      *
      * @since 1.0-beta-1
      */
     private ArtifactVersion currentVersion = null;
 
     /**
-     * Do we want to include snapshots when snapshot inclusion is not specified.
-     * Guarded by {@link #currentVersionLock}.
+     * Do we want to include snapshots when snapshot inclusion is not specified. Guarded by {@link #currentVersionLock}.
      *
      * @since 1.0-beta-1
      */
@@ -142,12 +140,11 @@ public abstract class AbstractVersionDetails
     /**
      * Gets newer versions of the specified artifact version.
      *
-     * @param version                The current version of the artifact.
-     * @param upperBoundFixedSegment Indicates the segment in the version number
-     *                               that cannot be changed. For example, a value of 0 indicates that the major
-     *                               version number cannot be changed. A value of -1 indicates any segment
-     *                               value can be changed.
-     * @param includeSnapshots       Whether to include snapshot versions.
+     * @param version The current version of the artifact.
+     * @param upperBoundFixedSegment Indicates the segment in the version number that cannot be changed. For example, a
+     *            value of 0 indicates that the major version number cannot be changed. A value of -1 indicates any
+     *            segment value can be changed.
+     * @param includeSnapshots Whether to include snapshot versions.
      * @return Returns the newer artifact versions.
      */
     private final ArtifactVersion[] getNewerVersions( ArtifactVersion version, int upperBoundFixedSegment,
@@ -420,7 +417,7 @@ public abstract class AbstractVersionDetails
     public ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, VersionRange versionRange,
                                             boolean includeSnapshots )
     {
-        return new ArtifactVersion[0];  //To change body of implemented methods use File | Settings | File Templates.
+        return new ArtifactVersion[0]; // To change body of implemented methods use File | Settings | File Templates.
     }
 
     public final ArtifactVersion getOldestUpdate( UpdateScope updateScope )

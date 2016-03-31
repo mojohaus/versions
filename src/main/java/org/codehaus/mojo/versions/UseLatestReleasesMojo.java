@@ -88,12 +88,9 @@ public class UseLatestReleasesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException
-     *          when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
+     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -166,11 +163,10 @@ public class UseLatestReleasesMojo
         for ( int j = 0; j < newer.length; j++ )
         {
             ArtifactVersion artifactVersion = newer[j];
-            Artifact artefactWithNewVersion = new DefaultArtifact( artifact.getGroupId(), artifact.getArtifactId(),
-                                                                   VersionRange.createFromVersion(
-                                                                       artifactVersion.toString() ),
-                                                                   artifact.getScope(), artifact.getType(), null,
-                                                                   new DefaultArtifactHandler(), false );
+            Artifact artefactWithNewVersion =
+                new DefaultArtifact( artifact.getGroupId(), artifact.getArtifactId(),
+                                     VersionRange.createFromVersion( artifactVersion.toString() ), artifact.getScope(),
+                                     artifact.getType(), null, new DefaultArtifactHandler(), false );
             if ( isIncluded( artefactWithNewVersion ) )
             {
                 filteredNewer.add( artifactVersion );

@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Scans the current projects child modules, updating the versions of any which use the current project to
- * the version of the current project.
+ * Scans the current projects child modules, updating the versions of any which use the current project to the version
+ * of the current project.
  *
  * @author Stephen Connolly
  * @goal update-child-modules
@@ -71,7 +71,7 @@ public class UpdateChildModulesMojo
      * Called when this mojo is executed.
      *
      * @throws MojoExecutionException when things go wrong.
-     * @throws MojoFailureException   when things go wrong.
+     * @throws MojoFailureException when things go wrong.
      */
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -109,9 +109,8 @@ public class UpdateChildModulesMojo
                 String sourcePath = (String) i.next();
                 Model sourceModel = (Model) reactor.get( sourcePath );
 
-                getLog().debug( sourcePath.length() == 0
-                                    ? "Processing root module as parent"
-                                    : "Processing " + sourcePath + " as a parent." );
+                getLog().debug( sourcePath.length() == 0 ? "Processing root module as parent"
+                                : "Processing " + sourcePath + " as a parent." );
 
                 synchronized ( this )
                 {
@@ -134,9 +133,8 @@ public class UpdateChildModulesMojo
                         continue;
                     }
 
-                    getLog().debug( "Looking for modules which use " +
-                                        ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                                        + " as their parent" );
+                    getLog().debug( "Looking for modules which use "
+                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
 
                     Iterator j =
                         PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
@@ -165,19 +163,19 @@ public class UpdateChildModulesMojo
                         final Parent parent = targetModel.getParent();
                         if ( sourceVersion.equals( parent.getVersion() ) )
                         {
-                            getLog().debug( "Module: " + targetPath + " parent is " +
-                                                ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                                + sourceVersion );
+                            getLog().debug( "Module: " + targetPath + " parent is "
+                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                                + sourceVersion );
                         }
                         else
                         {
                             getLog().info( "Module: " + targetPath );
-                            getLog().info(
-                                "    parent was " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) +
-                                    ":" + parent.getVersion() );
-                            getLog().info(
-                                "    updated to " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) +
-                                    ":" + sourceVersion );
+                            getLog().info( "    parent was "
+                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                                + parent.getVersion() );
+                            getLog().info( "    updated to "
+                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                                + sourceVersion );
                             process( moduleProjectFile );
                             // don't forget to update the cached model
                             targetModel.setVersion( sourceVersion );
@@ -203,8 +201,8 @@ public class UpdateChildModulesMojo
      *
      * @param pom The pom file to update.
      * @throws MojoExecutionException when things go wrong.
-     * @throws MojoFailureException   when things go wrong.
-     * @throws XMLStreamException     when things go wrong.
+     * @throws MojoFailureException when things go wrong.
+     * @throws XMLStreamException when things go wrong.
      */
     protected synchronized void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException

@@ -51,7 +51,8 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
- * Sets the current project's version and based on that change propagates that change onto any child modules as necessary.
+ * Sets the current project's version and based on that change propagates that change onto any child modules as
+ * necessary.
  *
  * @author Stephen Connolly
  * @goal set
@@ -159,10 +160,8 @@ public class SetMojo
     /**
      * Called when this mojo is executed.
      *
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          when things go wrong.
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          when things go wrong.
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
+     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong.
      */
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -194,13 +193,13 @@ public class SetMojo
             else
             {
                 throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
-                                                      + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+                    + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
             }
         }
         if ( StringUtils.isEmpty( newVersion ) )
         {
             throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
-                                                  + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+                + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
         }
 
         try
@@ -217,8 +216,8 @@ public class SetMojo
             // set of files to update
             final Set<File> files = new LinkedHashSet<File>();
 
-            getLog().info(
-                "Processing change of " + groupId + ":" + artifactId + ":" + oldVersion + " -> " + newVersion );
+            getLog().info( "Processing change of " + groupId + ":" + artifactId + ":" + oldVersion + " -> "
+                + newVersion );
             Pattern groupIdRegex =
                 Pattern.compile( RegexUtils.convertWildcardsToRegex( fixNullOrEmpty( groupId, "*" ), true ) );
             Pattern artifactIdRegex =
@@ -282,9 +281,8 @@ public class SetMojo
             final String sourcePath = sourceEntry.getKey();
             final Model sourceModel = sourceEntry.getValue();
 
-            getLog().debug( sourcePath.length() == 0
-                                ? "Processing root module as parent"
-                                : "Processing " + sourcePath + " as a parent." );
+            getLog().debug( sourcePath.length() == 0 ? "Processing root module as parent"
+                            : "Processing " + sourcePath + " as a parent." );
 
             final String sourceGroupId = PomHelper.getGroupId( sourceModel );
             if ( sourceGroupId == null )
@@ -307,9 +305,8 @@ public class SetMojo
 
             addFile( files, project, sourcePath );
 
-            getLog().debug(
-                "Looking for modules which use " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                    + " as their parent" );
+            getLog().debug( "Looking for modules which use "
+                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
 
             for ( Map.Entry<String, Model> stringModelEntry : PomHelper.getChildModels( reactor, sourceGroupId,
                                                                                         sourceArtifactId ).entrySet() )
@@ -321,42 +318,38 @@ public class SetMojo
                 getLog().debug( "Module: " + targetPath );
                 if ( sourceVersion.equals( parent.getVersion() ) )
                 {
-                    getLog().debug(
-                        "    parent already is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                            + sourceVersion );
+                    getLog().debug( "    parent already is "
+                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + sourceVersion );
                 }
                 else
                 {
-                    getLog().debug(
-                        "    parent is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                            + parent.getVersion() );
-                    getLog().debug(
-                        "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                            + sourceVersion );
+                    getLog().debug( "    parent is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
+                        + ":" + parent.getVersion() );
+                    getLog().debug( "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
+                        + ":" + sourceVersion );
                 }
                 final boolean targetExplicit = PomHelper.isExplicitVersion( targetModel );
-                if ( ( updateMatchingVersions || !targetExplicit ) && StringUtils.equals( parent.getVersion(),
-                                                                                          PomHelper.getVersion(
-                                                                                              targetModel ) ) )
+                if ( ( updateMatchingVersions || !targetExplicit )
+                    && StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
                 {
-                    getLog().debug(
-                        "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                                         PomHelper.getArtifactId( targetModel ) ) + ":"
-                            + PomHelper.getVersion( targetModel ) );
-                    getLog().debug(
-                        "    will become " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                                           PomHelper.getArtifactId( targetModel ) )
-                            + ":" + sourceVersion );
+                    getLog().debug( "    module is "
+                        + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                        PomHelper.getArtifactId( targetModel ) )
+                        + ":" + PomHelper.getVersion( targetModel ) );
+                    getLog().debug( "    will become "
+                        + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                        PomHelper.getArtifactId( targetModel ) )
+                        + ":" + sourceVersion );
                     addChange( PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ),
                                PomHelper.getVersion( targetModel ), sourceVersion );
                     targetModel.setVersion( sourceVersion );
                 }
                 else
                 {
-                    getLog().debug(
-                        "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                                         PomHelper.getArtifactId( targetModel ) ) + ":"
-                            + PomHelper.getVersion( targetModel ) );
+                    getLog().debug( "    module is "
+                        + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                        PomHelper.getArtifactId( targetModel ) )
+                        + ":" + PomHelper.getVersion( targetModel ) );
                 }
             }
         }
@@ -391,12 +384,9 @@ public class SetMojo
      * Updates the pom file.
      *
      * @param pom The pom file to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          when things go wrong.
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          when things go wrong.
-     * @throws javax.xml.stream.XMLStreamException
-     *          when things go wrong.
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
+     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong.
+     * @throws javax.xml.stream.XMLStreamException when things go wrong.
      */
     protected synchronized void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
@@ -412,9 +402,8 @@ public class SetMojo
             versionChangerFactory.setLog( log );
             versionChangerFactory.setModel( model );
 
-            VersionChanger changer =
-                versionChangerFactory.newVersionChanger( processParent, processProject, processDependencies,
-                                                         processPlugins );
+            VersionChanger changer = versionChangerFactory.newVersionChanger( processParent, processProject,
+                                                                              processDependencies, processPlugins );
 
             for ( VersionChange versionChange : sourceChanges )
             {
@@ -429,4 +418,3 @@ public class SetMojo
     }
 
 }
-

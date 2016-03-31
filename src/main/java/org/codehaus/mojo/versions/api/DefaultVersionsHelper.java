@@ -176,20 +176,20 @@ public class DefaultVersionsHelper
     /**
      * Constructs a new {@link DefaultVersionsHelper}.
      *
-     * @param artifactFactory            The artifact factory.
+     * @param artifactFactory The artifact factory.
      * @param artifactResolver
-     * @param artifactMetadataSource     The artifact metadata source to use.
+     * @param artifactMetadataSource The artifact metadata source to use.
      * @param remoteArtifactRepositories The remote artifact repositories to consult.
-     * @param remotePluginRepositories   The remote plugin repositories to consult.
-     * @param localRepository            The local repository to consult.
-     * @param wagonManager               The wagon manager (used if rules need to be retrieved).
-     * @param settings                   The settings  (used to provide proxy information to the wagon manager).
-     * @param serverId                   The serverId hint for the wagon manager.
-     * @param rulesUri                   The URL to retrieve the versioning rules from.
-     * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
-     * @param mavenSession               The maven session information.
-     * @param pathTranslator             The path translator component.            @throws org.apache.maven.plugin.MojoExecutionException
-     *                                   If things go wrong.
+     * @param remotePluginRepositories The remote plugin repositories to consult.
+     * @param localRepository The local repository to consult.
+     * @param wagonManager The wagon manager (used if rules need to be retrieved).
+     * @param settings The settings (used to provide proxy information to the wagon manager).
+     * @param serverId The serverId hint for the wagon manager.
+     * @param rulesUri The URL to retrieve the versioning rules from.
+     * @param log The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
+     * @param mavenSession The maven session information.
+     * @param pathTranslator The path translator component. @throws org.apache.maven.plugin.MojoExecutionException If
+     *            things go wrong.
      * @since 1.0-alpha-3
      */
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
@@ -197,7 +197,7 @@ public class DefaultVersionsHelper
                                   List remotePluginRepositories, ArtifactRepository localRepository,
                                   WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
                                   Log log, MavenSession mavenSession, PathTranslator pathTranslator )
-        throws MojoExecutionException
+                                      throws MojoExecutionException
     {
         this.artifactFactory = artifactFactory;
         this.artifactResolver = artifactResolver;
@@ -281,7 +281,7 @@ public class DefaultVersionsHelper
 
     private static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
                                         Log logger )
-        throws MojoExecutionException
+                                            throws MojoExecutionException
     {
         RuleSet ruleSet = new RuleSet();
         if ( rulesUri != null && rulesUri.trim().length() != 0 )
@@ -409,9 +409,9 @@ public class DefaultVersionsHelper
                         {
                             if ( getLog().isDebugEnabled() )
                             {
-                                getLog().debug(
-                                    "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact )
-                                        + " found on ignore list: " + ignoreVersion );
+                                getLog().debug( "Version " + version + " for artifact "
+                                    + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list: "
+                                    + ignoreVersion );
                             }
                             i.remove();
                             break;
@@ -423,9 +423,9 @@ public class DefaultVersionsHelper
                         {
                             if ( getLog().isDebugEnabled() )
                             {
-                                getLog().debug(
-                                    "Version " + version + " for artifact " + ArtifactUtils.versionlessKey( artifact )
-                                        + " found on ignore list: " + ignoreVersion );
+                                getLog().debug( "Version " + version + " for artifact "
+                                    + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list: "
+                                    + ignoreVersion );
                             }
                             i.remove();
                             break;
@@ -438,8 +438,7 @@ public class DefaultVersionsHelper
     }
 
     /**
-     * Returns a list of versions which should not be considered when looking
-     * for updates.
+     * Returns a list of versions which should not be considered when looking for updates.
      *
      * @param artifact The artifact
      * @return List of ignored version
@@ -452,9 +451,9 @@ public class DefaultVersionsHelper
         {
             if ( !TYPE_EXACT.equals( ignoreVersion.getType() ) && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
             {
-                getLog().warn(
-                    "The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion[" + ignoreVersion
-                        + "] is not valid." + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
+                getLog().warn( "The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion["
+                    + ignoreVersion + "] is not valid." + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX
+                    + "'." );
             }
             else
             {
@@ -471,7 +470,7 @@ public class DefaultVersionsHelper
                 if ( !TYPE_EXACT.equals( ignoreVersion.getType() ) && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
                 {
                     getLog().warn( "The type attribute '" + ignoreVersion.getType() + "' for " + rule + " is not valid."
-                                       + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
+                        + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
                 }
                 else
                 {
@@ -533,7 +532,7 @@ public class DefaultVersionsHelper
     /**
      * Find the rule, if any, which best fits the artifact details given.
      *
-     * @param groupId    Group id of the artifact
+     * @param groupId Group id of the artifact
      * @param artifactId Artifact id of the artifact
      * @return Rule which best describes the given artifact
      */
@@ -625,9 +624,8 @@ public class DefaultVersionsHelper
         throws InvalidVersionSpecificationException
     {
         return createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                         dependency.getVersion() == null
-                                             ? VersionRange.createFromVersionSpec( "[0,]" )
-                                             : VersionRange.createFromVersionSpec( dependency.getVersion() ),
+                                         dependency.getVersion() == null ? VersionRange.createFromVersionSpec( "[0,]" )
+                                                         : VersionRange.createFromVersionSpec( dependency.getVersion() ),
                                          dependency.getType(), dependency.getClassifier(), dependency.getScope(),
                                          dependency.isOptional() );
     }
@@ -659,7 +657,7 @@ public class DefaultVersionsHelper
      */
     public ArtifactVersions lookupArtifactUpdates( Artifact artifact, Boolean allowSnapshots,
                                                    boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException
+                                                       throws ArtifactMetadataRetrievalException
     {
         ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
 
@@ -673,7 +671,8 @@ public class DefaultVersionsHelper
      */
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies,
                                                                         boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+                                                                            throws ArtifactMetadataRetrievalException,
+                                                                            InvalidVersionSpecificationException
     {
         // Create the request for details collection for parallel lookup...
         final List<Callable<DependencyArtifactVersions>> requestsForDetails =
@@ -703,13 +702,13 @@ public class DefaultVersionsHelper
         }
         catch ( final ExecutionException ee )
         {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " +
-                                                              dependencies + ": " + ee.getMessage(), ee );
+            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
+                + ": " + ee.getMessage(), ee );
         }
         catch ( final InterruptedException ie )
         {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " +
-                                                              dependencies + ": " + ie.getMessage(), ie );
+            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
+                + ": " + ie.getMessage(), ie );
         }
         finally
         {
@@ -724,15 +723,15 @@ public class DefaultVersionsHelper
     public ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
-        getLog().debug(
-            "Checking " + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() ) +
-                " for updates newer than " + dependency.getVersion() );
+        getLog().debug( "Checking "
+            + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )
+            + " for updates newer than " + dependency.getVersion() );
         VersionRange versionRange = VersionRange.createFromVersionSpec( dependency.getVersion() );
 
-        return lookupArtifactVersions(
-            createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(), versionRange,
-                                      dependency.getType(), dependency.getClassifier(), dependency.getScope() ),
-            usePluginRepositories );
+        return lookupArtifactVersions( createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(),
+                                                                 versionRange, dependency.getType(),
+                                                                 dependency.getClassifier(), dependency.getScope() ),
+                                       usePluginRepositories );
     }
 
     /**
@@ -768,13 +767,13 @@ public class DefaultVersionsHelper
         }
         catch ( final ExecutionException ee )
         {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " +
-                                                              plugins + ": " + ee.getMessage(), ee );
+            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
+                + ee.getMessage(), ee );
         }
         catch ( final InterruptedException ie )
         {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " +
-                                                              plugins + ": " + ie.getMessage(), ie );
+            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
+                + ie.getMessage(), ie );
         }
         finally
         {
@@ -791,8 +790,8 @@ public class DefaultVersionsHelper
     {
         String version = plugin.getVersion();
         version = version == null ? "LATEST" : version;
-        getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) +
-                            " for updates newer than " + version );
+        getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
+            + " for updates newer than " + version );
 
         VersionRange versionRange = VersionRange.createFromVersion( version );
 
@@ -828,7 +827,7 @@ public class DefaultVersionsHelper
                                                                     Property[] propertyDefinitions,
                                                                     String includeProperties, String excludeProperties,
                                                                     boolean autoLinkItems )
-        throws MojoExecutionException
+                                                                        throws MojoExecutionException
     {
         Map<String, Property> properties = new HashMap<String, Property>();
         if ( propertyDefinitions != null )
@@ -862,8 +861,8 @@ public class DefaultVersionsHelper
                 if ( !properties.containsKey( name ) )
                 {
                     final Property value = new Property( name );
-                    getLog().debug( "Property ${" + name + "}: Adding inferred version range of " +
-                                        propertyVersionsBuilder.getVersionRange() );
+                    getLog().debug( "Property ${" + name + "}: Adding inferred version range of "
+                        + propertyVersionsBuilder.getVersionRange() );
                     value.setVersion( propertyVersionsBuilder.getVersionRange() );
                     properties.put( name, value );
                 }
@@ -895,8 +894,8 @@ public class DefaultVersionsHelper
             PropertyVersionsBuilder builder = builders.get( property.getName() );
             if ( builder == null || !builder.isAssociated() )
             {
-                getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not " +
-                                    "associated with any dependency..." );
+                getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not "
+                    + "associated with any dependency..." );
                 builder = new PropertyVersionsBuilder( null, property.getName(), this );
             }
             if ( !property.isAutoLinkDependencies() )
@@ -923,11 +922,11 @@ public class DefaultVersionsHelper
             try
             {
                 final PropertyVersions versions = builder.newPropertyVersions();
-                if ( property.isAutoLinkDependencies() && StringUtils.isEmpty( property.getVersion() ) &&
-                    !StringUtils.isEmpty( builder.getVersionRange() ) )
+                if ( property.isAutoLinkDependencies() && StringUtils.isEmpty( property.getVersion() )
+                    && !StringUtils.isEmpty( builder.getVersionRange() ) )
                 {
-                    getLog().debug( "Property ${" + property.getName() + "}: Adding inferred version range of " +
-                                        builder.getVersionRange() );
+                    getLog().debug( "Property ${" + property.getName() + "}: Adding inferred version range of "
+                        + builder.getVersionRange() );
                     property.setVersion( builder.getVersionRange() );
                 }
                 versions.setCurrentVersion( project.getProperties().getProperty( property.getName() ) );
@@ -1031,6 +1030,5 @@ public class DefaultVersionsHelper
             return new PluginPluginUpdatesDetails( plugin, lookupPluginUpdates( plugin, allowSnapshots ) );
         }
     }
-
 
 }

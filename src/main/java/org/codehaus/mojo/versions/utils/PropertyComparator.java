@@ -24,7 +24,7 @@ import org.codehaus.mojo.versions.Property;
 import java.util.Comparator;
 
 /**
- * A comparator used to sort {@link Property}  instances.
+ * A comparator used to sort {@link Property} instances.
  *
  * @since 1.0-beta-1
  */

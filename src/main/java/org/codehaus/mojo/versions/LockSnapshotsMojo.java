@@ -34,10 +34,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Attempts to resolve unlocked snapshot dependency versions to the locked timestamp versions used in the build.
- * For example, an unlocked snapshot version like "1.0-SNAPSHOT" could be resolved to "1.0-20090128.202731-1".
- * If a timestamped snapshot is not available, then the version will remained unchanged.  This would be the case
- * if the dependency is only available in the local repository and not in a remote snapshot repository.
+ * Attempts to resolve unlocked snapshot dependency versions to the locked timestamp versions used in the build. For
+ * example, an unlocked snapshot version like "1.0-SNAPSHOT" could be resolved to "1.0-20090128.202731-1". If a
+ * timestamped snapshot is not available, then the version will remained unchanged. This would be the case if the
+ * dependency is only available in the local repository and not in a remote snapshot repository.
  *
  * @author Paul Gier
  * @goal lock-snapshots
@@ -61,8 +61,8 @@ public class LockSnapshotsMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException   when things go wrong in a very bad way
-     * @throws XMLStreamException     when things go wrong with XML streaming
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -76,10 +76,10 @@ public class LockSnapshotsMojo
         {
             lockSnapshots( pom, getProject().getDependencies() );
         }
-	if ( isProcessingParent() )
-	{
-	    lockParentSnapshot( pom, getProject().getParent() );
-	}
+        if ( isProcessingParent() )
+        {
+            lockParentSnapshot( pom, getProject().getParent() );
+        }
     }
 
     private void lockSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
@@ -134,7 +134,7 @@ public class LockSnapshotsMojo
             return;
         }
 
-	Artifact parentArtifact = parent.getArtifact();
+        Artifact parentArtifact = parent.getArtifact();
         String parentVersion = parentArtifact.getVersion();
 
         Matcher versionMatcher = matchSnapshotRegex.matcher( parentVersion );
@@ -145,7 +145,8 @@ public class LockSnapshotsMojo
             {
                 if ( PomHelper.setProjectParentVersion( pom, lockedParentVersion ) )
                 {
-                    getLog().info( "Locked parent " + parentArtifact.toString() + " to version " + lockedParentVersion );
+                    getLog().info( "Locked parent " + parentArtifact.toString() + " to version "
+                        + lockedParentVersion );
                 }
             }
         }
@@ -188,9 +189,8 @@ public class LockSnapshotsMojo
 
         String lockedVersion = dep.getVersion();
 
-        Artifact depArtifact =
-            artifactFactory.createArtifact( dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), dep.getScope(),
-                                            dep.getType() );
+        Artifact depArtifact = artifactFactory.createArtifact( dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
+                                                               dep.getScope(), dep.getType() );
         try
         {
             resolver.resolve( depArtifact, getProject().getRemoteArtifactRepositories(), localRepository );

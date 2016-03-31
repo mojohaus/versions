@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -50,7 +49,6 @@ public class CommitMojo
      * @since 1.0-alpha-1
      */
     private MavenProject project;
-
 
     public void execute()
         throws MojoExecutionException, MojoFailureException

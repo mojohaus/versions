@@ -114,8 +114,8 @@ public abstract class AbstractVersionsDisplayMojo
             if ( !outputFileError && StringUtils.isBlank( outputEncoding ) )
             {
                 outputEncoding = System.getProperty( "file.encoding" );
-                getLog().warn( "File encoding has not been set, using platform encoding " + outputEncoding +
-                                   ", i.e. build is platform dependent!" );
+                getLog().warn( "File encoding has not been set, using platform encoding " + outputEncoding
+                    + ", i.e. build is platform dependent!" );
             }
         }
     }
@@ -137,9 +137,9 @@ public abstract class AbstractVersionsDisplayMojo
         {
             try
             {
-                FileUtils.fileAppend( outputFile.getAbsolutePath(), outputEncoding, error
-                    ? "> " + line + System.getProperty( "line.separator" )
-                    : line + System.getProperty( "line.separator" ) );
+                FileUtils.fileAppend( outputFile.getAbsolutePath(), outputEncoding,
+                                      error ? "> " + line + System.getProperty( "line.separator" )
+                                                      : line + System.getProperty( "line.separator" ) );
             }
             catch ( IOException e )
             {

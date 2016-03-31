@@ -49,8 +49,7 @@ public class ResolveRangesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
     /**
-     * Whether to process the properties section of the project. If not
-     * set will default to true.
+     * Whether to process the properties section of the project. If not set will default to true.
      *
      * @parameter property="processProperties" defaultValue="true"
      * @since 1.3
@@ -97,18 +96,18 @@ public class ResolveRangesMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException   when things go wrong in a very bad way
-     * @throws XMLStreamException     when things go wrong with XML streaming
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
-        // Note we have to get the dependencies from the model because the dependencies in the 
+        // Note we have to get the dependencies from the model because the dependencies in the
         // project may have already had their range resolved [MNG-4138]
-        if ( getProject().getModel().getDependencyManagement() != null &&
-            getProject().getModel().getDependencyManagement().getDependencies() != null &&
-            isProcessingDependencyManagement() )
+        if ( getProject().getModel().getDependencyManagement() != null
+            && getProject().getModel().getDependencyManagement().getDependencies() != null
+            && isProcessingDependencyManagement() )
         {
             resolveRanges( pom, getProject().getModel().getDependencyManagement().getDependencies() );
         }
@@ -169,7 +168,7 @@ public class ResolveRangesMojo
                         else
                         {
                             getLog().warn( "Could not find the dependency " + artifact + " so unable to set version to "
-                                               + artifactVersion );
+                                + artifactVersion );
                         }
                     }
                 }

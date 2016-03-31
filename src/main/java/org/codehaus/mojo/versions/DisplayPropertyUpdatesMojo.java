@@ -51,7 +51,7 @@ public class DisplayPropertyUpdatesMojo
      */
     private static final int INFO_PAD_SIZE = 68;
 
-// ------------------------------ FIELDS ------------------------------
+    // ------------------------------ FIELDS ------------------------------
 
     /**
      * Any restrictions that apply to specific properties.
@@ -85,7 +85,7 @@ public class DisplayPropertyUpdatesMojo
      */
     private Boolean autoLinkItems;
 
-// -------------------------- STATIC METHODS --------------------------
+    // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
 
@@ -110,9 +110,8 @@ public class DisplayPropertyUpdatesMojo
                 continue;
             }
 
-            ArtifactVersion winner =
-                version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                          this.getHelper() );
+            ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
+                                                               this.reactorProjects, this.getHelper() );
 
             if ( winner != null && !currentVersion.equals( winner.toString() ) )
             {

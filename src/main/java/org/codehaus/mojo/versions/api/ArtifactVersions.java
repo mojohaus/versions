@@ -64,8 +64,8 @@ public class ArtifactVersions
     /**
      * Creates a new {@link ArtifactVersions} instance.
      *
-     * @param artifact          The artifact.
-     * @param versions          The versions.
+     * @param artifact The artifact.
+     * @param versions The versions.
      * @param versionComparator The version comparison rule.
      * @since 1.0-alpha-3
      */
@@ -82,11 +82,11 @@ public class ArtifactVersions
     }
 
     /**
-     * Checks if the version is in the range (and ensures that the range respects the <code>-!</code> syntax
-     * to rule out any qualifiers from range boundaries).
+     * Checks if the version is in the range (and ensures that the range respects the <code>-!</code> syntax to rule out
+     * any qualifiers from range boundaries).
      *
      * @param version the version to check.
-     * @param range   the range to check.
+     * @param range the range to check.
      * @return <code>true</code> if and only if the version is in the range.
      * @since 1.3
      */

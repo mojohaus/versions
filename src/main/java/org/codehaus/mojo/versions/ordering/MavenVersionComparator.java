@@ -196,8 +196,8 @@ public class MavenVersionComparator
         {
             return qualifier.substring( 0, 8 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 8 ) );
         }
-        if ( qualifier.toLowerCase().startsWith( "cr" ) || qualifier.toLowerCase().startsWith( "rc" ) ||
-            qualifier.toLowerCase().startsWith( "sp" ) )
+        if ( qualifier.toLowerCase().startsWith( "cr" ) || qualifier.toLowerCase().startsWith( "rc" )
+            || qualifier.toLowerCase().startsWith( "sp" ) )
         {
             return qualifier.substring( 0, 2 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 2 ) );
         }

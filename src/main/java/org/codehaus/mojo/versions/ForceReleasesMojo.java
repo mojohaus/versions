@@ -59,12 +59,9 @@ public class ForceReleasesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException
-     *          when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
+     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -122,14 +119,18 @@ public class ForceReleasesMojo
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
                     }
-                } else {
-                    ArtifactVersion[] v = versions.getVersions(false);
-                    if (v.length == 0) {
-                        getLog().info( "No release of " + toString( dep ) + " to force.");
-                    } else if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         v[v.length-1].toString() ) )
+                }
+                else
+                {
+                    ArtifactVersion[] v = versions.getVersions( false );
+                    if ( v.length == 0 )
                     {
-                        getLog().info( "Reverted " + toString( dep ) + " to version " + v[v.length-1].toString() );
+                        getLog().info( "No release of " + toString( dep ) + " to force." );
+                    }
+                    else if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                                              v[v.length - 1].toString() ) )
+                    {
+                        getLog().info( "Reverted " + toString( dep ) + " to version " + v[v.length - 1].toString() );
                     }
                 }
             }

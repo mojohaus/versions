@@ -19,6 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.Collection;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -26,15 +30,8 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Replaces any versions with the corresponding version from the reactor.
@@ -53,12 +50,9 @@ public class UseReactorMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException
-     *          when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
+     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -68,11 +62,11 @@ public class UseReactorMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                useReactor(pom, getProject().getDependencyManagement().getDependencies());
+                useReactor( pom, getProject().getDependencyManagement().getDependencies() );
             }
             if ( isProcessingDependencies() )
             {
-                useReactor(pom, getProject().getDependencies());
+                useReactor( pom, getProject().getDependencies() );
             }
         }
         catch ( ArtifactMetadataRetrievalException e )
@@ -85,22 +79,27 @@ public class UseReactorMojo
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
 
-        for (Object dependency : dependencies) {
+        for ( Object dependency : dependencies )
+        {
             Dependency dep = (Dependency) dependency;
 
-            Artifact artifact = this.toArtifact(dep);
-            if (!isIncluded(artifact)) {
+            Artifact artifact = this.toArtifact( dep );
+            if ( !isIncluded( artifact ) )
+            {
                 continue;
             }
 
-            for (Object reactorProject : reactorProjects) {
+            for ( Object reactorProject : reactorProjects )
+            {
                 MavenProject project = (MavenProject) reactorProject;
-                if (StringUtils.equals(project.getGroupId(), dep.getGroupId())
-                        && StringUtils.equals(project.getArtifactId(), dep.getArtifactId()) &&
-                        !StringUtils.equals(project.getVersion(), dep.getVersion())) {
-                    if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                            project.getVersion())) {
-                        getLog().info("Updated " + toString(dep) + " to version " + project.getVersion());
+                if ( StringUtils.equals( project.getGroupId(), dep.getGroupId() )
+                    && StringUtils.equals( project.getArtifactId(), dep.getArtifactId() )
+                    && !StringUtils.equals( project.getVersion(), dep.getVersion() ) )
+                {
+                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
+                                                         project.getVersion() ) )
+                    {
+                        getLog().info( "Updated " + toString( dep ) + " to version " + project.getVersion() );
                     }
                     break;
                 }

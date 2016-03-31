@@ -67,15 +67,14 @@ public class DependencyUpdatesReport
      * generates an empty report in case there are no sources to generate a report with
      *
      * @param locale the locale to generate the report for.
-     * @param sink   the report formatting tool
+     * @param sink the report formatting tool
      */
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
         Set dependencyManagement = new TreeSet( new DependencyComparator() );
-        dependencyManagement.addAll( getProject().getDependencyManagement() == null
-                                         ? Collections.EMPTY_LIST
-                                         : getProject().getDependencyManagement().getDependencies() );
+        dependencyManagement.addAll( getProject().getDependencyManagement() == null ? Collections.EMPTY_LIST
+                        : getProject().getDependencyManagement().getDependencies() );
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
@@ -106,7 +105,7 @@ public class DependencyUpdatesReport
      * Returns a set of dependencies where the dependencies which are defined in the dependency management section have
      * been filtered out.
      *
-     * @param dependencies         The set of dependencies.
+     * @param dependencies The set of dependencies.
      * @param dependencyManagement The set of dependencies from the dependency management section.
      * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency
      *         management dependencies.
@@ -123,12 +122,12 @@ public class DependencyUpdatesReport
             while ( !matched && j.hasNext() )
             {
                 Dependency t = (Dependency) j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) &&
-                    StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) &&
-                    ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) ) &&
-                    ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) ) &&
-                    ( c.getVersion() == null || t.getVersion() == null ||
-                        StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
+                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
+                    && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
+                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )
+                    && ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) )
+                    && ( c.getVersion() == null || t.getVersion() == null
+                        || StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
                 {
                     matched = true;
                     break;

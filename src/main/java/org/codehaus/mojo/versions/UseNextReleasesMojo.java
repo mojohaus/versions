@@ -59,12 +59,9 @@ public class UseNextReleasesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException
-     *          when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
+     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )

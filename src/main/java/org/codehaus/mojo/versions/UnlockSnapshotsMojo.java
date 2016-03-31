@@ -61,8 +61,8 @@ public class UnlockSnapshotsMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException   when things go wrong in a very bad way
-     * @throws XMLStreamException     when things go wrong with XML streaming
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -77,10 +77,10 @@ public class UnlockSnapshotsMojo
         {
             unlockSnapshots( pom, getProject().getDependencies() );
         }
-	if ( isProcessingParent() )
-	{
-	    unlockParentSnapshot( pom, getProject().getParent() );
-	}
+        if ( isProcessingParent() )
+        {
+            unlockParentSnapshot( pom, getProject().getParent() );
+        }
     }
 
     private void unlockSnapshots( ModifiedPomXMLEventReader pom, List dependencies )
@@ -131,7 +131,7 @@ public class UnlockSnapshotsMojo
             return;
         }
 
-	Artifact parentArtifact = parent.getArtifact();
+        Artifact parentArtifact = parent.getArtifact();
         String parentVersion = parentArtifact.getVersion();
 
         Matcher versionMatcher = matchSnapshotRegex.matcher( parentVersion );
@@ -140,7 +140,8 @@ public class UnlockSnapshotsMojo
             String unlockedParentVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
             if ( PomHelper.setProjectParentVersion( pom, unlockedParentVersion ) )
             {
-                getLog().info( "Unlocked parent " + parentArtifact.toString() + " to version " + unlockedParentVersion );
+                getLog().info( "Unlocked parent " + parentArtifact.toString() + " to version "
+                    + unlockedParentVersion );
             }
         }
     }

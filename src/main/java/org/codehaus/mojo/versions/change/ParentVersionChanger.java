@@ -9,7 +9,7 @@ package org.codehaus.mojo.versions.change;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -47,8 +47,8 @@ public class ParentVersionChanger
             if ( PomHelper.setProjectParentVersion( getPom(), versionChange.getNewVersion() ) )
             {
                 info( "    Updating parent " + versionChange.getGroupId() + ":" + versionChange.getArtifactId() );
-                info(
-                    "        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion() );
+                info( "        from version " + versionChange.getOldVersion() + " to "
+                    + versionChange.getNewVersion() );
             }
         }
     }

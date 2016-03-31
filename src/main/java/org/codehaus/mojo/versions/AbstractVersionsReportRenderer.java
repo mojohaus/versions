@@ -111,8 +111,8 @@ public abstract class AbstractVersionsReportRenderer
 
     protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
     {
-        return v1 == v2 || ( v1 != null && v1.equals( v2 ) ) || ( v1 != null && v2 != null && v1.toString().equals(
-            v2.toString() ) );
+        return v1 == v2 || ( v1 != null && v1.equals( v2 ) )
+            || ( v1 != null && v2 != null && v1.toString().equals( v2.toString() ) );
     }
 
     protected void renderDependencySummaryTableRow( Dependency dependency, ArtifactVersions details )
@@ -318,7 +318,7 @@ public abstract class AbstractVersionsReportRenderer
         final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
         headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "80%" );
         sink.table();
-        sink.tableRows( new int[]{ Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
+        sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
         sink.tableRow();
         sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.status" ) );
@@ -427,17 +427,13 @@ public abstract class AbstractVersionsReportRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold =
-                    equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) || equals( versions[i],
-                                                                                                            details.getOldestUpdate(
-                                                                                                                UpdateScope.INCREMENTAL ) )
-                        || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) ) || equals(
-                        versions[i], details.getOldestUpdate( UpdateScope.MINOR ) ) || equals( versions[i],
-                                                                                               details.getNewestUpdate(
-                                                                                                   UpdateScope.MINOR ) )
-                        || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) || equals( versions[i],
-                                                                                                          details.getNewestUpdate(
-                                                                                                              UpdateScope.MAJOR ) );
+                boolean bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )
+                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) )
+                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) )
+                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MAJOR ) );
                 if ( bold )
                 {
                     safeBold();
@@ -611,7 +607,7 @@ public abstract class AbstractVersionsReportRenderer
         final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
         headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "80%" );
         sink.table();
-        sink.tableRows( new int[]{ Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
+        sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
         sink.tableRow();
         sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.status" ) );
@@ -701,14 +697,13 @@ public abstract class AbstractVersionsReportRenderer
                     sink.lineBreak();
                 }
                 boolean allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );
-                boolean bold =
-                    equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) || equals(
-                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) ) || equals(
-                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) ) || equals(
-                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) ) || equals(
-                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) ) || equals(
-                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) ) || equals(
-                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );
+                boolean bold = equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) )
+                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) )
+                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) )
+                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) )
+                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );
                 if ( !allowed )
                 {
                     sink.text( "* " );

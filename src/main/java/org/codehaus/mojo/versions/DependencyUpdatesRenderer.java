@@ -51,7 +51,6 @@ public class DependencyUpdatesRenderer
         this.dependencyManagementUpdates = dependencyManagementUpdates;
     }
 
-
     protected void renderBody()
     {
         Map<Dependency, ArtifactVersions> allUpdates =

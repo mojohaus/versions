@@ -54,7 +54,7 @@ public class DisplayDependencyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
 
-// ------------------------------ FIELDS ------------------------------
+    // ------------------------------ FIELDS ------------------------------
 
     /**
      * The width to pad info messages.
@@ -64,8 +64,7 @@ public class DisplayDependencyUpdatesMojo
     private static final int INFO_PAD_SIZE = 72;
 
     /**
-     * Whether to process the dependencyManagement section of the project. If not
-     * set will default to true.
+     * Whether to process the dependencyManagement section of the project. If not set will default to true.
      *
      * @parameter property="processDependencyManagement" defaultValue="true"
      * @since 1.2
@@ -73,8 +72,7 @@ public class DisplayDependencyUpdatesMojo
     protected Boolean processDependencyManagement = Boolean.TRUE;
 
     /**
-     * Whether to process the dependencies section of the project. If not
-     * set will default to true.
+     * Whether to process the dependencies section of the project. If not set will default to true.
      *
      * @parameter property="processDependencies" defaultValue="true"
      * @since 1.2
@@ -82,8 +80,7 @@ public class DisplayDependencyUpdatesMojo
     protected Boolean processDependencies = Boolean.TRUE;
 
     /**
-     * Whether to show additional information such as dependencies that
-     * do not need updating.  Defaults to false.
+     * Whether to show additional information such as dependencies that do not need updating. Defaults to false.
      *
      * @parameter property="verbose" defaultValue="false"
      * @since 2.1
@@ -96,7 +93,7 @@ public class DisplayDependencyUpdatesMojo
      * Returns a set of dependencies where the dependencies which are defined in the dependency management section have
      * been filtered out.
      *
-     * @param dependencies         The set of dependencies.
+     * @param dependencies The set of dependencies.
      * @param dependencyManagement The set of dependencies from the dependency management section.
      * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency
      *         management dependencies.
@@ -113,12 +110,12 @@ public class DisplayDependencyUpdatesMojo
             while ( !matched && j.hasNext() )
             {
                 Dependency t = (Dependency) j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) &&
-                    StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) &&
-                    ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) ) &&
-                    ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) ) &&
-                    ( c.getVersion() == null || t.getVersion() == null ||
-                        StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
+                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
+                    && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
+                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )
+                    && ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) )
+                    && ( c.getVersion() == null || t.getVersion() == null
+                        || StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
                 {
                     matched = true;
                     break;
@@ -150,15 +147,13 @@ public class DisplayDependencyUpdatesMojo
         return !Boolean.FALSE.equals( verbose );
     }
 
-// ------------------------ INTERFACE METHODS ------------------------
+    // ------------------------ INTERFACE METHODS ------------------------
 
-// --------------------- Interface Mojo ---------------------
+    // --------------------- Interface Mojo ---------------------
 
     /**
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          when things go wrong in a very bad way
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
+     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()
      * @since 1.0-alpha-1
      */
@@ -167,9 +162,8 @@ public class DisplayDependencyUpdatesMojo
     {
         logInit();
         Set dependencyManagement = new TreeSet( new DependencyComparator() );
-        dependencyManagement.addAll( getProject().getDependencyManagement() == null
-                                         ? Collections.EMPTY_LIST
-                                         : getProject().getDependencyManagement().getDependencies() );
+        dependencyManagement.addAll( getProject().getDependencyManagement() == null ? Collections.EMPTY_LIST
+                        : getProject().getDependencyManagement().getDependencies() );
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
@@ -221,11 +215,11 @@ public class DisplayDependencyUpdatesMojo
                 ArtifactVersion newestVersion = versions.getNewestVersion( versions.getArtifact().getVersionRange(),
                                                                            Boolean.TRUE.equals( allowSnapshots ) );
                 current = versions.getArtifact().getVersionRange().toString();
-                latest = newestVersion == null
-                    ? null
-                    : versions.getNewestUpdate( newestVersion, UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );
-                if ( latest != null && ArtifactVersions.isVersionInRange( latest,
-                                                                          versions.getArtifact().getVersionRange() ) )
+                latest = newestVersion == null ? null
+                                : versions.getNewestUpdate( newestVersion, UpdateScope.ANY,
+                                                            Boolean.TRUE.equals( allowSnapshots ) );
+                if ( latest != null
+                    && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
                 {
                     latest = null;
                 }
@@ -277,12 +271,9 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException
-     *          when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
+     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */

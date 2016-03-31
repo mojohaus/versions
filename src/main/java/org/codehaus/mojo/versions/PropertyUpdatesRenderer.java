@@ -46,7 +46,6 @@ public class PropertyUpdatesRenderer
         this.propertyUpdates = propertyUpdates;
     }
 
-
     protected void renderBody()
     {
         Map<Property, PropertyVersions> allUpdates =

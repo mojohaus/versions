@@ -28,7 +28,7 @@ package org.codehaus.mojo.versions;
 public class LinkItem
 {
 
-// ------------------------------ FIELDS ------------------------------
+    // ------------------------------ FIELDS ------------------------------
 
     /**
      * Group Id of the Artifact.
@@ -73,7 +73,7 @@ public class LinkItem
      */
     private Boolean allowSnapshots = null;
 
-// --------------------------- CONSTRUCTORS ---------------------------
+    // --------------------------- CONSTRUCTORS ---------------------------
 
     /**
      * Constructs a new LinkItem.
@@ -84,7 +84,7 @@ public class LinkItem
     {
     }
 
-// --------------------- GETTER / SETTER METHODS ---------------------
+    // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
      * Getter for property 'allowSnapshots'.
@@ -196,7 +196,7 @@ public class LinkItem
         this.version = version;
     }
 
-// ------------------------ CANONICAL METHODS ------------------------
+    // ------------------------ CANONICAL METHODS ------------------------
 
     /**
      * {@inheritDoc}

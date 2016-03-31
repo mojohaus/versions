@@ -64,7 +64,7 @@ public abstract class AbstractVersionsUpdaterMojo
     extends AbstractMojo
 {
 
-// ------------------------------ FIELDS ------------------------------
+    // ------------------------------ FIELDS ------------------------------
 
     /**
      * The Maven Project.
@@ -147,8 +147,7 @@ public abstract class AbstractVersionsUpdaterMojo
     protected Settings settings;
 
     /**
-     * settings.xml's server id for the URL.
-     * This is used when wagon needs extra authentication information.
+     * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
      *
      * @parameter property="maven.version.rules.serverId" default-value="serverId";
      * @since 1.0-alpha-3
@@ -241,9 +240,9 @@ public abstract class AbstractVersionsUpdaterMojo
         this.project = project;
     }
 
-// ------------------------ INTERFACE METHODS ------------------------
+    // ------------------------ INTERFACE METHODS ------------------------
 
-// --------------------- Interface Mojo ---------------------
+    // --------------------- Interface Mojo ---------------------
 
     /**
      * {@inheritDoc}
@@ -257,24 +256,23 @@ public abstract class AbstractVersionsUpdaterMojo
         process( outFile );
     }
 
-// -------------------------- OTHER METHODS --------------------------
+    // -------------------------- OTHER METHODS --------------------------
 
     /**
      * Finds the latest version of the specified artifact that matches the version range.
      *
-     * @param artifact              The artifact.
-     * @param versionRange          The version range.
-     * @param allowingSnapshots     <code>null</code> for no override, otherwise the local override to apply.
+     * @param artifact The artifact.
+     * @param versionRange The version range.
+     * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
      * @param usePluginRepositories
      * @return The latest version of the specified artifact that matches the specified version range or
      *         <code>null</code> if no matching version could be found.
-     * @throws ArtifactMetadataRetrievalException
-     *          If the artifact metadata could not be found.
+     * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, MojoExecutionException
+                                                     throws ArtifactMetadataRetrievalException, MojoExecutionException
     {
         boolean includeSnapshots = Boolean.TRUE.equals( this.allowSnapshots );
         if ( Boolean.TRUE.equals( allowingSnapshots ) )
@@ -290,10 +288,10 @@ public abstract class AbstractVersionsUpdaterMojo
     }
 
     /**
-     * Gets the property value that is defined in the pom. This is an extension point to allow updating a file
-     * external to the reactor.
+     * Gets the property value that is defined in the pom. This is an extension point to allow updating a file external
+     * to the reactor.
      *
-     * @param pom      The pom.
+     * @param pom The pom.
      * @param property The property.
      * @return The value as defined in the pom or <code>null</code> if not defined.
      * @since 1.0-alpha-1
@@ -308,7 +306,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @param outFile The file to process.
      * @throws MojoExecutionException If things go wrong.
-     * @throws MojoFailureException   If things go wrong.
+     * @throws MojoFailureException If things go wrong.
      * @since 1.0-alpha-1
      */
     protected void process( File outFile )
@@ -384,7 +382,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Writes a StringBuilder into a file.
      *
      * @param outFile The file to read.
-     * @param input   The contents of the file.
+     * @param input The contents of the file.
      * @throws IOException when things go wrong.
      */
     protected final void writeFile( File outFile, StringBuilder input )
@@ -406,9 +404,8 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @param pom The pom to update.
      * @throws MojoExecutionException If things go wrong.
-     * @throws MojoFailureException   If things go wrong.
-     * @throws javax.xml.stream.XMLStreamException
-     *                                If things go wrong.
+     * @throws MojoFailureException If things go wrong.
+     * @throws javax.xml.stream.XMLStreamException If things go wrong.
      * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
@@ -417,9 +414,9 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Returns <code>true</code> if the update should be applied.
      *
-     * @param artifact       The artifact.
+     * @param artifact The artifact.
      * @param currentVersion The current version of the artifact.
-     * @param updateVersion  The proposed new version of the artifact.
+     * @param updateVersion The proposed new version of the artifact.
      * @return <code>true</code> if the update should be applied.
      * @since 1.0-alpha-1
      */
@@ -458,14 +455,13 @@ public abstract class AbstractVersionsUpdaterMojo
     }
 
     /**
-     * Based on the passed flags, determines which segment is unchangable. This
-     * can be used when determining an upper bound for the "latest" version.
+     * Based on the passed flags, determines which segment is unchangable. This can be used when determining an upper
+     * bound for the "latest" version.
      *
      * @param allowMajorUpdates
      * @param allowMinorUpdates
      * @param allowIncrementalUpdates
-     * @return Returns the segment that is unchangable. If any segment
-     *         can change, returns -1.
+     * @return Returns the segment that is unchangable. If any segment can change, returns -1.
      */
     protected int determineUnchangedSegment( Boolean allowMajorUpdates, Boolean allowMinorUpdates,
                                              Boolean allowIncrementalUpdates )
@@ -497,11 +493,10 @@ public abstract class AbstractVersionsUpdaterMojo
 
     protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
                                                   PropertyVersions version, String currentVersion )
-        throws MojoExecutionException, XMLStreamException
+                                                      throws MojoExecutionException, XMLStreamException
     {
-        ArtifactVersion winner =
-            version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                      this.getHelper() );
+        ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
+                                                           this.reactorProjects, this.getHelper() );
 
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {

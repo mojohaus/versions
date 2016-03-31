@@ -40,7 +40,7 @@ public class UpdatePropertyMojo
     extends AbstractVersionsUpdaterMojo
 {
 
-// ------------------------------ FIELDS ------------------------------
+    // ------------------------------ FIELDS ------------------------------
 
     /**
      * A property to update.
@@ -66,15 +66,15 @@ public class UpdatePropertyMojo
      */
     private Boolean autoLinkItems;
 
-// -------------------------- STATIC METHODS --------------------------
+    // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
 
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException   when things go wrong in a very bad way
-     * @throws XMLStreamException     when things go wrong with XML streaming
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
@@ -84,7 +84,7 @@ public class UpdatePropertyMojo
         Property propertyConfig = new Property( property );
         propertyConfig.setVersion( newVersion );
         Map<Property, PropertyVersions> propertyVersions =
-            this.getHelper().getVersionPropertiesMap( getProject(), new Property[]{ propertyConfig }, property, "",
+            this.getHelper().getVersionPropertiesMap( getProject(), new Property[] { propertyConfig }, property, "",
                                                       !Boolean.FALSE.equals( autoLinkItems ) );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {

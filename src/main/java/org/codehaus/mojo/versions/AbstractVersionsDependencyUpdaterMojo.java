@@ -19,6 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
@@ -28,12 +34,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Base class for a mojo that updates dependency versions.
@@ -73,9 +73,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private String excludesList = null;
 
     /**
-     * A list of artifact patterns to include. Follows the pattern
-     * "groupId:artifactId:type:classifier:version". This configuration setting is ignored if {@link #includesList} is
-     * defined.
+     * A list of artifact patterns to include. Follows the pattern "groupId:artifactId:type:classifier:version". This
+     * configuration setting is ignored if {@link #includesList} is defined.
      *
      * @parameter
      * @since 1.0-beta-1
@@ -83,9 +82,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private String[] includes = null;
 
     /**
-     * A list of artifact patterns to exclude. Follows the pattern
-     * "groupId:artifactId:type:classifier:version". This configuration setting is ignored if {@link #excludesList} is
-     * defined.
+     * A list of artifact patterns to exclude. Follows the pattern "groupId:artifactId:type:classifier:version". This
+     * configuration setting is ignored if {@link #excludesList} is defined.
      *
      * @parameter
      * @since 1.0-beta-1
@@ -93,8 +91,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private String[] excludes = null;
 
     /**
-     * Whether to process the dependencies section of the project. If not
-     * set will default to true.
+     * Whether to process the dependencies section of the project. If not set will default to true.
      *
      * @parameter property="processDependencies" defaultValue="true"
      * @since 1.0-alpha-3
@@ -102,8 +99,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private Boolean processDependencies;
 
     /**
-     * Whether to process the dependencyManagement section of the project. If not
-     * set will default to true.
+     * Whether to process the dependencyManagement section of the project. If not set will default to true.
      *
      * @parameter property="processDependencyManagement" defaultValue="true"
      * @since 1.0-alpha-3
@@ -111,8 +107,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private Boolean processDependencyManagement;
 
     /**
-     * Whether to process the parent section of the project. If not
-     * set will default to false.
+     * Whether to process the parent section of the project. If not set will default to false.
      *
      * @parameter property="processParent" defaultValue="false"
      * @since 2.3
@@ -290,11 +285,10 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     }
 
     /**
-     * Compare a project to a dependency. Returns true only if the groupId and artifactId are all
-     * equal.
+     * Compare a project to a dependency. Returns true only if the groupId and artifactId are all equal.
      *
      * @param project the project
-     * @param dep     the dependency
+     * @param dep the dependency
      * @return true if project and dep refer to the same artifact
      */
     private boolean compare( MavenProject project, Dependency dep )
@@ -404,8 +398,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     }
 
     /**
-     * To handle multiple includes with version range like "group:artifact:jar:[1.0.0,2.2)",
-     * we have to use a parsing a little bit more complex than split().
+     * To handle multiple includes with version range like "group:artifact:jar:[1.0.0,2.2)", we have to use a parsing a
+     * little bit more complex than split().
      *
      * @param includeString the string to parse
      * @return list of patterns

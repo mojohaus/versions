@@ -41,7 +41,7 @@ public class UpdatePropertiesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
 
-// ------------------------------ FIELDS ------------------------------
+    // ------------------------------ FIELDS ------------------------------
 
     /**
      * Any restrictions that apply to specific properties.
@@ -75,15 +75,15 @@ public class UpdatePropertiesMojo
      */
     private Boolean autoLinkItems;
 
-// -------------------------- STATIC METHODS --------------------------
+    // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
 
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException   when things go wrong in a very bad way
-     * @throws XMLStreamException     when things go wrong with XML streaming
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
@@ -108,11 +108,9 @@ public class UpdatePropertiesMojo
             {
                 if ( !( isIncluded( association.getArtifact() ) ) )
                 {
-                    getLog().info(
-                        "Not updating the property ${" + property.getName() + "} because it is used by artifact " +
-                            association.getArtifact().toString() + " and that artifact is not included in the list of "
-                            +
-                            " allowed artifacts to be updated." );
+                    getLog().info( "Not updating the property ${" + property.getName()
+                        + "} because it is used by artifact " + association.getArtifact().toString()
+                        + " and that artifact is not included in the list of " + " allowed artifacts to be updated." );
                     canUpdateProperty = false;
                     break;
                 }

@@ -33,8 +33,8 @@ import java.io.StringReader;
 
 /**
  * Represents the modified pom file. Note: implementations of the StAX API (JSR-173) are not good round-trip rewriting
- * <b>while</b> keeping all unchanged bytes in the file as is.  For example, the StAX API specifies that <code>CR</code>
- * characters will be stripped.  Current implementations do not keep &quot; and &apos; characters consistent.
+ * <b>while</b> keeping all unchanged bytes in the file as is. For example, the StAX API specifies that <code>CR</code>
+ * characters will be stripped. Current implementations do not keep &quot; and &apos; characters consistent.
  *
  * @author Stephen Connolly
  */
@@ -42,7 +42,7 @@ public class ModifiedPomXMLEventReader
     implements XMLEventReader
 {
 
-// ------------------------------ FIELDS ------------------------------
+    // ------------------------------ FIELDS ------------------------------
 
     /**
      * Field MAX_MARKS
@@ -119,12 +119,12 @@ public class ModifiedPomXMLEventReader
      */
     private XMLEventReader backing;
 
-// --------------------------- CONSTRUCTORS ---------------------------
+    // --------------------------- CONSTRUCTORS ---------------------------
 
     /**
      * Constructor ModifiedPomXMLEventReader creates a new ModifiedPomXMLEventReader instance.
      *
-     * @param pom     of type StringBuilder
+     * @param pom of type StringBuilder
      * @param factory of type XMLInputFactory
      * @throws XMLStreamException when
      */
@@ -159,7 +159,7 @@ public class ModifiedPomXMLEventReader
         next = null;
     }
 
-// --------------------- GETTER / SETTER METHODS ---------------------
+    // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
      * Getter for property 'modified'.
@@ -171,10 +171,9 @@ public class ModifiedPomXMLEventReader
         return modified;
     }
 
-// ------------------------ INTERFACE METHODS ------------------------
+    // ------------------------ INTERFACE METHODS ------------------------
 
-// --------------------- Interface Iterator ---------------------
-
+    // --------------------- Interface Iterator ---------------------
 
     /**
      * {@inheritDoc}
@@ -199,7 +198,7 @@ public class ModifiedPomXMLEventReader
         throw new UnsupportedOperationException();
     }
 
-// --------------------- Interface XMLEventReader ---------------------
+    // --------------------- Interface XMLEventReader ---------------------
 
     /**
      * {@inheritDoc}
@@ -278,7 +277,7 @@ public class ModifiedPomXMLEventReader
         backing = null;
     }
 
-// -------------------------- OTHER METHODS --------------------------
+    // -------------------------- OTHER METHODS --------------------------
 
     /**
      * Returns a copy of the backing string buffer.
@@ -357,8 +356,8 @@ public class ModifiedPomXMLEventReader
             {
                 if ( !next.isCharacters() )
                 {
-                    while ( nextStart < nextEnd && nextStart < pom.length() &&
-                        ( c( nextStart ) == '\n' || c( nextStart ) == '\r' ) )
+                    while ( nextStart < nextEnd && nextStart < pom.length()
+                        && ( c( nextStart ) == '\n' || c( nextStart ) == '\r' ) )
                     {
                         nextStart++;
                     }
@@ -422,8 +421,8 @@ public class ModifiedPomXMLEventReader
      */
     private boolean nextEndIncludesNextEvent()
     {
-        return nextEnd > nextStart + 1 && nextEnd - 2 < pom.length() &&
-            ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
+        return nextEnd > nextStart + 1 && nextEnd - 2 < pom.length()
+            && ( c( nextEnd - 1 ) == '<' || c( nextEnd - 1 ) == '&' );
     }
 
     /**
@@ -494,8 +493,8 @@ public class ModifiedPomXMLEventReader
     /**
      * Replaces all content between marks index1 and index2 with the replacement text.
      *
-     * @param index1      The event mark to replace after.
-     * @param index2      The event mark to replace before.
+     * @param index1 The event mark to replace after.
+     * @param index2 The event mark to replace before.
      * @param replacement The replacement.
      */
     public void replaceBetween( int index1, int index2, String replacement )
@@ -540,7 +539,7 @@ public class ModifiedPomXMLEventReader
     /**
      * Replaces the specified marked element with the replacement text.
      *
-     * @param index       The mark.
+     * @param index The mark.
      * @param replacement The replacement.
      */
     public void replaceMark( int index, String replacement )

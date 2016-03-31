@@ -63,8 +63,8 @@ public class CompareDependenciesMojo
     private static final int INFO_PAD_SIZE = 68;
 
     /**
-     * The groupId, artifactId, and version of the remote project (POM) to which we are comparing.  This
-     * should be in the form "groupId:artifactId:version"
+     * The groupId, artifactId, and version of the remote project (POM) to which we are comparing. This should be in the
+     * form "groupId:artifactId:version"
      *
      * @parameter property="remotePom"
      * @required true
@@ -125,12 +125,9 @@ public class CompareDependenciesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          Something wrong with the plugin itself
-     * @throws org.apache.maven.plugin.MojoFailureException
-     *          The plugin detected an error in the build
-     * @throws javax.xml.stream.XMLStreamException
-     *          when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the plugin itself
+     * @throws org.apache.maven.plugin.MojoFailureException The plugin detected an error in the build
+     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -139,7 +136,7 @@ public class CompareDependenciesMojo
         if ( this.ignoreRemoteDependencies && this.ignoreRemoteDependencyManagement )
         {
             throw new MojoFailureException( " ignoreRemoteDependencies and ignoreRemoteDependencyManagement"
-                                                + "are both set to true.  At least one of these needs to be false " );
+                + "are both set to true.  At least one of these needs to be false " );
         }
 
         if ( updateDependencies )
@@ -176,9 +173,8 @@ public class CompareDependenciesMojo
         Map<String, Dependency> remoteDepsMap = new HashMap<String, Dependency>();
         if ( !ignoreRemoteDependencyManagement )
         {
-            List<Dependency> remoteProjectDepMgmtDeps = ( remoteMavenProject.getDependencyManagement() == null )
-                ? null
-                : remoteMavenProject.getDependencyManagement().getDependencies();
+            List<Dependency> remoteProjectDepMgmtDeps = ( remoteMavenProject.getDependencyManagement() == null ) ? null
+                            : remoteMavenProject.getDependencyManagement().getDependencies();
             mapDependencies( remoteDepsMap, remoteProjectDepMgmtDeps );
         }
         if ( !ignoreRemoteDependencies )
@@ -250,7 +246,7 @@ public class CompareDependenciesMojo
      */
     private List<String> compareVersions( ModifiedPomXMLEventReader pom, List<Dependency> dependencies,
                                           Map<String, Dependency> remoteDependencies )
-        throws MojoExecutionException, XMLStreamException
+                                              throws MojoExecutionException, XMLStreamException
     {
         List<String> updates = new ArrayList<String>();
         for ( Dependency dep : dependencies )
@@ -288,14 +284,13 @@ public class CompareDependenciesMojo
 
     }
 
-
     /**
      * Updates the properties holding a version if necessary.
      */
     private List<String> updatePropertyVersions( ModifiedPomXMLEventReader pom,
                                                  Map<Property, PropertyVersions> versionProperties,
                                                  Map<String, Dependency> remoteDependencies )
-        throws XMLStreamException
+                                                     throws XMLStreamException
     {
         List<String> result = new ArrayList<String>();
         for ( Map.Entry<Property, PropertyVersions> entry : versionProperties.entrySet() )
@@ -310,11 +305,11 @@ public class CompareDependenciesMojo
                 if ( !candidateVersion.equals( originalVersion ) ) // Update needed
                 {
                     result.add( writeDiffMessage( property.getName(), originalVersion, candidateVersion ).toString() );
-                    if ( !reportMode && PomHelper.setPropertyVersion( pom, null, property.getName(),
-                                                                      candidateVersion ) )
+                    if ( !reportMode
+                        && PomHelper.setPropertyVersion( pom, null, property.getName(), candidateVersion ) )
                     {
                         getLog().info( "Updated ${" + property.getName() + "} from " + originalVersion + " to "
-                                           + candidateVersion );
+                            + candidateVersion );
                     }
                 }
             }
@@ -325,14 +320,13 @@ public class CompareDependenciesMojo
     /**
      * Returns the candidate version to use for the specified property.
      * <p/>
-     * The dependencies currently linked to the property must all be defined by the remote
-     * POM and they should refer to the same version. If that's the case, that same version
-     * is returned. Otherwise, <tt>null</tt> is returned indicating that there is no
-     * candidate.
+     * The dependencies currently linked to the property must all be defined by the remote POM and they should refer to
+     * the same version. If that's the case, that same version is returned. Otherwise, <tt>null</tt> is returned
+     * indicating that there is no candidate.
      *
      * @param remoteDependencies the remote dependencies
-     * @param property           the property to update
-     * @param propertyVersions   the association
+     * @param property the property to update
+     * @param propertyVersions the association
      * @return the candidate version or <tt>null</tt> if there isn't any
      */
     private String computeCandidateVersion( Map<String, Dependency> remoteDependencies, Property property,
@@ -481,14 +475,12 @@ public class CompareDependenciesMojo
     }
 
     /**
-     * Creates a key that is similar to what {@link Dependency#getManagementKey()} generates
-     * for a dependency.
+     * Creates a key that is similar to what {@link Dependency#getManagementKey()} generates for a dependency.
      */
     private static String generateId( Artifact artifact )
     {
         StringBuilder sb = new StringBuilder();
-        sb.append( artifact.getGroupId() ).append( ":" ).append( artifact.getArtifactId() ).append( ":" ).append(
-            artifact.getType() );
+        sb.append( artifact.getGroupId() ).append( ":" ).append( artifact.getArtifactId() ).append( ":" ).append( artifact.getType() );
         if ( artifact.getClassifier() != null )
         {
             sb.append( ":" ).append( artifact.getClassifier() );
