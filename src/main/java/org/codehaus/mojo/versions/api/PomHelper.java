@@ -46,9 +46,9 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -102,14 +102,12 @@ public class PomHelper
     public static Model getRawModel( File moduleProjectFile )
         throws IOException
     {
-        FileReader fileReader = null;
-        BufferedReader bufferedReader = null;
+        FileInputStream input = null;
         try
         {
-            fileReader = new FileReader( moduleProjectFile );
-            bufferedReader = new BufferedReader( fileReader );
+            input = new FileInputStream( moduleProjectFile );
             MavenXpp3Reader reader = new MavenXpp3Reader();
-            return reader.read( bufferedReader );
+            return reader.read( input );
         }
         catch ( XmlPullParserException e )
         {
@@ -119,13 +117,9 @@ public class PomHelper
         }
         finally
         {
-            if ( bufferedReader != null )
+            if ( input != null )
             {
-                bufferedReader.close();
-            }
-            if ( fileReader != null )
-            {
-                fileReader.close();
+                input.close();
             }
         }
     }
