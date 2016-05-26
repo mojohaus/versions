@@ -4,3 +4,5 @@ target
 .project
 *.iml
 .idea
+release-me.sh
+settings.xml

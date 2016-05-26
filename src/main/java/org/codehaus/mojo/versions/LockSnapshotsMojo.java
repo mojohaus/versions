@@ -183,14 +183,11 @@ public class LockSnapshotsMojo
      * @param dep
      * @return The timestamp version if exists, otherwise the original snapshot dependency version is returned.
      */
-    private String resolveSnapshotVersion( Dependency dep )
-    {
+    private String resolveSnapshotVersion( Dependency dep ) throws MojoExecutionException {
         getLog().debug( "Resolving snapshot version for dependency: " + dep );
 
         String lockedVersion = dep.getVersion();
-
-        Artifact depArtifact = artifactFactory.createArtifact( dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                                                               dep.getScope(), dep.getType() );
+        Artifact depArtifact = toArtifact(dep);
         try
         {
             resolver.resolve( depArtifact, getProject().getRemoteArtifactRepositories(), localRepository );
