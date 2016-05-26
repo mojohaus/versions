@@ -110,6 +110,8 @@ public class UseReleasesMojo
                 }
 
                 getLog().debug( "Looking for a release of " + toString( dep ) );
+                //Force releaseVersion version because org.apache.maven.artifact.metadata.MavenMetadataSource does not retrieve release version if provided snapshot version.
+                artifact.setVersion(releaseVersion);
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 if ( versions.containsVersion( releaseVersion ) )
                 {
