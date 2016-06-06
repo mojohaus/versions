@@ -265,14 +265,16 @@ public class SetMojo
     {
 
         getLog().debug( "Applying change " + groupId + ":" + artifactId + ":" + oldVersion + " -> " + newVersion );
+
         // this is a triggering change
         addChange( groupId, artifactId, oldVersion, newVersion );
         // now fake out the triggering change
+        if(files.size() > 0){
+            final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
+            current.getValue().setVersion( newVersion );
+            addFile( files, project, current.getKey() );
+        }
 
-        final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
-        current.getValue().setVersion( newVersion );
-
-        addFile( files, project, current.getKey() );
 
         for ( Map.Entry<String, Model> sourceEntry : reactor.entrySet() )
         {
