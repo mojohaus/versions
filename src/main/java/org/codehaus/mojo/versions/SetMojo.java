@@ -204,10 +204,8 @@ public class SetMojo
 
         try
         {
-            final MavenProject project =
-                PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
-
-            getLog().info( "Local aggregation root: " + project.getBasedir() );
+            final MavenProject project = getProject();
+            getLog().info( "Root project: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
             final SortedMap<String, Model> reactor =
                 new TreeMap<String, Model>( new ReactorDepthComparator( reactorModels ) );
