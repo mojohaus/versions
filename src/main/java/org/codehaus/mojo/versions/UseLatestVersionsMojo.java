@@ -23,6 +23,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
@@ -30,6 +32,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -85,7 +88,11 @@ public class UseLatestVersionsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                useLatestVersions( pom, getProject().getDependencyManagement().getDependencies() );
+                DependencyManagement dependencyManagement = PomHelper.getRawModel( getProject() ).getDependencyManagement();
+                if ( dependencyManagement != null )
+                {
+                    useLatestVersions( pom, dependencyManagement.getDependencies() );
+                }
             }
             if ( isProcessingDependencies() )
             {
@@ -94,6 +101,9 @@ public class UseLatestVersionsMojo
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
+        catch ( IOException e ) {
             throw new MojoExecutionException( e.getMessage(), e );
         }
     }
