@@ -66,6 +66,30 @@ public class UpdatePropertyMojo
      */
     private Boolean autoLinkItems;
 
+    /**
+     * Whether to allow the major version number to be changed.
+     *
+     * @parameter property="allowMajorUpdates" default-value="true"
+     * @since 1.2
+     */
+    protected Boolean allowMajorUpdates;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     *
+     * @parameter property="allowMinorUpdates" default-value="true"
+     * @since 1.2
+     */
+    protected Boolean allowMinorUpdates;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     *
+     * @parameter property="allowIncrementalUpdates" default-value="true"
+     * @since 1.2
+     */
+    protected Boolean allowIncrementalUpdates;
+
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
@@ -97,7 +121,7 @@ public class UpdatePropertyMojo
                 continue;
             }
 
-            updatePropertyToNewestVersion( pom, property, version, currentVersion );
+            updatePropertyToNewestVersion( pom, property, version, currentVersion, determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates ) );
 
         }
     }

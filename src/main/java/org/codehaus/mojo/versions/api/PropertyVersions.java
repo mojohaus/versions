@@ -309,7 +309,7 @@ public class PropertyVersions
     }
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper )
+                                             List reactorProjects, VersionsHelper helper, int upperBound)
                                                  throws MojoExecutionException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
@@ -333,7 +333,10 @@ public class PropertyVersions
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
-        ArtifactVersion result = getNewestVersion( range, helper.createArtifactVersion( currentVersion ), null,
+
+        ArtifactVersion lowerBoundVersion = helper.createArtifactVersion( currentVersion );
+        ArtifactVersion upperBoundVersion = getVersionComparator().incrementSegment( lowerBoundVersion, upperBound );
+        ArtifactVersion result = getNewestVersion( range, lowerBoundVersion , upperBoundVersion,
                                                    includeSnapshots, false, true );
         helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
 
