@@ -335,10 +335,15 @@ public class PropertyVersions
         }
 
         ArtifactVersion lowerBoundVersion = helper.createArtifactVersion( currentVersion );
-        ArtifactVersion upperBoundVersion = getVersionComparator().incrementSegment( lowerBoundVersion, upperBound );
+        ArtifactVersion upperBoundVersion = null;
+
+        if ( upperBound != -1 )
+        {
+            upperBoundVersion = getVersionComparator().incrementSegment( lowerBoundVersion, upperBound );
+        }
+
         ArtifactVersion result = getNewestVersion( range, lowerBoundVersion , upperBoundVersion,
-                                                   includeSnapshots, false, true );
-        helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
+                includeSnapshots, false, true );        helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
 
         if ( property.isSearchReactor() )
         {
