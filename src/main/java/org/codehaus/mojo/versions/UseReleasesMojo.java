@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -31,6 +32,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,9 +45,23 @@ import java.util.regex.Pattern;
  * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
-public class UseReleasesMojo
-    extends AbstractVersionsDependencyUpdaterMojo
-{
+public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
+
+    /**
+     * Whether to check for releases within the range.
+     *
+     * @parameter property="allowRangeMatching" default-value="false"
+     * @since 2.3
+     */
+    private Boolean allowRangeMatching;
+
+    /**
+     * Whether to fail if a SNAPSHOT could not be replaced
+     *
+     * @parameter property="failIfNotReplaced" default-value="false"
+     * @since 2.3
+     */
+    private Boolean failIfNotReplaced;
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -119,8 +135,36 @@ public class UseReleasesMojo
                         getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
                     }
                 }
+                else if ( allowRangeMatching )
+                {
+
+                    ArtifactVersion finalVersion = null;
+                    for (ArtifactVersion proposedVersion : versions.getVersions( false )) {
+                        if (proposedVersion.toString().startsWith( releaseVersion )) {
+                            getLog().debug("Found matching version for " + toString(dep) + " to version " + releaseVersion);
+                            finalVersion = proposedVersion;
+                        }
+                    }
+
+                    if ( finalVersion != null )
+                    {
+                        if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                finalVersion.toString()))
+                        {
+                            getLog().info("Updated " + toString(dep) + " to version " + finalVersion.toString());
+                        }
+                    } else
+                    {
+                        getLog().info("No matching release of " + toString(dep) + " to force.");
+                        if ( failIfNotReplaced ) {
+                            throw new NoSuchElementException("No matching release of " + toString(dep) + " to found for update.");
+                        }
+                    }
+
+                }
             }
         }
     }
+
 
 }
