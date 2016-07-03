@@ -358,7 +358,14 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         }
 
         return result;
-
+    }
+    
+    /**
+     * Indicates whether any includes were specified via the 'includes' or 'includesList' options.
+     * @return true if includes were specified, false otherwise.
+     */
+    protected boolean hasIncludes() {
+    	return includes != null || includesList != null;
     }
 
     private ArtifactFilter getIncludesArtifactFilter()
