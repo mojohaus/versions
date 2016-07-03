@@ -239,7 +239,9 @@ public class SetMojo
                                  StringUtils.isBlank( oldVersion ) || "*".equals( oldVersion ) ? "" : m.getVersion() );
                 }
             }
-            if ( !found )
+            if ( !found && RegexUtils.getWildcardScore(groupId) == 0
+            		&& RegexUtils.getWildcardScore(artifactId) == 0
+            		&& RegexUtils.getWildcardScore(oldVersion) == 0 )
             {
                 applyChange( project, reactor, files, groupId, artifactId, oldVersion );
             }
