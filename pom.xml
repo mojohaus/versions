@@ -12,6 +12,7 @@
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
+  <url>http://www.mojohaus.org/versions-maven-plugin/</url>
   <description>
     Versions Plugin for Maven 2. The Versions Plugin updates the versions of components in the POM.
   </description>
