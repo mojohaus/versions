@@ -74,7 +74,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @readonly
      * @since 1.0-alpha-1
      */
-    private MavenProject project;
+    protected MavenProject project;
 
     /**
      * @component
@@ -238,6 +238,10 @@ public abstract class AbstractVersionsUpdaterMojo
     public void setProject( MavenProject project )
     {
         this.project = project;
+    }
+
+    public String getVersion() {
+        return getProject() == null ? null : getProject().getVersion();
     }
 
     // ------------------------ INTERFACE METHODS ------------------------
