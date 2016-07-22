@@ -129,7 +129,7 @@
 <tr>  <td class="numLine">&nbsp;56</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;57</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">// ------------------------------ FIELDS ------------------------------</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;    <span class="comment">// ------------------------------ FIELDS ------------------------------</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;58</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;59</td>  <td class="nbHits">&nbsp;</td>
@@ -149,386 +149,368 @@
 <tr>  <td class="numLine">&nbsp;66</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="comment">/**</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;67</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * Whether to process the dependencyManagement section of the project. If not</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * Whether to process the dependencyManagement section of the project. If not set will default to true.</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;68</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * set will default to true.</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     *</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;69</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     *</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;70</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @parameter property="processDependencyManagement" defaultValue="true"</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;70</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @since 1.2</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;71</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @since 1.2</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;72</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     */</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;73</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    <span class="keyword">protected</span> Boolean processDependencyManagement = Boolean.TRUE;</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;72</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    <span class="keyword">protected</span> Boolean processDependencyManagement = Boolean.TRUE;</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;73</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;74</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;    <span class="comment">/**</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;75</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    <span class="comment">/**</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * Whether to process the dependencies section of the project. If not set will default to true.</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;76</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * Whether to process the dependencies section of the project. If not</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     *</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;77</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * set will default to true.</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;78</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     *</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;79</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @parameter property="processDependencies" defaultValue="true"</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;80</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;78</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @since 1.2</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;79</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     */</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;80</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    <span class="keyword">protected</span> Boolean processDependencies = Boolean.TRUE;</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;81</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     */</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;82</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    <span class="keyword">protected</span> Boolean processDependencies = Boolean.TRUE;</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;82</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    <span class="comment">/**</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;83</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * Whether to show additional information such as dependencies that do not need updating. Defaults to false.</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;84</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    <span class="comment">/**</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     *</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;85</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * Whether to show additional information such as dependencies that</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;86</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * do not need updating.  Defaults to false.</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;87</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     *</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;88</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @parameter property="verbose" defaultValue="false"</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;89</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;86</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @since 2.1</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;87</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     */</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;88</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    <span class="keyword">protected</span> Boolean verbose = Boolean.FALSE;</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;89</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;90</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     */</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;91</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    <span class="keyword">protected</span> Boolean verbose = Boolean.FALSE;</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;92</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;93</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="comment">// --------------------- GETTER / SETTER METHODS ---------------------</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;94</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;91</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;95</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;92</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="comment">/**</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;96</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;93</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * Returns a set of dependencies where the dependencies which are defined in the dependency management section have</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;97</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;94</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * been filtered out.</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;98</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;95</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     *</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;99</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @param dependencies         The set of dependencies.</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;100</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;96</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @param dependencies The set of dependencies.</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;97</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @param dependencyManagement The set of dependencies from the dependency management section.</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;101</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;98</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;102</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;99</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     *         management dependencies.</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;103</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;100</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @since 1.0-beta-1</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;104</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;101</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     */</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;105</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;102</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">private</span> <span class="keyword">static</span> Set removeDependencyManagment( Set dependencies, Set dependencyManagement )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;103</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;104</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set result = <span class="keyword">new</span> TreeSet( <span class="keyword">new</span> DependencyComparator() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;105</td>  <td class="nbHitsUncovered"><a title="Line 105: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 105: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( Iterator i = dependencies.iterator(); i.hasNext(); )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;106</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;107</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set result = <span class="keyword">new</span> TreeSet( <span class="keyword">new</span> DependencyComparator() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;108</td>  <td class="nbHitsUncovered"><a title="Line 108: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 108: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( Iterator i = dependencies.iterator(); i.hasNext(); )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;109</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;110</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            Dependency c = (Dependency) i.next();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;111</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">boolean</span> matched = <span class="keyword">false</span>;</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;112</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            Iterator j = dependencyManagement.iterator();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;113</td>  <td class="nbHitsUncovered"><a title="Line 113: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 113: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">            <span class="keyword">while</span> ( !matched &amp;&amp; j.hasNext() )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;107</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            Dependency c = (Dependency) i.next();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;108</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">boolean</span> matched = <span class="keyword">false</span>;</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;109</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            Iterator j = dependencyManagement.iterator();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;110</td>  <td class="nbHitsUncovered"><a title="Line 110: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 110: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">            <span class="keyword">while</span> ( !matched &amp;&amp; j.hasNext() )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;111</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;112</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                Dependency t = (Dependency) j.next();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;113</td>  <td class="nbHitsUncovered"><a title="Line 113: Conditional coverage 0% (0/18) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 113: Conditional coverage 0% (0/18) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%].">                <span class="keyword">if</span> ( StringUtils.equals( t.getGroupId(), c.getGroupId() )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;114</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;115</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                Dependency t = (Dependency) j.next();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;116</td>  <td class="nbHitsUncovered"><a title="Line 116: Conditional coverage 0% (0/18) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 116: Conditional coverage 0% (0/18) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%].">                <span class="keyword">if</span> ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) &amp;&amp;</a></span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    &amp;&amp; StringUtils.equals( t.getArtifactId(), c.getArtifactId() )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;115</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    &amp;&amp; ( t.getScope() == <span class="keyword">null</span> || StringUtils.equals( t.getScope(), c.getScope() ) )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;116</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    &amp;&amp; ( t.getClassifier() == <span class="keyword">null</span> || StringUtils.equals( t.getClassifier(), c.getClassifier() ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;117</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) &amp;&amp;</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    &amp;&amp; ( c.getVersion() == <span class="keyword">null</span> || t.getVersion() == <span class="keyword">null</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;118</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    ( t.getScope() == <span class="keyword">null</span> || StringUtils.equals( t.getScope(), c.getScope() ) ) &amp;&amp;</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                        || StringUtils.equals( t.getVersion(), c.getVersion() ) ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;119</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    ( t.getClassifier() == <span class="keyword">null</span> || StringUtils.equals( t.getClassifier(), c.getClassifier() ) ) &amp;&amp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;120</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    ( c.getVersion() == <span class="keyword">null</span> || t.getVersion() == <span class="keyword">null</span> ||</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;121</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        StringUtils.equals( t.getVersion(), c.getVersion() ) ) )</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;120</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    matched = <span class="keyword">true</span>;</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;121</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    <span class="keyword">break</span>;</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;122</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;123</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    matched = <span class="keyword">true</span>;</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    <span class="keyword">break</span>;</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;123</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            }</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsUncovered"><a title="Line 124: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 124: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( !matched )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;125</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;126</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            }</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;127</td>  <td class="nbHitsUncovered"><a title="Line 127: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 127: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( !matched )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;128</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;129</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                result.add( c );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;126</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                result.add( c );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;127</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;128</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;129</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">return</span> result;</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;130</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;131</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;132</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">return</span> result;</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;133</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;134</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;131</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;135</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;132</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">public</span> <span class="keyword">boolean</span> isProcessingDependencyManagement()</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;133</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;134</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="comment">// true if true or null</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;135</td>  <td class="nbHitsUncovered"><a title="Line 135: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 135: Conditional coverage 0% (0/2).">        <span class="keyword">return</span> !Boolean.FALSE.equals( processDependencyManagement );</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;136</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;137</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        <span class="comment">// true if true or null</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;138</td>  <td class="nbHitsUncovered"><a title="Line 138: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 138: Conditional coverage 0% (0/2).">        <span class="keyword">return</span> !Boolean.FALSE.equals( processDependencyManagement );</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;139</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;140</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;141</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;138</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">public</span> <span class="keyword">boolean</span> isProcessingDependencies()</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;139</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;140</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="comment">// true if true or null</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;141</td>  <td class="nbHitsUncovered"><a title="Line 141: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 141: Conditional coverage 0% (0/2).">        <span class="keyword">return</span> !Boolean.FALSE.equals( processDependencies );</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;142</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;143</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        <span class="comment">// true if true or null</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;144</td>  <td class="nbHitsUncovered"><a title="Line 144: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 144: Conditional coverage 0% (0/2).">        <span class="keyword">return</span> !Boolean.FALSE.equals( processDependencies );</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;145</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;146</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;147</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;144</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">public</span> <span class="keyword">boolean</span> isVerbose()</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;148</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;145</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;149</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;146</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="comment">// true if true or null</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;150</td>  <td class="nbHitsUncovered"><a title="Line 150: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 150: Conditional coverage 0% (0/2).">        <span class="keyword">return</span> !Boolean.FALSE.equals( verbose );</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;151</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;147</td>  <td class="nbHitsUncovered"><a title="Line 147: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 147: Conditional coverage 0% (0/2).">        <span class="keyword">return</span> !Boolean.FALSE.equals( verbose );</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;148</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;149</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;150</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    <span class="comment">// ------------------------ INTERFACE METHODS ------------------------</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;151</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;152</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;    <span class="comment">// --------------------- Interface Mojo ---------------------</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;153</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">// ------------------------ INTERFACE METHODS ------------------------</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;154</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;155</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">// --------------------- Interface Mojo ---------------------</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;156</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;157</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="comment">/**</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;158</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws org.apache.maven.plugin.MojoExecutionException</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;159</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     *          when things go wrong</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;160</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws org.apache.maven.plugin.MojoFailureException</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;161</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     *          when things go wrong in a very bad way</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;162</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;155</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;156</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;157</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;163</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;158</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @since 1.0-alpha-1</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;164</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;159</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     */</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;165</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;160</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">public</span> <span class="keyword">void</span> execute()</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;166</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;161</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">throws</span> MojoExecutionException, MojoFailureException</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;162</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;163</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        logInit();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;164</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set dependencyManagement = <span class="keyword">new</span> TreeSet( <span class="keyword">new</span> DependencyComparator() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;165</td>  <td class="nbHitsUncovered"><a title="Line 165: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 165: Conditional coverage 0% (0/2).">        dependencyManagement.addAll( getProject().getDependencyManagement() == <span class="keyword">null</span> ? Collections.EMPTY_LIST</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;166</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                        : getProject().getDependencyManagement().getDependencies() );</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;167</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;168</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        logInit();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;169</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set dependencyManagement = <span class="keyword">new</span> TreeSet( <span class="keyword">new</span> DependencyComparator() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;170</td>  <td class="nbHitsUncovered"><a title="Line 170: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 170: Conditional coverage 0% (0/2).">        dependencyManagement.addAll( getProject().getDependencyManagement() == <span class="keyword">null</span></a></span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;168</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set dependencies = <span class="keyword">new</span> TreeSet( <span class="keyword">new</span> DependencyComparator() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;169</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        dependencies.addAll( getProject().getDependencies() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;170</td>  <td class="nbHitsUncovered"><a title="Line 170: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 170: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( isProcessingDependencyManagement() )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;171</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                         ? Collections.EMPTY_LIST</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;172</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                         : getProject().getDependencyManagement().getDependencies() );</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;172</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            dependencies = removeDependencyManagment( dependencies, dependencyManagement );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;173</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;174</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set dependencies = <span class="keyword">new</span> TreeSet( <span class="keyword">new</span> DependencyComparator() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;175</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        dependencies.addAll( getProject().getDependencies() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;176</td>  <td class="nbHitsUncovered"><a title="Line 176: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 176: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( isProcessingDependencyManagement() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;177</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;178</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            dependencies = removeDependencyManagment( dependencies, dependencyManagement );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;179</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;180</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;174</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;181</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;175</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">try</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;182</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;176</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;183</td>  <td class="nbHitsUncovered"><a title="Line 183: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 183: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( isProcessingDependencyManagement() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;184</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;177</td>  <td class="nbHitsUncovered"><a title="Line 177: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 177: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( isProcessingDependencyManagement() )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;178</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;185</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, <span class="keyword">false</span> ),</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;186</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;179</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, <span class="keyword">false</span> ),</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;180</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                            <span class="string">"Dependency Management"</span> );</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;187</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;181</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;188</td>  <td class="nbHitsUncovered"><a title="Line 188: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 188: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( isProcessingDependencies() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;189</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;182</td>  <td class="nbHitsUncovered"><a title="Line 182: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 182: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( isProcessingDependencies() )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;183</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;190</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                logUpdates( getHelper().lookupDependenciesUpdates( dependencies, <span class="keyword">false</span> ), <span class="string">"Dependencies"</span> );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;191</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;184</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                logUpdates( getHelper().lookupDependenciesUpdates( dependencies, <span class="keyword">false</span> ), <span class="string">"Dependencies"</span> );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;185</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;186</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;187</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">catch</span> ( InvalidVersionSpecificationException e )</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;188</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;189</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">throw</span> <span class="keyword">new</span> MojoExecutionException( e.getMessage(), e );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;190</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;191</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">catch</span> ( ArtifactMetadataRetrievalException e )</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;192</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;193</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">catch</span> ( InvalidVersionSpecificationException e )</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;194</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;195</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">throw</span> <span class="keyword">new</span> MojoExecutionException( e.getMessage(), e );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;193</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">throw</span> <span class="keyword">new</span> MojoExecutionException( e.getMessage(), e );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;194</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;195</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;196</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;197</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">catch</span> ( ArtifactMetadataRetrievalException e )</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;198</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;199</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">throw</span> <span class="keyword">new</span> MojoExecutionException( e.getMessage(), e );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;200</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;201</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;202</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;203</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;197</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">private</span> <span class="keyword">void</span> logUpdates( Map updates, String section )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;204</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;198</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;205</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        List withUpdates = <span class="keyword">new</span> ArrayList();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;206</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        List usingCurrent = <span class="keyword">new</span> ArrayList();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;207</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Iterator i = updates.values().iterator();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;208</td>  <td class="nbHitsUncovered"><a title="Line 208: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 208: Conditional coverage 0% (0/2).">        <span class="keyword">while</span> ( i.hasNext() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;209</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;199</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        List withUpdates = <span class="keyword">new</span> ArrayList();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;200</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        List usingCurrent = <span class="keyword">new</span> ArrayList();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;201</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Iterator i = updates.values().iterator();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;202</td>  <td class="nbHitsUncovered"><a title="Line 202: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 202: Conditional coverage 0% (0/2).">        <span class="keyword">while</span> ( i.hasNext() )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;203</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;210</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            ArtifactVersions versions = (ArtifactVersions) i.next();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;211</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            String left = <span class="string">"  "</span> + ArtifactUtils.versionlessKey( versions.getArtifact() ) + <span class="string">" "</span>;</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;212</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;204</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            ArtifactVersions versions = (ArtifactVersions) i.next();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;205</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            String left = <span class="string">"  "</span> + ArtifactUtils.versionlessKey( versions.getArtifact() ) + <span class="string">" "</span>;</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;206</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            <span class="keyword">final</span> String current;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;213</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;207</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            ArtifactVersion latest;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;214</td>  <td class="nbHitsUncovered"><a title="Line 214: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 214: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( versions.isCurrentVersionDefined() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;215</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;208</td>  <td class="nbHitsUncovered"><a title="Line 208: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 208: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( versions.isCurrentVersionDefined() )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;209</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;216</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                current = versions.getCurrentVersion().toString();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;217</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                latest = versions.getNewestUpdate( UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;218</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;210</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                current = versions.getCurrentVersion().toString();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;211</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                latest = versions.getNewestUpdate( UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;212</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;219</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;213</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            <span class="keyword">else</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;220</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;214</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;221</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                ArtifactVersion newestVersion = versions.getNewestVersion( versions.getArtifact().getVersionRange(),</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;222</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;215</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                ArtifactVersion newestVersion = versions.getNewestVersion( versions.getArtifact().getVersionRange(),</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;216</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                                                           Boolean.TRUE.equals( allowSnapshots ) );</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;223</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                current = versions.getArtifact().getVersionRange().toString();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;224</td>  <td class="nbHitsUncovered"><a title="Line 224: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 224: Conditional coverage 0% (0/2).">                latest = newestVersion == <span class="keyword">null</span></a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;225</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    ? <span class="keyword">null</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;226</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    : versions.getNewestUpdate( newestVersion, UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;227</td>  <td class="nbHitsUncovered"><a title="Line 227: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 227: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">                <span class="keyword">if</span> ( latest != <span class="keyword">null</span> &amp;&amp; ArtifactVersions.isVersionInRange( latest,</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;228</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                                                          versions.getArtifact().getVersionRange() ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;229</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;217</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                current = versions.getArtifact().getVersionRange().toString();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;218</td>  <td class="nbHitsUncovered"><a title="Line 218: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 218: Conditional coverage 0% (0/2).">                latest = newestVersion == <span class="keyword">null</span> ? <span class="keyword">null</span></a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;219</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                                : versions.getNewestUpdate( newestVersion, UpdateScope.ANY,</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;220</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                                                            Boolean.TRUE.equals( allowSnapshots ) );</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;221</td>  <td class="nbHitsUncovered"><a title="Line 221: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 221: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">                <span class="keyword">if</span> ( latest != <span class="keyword">null</span></a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;222</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    &amp;&amp; ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;223</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;230</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    latest = <span class="keyword">null</span>;</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;231</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;224</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    latest = <span class="keyword">null</span>;</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;225</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;232</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;226</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;233</td>  <td class="nbHitsUncovered"><a title="Line 233: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 233: Conditional coverage 0% (0/2).">            String right = <span class="string">" "</span> + ( latest == <span class="keyword">null</span> ? current : current + <span class="string">" -&gt; "</span> + latest.toString() );</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;234</td>  <td class="nbHitsUncovered"><a title="Line 234: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 234: Conditional coverage 0% (0/2).">            List t = latest == <span class="keyword">null</span> ? usingCurrent : withUpdates;</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;235</td>  <td class="nbHitsUncovered"><a title="Line 235: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 235: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( right.length() + left.length() + 3 &gt; INFO_PAD_SIZE )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;227</td>  <td class="nbHitsUncovered"><a title="Line 227: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 227: Conditional coverage 0% (0/2).">            String right = <span class="string">" "</span> + ( latest == <span class="keyword">null</span> ? current : current + <span class="string">" -&gt; "</span> + latest.toString() );</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;228</td>  <td class="nbHitsUncovered"><a title="Line 228: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 228: Conditional coverage 0% (0/2).">            List t = latest == <span class="keyword">null</span> ? usingCurrent : withUpdates;</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;229</td>  <td class="nbHitsUncovered"><a title="Line 229: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 229: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( right.length() + left.length() + 3 &gt; INFO_PAD_SIZE )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;230</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;231</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                t.add( left + <span class="string">"..."</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;232</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                t.add( StringUtils.leftPad( right, INFO_PAD_SIZE ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;233</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;234</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;235</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;            <span class="keyword">else</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;236</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;237</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                t.add( left + <span class="string">"..."</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;238</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                t.add( StringUtils.leftPad( right, INFO_PAD_SIZE ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;239</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;240</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;237</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE - right.length(), <span class="string">"."</span> ) + right );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;238</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;239</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;240</td>  <td class="nbHitsUncovered"><a title="Line 240: Conditional coverage 0% (0/6) [each condition: 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 240: Conditional coverage 0% (0/6) [each condition: 0%, 0%, 0%].">        <span class="keyword">if</span> ( isVerbose() &amp;&amp; usingCurrent.isEmpty() &amp;&amp; !withUpdates.isEmpty() )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;241</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            <span class="keyword">else</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;242</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;243</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE - right.length(), <span class="string">"."</span> ) + right );</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;242</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">"No dependencies in "</span> + section + <span class="string">" are using the newest version."</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;243</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">""</span> );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;244</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;245</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;246</td>  <td class="nbHitsUncovered"><a title="Line 246: Conditional coverage 0% (0/6) [each condition: 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 246: Conditional coverage 0% (0/6) [each condition: 0%, 0%, 0%].">        <span class="keyword">if</span> ( isVerbose() &amp;&amp; usingCurrent.isEmpty() &amp;&amp; !withUpdates.isEmpty() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;247</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;245</td>  <td class="nbHitsUncovered"><a title="Line 245: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 245: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">        <span class="keyword">else</span> <span class="keyword">if</span> ( isVerbose() &amp;&amp; !usingCurrent.isEmpty() )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;246</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;248</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">"No dependencies in "</span> + section + <span class="string">" are using the newest version."</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;249</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">""</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;247</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">"The following dependencies in "</span> + section + <span class="string">" are using the newest version:"</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;248</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            i = usingCurrent.iterator();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;249</td>  <td class="nbHitsUncovered"><a title="Line 249: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 249: Conditional coverage 0% (0/2).">            <span class="keyword">while</span> ( i.hasNext() )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;250</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;251</td>  <td class="nbHitsUncovered"><a title="Line 251: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 251: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">        <span class="keyword">else</span> <span class="keyword">if</span> ( isVerbose() &amp;&amp; !usingCurrent.isEmpty() )</a></span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;251</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                logLine( <span class="keyword">false</span>, (String) i.next() );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;252</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;253</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">"The following dependencies in "</span> + section + <span class="string">" are using the newest version:"</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;254</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            i = usingCurrent.iterator();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;255</td>  <td class="nbHitsUncovered"><a title="Line 255: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 255: Conditional coverage 0% (0/2).">            <span class="keyword">while</span> ( i.hasNext() )</a></span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;253</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">""</span> );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;254</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;255</td>  <td class="nbHitsUncovered"><a title="Line 255: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 255: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">        <span class="keyword">if</span> ( withUpdates.isEmpty() &amp;&amp; !usingCurrent.isEmpty() )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;256</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;257</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                logLine( <span class="keyword">false</span>, (String) i.next() );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;258</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;259</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">""</span> );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;260</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;261</td>  <td class="nbHitsUncovered"><a title="Line 261: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 261: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">        <span class="keyword">if</span> ( withUpdates.isEmpty() &amp;&amp; !usingCurrent.isEmpty() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;262</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;263</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">"No dependencies in "</span> + section + <span class="string">" have newer versions."</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;264</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">""</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;257</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">"No dependencies in "</span> + section + <span class="string">" have newer versions."</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;258</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">""</span> );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;259</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;260</td>  <td class="nbHitsUncovered"><a title="Line 260: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 260: Conditional coverage 0% (0/2).">        <span class="keyword">else</span> <span class="keyword">if</span> ( !withUpdates.isEmpty() )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;261</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;262</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">"The following dependencies in "</span> + section + <span class="string">" have newer versions:"</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;263</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            i = withUpdates.iterator();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;264</td>  <td class="nbHitsUncovered"><a title="Line 264: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 264: Conditional coverage 0% (0/2).">            <span class="keyword">while</span> ( i.hasNext() )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;265</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;266</td>  <td class="nbHitsUncovered"><a title="Line 266: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 266: Conditional coverage 0% (0/2).">        <span class="keyword">else</span> <span class="keyword">if</span> ( !withUpdates.isEmpty() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;267</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;268</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">"The following dependencies in "</span> + section + <span class="string">" have newer versions:"</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;269</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            i = withUpdates.iterator();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;270</td>  <td class="nbHitsUncovered"><a title="Line 270: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 270: Conditional coverage 0% (0/2).">            <span class="keyword">while</span> ( i.hasNext() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;271</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;272</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                logLine( <span class="keyword">false</span>, (String) i.next() );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;273</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;266</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                logLine( <span class="keyword">false</span>, (String) i.next() );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;267</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;274</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">""</span> );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;275</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;268</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            logLine( <span class="keyword">false</span>, <span class="string">""</span> );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;269</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;276</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;277</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;270</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;271</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;278</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;272</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="comment">/**</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;279</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;273</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @param pom the pom to update.</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;280</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws org.apache.maven.plugin.MojoExecutionException</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;281</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     *          when things go wrong</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;282</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws org.apache.maven.plugin.MojoFailureException</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;283</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     *          when things go wrong in a very bad way</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;284</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws javax.xml.stream.XMLStreamException</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;285</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     *          when things go wrong with XML streaming</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;286</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;274</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;275</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;276</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;277</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;287</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;278</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @since 1.0-alpha-1</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;288</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;279</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     */</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;289</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;280</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">void</span> update( ModifiedPomXMLEventReader pom )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;290</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;281</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">throws</span> MojoExecutionException, MojoFailureException, XMLStreamException</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;291</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;282</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;292</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;283</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="comment">// do nothing</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;293</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;294</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;284</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;285</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;295</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;286</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 5/21/15 2:14 PM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 7/22/16 11:10 PM.</div>
 </body>
 </html>

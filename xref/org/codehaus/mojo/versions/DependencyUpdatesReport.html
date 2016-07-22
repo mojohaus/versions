@@ -75,92 +75,91 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment">     * generates an empty report in case there are no sources to generate a report with</em>
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment">     *</em>
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment">     * @param locale the locale to generate the report for.</em>
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">     * @param sink   the report formatting tool</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">     * @param sink the report formatting tool</em>
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doGenerateReport( Locale locale, Sink sink )
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>          <strong class="jxr_keyword">throws</strong> MavenReportException
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>      {
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>          Set dependencyManagement = <strong class="jxr_keyword">new</strong> TreeSet( <strong class="jxr_keyword">new</strong> DependencyComparator() );
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>          dependencyManagement.addAll( getProject().getDependencyManagement() == <strong class="jxr_keyword">null</strong>
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>                                           ? Collections.EMPTY_LIST
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>                                           : getProject().getDependencyManagement().getDependencies() );
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>          Set dependencies = <strong class="jxr_keyword">new</strong> TreeSet( <strong class="jxr_keyword">new</strong> DependencyComparator() );
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>          dependencies.addAll( getProject().getDependencies() );
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>          dependencies = removeDependencyManagment( dependencies, dependencyManagement );
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>          <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>          {
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>              Map&lt;Dependency, ArtifactVersions&gt; dependencyUpdates =
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>                  getHelper().lookupDependenciesUpdates( dependencies, false );
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>              Map&lt;Dependency, ArtifactVersions&gt; dependencyManagementUpdates =
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>                  getHelper().lookupDependenciesUpdates( dependencyManagement, false );
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>              <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesRenderer.html">DependencyUpdatesRenderer</a> renderer =
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>                  <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesRenderer.html">DependencyUpdatesRenderer</a>( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>                                                 dependencyManagementUpdates );
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>              renderer.render();
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>          }
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>          <strong class="jxr_keyword">catch</strong> ( InvalidVersionSpecificationException e )
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>          {
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MavenReportException( e.getMessage(), e );
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>          }
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>          <strong class="jxr_keyword">catch</strong> ( ArtifactMetadataRetrievalException e )
-<a class="jxr_linenumber" name="L100" href="#L100">100</a>         {
-<a class="jxr_linenumber" name="L101" href="#L101">101</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MavenReportException( e.getMessage(), e );
-<a class="jxr_linenumber" name="L102" href="#L102">102</a>         }
-<a class="jxr_linenumber" name="L103" href="#L103">103</a>     }
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
-<a class="jxr_linenumber" name="L105" href="#L105">105</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">     * Returns a set of dependencies where the dependencies which are defined in the dependency management section have</em>
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">     * been filtered out.</em>
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">     * @param dependencies         The set of dependencies.</em>
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment">     * @param dependencyManagement The set of dependencies from the dependency management section.</em>
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment">     * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency</em>
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">     *         management dependencies.</em>
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L115" href="#L115">115</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Set removeDependencyManagment( Set dependencies, Set dependencyManagement )
-<a class="jxr_linenumber" name="L116" href="#L116">116</a>     {
-<a class="jxr_linenumber" name="L117" href="#L117">117</a>         Set result = <strong class="jxr_keyword">new</strong> TreeSet( <strong class="jxr_keyword">new</strong> DependencyComparator() );
-<a class="jxr_linenumber" name="L118" href="#L118">118</a>         <strong class="jxr_keyword">for</strong> ( Iterator i = dependencies.iterator(); i.hasNext(); )
-<a class="jxr_linenumber" name="L119" href="#L119">119</a>         {
-<a class="jxr_linenumber" name="L120" href="#L120">120</a>             Dependency c = (Dependency) i.next();
-<a class="jxr_linenumber" name="L121" href="#L121">121</a>             <strong class="jxr_keyword">boolean</strong> matched = false;
-<a class="jxr_linenumber" name="L122" href="#L122">122</a>             Iterator j = dependencyManagement.iterator();
-<a class="jxr_linenumber" name="L123" href="#L123">123</a>             <strong class="jxr_keyword">while</strong> ( !matched &amp;&amp; j.hasNext() )
-<a class="jxr_linenumber" name="L124" href="#L124">124</a>             {
-<a class="jxr_linenumber" name="L125" href="#L125">125</a>                 Dependency t = (Dependency) j.next();
-<a class="jxr_linenumber" name="L126" href="#L126">126</a>                 <strong class="jxr_keyword">if</strong> ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) &amp;&amp;
-<a class="jxr_linenumber" name="L127" href="#L127">127</a>                     StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) &amp;&amp;
-<a class="jxr_linenumber" name="L128" href="#L128">128</a>                     ( t.getScope() == <strong class="jxr_keyword">null</strong> || StringUtils.equals( t.getScope(), c.getScope() ) ) &amp;&amp;
-<a class="jxr_linenumber" name="L129" href="#L129">129</a>                     ( t.getClassifier() == <strong class="jxr_keyword">null</strong> || StringUtils.equals( t.getClassifier(), c.getClassifier() ) ) &amp;&amp;
-<a class="jxr_linenumber" name="L130" href="#L130">130</a>                     ( c.getVersion() == <strong class="jxr_keyword">null</strong> || t.getVersion() == <strong class="jxr_keyword">null</strong> ||
-<a class="jxr_linenumber" name="L131" href="#L131">131</a>                         StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
-<a class="jxr_linenumber" name="L132" href="#L132">132</a>                 {
-<a class="jxr_linenumber" name="L133" href="#L133">133</a>                     matched = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L134" href="#L134">134</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L135" href="#L135">135</a>                 }
-<a class="jxr_linenumber" name="L136" href="#L136">136</a>             }
-<a class="jxr_linenumber" name="L137" href="#L137">137</a>             <strong class="jxr_keyword">if</strong> ( !matched )
-<a class="jxr_linenumber" name="L138" href="#L138">138</a>             {
-<a class="jxr_linenumber" name="L139" href="#L139">139</a>                 result.add( c );
-<a class="jxr_linenumber" name="L140" href="#L140">140</a>             }
-<a class="jxr_linenumber" name="L141" href="#L141">141</a>         }
-<a class="jxr_linenumber" name="L142" href="#L142">142</a>         <strong class="jxr_keyword">return</strong> result;
-<a class="jxr_linenumber" name="L143" href="#L143">143</a>     }
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 
-<a class="jxr_linenumber" name="L145" href="#L145">145</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">     * {@inheritDoc}</em>
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L148" href="#L148">148</a>     <strong class="jxr_keyword">public</strong> String getOutputName()
-<a class="jxr_linenumber" name="L149" href="#L149">149</a>     {
-<a class="jxr_linenumber" name="L150" href="#L150">150</a>         <strong class="jxr_keyword">return</strong> <span class="jxr_string">"dependency-updates-report"</span>;
-<a class="jxr_linenumber" name="L151" href="#L151">151</a>     }
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> }
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>          dependencyManagement.addAll( getProject().getDependencyManagement() == <strong class="jxr_keyword">null</strong> ? Collections.EMPTY_LIST
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>                          : getProject().getDependencyManagement().getDependencies() );
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>          Set dependencies = <strong class="jxr_keyword">new</strong> TreeSet( <strong class="jxr_keyword">new</strong> DependencyComparator() );
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>          dependencies.addAll( getProject().getDependencies() );
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>          dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>          <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>          {
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>              Map&lt;Dependency, ArtifactVersions&gt; dependencyUpdates =
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>                  getHelper().lookupDependenciesUpdates( dependencies, false );
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>              Map&lt;Dependency, ArtifactVersions&gt; dependencyManagementUpdates =
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>                  getHelper().lookupDependenciesUpdates( dependencyManagement, false );
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>              <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesRenderer.html">DependencyUpdatesRenderer</a> renderer =
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>                  <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesRenderer.html">DependencyUpdatesRenderer</a>( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>                                                 dependencyManagementUpdates );
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>              renderer.render();
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>          }
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>          <strong class="jxr_keyword">catch</strong> ( InvalidVersionSpecificationException e )
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>          {
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MavenReportException( e.getMessage(), e );
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          }
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>          <strong class="jxr_keyword">catch</strong> ( ArtifactMetadataRetrievalException e )
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          {
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MavenReportException( e.getMessage(), e );
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>         }
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>     }
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">     * Returns a set of dependencies where the dependencies which are defined in the dependency management section have</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">     * been filtered out.</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">     * @param dependencies The set of dependencies.</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">     * @param dependencyManagement The set of dependencies from the dependency management section.</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment">     * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment">     *         management dependencies.</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Set removeDependencyManagment( Set dependencies, Set dependencyManagement )
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>     {
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>         Set result = <strong class="jxr_keyword">new</strong> TreeSet( <strong class="jxr_keyword">new</strong> DependencyComparator() );
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>         <strong class="jxr_keyword">for</strong> ( Iterator i = dependencies.iterator(); i.hasNext(); )
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>         {
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>             Dependency c = (Dependency) i.next();
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>             <strong class="jxr_keyword">boolean</strong> matched = false;
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>             Iterator j = dependencyManagement.iterator();
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>             <strong class="jxr_keyword">while</strong> ( !matched &amp;&amp; j.hasNext() )
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>             {
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>                 Dependency t = (Dependency) j.next();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>                 <strong class="jxr_keyword">if</strong> ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>                     &amp;&amp; StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>                     &amp;&amp; ( t.getScope() == <strong class="jxr_keyword">null</strong> || StringUtils.equals( t.getScope(), c.getScope() ) )
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>                     &amp;&amp; ( t.getClassifier() == <strong class="jxr_keyword">null</strong> || StringUtils.equals( t.getClassifier(), c.getClassifier() ) )
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>                     &amp;&amp; ( c.getVersion() == <strong class="jxr_keyword">null</strong> || t.getVersion() == <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>                         || StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>                 {
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>                     matched = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>                 }
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>             }
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>             <strong class="jxr_keyword">if</strong> ( !matched )
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>             {
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>                 result.add( c );
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>             }
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>         }
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>         <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     }
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">     * {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>     <strong class="jxr_keyword">public</strong> String getOutputName()
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>     {
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>         <strong class="jxr_keyword">return</strong> <span class="jxr_string">"dependency-updates-report"</span>;
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>     }
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2015 <a href="http://codehaus.org">Codehaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2016 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

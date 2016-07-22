@@ -122,8 +122,8 @@
 <a class="jxr_linenumber" name="L114" href="#L114">114</a>             <strong class="jxr_keyword">if</strong> ( !outputFileError &amp;&amp; StringUtils.isBlank( outputEncoding ) )
 <a class="jxr_linenumber" name="L115" href="#L115">115</a>             {
 <a class="jxr_linenumber" name="L116" href="#L116">116</a>                 outputEncoding = System.getProperty( <span class="jxr_string">"file.encoding"</span> );
-<a class="jxr_linenumber" name="L117" href="#L117">117</a>                 getLog().warn( <span class="jxr_string">"File encoding has not been set, using platform encoding "</span> + outputEncoding +
-<a class="jxr_linenumber" name="L118" href="#L118">118</a>                                    <span class="jxr_string">", i.e. build is platform dependent!"</span> );
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>                 getLog().warn( <span class="jxr_string">"File encoding has not been set, using platform encoding "</span> + outputEncoding
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>                     + <span class="jxr_string">", i.e. build is platform dependent!"</span> );
 <a class="jxr_linenumber" name="L119" href="#L119">119</a>             }
 <a class="jxr_linenumber" name="L120" href="#L120">120</a>         }
 <a class="jxr_linenumber" name="L121" href="#L121">121</a>     }
@@ -145,9 +145,9 @@
 <a class="jxr_linenumber" name="L137" href="#L137">137</a>         {
 <a class="jxr_linenumber" name="L138" href="#L138">138</a>             <strong class="jxr_keyword">try</strong>
 <a class="jxr_linenumber" name="L139" href="#L139">139</a>             {
-<a class="jxr_linenumber" name="L140" href="#L140">140</a>                 FileUtils.fileAppend( outputFile.getAbsolutePath(), outputEncoding, error
-<a class="jxr_linenumber" name="L141" href="#L141">141</a>                     ? <span class="jxr_string">"&gt; "</span> + line + System.getProperty( <span class="jxr_string">"line.separator"</span> )
-<a class="jxr_linenumber" name="L142" href="#L142">142</a>                     : line + System.getProperty( <span class="jxr_string">"line.separator"</span> ) );
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>                 FileUtils.fileAppend( outputFile.getAbsolutePath(), outputEncoding,
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>                                       error ? <span class="jxr_string">"&gt; "</span> + line + System.getProperty( <span class="jxr_string">"line.separator"</span> )
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>                                                       : line + System.getProperty( <span class="jxr_string">"line.separator"</span> ) );
 <a class="jxr_linenumber" name="L143" href="#L143">143</a>             }
 <a class="jxr_linenumber" name="L144" href="#L144">144</a>             <strong class="jxr_keyword">catch</strong> ( IOException e )
 <a class="jxr_linenumber" name="L145" href="#L145">145</a>             {
@@ -160,6 +160,6 @@
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2015 <a href="http://codehaus.org">Codehaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2016 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

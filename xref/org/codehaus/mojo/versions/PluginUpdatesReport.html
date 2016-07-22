@@ -70,22 +70,22 @@
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> haveBuildPluginManagementPlugins()
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>      {
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>          <strong class="jxr_keyword">return</strong> getProject().getBuild() != <strong class="jxr_keyword">null</strong> &amp;&amp; getProject().getBuild().getPluginManagement() != <strong class="jxr_keyword">null</strong> &amp;&amp;
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>              getProject().getBuild().getPluginManagement().getPlugins() != <strong class="jxr_keyword">null</strong> &amp;&amp;
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>              !getProject().getBuild().getPluginManagement().getPlugins().isEmpty();
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>          <strong class="jxr_keyword">return</strong> getProject().getBuild() != <strong class="jxr_keyword">null</strong> &amp;&amp; getProject().getBuild().getPluginManagement() != <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>              &amp;&amp; getProject().getBuild().getPluginManagement().getPlugins() != <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>              &amp;&amp; !getProject().getBuild().getPluginManagement().getPlugins().isEmpty();
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>      }
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> haveBuildPlugins()
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>      {
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>          <strong class="jxr_keyword">return</strong> getProject().getBuild() != <strong class="jxr_keyword">null</strong> &amp;&amp; getProject().getBuild().getPlugins() != <strong class="jxr_keyword">null</strong> &amp;&amp;
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>              !getProject().getBuild().getPlugins().isEmpty();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>          <strong class="jxr_keyword">return</strong> getProject().getBuild() != <strong class="jxr_keyword">null</strong> &amp;&amp; getProject().getBuild().getPlugins() != <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>              &amp;&amp; !getProject().getBuild().getPlugins().isEmpty();
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>      }
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment">     * generates an empty report in case there are no sources to generate a report with</em>
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment">     *</em>
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">     * @param locale the locale to generate the report for.</em>
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment">     * @param sink   the report formatting tool</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment">     * @param sink the report formatting tool</em>
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doGenerateReport( Locale locale, Sink sink )
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>          <strong class="jxr_keyword">throws</strong> MavenReportException
@@ -110,65 +110,64 @@
 <a class="jxr_linenumber" name="L102" href="#L102">102</a>                 getHelper().lookupPluginsUpdates( plugins, getAllowSnapshots() );
 <a class="jxr_linenumber" name="L103" href="#L103">103</a>             Map&lt;Plugin, PluginUpdatesDetails&gt; pluginManagementUpdates =
 <a class="jxr_linenumber" name="L104" href="#L104">104</a>                 getHelper().lookupPluginsUpdates( pluginManagement, getAllowSnapshots() );
-<a class="jxr_linenumber" name="L105" href="#L105">105</a>             <a href="../../../../org/codehaus/mojo/versions/PluginUpdatesRenderer.html">PluginUpdatesRenderer</a> renderer =
-<a class="jxr_linenumber" name="L106" href="#L106">106</a>                 <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/PluginUpdatesRenderer.html">PluginUpdatesRenderer</a>( sink, getI18n(), getOutputName(), locale, pluginUpdates,
-<a class="jxr_linenumber" name="L107" href="#L107">107</a>                                            pluginManagementUpdates );
-<a class="jxr_linenumber" name="L108" href="#L108">108</a>             renderer.render();
-<a class="jxr_linenumber" name="L109" href="#L109">109</a>         }
-<a class="jxr_linenumber" name="L110" href="#L110">110</a>         <strong class="jxr_keyword">catch</strong> ( InvalidVersionSpecificationException e )
-<a class="jxr_linenumber" name="L111" href="#L111">111</a>         {
-<a class="jxr_linenumber" name="L112" href="#L112">112</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MavenReportException( e.getMessage(), e );
-<a class="jxr_linenumber" name="L113" href="#L113">113</a>         }
-<a class="jxr_linenumber" name="L114" href="#L114">114</a>         <strong class="jxr_keyword">catch</strong> ( ArtifactMetadataRetrievalException e )
-<a class="jxr_linenumber" name="L115" href="#L115">115</a>         {
-<a class="jxr_linenumber" name="L116" href="#L116">116</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MavenReportException( e.getMessage(), e );
-<a class="jxr_linenumber" name="L117" href="#L117">117</a>         }
-<a class="jxr_linenumber" name="L118" href="#L118">118</a>     }
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
-<a class="jxr_linenumber" name="L120" href="#L120">120</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">     * Returns a set of dependencies where the dependencies which are defined in the dependency management section have</em>
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">     * been filtered out.</em>
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     * @param plugins          The set of dependencies.</em>
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">     * @param pluginManagement The set of dependencies from the dependency management section.</em>
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment">     * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency</em>
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_javadoccomment">     *         management dependencies.</em>
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L130" href="#L130">130</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Set&lt;Plugin&gt; removePluginManagment( Set&lt;Plugin&gt; plugins, Set&lt;Plugin&gt; pluginManagement )
-<a class="jxr_linenumber" name="L131" href="#L131">131</a>     {
-<a class="jxr_linenumber" name="L132" href="#L132">132</a>         Set&lt;Plugin&gt; result = <strong class="jxr_keyword">new</strong> TreeSet&lt;Plugin&gt;( <strong class="jxr_keyword">new</strong> PluginComparator() );
-<a class="jxr_linenumber" name="L133" href="#L133">133</a>         <strong class="jxr_keyword">for</strong> ( Plugin c : plugins )
-<a class="jxr_linenumber" name="L134" href="#L134">134</a>         {
-<a class="jxr_linenumber" name="L135" href="#L135">135</a>             <strong class="jxr_keyword">boolean</strong> matched = false;
-<a class="jxr_linenumber" name="L136" href="#L136">136</a>             <strong class="jxr_keyword">for</strong> ( Plugin t : pluginManagement )
-<a class="jxr_linenumber" name="L137" href="#L137">137</a>             {
-<a class="jxr_linenumber" name="L138" href="#L138">138</a>                 <strong class="jxr_keyword">if</strong> ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) &amp;&amp; StringUtils.equals( t.getArtifactId(),
-<a class="jxr_linenumber" name="L139" href="#L139">139</a>                                                                                                  c.getArtifactId() ) )
-<a class="jxr_linenumber" name="L140" href="#L140">140</a>                 {
-<a class="jxr_linenumber" name="L141" href="#L141">141</a>                     matched = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L142" href="#L142">142</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L143" href="#L143">143</a>                 }
-<a class="jxr_linenumber" name="L144" href="#L144">144</a>             }
-<a class="jxr_linenumber" name="L145" href="#L145">145</a>             <strong class="jxr_keyword">if</strong> ( !matched )
-<a class="jxr_linenumber" name="L146" href="#L146">146</a>             {
-<a class="jxr_linenumber" name="L147" href="#L147">147</a>                 result.add( c );
-<a class="jxr_linenumber" name="L148" href="#L148">148</a>             }
-<a class="jxr_linenumber" name="L149" href="#L149">149</a>         }
-<a class="jxr_linenumber" name="L150" href="#L150">150</a>         <strong class="jxr_keyword">return</strong> result;
-<a class="jxr_linenumber" name="L151" href="#L151">151</a>     }
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
-<a class="jxr_linenumber" name="L153" href="#L153">153</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">     * {@inheritDoc}</em>
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L156" href="#L156">156</a>     <strong class="jxr_keyword">public</strong> String getOutputName()
-<a class="jxr_linenumber" name="L157" href="#L157">157</a>     {
-<a class="jxr_linenumber" name="L158" href="#L158">158</a>         <strong class="jxr_keyword">return</strong> <span class="jxr_string">"plugin-updates-report"</span>;
-<a class="jxr_linenumber" name="L159" href="#L159">159</a>     }
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> }
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>             <a href="../../../../org/codehaus/mojo/versions/PluginUpdatesRenderer.html">PluginUpdatesRenderer</a> renderer = <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/PluginUpdatesRenderer.html">PluginUpdatesRenderer</a>( sink, getI18n(), getOutputName(), locale,
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>                                                                         pluginUpdates, pluginManagementUpdates );
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>             renderer.render();
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>         }
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>         <strong class="jxr_keyword">catch</strong> ( InvalidVersionSpecificationException e )
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>         {
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MavenReportException( e.getMessage(), e );
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>         }
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>         <strong class="jxr_keyword">catch</strong> ( ArtifactMetadataRetrievalException e )
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>         {
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MavenReportException( e.getMessage(), e );
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>         }
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>     }
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">     * Returns a set of dependencies where the dependencies which are defined in the dependency management section have</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">     * been filtered out.</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     * @param plugins The set of dependencies.</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     * @param pluginManagement The set of dependencies from the dependency management section.</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">     * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment">     *         management dependencies.</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Set&lt;Plugin&gt; removePluginManagment( Set&lt;Plugin&gt; plugins, Set&lt;Plugin&gt; pluginManagement )
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>     {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>         Set&lt;Plugin&gt; result = <strong class="jxr_keyword">new</strong> TreeSet&lt;Plugin&gt;( <strong class="jxr_keyword">new</strong> PluginComparator() );
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>         <strong class="jxr_keyword">for</strong> ( Plugin c : plugins )
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>         {
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>             <strong class="jxr_keyword">boolean</strong> matched = false;
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>             <strong class="jxr_keyword">for</strong> ( Plugin t : pluginManagement )
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>             {
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>                 <strong class="jxr_keyword">if</strong> ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>                     &amp;&amp; StringUtils.equals( t.getArtifactId(), c.getArtifactId() ) )
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>                 {
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>                     matched = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>                 }
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>             }
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>             <strong class="jxr_keyword">if</strong> ( !matched )
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>             {
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>                 result.add( c );
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>             }
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>         }
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>         <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>     }
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> <em class="jxr_javadoccomment">     * {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>     <strong class="jxr_keyword">public</strong> String getOutputName()
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>     {
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         <strong class="jxr_keyword">return</strong> <span class="jxr_string">"plugin-updates-report"</span>;
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>     }
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2015 <a href="http://codehaus.org">Codehaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2016 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

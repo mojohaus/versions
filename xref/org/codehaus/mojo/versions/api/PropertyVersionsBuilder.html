@@ -9,23 +9,23 @@
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> org.codehaus.mojo.versions.api;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
 <a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment">* Licensed to the Apache Software Foundation (ASF) under one</em>
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment">* or more contributor license agreements.  See the NOTICE file</em>
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment">* distributed with this work for additional information</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment">* regarding copyright ownership.  The ASF licenses this file</em>
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment">* to you under the Apache License, Version 2.0 (the</em>
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment">* "License"); you may not use this file except in compliance</em>
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment">* with the License.  You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment">*</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment">*  <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment">*</em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment">* Unless required by applicable law or agreed to in writing,</em>
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment">* software distributed under the License is distributed on an</em>
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment">* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</em>
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment">* KIND, either express or implied.  See the License for the</em>
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment">* specific language governing permissions and limitations</em>
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment">* under the License.</em>
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed to the Apache Software Foundation (ASF) under one</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * or more contributor license agreements.  See the NOTICE file</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * distributed with this work for additional information</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * regarding copyright ownership.  The ASF licenses this file</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * to you under the Apache License, Version 2.0 (the</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * KIND, either express or implied.  See the License for the</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * specific language governing permissions and limitations</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * under the License.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> org.apache.maven.artifact.Artifact;
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -63,8 +63,8 @@
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment">     * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.</em>
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment">     *</em>
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment">     * @param profileId The profileId.</em>
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">     * @param name      The property name.</em>
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">     * @param helper    The {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper}.</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">     * @param name The property name.</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">     * @param helper The {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper}.</em>
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>      <strong class="jxr_keyword">public</strong> <a href="../../../../../org/codehaus/mojo/versions/api/PropertyVersionsBuilder.html">PropertyVersionsBuilder</a>( String profileId, String name, VersionsHelper helper )
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>      {
@@ -254,24 +254,21 @@
 <a class="jxr_linenumber" name="L246" href="#L246">246</a>                 <strong class="jxr_keyword">int</strong> alt = comparators[i].compare( v1, v2 );
 <a class="jxr_linenumber" name="L247" href="#L247">247</a>                 <strong class="jxr_keyword">if</strong> ( result != alt &amp;&amp; ( result &gt;= 0 &amp;&amp; alt &lt; 0 ) || ( result &lt;= 0 &amp;&amp; alt &gt; 0 ) )
 <a class="jxr_linenumber" name="L248" href="#L248">248</a>                 {
-<a class="jxr_linenumber" name="L249" href="#L249">249</a>                     <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException( <span class="jxr_string">"Property "</span> + name + <span class="jxr_string">" is associated with multiple artifacts"</span> +
-<a class="jxr_linenumber" name="L250" href="#L250">250</a>                                                          <span class="jxr_string">" and these artifacts use different version sorting rules and these rules are effectively"</span>
-<a class="jxr_linenumber" name="L251" href="#L251">251</a>                                                          +
-<a class="jxr_linenumber" name="L252" href="#L252">252</a>                                                          <span class="jxr_string">" incompatible for the two of versions being compared.\nFirst rule says compare(\&quot;"</span>
-<a class="jxr_linenumber" name="L253" href="#L253">253</a>                                                          + v1 +
-<a class="jxr_linenumber" name="L254" href="#L254">254</a>                                                          <span class="jxr_string">"\&quot;, \&quot;"</span> + v2 + <span class="jxr_string">"\&quot;) = "</span> + result
-<a class="jxr_linenumber" name="L255" href="#L255">255</a>                                                          + <span class="jxr_string">"\nSecond rule says compare(\&quot;"</span> + v1 + <span class="jxr_string">"\&quot;, \&quot;"</span> + v2 +
-<a class="jxr_linenumber" name="L256" href="#L256">256</a>                                                          <span class="jxr_string">"\&quot;) = "</span> + alt );
-<a class="jxr_linenumber" name="L257" href="#L257">257</a>                 }
-<a class="jxr_linenumber" name="L258" href="#L258">258</a>             }
-<a class="jxr_linenumber" name="L259" href="#L259">259</a>             <strong class="jxr_keyword">return</strong> result;
-<a class="jxr_linenumber" name="L260" href="#L260">260</a>         }
-<a class="jxr_linenumber" name="L261" href="#L261">261</a> 
-<a class="jxr_linenumber" name="L262" href="#L262">262</a>     }
-<a class="jxr_linenumber" name="L263" href="#L263">263</a> 
-<a class="jxr_linenumber" name="L264" href="#L264">264</a> }
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>                     <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException( <span class="jxr_string">"Property "</span> + name + <span class="jxr_string">" is associated with multiple artifacts"</span>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>                         + <span class="jxr_string">" and these artifacts use different version sorting rules and these rules are effectively"</span>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>                         + <span class="jxr_string">" incompatible for the two of versions being compared.\nFirst rule says compare(\&quot;"</span> + v1
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>                         + <span class="jxr_string">"\&quot;, \&quot;"</span> + v2 + <span class="jxr_string">"\&quot;) = "</span> + result + <span class="jxr_string">"\nSecond rule says compare(\&quot;"</span> + v1 + <span class="jxr_string">"\&quot;, \&quot;"</span> + v2
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>                         + <span class="jxr_string">"\&quot;) = "</span> + alt );
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>                 }
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>             }
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>             <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>         }
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> 
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>     }
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2015 <a href="http://codehaus.org">Codehaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2016 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

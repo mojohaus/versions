@@ -204,8 +204,8 @@
 <a class="jxr_linenumber" name="L196" href="#L196">196</a>         {
 <a class="jxr_linenumber" name="L197" href="#L197">197</a>             <strong class="jxr_keyword">return</strong> qualifier.substring( 0, 8 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 8 ) );
 <a class="jxr_linenumber" name="L198" href="#L198">198</a>         }
-<a class="jxr_linenumber" name="L199" href="#L199">199</a>         <strong class="jxr_keyword">if</strong> ( qualifier.toLowerCase().startsWith( <span class="jxr_string">"cr"</span> ) || qualifier.toLowerCase().startsWith( <span class="jxr_string">"rc"</span> ) ||
-<a class="jxr_linenumber" name="L200" href="#L200">200</a>             qualifier.toLowerCase().startsWith( <span class="jxr_string">"sp"</span> ) )
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>         <strong class="jxr_keyword">if</strong> ( qualifier.toLowerCase().startsWith( <span class="jxr_string">"cr"</span> ) || qualifier.toLowerCase().startsWith( <span class="jxr_string">"rc"</span> )
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>             || qualifier.toLowerCase().startsWith( <span class="jxr_string">"sp"</span> ) )
 <a class="jxr_linenumber" name="L201" href="#L201">201</a>         {
 <a class="jxr_linenumber" name="L202" href="#L202">202</a>             <strong class="jxr_keyword">return</strong> qualifier.substring( 0, 2 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 2 ) );
 <a class="jxr_linenumber" name="L203" href="#L203">203</a>         }
@@ -214,6 +214,6 @@
 <a class="jxr_linenumber" name="L206" href="#L206">206</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2015 <a href="http://codehaus.org">Codehaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2016 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

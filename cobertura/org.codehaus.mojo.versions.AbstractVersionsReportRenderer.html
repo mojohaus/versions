@@ -228,9 +228,9 @@
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">boolean</span> equals( ArtifactVersion v1, ArtifactVersion v2 )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;113</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;114</td>  <td class="nbHitsUncovered"><a title="Line 114: Conditional coverage 0% (0/12) [each condition: 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 114: Conditional coverage 0% (0/12) [each condition: 0%, 0%, 0%, 0%, 0%, 0%].">        <span class="keyword">return</span> v1 == v2 || ( v1 != <span class="keyword">null</span> &amp;&amp; v1.equals( v2 ) ) || ( v1 != <span class="keyword">null</span> &amp;&amp; v2 != <span class="keyword">null</span> &amp;&amp; v1.toString().equals(</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;114</td>  <td class="nbHitsUncovered"><a title="Line 114: Conditional coverage 0% (0/12) [each condition: 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 114: Conditional coverage 0% (0/12) [each condition: 0%, 0%, 0%, 0%, 0%, 0%].">        <span class="keyword">return</span> v1 == v2 || ( v1 != <span class="keyword">null</span> &amp;&amp; v1.equals( v2 ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;115</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            v2.toString() ) );</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;            || ( v1 != <span class="keyword">null</span> &amp;&amp; v2 != <span class="keyword">null</span> &amp;&amp; v1.toString().equals( v2.toString() ) );</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;116</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;117</td>  <td class="nbHits">&nbsp;</td>
@@ -521,7 +521,7 @@
 <tr>  <td class="numLineCover">&nbsp;318</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">final</span> SinkEventAttributes cellAttributes = <span class="keyword">new</span> SinkEventAttributeSet();</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;319</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="string">"80%"</span> );</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;320</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;321</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRows( <span class="keyword">new</span> <span class="keyword">int</span>[]{ Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, <span class="keyword">false</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;321</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRows( <span class="keyword">new</span> <span class="keyword">int</span>[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, <span class="keyword">false</span> );</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;322</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;323</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;324</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.status"</span> ) );</span></pre></td></tr>
@@ -651,574 +651,564 @@
 <tr>  <td class="numLineCover">&nbsp;428</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.lineBreak();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;429</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;430</td>  <td class="nbHitsUncovered"><a title="Line 430: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 430: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">                <span class="keyword">boolean</span> bold =</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;430</td>  <td class="nbHitsUncovered"><a title="Line 430: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 430: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">                <span class="keyword">boolean</span> bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;431</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) || equals( versions[i],</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;432</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                                                                                            details.getOldestUpdate(</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;433</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                                                                                                UpdateScope.INCREMENTAL ) )</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;434</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) ) || equals(</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;435</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        versions[i], details.getOldestUpdate( UpdateScope.MINOR ) ) || equals( versions[i],</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;436</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                                                                               details.getNewestUpdate(</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;437</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                                                                                   UpdateScope.MINOR ) )</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MAJOR ) );</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;437</td>  <td class="nbHitsUncovered"><a title="Line 437: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 437: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( bold )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;438</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) || equals( versions[i],</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;439</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                                                                                          details.getNewestUpdate(</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;439</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeBold();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;440</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                                                                                                              UpdateScope.MAJOR ) );</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;441</td>  <td class="nbHitsUncovered"><a title="Line 441: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 441: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( bold )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;442</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;443</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeBold();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;444</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;445</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.text( versions[i].toString() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;446</td>  <td class="nbHitsUncovered"><a title="Line 446: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 446: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( bold )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;447</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;441</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.text( versions[i].toString() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;442</td>  <td class="nbHitsUncovered"><a title="Line 442: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 442: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( bold )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;443</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;448</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeBold_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;449</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.nonBreakingSpace();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;450</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeItalic();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;451</td>  <td class="nbHitsUncovered"><a title="Line 451: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 451: Conditional coverage 0% (0/2).">                    <span class="keyword">if</span> ( equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;444</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeBold_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;445</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.nonBreakingSpace();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;446</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeItalic();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;447</td>  <td class="nbHitsUncovered"><a title="Line 447: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 447: Conditional coverage 0% (0/2).">                    <span class="keyword">if</span> ( equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;448</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;449</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextVersion"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;450</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;451</td>  <td class="nbHitsUncovered"><a title="Line 451: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 451: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;452</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;453</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextVersion"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;453</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextIncremental"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;454</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;455</td>  <td class="nbHitsUncovered"><a title="Line 455: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 455: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;455</td>  <td class="nbHitsUncovered"><a title="Line 455: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 455: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;456</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;457</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextIncremental"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;457</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestIncremental"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;458</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;459</td>  <td class="nbHitsUncovered"><a title="Line 459: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 459: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;459</td>  <td class="nbHitsUncovered"><a title="Line 459: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 459: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;460</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;461</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestIncremental"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;461</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextMinor"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;462</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;463</td>  <td class="nbHitsUncovered"><a title="Line 463: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 463: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;463</td>  <td class="nbHitsUncovered"><a title="Line 463: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 463: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;464</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;465</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextMinor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;465</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestMinor"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;466</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;467</td>  <td class="nbHitsUncovered"><a title="Line 467: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 467: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;467</td>  <td class="nbHitsUncovered"><a title="Line 467: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 467: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;468</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;469</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestMinor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;469</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextMajor"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;470</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;471</td>  <td class="nbHitsUncovered"><a title="Line 471: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 471: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;471</td>  <td class="nbHitsUncovered"><a title="Line 471: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 471: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getNewestUpdate( UpdateScope.MAJOR ) ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;472</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;473</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextMajor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;473</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestMajor"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;474</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;475</td>  <td class="nbHitsUncovered"><a title="Line 475: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 475: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( versions[i], details.getNewestUpdate( UpdateScope.MAJOR ) ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;476</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;477</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestMajor"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;478</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;479</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;475</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;480</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeItalic_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;481</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;476</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeItalic_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;477</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;482</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;478</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;483</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;484</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;485</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;479</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;480</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;481</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;486</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRows_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;487</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;488</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;489</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;482</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRows_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;483</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;484</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;485</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;490</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;486</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">void</span> renderDependencySummaryTable( Map map )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;487</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;488</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderDependencySummaryTable( map, <span class="keyword">true</span>, <span class="keyword">true</span>, <span class="keyword">true</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;489</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;490</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;491</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;492</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderDependencySummaryTable( map, <span class="keyword">true</span>, <span class="keyword">true</span>, <span class="keyword">true</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;493</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;494</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;495</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">void</span> renderDependencySummaryTable( Map&lt;Dependency, ArtifactVersions&gt; map, <span class="keyword">boolean</span> includeScope,</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;496</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;492</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                                 <span class="keyword">boolean</span> includeClassifier, <span class="keyword">boolean</span> includeType )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;493</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;494</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;495</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;496</td>  <td class="nbHitsUncovered"><a title="Line 496: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 496: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( Map.Entry&lt;Dependency, ArtifactVersions&gt; entry : map.entrySet() )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;497</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;498</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;499</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;500</td>  <td class="nbHitsUncovered"><a title="Line 500: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 500: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( Map.Entry&lt;Dependency, ArtifactVersions&gt; entry : map.entrySet() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;501</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;502</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderDependencySummaryTableRow( entry.getKey(), entry.getValue(), includeScope, includeClassifier,</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;503</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;498</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderDependencySummaryTableRow( entry.getKey(), entry.getValue(), includeScope, includeClassifier,</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;499</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                             includeType );</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;504</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;505</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;506</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;507</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;508</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;500</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;501</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderDependencySummaryTableHeader( includeScope, includeClassifier, includeType );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;502</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;503</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;504</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;509</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;505</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">void</span> renderPropertySummaryTable( Map&lt;Property, PropertyVersions&gt; map )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;506</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;507</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;508</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderPropertySummaryTableHeader();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;509</td>  <td class="nbHitsUncovered"><a title="Line 509: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 509: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( Map.Entry&lt;Property, PropertyVersions&gt; entry : map.entrySet() )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;510</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;511</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;512</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderPropertySummaryTableHeader();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;513</td>  <td class="nbHitsUncovered"><a title="Line 513: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 513: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( Map.Entry&lt;Property, PropertyVersions&gt; entry : map.entrySet() )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;514</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;515</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderPropertySummaryTableRow( entry.getKey(), entry.getValue() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;516</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;517</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderPropertySummaryTableHeader();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;518</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;519</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;520</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;511</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderPropertySummaryTableRow( entry.getKey(), entry.getValue() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;512</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;513</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        renderPropertySummaryTableHeader();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;514</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;515</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;516</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;521</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;517</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">void</span> renderPropertySummaryTableRow( Property property, PropertyVersions versions )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;522</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;518</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;523</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;524</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;525</td>  <td class="nbHitsUncovered"><a title="Line 525: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 525: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getAllUpdates( UpdateScope.ANY ).length == 0 )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;519</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;520</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;521</td>  <td class="nbHitsUncovered"><a title="Line 521: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 521: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getAllUpdates( UpdateScope.ANY ).length == 0 )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;522</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;523</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderSuccessIcon();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;524</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;525</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">else</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;526</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;527</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderSuccessIcon();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;527</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;528</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;529</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        <span class="keyword">else</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;530</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;531</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;532</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;533</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;534</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;535</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( <span class="string">"${"</span> + property.getName() + <span class="string">"}"</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;536</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;529</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;530</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;531</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( <span class="string">"${"</span> + property.getName() + <span class="string">"}"</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;532</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;533</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;534</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( versions.getCurrentVersion().toString() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;535</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;536</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;537</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;538</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( versions.getCurrentVersion().toString() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;539</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;540</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;541</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;542</td>  <td class="nbHitsUncovered"><a title="Line 542: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 542: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;538</td>  <td class="nbHitsUncovered"><a title="Line 538: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 538: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;539</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;540</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;541</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;542</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold_();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;543</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;544</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;545</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;546</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;547</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;548</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;549</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;544</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;545</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;550</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;551</td>  <td class="nbHitsUncovered"><a title="Line 551: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 551: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.INCREMENTAL ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;546</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;547</td>  <td class="nbHitsUncovered"><a title="Line 547: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 547: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.INCREMENTAL ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;548</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;549</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;550</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( versions.getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;551</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold_();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;552</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;553</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;554</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( versions.getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;555</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;556</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;557</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;558</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;553</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;554</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;559</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;560</td>  <td class="nbHitsUncovered"><a title="Line 560: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 560: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.MINOR ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;555</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;556</td>  <td class="nbHitsUncovered"><a title="Line 556: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 556: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.MINOR ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;557</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;558</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;559</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( versions.getOldestUpdate( UpdateScope.MINOR ).toString() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;560</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold_();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;561</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;562</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;563</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( versions.getOldestUpdate( UpdateScope.MINOR ).toString() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;564</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;565</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;566</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;567</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;562</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;563</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;568</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;569</td>  <td class="nbHitsUncovered"><a title="Line 569: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 569: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.MAJOR ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;564</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;565</td>  <td class="nbHitsUncovered"><a title="Line 565: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 565: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.MAJOR ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;566</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;567</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;568</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( versions.getOldestUpdate( UpdateScope.MAJOR ).toString() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;569</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold_();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;570</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;571</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;572</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( versions.getOldestUpdate( UpdateScope.MAJOR ).toString() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;573</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            safeBold_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;574</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;575</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;571</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;572</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;573</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;574</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;575</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;576</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;577</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;578</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;579</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;580</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">void</span> renderPropertySummaryTableHeader()</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;581</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;577</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;582</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;583</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;584</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.status"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;585</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;586</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;587</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.property"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;588</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;589</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;590</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.currentVersion"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;591</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;592</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;593</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.nextVersion"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;594</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;595</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;596</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.nextIncremental"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;597</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;598</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;599</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.nextMinor"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;600</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;601</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;602</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.nextMajor"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;603</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;604</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;605</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;606</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;578</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;579</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;580</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.status"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;581</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;582</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;583</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.property"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;584</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;585</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;586</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.currentVersion"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;587</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;588</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;589</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.nextVersion"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;590</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;591</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;592</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.nextIncremental"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;593</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;594</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;595</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.nextMinor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;596</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;597</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;598</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.nextMajor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;599</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;600</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;601</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;602</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;607</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;603</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">void</span> renderPropertyDetailTable( Property property, PropertyVersions versions )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;608</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;604</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;609</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">final</span> SinkEventAttributes headerAttributes = <span class="keyword">new</span> SinkEventAttributeSet();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;610</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="string">"20%"</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;611</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">final</span> SinkEventAttributes cellAttributes = <span class="keyword">new</span> SinkEventAttributeSet();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;612</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="string">"80%"</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;613</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;614</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRows( <span class="keyword">new</span> <span class="keyword">int</span>[]{ Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, <span class="keyword">false</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;615</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;616</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;617</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.status"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;618</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;619</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;620</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        VersionRange range = <span class="keyword">null</span>;</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;621</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        ArtifactVersion[] artifactVersions = versions.getAllUpdates( UpdateScope.ANY );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;622</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set&lt;String&gt; rangeVersions = getVersionsInRange( property, versions, artifactVersions );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;623</td>  <td class="nbHitsUncovered"><a title="Line 623: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 623: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;605</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">final</span> SinkEventAttributes headerAttributes = <span class="keyword">new</span> SinkEventAttributeSet();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;606</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="string">"20%"</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;607</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">final</span> SinkEventAttributes cellAttributes = <span class="keyword">new</span> SinkEventAttributeSet();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;608</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="string">"80%"</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;609</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;610</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRows( <span class="keyword">new</span> <span class="keyword">int</span>[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, <span class="keyword">false</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;611</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;612</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;613</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.status"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;614</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;615</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;616</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        VersionRange range = <span class="keyword">null</span>;</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;617</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        ArtifactVersion[] artifactVersions = versions.getAllUpdates( UpdateScope.ANY );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;618</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set&lt;String&gt; rangeVersions = getVersionsInRange( property, versions, artifactVersions );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;619</td>  <td class="nbHitsUncovered"><a title="Line 619: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 619: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;620</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;621</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;622</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;623</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.otherUpdatesAvailable"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;624</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;625</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;626</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;627</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.otherUpdatesAvailable"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;628</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;629</td>  <td class="nbHitsUncovered"><a title="Line 629: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 629: Conditional coverage 0% (0/2).">        <span class="keyword">else</span> <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.INCREMENTAL ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;625</td>  <td class="nbHitsUncovered"><a title="Line 625: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 625: Conditional coverage 0% (0/2).">        <span class="keyword">else</span> <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.INCREMENTAL ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;626</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;627</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;628</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;629</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.incrementalUpdatesAvailable"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;630</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;631</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;632</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;633</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.incrementalUpdatesAvailable"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;634</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;635</td>  <td class="nbHitsUncovered"><a title="Line 635: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 635: Conditional coverage 0% (0/2).">        <span class="keyword">else</span> <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.MINOR ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;631</td>  <td class="nbHitsUncovered"><a title="Line 631: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 631: Conditional coverage 0% (0/2).">        <span class="keyword">else</span> <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.MINOR ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;632</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;633</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;634</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;635</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.minorUpdatesAvailable"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;636</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;637</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;638</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;639</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.minorUpdatesAvailable"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;640</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;641</td>  <td class="nbHitsUncovered"><a title="Line 641: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 641: Conditional coverage 0% (0/2).">        <span class="keyword">else</span> <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.MAJOR ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;637</td>  <td class="nbHitsUncovered"><a title="Line 637: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 637: Conditional coverage 0% (0/2).">        <span class="keyword">else</span> <span class="keyword">if</span> ( versions.getOldestUpdate( UpdateScope.MAJOR ) != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;638</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;639</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;640</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;641</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.majorUpdatesAvailable"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;642</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;643</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderWarningIcon();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;644</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;645</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.majorUpdatesAvailable"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;646</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;647</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;643</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">else</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;644</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;645</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderSuccessIcon();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;646</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;647</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.noUpdatesAvailable"</span> ) );</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;648</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;649</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            renderSuccessIcon();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;650</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.nonBreakingSpace();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;651</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.noUpdatesAvailable"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;652</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;653</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;654</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;655</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;656</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;657</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.property"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;658</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;659</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;660</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( <span class="string">"${"</span> + property.getName() + <span class="string">"}"</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;661</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;662</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;663</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;649</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;650</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;651</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;652</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;653</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.property"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;654</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;655</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;656</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( <span class="string">"${"</span> + property.getName() + <span class="string">"}"</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;657</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;658</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;659</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;664</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;665</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;666</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.associations"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;667</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;668</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;669</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        ArtifactAssociation[] associations = versions.getAssociations();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;670</td>  <td class="nbHitsUncovered"><a title="Line 670: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 670: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( <span class="keyword">int</span> i = 0; i &lt; associations.length; i++ )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;660</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;661</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;662</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.associations"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;663</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;664</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;665</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        ArtifactAssociation[] associations = versions.getAssociations();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;666</td>  <td class="nbHitsUncovered"><a title="Line 666: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 666: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( <span class="keyword">int</span> i = 0; i &lt; associations.length; i++ )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;667</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;668</td>  <td class="nbHitsUncovered"><a title="Line 668: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 668: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( i &gt; 0 )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;669</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;670</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.lineBreak();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;671</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;672</td>  <td class="nbHitsUncovered"><a title="Line 672: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 672: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( i &gt; 0 )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;673</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;674</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.lineBreak();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;675</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;676</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( ArtifactUtils.versionlessKey( associations[i].getArtifact() ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;677</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;672</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( ArtifactUtils.versionlessKey( associations[i].getArtifact() ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;673</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;678</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;679</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;680</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;674</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;675</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;676</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;681</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;682</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;683</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.currentVersion"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;684</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;685</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;686</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( versions.getCurrentVersion().toString() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;687</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;688</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;689</td>  <td class="nbHitsUncovered"><a title="Line 689: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 689: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( artifactVersions.length &gt; 0 )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;690</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;677</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;678</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;679</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.currentVersion"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;680</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;681</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;682</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( versions.getCurrentVersion().toString() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;683</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;684</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;685</td>  <td class="nbHitsUncovered"><a title="Line 685: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 685: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( artifactVersions.length &gt; 0 )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;686</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;691</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;692</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;693</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.updateVersions"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;694</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;695</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;696</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">boolean</span> someNotAllowed = <span class="keyword">false</span>;</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;697</td>  <td class="nbHitsUncovered"><a title="Line 697: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 697: Conditional coverage 0% (0/2).">            <span class="keyword">for</span> ( <span class="keyword">int</span> i = 0; i &lt; artifactVersions.length; i++ )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;698</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;687</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;688</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;689</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.text( getText( <span class="string">"report.updateVersions"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;690</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;691</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;692</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">boolean</span> someNotAllowed = <span class="keyword">false</span>;</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;693</td>  <td class="nbHitsUncovered"><a title="Line 693: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 693: Conditional coverage 0% (0/2).">            <span class="keyword">for</span> ( <span class="keyword">int</span> i = 0; i &lt; artifactVersions.length; i++ )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;694</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;699</td>  <td class="nbHitsUncovered"><a title="Line 699: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 699: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( i &gt; 0 )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;700</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;695</td>  <td class="nbHitsUncovered"><a title="Line 695: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 695: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( i &gt; 0 )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;696</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;701</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.lineBreak();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;702</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;697</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.lineBreak();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;698</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;703</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                <span class="keyword">boolean</span> allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;704</td>  <td class="nbHitsUncovered"><a title="Line 704: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 704: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">                <span class="keyword">boolean</span> bold =</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;699</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                <span class="keyword">boolean</span> allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;700</td>  <td class="nbHitsUncovered"><a title="Line 700: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 700: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">                <span class="keyword">boolean</span> bold = equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;701</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;702</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;703</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) )</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;704</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;705</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) || equals(</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) )</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;706</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) ) || equals(</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;707</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) ) || equals(</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;707</td>  <td class="nbHitsUncovered"><a title="Line 707: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 707: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( !allowed )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;708</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) ) || equals(</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;709</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) ) || equals(</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;710</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) ) || equals(</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;709</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.text( <span class="string">"* "</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;710</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    someNotAllowed = <span class="keyword">true</span>;</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;711</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;712</td>  <td class="nbHitsUncovered"><a title="Line 712: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 712: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( !allowed )</a></span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;712</td>  <td class="nbHitsUncovered"><a title="Line 712: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 712: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">                <span class="keyword">if</span> ( allowed &amp;&amp; bold )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;713</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;714</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.text( <span class="string">"* "</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;715</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    someNotAllowed = <span class="keyword">true</span>;</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;716</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;714</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeBold();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;715</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;717</td>  <td class="nbHitsUncovered"><a title="Line 717: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 717: Conditional coverage 0% (0/4) [each condition: 0%, 0%].">                <span class="keyword">if</span> ( allowed &amp;&amp; bold )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;716</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.text( artifactVersions[i].toString() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;717</td>  <td class="nbHitsUncovered"><a title="Line 717: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 717: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( bold )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;718</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;719</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeBold();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;719</td>  <td class="nbHitsUncovered"><a title="Line 719: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 719: Conditional coverage 0% (0/2).">                    <span class="keyword">if</span> ( allowed )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;720</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;721</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.text( artifactVersions[i].toString() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;722</td>  <td class="nbHitsUncovered"><a title="Line 722: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 722: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( bold )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;723</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;724</td>  <td class="nbHitsUncovered"><a title="Line 724: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 724: Conditional coverage 0% (0/2).">                    <span class="keyword">if</span> ( allowed )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;725</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;726</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        safeBold_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;727</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;721</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        safeBold_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;722</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;728</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.nonBreakingSpace();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;729</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeItalic();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;730</td>  <td class="nbHitsUncovered"><a title="Line 730: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 730: Conditional coverage 0% (0/2).">                    <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;731</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;723</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    sink.nonBreakingSpace();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;724</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeItalic();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;725</td>  <td class="nbHitsUncovered"><a title="Line 725: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 725: Conditional coverage 0% (0/2).">                    <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;726</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;732</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextVersion"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;733</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;727</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextVersion"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;728</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;734</td>  <td class="nbHitsUncovered"><a title="Line 734: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 734: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;735</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;729</td>  <td class="nbHitsUncovered"><a title="Line 729: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 729: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;730</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;736</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextIncremental"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;737</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;731</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextIncremental"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;732</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;738</td>  <td class="nbHitsUncovered"><a title="Line 738: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 738: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;739</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;733</td>  <td class="nbHitsUncovered"><a title="Line 733: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 733: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;734</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;740</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestIncremental"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;741</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;735</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestIncremental"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;736</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;742</td>  <td class="nbHitsUncovered"><a title="Line 742: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 742: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;743</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;737</td>  <td class="nbHitsUncovered"><a title="Line 737: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 737: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;738</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;744</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextMinor"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;745</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;739</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextMinor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;740</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;746</td>  <td class="nbHitsUncovered"><a title="Line 746: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 746: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;747</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;741</td>  <td class="nbHitsUncovered"><a title="Line 741: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 741: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;742</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;748</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestMinor"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;749</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;743</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestMinor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;744</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;750</td>  <td class="nbHitsUncovered"><a title="Line 750: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 750: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;751</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;745</td>  <td class="nbHitsUncovered"><a title="Line 745: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 745: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;746</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;752</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextMajor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;747</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.nextMajor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;748</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;749</td>  <td class="nbHitsUncovered"><a title="Line 749: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 749: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) ) )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;750</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;751</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestMajor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;752</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;753</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;754</td>  <td class="nbHitsUncovered"><a title="Line 754: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 754: Conditional coverage 0% (0/2).">                    <span class="keyword">else</span> <span class="keyword">if</span> ( equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) ) )</a></span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;754</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeItalic_();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;755</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;756</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        sink.text( getText( <span class="string">"report.latestMajor"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;757</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;758</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;759</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    safeItalic_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;760</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;761</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;756</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;762</td>  <td class="nbHitsUncovered"><a title="Line 762: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 762: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( someNotAllowed )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;763</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;757</td>  <td class="nbHitsUncovered"><a title="Line 757: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 757: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( someNotAllowed )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;758</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;764</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.lineBreak();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;765</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.lineBreak();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;766</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.text( <span class="string">"* "</span> );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;767</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                safeItalic();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;768</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.text( getText( <span class="string">"report.excludedVersion"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;769</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                safeItalic_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;770</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;759</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.lineBreak();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;760</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.lineBreak();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;761</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.text( <span class="string">"* "</span> );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;762</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                safeItalic();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;763</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                sink.text( getText( <span class="string">"report.excludedVersion"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;764</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                safeItalic_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;765</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;771</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;772</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;773</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;766</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;767</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;768</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;774</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;775</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;776</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.versionRange"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;777</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;778</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;779</td>  <td class="nbHitsUncovered"><a title="Line 779: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 779: Conditional coverage 0% (0/2).">        sink.text( StringUtils.isEmpty( property.getVersion() ) ? <span class="string">"[,)"</span> : property.getVersion() );</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;780</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;781</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;782</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;783</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;784</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.autoLinkDependencies"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;785</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;786</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;787</td>  <td class="nbHitsUncovered"><a title="Line 787: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 787: Conditional coverage 0% (0/2).">        sink.text( property.isAutoLinkDependencies() ? getText( <span class="string">"report.yes"</span> ) : getText( <span class="string">"report.no"</span> ) );</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;788</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;789</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;790</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;791</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;792</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.banSnapshots"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;793</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;794</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;795</td>  <td class="nbHitsUncovered"><a title="Line 795: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 795: Conditional coverage 0% (0/2).">        sink.text( property.isBanSnapshots() ? getText( <span class="string">"report.yes"</span> ) : getText( <span class="string">"report.no"</span> ) );</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;796</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;797</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;798</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;799</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;800</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.searchReactor"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;801</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;802</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;803</td>  <td class="nbHitsUncovered"><a title="Line 803: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 803: Conditional coverage 0% (0/2).">        sink.text( property.isSearchReactor() ? getText( <span class="string">"report.yes"</span> ) : getText( <span class="string">"report.no"</span> ) );</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;804</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;805</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;806</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;807</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;808</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.preferReactor"</span> ) );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;809</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;810</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;811</td>  <td class="nbHitsUncovered"><a title="Line 811: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 811: Conditional coverage 0% (0/2).">        sink.text( property.isPreferReactor() ? getText( <span class="string">"report.yes"</span> ) : getText( <span class="string">"report.no"</span> ) );</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;812</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;813</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;769</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;770</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;771</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.versionRange"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;772</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;773</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;774</td>  <td class="nbHitsUncovered"><a title="Line 774: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 774: Conditional coverage 0% (0/2).">        sink.text( StringUtils.isEmpty( property.getVersion() ) ? <span class="string">"[,)"</span> : property.getVersion() );</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;775</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;776</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;777</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;778</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;779</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.autoLinkDependencies"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;780</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;781</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;782</td>  <td class="nbHitsUncovered"><a title="Line 782: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 782: Conditional coverage 0% (0/2).">        sink.text( property.isAutoLinkDependencies() ? getText( <span class="string">"report.yes"</span> ) : getText( <span class="string">"report.no"</span> ) );</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;783</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;784</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;785</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;786</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;787</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.banSnapshots"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;788</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;789</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;790</td>  <td class="nbHitsUncovered"><a title="Line 790: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 790: Conditional coverage 0% (0/2).">        sink.text( property.isBanSnapshots() ? getText( <span class="string">"report.yes"</span> ) : getText( <span class="string">"report.no"</span> ) );</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;791</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;792</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;793</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;794</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;795</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.searchReactor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;796</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;797</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;798</td>  <td class="nbHitsUncovered"><a title="Line 798: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 798: Conditional coverage 0% (0/2).">        sink.text( property.isSearchReactor() ? getText( <span class="string">"report.yes"</span> ) : getText( <span class="string">"report.no"</span> ) );</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;799</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;800</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;801</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;802</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell( headerAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;803</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.text( getText( <span class="string">"report.preferReactor"</span> ) );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;804</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableHeaderCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;805</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell( cellAttributes );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;806</td>  <td class="nbHitsUncovered"><a title="Line 806: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 806: Conditional coverage 0% (0/2).">        sink.text( property.isPreferReactor() ? getText( <span class="string">"report.yes"</span> ) : getText( <span class="string">"report.no"</span> ) );</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;807</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableCell_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;808</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRow_();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;809</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;810</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRows_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;811</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table_();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;812</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;813</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;814</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;815</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.tableRows_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;816</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        sink.table_();</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;817</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;818</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;819</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">private</span> Set&lt;String&gt; getVersionsInRange( Property property, PropertyVersions versions,</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;820</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;815</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                            ArtifactVersion[] artifactVersions )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;821</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;816</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;822</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;817</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        VersionRange range;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;823</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set&lt;String&gt; rangeVersions = <span class="keyword">new</span> HashSet&lt;String&gt;();</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;824</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;818</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set&lt;String&gt; rangeVersions = <span class="keyword">new</span> HashSet&lt;String&gt;();</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;819</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        ArtifactVersion[] tmp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;825</td>  <td class="nbHitsUncovered"><a title="Line 825: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 825: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( property.getVersion() != <span class="keyword">null</span> )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;826</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;820</td>  <td class="nbHitsUncovered"><a title="Line 820: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 820: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( property.getVersion() != <span class="keyword">null</span> )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;821</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;827</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;822</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            <span class="keyword">try</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;823</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;824</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                range = VersionRange.createFromVersionSpec( property.getVersion() );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;825</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                tmp = versions.getAllUpdates( range );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;826</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;827</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">catch</span> ( InvalidVersionSpecificationException e )</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;828</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;829</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                range = VersionRange.createFromVersionSpec( property.getVersion() );</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;830</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                tmp = versions.getAllUpdates( range );</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;829</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                tmp = artifactVersions;</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;830</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            }</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;831</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;832</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            <span class="keyword">catch</span> ( InvalidVersionSpecificationException e )</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;833</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;834</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                tmp = artifactVersions;</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;835</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;836</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;837</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;832</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">else</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;838</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;833</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;839</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            tmp = artifactVersions;</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;840</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;834</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            tmp = artifactVersions;</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;835</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;841</td>  <td class="nbHitsUncovered"><a title="Line 841: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 841: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( <span class="keyword">int</span> i = 0; i &lt; tmp.length; i++ )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;842</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;836</td>  <td class="nbHitsUncovered"><a title="Line 836: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 836: Conditional coverage 0% (0/2).">        <span class="keyword">for</span> ( <span class="keyword">int</span> i = 0; i &lt; tmp.length; i++ )</a></span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;837</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;843</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            rangeVersions.add( tmp[i].toString() );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;844</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;838</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;            rangeVersions.add( tmp[i].toString() );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;839</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;845</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">return</span> rangeVersions;</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;846</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;840</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        <span class="keyword">return</span> rangeVersions;</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;841</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;847</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;842</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;848</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;843</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 5/21/15 2:14 PM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 7/22/16 11:10 PM.</div>
 </body>
 </html>

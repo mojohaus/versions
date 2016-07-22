@@ -103,7 +103,7 @@
 <tr>  <td class="numLine">&nbsp;43</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;44</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">// ------------------------------ FIELDS ------------------------------</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;    <span class="comment">// ------------------------------ FIELDS ------------------------------</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;45</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;46</td>  <td class="nbHits">&nbsp;</td>
@@ -169,7 +169,7 @@
 <tr>  <td class="numLine">&nbsp;77</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;78</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">// -------------------------- STATIC METHODS --------------------------</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;    <span class="comment">// -------------------------- STATIC METHODS --------------------------</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;79</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;80</td>  <td class="nbHits">&nbsp;</td>
@@ -183,9 +183,9 @@
 <tr>  <td class="numLine">&nbsp;84</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws MojoExecutionException when things go wrong</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;85</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws MojoFailureException   when things go wrong in a very bad way</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws MojoFailureException when things go wrong in a very bad way</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;86</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws XMLStreamException     when things go wrong with XML streaming</span></pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">     * @throws XMLStreamException when things go wrong with XML streaming</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;87</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;88</td>  <td class="nbHits">&nbsp;</td>
@@ -224,39 +224,35 @@
 <tr>  <td class="numLineCover">&nbsp;109</td>  <td class="nbHitsUncovered"><a title="Line 109: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 109: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( !( isIncluded( association.getArtifact() ) ) )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;110</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;111</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    getLog().info(</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;111</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    getLog().info( <span class="string">"Not updating the property ${"</span> + property.getName()</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;112</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                        <span class="string">"Not updating the property ${"</span> + property.getName() + <span class="string">"} because it is used by artifact "</span> +</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;                        + <span class="string">"} because it is used by artifact "</span> + association.getArtifact().toString()</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;113</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                            association.getArtifact().toString() + <span class="string">" and that artifact is not included in the list of "</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;114</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                            +</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;115</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                            <span class="string">" allowed artifacts to be updated."</span> );</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;116</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    canUpdateProperty = <span class="keyword">false</span>;</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;117</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    <span class="keyword">break</span>;</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;118</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                        + <span class="string">" and that artifact is not included in the list of "</span> + <span class="string">" allowed artifacts to be updated."</span> );</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;114</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    canUpdateProperty = <span class="keyword">false</span>;</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;115</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                    <span class="keyword">break</span>;</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;116</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;119</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;117</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;118</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;119</td>  <td class="nbHitsUncovered"><a title="Line 119: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 119: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( canUpdateProperty )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;120</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;121</td>  <td class="nbHitsUncovered"><a title="Line 121: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 121: Conditional coverage 0% (0/2).">            <span class="keyword">if</span> ( canUpdateProperty )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;122</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;123</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                updatePropertyToNewestVersion( pom, property, version, currentVersion );</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;124</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;121</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                updatePropertyToNewestVersion( pom, property, version, currentVersion );</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;122</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;            }</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;125</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;123</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;126</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;127</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;128</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        }</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;125</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;126</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;129</td>  <td class="nbHits">&nbsp;</td>
+<tr>  <td class="numLine">&nbsp;127</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 5/21/15 2:14 PM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 7/22/16 11:10 PM.</div>
 </body>
 </html>
