@@ -163,9 +163,9 @@ public abstract class AbstractVersionsUpdaterMojo
     private String rulesUri;
 
     /**
-     * Controls whether a backup pom should be created (default is true).
+     * Controls whether a backup pom should be created.
      *
-     * @parameter property="generateBackupPoms"
+     * @parameter property="generateBackupPoms" default-value="true"
      * @since 1.0-alpha-3
      */
     private Boolean generateBackupPoms;
