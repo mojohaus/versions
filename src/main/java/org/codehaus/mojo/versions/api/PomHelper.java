@@ -1395,7 +1395,7 @@ public class PomHelper
         while ( true )
         {
             final File parentDir = project.getBasedir().getParentFile();
-            if ( parentDir.isDirectory() )
+            if ( parentDir != null && parentDir.isDirectory() )
             {
                 logger.debug( "Checking to see if " + parentDir + " is an aggregator parent" );
                 File parent = new File( parentDir, "pom.xml" );
