@@ -30,6 +30,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
@@ -47,6 +48,14 @@ import java.util.TreeSet;
 public class DependencyUpdatesReport
     extends AbstractVersionsReport
 {
+
+    /**
+     * Report formats (html and/or xml).
+     * HTML by default.
+     * @parameter expression="${versions.report.formats}"
+     */
+    private String[] formats = new String[] { "html" };
+
     /**
      * {@inheritDoc}
      */
@@ -86,10 +95,25 @@ public class DependencyUpdatesReport
                 getHelper().lookupDependenciesUpdates( dependencies, false );
             Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
                 getHelper().lookupDependenciesUpdates( dependencyManagement, false );
-            DependencyUpdatesRenderer renderer =
-                new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
-                                               dependencyManagementUpdates );
-            renderer.render();
+            for (String format : formats)
+            {
+                if ("html".equals(format))
+                {
+                    DependencyUpdatesRenderer renderer = new DependencyUpdatesRenderer(sink, getI18n(), getOutputName(),
+                            locale,
+                            dependencyUpdates,
+                            dependencyManagementUpdates);
+                    renderer.render();
+
+                } else if ("xml".equals(format))
+                {
+                    String outputFile = getProject().getBuild().getDirectory() + File.separator + getOutputName()
+                            + ".xml";
+                    DependencyUpdatesXmlRenderer xmlGenerator = new DependencyUpdatesXmlRenderer(dependencyUpdates,
+                            dependencyManagementUpdates, outputFile);
+                    xmlGenerator.render();
+                }
+            }
         }
         catch ( InvalidVersionSpecificationException e )
         {

@@ -29,6 +29,7 @@ import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.io.File;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +45,14 @@ import java.util.TreeSet;
 public class PluginUpdatesReport
     extends AbstractVersionsReport
 {
+
+    /**
+     * Report formats (html and/or xml).
+     * HTML by default.
+     * @parameter
+     */
+    private String[] formats = new String[] { "html" };
+
     /**
      * {@inheritDoc}
      */
@@ -102,9 +111,22 @@ public class PluginUpdatesReport
                 getHelper().lookupPluginsUpdates( plugins, getAllowSnapshots() );
             Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates =
                 getHelper().lookupPluginsUpdates( pluginManagement, getAllowSnapshots() );
-            PluginUpdatesRenderer renderer = new PluginUpdatesRenderer( sink, getI18n(), getOutputName(), locale,
-                                                                        pluginUpdates, pluginManagementUpdates );
-            renderer.render();
+            for (String format : formats)
+            {
+                if ("html".equals(format))
+                {
+                    PluginUpdatesRenderer renderer = new PluginUpdatesRenderer(sink, getI18n(), getOutputName(), locale,
+                            pluginUpdates, pluginManagementUpdates);
+                    renderer.render();
+                } else if ("xml".equals(format))
+                {
+                    String outputFile = getProject().getBuild().getDirectory() + File.separator + getOutputName()
+                            + ".xml";
+                    PluginUpdatesXmlRenderer xmlGenerator = new PluginUpdatesXmlRenderer(pluginUpdates,
+                            pluginManagementUpdates, outputFile);
+                    xmlGenerator.render();
+                }
+            }
         }
         catch ( InvalidVersionSpecificationException e )
         {
