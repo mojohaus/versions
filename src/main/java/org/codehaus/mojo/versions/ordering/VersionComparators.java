@@ -142,12 +142,12 @@ public final class VersionComparators
         }
     }
 
-    static boolean isSnapshot( ArtifactVersion v )
+    public static boolean isSnapshot( ArtifactVersion v )
     {
         return v != null && SNAPSHOT_PATTERN.matcher( v.toString() ).find();
     }
 
-    static ArtifactVersion stripSnapshot( ArtifactVersion v )
+    public static ArtifactVersion stripSnapshot( ArtifactVersion v )
     {
         final String version = v.toString();
         final Matcher matcher = SNAPSHOT_PATTERN.matcher( version );

@@ -19,22 +19,9 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -48,6 +35,8 @@ import org.codehaus.mojo.versions.change.VersionChange;
 import org.codehaus.mojo.versions.change.VersionChanger;
 import org.codehaus.mojo.versions.change.VersionChangerFactory;
 import org.codehaus.mojo.versions.ordering.ReactorDepthComparator;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.ContextualLog;
 import org.codehaus.mojo.versions.utils.DelegatingContextualLog;
@@ -55,6 +44,18 @@ import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.StringUtils;
+
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 /**
  * Sets the current project's version and based on that change propagates that change onto any child modules as
@@ -153,7 +154,7 @@ public class SetMojo
     /**
      * Whether to remove -SNAPSHOT from the existing version. If not set will default to false.
      *
-     * @since 2.10
+     * @since 2.3
      */
     @Parameter(property = "removeSnapshot", defaultValue = "false")
     private boolean removeSnapshot;
@@ -161,10 +162,18 @@ public class SetMojo
     /**
      * Whether to add next version number and -SNAPSHOT to the existing version. If not set will default to false.
      *
-     * @since 2.10
+     * @since 2.3
      */
     @Parameter(property = "nextSnapshot", defaultValue = "false")
     private boolean nextSnapshot;
+
+    /**
+     * Version rule to use for generation the next version.
+     *
+     * @since 2.4
+     */
+    @Parameter(property = "nextVersion")
+    private String nextVersion;
 
     /**
      * The changes to module coordinates. Guarded by this.
@@ -198,7 +207,11 @@ public class SetMojo
             throw new MojoExecutionException( "Project version is inherited from parent." );
         }
 
-        if ( removeSnapshot == true && nextSnapshot == false ) {
+        if (nextSnapshot && StringUtils.isBlank(nextVersion)) {
+            nextVersion = "maven";
+        }
+
+        if ( removeSnapshot == true && StringUtils.isBlank(nextVersion) ) {
             String version = getVersion();
             String release = version;
             if (version.endsWith( SNAPSHOT)) {
@@ -208,36 +221,11 @@ public class SetMojo
             }
         }
 
-        if ( removeSnapshot == false && nextSnapshot == true )
-        {
-            boolean havingSnapshot = false;
+        if ( StringUtils.isNotBlank(nextVersion) ) {
+            VersionComparator comparator = VersionComparators.getVersionComparator(nextVersion);
             String version = getVersion();
-            String versionWithoutSnapshot = version;
-            if ( version.endsWith( SNAPSHOT ) )
-            {
-                havingSnapshot = true;
-                versionWithoutSnapshot = version.substring( 0, version.indexOf( SNAPSHOT ) );
-            }
-            LinkedList<String> numbers = new LinkedList<String>();
-            if ( versionWithoutSnapshot.contains( "." ) )
-            {
-                // Chop the version into numbers by splitting on the dot (.)
-                Collections.addAll( numbers, versionWithoutSnapshot.split( "\\." ) );
-            }
-            else
-            {
-                // The version contains no dots, assume that it is only 1 number
-                numbers.add( versionWithoutSnapshot );
-            }
-
-            int lastNumber = Integer.parseInt( numbers.removeLast() );
-            numbers.addLast( String.valueOf( lastNumber + 1 ) );
-            String nextVersion = StringUtils.join( numbers.toArray( new String[0] ), "." );
-            if ( havingSnapshot )
-            {
-                newVersion = nextVersion + "-SNAPSHOT";
-            }
-            getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );
+            newVersion = generateNextVersion(comparator, version);
+            getLog().info("Updated version to next version: " + version + " --> " + newVersion);
         }
 
         if ( StringUtils.isEmpty( newVersion ) )
@@ -256,8 +244,9 @@ public class SetMojo
             }
             else
             {
-                throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
-                    + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+                throw new MojoExecutionException( "You must specify the new version, either by using the newVersion, "
+                    + "nextVersion or nextSnapshot properties (that is -DnewVersion=... on the command line) or run "
+                    + "in interactive mode" );
             }
         }
         if ( StringUtils.isEmpty( newVersion ) )
@@ -323,6 +312,18 @@ public class SetMojo
         }
     }
 
+    String generateNextVersion(VersionComparator rule, String version) {
+        ArtifactVersion current = new DefaultArtifactVersion(version);
+        if (removeSnapshot) {
+            current = VersionComparators.stripSnapshot(current);
+        }
+        ArtifactVersion incremented = rule.incrementSegment(current, rule.getSegmentCount(current) - 1);
+        if (nextSnapshot && !VersionComparators.isSnapshot(incremented)) {
+            return incremented.toString() + SNAPSHOT;
+        }
+        return incremented.toString();
+    }
+
     private static String fixNullOrEmpty( String value, String defaultValue )
     {
         return StringUtils.isBlank( value ) ? defaultValue : value;
@@ -374,12 +375,11 @@ public class SetMojo
             getLog().debug( "Looking for modules which use "
                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
 
-            for ( Map.Entry<String, Model> stringModelEntry : PomHelper.getChildModels( reactor, sourceGroupId,
+            for ( Map.Entry<String, Model> target : PomHelper.getChildModels( reactor, sourceGroupId,
                                                                                         sourceArtifactId ).entrySet() )
             {
-                final Map.Entry target = (Map.Entry) stringModelEntry;
-                final String targetPath = (String) target.getKey();
-                final Model targetModel = (Model) target.getValue();
+                final String targetPath = target.getKey();
+                final Model targetModel = target.getValue();
                 final Parent parent = targetModel.getParent();
                 getLog().debug( "Module: " + targetPath );
                 if ( sourceVersion.equals( parent.getVersion() ) )

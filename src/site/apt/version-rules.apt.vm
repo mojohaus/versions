@@ -51,6 +51,8 @@ Version number rules
     [<<<maven>>>] The standard Maven 2.x version numbering scheme.
 
     [<<<numeric>>>] An alternative version numbering scheme with no "special" qualifiers.
+
+    [<<<mercury>>>] An alternative version numbering scheme following Mercury's version rules.
     
   The <<<versions-maven-plugin>>> will assume that all version numbers follow the <<<maven>>> scheme unless you tell
   it otherwise.
