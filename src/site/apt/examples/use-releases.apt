@@ -45,7 +45,7 @@ Replacing -SNAPSHOT versions with their corresponding releases
   a corresponding release version, then it will replace the -SNAPSHOT with its corresponding release version.
 
 ---
-mvn versions:unlock-snapshots
+mvn versions:use-releases
 ---
 
   When org.codehaus.cargo:cargo-core-api releases the 1.0-alpha-7 version this would update the pom to look like:
