@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
+import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
@@ -31,6 +32,8 @@ import org.codehaus.mojo.versions.change.VersionChanger;
 import org.codehaus.mojo.versions.change.VersionChangerFactory;
 import org.codehaus.mojo.versions.ordering.ReactorDepthComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.set.PropertyScope;
+import org.codehaus.mojo.versions.set.PropertyPattern;
 import org.codehaus.mojo.versions.utils.ContextualLog;
 import org.codehaus.mojo.versions.utils.DelegatingContextualLog;
 import org.codehaus.mojo.versions.utils.RegexUtils;
@@ -42,9 +45,11 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -161,6 +166,38 @@ public class SetMojo
     private boolean nextSnapshot;
 
     /**
+     * Property patterns to find in pom.xml files to set their values to {@code ${newVersion}.
+     * <p>
+     * Property patterns are defined using a string notation - here is a couple of examples:
+     * <ul>
+     * <li>{@code myProperty} matches property called {@code myProperty} located directly under {@code <project>} or
+     * under any arbitrary {@code <profile>}
+     * <li>{@code /myProfileLessProperty} matches property called {@code myProfileLessProperty} located only directly
+     * under {@code <project>}. Does not match any property occurrence under any {@code <profile>}.
+     * <li>{@code myProfile/myProperty} matches property called {@code myProperty} only if it is located under a
+     * {@code <profile>} having {@code <id>myProfile</id>}. Does not match any property occurrence directly under
+     * {@code <project>}.
+     * <li><code>myProfilePrefix&ast;/myPropertyPrefix*</code> matches all properties starting with
+     * {@code myPropertyPrefix} as long as they are located under a {@code <profile>} whose {@code id} starts with
+     * {@code myProfilePrefix}.
+     * <li><code>&ast;/myPropertyPrefix*</code> matches all properties starting with {@code myPropertyPrefix} as long as
+     * they are located under any {@code <profile>}. Does not match any property occurrence directly under
+     * {@code <project>}.
+     * </ul>
+     * <p>
+     * Note that you can pass a comma separated list of property patterns on the command line - e.g. <code>
+     * "-DsetProperties=myProperty,myProfile/myOtherProperty,&ast;/yetAnotherProperty"</code>
+     *
+     * @parameter property="setProperties"
+     ** @since 2.4
+     */
+
+    private String[] setProperties;
+
+    /** A {@link List} of parsed {@link #setProperties} */
+    private List<PropertyPattern> setPropertyPatterns;
+
+    /**
      * The changes to module coordinates. Guarded by this.
      */
     private final transient List<VersionChange> sourceChanges = new ArrayList<VersionChange>();
@@ -246,6 +283,20 @@ public class SetMojo
         {
             throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
                 + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+        }
+
+        if ( setProperties == null || setProperties.length == 0 )
+        {
+            setPropertyPatterns = Collections.emptyList();
+        }
+        else
+        {
+            List<PropertyPattern> setPropPatterns = new ArrayList<PropertyPattern>();
+            for ( int i = 0; i < setProperties.length; i++ )
+            {
+                setPropPatterns.add( PropertyPattern.of( setProperties[i] ) );
+            }
+            setPropertyPatterns = Collections.unmodifiableList( setPropPatterns );
         }
 
         try
@@ -457,12 +508,63 @@ public class SetMojo
             {
                 changer.apply( versionChange );
             }
+
+            if ( !setPropertyPatterns.isEmpty() && !StringUtils.isEmpty( newVersion ) )
+            {
+                for ( PropertyPattern propertyPattern : setPropertyPatterns )
+                {
+                    /* set the property on the top level - i.e. out of any profile scope */
+                    setProperty( propertyPattern, PropertyScope.profileLess(), model.getProperties(), pom );
+
+                    /* set the property in the individual profiles */
+                    final List<Profile> profiles = model.getProfiles();
+                    if ( profiles != null )
+                    {
+                        for ( Profile profile : profiles )
+                        {
+                            setProperty( propertyPattern, PropertyScope.ofProfile( profile.getId() ),
+                                         profile.getProperties(), pom );
+                        }
+                    }
+                }
+
+            }
         }
         catch ( IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
         log.clearContext();
+    }
+
+    /**
+     * A helper method to find properties matching the given {@code propertyPattern} in the given set of
+     * {@code properties} and given {@code propertyScope} and change their value to the current {@link #newVersion}
+     *
+     * @param propertyPattern the pattern to match properties against
+     * @param propertyScope the scope of the given {@code properties}
+     * @param properties the properties to search within
+     * @param pom the model to change
+     * @throws XMLStreamException thrown from
+     *             {@link PomHelper#setPropertyVersion(ModifiedPomXMLEventReader, String, String, String)}
+     */
+    private void setProperty( PropertyPattern propertyPattern, PropertyScope propertyScope, final Properties properties,
+                              ModifiedPomXMLEventReader pom )
+        throws XMLStreamException
+    {
+        if ( properties != null )
+        {
+            for ( Map.Entry<Object, Object> prop : properties.entrySet() )
+            {
+                final Object key = prop.getKey();
+                if ( key instanceof String && propertyPattern.matches( propertyScope, (String) key ) )
+                {
+                    getLog().info( "        property '" + key + "' from " + prop.getValue() + " to " + newVersion );
+                    final String profileId = propertyScope.isProfileLess() ? null : propertyScope.getProfileId();
+                    PomHelper.setPropertyVersion( pom, profileId, (String) key, newVersion );
+                }
+            }
+        }
     }
 
 }
