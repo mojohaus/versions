@@ -158,7 +158,7 @@ public class UseNextSnapshotsMojo
                     if ( matchSnapshotRegex.matcher( newVersion ).matches() )
                     {
                         if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             newVersion ) )
+                                                             newVersion, getProject().getModel() ) )
                         {
                             getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
                         }

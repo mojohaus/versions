@@ -269,7 +269,8 @@ public class CompareDependenciesMojo
                     if ( !reportMode )
                     {
                         if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(),
-                                                             dep.getVersion(), remoteVersion ) )
+                                                             dep.getVersion(), remoteVersion,
+                                                             getProject().getModel() ) )
                         {
                             getLog().info( "Updated " + toString( dep ) + " to version " + remoteVersion );
                         }

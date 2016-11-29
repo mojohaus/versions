@@ -97,7 +97,7 @@ public class UseReactorMojo
                     && !StringUtils.equals( project.getVersion(), dep.getVersion() ) )
                 {
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                                                         project.getVersion() ) )
+                                                         project.getVersion(), getProject().getModel() ) )
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + project.getVersion() );
                     }

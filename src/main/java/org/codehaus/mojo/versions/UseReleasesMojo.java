@@ -131,7 +131,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                 {
                     if (versions.containsVersion(releaseVersion)) {
                         if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                releaseVersion)) {
+                                releaseVersion, getProject().getModel())) {
                             getLog().info("Updated " + toString(dep) + " to version " + releaseVersion);
                         }
                     } else if ( failIfNotReplaced ) {
@@ -151,7 +151,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                     if ( finalVersion != null )
                     {
                         if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                finalVersion.toString()))
+                                finalVersion.toString(), getProject().getModel()))
                         {
                             getLog().info("Updated " + toString(dep) + " to version " + finalVersion.toString());
                         }

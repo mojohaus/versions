@@ -89,7 +89,8 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 				
 				String version = dep.getVersion();
 				
-				if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), version, depVersion)) {
+				if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), version, depVersion,
+						                           getProject().getModel())) {
 					getLog().info("Updated " + toString(dep) + " to version " + depVersion);
 				}
 			}

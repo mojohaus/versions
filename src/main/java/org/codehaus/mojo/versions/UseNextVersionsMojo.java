@@ -104,7 +104,8 @@ public class UseNextVersionsMojo
             if ( newer.length > 0 )
             {
                 String newVersion = newer[0].toString();
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion ) )
+                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion,
+                                                     getProject().getModel() ) )
                 {
                     getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
                 }

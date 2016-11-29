@@ -45,7 +45,8 @@ public class DependencyVersionChanger
         throws XMLStreamException
     {
         if ( PomHelper.setDependencyVersion( getPom(), versionChange.getGroupId(), versionChange.getArtifactId(),
-                                             versionChange.getOldVersion(), versionChange.getNewVersion() ) )
+                                             versionChange.getOldVersion(), versionChange.getNewVersion(),
+                                             getModel() ) )
         {
             info( "    Updating dependency " + versionChange.getGroupId() + ":" + versionChange.getArtifactId() );
             info( "        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion() );

@@ -108,7 +108,7 @@ public class UnlockSnapshotsMojo
             {
                 String unlockedVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                                                     unlockedVersion ) )
+                                                     unlockedVersion, getProject().getModel() ) )
                 {
                     getLog().info( "Unlocked " + toString( dep ) + " to version " + unlockedVersion );
                 }
