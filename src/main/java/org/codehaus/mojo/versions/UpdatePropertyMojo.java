@@ -19,8 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -57,6 +59,14 @@ public class UpdatePropertyMojo
      * @since 1.3
      */
     private String newVersion = null;
+
+    /**
+     * Sets the newVersion property to a specific version (while default is the latest version)
+     *
+     * @parameter property="specificVersion" defaultValue="false"
+     * @since 2.5
+     */
+    private boolean specificVersion;
 
     /**
      * Whether properties linking versions should be auto-detected or not.
@@ -97,9 +107,29 @@ public class UpdatePropertyMojo
                 continue;
             }
 
-            updatePropertyToNewestVersion( pom, property, version, currentVersion );
+            if (specificVersion) {
+                updatePropertyToSpecificVersion( pom, property, version, currentVersion, newVersion );
+            } else {
+                updatePropertyToNewestVersion( pom, property, version, currentVersion );
+            }
 
         }
     }
 
+    protected void updatePropertyToSpecificVersion( ModifiedPomXMLEventReader pom, Property property,
+                                                  PropertyVersions version, String currentVersion, String newVersion )
+            throws MojoExecutionException, XMLStreamException
+    {
+        boolean versionExists = false;
+        ArtifactVersion[] allVersions = version.getVersions(true);
+        for(ArtifactVersion aVersion : allVersions) {
+            versionExists = aVersion.toString().equals(newVersion);
+            if( versionExists ) break;
+        }
+        if( !versionExists ) {
+            getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
+        } else if ( PomHelper.setPropertyVersion(pom, version.getProfileId(), property.getName(), newVersion) ) {
+            getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + newVersion);
+        }
+    }
 }
