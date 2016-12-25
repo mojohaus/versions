@@ -117,19 +117,23 @@ public class UpdatePropertyMojo
     }
 
     protected void updatePropertyToSpecificVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                  PropertyVersions version, String currentVersion, String newVersion )
+                                                  PropertyVersions versions, String currentVersion, String newVersion )
             throws MojoExecutionException, XMLStreamException
     {
-        boolean versionExists = false;
-        ArtifactVersion[] allVersions = version.getVersions(true);
-        for(ArtifactVersion aVersion : allVersions) {
-            versionExists = aVersion.toString().equals(newVersion);
-            if( versionExists ) break;
-        }
+        boolean versionExists = doesVersionExist(versions, newVersion);
         if( !versionExists ) {
             getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
-        } else if ( PomHelper.setPropertyVersion(pom, version.getProfileId(), property.getName(), newVersion) ) {
+        } else if ( PomHelper.setPropertyVersion(pom, versions.getProfileId(), property.getName(), newVersion) ) {
             getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + newVersion);
         }
+    }
+
+    private boolean doesVersionExist(PropertyVersions versions, String newVersion) {
+        ArtifactVersion[] allVersions = versions.getVersions(true);
+        for(ArtifactVersion artifactVersion : allVersions) {
+            if(artifactVersion.toString().equals(newVersion))
+                return true;
+        }
+        return false;
     }
 }
