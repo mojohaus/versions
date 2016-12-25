@@ -61,12 +61,12 @@ public class UpdatePropertyMojo
     private String newVersion = null;
 
     /**
-     * Sets the newVersion property to a specific version (while default is the latest version)
+     * Updates specifically to the newVersion parameter if there are latest versions
      *
-     * @parameter property="specificVersion" defaultValue="false"
+     * @parameter property="forceNewVersion" defaultValue="false"
      * @since 2.5
      */
-    private boolean specificVersion;
+    private boolean forceNewVersion;
 
     /**
      * Whether properties linking versions should be auto-detected or not.
@@ -107,10 +107,10 @@ public class UpdatePropertyMojo
                 continue;
             }
 
-            if (specificVersion) {
+            if (forceNewVersion) {
                 updatePropertyToSpecificVersion( pom, property, version, currentVersion, newVersion );
             } else {
-                updatePropertyToNewestVersion( pom, property, version, currentVersion );
+                updatePropertyToNewestVersion(pom, property, version, currentVersion);
             }
 
         }
