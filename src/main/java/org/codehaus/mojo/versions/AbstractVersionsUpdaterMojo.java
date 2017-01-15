@@ -495,12 +495,17 @@ public abstract class AbstractVersionsUpdaterMojo
         return segment;
     }
 
-    protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                  PropertyVersions version, String currentVersion )
-                                                      throws MojoExecutionException, XMLStreamException
-    {
-        ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                                                           this.reactorProjects, this.getHelper() );
+    protected void updatePropertyToNewestVersion(ModifiedPomXMLEventReader pom, Property property,
+                                                 PropertyVersions version, String currentVersion)
+        throws MojoExecutionException, XMLStreamException {
+        updatePropertyToNewestVersion(pom, property, version, currentVersion, -1);
+    }
+
+    protected void updatePropertyToNewestVersion(ModifiedPomXMLEventReader pom, Property property,
+                                                  PropertyVersions version, String currentVersion, int segment)
+                                                      throws MojoExecutionException, XMLStreamException {
+        ArtifactVersion winner = version.getNewestVersion(currentVersion, property, this.allowSnapshots,
+                                                           this.reactorProjects, this.getHelper(), segment);
 
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {

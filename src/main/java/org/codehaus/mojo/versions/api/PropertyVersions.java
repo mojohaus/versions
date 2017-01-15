@@ -310,6 +310,12 @@ public class PropertyVersions
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
                                              List reactorProjects, VersionsHelper helper )
+            throws MojoExecutionException {
+        return getNewestVersion(currentVersion, property, allowSnapshots, reactorProjects, helper, -1);
+    }
+
+    public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
+                                             List reactorProjects, VersionsHelper helper, int segment )
                                                  throws MojoExecutionException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
@@ -333,9 +339,7 @@ public class PropertyVersions
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
-        ArtifactVersion result = getNewestVersion( range, includeSnapshots ? 
-                                   helper.createArtifactVersion( currentVersion ) : null, null, includeSnapshots, false,
-                                   true );
+        ArtifactVersion result = getNewestVersion(currentVersion, helper, segment, includeSnapshots, range);
         helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
 
         if ( property.isSearchReactor() )
@@ -388,6 +392,16 @@ public class PropertyVersions
             }
         }
         return result;
+    }
+
+    private ArtifactVersion getNewestVersion(String currentVersion, VersionsHelper helper, int segment,
+                                             boolean includeSnapshots, VersionRange range) {
+        ArtifactVersion lowerBound = helper.createArtifactVersion(currentVersion);
+        ArtifactVersion upperBound = null;
+        if (segment != -1) {
+            upperBound = getVersionComparator().incrementSegment(lowerBound, segment);
+        }
+        return getNewestVersion(range, lowerBound, upperBound, includeSnapshots, false, false);
     }
 
     private final class PropertyVersionComparator

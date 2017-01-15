@@ -44,6 +44,30 @@ public class UpdatePropertiesMojo
     // ------------------------------ FIELDS ------------------------------
 
     /**
+     * Whether to allow the major version number to be changed.
+     *
+     * @parameter property="allowMajorUpdates" default-value="true"
+     * @since 2.4
+     */
+    protected Boolean allowMajorUpdates;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     *
+     * @parameter property="allowMinorUpdates" default-value="true"
+     * @since 2.4
+     */
+    protected Boolean allowMinorUpdates;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     *
+     * @parameter property="allowIncrementalUpdates" default-value="true"
+     * @since 2.4
+     */
+    protected Boolean allowIncrementalUpdates;
+
+    /**
      * Any restrictions that apply to specific properties.
      *
      * @parameter
@@ -118,7 +142,8 @@ public class UpdatePropertiesMojo
 
             if ( canUpdateProperty )
             {
-                updatePropertyToNewestVersion( pom, property, version, currentVersion );
+                int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates);
+                updatePropertyToNewestVersion(pom, property, version, currentVersion, segment);
             }
 
         }
