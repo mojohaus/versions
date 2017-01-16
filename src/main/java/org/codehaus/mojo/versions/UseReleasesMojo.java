@@ -165,6 +165,33 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                     }
 
                 }
+                else if ( allowRangeMatching )
+                {
+
+                    ArtifactVersion finalVersion = null;
+                    for (ArtifactVersion proposedVersion : versions.getVersions( false )) {
+                        if (proposedVersion.toString().startsWith( releaseVersion )) {
+                            getLog().debug("Found matching version for " + toString(dep) + " to version " + releaseVersion);
+                            finalVersion = proposedVersion;
+                        }
+                    }
+
+                    if ( finalVersion != null )
+                    {
+                        if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                finalVersion.toString()))
+                        {
+                            getLog().info("Updated " + toString(dep) + " to version " + finalVersion.toString());
+                        }
+                    } else
+                    {
+                        getLog().info("No matching release of " + toString(dep) + " to force.");
+                        if ( failIfNotReplaced ) {
+                            throw new NoSuchElementException("No matching release of " + toString(dep) + " to found for update.");
+                        }
+                    }
+
+                }
             }
         }
     }
