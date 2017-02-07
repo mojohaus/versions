@@ -411,7 +411,7 @@
           <showErrors>true</showErrors>
           <streamLogs>true</streamLogs>
           <pomIncludes>
-            <pomInclude>*/pom.xml</pomInclude>
+            <pomInclude>it-dependency-updates-report-003/pom.xml</pomInclude>
           </pomIncludes>
           <postBuildHookScript>verify</postBuildHookScript>
           <filterProperties>
