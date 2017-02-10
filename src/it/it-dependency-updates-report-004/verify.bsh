@@ -11,7 +11,7 @@ try
             .replaceAll( "&[^;]+;", " " )
             .replaceAll( "\\s+", " " );
 
-    if ( result.indexOf( "localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.1 1.2 2.0" ) < 0 )
+    if ( !result.contains( "localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.1 1.2 2.0" ) )
     {
         System.out.println( "Did not pick up updated in dependencies section" );
         System.out.println( "Result = \"" + result +"\"" );
