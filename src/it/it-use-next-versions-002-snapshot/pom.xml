@@ -19,7 +19,7 @@
   </dependencies>
 
   <properties>
-    <allowSnapshots>false</allowSnapshots>
+    <allowSnapshots>true</allowSnapshots>
   </properties>
 
 </project>
