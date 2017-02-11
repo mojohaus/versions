@@ -24,6 +24,7 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -32,6 +33,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -117,6 +119,8 @@ public class UseLatestReleasesMojo
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+        MajorMinorIncrementalFilter majorMinorIncfilter =
+                        new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         Iterator i = dependencies.iterator();
 
@@ -140,13 +144,18 @@ public class UseLatestReleasesMojo
                     continue;
                 }
 
+                ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
+                getLog().debug( "Selected version:" + selectedVersion.toString() );
+
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 ArtifactVersion[] newer = versions.getNewerVersions( version, segment, false );
                 newer = filterVersionsWithIncludes( newer, artifact );
-                if ( newer.length > 0 )
+
+                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newer );
+                if ( filteredVersions.length > 0 )
                 {
-                    String newVersion = newer[newer.length - 1].toString();
+                    String newVersion = filteredVersions[filteredVersions.length - 1].toString();
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
                                                          newVersion ) )
                     {
