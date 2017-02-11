@@ -24,6 +24,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -42,12 +43,9 @@ import java.util.Map;
  * of the current project.
  *
  * @author Stephen Connolly
- * @goal update-child-modules
- * @aggregator
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-2
  */
+@Mojo(name="update-child-modules", requiresProject = true, requiresDirectInvocation = true, aggregator = true)
 public class UpdateChildModulesMojo
     extends AbstractVersionsUpdaterMojo
 {

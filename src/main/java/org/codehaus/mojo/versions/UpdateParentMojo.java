@@ -26,6 +26,8 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -35,11 +37,9 @@ import javax.xml.stream.XMLStreamException;
  * Sets the parent version to the latest parent version.
  *
  * @author Stephen Connolly
- * @goal update-parent
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-1
  */
+@Mojo(name= "update-parent", requiresProject = true, requiresDirectInvocation = true)
 public class UpdateParentMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -49,9 +49,9 @@ public class UpdateParentMojo
     /**
      * Version specification to control artifact resolution.
      *
-     * @parameter property="parentVersion"
      * @since 1.0-alpha-1
      */
+    @Parameter ( property = "parentVersion", defaultValue = "null")
     protected String parentVersion = null;
 
     // -------------------------- OTHER METHODS --------------------------

@@ -21,6 +21,8 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -32,11 +34,9 @@ import java.util.Map;
  * Sets properties to the latest versions of specific artifacts.
  *
  * @author Stephen Connolly
- * @goal update-properties
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-1
  */
+@Mojo(name = "update-properties", requiresProject = true, requiresDirectInvocation = true)
 public class UpdatePropertiesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -46,33 +46,33 @@ public class UpdatePropertiesMojo
     /**
      * Any restrictions that apply to specific properties.
      *
-     * @parameter
      * @since 1.0-alpha-3
      */
+    @Parameter
     private Property[] properties;
 
     /**
      * A comma separated list of properties to update.
      *
-     * @parameter property="includeProperties"
      * @since 1.0-alpha-1
      */
+    @Parameter(property = "includeProperties")
     private String includeProperties = null;
 
     /**
      * A comma separated list of properties to not update.
      *
-     * @parameter property="excludeProperties"
      * @since 1.0-alpha-1
      */
+    @Parameter(property = "excludeProperties")
     private String excludeProperties = null;
 
     /**
      * Whether properties linking versions should be auto-detected or not.
      *
-     * @parameter property="autoLinkItems" defaultValue="true"
      * @since 1.0-alpha-2
      */
+    @Parameter(property = "autoLinkItems", defaultValue = "true")
     private Boolean autoLinkItems;
 
     // -------------------------- STATIC METHODS --------------------------

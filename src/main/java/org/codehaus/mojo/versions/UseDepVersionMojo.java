@@ -10,6 +10,8 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -17,23 +19,22 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 /**
  * 
  * @author Dan Arcari
- * @goal use-dep-version
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 2.3
  */
+@Mojo(name = "use-dep-version", requiresProject = true, requiresDirectInvocation = true)
 public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
 	/**
 	 * The exact version to be applied for the included dependencies
-	 * @parameter property="depVersion" required="true"
 	 */
+    @Parameter(property = "depVersion", required = true)
 	protected String depVersion;
 
 	/**
 	 * If set to true, will use whatever version is supplied without attempting to validate that such a version is obtainable from the repository chain.
 	 * @parameter property="forceVersion" required="false" default-value="false"
 	 */
+    @Parameter(property = "forceVersion", defaultValue = "false")
 	protected boolean forceVersion;
 	
 	@SuppressWarnings("unchecked")

@@ -24,6 +24,9 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.change.VersionChange;
@@ -55,12 +58,9 @@ import java.util.regex.Pattern;
  * necessary.
  *
  * @author Stephen Connolly
- * @goal set
- * @aggregator
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-beta-1
  */
+@Mojo (name="set", requiresProject = true, requiresDirectInvocation = true, aggregator = true)
 public class SetMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -68,33 +68,33 @@ public class SetMojo
     /**
      * The new version number to set.
      *
-     * @parameter property="newVersion"
      * @since 1.0-beta-1
      */
+    @Parameter(property = "newVersion")
     private String newVersion;
 
     /**
      * The groupId of the dependency/module to update.
      *
-     * @parameter property="groupId" default-value="${project.groupId}"
      * @since 1.2
      */
+    @Parameter(property = "groupId", defaultValue = "${project.groupId}")
     private String groupId;
 
     /**
      * The artifactId of the dependency/module to update.
      *
-     * @parameter property="artifactId" default-value="${project.artifactId}"
      * @since 1.2
      */
+    @Parameter(property = "artifactId", defaultValue = "${project.artifactId}")
     private String artifactId;
 
     /**
      * The version of the dependency/module to update.
      *
-     * @parameter property="oldVersion" default-value="${project.version}"
      * @since 1.2
      */
+    @Parameter(property = "oldVersion", defaultValue = "${project.version}")
     private String oldVersion;
 
     /**
@@ -103,38 +103,39 @@ public class SetMojo
      * @parameter property="updateMatchingVersions" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "updateMatchingVersions", defaultValue = "true")
     private Boolean updateMatchingVersions;
 
     /**
      * Whether to process the parent of the project. If not set will default to true.
      *
-     * @parameter property="processParent" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "processParent", defaultValue = "true")
     private boolean processParent;
 
     /**
      * Whether to process the project version. If not set will default to true.
      *
-     * @parameter property="processProject" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "processProject", defaultValue = "true")
     private boolean processProject;
 
     /**
      * Whether to process the dependencies section of the project. If not set will default to true.
      *
-     * @parameter property="processDependencies" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "processDependencies", defaultValue = "true")
     private boolean processDependencies;
 
     /**
      * Whether to process the plugins section of the project. If not set will default to true.
      *
-     * @parameter property="processPlugins" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "processPlugins", defaultValue = "true")
     private boolean processPlugins;
 
     /**
@@ -142,22 +143,23 @@ public class SetMojo
      *
      * @component
      */
+    @Component
     private Prompter prompter;
 
     /**
      * Whether to remove -SNAPSHOT from the existing version. If not set will default to false.
      *
-     * @parameter property="removeSnapshot" default-value="false"
      * @since 2.10
      */
+    @Parameter(property = "removeSnapshot", defaultValue = "false")
     private boolean removeSnapshot;
 
     /**
      * Whether to add next version number and -SNAPSHOT to the existing version. If not set will default to false.
      *
-     * @parameter property="nextSnapshot" default-value="false"
      * @since 2.10
      */
+    @Parameter(property = "nextSnapshot", defaultValue = "false")
     private boolean nextSnapshot;
 
     /**

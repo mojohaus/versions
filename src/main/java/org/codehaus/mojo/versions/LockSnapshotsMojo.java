@@ -23,6 +23,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -40,11 +41,9 @@ import java.util.regex.Pattern;
  * dependency is only available in the local repository and not in a remote snapshot repository.
  *
  * @author Paul Gier
- * @goal lock-snapshots
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo(name= "lock-snapshots", requiresProject = true, requiresDirectInvocation = true)
 public class LockSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

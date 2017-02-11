@@ -31,6 +31,7 @@ import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
@@ -56,9 +57,9 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * line. When specifying includes from the pom, use the {@link #includes} configuration instead. If this property is
      * specified then the {@link # include} configuration is ignored.
      *
-     * @parameter property="includes"
      * @since 1.0-beta-1
      */
+    @Parameter (property = "includes")
     private String includesList = null;
 
     /**
@@ -67,35 +68,35 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * line. When specifying excludes from the pom, use the {@link #excludes} configuration instead. If this property is
      * specified then the {@link # exclude} configuration is ignored.
      *
-     * @parameter property="excludes"
      * @since 1.0-beta-1
      */
+    @Parameter (property = "excludes")
     private String excludesList = null;
 
     /**
      * A list of artifact patterns to include. Follows the pattern "groupId:artifactId:type:classifier:version". This
      * configuration setting is ignored if {@link #includesList} is defined.
      *
-     * @parameter
      * @since 1.0-beta-1
      */
+    @Parameter
     private String[] includes = null;
 
     /**
      * A list of artifact patterns to exclude. Follows the pattern "groupId:artifactId:type:classifier:version". This
      * configuration setting is ignored if {@link #excludesList} is defined.
      *
-     * @parameter
      * @since 1.0-beta-1
      */
+    @Parameter
     private String[] excludes = null;
 
     /**
      * Whether to process the dependencies section of the project. If not set will default to true.
      *
-     * @parameter property="processDependencies" defaultValue="true"
      * @since 1.0-alpha-3
      */
+    @Parameter(property = "processDependencies", defaultValue = "true")
     private Boolean processDependencies;
 
     /**
@@ -104,6 +105,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @parameter property="processDependencyManagement" defaultValue="true"
      * @since 1.0-alpha-3
      */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
     private Boolean processDependencyManagement;
 
     /**
@@ -112,6 +114,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @parameter property="processParent" defaultValue="false"
      * @since 2.3
      */
+    @Parameter(property = "processParent", defaultValue = "false")
     private Boolean processParent = false;
 
     /**
@@ -134,6 +137,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @parameter property="excludeReactor" defaultValue="true"
      * @since 1.0-alpha-3
      */
+    @Parameter(property = "excludeReactor", defaultValue = "true")
     private Boolean excludeReactor;
 
     /**

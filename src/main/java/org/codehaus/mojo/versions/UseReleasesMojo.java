@@ -25,6 +25,8 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -40,27 +42,25 @@ import java.util.regex.Pattern;
  * Replaces any -SNAPSHOT versions with the corresponding release version (if it has been released).
  *
  * @author Stephen Connolly
- * @goal use-releases
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo(name = "use-releases", requiresProject = true, requiresDirectInvocation = true)
 public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     /**
      * Whether to check for releases within the range.
      *
-     * @parameter property="allowRangeMatching" default-value="false"
      * @since 2.3
      */
+    @Parameter(property = "allowRangeMatching", defaultValue = "false")
     private Boolean allowRangeMatching;
 
     /**
      * Whether to fail if a SNAPSHOT could not be replaced
      *
-     * @parameter property="failIfNotReplaced" default-value="false"
      * @since 2.3
      */
+    @Parameter(property = "failIfNotReplaced", defaultValue = "false")
     private Boolean failIfNotReplaced;
 
     // ------------------------------ FIELDS ------------------------------

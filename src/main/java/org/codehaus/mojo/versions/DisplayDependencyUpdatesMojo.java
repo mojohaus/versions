@@ -26,6 +26,8 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -45,11 +47,9 @@ import java.util.TreeSet;
  * Displays all dependencies that have newer versions available.
  *
  * @author Stephen Connolly
- * @goal display-dependency-updates
- * @requiresProject true
- * @requiresDirectInvocation false
  * @since 1.0-alpha-1
  */
+@Mojo(name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false)
 public class DisplayDependencyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
@@ -66,17 +66,17 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to process the dependencyManagement section of the project. If not set will default to true.
      *
-     * @parameter property="processDependencyManagement" defaultValue="true"
      * @since 1.2
      */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
     protected Boolean processDependencyManagement = Boolean.TRUE;
 
     /**
      * Whether to process the dependencies section of the project. If not set will default to true.
      *
-     * @parameter property="processDependencies" defaultValue="true"
      * @since 1.2
      */
+    @Parameter(property = "processDependencies", defaultValue = "true")
     protected Boolean processDependencies = Boolean.TRUE;
 
     /**
@@ -85,6 +85,7 @@ public class DisplayDependencyUpdatesMojo
      * @parameter property="verbose" defaultValue="false"
      * @since 2.1
      */
+    @Parameter(property = "verbose", defaultValue = "false")
     protected Boolean verbose = Boolean.FALSE;
 
     // --------------------- GETTER / SETTER METHODS ---------------------

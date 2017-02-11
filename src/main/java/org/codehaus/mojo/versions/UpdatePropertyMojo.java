@@ -21,6 +21,8 @@ package org.codehaus.mojo.versions;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -31,11 +33,9 @@ import java.util.Map;
  * Sets a property to the latest version in a given range of associated artifacts.
  *
  * @author Eric Pabst
- * @goal update-property
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.3
  */
+@Mojo(name = "update-property", requiresProject = true, requiresDirectInvocation = true)
 public class UpdatePropertyMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -44,18 +44,18 @@ public class UpdatePropertyMojo
 
     /**
      * A property to update.
-     *
-     * @parameter property="property"
+     * 
      * @since 1.3
      */
+    @Parameter (property = "property")
     private String property = null;
 
     /**
      * The new version to set the property to (can be a version range to find a version within).
      *
-     * @parameter property="newVersion"
      * @since 1.3
      */
+    @Parameter (property = "newVersion")
     private String newVersion = null;
 
     /**
@@ -64,6 +64,7 @@ public class UpdatePropertyMojo
      * @parameter property="autoLinkItems" defaultValue="true"
      * @since 1.0-alpha-2
      */
+    @Parameter (property = "autoLinkItems", defaultValue = "true")
     private Boolean autoLinkItems;
 
     // -------------------------- STATIC METHODS --------------------------

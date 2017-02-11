@@ -27,6 +27,8 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -40,36 +42,34 @@ import java.util.Iterator;
  * Replaces any version with the latest version.
  *
  * @author Stephen Connolly
- * @goal use-latest-versions
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo(name = "use-latest-versions", requiresProject = true, requiresDirectInvocation = true)
 public class UseLatestVersionsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
     /**
      * Whether to allow the major version number to be changed.
      *
-     * @parameter property="allowMajorUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
     protected Boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
      *
-     * @parameter property="allowMinorUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
     protected Boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
      *
-     * @parameter property="allowIncrementalUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     protected Boolean allowIncrementalUpdates;
 
     // ------------------------------ METHODS --------------------------
