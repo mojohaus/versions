@@ -324,7 +324,7 @@ public class SetMojo
         final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
         current.getValue().setVersion( newVersion );
 
-        addFile( files, getProject(), current.getKey() );
+        addFile( files, project, current.getKey() );
 
         for ( Map.Entry<String, Model> sourceEntry : reactor.entrySet() )
         {
