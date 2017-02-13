@@ -100,7 +100,6 @@ public class SetMojo
     /**
      * Whether matching versions explicitly specified (as /project/version) in child modules should be updated.
      *
-     * @parameter property="updateMatchingVersions" default-value="true"
      * @since 1.3
      */
     @Parameter(property = "updateMatchingVersions", defaultValue = "true")
