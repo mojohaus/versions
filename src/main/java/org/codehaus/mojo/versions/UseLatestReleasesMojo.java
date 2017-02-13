@@ -159,7 +159,7 @@ public class UseLatestReleasesMojo
 
     private ArtifactVersion[] filterVersionsWithIncludes( ArtifactVersion[] newer, Artifact artifact )
     {
-        List filteredNewer = new ArrayList( newer.length );
+        List<ArtifactVersion> filteredNewer = new ArrayList<ArtifactVersion>( newer.length );
         for ( int j = 0; j < newer.length; j++ )
         {
             ArtifactVersion artifactVersion = newer[j];
