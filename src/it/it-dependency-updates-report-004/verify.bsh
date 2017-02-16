@@ -11,15 +11,15 @@ try
             .replaceAll( "&[^;]+;", " " )
             .replaceAll( "\\s+", " " );
 
-    if ( result.indexOf( "localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.1 1.2 2.0" ) < 0 )
+    if ( result.contains( "localhost dummy-api 1.1 jar 1.1.0-2 1.1.1 1.2 2.0" ) )
     {
         System.out.println( "Did not pick up updated in dependencies section" );
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
-    if ( !result.contains("localhost dummy-api 2.0 jar 2.1 3.0"))
+    if ( result.contains( "localhost dummy-impl 1.1 jar 1.2 2.0" ) )
     {
-        System.out.println( "Did not pick up updated in dependencies management section" );
+        System.out.println( "Did not pick up updated in dependencies section" );
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }

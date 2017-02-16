@@ -87,7 +87,11 @@ public class DependencyUpdatesReport
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+
+        if(isProcessingDependencyManagement())
+        {
+            dependencies = removeDependencyManagment(dependencies, dependencyManagement);
+        }
 
         try
         {
