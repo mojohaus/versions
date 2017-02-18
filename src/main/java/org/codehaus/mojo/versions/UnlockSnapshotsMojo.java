@@ -120,7 +120,7 @@ public class UnlockSnapshotsMojo
             return;
         }
 
-        if ( reactorProjects.contains( parent ) )
+        if ( session.getProjectDependencyGraph().getSortedProjects().contains( parent ) )
         {
             getLog().info( "Project's parent is part of the reactor" );
             return;

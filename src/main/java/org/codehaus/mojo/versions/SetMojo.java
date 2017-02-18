@@ -286,8 +286,10 @@ public class SetMojo
 
         try
         {
-            final MavenProject project =
-                PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
+//            session.getProjectDependencyGraph().getSortedProjects();
+//            session.getTopLevelProject();
+            final MavenProject project = session.getTopLevelProject();
+//                PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
@@ -327,6 +329,9 @@ public class SetMojo
             {
                 applyChange( project, reactor, files, groupId, artifactId, oldVersion );
             }
+
+//            getLog().info( "getDegreeOfConcurrency(): " + session.getRequest().getDegreeOfConcurrency() );
+//            getLog().info( "getDegreeOfConcurrency(): " + session.getRequest().getThreadCount() );
 
             // now process all the updates
             for ( File file : files )
@@ -396,6 +401,7 @@ public class SetMojo
                                                                     PomHelper.getChildModels( reactor, sourceGroupId,
                                                                                         sourceArtifactId ).entrySet() )
             {
+                final String targetPath = stringModelEntry.getKey();
                 final Model targetModel = stringModelEntry.getValue();
                 final Parent parent = targetModel.getParent();
                 getLog().debug( "Module: " + stringModelEntry.getKey() );

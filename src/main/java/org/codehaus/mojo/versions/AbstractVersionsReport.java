@@ -19,13 +19,16 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
@@ -39,14 +42,11 @@ import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolver;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.plexus.i18n.I18N;
-
-import java.io.File;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Base class for all versions reports.
@@ -125,13 +125,13 @@ public abstract class AbstractVersionsReport
      * @since 1.0-alpha-3
      */
     @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
-    protected List remoteArtifactRepositories;
+    protected List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * @since 1.0-alpha-3
      */
     @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
-    protected List remotePluginRepositories;
+    protected List<ArtifactRepository> remotePluginRepositories;
 
     /**
      * @since 1.0-alpha-1

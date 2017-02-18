@@ -235,6 +235,7 @@ public abstract class AbstractVersionDetails
             {
                 return true;
             }
+
         }
         return false;
     }

@@ -36,7 +36,6 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -113,7 +112,7 @@ public class UseLatestSnapshotsMojo
                 dependency.setGroupId(getProject().getParent().getGroupId());
                 dependency.setVersion(getProject().getParent().getVersion());
                 dependency.setType("pom");
-                List list = new ArrayList();
+                List<Dependency> list = new ArrayList<>();
                 list.add(dependency);
                 useLatestSnapshots( pom, list);
             }
@@ -129,12 +128,8 @@ public class UseLatestSnapshotsMojo
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
-        Iterator<Dependency> i = dependencies.iterator();
-
-        while ( i.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );

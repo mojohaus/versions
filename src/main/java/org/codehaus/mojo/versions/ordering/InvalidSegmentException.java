@@ -26,6 +26,11 @@ public class InvalidSegmentException
     extends RuntimeException
 {
     /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
      * Constructs a new exception.
      *
      * @param segment the invalid segment index.

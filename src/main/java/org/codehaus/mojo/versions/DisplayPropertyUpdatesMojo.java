@@ -138,7 +138,7 @@ public class DisplayPropertyUpdatesMojo
 
             int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
             ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                                                               this.reactorProjects, this.getHelper(), false, segment );
+                                                               session.getProjectDependencyGraph().getSortedProjects(), this.getHelper(), false, segment );
 
             if ( winner != null && !currentVersion.equals( winner.toString() ) )
             {

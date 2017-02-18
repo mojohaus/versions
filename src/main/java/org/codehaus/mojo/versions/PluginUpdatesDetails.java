@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 
@@ -33,11 +34,11 @@ public class PluginUpdatesDetails
 {
     private final ArtifactVersions artifactVersions;
 
-    private final Map dependencyVersions;
+    private final Map<Dependency, ArtifactVersions> dependencyVersions;
 
     private final boolean includeSnapshots;
 
-    public PluginUpdatesDetails( ArtifactVersions artifactVersions, Map dependencyVersions, boolean includeSnapshots )
+    public PluginUpdatesDetails( ArtifactVersions artifactVersions, Map<Dependency, ArtifactVersions> dependencyVersions, boolean includeSnapshots )
     {
         artifactVersions.getClass(); // throw NPE if null
         dependencyVersions.getClass(); // throw NPE if null
@@ -51,7 +52,7 @@ public class PluginUpdatesDetails
         return artifactVersions;
     }
 
-    public Map getDependencyVersions()
+    public Map<Dependency, ArtifactVersions> getDependencyVersions()
     {
         return dependencyVersions;
     }
@@ -63,7 +64,7 @@ public class PluginUpdatesDetails
 
     public boolean isDependencyUpdateAvailable()
     {
-        for ( Iterator i = dependencyVersions.values().iterator(); i.hasNext(); )
+        for ( Iterator<ArtifactVersions> i = dependencyVersions.values().iterator(); i.hasNext(); )
         {
             ArtifactVersions versions = (ArtifactVersions) i.next();
             ArtifactVersion[] dependencyUpdates = versions.getAllUpdates( UpdateScope.ANY, includeSnapshots );

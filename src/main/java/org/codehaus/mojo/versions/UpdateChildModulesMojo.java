@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Scans the current projects child modules, updating the versions of any which use the current project to the version
@@ -154,13 +155,13 @@ public class UpdateChildModulesMojo
                         final Parent parent = targetModel.getParent();
                         if ( sourceVersion.equals( parent.getVersion() ) )
                         {
-                            getLog().debug( "Module: " + targetPath + " parent is "
+                            getLog().debug( "Module: " + childModelEntry.getKey() + " parent is "
                                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
                                 + sourceVersion );
                         }
                         else
                         {
-                            getLog().info( "Module: " + targetPath );
+                            getLog().info( "Module: " + childModelEntry.getKey() );
                             getLog().info( "    parent was "
                                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
                                 + parent.getVersion() );

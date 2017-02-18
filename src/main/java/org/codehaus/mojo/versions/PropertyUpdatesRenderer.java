@@ -27,6 +27,7 @@ import org.codehaus.plexus.i18n.I18N;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 /**

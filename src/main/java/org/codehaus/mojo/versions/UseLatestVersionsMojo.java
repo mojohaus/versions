@@ -42,6 +42,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
+
 /**
  * Replaces any version with the latest version.
  *
@@ -133,10 +134,8 @@ public class UseLatestVersionsMojo
             new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         Iterator<Dependency> i = dependencies.iterator();
 
-        while ( i.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
