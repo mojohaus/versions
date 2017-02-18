@@ -195,14 +195,14 @@ public class DisplayDependencyUpdatesMojo
      *         management dependencies.
      * @since 1.0-beta-1
      */
-    private static Set<Dependency> removeDependencyManagment( Set dependencies, Set dependencyManagement )
+    private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
     {
         Set<Dependency> result = new TreeSet<Dependency>( new DependencyComparator() );
-        for ( Iterator i = dependencies.iterator(); i.hasNext(); )
+        for ( Iterator<Dependency> i = dependencies.iterator(); i.hasNext(); )
         {
             Dependency c = (Dependency) i.next();
             boolean matched = false;
-            Iterator j = dependencyManagement.iterator();
+            Iterator<Dependency> j = dependencyManagement.iterator();
             while ( !matched && j.hasNext() )
             {
                 Dependency t = (Dependency) j.next();
@@ -469,10 +469,10 @@ public class DisplayDependencyUpdatesMojo
         else
         {
             logLine( false, "The following dependencies in " + section + " have newer versions:" );
-            i = withUpdates.iterator();
-            while ( i.hasNext() )
+            Iterator<String> withUpdateIter = withUpdates.iterator();
+            while ( withUpdateIter.hasNext() )
             {
-                logLine( false, (String) i.next() );
+                logLine( false, withUpdateIter.next() );
             }
             logLine( false, "" );
         }

@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
-  <version>2.5-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
@@ -92,7 +92,7 @@
 
   <properties>
     <mojo.java.target>1.5</mojo.java.target>
-    <mavenVersion>2.2.1</mavenVersion>
+    <mavenVersion>3.0</mavenVersion>
     <wagonVersion>2.12</wagonVersion>
     <doxiaVersion>1.7</doxiaVersion>
     <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
@@ -115,11 +115,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact-manager</artifactId>
-      <version>${mavenVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
@@ -136,11 +131,6 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-settings</artifactId>
-      <version>${mavenVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-project</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
     <dependency>
@@ -167,6 +157,12 @@
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-file</artifactId>
       <version>${wagonVersion}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-artifact-transfer</artifactId>
+      <version>0.9.0</version>
     </dependency>
 
     <!-- Doxia -->

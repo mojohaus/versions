@@ -27,8 +27,6 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -37,6 +35,7 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolverException;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
@@ -192,7 +191,7 @@ public interface VersionsHelper
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      * @since 1.0-beta-1
      */
-    Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies, boolean usePluginRepositories )
+    Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
@@ -265,8 +264,9 @@ public interface VersionsHelper
      *
      * @param artifact The artifact to resolve.
      * @param usePluginRepositories whether to resolve from the plugin repositories or the regular repositories.
+     * @throws ArtifactResolverException 
      * @since 1.3
      */
     void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactResolutionException, ArtifactNotFoundException;
+        throws ArtifactResolverException;
 }

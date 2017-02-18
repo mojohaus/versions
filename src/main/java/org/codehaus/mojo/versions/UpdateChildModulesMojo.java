@@ -19,6 +19,17 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
@@ -27,16 +38,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Scans the current projects child modules, updating the versions of any which use the current project to the version
@@ -79,11 +80,11 @@ public class UpdateChildModulesMojo
 
         try
         {
-            final Map reactor = PomHelper.getReactorModels( getProject(), getLog() );
-            List order = new ArrayList( reactor.keySet() );
-            Collections.sort( order, new Comparator()
+            final Map<String, Model> reactor = PomHelper.getReactorModels( getProject(), getLog() );
+            List<String> order = new ArrayList<String>( reactor.keySet() );
+            Collections.sort( order, new Comparator<String>()
             {
-                public int compare( Object o1, Object o2 )
+                public int compare( String o1, String o2 )
                 {
                     Model m1 = (Model) reactor.get( o1 );
                     Model m2 = (Model) reactor.get( o2 );
@@ -101,10 +102,9 @@ public class UpdateChildModulesMojo
                 }
             } );
 
-            Iterator i = order.iterator();
-            while ( i.hasNext() )
+            for ( String item : order )
             {
-                String sourcePath = (String) i.next();
+                String sourcePath = item;
                 Model sourceModel = (Model) reactor.get( sourcePath );
 
                 getLog().debug( sourcePath.length() == 0 ? "Processing root module as parent"
@@ -134,15 +134,11 @@ public class UpdateChildModulesMojo
                     getLog().debug( "Looking for modules which use "
                         + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
 
-                    Iterator j =
-                        PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
-
-                    while ( j.hasNext() )
+                    Map<String, Model> childModels =
+                        PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId );
+                    for ( Entry<String, Model> childModelEntry : childModels.entrySet() )
                     {
-                        Map.Entry target = (Map.Entry) j.next();
-                        String targetPath = (String) target.getKey();
-
-                        File moduleDir = new File( getProject().getBasedir(), targetPath );
+                        File moduleDir = new File( getProject().getBasedir(), childModelEntry.getKey() );
 
                         File moduleProjectFile;
 
@@ -157,17 +153,17 @@ public class UpdateChildModulesMojo
                             moduleProjectFile = moduleDir;
                         }
 
-                        Model targetModel = (Model) target.getValue();
+                        Model targetModel = childModelEntry.getValue();
                         final Parent parent = targetModel.getParent();
                         if ( sourceVersion.equals( parent.getVersion() ) )
                         {
-                            getLog().debug( "Module: " + targetPath + " parent is "
+                            getLog().debug( "Module: " + childModelEntry.getKey() + " parent is "
                                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
                                 + sourceVersion );
                         }
                         else
                         {
-                            getLog().info( "Module: " + targetPath );
+                            getLog().info( "Module: " + childModelEntry.getKey() );
                             getLog().info( "    parent was "
                                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
                                 + parent.getVersion() );

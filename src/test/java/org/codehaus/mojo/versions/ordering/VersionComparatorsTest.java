@@ -39,9 +39,6 @@ public class VersionComparatorsTest
     public void testMavenVersionComparator() {
         assertVersions( new MavenVersionComparator() );
     }
-    public void testMercuryVersionComparator() {
-        assertVersions( new MercuryVersionComparator());
-    }
     public void testNumericVersionComparator() {
         assertVersions( new NumericVersionComparator() );
     }

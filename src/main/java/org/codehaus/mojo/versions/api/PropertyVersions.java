@@ -1,5 +1,16 @@
 package org.codehaus.mojo.versions.api;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -27,19 +38,9 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Manages a property that is associated with one or more artifacts.
@@ -94,11 +95,11 @@ public class PropertyVersions
                 final ArtifactVersion[] artifactVersions = associatedVersions.getVersions( true );
                 // since ArtifactVersion does not override equals, we have to do this the hard way
                 // result.retainAll( Arrays.asList( artifactVersions ) );
-                Iterator j = versions.iterator();
+                Iterator<ArtifactVersion> j = versions.iterator();
                 while ( j.hasNext() )
                 {
                     boolean contains = false;
-                    ArtifactVersion version = (ArtifactVersion) j.next();
+                    ArtifactVersion version = j.next();
                     for ( ArtifactVersion artifactVersion : artifactVersions )
                     {
                         if ( version.compareTo( artifactVersion ) == 0 )
@@ -144,11 +145,11 @@ public class PropertyVersions
 
     private VersionComparator[] lookupComparators()
     {
-        Set result = new HashSet();
-        Iterator i = associations.iterator();
+        Set<VersionComparator> result = new HashSet<VersionComparator>();
+        Iterator<ArtifactAssociation> i = associations.iterator();
         while ( i.hasNext() )
         {
-            ArtifactAssociation association = (ArtifactAssociation) i.next();
+            ArtifactAssociation association = i.next();
             result.add( helper.getVersionComparator( association.getArtifact() ) );
         }
         return (VersionComparator[]) result.toArray( new VersionComparator[result.size()] );
@@ -309,14 +310,14 @@ public class PropertyVersions
     }
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper )
+                                             List<MavenProject> reactorProjects, VersionsHelper helper )
         throws MojoExecutionException
     {
         return getNewestVersion( currentVersion, property, allowSnapshots, reactorProjects, helper, false, -1 );
     }
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper, boolean allowDowngrade,
+                                             List<MavenProject> reactorProjects, VersionsHelper helper, boolean allowDowngrade,
                                              int segment )
         throws MojoExecutionException
     {
@@ -368,7 +369,7 @@ public class PropertyVersions
         if ( property.isSearchReactor() )
         {
             helper.getLog().debug( "Property ${" + property.getName() + "}: Searching reactor for a valid version..." );
-            Collection reactorArtifacts = helper.extractArtifacts( reactorProjects );
+            Collection<Artifact> reactorArtifacts = helper.extractArtifacts( reactorProjects );
             ArtifactVersion[] reactorVersions = getVersions( reactorArtifacts );
             helper.getLog().debug( "Property ${" + property.getName()
                 + "}: Set of valid available versions from the reactor is " + Arrays.asList( reactorVersions ) );

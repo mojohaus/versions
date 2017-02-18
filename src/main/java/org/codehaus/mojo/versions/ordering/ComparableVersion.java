@@ -130,7 +130,7 @@ public class ComparableVersion
     {
         private final static String[] QUALIFIERS = { "snapshot", "alpha", "beta", "milestone", "rc", "", "sp" };
 
-        private final static List QUALIFIERS_LIST = Arrays.asList( QUALIFIERS );
+        private final static List<String> QUALIFIERS_LIST = Arrays.asList( QUALIFIERS );
 
         private final static Properties ALIASES = new Properties();
 
@@ -145,7 +145,7 @@ public class ComparableVersion
          * A comparable for the empty-string qualifier. This one is used to determine if a given qualifier makes the
          * version older than one without a qualifier, or more recent.
          */
-        private static Comparable RELEASE_VERSION_INDEX = String.valueOf( QUALIFIERS_LIST.indexOf( "" ) );
+        private static Comparable<String> RELEASE_VERSION_INDEX = String.valueOf( QUALIFIERS_LIST.indexOf( "" ) );
 
         private String value;
 

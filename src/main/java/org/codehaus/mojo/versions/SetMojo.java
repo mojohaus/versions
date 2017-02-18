@@ -63,7 +63,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "set", requiresProject = true, requiresDirectInvocation = true, aggregator = true )
+@Mojo (name="set", requiresProject = true, requiresDirectInvocation = true, aggregator = true, threadSafe = true)
 public class SetMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -279,8 +279,10 @@ public class SetMojo
 
         try
         {
-            final MavenProject project =
-                PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
+//            session.getProjectDependencyGraph().getSortedProjects();
+//            session.getTopLevelProject();
+            final MavenProject project = session.getTopLevelProject();
+//                PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
@@ -319,6 +321,9 @@ public class SetMojo
             {
                 applyChange( project, reactor, files, groupId, artifactId, oldVersion );
             }
+
+//            getLog().info( "getDegreeOfConcurrency(): " + session.getRequest().getDegreeOfConcurrency() );
+//            getLog().info( "getDegreeOfConcurrency(): " + session.getRequest().getThreadCount() );
 
             // now process all the updates
             for ( File file : files )
@@ -387,9 +392,8 @@ public class SetMojo
             for ( Map.Entry<String, Model> stringModelEntry : PomHelper.getChildModels( reactor, sourceGroupId,
                                                                                         sourceArtifactId ).entrySet() )
             {
-                final Map.Entry target = (Map.Entry) stringModelEntry;
-                final String targetPath = (String) target.getKey();
-                final Model targetModel = (Model) target.getValue();
+                final String targetPath = stringModelEntry.getKey();
+                final Model targetModel = stringModelEntry.getValue();
                 final Parent parent = targetModel.getParent();
                 getLog().debug( "Module: " + targetPath );
                 if ( sourceVersion.equals( parent.getVersion() ) )

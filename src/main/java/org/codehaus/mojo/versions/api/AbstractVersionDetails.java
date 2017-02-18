@@ -183,10 +183,10 @@ public abstract class AbstractVersionDetails
     {
         ArtifactVersion latest = null;
         final VersionComparator versionComparator = getVersionComparator();
-        Iterator i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
+        Iterator<ArtifactVersion> i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
         while ( i.hasNext() )
         {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
+            ArtifactVersion candidate = i.next();
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
@@ -232,14 +232,13 @@ public abstract class AbstractVersionDetails
 
     public final boolean containsVersion( String version )
     {
-        Iterator i = Arrays.asList( getVersions( true ) ).iterator();
-        while ( i.hasNext() )
+        ArtifactVersion[] versions = getVersions (true);
+        for ( ArtifactVersion item : versions )
         {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
-            if ( version.equals( candidate.toString() ) )
-            {
+            if (version.equals( item.toString() )) {
                 return true;
             }
+                
         }
         return false;
     }
@@ -283,10 +282,10 @@ public abstract class AbstractVersionDetails
     {
         ArtifactVersion oldest = null;
         final VersionComparator versionComparator = getVersionComparator();
-        Iterator i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
+        Iterator<ArtifactVersion> i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
         while ( i.hasNext() )
         {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
+            ArtifactVersion candidate = i.next();
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;

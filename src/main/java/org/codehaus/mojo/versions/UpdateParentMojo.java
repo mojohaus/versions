@@ -73,7 +73,7 @@ public class UpdateParentMojo
             return;
         }
 
-        if ( reactorProjects.contains( getProject().getParent() ) )
+        if ( session.getProjectDependencyGraph().getSortedProjects().contains( getProject().getParent() ) )
         {
             getLog().info( "Project's parent is part of the reactor" );
             return;

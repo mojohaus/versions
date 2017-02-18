@@ -24,9 +24,6 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
@@ -39,6 +36,9 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolver;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolverException;
+import org.apache.maven.shared.dependencies.resolve.DependencyResolver;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -50,12 +50,13 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -86,19 +87,16 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-1
      */
     @Component
-    protected org.apache.maven.artifact.resolver.ArtifactResolver resolver;
+    protected ArtifactResolver resolver;
+    
+    @Component
+    protected DependencyResolver dependencyResolver;
 
     /**
      * @since 1.0-alpha-1
      */
     @Component
     protected MavenProjectBuilder projectBuilder;
-
-    /**
-     * @since 1.0-alpha-1
-     */
-    @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
-    protected List reactorProjects;
 
     /**
      * The artifact metadata source to use.
@@ -111,14 +109,14 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * @since 1.0-alpha-3
      */
-    @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
-    protected List remoteArtifactRepositories;
+    @Parameter(defaultValue = "${project.remoteArtifactRepositories}", readonly = true)
+    protected List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * @since 1.0-alpha-3
      */
-    @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
-    protected List remotePluginRepositories;
+    @Parameter(defaultValue = "${project.pluginArtifactRepositories}", readonly = true)
+    protected List<ArtifactRepository> remotePluginRepositories;
 
     /**
      * @since 1.0-alpha-1
@@ -425,16 +423,22 @@ public abstract class AbstractVersionsUpdaterMojo
         artifact.setVersion( updateVersion.toString() );
         try
         {
-            resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
+            resolver.resolveArtifact( session.getProjectBuildingRequest(), artifact );
+//            resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
         }
-        catch ( ArtifactResolutionException e )
+//        catch ( ArtifactResolutionException e )
+//        {
+//            getLog().warn( "Not updating version: could not resolve " + artifact.toString(), e );
+//            return false;
+//        }
+//        catch ( ArtifactNotFoundException e )
+//        {
+//            getLog().warn( "Not updating version: could not find " + artifact.toString(), e );
+//            return false;
+//        }
+        catch ( ArtifactResolverException e )
         {
             getLog().warn( "Not updating version: could not resolve " + artifact.toString(), e );
-            return false;
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            getLog().warn( "Not updating version: could not find " + artifact.toString(), e );
             return false;
         }
 
@@ -495,9 +499,8 @@ public abstract class AbstractVersionsUpdaterMojo
                                                   boolean allowDowngrade, int segment )
         throws MojoExecutionException, XMLStreamException
     {
-        ArtifactVersion winner =
-            version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                      this.getHelper(), allowDowngrade, segment );
+        ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
+                                                           session.getProjectDependencyGraph().getSortedProjects(), this.getHelper(), allowDowngrade, segment );
 
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {

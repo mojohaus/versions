@@ -90,6 +90,7 @@ public class PomHelper
     public static Model getRawModel( MavenProject project )
         throws IOException
     {
+//        return project.getOriginalModel().clone(); // Using this will fail "it-update-properties-005"
         return getRawModel( project.getFile() );
     }
 
@@ -1195,7 +1196,7 @@ public class PomHelper
         {
             return;
         }
-        for ( Enumeration j = properties.propertyNames(); j.hasMoreElements(); )
+        for ( Enumeration<?> j = properties.propertyNames(); j.hasMoreElements(); )
         {
             String propertyName = (String) j.nextElement();
             if ( !result.containsKey( propertyName ) )
@@ -1207,10 +1208,9 @@ public class PomHelper
 
     private static void purgeProperties( Map<String, PropertyVersionsBuilder> result )
     {
-        for ( Iterator i = result.values().iterator(); i.hasNext(); )
+        for ( Iterator<PropertyVersionsBuilder> i = result.values().iterator(); i.hasNext(); )
         {
-            PropertyVersionsBuilder versions = (PropertyVersionsBuilder) i.next();
-            if ( versions.getAssociations().length == 0 )
+            if ( i.next().getAssociations().length == 0 )
             {
                 i.remove();
             }
@@ -1225,7 +1225,7 @@ public class PomHelper
      * @param logger The logger to use.
      * @return the set of all child modules of the project.
      */
-    public static Set getAllChildModules( MavenProject project, Log logger )
+    public static Set<String> getAllChildModules( MavenProject project, Log logger )
     {
         return getAllChildModules( project.getOriginalModel(), logger );
     }
@@ -1258,9 +1258,9 @@ public class PomHelper
      * @param message The message to display.
      * @param modules The modules to append to the message.
      */
-    public static void debugModules( Log logger, String message, Collection modules )
+    public static void debugModules( Log logger, String message, Collection<String> modules )
     {
-        Iterator i;
+        Iterator<String> i;
         if ( logger.isDebugEnabled() )
         {
             logger.debug( message );

@@ -40,6 +40,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
+
 /**
  * Replaces any version with the latest version.
  *
@@ -112,7 +113,7 @@ public class UseLatestVersionsMojo
         }
     }
 
-    private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection dependencies )
+    private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
@@ -120,10 +121,8 @@ public class UseLatestVersionsMojo
             new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         Iterator i = dependencies.iterator();
 
-        while ( i.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = (Dependency) i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );

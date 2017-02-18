@@ -19,58 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.maven.BuildFailureException;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.execution.RuntimeInformation;
-import org.apache.maven.lifecycle.Lifecycle;
-import org.apache.maven.lifecycle.LifecycleExecutionException;
-import org.apache.maven.lifecycle.LifecycleExecutor;
-import org.apache.maven.lifecycle.mapping.LifecycleMapping;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.Prerequisites;
-import org.apache.maven.model.Profile;
-import org.apache.maven.model.ReportPlugin;
-import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.apache.maven.plugin.InvalidPluginException;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.PluginManager;
-import org.apache.maven.plugin.PluginManagerException;
-import org.apache.maven.plugin.PluginNotFoundException;
-import org.apache.maven.plugin.descriptor.PluginDescriptor;
-import org.apache.maven.plugin.version.PluginVersionNotFoundException;
-import org.apache.maven.plugin.version.PluginVersionResolutionException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.project.DefaultProjectBuilderConfiguration;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.project.interpolation.ModelInterpolationException;
-import org.apache.maven.project.interpolation.ModelInterpolator;
-import org.apache.maven.settings.Settings;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.mojo.versions.utils.PluginComparator;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.ReaderFactory;
-import org.codehaus.plexus.util.StringUtils;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -80,7 +28,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -89,11 +36,49 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.lifecycle.Lifecycle;
+import org.apache.maven.lifecycle.LifecycleExecutionException;
+import org.apache.maven.lifecycle.LifecycleExecutor;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Prerequisites;
+import org.apache.maven.model.Profile;
+import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.PluginManager;
+import org.apache.maven.plugin.PluginNotFoundException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.project.DefaultProjectBuilderConfiguration;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.interpolation.ModelInterpolationException;
+import org.apache.maven.project.interpolation.ModelInterpolator;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolverException;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.PluginComparator;
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.ReaderFactory;
 
 /**
  * Displays all plugins that have newer versions available.
@@ -144,17 +129,10 @@ public class DisplayPluginUpdatesMojo
     /**
      * The plugin manager.
      *
-     * @component
      * @since 1.0-alpha-1
      */
     @Component
     private PluginManager pluginManager;
-
-    /**
-     * @since 1.3
-     */
-    @Component
-    private RuntimeInformation runtimeInformation;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -167,138 +145,132 @@ public class DisplayPluginUpdatesMojo
     private Map<String, String> getSuperPomPluginManagement()
         throws MojoExecutionException
     {
-        if ( new DefaultArtifactVersion( "3.0" ).compareTo( runtimeInformation.getApplicationVersion() ) <= 0 )
-        {
-            getLog().debug( "Using Maven 3.x strategy to determine superpom defined plugins" );
-            try
-            {
-                Method getPluginsBoundByDefaultToAllLifecycles =
-                    LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles",
-                                                       new Class[] { String.class } );
-                Set<Plugin> plugins =
-                    (Set<Plugin>) getPluginsBoundByDefaultToAllLifecycles.invoke( lifecycleExecutor, new Object[] {
-                        getProject().getPackaging() } );
-                // we need to provide a copy with the version blanked out so that inferring from super-pom
-                // works as for 2.x as 3.x fills in the version on us!
-                Map<String, String> result = new LinkedHashMap<String, String>( plugins.size() );
-                for ( Plugin plugin : plugins )
-                {
-                    result.put( getPluginCoords( plugin ), getPluginVersion( plugin ) );
-                }
-                URL superPom = getClass().getClassLoader().getResource( "org/apache/maven/model/pom-4.0.0.xml" );
-                if ( superPom != null )
-                {
-                    try
-                    {
-                        Reader reader = ReaderFactory.newXmlReader( superPom );
-                        try
-                        {
-                            StringBuilder buf = new StringBuilder( IOUtil.toString( reader ) );
-                            ModifiedPomXMLEventReader pom = newModifiedPomXER( buf );
+        Map<String, String> result = Collections.emptyMap();
 
-                            Pattern pathRegex = Pattern.compile( "/project(/profiles/profile)?"
-                                + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );
-                            Stack<StackState> pathStack = new Stack<StackState>();
-                            StackState curState = null;
-                            while ( pom.hasNext() )
-                            {
-                                XMLEvent event = pom.nextEvent();
-                                if ( event.isStartDocument() )
-                                {
-                                    curState = new StackState( "" );
-                                    pathStack.clear();
-                                }
-                                else if ( event.isStartElement() )
-                                {
-                                    String elementName = event.asStartElement().getName().getLocalPart();
-                                    if ( curState != null && pathRegex.matcher( curState.path ).matches() )
-                                    {
-                                        if ( "groupId".equals( elementName ) )
-                                        {
-                                            curState.groupId = pom.getElementText().trim();
-                                            continue;
-                                        }
-                                        else if ( "artifactId".equals( elementName ) )
-                                        {
-                                            curState.artifactId = pom.getElementText().trim();
-                                            continue;
-
-                                        }
-                                        else if ( "version".equals( elementName ) )
-                                        {
-                                            curState.version = pom.getElementText().trim();
-                                            continue;
-                                        }
-                                    }
-
-                                    pathStack.push( curState );
-                                    curState = new StackState( curState.path + "/" + elementName );
-                                }
-                                else if ( event.isEndElement() )
-                                {
-                                    if ( curState != null && pathRegex.matcher( curState.path ).matches() )
-                                    {
-                                        if ( curState.artifactId != null )
-                                        {
-                                            Plugin plugin = new Plugin();
-                                            plugin.setArtifactId( curState.artifactId );
-                                            plugin.setGroupId( curState.groupId == null
-                                                            ? PomHelper.APACHE_MAVEN_PLUGINS_GROUPID
-                                                            : curState.groupId );
-                                            plugin.setVersion( curState.version );
-                                            if ( !result.containsKey( getPluginCoords( plugin ) ) )
-                                            {
-                                                result.put( getPluginCoords( plugin ), getPluginVersion( plugin ) );
-                                            }
-                                        }
-                                    }
-                                    curState = pathStack.pop();
-                                }
-                            }
-                        }
-                        finally
-                        {
-                            IOUtil.close( reader );
-                        }
-                    }
-                    catch ( IOException e )
-                    {
-                        // ignore
-                    }
-                    catch ( XMLStreamException e )
-                    {
-                        // ignore
-                    }
-                }
-
-                return result;
-            }
-            catch ( NoSuchMethodException e1 )
-            {
-                // no much we can do here
-            }
-            catch ( InvocationTargetException e1 )
-            {
-                // no much we can do here
-            }
-            catch ( IllegalAccessException e1 )
-            {
-                // no much we can do here
-            }
-        }
-        getLog().debug( "Using Maven 2.x strategy to determine superpom defined plugins" );
-        Map<String, String> superPomPluginManagement = new HashMap();
+        getLog().debug( "Using Maven 3.x strategy to determine superpom defined plugins" );
         try
         {
-            MavenProject superProject =
-                projectBuilder.buildStandaloneSuperProject( new DefaultProjectBuilderConfiguration() );
-            superPomPluginManagement.putAll( getPluginManagement( superProject.getOriginalModel() ) );
+            Method getPluginsBoundByDefaultToAllLifecycles =
+                LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles",
+                                                   new Class[] { String.class } );
+            Set<Plugin> plugins =
+                (Set<Plugin>) getPluginsBoundByDefaultToAllLifecycles.invoke( lifecycleExecutor, new Object[] {
+                    getProject().getPackaging() } );
+            // we need to provide a copy with the version blanked out so that inferring from super-pom
+            // works as for 2.x as 3.x fills in the version on us!
+            result = new LinkedHashMap<String, String>( plugins.size() );
+            for ( Plugin plugin : plugins )
+            {
+                result.put( getPluginCoords( plugin ), getPluginVersion( plugin ) );
+            }
+            URL superPom = getClass().getClassLoader().getResource( "org/apache/maven/model/pom-4.0.0.xml" );
+            if ( superPom != null )
+            {
+                try
+                {
+                    readSuperPom( result, superPom );
+                }
+                catch ( IOException e )
+                {
+                    // ignore
+                }
+                catch ( XMLStreamException e )
+                {
+                    // ignore
+                }
+            }
+
+            return result;
         }
-        catch ( ProjectBuildingException e )
+        catch ( NoSuchMethodException e1 )
         {
-            throw new MojoExecutionException( "Could not determine the super pom.xml", e );
+            getLog().error( "NoSuchMethodException", e1 );
         }
-        return superPomPluginManagement;
+        catch ( InvocationTargetException e1 )
+        {
+            getLog().error( "InvocationTargetException", e1 );
+        }
+        catch ( IllegalAccessException e1 )
+        {
+            // no much we can do here
+            getLog().error( "IllegalAccessException", e1 );
+        }
+
+        return result;
+    }
+
+    private void readSuperPom( Map<String, String> result, URL superPom )
+        throws IOException, XMLStreamException
+    {
+        Reader reader = ReaderFactory.newXmlReader( superPom );
+        try
+        {
+            StringBuilder buf = new StringBuilder( IOUtil.toString( reader ) );
+            ModifiedPomXMLEventReader pom = newModifiedPomXER( buf );
+
+            Pattern pathRegex = Pattern.compile( "/project(/profiles/profile)?"
+                + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );
+            Stack<StackState> pathStack = new Stack<StackState>();
+            StackState curState = null;
+            while ( pom.hasNext() )
+            {
+                XMLEvent event = pom.nextEvent();
+                if ( event.isStartDocument() )
+                {
+                    curState = new StackState( "" );
+                    pathStack.clear();
+                }
+                else if ( event.isStartElement() )
+                {
+                    String elementName = event.asStartElement().getName().getLocalPart();
+                    if ( curState != null && pathRegex.matcher( curState.path ).matches() )
+                    {
+                        if ( "groupId".equals( elementName ) )
+                        {
+                            curState.groupId = pom.getElementText().trim();
+                            continue;
+                        }
+                        else if ( "artifactId".equals( elementName ) )
+                        {
+                            curState.artifactId = pom.getElementText().trim();
+                            continue;
+
+                        }
+                        else if ( "version".equals( elementName ) )
+                        {
+                            curState.version = pom.getElementText().trim();
+                            continue;
+                        }
+                    }
+
+                    pathStack.push( curState );
+                    curState = new StackState( curState.path + "/" + elementName );
+                }
+                else if ( event.isEndElement() )
+                {
+                    if ( curState != null && pathRegex.matcher( curState.path ).matches() )
+                    {
+                        if ( curState.artifactId != null )
+                        {
+                            Plugin plugin = new Plugin();
+                            plugin.setArtifactId( curState.artifactId );
+                            plugin.setGroupId( curState.groupId == null ? PomHelper.APACHE_MAVEN_PLUGINS_GROUPID
+                                            : curState.groupId );
+                            plugin.setVersion( curState.version );
+                            if ( !result.containsKey( getPluginCoords( plugin ) ) )
+                            {
+                                result.put( getPluginCoords( plugin ), getPluginVersion( plugin ) );
+                            }
+                        }
+                    }
+                    curState = pathStack.pop();
+                }
+            }
+        }
+        finally
+        {
+            IOUtil.close( reader );
+        }
     }
 
     /**
@@ -473,7 +445,7 @@ public class DisplayPluginUpdatesMojo
         List<String> lockdowns = new ArrayList<String>();
         Map<ArtifactVersion, Map<String, String>> upgrades =
             new TreeMap<ArtifactVersion, Map<String, String>>( new MavenVersionComparator() );
-        ArtifactVersion curMavenVersion = runtimeInformation.getApplicationVersion();
+        ArtifactVersion curMavenVersion = new DefaultArtifactVersion( "3.0.0" );
         ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject(), "2.0" ) );
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
@@ -556,17 +528,13 @@ public class DisplayPluginUpdatesMojo
                             minRequires = requires;
                         }
                     }
-                    catch ( ArtifactResolutionException e )
-                    {
-                        // ignore bad version
-                    }
-                    catch ( ArtifactNotFoundException e )
-                    {
-                        // ignore bad version
-                    }
                     catch ( ProjectBuildingException e )
                     {
                         // ignore bad version
+                    }
+                    catch ( ArtifactResolverException e )
+                    {
+                        e.printStackTrace();
                     }
                 }
                 if ( effectiveVersion != null )
@@ -586,17 +554,13 @@ public class DisplayPluginUpdatesMojo
                             minMavenVersion = requires;
                         }
                     }
-                    catch ( ArtifactResolutionException e )
-                    {
-                        // ignore bad version
-                    }
-                    catch ( ArtifactNotFoundException e )
-                    {
-                        // ignore bad version
-                    }
                     catch ( ProjectBuildingException e )
                     {
                         // ignore bad version
+                    }
+                    catch ( ArtifactResolverException e )
+                    {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -963,7 +927,7 @@ public class DisplayPluginUpdatesMojo
      */
     private Map<String, String> getBuildPlugins( Model model, boolean onlyIncludeInherited )
     {
-        Map<String, String> buildPlugins = new HashMap();
+        Map<String, String> buildPlugins = new HashMap<String, String>();
         try
         {
             for ( Plugin plugin : model.getBuild().getPlugins() )
@@ -1078,52 +1042,31 @@ public class DisplayPluginUpdatesMojo
     private Set<Plugin> getBoundPlugins( MavenProject project, String thePhases )
         throws PluginNotFoundException, LifecycleExecutionException, IllegalAccessException
     {
-        if ( new DefaultArtifactVersion( "3.0" ).compareTo( runtimeInformation.getApplicationVersion() ) <= 0 )
-        {
-            getLog().debug( "Using Maven 3.0+ strategy to determine lifecycle defined plugins" );
-            try
-            {
-                Method getPluginsBoundByDefaultToAllLifecycles =
-                    LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles",
-                                                       new Class[] { String.class } );
-                Set<Plugin> plugins =
-                    (Set<Plugin>) getPluginsBoundByDefaultToAllLifecycles.invoke( lifecycleExecutor, new Object[] {
-                        project.getPackaging() == null ? "jar" : project.getPackaging() } );
-                // we need to provide a copy with the version blanked out so that inferring from super-pom
-                // works as for 2.x as 3.x fills in the version on us!
-                Set<Plugin> result = new LinkedHashSet<Plugin>( plugins.size() );
-                for ( Plugin plugin : plugins )
-                {
-                    Plugin dup = new Plugin();
-                    dup.setGroupId( plugin.getGroupId() );
-                    dup.setArtifactId( plugin.getArtifactId() );
-                    result.add( dup );
-                }
-                return result;
-            }
-            catch ( NoSuchMethodException e1 )
-            {
-                // no much we can do here
-            }
-            catch ( InvocationTargetException e1 )
-            {
-                // no much we can do here
-            }
-            catch ( IllegalAccessException e1 )
-            {
-                // no much we can do here
-            }
-        }
-        List lifecycles = null;
-        getLog().debug( "Using Maven 2.0.10+ strategy to determine lifecycle defined plugins" );
+        Set<Plugin> result = new LinkedHashSet<Plugin>();
+        getLog().debug( "Using Maven 3.0+ strategy to determine lifecycle defined plugins" );
         try
         {
-            Method getLifecycles = LifecycleExecutor.class.getMethod( "getLifecycles", new Class[0] );
-            lifecycles = (List) getLifecycles.invoke( lifecycleExecutor, new Object[0] );
+            Method getPluginsBoundByDefaultToAllLifecycles =
+                LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles",
+                                                   new Class[] { String.class } );
+            Set<Plugin> plugins =
+                (Set<Plugin>) getPluginsBoundByDefaultToAllLifecycles.invoke( lifecycleExecutor, new Object[] {
+                    project.getPackaging() == null ? "jar" : project.getPackaging() } );
+            // we need to provide a copy with the version blanked out so that inferring from super-pom
+            // works as for 2.x as 3.x fills in the version on us!
+            result = new LinkedHashSet<Plugin>( plugins.size() );
+            for ( Plugin plugin : plugins )
+            {
+                Plugin dup = new Plugin();
+                dup.setGroupId( plugin.getGroupId() );
+                dup.setArtifactId( plugin.getArtifactId() );
+                result.add( dup );
+            }
+            return result;
         }
         catch ( NoSuchMethodException e1 )
         {
-            // no much we can do here
+            getLog().error( "NoSuchMethodException", e1 );
         }
         catch ( InvocationTargetException e1 )
         {
@@ -1133,298 +1076,7 @@ public class DisplayPluginUpdatesMojo
         {
             // no much we can do here
         }
-
-        Set<Plugin> allPlugins = new HashSet<Plugin>();
-
-        // lookup the bindings for all the passed in phases
-        for ( String lifecyclePhase : thePhases.split( "," ) )
-        {
-            if ( StringUtils.isNotEmpty( lifecyclePhase ) )
-            {
-                try
-                {
-                    Lifecycle lifecycle = getLifecycleForPhase( lifecycles, lifecyclePhase );
-                    allPlugins.addAll( getAllPlugins( project, lifecycle ) );
-                }
-                catch ( BuildFailureException e )
-                {
-                    // i'm going to swallow this because the
-                    // user may have declared a phase that
-                    // doesn't exist for every module.
-                }
-            }
-        }
-        return allPlugins;
-    }
-
-    /**
-     * Gets the lifecycle for phase.
-     *
-     * @param lifecycles The list of lifecycles.
-     * @param phase the phase
-     * @return the lifecycle for phase
-     * @throws BuildFailureException the build failure exception
-     * @throws LifecycleExecutionException the lifecycle execution exception
-     */
-    private Lifecycle getLifecycleForPhase( List lifecycles, String phase )
-        throws BuildFailureException, LifecycleExecutionException
-    {
-        Lifecycle lifecycle = (Lifecycle) getPhaseToLifecycleMap( lifecycles ).get( phase );
-
-        if ( lifecycle == null )
-        {
-            throw new BuildFailureException( "Unable to find lifecycle for phase '" + phase + "'" );
-        }
-        return lifecycle;
-    }
-
-    /*
-     * Uses borrowed lifecycle code to get a list of all plugins bound to the lifecycle.
-     */
-
-    /**
-     * Gets the all plugins.
-     *
-     * @param project the project
-     * @param lifecycle the lifecycle
-     * @return the all plugins
-     * @throws PluginNotFoundException the plugin not found exception
-     * @throws LifecycleExecutionException the lifecycle execution exception
-     */
-    private Set<Plugin> getAllPlugins( MavenProject project, Lifecycle lifecycle )
-        throws PluginNotFoundException, LifecycleExecutionException
-
-    {
-        Set<Plugin> plugins = new HashSet<Plugin>();
-        // first, bind those associated with the packaging
-        Map mappings = findMappingsForLifecycle( project, lifecycle );
-
-        Iterator iter = mappings.entrySet().iterator();
-        while ( iter.hasNext() )
-        {
-            Map.Entry entry = (Map.Entry) iter.next();
-            String value = (String) entry.getValue();
-            String[] tokens = value.split( ":" );
-
-            Plugin plugin = new Plugin();
-            plugin.setGroupId( tokens[0] );
-            plugin.setArtifactId( tokens[1] );
-            plugins.add( plugin );
-        }
-
-        for ( String value : findOptionalMojosForLifecycle( project, lifecycle ) )
-        {
-            String[] tokens = value.split( ":" );
-
-            Plugin plugin = new Plugin();
-            plugin.setGroupId( tokens[0] );
-            plugin.setArtifactId( tokens[1] );
-            plugins.add( plugin );
-        }
-
-        plugins.addAll( (List<Plugin>) project.getBuildPlugins() );
-
-        return plugins;
-    }
-
-    /**
-     * Find mappings for lifecycle.
-     *
-     * @param project the project
-     * @param lifecycle the lifecycle
-     * @return the map
-     * @throws LifecycleExecutionException the lifecycle execution exception
-     * @throws PluginNotFoundException the plugin not found exception
-     */
-    private Map findMappingsForLifecycle( MavenProject project, Lifecycle lifecycle )
-        throws LifecycleExecutionException, PluginNotFoundException
-    {
-        String packaging = project.getPackaging();
-        Map mappings = null;
-
-        LifecycleMapping m = (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging,
-                                                               session.getSettings(), session.getLocalRepository() );
-        if ( m != null )
-        {
-            mappings = m.getPhases( lifecycle.getId() );
-        }
-
-        Map defaultMappings = lifecycle.getDefaultPhases();
-
-        if ( mappings == null )
-        {
-            try
-            {
-                m = (LifecycleMapping) session.lookup( LifecycleMapping.ROLE, packaging );
-                mappings = m.getPhases( lifecycle.getId() );
-            }
-            catch ( ComponentLookupException e )
-            {
-                if ( defaultMappings == null )
-                {
-                    throw new LifecycleExecutionException( "Cannot find lifecycle mapping for packaging: \'" + packaging
-                        + "\'.", e );
-                }
-            }
-        }
-
-        if ( mappings == null )
-        {
-            if ( defaultMappings == null )
-            {
-                throw new LifecycleExecutionException( "Cannot find lifecycle mapping for packaging: \'" + packaging
-                    + "\', and there is no default" );
-            }
-            else
-            {
-                mappings = defaultMappings;
-            }
-        }
-
-        return mappings;
-    }
-
-    /**
-     * Find optional mojos for lifecycle.
-     *
-     * @param project the project
-     * @param lifecycle the lifecycle
-     * @return the list
-     * @throws LifecycleExecutionException the lifecycle execution exception
-     * @throws PluginNotFoundException the plugin not found exception
-     */
-    private List<String> findOptionalMojosForLifecycle( MavenProject project, Lifecycle lifecycle )
-        throws LifecycleExecutionException, PluginNotFoundException
-    {
-        String packaging = project.getPackaging();
-        List<String> optionalMojos = null;
-
-        LifecycleMapping m = (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging,
-                                                               session.getSettings(), session.getLocalRepository() );
-
-        if ( m != null )
-        {
-            optionalMojos = m.getOptionalMojos( lifecycle.getId() );
-        }
-
-        if ( optionalMojos == null )
-        {
-            try
-            {
-                m = (LifecycleMapping) session.lookup( LifecycleMapping.ROLE, packaging );
-                optionalMojos = m.getOptionalMojos( lifecycle.getId() );
-            }
-            catch ( ComponentLookupException e )
-            {
-                getLog().debug( "Error looking up lifecycle mapping to retrieve optional mojos. Lifecycle ID: "
-                    + lifecycle.getId() + ". Error: " + e.getMessage(), e );
-            }
-        }
-
-        if ( optionalMojos == null )
-        {
-            optionalMojos = Collections.emptyList();
-        }
-
-        return optionalMojos;
-    }
-
-    /**
-     * Find extension.
-     *
-     * @param project the project
-     * @param role the role
-     * @param roleHint the role hint
-     * @param settings the settings
-     * @param localRepository the local repository
-     * @return the object
-     * @throws LifecycleExecutionException the lifecycle execution exception
-     * @throws PluginNotFoundException the plugin not found exception
-     */
-    private Object findExtension( MavenProject project, String role, String roleHint, Settings settings,
-                                  ArtifactRepository localRepository )
-        throws LifecycleExecutionException, PluginNotFoundException
-    {
-        Object pluginComponent = null;
-
-        for ( Iterator i = project.getBuildPlugins().iterator(); i.hasNext() && pluginComponent == null; )
-        {
-            Plugin plugin = (Plugin) i.next();
-
-            if ( plugin.isExtensions() )
-            {
-                loadPluginDescriptor( plugin, project, session );
-
-                // TODO: if moved to the plugin manager we
-                // already have the descriptor from above
-                // and so do can lookup the container
-                // directly
-                try
-                {
-                    pluginComponent = pluginManager.getPluginComponent( plugin, role, roleHint );
-                }
-                catch ( ComponentLookupException e )
-                {
-                    getLog().debug( "Unable to find the lifecycle component in the extension", e );
-                }
-                catch ( PluginManagerException e )
-                {
-                    throw new LifecycleExecutionException( "Error getting extensions from the plugin '"
-                        + plugin.getKey() + "': " + e.getMessage(), e );
-                }
-            }
-        }
-        return pluginComponent;
-    }
-
-    /**
-     * Verify plugin.
-     *
-     * @param plugin the plugin
-     * @param project the project
-     * @param session the session
-     * @return the plugin descriptor
-     * @throws LifecycleExecutionException the lifecycle execution exception
-     * @throws PluginNotFoundException the plugin not found exception
-     */
-    private PluginDescriptor loadPluginDescriptor( Plugin plugin, MavenProject project, MavenSession session )
-        throws LifecycleExecutionException, PluginNotFoundException
-    {
-        PluginDescriptor pluginDescriptor;
-        try
-        {
-            pluginDescriptor = pluginManager.loadPluginDescriptor( plugin, project, session );
-        }
-        catch ( PluginManagerException e )
-        {
-            throw new LifecycleExecutionException( "Internal error in the plugin manager getting plugin '"
-                + plugin.getKey() + "': " + e.getMessage(), e );
-        }
-        catch ( PluginVersionResolutionException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( InvalidPluginException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( ArtifactResolutionException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( PluginVersionNotFoundException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        return pluginDescriptor;
+        return result;
     }
 
     /**
@@ -1725,17 +1377,15 @@ public class DisplayPluginUpdatesMojo
      * @param plugins a map with keys being the {@link String} corresponding to the versionless artifact key and values
      *            being {@link Plugin} or {@link ReportPlugin}.
      */
-    private void debugPluginMap( String description, Map plugins )
+    private void debugPluginMap( String description, Map<String, Plugin> plugins )
     {
         if ( getLog().isDebugEnabled() )
         {
-            Set sorted = new TreeSet( new PluginComparator() );
+            Set<Plugin> sorted = new TreeSet<Plugin>( new PluginComparator() );
             sorted.addAll( plugins.values() );
             StringBuilder buf = new StringBuilder( description );
-            Iterator i = sorted.iterator();
-            while ( i.hasNext() )
+            for ( Plugin plugin : sorted )
             {
-                Object plugin = i.next();
                 buf.append( "\n    " );
                 buf.append( getPluginCoords( plugin ) );
                 buf.append( ":" );
@@ -1752,15 +1402,13 @@ public class DisplayPluginUpdatesMojo
      * @param plugins a map with keys being the {@link String} corresponding to the versionless artifact key and values
      *            being {@link String} plugin version.
      */
-    private void debugVersionMap( String description, Map plugins )
+    private void debugVersionMap( String description, Map<String, String> plugins )
     {
         if ( getLog().isDebugEnabled() )
         {
             StringBuilder buf = new StringBuilder( description );
-            Iterator i = plugins.entrySet().iterator();
-            while ( i.hasNext() )
+            for ( Map.Entry<String, String> plugin : plugins.entrySet() )
             {
-                Map.Entry plugin = (Map.Entry) i.next();
                 buf.append( "\n    " );
                 buf.append( plugin.getKey() );
                 buf.append( ":" );
@@ -1804,45 +1452,6 @@ public class DisplayPluginUpdatesMojo
         return plugin;
     }
 
-    private static ReportPlugin toReportPlugin( Plugin plugin )
-    {
-        ReportPlugin reportPlugin = new ReportPlugin();
-        reportPlugin.setGroupId( plugin.getGroupId() );
-        reportPlugin.setArtifactId( plugin.getArtifactId() );
-        reportPlugin.setVersion( plugin.getVersion() );
-        return reportPlugin;
-    }
-
-    private static Set<Plugin> toPlugins( Set<ReportPlugin> reportPlugins )
-    {
-        Set<Plugin> result;
-        if ( reportPlugins instanceof LinkedHashSet )
-        {
-            result = new LinkedHashSet<Plugin>( reportPlugins.size() );
-        }
-        else if ( reportPlugins instanceof SortedSet )
-        {
-            final Comparator<? super ReportPlugin> comparator =
-                ( (SortedSet<ReportPlugin>) reportPlugins ).comparator();
-            result = new TreeSet<Plugin>( new Comparator<Plugin>()
-            {
-                public int compare( Plugin o1, Plugin o2 )
-                {
-                    return comparator.compare( toReportPlugin( o1 ), toReportPlugin( o2 ) );
-                }
-            } );
-        }
-        else
-        {
-            result = new HashSet<Plugin>( reportPlugins.size() );
-        }
-        for ( ReportPlugin reportPlugin : reportPlugins )
-        {
-            result.add( toPlugin( reportPlugin ) );
-        }
-        return result;
-    }
-
     private static List<Plugin> toPlugins( List<ReportPlugin> reportPlugins )
     {
         List<Plugin> result = new ArrayList<Plugin>( reportPlugins.size() );
@@ -1851,19 +1460,6 @@ public class DisplayPluginUpdatesMojo
             result.add( toPlugin( reportPlugin ) );
         }
         return result;
-    }
-
-    private static Collection<Plugin> toPlugins( Collection<ReportPlugin> reportPlugins )
-    {
-        if ( reportPlugins instanceof Set )
-        {
-            return toPlugins( (Set<ReportPlugin>) reportPlugins );
-        }
-        if ( reportPlugins instanceof List )
-        {
-            return toPlugins( (List<ReportPlugin>) reportPlugins );
-        }
-        return toPlugins( new ArrayList<ReportPlugin>( reportPlugins ) );
     }
 
     /**

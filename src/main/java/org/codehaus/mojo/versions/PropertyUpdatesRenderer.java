@@ -19,16 +19,16 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 import org.apache.maven.doxia.sink.Sink;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
 import org.codehaus.plexus.i18n.I18N;
-
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @since 1.0-beta-1
@@ -81,7 +81,7 @@ public class PropertyUpdatesRenderer
         sink.section1_();
     }
 
-    private void renderSummaryTable( String titleKey, Map contents, String emptyKey )
+    private void renderSummaryTable( String titleKey, Map<Property, PropertyVersions> contents, String emptyKey )
     {
         sink.section2();
         sink.sectionTitle2();
@@ -101,16 +101,16 @@ public class PropertyUpdatesRenderer
         sink.section2_();
     }
 
-    private void renderSummaryTotalsTable( Map allUpdates )
+    private void renderSummaryTotalsTable( Map<Property, PropertyVersions> allUpdates )
     {
         int numInc = 0;
         int numMin = 0;
         int numMaj = 0;
         int numAny = 0;
         int numCur = 0;
-        for ( Iterator iterator = allUpdates.values().iterator(); iterator.hasNext(); )
+        for ( Entry<Property, PropertyVersions> item : allUpdates.entrySet() )
         {
-            PropertyVersions details = (PropertyVersions) iterator.next();
+            PropertyVersions details = item.getValue();
             if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
             {
                 numAny++;

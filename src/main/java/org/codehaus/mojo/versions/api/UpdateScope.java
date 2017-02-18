@@ -41,6 +41,11 @@ public abstract class UpdateScope
 {
 
     /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
      * Versions which are less than an incremental update.
      *
      * @since 1.0-beta-1
@@ -90,6 +95,11 @@ public abstract class UpdateScope
      */
     public static final UpdateScope INCREMENTAL = new UpdateScope( "INCREMENTAL", 1 )
     {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -5208556011661223059L;
+
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
@@ -133,6 +143,11 @@ public abstract class UpdateScope
      */
     public static final UpdateScope MINOR = new UpdateScope( "MINOR", 2 )
     {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -5666111799673052641L;
+
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
@@ -176,6 +191,11 @@ public abstract class UpdateScope
      */
     public static final UpdateScope MAJOR = new UpdateScope( "MAJOR", 3 )
     {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -5024680992626893873L;
+
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
@@ -215,6 +235,11 @@ public abstract class UpdateScope
      */
     public static final UpdateScope ANY = new UpdateScope( "ANY", 4 )
     {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -4711065552278068643L;
+
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
@@ -463,11 +488,11 @@ public abstract class UpdateScope
         }
     }
 
-    private static final Map levelConstants;
+    private static final Map<String, UpdateScope> levelConstants;
 
     static
     {
-        Map map = new HashMap( 5 );
+        HashMap<String, UpdateScope> map = new HashMap<String, UpdateScope>( 5 );
         map.put( SUBINCREMENTAL.name(), SUBINCREMENTAL );
         map.put( INCREMENTAL.name(), INCREMENTAL );
         map.put( MINOR.name(), MINOR );

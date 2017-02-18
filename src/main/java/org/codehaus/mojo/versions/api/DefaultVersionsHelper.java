@@ -26,9 +26,6 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -41,6 +38,8 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolver;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolverException;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -132,14 +131,14 @@ public class DefaultVersionsHelper
      *
      * @since 1.0-alpha-3
      */
-    private final List remoteArtifactRepositories;
+    private final List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * The remote plugin repositories to consult.
      *
      * @since 1.0-alpha-3
      */
-    private final List remotePluginRepositories;
+    private final List<ArtifactRepository> remotePluginRepositories;
 
     /**
      * The artifact factory.
@@ -172,7 +171,9 @@ public class DefaultVersionsHelper
     /**
      * The artifact resolver.
      *
+     * Note: With version 3.0.0 upgraded to maven-artifact-transfer shared.
      * @since 1.3
+     * 
      */
     private final ArtifactResolver artifactResolver;
 
@@ -196,8 +197,8 @@ public class DefaultVersionsHelper
      * @since 1.0-alpha-3
      */
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
-                                  ArtifactMetadataSource artifactMetadataSource, List remoteArtifactRepositories,
-                                  List remotePluginRepositories, ArtifactRepository localRepository,
+                                  ArtifactMetadataSource artifactMetadataSource, List<ArtifactRepository> remoteArtifactRepositories,
+                                  List<ArtifactRepository> remotePluginRepositories, ArtifactRepository localRepository,
                                   WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
                                   Log log, MavenSession mavenSession, PathTranslator pathTranslator )
         throws MojoExecutionException
@@ -389,7 +390,7 @@ public class DefaultVersionsHelper
     public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
-        List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
+        List<ArtifactRepository> remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
         final List<ArtifactVersion> versions =
             artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
         final List<IgnoreVersion> ignoredVersions = getIgnoredVersions( artifact );
@@ -509,10 +510,10 @@ public class DefaultVersionsHelper
     }
 
     public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactResolutionException, ArtifactNotFoundException
+        throws ArtifactResolverException
     {
-        List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
-        artifactResolver.resolve( artifact, remoteRepositories, localRepository );
+        artifactResolver.resolveArtifact( mavenSession.getProjectBuildingRequest(), artifact );
+//        artifactResolver.resolve( artifact, remoteRepositories, localRepository );
     }
 
     /**
@@ -673,7 +674,7 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies,
+    public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                         boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
@@ -706,12 +707,12 @@ public class DefaultVersionsHelper
         catch ( final ExecutionException ee )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
-                + ": " + ee.getMessage(), ee );
+                + ": " + ee.getMessage(), ee, null );
         }
         catch ( final InterruptedException ie )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
-                + ": " + ie.getMessage(), ie );
+                + ": " + ie.getMessage(), ie, null );
         }
         finally
         {
@@ -771,12 +772,12 @@ public class DefaultVersionsHelper
         catch ( final ExecutionException ee )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
-                + ee.getMessage(), ee );
+                + ee.getMessage(), ee, null );
         }
         catch ( final InterruptedException ie )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
-                + ie.getMessage(), ie );
+                + ie.getMessage(), ie, null );
         }
         finally
         {

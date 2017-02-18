@@ -47,9 +47,6 @@ public class SeparatePatternsForIncludesAnExcludesTest
         assertEquals( 1, patterns.size() );
         assertEquals( "group:artifact:type:[1.0.2,2.0.0]", patterns.get( 0 ) );
 
-        patterns = mojo.separatePatterns( "group:artifact:type:(1.0.2,2.0.0]" );
-        assertEquals( 1, patterns.size() );
-        assertEquals( "group:artifact:type:(1.0.2,2.0.0]", patterns.get( 0 ) );
     }
 
     public void testSeparatePatternWithSeveralPatternsAndRanges()
