@@ -37,9 +37,11 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
@@ -114,7 +116,7 @@ public class CompareDependenciesMojo
      * The project builder used to initialize the remote project.
      */
     @Component
-    protected MavenProjectBuilder mavenProjectBuilder;
+    protected ProjectBuilder mavenProjectBuilder;
 
     // ------------------------------ METHODS --------------------------
 
@@ -154,11 +156,15 @@ public class CompareDependenciesMojo
         remoteDependency.setVersion( rVersion );
 
         Artifact remoteArtifact = this.toArtifact( remoteDependency );
-        MavenProject remoteMavenProject = null;
+        ProjectBuildingResult projectBuildingResult = null;
         try
         {
-            remoteMavenProject =
-                mavenProjectBuilder.buildFromRepository( remoteArtifact, remoteArtifactRepositories, localRepository );
+            ProjectBuildingRequest pbr = new DefaultProjectBuildingRequest();
+            pbr.setRemoteRepositories( remoteArtifactRepositories);
+            pbr.setLocalRepository( localRepository );
+            
+            projectBuildingResult =
+                mavenProjectBuilder.build( remoteArtifact, pbr );
         }
         catch ( ProjectBuildingException e )
         {
@@ -168,13 +174,13 @@ public class CompareDependenciesMojo
         Map<String, Dependency> remoteDepsMap = new HashMap<String, Dependency>();
         if ( !ignoreRemoteDependencyManagement )
         {
-            List<Dependency> remoteProjectDepMgmtDeps = ( remoteMavenProject.getDependencyManagement() == null ) ? null
-                            : remoteMavenProject.getDependencyManagement().getDependencies();
+            List<Dependency> remoteProjectDepMgmtDeps = ( projectBuildingResult.getProject().getDependencyManagement() == null ) ? null
+                            : projectBuildingResult.getProject().getDependencyManagement().getDependencies();
             mapDependencies( remoteDepsMap, remoteProjectDepMgmtDeps );
         }
         if ( !ignoreRemoteDependencies )
         {
-            List<Dependency> remoteProjectDeps = remoteMavenProject.getDependencies();
+            List<Dependency> remoteProjectDeps = projectBuildingResult.getProject().getDependencies();
             mapDependencies( remoteDepsMap, remoteProjectDeps );
         }
 

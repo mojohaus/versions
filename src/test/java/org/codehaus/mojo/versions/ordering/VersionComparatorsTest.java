@@ -43,11 +43,6 @@ public class VersionComparatorsTest
     }
 
     @Test
-    public void testMercuryVersionComparator() {
-        assertVersions( new MercuryVersionComparator());
-    }
-
-    @Test
     public void testNumericVersionComparator() {
         assertVersions( new NumericVersionComparator() );
     }

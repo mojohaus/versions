@@ -281,8 +281,7 @@ public class SetMojo
 
         try
         {
-            final MavenProject project =
-                PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
+            final MavenProject project = session.getTopLevelProject();
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );

@@ -22,7 +22,6 @@ package org.codehaus.mojo.versions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -195,10 +194,9 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return null;
         }
-        Iterator<?> iter = getProject().getDependencyArtifacts().iterator();
-        while ( iter.hasNext() )
+
+        for ( Artifact artifact : getProject().getDependencyArtifacts() )
         {
-            Artifact artifact = (Artifact) iter.next();
             if ( compare( artifact, dependency ) )
             {
                 return artifact;
@@ -298,10 +296,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     protected boolean isProducedByReactor( Dependency dependency )
     {
-        Iterator<?> iter = reactorProjects.iterator();
-        while ( iter.hasNext() )
+        for ( MavenProject project : session.getProjectDependencyGraph().getSortedProjects() )
         {
-            MavenProject project = (MavenProject) iter.next();
             if ( compare( project, dependency ) )
             {
                 return true;

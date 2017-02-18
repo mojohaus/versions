@@ -24,9 +24,6 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
@@ -36,9 +33,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolver;
+import org.apache.maven.shared.artifact.resolve.ArtifactResolverException;
+import org.apache.maven.shared.dependencies.resolve.DependencyResolver;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -83,22 +83,22 @@ public abstract class AbstractVersionsUpdaterMojo
     protected org.apache.maven.artifact.factory.ArtifactFactory artifactFactory;
 
     /**
-     * @since 1.0-alpha-1
+     * @since 3.0.0
      */
     @Component
-    protected org.apache.maven.artifact.resolver.ArtifactResolver resolver;
+    protected DependencyResolver dependencyResolver;
 
     /**
      * @since 1.0-alpha-1
      */
     @Component
-    protected MavenProjectBuilder projectBuilder;
+    protected ArtifactResolver resolver;
 
     /**
      * @since 1.0-alpha-1
      */
-    @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
-    protected List reactorProjects;
+    @Component
+    protected ProjectBuilder projectBuilder;
 
     /**
      * The artifact metadata source to use.
@@ -112,13 +112,13 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-3
      */
     @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
-    protected List remoteArtifactRepositories;
+    protected List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * @since 1.0-alpha-3
      */
     @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
-    protected List remotePluginRepositories;
+    protected List<ArtifactRepository> remotePluginRepositories;
 
     /**
      * @since 1.0-alpha-1
@@ -427,16 +427,11 @@ public abstract class AbstractVersionsUpdaterMojo
         artifact.setVersion( updateVersion.toString() );
         try
         {
-            resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
+            resolver.resolveArtifact( session.getProjectBuildingRequest(), artifact );
         }
-        catch ( ArtifactResolutionException e )
+        catch ( ArtifactResolverException e )
         {
             getLog().warn( "Not updating version: could not resolve " + artifact.toString(), e );
-            return false;
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            getLog().warn( "Not updating version: could not find " + artifact.toString(), e );
             return false;
         }
 
@@ -497,9 +492,8 @@ public abstract class AbstractVersionsUpdaterMojo
                                                   boolean allowDowngrade, int segment )
         throws MojoExecutionException, XMLStreamException
     {
-        ArtifactVersion winner =
-            version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                      this.getHelper(), allowDowngrade, segment );
+        ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
+                                                           session.getProjectDependencyGraph().getSortedProjects(), this.getHelper(), allowDowngrade, segment );
 
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {

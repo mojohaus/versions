@@ -55,10 +55,6 @@ public final class VersionComparators
         {
             return new NumericVersionComparator();
         }
-        else if ( "mercury".equalsIgnoreCase( comparisonMethod ) )
-        {
-            return new MercuryVersionComparator();
-        }
         return new MavenVersionComparator();
     }
 

@@ -53,7 +53,7 @@ public class DisplayParentUpdatesMojo
             return;
         }
 
-        if ( reactorProjects.contains( getProject().getParent() ) )
+        if ( session.getProjectDependencyGraph().getSortedProjects().contains( getProject().getParent() ) )
         {
             logLine( false, "Parent project is part of the reactor." );
             return;

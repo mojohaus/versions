@@ -85,8 +85,8 @@ public final class WagonUtils
      */
     public static Wagon createWagon( String serverId, String url, WagonManager wagonManager, Settings settings,
                                      Log logger )
-                                         throws UnsupportedProtocolException, WagonConfigurationException,
-                                         ConnectionException, AuthenticationException
+            throws UnsupportedProtocolException, org.apache.maven.repository.legacy.WagonConfigurationException,
+            ConnectionException, AuthenticationException
     {
         Repository repository = new Repository( serverId, url );
         Wagon wagon = wagonManager.getWagon( repository );

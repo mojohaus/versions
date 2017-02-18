@@ -469,10 +469,8 @@ public class DisplayDependencyUpdatesMojo
         else
         {
             logLine( false, "The following dependencies in " + section + " have newer versions:" );
-            i = withUpdates.iterator();
-            while ( i.hasNext() )
-            {
-                logLine( false, (String) i.next() );
+            for ( String withUpdate : withUpdates ) {
+                logLine( false, withUpdate );
             }
             logLine( false, "" );
         }
