@@ -282,14 +282,6 @@
           <artifactId>maven-gpg-plugin</artifactId>
           <version>1.6</version>
         </plugin>
-        <!--
-          ! Use the most uptodate version.
-        -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-invoker-plugin</artifactId>
-          <version>2.0.0</version>
-        </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -441,7 +433,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-invoker-plugin</artifactId>
-        <version>2.0.0</version>
         <reportSets>
           <reportSet>
             <reports>
