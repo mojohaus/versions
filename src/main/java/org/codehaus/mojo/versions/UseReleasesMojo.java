@@ -88,6 +88,7 @@ public class UseReleasesMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
+                useReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
                 useReleases( pom, getProject().getDependencyManagement().getDependencies() );
             }
             if ( isProcessingDependencies() )
