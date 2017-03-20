@@ -75,6 +75,13 @@ public class UpdatePropertiesMojo
     @Parameter(property = "autoLinkItems", defaultValue = "true")
     private Boolean autoLinkItems;
 
+    
+    /**
+     * @since 3.0.0
+     */
+    @Parameter(property = "allowDowngrade", defaultValue = "false")
+    private boolean allowDowngrade;
+    
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
@@ -118,7 +125,7 @@ public class UpdatePropertiesMojo
 
             if ( canUpdateProperty )
             {
-                updatePropertyToNewestVersion( pom, property, version, currentVersion );
+                updatePropertyToNewestVersion( pom, property, version, currentVersion, allowDowngrade );
             }
 
         }

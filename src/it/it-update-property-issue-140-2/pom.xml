@@ -4,13 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>localhost</groupId>
-  <artifactId>it-issue-140</artifactId>
+  <artifactId>it-issue-140-2</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
 
   <name>update-property based on issue-140</name>
   <description>This test should proove that using -Dproperty=versionModuleTest -DnewVersion=[0.0.2.19]
-    without the -DallowSnapshot=true the result will be that none of the properties will be changed.
+    -DallowDowngrade=true should only update the property versionModuleTest but not versionModule.
   </description>
   <inceptionYear>2017</inceptionYear>
   <properties>

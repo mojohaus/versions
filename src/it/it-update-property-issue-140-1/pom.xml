@@ -10,7 +10,7 @@
 
   <name>update-property based on issue-140</name>
   <description>This test should proove that using -Dproperty=versionModule -DnewVersion=[0.0.2.19]
-    should only update the property versionModuleTest but versionModule instead.
+    without the -DallowDowngrade=true the result is that this will not change anything.
   </description>
   <inceptionYear>2017</inceptionYear>
   <properties>

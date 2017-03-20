@@ -483,11 +483,11 @@ public abstract class AbstractVersionsUpdaterMojo
     }
 
     protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                  PropertyVersions version, String currentVersion )
+                                                  PropertyVersions version, String currentVersion, boolean allowDowngrade )
                                                       throws MojoExecutionException, XMLStreamException
     {
         ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                                                           this.reactorProjects, this.getHelper() );
+                                                           this.reactorProjects, this.getHelper(), allowDowngrade );
 
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {
