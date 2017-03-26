@@ -142,7 +142,6 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
      *
-     * @parameter property="maven.version.rules.serverId" default-value="serverId";
      * @since 1.0-alpha-3
      */
     @Parameter(property = "maven.version.rules.serverId", defaultValue = "serverId")
@@ -159,7 +158,6 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Controls whether a backup pom should be created.
      *
-     * @parameter property="generateBackupPoms" default-value="true"
      * @since 1.0-alpha-3
      */
     @Parameter(property = "generateBackupPoms", defaultValue = "true")
