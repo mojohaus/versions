@@ -97,7 +97,7 @@
     <doxiaVersion>1.4</doxiaVersion>
     <doxia-sitetoolsVersion>1.4</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
-    <sitePluginVersion>3.3</sitePluginVersion>
+    <sitePluginVersion>3.6</sitePluginVersion>
   </properties>
 
   <dependencies>
@@ -447,11 +447,13 @@
           </reportSet>
         </reportSets>
       </plugin>
+      <!-- Should be replaced with JaCoCo
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
         <version>2.7</version>
       </plugin>
+      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
