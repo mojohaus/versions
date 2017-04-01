@@ -134,7 +134,6 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Whether to skip processing dependencies that are produced as part of the current reactor.
      *
-     * @parameter property="excludeReactor" defaultValue="true"
      * @since 1.0-alpha-3
      */
     @Parameter(property = "excludeReactor", defaultValue = "true")
