@@ -52,7 +52,16 @@ public class UpdatePropertyMojo
 
     /**
      * The new version to set the property to (can be a version range to find a version within).
-     *
+     * <ul>
+     *   <li><code>1.0</code>x >= 1.0. The default Maven meaning for 1.0 is everything (,) but with 1.0 recommended.</li>
+     *   <li><code>[1.0,2.0)</code> Versions 1.0 (included) to 2.0 (not included)</li>
+     *   <li><code>[1.0,2.0]</code> Versions 1.0 to 2.0 (both included)</li>
+     *   <li><code>[1.5,)</code> Versions 1.5 and higher</li>
+     *   <li><code>(,1.0],[1.2,)</code> Versions up to 1.0 (included) and 1.2 or higher</li>
+     * </ul>
+     * If you like to define version to be used exactly you have to use something like this:
+     * <code>-DnewVersion=[19.0]</code> otherwise a newer existing version will be used.
+     * 
      * @since 1.3
      */
     @Parameter (property = "newVersion")
