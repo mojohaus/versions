@@ -237,6 +237,22 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         return artifact;
     }
 
+    protected String toString( MavenProject project ) {
+        StringBuilder buf = new StringBuilder();
+
+        buf.append( project.getGroupId() );
+        buf.append( ':' );
+        buf.append( project.getArtifactId() );
+
+        if ( project.getVersion() != null && project.getVersion().length() > 0 )
+        {
+            buf.append( ":" );
+            buf.append( project.getVersion() );
+        }
+
+        return buf.toString();
+    }
+
     protected String toString( Dependency d )
     {
         StringBuilder buf = new StringBuilder();
