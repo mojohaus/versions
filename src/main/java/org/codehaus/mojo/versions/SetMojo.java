@@ -19,11 +19,29 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.change.VersionChange;
@@ -38,103 +56,90 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.StringUtils;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-
 /**
  * Sets the current project's version and based on that change propagates that change onto any child modules as
  * necessary.
  *
  * @author Stephen Connolly
- * @goal set
- * @aggregator
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-beta-1
  */
+@Mojo (name="set", requiresProject = true, requiresDirectInvocation = true, aggregator = true)
 public class SetMojo
     extends AbstractVersionsUpdaterMojo
 {
 
+    private static final String SNAPSHOT = "-SNAPSHOT";
+
     /**
      * The new version number to set.
      *
-     * @parameter property="newVersion"
      * @since 1.0-beta-1
      */
+    @Parameter(property = "newVersion")
     private String newVersion;
 
     /**
      * The groupId of the dependency/module to update.
      *
-     * @parameter property="groupId" default-value="${project.groupId}"
      * @since 1.2
      */
+    @Parameter(property = "groupId", defaultValue = "${project.groupId}")
     private String groupId;
 
     /**
      * The artifactId of the dependency/module to update.
      *
-     * @parameter property="artifactId" default-value="${project.artifactId}"
      * @since 1.2
      */
+    @Parameter(property = "artifactId", defaultValue = "${project.artifactId}")
     private String artifactId;
 
     /**
      * The version of the dependency/module to update.
      *
-     * @parameter property="oldVersion" default-value="${project.version}"
      * @since 1.2
      */
+    @Parameter(property = "oldVersion", defaultValue = "${project.version}")
     private String oldVersion;
 
     /**
      * Whether matching versions explicitly specified (as /project/version) in child modules should be updated.
      *
-     * @parameter property="updateMatchingVersions" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "updateMatchingVersions", defaultValue = "true")
     private Boolean updateMatchingVersions;
 
     /**
      * Whether to process the parent of the project. If not set will default to true.
      *
-     * @parameter property="processParent" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "processParent", defaultValue = "true")
     private boolean processParent;
 
     /**
      * Whether to process the project version. If not set will default to true.
      *
-     * @parameter property="processProject" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "processProject", defaultValue = "true")
     private boolean processProject;
 
     /**
      * Whether to process the dependencies section of the project. If not set will default to true.
      *
-     * @parameter property="processDependencies" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "processDependencies", defaultValue = "true")
     private boolean processDependencies;
 
     /**
      * Whether to process the plugins section of the project. If not set will default to true.
      *
-     * @parameter property="processPlugins" default-value="true"
      * @since 1.3
      */
+    @Parameter(property = "processPlugins", defaultValue = "true")
     private boolean processPlugins;
 
     /**
@@ -142,22 +147,23 @@ public class SetMojo
      *
      * @component
      */
+    @Component
     private Prompter prompter;
 
     /**
      * Whether to remove -SNAPSHOT from the existing version. If not set will default to false.
      *
-     * @parameter property="removeSnapshot" default-value="false"
      * @since 2.10
      */
+    @Parameter(property = "removeSnapshot", defaultValue = "false")
     private boolean removeSnapshot;
 
     /**
      * Whether to add next version number and -SNAPSHOT to the existing version. If not set will default to false.
      *
-     * @parameter property="nextSnapshot" default-value="false"
      * @since 2.10
      */
+    @Parameter(property = "nextSnapshot", defaultValue = "false")
     private boolean nextSnapshot;
 
     /**
@@ -195,31 +201,43 @@ public class SetMojo
         if ( removeSnapshot == true && nextSnapshot == false ) {
             String version = getVersion();
             String release = version;
-            if (version.indexOf("-SNAPSHOT") > -1) {
-                release = version.substring(0, version.indexOf(
-                        "-SNAPSHOT"));
+            if (version.endsWith( SNAPSHOT)) {
+                release = version.substring( 0, version.indexOf( SNAPSHOT ) );
                 newVersion = release;
                 getLog().info("SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion);
             }
         }
 
-        if ( removeSnapshot == false && nextSnapshot == true ) {
+        if ( removeSnapshot == false && nextSnapshot == true )
+        {
+            boolean havingSnapshot = false;
             String version = getVersion();
             String versionWithoutSnapshot = version;
-            if (version.indexOf("-SNAPSHOT") > -1) {
-                versionWithoutSnapshot = version.substring(0, version.indexOf("-SNAPSHOT"));
+            if ( version.endsWith( SNAPSHOT ) )
+            {
+                havingSnapshot = true;
+                versionWithoutSnapshot = version.substring( 0, version.indexOf( SNAPSHOT ) );
             }
-            String subversion = versionWithoutSnapshot.substring(0, versionWithoutSnapshot.length() - 3);
+            LinkedList<String> numbers = new LinkedList<String>();
+            if ( versionWithoutSnapshot.contains( "." ) )
+            {
+                // Chop the version into numbers by splitting on the dot (.)
+                Collections.addAll( numbers, versionWithoutSnapshot.split( "\\." ) );
+            }
+            else
+            {
+                // The version contains no dots, assume that it is only 1 number
+                numbers.add( versionWithoutSnapshot );
+            }
 
-            // 1.0-b1-002
-            String currentVersionStr = versionWithoutSnapshot.substring(versionWithoutSnapshot.length() - 3);
-            getLog().info("VER: " + currentVersionStr);
-            int currentVersion = Integer.parseInt(currentVersionStr);
-            int nextVersion = currentVersion + 1;
-            String nextVersionStr = ("000" + nextVersion);
-            nextVersionStr = nextVersionStr.substring(nextVersionStr.length() - 3);
-            newVersion = subversion + nextVersionStr + "-SNAPSHOT";
-            getLog().info("SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion);
+            int lastNumber = Integer.parseInt( numbers.removeLast() );
+            numbers.addLast( String.valueOf( lastNumber + 1 ) );
+            String nextVersion = StringUtils.join( numbers.toArray( new String[0] ), "." );
+            if ( havingSnapshot )
+            {
+                newVersion = nextVersion + "-SNAPSHOT";
+            }
+            getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );
         }
 
         if ( StringUtils.isEmpty( newVersion ) )
@@ -322,7 +340,7 @@ public class SetMojo
         final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
         current.getValue().setVersion( newVersion );
 
-        addFile( files, getProject(), current.getKey() );
+        addFile( files, project, current.getKey() );
 
         for ( Map.Entry<String, Model> sourceEntry : reactor.entrySet() )
         {

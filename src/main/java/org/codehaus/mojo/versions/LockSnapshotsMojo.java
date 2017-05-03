@@ -19,19 +19,21 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Attempts to resolve unlocked snapshot dependency versions to the locked timestamp versions used in the build. For
@@ -40,11 +42,9 @@ import java.util.regex.Pattern;
  * dependency is only available in the local repository and not in a remote snapshot repository.
  *
  * @author Paul Gier
- * @goal lock-snapshots
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo(name= "lock-snapshots", requiresProject = true, requiresDirectInvocation = true)
 public class LockSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -54,7 +54,7 @@ public class LockSnapshotsMojo
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
      */
-    public final Pattern matchSnapshotRegex = Pattern.compile( "-SNAPSHOT" );
+    public final Pattern matchSnapshotRegex = Pattern.compile( "-" + Artifact.SNAPSHOT_VERSION );
 
     // ------------------------------ METHODS --------------------------
 
@@ -82,15 +82,11 @@ public class LockSnapshotsMojo
         }
     }
 
-    private void lockSnapshots( ModifiedPomXMLEventReader pom, Collection dependencies )
+    private void lockSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException
     {
-        Iterator iter = dependencies.iterator();
-
-        while ( iter.hasNext() )
+        for (Dependency dep : dependencies)
         {
-            Dependency dep = (Dependency) iter.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
@@ -189,10 +185,12 @@ public class LockSnapshotsMojo
 
         String lockedVersion = dep.getVersion();
 
-        Artifact depArtifact = artifactFactory.createArtifact( dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                                                               dep.getScope(), dep.getType() );
         try
         {
+            Artifact depArtifact = artifactFactory.createDependencyArtifact(
+                    dep.getGroupId(), dep.getArtifactId(),
+                    VersionRange.createFromVersionSpec(dep.getVersion()),
+                    dep.getType(), dep.getClassifier(), dep.getScope());
             resolver.resolve( depArtifact, getProject().getRemoteArtifactRepositories(), localRepository );
 
             lockedVersion = depArtifact.getVersion();

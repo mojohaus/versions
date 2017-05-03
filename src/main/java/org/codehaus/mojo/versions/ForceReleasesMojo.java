@@ -25,6 +25,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -39,11 +40,9 @@ import java.util.regex.Pattern;
  * Replaces any -SNAPSHOT versions with a release version, older if necessary (if there has been a release).
  *
  * @author Stephen Connolly
- * @goal force-releases
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 2.2
  */
+@Mojo(name = "force-releases", requiresProject = true, requiresDirectInvocation = true)
 public class ForceReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

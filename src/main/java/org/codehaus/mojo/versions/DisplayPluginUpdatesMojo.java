@@ -51,6 +51,8 @@ import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.version.PluginVersionNotFoundException;
 import org.apache.maven.plugin.version.PluginVersionResolutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.DefaultProjectBuilderConfiguration;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
@@ -97,11 +99,9 @@ import java.util.regex.Pattern;
  * Displays all plugins that have newer versions available.
  *
  * @author Stephen Connolly
- * @goal display-plugin-updates
- * @requiresProject true
- * @requiresDirectInvocation false
  * @since 1.0-alpha-1
  */
+@Mojo(name = "display-plugin-updates", requiresProject = true, requiresDirectInvocation = false)
 public class DisplayPluginUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
@@ -130,15 +130,15 @@ public class DisplayPluginUpdatesMojo
     private static final String FROM_SUPER_POM = "(from super-pom) ";
 
     /**
-     * @component
      * @since 1.0-alpha-1
      */
+    @Component
     private LifecycleExecutor lifecycleExecutor;
 
     /**
-     * @component
      * @since 1.0-alpha-3
      */
+    @Component
     private ModelInterpolator modelInterpolator;
 
     /**
@@ -147,12 +147,13 @@ public class DisplayPluginUpdatesMojo
      * @component
      * @since 1.0-alpha-1
      */
+    @Component
     private PluginManager pluginManager;
 
     /**
-     * @component
      * @since 1.3
      */
+    @Component
     private RuntimeInformation runtimeInformation;
 
     // --------------------- GETTER / SETTER METHODS ---------------------

@@ -19,35 +19,33 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Restores the pom from the initial backup.
  *
  * @author Stephen Connolly
- * @goal revert
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo( name = "revert", requiresProject = true, requiresDirectInvocation = true )
 public class RevertMojo
     extends AbstractMojo
 {
     /**
      * The Maven Project.
      *
-     * @parameter property="project"
-     * @required
-     * @readonly
      * @since 1.0-alpha-1
      */
+    @Parameter (defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
     public void execute()

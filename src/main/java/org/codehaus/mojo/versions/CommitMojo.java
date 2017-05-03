@@ -22,6 +22,8 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -32,22 +34,18 @@ import java.io.IOException;
  * Removes the initial backup of the pom, thereby accepting the changes.
  *
  * @author Stephen Connolly
- * @goal commit
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo(name="commit", requiresProject = true, requiresDirectInvocation = true)
 public class CommitMojo
     extends AbstractMojo
 {
     /**
      * The Maven Project.
      *
-     * @parameter property="project"
-     * @required
-     * @readonly
      * @since 1.0-alpha-1
      */
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
     public void execute()

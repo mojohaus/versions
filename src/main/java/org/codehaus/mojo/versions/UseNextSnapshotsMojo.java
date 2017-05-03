@@ -26,6 +26,8 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
@@ -42,11 +44,9 @@ import java.util.regex.Pattern;
  * Replaces any release versions with the next snapshot version (if it has been deployed).
  *
  * @author Stephen Connolly
- * @goal use-next-snapshots
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-beta-1
  */
+@Mojo(name = "use-next-snapshots", requiresProject = true, requiresDirectInvocation = true)
 public class UseNextSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -54,25 +54,25 @@ public class UseNextSnapshotsMojo
     /**
      * Whether to allow the major version number to be changed.
      *
-     * @parameter property="allowMajorUpdates" default-value="false"
      * @since 1.0-beta-1
      */
+    @Parameter(property = "allowMajorUpdates", defaultValue = "false")
     protected Boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
      *
-     * @parameter property="allowMinorUpdates" default-value="false"
      * @since 1.0-beta-1
      */
+    @Parameter(property = "allowMinorUpdates", defaultValue = "false")
     protected Boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
      *
-     * @parameter property="allowIncrementalUpdates" default-value="true"
      * @since 1.0-beta-1
      */
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     protected Boolean allowIncrementalUpdates;
 
     // ------------------------------ FIELDS ------------------------------

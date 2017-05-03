@@ -23,6 +23,8 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
@@ -39,14 +41,21 @@ import java.util.TreeSet;
  * Generates a report of available updates for the dependencies of a project.
  *
  * @author Stephen Connolly
- * @goal dependency-updates-report
- * @requiresDependencyResolution runtime
- * @requiresProject true
  * @since 1.0-beta-1
  */
+@Mojo( name = "dependency-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class DependencyUpdatesReport
     extends AbstractVersionsReport
 {
+
+    /**
+     * Whether to process the dependencyManagement section of the project. If not set will default to true.
+     *
+     * @parameter property="processDependencyManagement" defaultValue="true"
+     * @since 2.4-SNAPSHOT
+     */
+    protected Boolean processDependencyManagement = Boolean.TRUE;
+
     /**
      * {@inheritDoc}
      */
@@ -78,14 +87,22 @@ public class DependencyUpdatesReport
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+
+        if(isProcessingDependencyManagement())
+        {
+            dependencies = removeDependencyManagment(dependencies, dependencyManagement);
+        }
 
         try
         {
             Map<Dependency, ArtifactVersions> dependencyUpdates =
                 getHelper().lookupDependenciesUpdates( dependencies, false );
-            Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
-                getHelper().lookupDependenciesUpdates( dependencyManagement, false );
+
+            Map<Dependency, ArtifactVersions> dependencyManagementUpdates = Collections.emptyMap();
+            if(isProcessingDependencyManagement())
+            {
+                dependencyManagementUpdates = getHelper().lookupDependenciesUpdates(dependencyManagement, false);
+            }
             DependencyUpdatesRenderer renderer =
                 new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
                                                dependencyManagementUpdates );
@@ -149,4 +166,9 @@ public class DependencyUpdatesReport
         return "dependency-updates-report";
     }
 
+    public boolean isProcessingDependencyManagement()
+    {
+        // true if true or null
+        return !Boolean.FALSE.equals( processDependencyManagement );
+    }
 }

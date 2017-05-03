@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>39</version>
+    <version>40</version>
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
@@ -14,7 +14,7 @@
   <name>Versions Maven Plugin</name>
   <url>http://www.mojohaus.org/versions-maven-plugin/</url>
   <description>
-    Versions Plugin for Maven 2. The Versions Plugin updates the versions of components in the POM.
+    Versions Plugin for Maven. The Versions Plugin updates the versions of components in the POM.
   </description>
   <inceptionYear>2008</inceptionYear>
   <licenses>
@@ -76,7 +76,7 @@
   </contributors>
 
   <prerequisites>
-    <maven>2.2.1</maven>
+    <maven>3.0</maven>
   </prerequisites>
 
   <scm>
@@ -93,7 +93,7 @@
   <properties>
     <mojo.java.target>1.5</mojo.java.target>
     <mavenVersion>2.2.1</mavenVersion>
-    <wagonVersion>2.5</wagonVersion>
+    <wagonVersion>2.12</wagonVersion>
     <doxiaVersion>1.4</doxiaVersion>
     <doxia-sitetoolsVersion>1.4</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
@@ -101,6 +101,13 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
+      <version>3.5</version>
+      <scope>provided</scope>
+    </dependency>
+  
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
@@ -111,11 +118,6 @@
       <artifactId>maven-artifact-manager</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
-    <!--dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-repository-metadata</artifactId>
-      <version>${mavenVersion}</version>
-    </dependency-->
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
@@ -129,11 +131,6 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>${mavenVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-descriptor</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
     <dependency>
@@ -214,12 +211,12 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
-      <version>3.0.20</version>
+      <version>3.0.24</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-container-default</artifactId>
-      <version>1.5.5</version>
+      <version>1.7.1</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
@@ -278,20 +275,12 @@
         <plugin>
           <groupId>org.codehaus.modello</groupId>
           <artifactId>modello-maven-plugin</artifactId>
-          <version>1.8.1</version>
+          <version>1.8.3</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
           <version>1.6</version>
-        </plugin>
-        <!--
-          ! Use the most uptodate version.
-        -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-invoker-plugin</artifactId>
-          <version>2.0.0</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -306,7 +295,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.3</version>
+          <version>3.6</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -314,7 +303,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.3</version>
+        <version>3.5</version>
+        <configuration>
+          <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>helpmojo</goal>
+              <goal>descriptor</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -434,7 +434,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-invoker-plugin</artifactId>
-        <version>2.0.0</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -465,7 +464,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.7</version>
+        <version>2.9</version>
       </plugin>
     </plugins>
   </reporting>

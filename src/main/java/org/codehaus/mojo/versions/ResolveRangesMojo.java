@@ -25,6 +25,8 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -40,20 +42,18 @@ import java.util.regex.Pattern;
  * range of "[1.0, 1.2)" would be resolved to the specific version currently in use "1.1".
  *
  * @author Paul Gier
- * @goal resolve-ranges
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo( name = "resolve-ranges", requiresProject = true, requiresDirectInvocation = true )
 public class ResolveRangesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
     /**
      * Whether to process the properties section of the project. If not set will default to true.
      *
-     * @parameter property="processProperties" defaultValue="true"
      * @since 1.3
      */
+    @Parameter(property = "processProperties", defaultValue = "true")
     private Boolean processProperties;
 
     /**
@@ -62,14 +62,15 @@ public class ResolveRangesMojo
      * @parameter property="includeProperties"
      * @since 1.3
      */
+    @Parameter(property = "includeProperties")
     private String includeProperties = null;
 
     /**
      * A comma separated list of properties to not update even if they contain version-ranges.
      *
-     * @parameter property="excludeProperties"
      * @since 1.3
      */
+    @Parameter(property = "excludeProperties")
     private String excludeProperties = null;
 
     // ------------------------------ FIELDS ------------------------------
@@ -194,7 +195,7 @@ public class ResolveRangesMojo
             }
 
             property.setVersion( currentVersion );
-            updatePropertyToNewestVersion( pom, property, version, currentVersion );
+            updatePropertyToNewestVersion( pom, property, version, currentVersion, false );
 
         }
     }

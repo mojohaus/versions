@@ -25,6 +25,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -39,11 +40,9 @@ import java.util.regex.Pattern;
  * Replaces any release versions with the next release version (if it has been released).
  *
  * @author Stephen Connolly
- * @goal use-next-releases
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo(name = "use-next-releases", requiresProject = true, requiresDirectInvocation = true)
 public class UseNextReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

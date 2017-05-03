@@ -1,5 +1,11 @@
 package org.codehaus.mojo.versions;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.stream.XMLStreamException;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,23 +29,18 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Displays properties that are linked to artifact versions and have updates available.
  *
  * @author Stephen Connolly
- * @goal display-property-updates
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-beta-1
  */
+@Mojo(name="display-property-updates", requiresProject = true, requiresDirectInvocation = true)
 public class DisplayPropertyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
@@ -56,17 +57,17 @@ public class DisplayPropertyUpdatesMojo
     /**
      * Any restrictions that apply to specific properties.
      *
-     * @parameter
      * @since 1.0-alpha-3
      */
+    @Parameter
     private Property[] properties;
 
     /**
      * A comma separated list of properties to update.
      *
-     * @parameter property="includeProperties"
      * @since 1.0-alpha-1
      */
+    @Parameter(property = "includeProperties")
     private String includeProperties = null;
 
     /**
@@ -75,14 +76,15 @@ public class DisplayPropertyUpdatesMojo
      * @parameter property="excludeProperties"
      * @since 1.0-alpha-1
      */
+    @Parameter(property = "excludeProperties")
     private String excludeProperties = null;
 
     /**
      * Whether properties linking versions should be auto-detected or not.
      *
-     * @parameter property="autoLinkItems" defaultValue="true"
      * @since 1.0-alpha-2
      */
+    @Parameter(property = "autoLinkItems", defaultValue = "true")
     private Boolean autoLinkItems;
 
     // -------------------------- STATIC METHODS --------------------------
@@ -111,7 +113,7 @@ public class DisplayPropertyUpdatesMojo
             }
 
             ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                                                               this.reactorProjects, this.getHelper() );
+                                                               this.reactorProjects, this.getHelper(), false );
 
             if ( winner != null && !currentVersion.equals( winner.toString() ) )
             {

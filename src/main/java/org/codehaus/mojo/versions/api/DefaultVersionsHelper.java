@@ -71,7 +71,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,6 +89,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -868,17 +871,24 @@ public class DefaultVersionsHelper
                 }
             }
         }
+        
+        List<String> includePropertiesList = getSplittedProperties( includeProperties );
+        List<String> excludePropertiesList = getSplittedProperties( excludeProperties ); 
+
         getLog().debug( "Searching for properties associated with builders" );
         Iterator<Property> i = properties.values().iterator();
         while ( i.hasNext() )
         {
             Property property = i.next();
-            if ( includeProperties != null && !includeProperties.contains( property.getName() ) )
+            
+            getLog().debug( "includePropertiesList:" + includePropertiesList + " property: " + property.getName() );
+            getLog().debug( "excludePropertiesList:" + excludePropertiesList + " property: " + property.getName() );
+            if ( !includePropertiesList.isEmpty() && !includePropertiesList.contains( property.getName() ) )
             {
                 getLog().debug( "Skipping property ${" + property.getName() + "}" );
                 i.remove();
             }
-            else if ( excludeProperties != null && excludeProperties.contains( property.getName() ) )
+            else if ( !excludePropertiesList.isEmpty() && excludePropertiesList.contains( property.getName() ) )
             {
                 getLog().debug( "Ignoring property ${" + property.getName() + "}" );
                 i.remove();
@@ -938,6 +948,15 @@ public class DefaultVersionsHelper
             }
         }
         return propertyVersions;
+    }
+
+    private List<String> getSplittedProperties(String commaSeparatedProperties) {
+        List<String> propertiesList = Collections.emptyList(); 
+        if (StringUtils.isNotEmpty( commaSeparatedProperties ) ) {
+            String[] splittedProps = StringUtils.split( commaSeparatedProperties, "," );
+            propertiesList = Arrays.asList( StringUtils.stripAll( splittedProps ) );
+        }
+        return propertiesList;
     }
 
     // This is a data container to hold the result of a Dependency lookup to its ArtifactVersions.

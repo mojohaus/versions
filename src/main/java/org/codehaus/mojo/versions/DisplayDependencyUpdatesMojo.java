@@ -26,6 +26,8 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -33,8 +35,8 @@ import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +47,9 @@ import java.util.TreeSet;
  * Displays all dependencies that have newer versions available.
  *
  * @author Stephen Connolly
- * @goal display-dependency-updates
- * @requiresProject true
- * @requiresDirectInvocation false
  * @since 1.0-alpha-1
  */
+@Mojo( name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false )
 public class DisplayDependencyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
@@ -66,17 +66,17 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to process the dependencyManagement section of the project. If not set will default to true.
      *
-     * @parameter property="processDependencyManagement" defaultValue="true"
      * @since 1.2
      */
+    @Parameter( property = "processDependencyManagement", defaultValue = "true" )
     protected Boolean processDependencyManagement = Boolean.TRUE;
 
     /**
      * Whether to process the dependencies section of the project. If not set will default to true.
      *
-     * @parameter property="processDependencies" defaultValue="true"
      * @since 1.2
      */
+    @Parameter( property = "processDependencies", defaultValue = "true" )
     protected Boolean processDependencies = Boolean.TRUE;
 
     /**
@@ -85,6 +85,7 @@ public class DisplayDependencyUpdatesMojo
      * @parameter property="verbose" defaultValue="false"
      * @since 2.1
      */
+    @Parameter( property = "verbose", defaultValue = "false" )
     protected Boolean verbose = Boolean.FALSE;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
@@ -161,12 +162,57 @@ public class DisplayDependencyUpdatesMojo
         throws MojoExecutionException, MojoFailureException
     {
         logInit();
+
         Set dependencyManagement = new TreeSet( new DependencyComparator() );
-        dependencyManagement.addAll( getProject().getDependencyManagement() == null ? Collections.EMPTY_LIST
-                        : getProject().getDependencyManagement().getDependencies() );
+        if ( getProject().getDependencyManagement() != null )
+        {
+
+            List<Dependency> dependenciesFromPom = getProject().getDependencyManagement().getDependencies();
+            for ( Dependency dependency : dependenciesFromPom )
+            {
+                getLog().debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
+                    + ":" + dependency.getVersion() );
+                if ( dependency.getVersion() == null )
+                {
+                    // get parent and get the information from there.
+                    if ( getProject().hasParent() )
+                    {
+                        getLog().debug( "Reading parent dependencyManagement information" );
+                        if ( getProject().getParent().getDependencyManagement() != null )
+                        {
+                            List<Dependency> parentDeps =
+                                getProject().getParent().getDependencyManagement().getDependencies();
+                            for ( Dependency parentDep : parentDeps )
+                            {
+                                // only groupId && artifactId needed cause version is null
+                                if ( dependency.getGroupId().equals( parentDep.getGroupId() )
+                                    && dependency.getArtifactId().equals( parentDep.getArtifactId() )
+                                    && dependency.getType().equals( parentDep.getType() ) )
+                                {
+                                    dependencyManagement.add( parentDep );
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        String message = "We can't get the version for the dependency " + dependency.getGroupId() + ":"
+                            + dependency.getArtifactId() + " cause there does not exist a parent.";
+                        getLog().error( message );
+                        // Throw error cause we will not able to get a version for a dependency.
+                        throw new MojoExecutionException( message );
+                    }
+                }
+                else
+                {
+                    dependencyManagement.add( dependency );
+                }
+            }
+        }
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
+
         if ( isProcessingDependencyManagement() )
         {
             dependencies = removeDependencyManagment( dependencies, dependencyManagement );
