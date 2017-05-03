@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>localhost</groupId>
+    <artifactId>issue-114-depmgmt</artifactId>
+    <version>1.0</version>
+  </parent>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-display-dependency-updates-006</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <name>display-dependency-updates-006</name>
+  <description>This wil test issue #114 related to version less dependencyManagement.</description>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>localhost</groupId>
+        <artifactId>issue-114-artifact</artifactId>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-x</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>localhost</groupId>
+      <artifactId>dummy-api</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <!--
+      ! The version for this artifact
+      ! is defined in the parent of this pom
+      ! The following does currently not work. Need to check
+      ! against Maven core...
+    -->
+<!--     <dependency> -->
+<!--       <groupId>localhost</groupId> -->
+<!--       <artifactId>issue-114-artifact</artifactId> -->
+<!--     </dependency> -->
+  </dependencies>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>localhost</groupId>
+          <artifactId>dummy-maven-plugin</artifactId>
+          <version>1.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>2.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>2.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>

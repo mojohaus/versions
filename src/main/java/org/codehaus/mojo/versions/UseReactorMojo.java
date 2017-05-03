@@ -29,6 +29,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -37,11 +38,9 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * Replaces any versions with the corresponding version from the reactor.
  *
  * @author Stephen Connolly
- * @goal use-reactor
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 2.2
  */
+@Mojo(name = "use-reactor", requiresProject = true, requiresDirectInvocation = true)
 public class UseReactorMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

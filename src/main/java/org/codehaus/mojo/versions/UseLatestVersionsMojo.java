@@ -19,57 +19,59 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.model.Model;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
  * Replaces any version with the latest version.
  *
  * @author Stephen Connolly
- * @goal use-latest-versions
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo( name = "use-latest-versions", requiresProject = true, requiresDirectInvocation = true )
 public class UseLatestVersionsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
     /**
      * Whether to allow the major version number to be changed.
      *
-     * @parameter property="allowMajorUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
     protected Boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
      *
-     * @parameter property="allowMinorUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
     protected Boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
      *
-     * @parameter property="allowIncrementalUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     protected Boolean allowIncrementalUpdates;
 
     // ------------------------------ METHODS --------------------------
@@ -88,7 +90,8 @@ public class UseLatestVersionsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                DependencyManagement dependencyManagement = PomHelper.getRawModel( getProject() ).getDependencyManagement();
+                DependencyManagement dependencyManagement =
+                    PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
                     useLatestVersions( pom, dependencyManagement.getDependencies() );
@@ -103,7 +106,8 @@ public class UseLatestVersionsMojo
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
-        catch ( IOException e ) {
+        catch ( IOException e )
+        {
             throw new MojoExecutionException( e.getMessage(), e );
         }
     }
@@ -112,6 +116,8 @@ public class UseLatestVersionsMojo
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+        MajorMinorIncrementalFilter majorMinorIncfilter =
+            new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         Iterator i = dependencies.iterator();
 
         while ( i.hasNext() )
@@ -131,18 +137,25 @@ public class UseLatestVersionsMojo
                 continue;
             }
 
+            ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
+            getLog().debug( "Selected version:" + selectedVersion.toString() );
+
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-            ArtifactVersion[] newer =
+
+            ArtifactVersion[] newerVersions =
                 versions.getNewerVersions( version, segment, Boolean.TRUE.equals( allowSnapshots ) );
-            if ( newer.length > 0 )
+
+            ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
+            if ( filteredVersions.length > 0 )
             {
-                String newVersion = newer[newer.length - 1].toString();
+                String newVersion = filteredVersions[filteredVersions.length - 1].toString();
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion ) )
                 {
                     getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
                 }
             }
+
         }
     }
 

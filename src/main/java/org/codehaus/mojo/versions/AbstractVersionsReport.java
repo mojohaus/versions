@@ -32,6 +32,8 @@ import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.reporting.AbstractMavenReport;
@@ -59,39 +61,38 @@ public abstract class AbstractVersionsReport
     /**
      * Doxia Site Renderer component.
      *
-     * @component
      * @since 1.0-alpha-3
      */
+    @Component
     private Renderer siteRenderer;
 
     /**
      * Internationalization component.
      *
-     * @component
      * @since 1.0-alpha-3
      */
+    @Component
     private I18N i18n;
 
     /**
      * The Maven Project.
      *
-     * @parameter property="project"
-     * @required
-     * @readonly
      * @since 1.0-alpha-3
      */
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
     /**
-     * @component
      * @since 1.0-alpha-3
      */
+    @Component
     protected ArtifactFactory artifactFactory;
 
     /**
      * @component
      * @since 1.0-alpha-3
      */
+    @Component
     private ArtifactResolver resolver;
 
     /**
@@ -99,78 +100,71 @@ public abstract class AbstractVersionsReport
      * the command line. If the goal is run indirectly as part of a site generation, the output directory configured in
      * the Maven Site Plugin is used instead.
      *
-     * @parameter default-value="${project.reporting.outputDirectory}"
-     * @required
      * @since 1.0-alpha-3
      */
+    @Parameter (defaultValue = "${project.reporting.outputDirectory}", required = true)
     private File outputDirectory;
 
     /**
      * Skip entire check.
      *
-     * @parameter property="versions.skip"
      * @since 1.0-alpha-3
      */
+    @Parameter (property = "versions.skip")
     private Boolean skip;
 
     /**
      * The artifact metadata source to use.
      *
-     * @component
-     * @required
-     * @readonly
      * @since 1.0-alpha-1
      */
+    @Component
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
-     * @parameter property="project.remoteArtifactRepositories"
-     * @readonly
      * @since 1.0-alpha-3
      */
+    @Parameter(defaultValue = "${project.remoteArtifactRepositories}", readonly = true)
     protected List remoteArtifactRepositories;
 
     /**
-     * @parameter property="project.pluginArtifactRepositories"
-     * @readonly
      * @since 1.0-alpha-3
      */
+    @Parameter(defaultValue = "${project.pluginArtifactRepositories}", readonly = true)
     protected List remotePluginRepositories;
 
     /**
-     * @parameter property="localRepository"
-     * @readonly
      * @since 1.0-alpha-1
      */
+    @Parameter(defaultValue = "${localRepository}", readonly = true)
     protected ArtifactRepository localRepository;
 
     /**
-     * @component
      * @since 1.0-alpha-3
      */
+    @Component
     private WagonManager wagonManager;
 
     /**
-     * @parameter property="settings"
-     * @readonly
      * @since 1.0-alpha-3
      */
+    @Parameter (defaultValue = "${settings}", readonly = true)
     private Settings settings;
 
     /**
      * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
      *
-     * @parameter property="maven.version.rules.serverId" default-value="serverId";
      * @since 1.0-alpha-3
      */
+    @Parameter (property = "maven.version.rules.serverId", defaultValue = "serverId")
     private String serverId;
 
     /**
      * The Wagon URI of a ruleSet file containing the rules that control how to compare version numbers.
      *
-     * @parameter property="maven.version.rules"
      * @since 1.0-alpha-3
      */
+    @Parameter(property = "maven.version.rules")
     private String rulesUri;
 
     /**
@@ -178,17 +172,17 @@ public abstract class AbstractVersionsReport
      * which will handle long version numbers provided all components are numeric, or <code>mercury</code> which will
      * use the mercury version number comparison rules.
      *
-     * @parameter property="comparisonMethod"
      * @since 1.0-alpha-1
      */
+    @Parameter (property = "comparisonMethod")
     protected String comparisonMethod;
 
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
      *
-     * @parameter property="allowSnapshots" default-value="false"
      * @since 1.0-alpha-3
      */
+    @Parameter (property = "allowSnapshots", defaultValue = "false")
     protected Boolean allowSnapshots;
 
     /**
@@ -199,21 +193,15 @@ public abstract class AbstractVersionsReport
     /**
      * The Maven Session.
      *
-     * @parameter property="session"
-     * @required
-     * @readonly
      * @since 1.0-beta-1
      */
+    @Parameter(defaultValue = "${session}", required = true, readonly = true)
     protected MavenSession session;
 
-    /**
-     * @component
-     */
+    @Component
     protected PathTranslator pathTranslator;
 
-    /**
-     * @component
-     */
+    @Component
     protected ArtifactResolver artifactResolver;
 
     // --------------------- GETTER / SETTER METHODS ---------------------

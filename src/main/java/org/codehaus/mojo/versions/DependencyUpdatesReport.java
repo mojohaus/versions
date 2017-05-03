@@ -23,6 +23,8 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
@@ -39,11 +41,9 @@ import java.util.TreeSet;
  * Generates a report of available updates for the dependencies of a project.
  *
  * @author Stephen Connolly
- * @goal dependency-updates-report
- * @requiresDependencyResolution runtime
- * @requiresProject true
  * @since 1.0-beta-1
  */
+@Mojo( name = "dependency-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class DependencyUpdatesReport
     extends AbstractVersionsReport
 {

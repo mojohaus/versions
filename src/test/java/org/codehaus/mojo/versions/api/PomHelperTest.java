@@ -1,6 +1,7 @@
 package org.codehaus.mojo.versions.api;
 
 import junit.framework.TestCase;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -10,13 +11,43 @@ import javax.xml.stream.XMLInputFactory;
 import java.io.File;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.List;
 
 /**
- * Tets the methods of {@link PomHelper}.
+ * Tests the methods of {@link PomHelper}.
  */
 public class PomHelperTest
     extends TestCase
 {
+    /**
+     * Tests if imported POMs are properly read from dependency management section. Such logic is required to resolve
+     * <a href="https://github.com/mojohaus/versions-maven-plugin/issues/134">bug #134</a>
+     *
+     * @throws Exception if the test fails.
+     */
+    public void testImportedPOMsRetrievedFromDependencyManagement()
+        throws Exception
+    {
+        URL url = getClass().getResource( "PomHelperTest.dependencyManagementBOMs.pom.xml" );
+        StringBuilder input = PomHelper.readXmlFile( new File( url.getPath() ) );
+
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
+
+        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory );
+
+        List<Dependency> dependencies = PomHelper.readImportedPOMsFromDependencyManagementSection( pom );
+
+        assertNotNull( dependencies );
+        assertEquals( 1, dependencies.size() );
+
+        Dependency dependency = dependencies.get( 0 );
+        assertEquals( "org.group1", dependency.getGroupId() );
+        assertEquals( "artifact-pom", dependency.getArtifactId() );
+        assertEquals( "1.0-SNAPSHOT", dependency.getVersion() );
+        assertEquals( "import", dependency.getScope() );
+        assertEquals( "pom", dependency.getType() );
+    }
     /**
      * Tests what happens when changing a long property substitution pattern, e.g.
      * <a href="http://jira.codehaus.org/browse/MVERSIONS-44">MVERSIONS-44</a>

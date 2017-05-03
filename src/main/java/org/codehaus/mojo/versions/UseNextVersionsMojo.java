@@ -25,6 +25,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -37,11 +38,9 @@ import java.util.Iterator;
  * Replaces any version with the latest version.
  *
  * @author Stephen Connolly
- * @goal use-next-versions
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo(name = "use-next-versions", requiresProject = true, requiresDirectInvocation = true)
 public class UseNextVersionsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -99,8 +98,8 @@ public class UseNextVersionsMojo
 
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
             ArtifactVersions versions =
-                getHelper().lookupArtifactVersions( artifact, Boolean.TRUE.equals( allowSnapshots ) );
-            ArtifactVersion[] newer = versions.getNewerVersions( version, false );
+                getHelper().lookupArtifactVersions( artifact, false );
+            ArtifactVersion[] newer = versions.getNewerVersions( version, Boolean.TRUE.equals( allowSnapshots ) );
             if ( newer.length > 0 )
             {
                 String newVersion = newer[0].toString();

@@ -24,12 +24,16 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -44,11 +48,9 @@ import java.util.regex.Pattern;
  * Replaces any release versions with the latest release version.
  *
  * @author Stephen Connolly
- * @goal use-latest-releases
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 1.0-alpha-3
  */
+@Mojo(name = "use-latest-releases", requiresProject = true, requiresDirectInvocation = true)
 public class UseLatestReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -63,25 +65,25 @@ public class UseLatestReleasesMojo
     /**
      * Whether to allow the major version number to be changed.
      *
-     * @parameter property="allowMajorUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
     protected Boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
      *
-     * @parameter property="allowMinorUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
     protected Boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
      *
-     * @parameter property="allowIncrementalUpdates" default-value="true"
      * @since 1.2
      */
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     protected Boolean allowIncrementalUpdates;
 
     // ------------------------------ METHODS --------------------------
@@ -117,6 +119,8 @@ public class UseLatestReleasesMojo
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+        MajorMinorIncrementalFilter majorMinorIncfilter =
+                        new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         Iterator i = dependencies.iterator();
 
@@ -140,13 +144,18 @@ public class UseLatestReleasesMojo
                     continue;
                 }
 
+                ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
+                getLog().debug( "Selected version:" + selectedVersion.toString() );
+
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 ArtifactVersion[] newer = versions.getNewerVersions( version, segment, false );
                 newer = filterVersionsWithIncludes( newer, artifact );
-                if ( newer.length > 0 )
+
+                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newer );
+                if ( filteredVersions.length > 0 )
                 {
-                    String newVersion = newer[newer.length - 1].toString();
+                    String newVersion = filteredVersions[filteredVersions.length - 1].toString();
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
                                                          newVersion ) )
                     {
@@ -159,7 +168,7 @@ public class UseLatestReleasesMojo
 
     private ArtifactVersion[] filterVersionsWithIncludes( ArtifactVersion[] newer, Artifact artifact )
     {
-        List filteredNewer = new ArrayList( newer.length );
+        List<ArtifactVersion> filteredNewer = new ArrayList<ArtifactVersion>( newer.length );
         for ( int j = 0; j < newer.length; j++ )
         {
             ArtifactVersion artifactVersion = newer[j];

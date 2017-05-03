@@ -26,6 +26,7 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -34,11 +35,9 @@ import javax.xml.stream.XMLStreamException;
  * Displays any updates of the project's parent project
  *
  * @author Stephen Connolly
- * @goal display-parent-updates
- * @requiresProject true
- * @requiresDirectInvocation true
  * @since 2.2
  */
+@Mojo(name = "display-parent-updates", requiresProject = true, requiresDirectInvocation = true)
 public class DisplayParentUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {

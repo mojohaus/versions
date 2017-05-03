@@ -309,12 +309,13 @@ public class PropertyVersions
     }
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper )
+                                             List reactorProjects, VersionsHelper helper, boolean allowDowngrade )
                                                  throws MojoExecutionException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
         helper.getLog().debug( "Property ${" + property.getName() + "}: Set of valid available versions is "
             + Arrays.asList( getVersions( includeSnapshots ) ) );
+        helper.getLog().debug("getNewestVersion(): includeSnapshots='" + includeSnapshots + "'");
         VersionRange range;
         try
         {
@@ -333,9 +334,20 @@ public class PropertyVersions
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
-        ArtifactVersion result = getNewestVersion( range, includeSnapshots ? 
-                                   helper.createArtifactVersion( currentVersion ) : null, null, includeSnapshots, false,
-                                   true );
+
+
+        ArtifactVersion lowerBoundArtifactVersion = null;
+        if ( allowDowngrade )
+        {
+            helper.getLog().debug( "lowerBoundArtifactVersion: null" );
+        }
+        else
+        {
+            lowerBoundArtifactVersion = helper.createArtifactVersion( currentVersion );
+            helper.getLog().debug( "lowerBoundArtifactVersion: " + lowerBoundArtifactVersion.toString() );
+        }
+        ArtifactVersion result =
+            getNewestVersion( range, lowerBoundArtifactVersion, null, includeSnapshots, false, true );
         helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
 
         if ( property.isSearchReactor() )

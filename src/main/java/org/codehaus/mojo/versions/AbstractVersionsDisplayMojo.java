@@ -1,5 +1,10 @@
 package org.codehaus.mojo.versions;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,12 +25,8 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * Abstract base class for the Display___ mojos.
@@ -38,25 +39,25 @@ public abstract class AbstractVersionsDisplayMojo
     /**
      * If specified then the display output will be sent to the specified file.
      *
-     * @parameter property="versions.outputFile"
      * @since 2.2
      */
+    @Parameter(property = "versions.outputFile")
     private File outputFile;
 
     /**
      * Controls whether the display output is logged to the console.
      *
-     * @parameter property="versions.logOutput" default-value="true"
      * @since 2.2
      */
+    @Parameter(property = "versions.logOutput", defaultValue = "true")
     private boolean logOutput;
 
     /**
      * The character encoding to use when writing to {@link #outputFile}.
      *
-     * @parameter property="outputEncoding" default-value="${project.reporting.outputEncoding}"
      * @since 2.2
      */
+    @Parameter(property = "outputEncoding", defaultValue = "${project.reporting.outputEncoding}")
     private String outputEncoding;
 
     private boolean outputFileError = false;
