@@ -47,6 +47,15 @@ import java.util.TreeSet;
 public class DependencyUpdatesReport
     extends AbstractVersionsReport
 {
+
+    /**
+     * Whether to process the dependencyManagement section of the project. If not set will default to true.
+     *
+     * @parameter property="processDependencyManagement" defaultValue="true"
+     * @since 2.4-SNAPSHOT
+     */
+    protected Boolean processDependencyManagement = Boolean.TRUE;
+
     /**
      * {@inheritDoc}
      */
@@ -78,14 +87,22 @@ public class DependencyUpdatesReport
 
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+
+        if(isProcessingDependencyManagement())
+        {
+            dependencies = removeDependencyManagment(dependencies, dependencyManagement);
+        }
 
         try
         {
             Map<Dependency, ArtifactVersions> dependencyUpdates =
                 getHelper().lookupDependenciesUpdates( dependencies, false );
-            Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
-                getHelper().lookupDependenciesUpdates( dependencyManagement, false );
+
+            Map<Dependency, ArtifactVersions> dependencyManagementUpdates = Collections.emptyMap();
+            if(isProcessingDependencyManagement())
+            {
+                dependencyManagementUpdates = getHelper().lookupDependenciesUpdates(dependencyManagement, false);
+            }
             DependencyUpdatesRenderer renderer =
                 new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
                                                dependencyManagementUpdates );
@@ -149,4 +166,9 @@ public class DependencyUpdatesReport
         return "dependency-updates-report";
     }
 
+    public boolean isProcessingDependencyManagement()
+    {
+        // true if true or null
+        return !Boolean.FALSE.equals( processDependencyManagement );
+    }
 }
