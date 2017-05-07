@@ -50,13 +50,13 @@ public class ResolveRangesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
     /**
-     * Whether to process the properties section of the project. If not set will default to true.
+     * Whether to process the properties section of the project.
      *
      * @since 1.3
      */
     @Parameter(property = "processProperties", defaultValue = "true")
-    private Boolean processProperties;
-    
+    private boolean processProperties;
+
     /**
      * A comma separated list of properties to update if they contain version-ranges.
      *
@@ -82,18 +82,6 @@ public class ResolveRangesMojo
     public final Pattern matchRangeRegex = Pattern.compile( "," );
 
     // ------------------------------ METHODS --------------------------
-
-    /**
-     * Should the project/properties section of the pom be processed.
-     *
-     * @return returns <code>true if the project/properties section of the pom should be processed.
-     * @since 1.3
-     */
-    public boolean isProcessingProperties()
-    {
-        // true if true or null
-        return !Boolean.FALSE.equals( processProperties );
-    }
 
     /**
      * @param pom the pom to update.
@@ -124,7 +112,7 @@ public class ResolveRangesMojo
             getLog().debug( "processing parent " + getProject().getId() );
             resolveRangesInParent( pom );
         }
-        if ( isProcessingProperties() )
+        if ( processProperties )
         {
             getLog().debug( "processing properties of " + getProject().getId() );
             resolvePropertyRanges( pom );

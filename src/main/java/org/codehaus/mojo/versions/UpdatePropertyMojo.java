@@ -70,11 +70,10 @@ public class UpdatePropertyMojo
     /**
      * Whether properties linking versions should be auto-detected or not.
      *
-     * @parameter property="autoLinkItems" defaultValue="true"
      * @since 1.0-alpha-2
      */
     @Parameter (property = "autoLinkItems", defaultValue = "true")
-    private Boolean autoLinkItems;
+    private boolean autoLinkItems;
 
     /**
      * If a property points to a version like <code>1.2.3-SNAPSHOT</code>
@@ -128,7 +127,7 @@ public class UpdatePropertyMojo
         propertyConfig.setVersion( newVersion );
         Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), new Property[] { propertyConfig }, property, "",
-                                                      !Boolean.FALSE.equals( autoLinkItems ) );
+                                                      autoLinkItems );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property property = entry.getKey();

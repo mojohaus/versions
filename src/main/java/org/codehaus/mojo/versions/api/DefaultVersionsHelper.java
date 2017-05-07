@@ -658,13 +658,13 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public ArtifactVersions lookupArtifactUpdates( Artifact artifact, Boolean allowSnapshots,
+    public ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots,
                                                    boolean usePluginRepositories )
                                                        throws ArtifactMetadataRetrievalException
     {
         ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
 
-        artifactVersions.setIncludeSnapshots( Boolean.TRUE.equals( allowSnapshots ) );
+        artifactVersions.setIncludeSnapshots( allowSnapshots );
 
         return artifactVersions;
     }
@@ -740,7 +740,7 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, Boolean allowSnapshots )
+    public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         // Create the request for details collection for parallel lookup...
@@ -788,7 +788,7 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots )
+    public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         String version = plugin.getVersion();
@@ -798,7 +798,7 @@ public class DefaultVersionsHelper
 
         VersionRange versionRange = VersionRange.createFromVersion( version );
 
-        final boolean includeSnapshots = Boolean.TRUE.equals( allowSnapshots );
+        final boolean includeSnapshots = allowSnapshots;
 
         final ArtifactVersions pluginArtifactVersions =
             lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),

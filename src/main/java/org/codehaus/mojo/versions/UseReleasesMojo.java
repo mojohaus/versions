@@ -58,7 +58,7 @@ public class UseReleasesMojo
      * @since 2.3
      */
     @Parameter( property = "allowRangeMatching", defaultValue = "false" )
-    private Boolean allowRangeMatching;
+    private boolean allowRangeMatching;
 
     /**
      * Whether to fail if a SNAPSHOT could not be replaced
@@ -66,7 +66,7 @@ public class UseReleasesMojo
      * @since 2.3
      */
     @Parameter( property = "failIfNotReplaced", defaultValue = "false" )
-    private Boolean failIfNotReplaced;
+    private boolean failIfNotReplaced;
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -89,13 +89,14 @@ public class UseReleasesMojo
     {
         try
         {
-            if (isProcessingParent()) {
-                useReleases(pom, getProject().getParent());
+            if ( isProcessingParent() )
+            {
+                useReleases( pom, getProject().getParent() );
             }
 
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                useReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
+                useReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
                 useReleases( pom, getProject().getDependencyManagement().getDependencies() );
             }
             if ( isProcessingDependencies() )
@@ -109,7 +110,9 @@ public class UseReleasesMojo
         }
     }
 
-    private void useReleases(ModifiedPomXMLEventReader pom, MavenProject project) throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException {
+    private void useReleases( ModifiedPomXMLEventReader pom, MavenProject project )
+        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+    {
         String version = project.getVersion();
         Matcher versionMatcher = matchSnapshotRegex.matcher( version );
         if ( versionMatcher.matches() )
@@ -127,8 +130,8 @@ public class UseReleasesMojo
             }
 
             Artifact artifact = artifactFactory.createDependencyArtifact( getProject().getParent().getGroupId(),
-                    getProject().getParent().getArtifactId(),
-                    versionRange, "pom", null, null );
+                                                                          getProject().getParent().getArtifactId(),
+                                                                          versionRange, "pom", null, null );
             if ( !isIncluded( artifact ) )
             {
                 return;
@@ -151,7 +154,7 @@ public class UseReleasesMojo
                 else if ( failIfNotReplaced )
                 {
                     throw new NoSuchElementException( "No matching release of " + toString( project )
-                            + " found for update." );
+                        + " found for update." );
                 }
             }
             else
@@ -162,7 +165,7 @@ public class UseReleasesMojo
                     if ( proposedVersion.toString().startsWith( releaseVersion ) )
                     {
                         getLog().debug( "Found matching version for " + toString( project ) + " to version "
-                                + releaseVersion );
+                            + releaseVersion );
                         finalVersion = proposedVersion;
                     }
                 }
@@ -180,7 +183,7 @@ public class UseReleasesMojo
                     if ( failIfNotReplaced )
                     {
                         throw new NoSuchElementException( "No matching release of " + toString( project )
-                                + " found for update via rangeMatching." );
+                            + " found for update via rangeMatching." );
                     }
                 }
 
@@ -217,53 +220,64 @@ public class UseReleasesMojo
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 if ( !allowRangeMatching ) // standard behaviour
                 {
-                    if ( versions.containsVersion( releaseVersion ) )
-                    {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             releaseVersion, getProject().getModel() ) )
-                        {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
-                        }
-                    }
-                    else if ( failIfNotReplaced )
-                    {
-                        throw new NoSuchElementException( "No matching release of " + toString( dep )
-                            + " found for update." );
-                    }
+                    noRangeMatching( pom, dep, version, releaseVersion, versions );
                 }
                 else
                 {
-                    ArtifactVersion finalVersion = null;
-                    for ( ArtifactVersion proposedVersion : versions.getVersions( false ) )
-                    {
-                        if ( proposedVersion.toString().startsWith( releaseVersion ) )
-                        {
-                            getLog().debug( "Found matching version for " + toString( dep ) + " to version "
-                                + releaseVersion );
-                            finalVersion = proposedVersion;
-                        }
-                    }
-
-                    if ( finalVersion != null )
-                    {
-                        if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                finalVersion.toString(), getProject().getModel()))
-                        {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + finalVersion.toString() );
-                        }
-                    }
-                    else
-                    {
-                        getLog().info( "No matching release of " + toString( dep ) + " to update via rangeMatching." );
-                        if ( failIfNotReplaced )
-                        {
-                            throw new NoSuchElementException( "No matching release of " + toString( dep )
-                                + " found for update via rangeMatching." );
-                        }
-                    }
-
+                    rangeMatching( pom, dep, version, releaseVersion, versions );
                 }
             }
+        }
+    }
+
+    private void rangeMatching( ModifiedPomXMLEventReader pom, Dependency dep, String version, String releaseVersion,
+                                ArtifactVersions versions )
+        throws XMLStreamException
+    {
+        ArtifactVersion finalVersion = null;
+        for ( ArtifactVersion proposedVersion : versions.getVersions( false ) )
+        {
+            if ( proposedVersion.toString().startsWith( releaseVersion ) )
+            {
+                getLog().debug( "Found matching version for " + toString( dep ) + " to version " + releaseVersion );
+                finalVersion = proposedVersion;
+            }
+        }
+
+        if ( finalVersion != null )
+        {
+            if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                                 finalVersion.toString(), getProject().getModel() ) )
+            {
+                getLog().info( "Updated " + toString( dep ) + " to version " + finalVersion.toString() );
+            }
+        }
+        else
+        {
+            getLog().info( "No matching release of " + toString( dep ) + " to update via rangeMatching." );
+            if ( failIfNotReplaced )
+            {
+                throw new NoSuchElementException( "No matching release of " + toString( dep )
+                    + " found for update via rangeMatching." );
+            }
+        }
+    }
+
+    private void noRangeMatching( ModifiedPomXMLEventReader pom, Dependency dep, String version, String releaseVersion,
+                                  ArtifactVersions versions )
+        throws XMLStreamException
+    {
+        if ( versions.containsVersion( releaseVersion ) )
+        {
+            if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, releaseVersion,
+                                                 getProject().getModel() ) )
+            {
+                getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
+            }
+        }
+        else if ( failIfNotReplaced )
+        {
+            throw new NoSuchElementException( "No matching release of " + toString( dep ) + " found for update." );
         }
     }
 

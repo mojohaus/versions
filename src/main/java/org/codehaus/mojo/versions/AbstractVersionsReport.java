@@ -111,7 +111,7 @@ public abstract class AbstractVersionsReport
      * @since 1.0-alpha-3
      */
     @Parameter (property = "versions.skip")
-    private Boolean skip;
+    private boolean skip;
 
     /**
      * The artifact metadata source to use.
@@ -183,7 +183,7 @@ public abstract class AbstractVersionsReport
      * @since 1.0-alpha-3
      */
     @Parameter (property = "allowSnapshots", defaultValue = "false")
-    protected Boolean allowSnapshots;
+    protected boolean allowSnapshots;
 
     /**
      * Our versions helper.
@@ -232,7 +232,7 @@ public abstract class AbstractVersionsReport
     protected void executeReport( Locale locale )
         throws MavenReportException
     {
-        if ( !Boolean.TRUE.equals( skip ) )
+        if ( !skip )
         {
             try
             {
@@ -267,15 +267,15 @@ public abstract class AbstractVersionsReport
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
-                                                 Boolean allowingSnapshots, boolean usePluginRepositories )
+                                                 boolean allowingSnapshots, boolean usePluginRepositories )
                                                      throws MavenReportException
     {
-        boolean includeSnapshots = Boolean.TRUE.equals( this.allowSnapshots );
-        if ( Boolean.TRUE.equals( allowingSnapshots ) )
+        boolean includeSnapshots = this.allowSnapshots;
+        if ( allowingSnapshots )
         {
             includeSnapshots = true;
         }
-        if ( Boolean.FALSE.equals( allowingSnapshots ) )
+        if ( allowingSnapshots )
         {
             includeSnapshots = false;
         }

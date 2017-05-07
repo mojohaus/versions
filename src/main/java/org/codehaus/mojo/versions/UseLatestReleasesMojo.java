@@ -68,7 +68,7 @@ public class UseLatestReleasesMojo
      * @since 1.2
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
-    protected Boolean allowMajorUpdates;
+    protected boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
@@ -76,7 +76,7 @@ public class UseLatestReleasesMojo
      * @since 1.2
      */
     @Parameter(property = "allowMinorUpdates", defaultValue = "true")
-    protected Boolean allowMinorUpdates;
+    protected boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
@@ -84,7 +84,7 @@ public class UseLatestReleasesMojo
      * @since 1.2
      */
     @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
-    protected Boolean allowIncrementalUpdates;
+    protected boolean allowIncrementalUpdates;
 
     // ------------------------------ METHODS --------------------------
 

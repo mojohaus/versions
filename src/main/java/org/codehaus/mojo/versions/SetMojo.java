@@ -108,10 +108,10 @@ public class SetMojo
      * @since 1.3
      */
     @Parameter(property = "updateMatchingVersions", defaultValue = "true")
-    private Boolean updateMatchingVersions;
+    private boolean updateMatchingVersions;
 
     /**
-     * Whether to process the parent of the project. If not set will default to true.
+     * Whether to process the parent of the project.
      *
      * @since 1.3
      */
@@ -119,7 +119,7 @@ public class SetMojo
     private boolean processParent;
 
     /**
-     * Whether to process the project version. If not set will default to true.
+     * Whether to process the project version.
      *
      * @since 1.3
      */
@@ -127,7 +127,7 @@ public class SetMojo
     private boolean processProject;
 
     /**
-     * Whether to process the dependencies section of the project. If not set will default to true.
+     * Whether to process the dependencies section of the project.
      *
      * @since 1.3
      */
@@ -135,7 +135,7 @@ public class SetMojo
     private boolean processDependencies;
 
     /**
-     * Whether to process the plugins section of the project. If not set will default to true.
+     * Whether to process the plugins section of the project.
      *
      * @since 1.3
      */
@@ -151,7 +151,7 @@ public class SetMojo
     private Prompter prompter;
 
     /**
-     * Whether to remove -SNAPSHOT from the existing version. If not set will default to false.
+     * Whether to remove <code>-SNAPSHOT</code> from the existing version.
      *
      * @since 2.10
      */
@@ -159,7 +159,7 @@ public class SetMojo
     private boolean removeSnapshot;
 
     /**
-     * Whether to add next version number and -SNAPSHOT to the existing version. If not set will default to false.
+     * Whether to add next version number and <code>-SNAPSHOT</code> to the existing version.
      *
      * @since 2.10
      */
@@ -188,11 +188,6 @@ public class SetMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        if ( updateMatchingVersions == null )
-        {
-            updateMatchingVersions = Boolean.TRUE;
-        }
-
         if ( getProject().getOriginalModel().getVersion() == null )
         {
             throw new MojoExecutionException( "Project version is inherited from parent." );

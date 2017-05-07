@@ -1,11 +1,5 @@
 package org.codehaus.mojo.versions;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.stream.XMLStreamException;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,6 +19,12 @@ import javax.xml.stream.XMLStreamException;
  * under the License.
  */
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -40,7 +40,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo(name="display-property-updates", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "display-property-updates", requiresProject = true, requiresDirectInvocation = true )
 public class DisplayPropertyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
@@ -67,7 +67,7 @@ public class DisplayPropertyUpdatesMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter(property = "includeProperties")
+    @Parameter( property = "includeProperties" )
     private String includeProperties = null;
 
     /**
@@ -76,7 +76,7 @@ public class DisplayPropertyUpdatesMojo
      * @parameter property="excludeProperties"
      * @since 1.0-alpha-1
      */
-    @Parameter(property = "excludeProperties")
+    @Parameter( property = "excludeProperties" )
     private String excludeProperties = null;
 
     /**
@@ -84,8 +84,8 @@ public class DisplayPropertyUpdatesMojo
      *
      * @since 1.0-alpha-2
      */
-    @Parameter(property = "autoLinkItems", defaultValue = "true")
-    private Boolean autoLinkItems;
+    @Parameter( property = "autoLinkItems", defaultValue = "true" )
+    private boolean autoLinkItems;
 
     // -------------------------- STATIC METHODS --------------------------
 
@@ -100,7 +100,7 @@ public class DisplayPropertyUpdatesMojo
 
         Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
-                                                      !Boolean.FALSE.equals( autoLinkItems ) );
+                                                      autoLinkItems );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property property = entry.getKey();

@@ -93,30 +93,28 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     private String[] excludes = null;
 
     /**
-     * Whether to process the dependencies section of the project. If not set will default to true.
+     * Whether to process the dependencies section of the project.
      *
      * @since 1.0-alpha-3
      */
     @Parameter(property = "processDependencies", defaultValue = "true")
-    private Boolean processDependencies;
+    private boolean processDependencies;
 
     /**
-     * Whether to process the dependencyManagement section of the project. If not set will default to true.
+     * Whether to process the dependencyManagement section of the project.
      *
-     * @parameter property="processDependencyManagement" defaultValue="true"
      * @since 1.0-alpha-3
      */
     @Parameter(property = "processDependencyManagement", defaultValue = "true")
-    private Boolean processDependencyManagement;
+    private boolean processDependencyManagement;
 
     /**
      * Whether to process the parent section of the project. If not set will default to false.
      *
-     * @parameter property="processParent" defaultValue="false"
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private Boolean processParent = false;
+    private boolean processParent = false;
 
     /**
      * Artifact filter to determine if artifact should be included
@@ -138,7 +136,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @since 1.0-alpha-3
      */
     @Parameter(property = "excludeReactor", defaultValue = "true")
-    private Boolean excludeReactor;
+    private boolean excludeReactor;
 
     /**
      * Should the project/dependencies section of the pom be processed.
@@ -148,8 +146,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     public boolean isProcessingDependencies()
     {
-        // true if true or null
-        return !Boolean.FALSE.equals( processDependencies );
+        return processDependencies;
     }
 
     /**
@@ -160,8 +157,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     public boolean isProcessingDependencyManagement()
     {
-        // true if true or null
-        return !Boolean.FALSE.equals( processDependencyManagement );
+        return processDependencyManagement;
     }
 
     /**
@@ -172,7 +168,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     public boolean isProcessingParent()
     {
-        return !Boolean.FALSE.equals( processParent );
+        return processParent;
     }
 
     /**
@@ -183,8 +179,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     public boolean isExcludeReactor()
     {
-        // true if true or null
-        return !Boolean.FALSE.equals( excludeReactor );
+        return excludeReactor;
     }
 
     /**

@@ -180,7 +180,7 @@ public interface VersionsHelper
      * @return The artifact update details.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      */
-    ArtifactVersions lookupArtifactUpdates( Artifact artifact, Boolean allowSnapshots, boolean usePluginRepositories )
+    ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException;
 
     /**
@@ -216,7 +216,7 @@ public interface VersionsHelper
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      * @since 1.0-beta-1
      */
-    Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, Boolean allowSnapshots )
+    Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
@@ -229,7 +229,7 @@ public interface VersionsHelper
      * @throws InvalidVersionSpecificationException if a version is invalid.
      * @since 1.0-beta-1
      */
-    PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, Boolean allowSnapshots )
+    PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**

@@ -512,7 +512,7 @@ public class DisplayPluginUpdatesMojo
                 // now we want to find the newest version that is compatible with the invoking version of Maven
                 ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, true );
                 ArtifactVersion[] newerVersions =
-                    artifactVersions.getVersions( Boolean.TRUE.equals( this.allowSnapshots ) );
+                    artifactVersions.getVersions( this.allowSnapshots );
                 ArtifactVersion minRequires = null;
                 for ( int j = newerVersions.length - 1; j >= 0; j-- )
                 {

@@ -56,7 +56,7 @@ public class UseLatestVersionsMojo
      * @since 1.2
      */
     @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
-    protected Boolean allowMajorUpdates;
+    private boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
@@ -64,7 +64,7 @@ public class UseLatestVersionsMojo
      * @since 1.2
      */
     @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
-    protected Boolean allowMinorUpdates;
+    private boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
@@ -72,7 +72,7 @@ public class UseLatestVersionsMojo
      * @since 1.2
      */
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
-    protected Boolean allowIncrementalUpdates;
+    private boolean allowIncrementalUpdates;
 
     // ------------------------------ METHODS --------------------------
 
@@ -144,7 +144,7 @@ public class UseLatestVersionsMojo
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
 
             ArtifactVersion[] newerVersions =
-                versions.getNewerVersions( version, segment, Boolean.TRUE.equals( allowSnapshots ) );
+                versions.getNewerVersions( version, segment, allowSnapshots );
 
             ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
             if ( filteredVersions.length > 0 )

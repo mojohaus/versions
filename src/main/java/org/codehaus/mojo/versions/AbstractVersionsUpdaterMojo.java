@@ -161,7 +161,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-3
      */
     @Parameter(property = "generateBackupPoms", defaultValue = "true")
-    private Boolean generateBackupPoms;
+    private boolean generateBackupPoms;
 
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
@@ -169,7 +169,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-1
      */
     @Parameter(property = "allowSnapshots", defaultValue = "false")
-    protected Boolean allowSnapshots;
+    protected boolean allowSnapshots;
 
     /**
      * Our versions helper.
@@ -265,7 +265,7 @@ public abstract class AbstractVersionsUpdaterMojo
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
                                                      throws ArtifactMetadataRetrievalException, MojoExecutionException
     {
-        boolean includeSnapshots = Boolean.TRUE.equals( this.allowSnapshots );
+        boolean includeSnapshots = this.allowSnapshots;
         if ( Boolean.TRUE.equals( allowingSnapshots ) )
         {
             includeSnapshots = true;
@@ -312,11 +312,7 @@ public abstract class AbstractVersionsUpdaterMojo
 
             if ( newPom.isModified() )
             {
-                if ( Boolean.FALSE.equals( generateBackupPoms ) )
-                {
-                    getLog().debug( "Skipping generation of backup file" );
-                }
-                else
+                if ( generateBackupPoms )
                 {
                     File backupFile = new File( outFile.getParentFile(), outFile.getName() + ".versionsBackup" );
                     if ( !backupFile.exists() )
@@ -328,6 +324,10 @@ public abstract class AbstractVersionsUpdaterMojo
                     {
                         getLog().debug( "Leaving existing backup " + backupFile + " unmodified" );
                     }
+                }
+                else
+                {
+                    getLog().debug( "Skipping generation of backup file" );
                 }
                 writeFile( outFile, input );
             }
@@ -454,21 +454,21 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param allowIncrementalUpdates
      * @return Returns the segment that is unchangable. If any segment can change, returns -1.
      */
-    protected int determineUnchangedSegment( Boolean allowMajorUpdates, Boolean allowMinorUpdates,
-                                             Boolean allowIncrementalUpdates )
+    protected int determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,
+                                             boolean allowIncrementalUpdates )
     {
         int segment;
-        if ( Boolean.TRUE.equals( allowMajorUpdates ) )
+        if ( allowMajorUpdates )
         {
             segment = -1;
             getLog().info( "Major version changes allowed" );
         }
-        else if ( Boolean.TRUE.equals( allowMinorUpdates ) )
+        else if ( allowMinorUpdates )
         {
             segment = 0;
             getLog().info( "Minor version changes allowed" );
         }
-        else if ( Boolean.TRUE.equals( allowIncrementalUpdates ) )
+        else if ( allowIncrementalUpdates )
         {
             segment = 1;
             getLog().info( "Incremental version changes allowed" );

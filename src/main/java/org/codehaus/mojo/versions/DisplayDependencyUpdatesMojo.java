@@ -64,29 +64,28 @@ public class DisplayDependencyUpdatesMojo
     private static final int INFO_PAD_SIZE = 72;
 
     /**
-     * Whether to process the dependencyManagement section of the project. If not set will default to true.
+     * Whether to process the dependencyManagement section of the project.
      *
      * @since 1.2
      */
     @Parameter( property = "processDependencyManagement", defaultValue = "true" )
-    protected Boolean processDependencyManagement = Boolean.TRUE;
+    protected boolean processDependencyManagement;
 
     /**
-     * Whether to process the dependencies section of the project. If not set will default to true.
+     * Whether to process the dependencies section of the project.
      *
      * @since 1.2
      */
     @Parameter( property = "processDependencies", defaultValue = "true" )
-    protected Boolean processDependencies = Boolean.TRUE;
+    protected boolean processDependencies;
 
     /**
-     * Whether to show additional information such as dependencies that do not need updating. Defaults to false.
+     * Whether to show additional information such as dependencies that do not need updating.
      *
-     * @parameter property="verbose" defaultValue="false"
      * @since 2.1
      */
     @Parameter( property = "verbose", defaultValue = "false" )
-    protected Boolean verbose = Boolean.FALSE;
+    protected boolean verbose;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -133,19 +132,17 @@ public class DisplayDependencyUpdatesMojo
     public boolean isProcessingDependencyManagement()
     {
         // true if true or null
-        return !Boolean.FALSE.equals( processDependencyManagement );
+        return processDependencyManagement;
     }
 
     public boolean isProcessingDependencies()
     {
-        // true if true or null
-        return !Boolean.FALSE.equals( processDependencies );
+        return processDependencies;
     }
 
     public boolean isVerbose()
     {
-        // true if true or null
-        return !Boolean.FALSE.equals( verbose );
+        return verbose;
     }
 
     // ------------------------ INTERFACE METHODS ------------------------
@@ -254,16 +251,16 @@ public class DisplayDependencyUpdatesMojo
             if ( versions.isCurrentVersionDefined() )
             {
                 current = versions.getCurrentVersion().toString();
-                latest = versions.getNewestUpdate( UpdateScope.ANY, Boolean.TRUE.equals( allowSnapshots ) );
+                latest = versions.getNewestUpdate( UpdateScope.ANY, allowSnapshots );
             }
             else
             {
                 ArtifactVersion newestVersion = versions.getNewestVersion( versions.getArtifact().getVersionRange(),
-                                                                           Boolean.TRUE.equals( allowSnapshots ) );
+                                                                           allowSnapshots );
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null ? null
                                 : versions.getNewestUpdate( newestVersion, UpdateScope.ANY,
-                                                            Boolean.TRUE.equals( allowSnapshots ) );
+                                                            allowSnapshots );
                 if ( latest != null
                     && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
                 {

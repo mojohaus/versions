@@ -57,7 +57,7 @@ public class UseNextSnapshotsMojo
      * @since 1.0-beta-1
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "false")
-    protected Boolean allowMajorUpdates;
+    private boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
@@ -65,7 +65,7 @@ public class UseNextSnapshotsMojo
      * @since 1.0-beta-1
      */
     @Parameter(property = "allowMinorUpdates", defaultValue = "false")
-    protected Boolean allowMinorUpdates;
+    private boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
@@ -73,7 +73,7 @@ public class UseNextSnapshotsMojo
      * @since 1.0-beta-1
      */
     @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
-    protected Boolean allowIncrementalUpdates;
+    private boolean allowIncrementalUpdates;
 
     // ------------------------------ FIELDS ------------------------------
 

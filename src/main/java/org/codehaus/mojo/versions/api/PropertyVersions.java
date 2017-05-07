@@ -308,17 +308,17 @@ public class PropertyVersions
             + '\'' + ", associations=" + associations + '}';
     }
 
-    public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
+    public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
                                              List reactorProjects, VersionsHelper helper )
             throws MojoExecutionException {
         return getNewestVersion(currentVersion, property, allowSnapshots, reactorProjects, helper, false, -1);
     }
 
-    public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
+    public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
                                              List reactorProjects, VersionsHelper helper, boolean allowDowngrade, int segment )
                                                  throws MojoExecutionException
     {
-        final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
+        final boolean includeSnapshots = !property.isBanSnapshots() && allowSnapshots;
         helper.getLog().debug("getNewestVersion(): includeSnapshots='" + includeSnapshots + "'");
         helper.getLog().debug( "Property ${" + property.getName() + "}: Set of valid available versions is "
             + Arrays.asList( getVersions( includeSnapshots ) ) );

@@ -71,7 +71,7 @@ public class PropertyUpdatesReport
      * @since 1.0-beta-1
      */
     @Parameter(property = "autoLinkItems", defaultValue = "true")
-    private Boolean autoLinkItems;
+    private boolean autoLinkItems;
 
     /**
      * {@inheritDoc}
@@ -102,7 +102,7 @@ public class PropertyUpdatesReport
         {
             updateSet =
                 getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
-                                                     !Boolean.FALSE.equals( autoLinkItems ) );
+                                                     autoLinkItems );
         }
         catch ( MojoExecutionException e )
         {

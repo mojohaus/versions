@@ -73,7 +73,7 @@ public class UpdatePropertiesMojo
      * @since 1.0-alpha-2
      */
     @Parameter(property = "autoLinkItems", defaultValue = "true")
-    private Boolean autoLinkItems;
+    private boolean autoLinkItems;
 
     
     /**
@@ -126,7 +126,7 @@ public class UpdatePropertiesMojo
     {
         Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
-                                                      !Boolean.FALSE.equals( autoLinkItems ) );
+                                                      autoLinkItems );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property property = entry.getKey();
