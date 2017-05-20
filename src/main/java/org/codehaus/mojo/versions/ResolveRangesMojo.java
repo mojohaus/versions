@@ -106,20 +106,33 @@ public class ResolveRangesMojo
     {
         // Note we have to get the dependencies from the model because the dependencies in the
         // project may have already had their range resolved [MNG-4138]
-        if ( getProject().getModel().getDependencyManagement() != null
-            && getProject().getModel().getDependencyManagement().getDependencies() != null
+        if ( hasDependencyManagement()
+            && hasDependenciesInDependencyManagement()
             && isProcessingDependencyManagement() )
         {
+            getLog().debug( "processing dependencyManagement of " + getProject().getId() );
             resolveRanges( pom, getProject().getModel().getDependencyManagement().getDependencies() );
         }
         if ( isProcessingDependencies() )
         {
+            getLog().debug( "processing dependencies of " + getProject().getId() );
             resolveRanges( pom, getProject().getModel().getDependencies() );
         }
         if ( isProcessingProperties() )
         {
+            getLog().debug( "processing properties of " + getProject().getId() );
             resolvePropertyRanges( pom );
         }
+    }
+
+    private boolean hasDependenciesInDependencyManagement()
+    {
+        return getProject().getModel().getDependencyManagement().getDependencies() != null;
+    }
+
+    private boolean hasDependencyManagement()
+    {
+        return getProject().getModel().getDependencyManagement() != null;
     }
 
     private void resolveRanges( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
@@ -147,7 +160,7 @@ public class ResolveRangesMojo
                     if ( artifactVersion == null )
                     {
                         ArtifactVersion latestVersion =
-                            findLatestVersion( artifact, artifact.getVersionRange(), null, false );
+                            findLatestVersion( artifact, artifact.getVersionRange(), allowSnapshots, false );
 
                         if ( latestVersion != null )
                         {
@@ -168,7 +181,7 @@ public class ResolveRangesMojo
                         }
                         else
                         {
-                            getLog().warn( "Could not find the dependency " + artifact + " so unable to set version to "
+                            getLog().debug( "Could not find the version tag for dependency " + artifact + " in project " + getProject().getId() + " so unable to set version to "
                                 + artifactVersion );
                         }
                     }
