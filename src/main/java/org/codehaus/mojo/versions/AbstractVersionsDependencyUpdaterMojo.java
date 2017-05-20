@@ -30,6 +30,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -171,7 +172,6 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     public boolean isProcessingParent()
     {
-        // true if true or null
         return !Boolean.FALSE.equals( processParent );
     }
 
@@ -235,6 +235,17 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
             }
         }
         return artifact;
+    }
+
+    protected Artifact toArtifact( Parent model ) throws MojoExecutionException
+    {
+        Dependency d = new Dependency();
+        d.setArtifactId( model.getArtifactId() );
+        d.setGroupId( model.getGroupId() );
+        d.setVersion( model.getVersion() );
+        d.setType( "pom" );
+        d.setScope( Artifact.SCOPE_COMPILE );
+        return this.toArtifact( d);
     }
 
     protected String toString( MavenProject project ) {

@@ -19,6 +19,13 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -30,12 +37,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Attempts to resolve dependency version ranges to the specific version being used in the build. For example a version
@@ -55,7 +56,7 @@ public class ResolveRangesMojo
      */
     @Parameter(property = "processProperties", defaultValue = "true")
     private Boolean processProperties;
-
+    
     /**
      * A comma separated list of properties to update if they contain version-ranges.
      *
@@ -118,11 +119,21 @@ public class ResolveRangesMojo
             getLog().debug( "processing dependencies of " + getProject().getId() );
             resolveRanges( pom, getProject().getModel().getDependencies() );
         }
+        if ( hasParent() && isProcessingParent() )
+        {
+            getLog().debug( "processing parent " + getProject().getId() );
+            resolveRangesInParent( pom );
+        }
         if ( isProcessingProperties() )
         {
             getLog().debug( "processing properties of " + getProject().getId() );
             resolvePropertyRanges( pom );
         }
+    }
+
+    private boolean hasParent()
+    {
+        return getProject().getModel().getParent() != null;
     }
 
     private boolean hasDependenciesInDependencyManagement()
@@ -133,6 +144,52 @@ public class ResolveRangesMojo
     private boolean hasDependencyManagement()
     {
         return getProject().getModel().getDependencyManagement() != null;
+    }
+
+    private void resolveRangesInParent( ModifiedPomXMLEventReader pom )
+        throws MojoExecutionException, ArtifactMetadataRetrievalException, XMLStreamException
+    {
+        Matcher versionMatcher = matchRangeRegex.matcher( getProject().getModel().getParent().getVersion() );
+
+        if ( versionMatcher.find() )
+        {
+            Artifact artifact = this.toArtifact( getProject().getModel().getParent() );
+
+            if ( artifact != null && isIncluded( artifact ) )
+            {
+                getLog().debug( "Resolving version range for parent: " + artifact );
+
+                String artifactVersion = artifact.getVersion();
+                if ( artifactVersion == null )
+                {
+                    ArtifactVersion latestVersion =
+                        findLatestVersion( artifact, artifact.getVersionRange(), allowSnapshots, false );
+
+                    if ( latestVersion != null )
+                    {
+                        artifactVersion = latestVersion.toString();
+                    }
+                    else
+                    {
+                        getLog().warn( "Not updating version " + artifact + " : could not resolve any versions" );
+                    }
+                }
+
+                if ( artifactVersion != null )
+                {
+                    if ( PomHelper.setProjectParentVersion( pom, artifactVersion ) )
+                    {
+                        getLog().debug( "Version set to " + artifactVersion + " for parent: " + artifact );
+                    }
+                    else
+                    {
+                        getLog().warn( "Could not find the version tag for parent " + artifact + " in project "
+                            + getProject().getId() + " so unable to set version to " + artifactVersion );
+                    }
+                }
+            }
+        }
+
     }
 
     private void resolveRanges( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
