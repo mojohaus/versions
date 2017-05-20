@@ -731,7 +731,8 @@ public class DisplayPluginUpdatesMojo
             logLine( false, "      version." );
         }
         logLine( false, "" );
-        if ( "maven-plugin".equals( getProject().getPackaging() ) )
+
+        if ( isMavenPluginProject() )
         {
             if ( noMavenMinVersion )
             {
@@ -742,6 +743,7 @@ public class DisplayPluginUpdatesMojo
                 getLog().warn( "    </prerequisites>" );
                 getLog().warn( "To build this plugin you need at least Maven " + minMavenVersion );
                 getLog().warn( "A Maven Enforcer rule can be used to enforce this if you have not already set one up" );
+                getLog().warn( "See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html" );
             }
             else if ( minMavenVersion != null && specMavenVersion.compareTo( minMavenVersion ) < 0 )
             {
@@ -749,6 +751,7 @@ public class DisplayPluginUpdatesMojo
                 getLog().warn( "but requires Maven " + minMavenVersion + " or newer to build." );
                 getLog().warn( "This may or may not be a problem. A Maven Enforcer rule can help " );
                 getLog().warn( "enforce that the correct version of Maven is used to build this plugin." );
+                getLog().warn( "See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html" );
             }
             else
             {
@@ -760,19 +763,18 @@ public class DisplayPluginUpdatesMojo
             if ( noMavenMinVersion )
             {
                 logLine( true, "Project does not define required minimum version of Maven." );
-                logLine( true, "Update the pom.xml to contain" );
-                logLine( true, "    <prerequisites>" );
-                logLine( true, "      <maven>" + minMavenVersion + "</maven>" );
-                logLine( true, "    </prerequisites>" );
+                logLine( true, "Update the pom.xml to contain maven-enforcer-plugin to" );
+                logLine( true, "force the maven version which is needed to build this project." );
+                logLine( true, "See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html" );
+                logLine( true, "Using the minimum version of Maven: " + minMavenVersion );
             }
             else if ( minMavenVersion != null && specMavenVersion.compareTo( minMavenVersion ) < 0 )
             {
                 logLine( true, "Project requires an incorrect minimum version of Maven." );
-                logLine( true, "Either change plugin versions to those compatible with " + specMavenVersion );
-                logLine( true, "or update the pom.xml to contain" );
-                logLine( true, "    <prerequisites>" );
-                logLine( true, "      <maven>" + minMavenVersion + "</maven>" );
-                logLine( true, "    </prerequisites>" );
+                logLine( true, "Update the pom.xml to contain maven-enforcer-plugin to" );
+                logLine( true, "force the maven version which is needed to build this project." );
+                logLine( true, "See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html" );
+                logLine( true, "Using the minimum version of Maven: " + specMavenVersion );
             }
             else
             {
@@ -806,6 +808,11 @@ public class DisplayPluginUpdatesMojo
             }
         }
         logLine( false, "" );
+    }
+
+    private boolean isMavenPluginProject()
+    {
+        return "maven-plugin".equals( getProject().getPackaging() );
     }
 
     private String compactKey( String groupId, String artifactId )
