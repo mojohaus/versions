@@ -114,7 +114,7 @@ public class ForceReleasesMojo
                 if ( versions.containsVersion( releaseVersion ) )
                 {
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         releaseVersion ) )
+                                                         releaseVersion, getProject().getModel() ) )
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
                     }
@@ -127,7 +127,7 @@ public class ForceReleasesMojo
                         getLog().info( "No release of " + toString( dep ) + " to force." );
                     }
                     else if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                              v[v.length - 1].toString() ) )
+                                                              v[v.length - 1].toString(), getProject().getModel() ) )
                     {
                         getLog().info( "Reverted " + toString( dep ) + " to version " + v[v.length - 1].toString() );
                     }

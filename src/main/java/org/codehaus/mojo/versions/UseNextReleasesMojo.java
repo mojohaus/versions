@@ -108,7 +108,7 @@ public class UseNextReleasesMojo
                 {
                     String newVersion = newer[0].toString();
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         newVersion ) )
+                                                         newVersion, getProject().getModel() ) )
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
                     }

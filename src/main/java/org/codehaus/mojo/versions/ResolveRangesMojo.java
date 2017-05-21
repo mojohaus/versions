@@ -232,7 +232,8 @@ public class ResolveRangesMojo
                     if ( artifactVersion != null )
                     {
                         if ( PomHelper.setDependencyVersion( pom, artifact.getGroupId(), artifact.getArtifactId(),
-                                                             dep.getVersion(), artifactVersion ) )
+                                                             dep.getVersion(), artifactVersion,
+                                                             getProject().getModel() ) )
                         {
                             getLog().debug( "Version set to " + artifactVersion + " for dependency: " + artifact );
                         }

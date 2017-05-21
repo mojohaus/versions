@@ -164,7 +164,7 @@ public class UseLatestSnapshotsMojo
                 if ( latestVersion != null )
                 {
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         latestVersion ) )
+                                                         latestVersion, getProject().getModel() ) )
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + latestVersion );
                     }

@@ -463,12 +463,13 @@ public class PomHelper
      * @param artifactId The artifactId of the dependency.
      * @param oldVersion The old version of the dependency.
      * @param newVersion The new version of the dependency.
+     * @param model The model to get the project properties from.
      * @return <code>true</code> if a replacement was made.
-     * @throws XMLStreamException if somethinh went wrong.
+     * @throws XMLStreamException if something went wrong.
      */
-    public static boolean setDependencyVersion( final ModifiedPomXMLEventReader pom, final String groupId,
-                                                final String artifactId, final String oldVersion,
-                                                final String newVersion )
+    public static boolean setDependencyVersion(final ModifiedPomXMLEventReader pom, final String groupId,
+                                               final String artifactId, final String oldVersion,
+                                               final String newVersion, final Model model)
                                                     throws XMLStreamException
     {
         Stack<String> stack = new Stack<String>();
@@ -479,6 +480,10 @@ public class PomHelper
                                                         "/project/parent/version", "/project/groupId",
                                                         "/project/artifactId", "/project/version" ) );
         Map<String, String> implicitProperties = new HashMap<String, String>();
+
+        for (Map.Entry<Object, Object> entry : model.getProperties().entrySet()) {
+            implicitProperties.put( (String) entry.getKey(), (String) entry.getValue() );
+        }
 
         pom.rewind();
 

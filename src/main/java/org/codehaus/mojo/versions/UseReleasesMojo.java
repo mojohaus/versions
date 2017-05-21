@@ -220,7 +220,7 @@ public class UseReleasesMojo
                     if ( versions.containsVersion( releaseVersion ) )
                     {
                         if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             releaseVersion ) )
+                                                             releaseVersion, getProject().getModel() ) )
                         {
                             getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
                         }
@@ -246,8 +246,8 @@ public class UseReleasesMojo
 
                     if ( finalVersion != null )
                     {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             finalVersion.toString() ) )
+                        if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                finalVersion.toString(), getProject().getModel()))
                         {
                             getLog().info( "Updated " + toString( dep ) + " to version " + finalVersion.toString() );
                         }
