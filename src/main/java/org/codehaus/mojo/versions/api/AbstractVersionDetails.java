@@ -1,5 +1,7 @@
 package org.codehaus.mojo.versions.api;
 
+import org.apache.commons.cli.HelpFormatter;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -191,18 +193,22 @@ public abstract class AbstractVersionDetails
             {
                 continue;
             }
+            System.out.println( "Candidate: " + candidate.toString() );
             int lower = lowerBound == null ? -1 : versionComparator.compare( lowerBound, candidate );
             int upper = upperBound == null ? +1 : versionComparator.compare( upperBound, candidate );
             if ( lower > 0 || upper < 0 )
             {
+                System.out.println( "lower > 0 || upper < 0  lower:" + lower + " upper:" + upper );
                 continue;
             }
             if ( ( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 ) )
             {
+                System.out.println( "( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 )  lower:" + lower + " upper:" + upper );
                 continue;
             }
             if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
             {
+                System.out.println( "!includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() )  includeSnapshots: " + includeSnapshots );
                 continue;
             }
             if ( latest == null )
@@ -213,6 +219,8 @@ public abstract class AbstractVersionDetails
             {
                 latest = candidate;
             }
+            System.out.println( "result: " + latest.toString() );
+            
         }
         return latest;
     }
