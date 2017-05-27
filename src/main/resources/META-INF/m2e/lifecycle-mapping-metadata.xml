@@ -21,6 +21,7 @@
 					<goal>resolve-ranges</goal>
 					<goal>revert</goal>
 					<goal>set</goal>
+					<goal>set-property</goal>
 					<goal>unlock-snapshots</goal>
 					<goal>update-child-modules</goal>
 					<goal>use-latest-releases</goal>
