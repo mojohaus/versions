@@ -100,12 +100,53 @@ public class DisplayDependencyUpdatesMojo
     private boolean processPluginDependenciesInPluginManagement;
 
     /**
-     * Whether to show additional information such as dependencies that do not need updating.
+     * Whether to allow the major version number to be changed.
+     * You need to set {@link #allowAnyUpdates} to <code>false</code> to
+     * get this configuration gets control. 
+     * @since 2.5
+     */
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
+    private Boolean allowMajorUpdates;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     * You need to set {@link #allowMajorUpdates} to <code>false</code> to
+     * get this configuration gets control. 
+     *
+     * @since 2.5
+     */
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
+    private Boolean allowMinorUpdates;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     * You need to set {@link #allowMinorUpdates} to <code>false</code> to
+     * get this configuration gets control. 
+     *
+     * @since 2.5
+     */
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
+    private Boolean allowIncrementalUpdates;
+
+    /**
+     * Whether to allow any version change to be allowed. This keeps
+     * compatibility with previous versions of the plugin.
+     * If you set this to false you can control changes in version
+     * number by {@link #allowMajorUpdates}, {@link #allowMinorUpdates} or
+     * {@link #allowIncrementalUpdates}.
+     * @deprecated This will be removed with version 3.0.0
+     * @since 2.5
+     */
+    @Parameter(property = "allowAnyUpdates", defaultValue = "true")
+    private Boolean allowAnyUpdates;
+
+    /**
+     * Whether to show additional information such as dependencies that do not need updating. Defaults to false.
      *
      * @since 2.1
      */
     @Parameter( property = "verbose", defaultValue = "false" )
-    protected boolean verbose;
+    private boolean verbose;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -324,6 +365,33 @@ public class DisplayDependencyUpdatesMojo
         }
     }
 
+    private UpdateScope calculateUpdateScope()
+    {
+        UpdateScope result = UpdateScope.ANY;
+        if ( !allowAnyUpdates )
+        {
+            if ( allowMajorUpdates )
+            {
+                result = UpdateScope.MAJOR;
+            }
+            else
+            {
+                if ( allowMinorUpdates )
+                {
+                    result = UpdateScope.MINOR;
+                }
+                else
+                {
+                    if ( allowIncrementalUpdates )
+                    {
+                        result = UpdateScope.INCREMENTAL;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
     {
         List withUpdates = new ArrayList();
@@ -338,7 +406,7 @@ public class DisplayDependencyUpdatesMojo
             if ( versions.isCurrentVersionDefined() )
             {
                 current = versions.getCurrentVersion().toString();
-                latest = versions.getNewestUpdate( UpdateScope.ANY, allowSnapshots );
+                latest = versions.getNewestUpdate( calculateUpdateScope(), allowSnapshots );
             }
             else
             {
@@ -346,7 +414,7 @@ public class DisplayDependencyUpdatesMojo
                     versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null ? null
-                                : versions.getNewestUpdate( newestVersion, UpdateScope.ANY, allowSnapshots );
+                                : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
                 if ( latest != null
                     && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
                 {
