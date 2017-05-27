@@ -266,7 +266,7 @@ public class ResolveRangesMojo
             }
 
             property.setVersion( currentVersion );
-            updatePropertyToNewestVersion( pom, property, version, currentVersion, false );
+            updatePropertyToNewestVersion( pom, property, version, currentVersion );
 
         }
     }

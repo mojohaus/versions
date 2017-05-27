@@ -85,6 +85,30 @@ public class UpdatePropertyMojo
     @Parameter(property = "allowDowngrade", defaultValue = "false")
     private boolean allowDowngrade;
 
+    /**
+     * Whether to allow the major version number to be changed.
+     *
+     * @since 2.4
+     */
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
+    protected Boolean allowMajorUpdates;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     *
+     * @since 2.4
+     */
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
+    protected Boolean allowMinorUpdates;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     *
+     * @since 2.4
+     */
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
+    protected Boolean allowIncrementalUpdates;
+    
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
@@ -116,7 +140,8 @@ public class UpdatePropertyMojo
                 continue;
             }
 
-            updatePropertyToNewestVersion( pom, property, version, currentVersion, allowDowngrade );
+            int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates);
+            updatePropertyToNewestVersion( pom, property, version, currentVersion, allowDowngrade, segment );
 
         }
     }

@@ -309,13 +309,19 @@ public class PropertyVersions
     }
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper, boolean allowDowngrade )
+                                             List reactorProjects, VersionsHelper helper )
+            throws MojoExecutionException {
+        return getNewestVersion(currentVersion, property, allowSnapshots, reactorProjects, helper, false, -1);
+    }
+
+    public ArtifactVersion getNewestVersion( String currentVersion, Property property, Boolean allowSnapshots,
+                                             List reactorProjects, VersionsHelper helper, boolean allowDowngrade, int segment )
                                                  throws MojoExecutionException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && Boolean.TRUE.equals( allowSnapshots );
+        helper.getLog().debug("getNewestVersion(): includeSnapshots='" + includeSnapshots + "'");
         helper.getLog().debug( "Property ${" + property.getName() + "}: Set of valid available versions is "
             + Arrays.asList( getVersions( includeSnapshots ) ) );
-        helper.getLog().debug("getNewestVersion(): includeSnapshots='" + includeSnapshots + "'");
         VersionRange range;
         try
         {
@@ -335,19 +341,24 @@ public class PropertyVersions
             throw new MojoExecutionException( e.getMessage(), e );
         }
 
-
         ArtifactVersion lowerBoundArtifactVersion = null;
         if ( allowDowngrade )
         {
-            helper.getLog().debug( "lowerBoundArtifactVersion: null" );
+            helper.getLog().debug( "lowerBoundArtifactVersion is null based on allowDowngrade:" + allowDowngrade );
         }
         else
         {
             lowerBoundArtifactVersion = helper.createArtifactVersion( currentVersion );
             helper.getLog().debug( "lowerBoundArtifactVersion: " + lowerBoundArtifactVersion.toString() );
         }
-        ArtifactVersion result =
-            getNewestVersion( range, lowerBoundArtifactVersion, null, includeSnapshots, false, true );
+        
+        ArtifactVersion upperBound = null;
+        if (segment != -1) {
+            upperBound = getVersionComparator().incrementSegment(lowerBoundArtifactVersion, segment);
+            helper.getLog().debug( "Property ${" + property.getName() + "}: upperBound is: " + upperBound );
+        }
+        ArtifactVersion result = getNewestVersion(range, lowerBoundArtifactVersion, upperBound, includeSnapshots, false, false);
+        
         helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
 
         if ( property.isSearchReactor() )
@@ -400,6 +411,16 @@ public class PropertyVersions
             }
         }
         return result;
+    }
+
+    private ArtifactVersion getNewestVersion(String currentVersion, VersionsHelper helper, int segment,
+                                             boolean includeSnapshots, VersionRange range) {
+        ArtifactVersion lowerBound = helper.createArtifactVersion(currentVersion);
+        ArtifactVersion upperBound = null;
+        if (segment != -1) {
+            upperBound = getVersionComparator().incrementSegment(lowerBound, segment);
+        }
+        return getNewestVersion(range, lowerBound, upperBound, includeSnapshots, false, false);
     }
 
     private final class PropertyVersionComparator
