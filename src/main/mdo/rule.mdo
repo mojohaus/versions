@@ -27,6 +27,8 @@ under the License.
   <name>Rule</name>
   <description>
     A collection of version number comparison rules.
+    This is marked deprecated and will be removed with release 3.0.0 of the versions-maven-plugin.
+    If you are user of this please vote on &lt;a href="https://github.com/mojohaus/versions-maven-plugin/issues/157"&gt;issue #157&lt;/a&gt;
   </description>
   <defaults>
     <default>
@@ -41,7 +43,7 @@ under the License.
     <class xml.tagName="rule">
       <name>Rule</name>
       <description>
-        Describes a rule for how versions of artifacts should be handled.
+        Describes a rule for how versions of artifacts should be handled. This is marked deprecated and will be removed with release 3.0.0 of the versions-maven-plugin.
       </description>
       <version>1.0+</version>
       <fields>

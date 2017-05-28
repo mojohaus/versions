@@ -35,6 +35,7 @@ import java.util.Stack;
  * @author <a href="mailto:kenney@apache.org">Kenney Westerhof</a>
  * @author <a href="mailto:hboutemy@apache.org">Herve Boutemy</a>
  * @version $Id: ComparableVersion.java 720520 2008-11-25 16:07:14Z bentmann $
+ * Note: The implementation of the maven core should be used.
  */
 public class ComparableVersion
     implements Comparable

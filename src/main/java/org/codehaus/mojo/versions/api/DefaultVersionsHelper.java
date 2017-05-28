@@ -108,6 +108,7 @@ public class DefaultVersionsHelper
     /**
      * The artifact comparison rules to use.
      *
+     * @deprecated
      * @since 1.0-alpha-3
      */
     private final RuleSet ruleSet;
@@ -213,6 +214,7 @@ public class DefaultVersionsHelper
         this.log = log;
     }
 
+    @Deprecated
     private static RuleSet getRuleSet( Wagon wagon, String remoteURI )
         throws IOException, AuthorizationException, TransferFailedException, ResourceDoesNotExistException
     {

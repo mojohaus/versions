@@ -30,6 +30,8 @@ import java.util.regex.Pattern;
  *
  * @author Stephen Connolly
  * @since 1.0-alpha-3
+ * @deprecated
+ * Note: This comparator should be replaced by using the one of Maven core instead.
  */
 public final class VersionComparators
 {

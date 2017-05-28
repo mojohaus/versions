@@ -25,6 +25,9 @@
 
 Version number rules
 
+  This has been marked deprecated and will be removed with release 3.0.0 of the versions-maven-plugin.
+  If you are a user of this please vote on the {{{https://github.com/mojohaus/versions-maven-plugin/issues/157}issue #157}}.
+
 * Introduction
 
   The current implementation of
