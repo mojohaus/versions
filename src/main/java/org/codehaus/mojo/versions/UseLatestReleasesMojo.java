@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo(name = "use-latest-releases", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "use-latest-releases", requiresProject = true, requiresDirectInvocation = true )
 public class UseLatestReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -67,7 +67,7 @@ public class UseLatestReleasesMojo
      *
      * @since 1.2
      */
-    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
     protected boolean allowMajorUpdates;
 
     /**
@@ -75,7 +75,7 @@ public class UseLatestReleasesMojo
      *
      * @since 1.2
      */
-    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
     protected boolean allowMinorUpdates;
 
     /**
@@ -83,7 +83,7 @@ public class UseLatestReleasesMojo
      *
      * @since 1.2
      */
-    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     protected boolean allowIncrementalUpdates;
 
     // ------------------------------ METHODS --------------------------
@@ -120,7 +120,7 @@ public class UseLatestReleasesMojo
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         MajorMinorIncrementalFilter majorMinorIncfilter =
-                        new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+            new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         Iterator i = dependencies.iterator();
 

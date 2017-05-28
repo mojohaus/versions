@@ -36,7 +36,7 @@ import java.util.Map;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo(name = "update-properties", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "update-properties", requiresProject = true, requiresDirectInvocation = true )
 public class UpdatePropertiesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -56,7 +56,7 @@ public class UpdatePropertiesMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter(property = "includeProperties")
+    @Parameter( property = "includeProperties" )
     private String includeProperties = null;
 
     /**
@@ -64,7 +64,7 @@ public class UpdatePropertiesMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter(property = "excludeProperties")
+    @Parameter( property = "excludeProperties" )
     private String excludeProperties = null;
 
     /**
@@ -72,25 +72,24 @@ public class UpdatePropertiesMojo
      *
      * @since 1.0-alpha-2
      */
-    @Parameter(property = "autoLinkItems", defaultValue = "true")
+    @Parameter( property = "autoLinkItems", defaultValue = "true" )
     private boolean autoLinkItems;
 
-    
     /**
-     * If a property points to a version like <code>1.2.3-SNAPSHOT</code>
-     * and your repo contains a version like <code>1.1.0</code> without
-     * settings this to <code>true</code> the property will not being changed.
+     * If a property points to a version like <code>1.2.3-SNAPSHOT</code> and your repo contains a version like
+     * <code>1.1.0</code> without settings this to <code>true</code> the property will not being changed.
+     * 
      * @since 3.0.0
      */
-    @Parameter(property = "allowDowngrade", defaultValue = "false")
+    @Parameter( property = "allowDowngrade", defaultValue = "false" )
     private boolean allowDowngrade;
-    
+
     /**
      * Whether to allow the major version number to be changed.
      *
      * @since 2.4
      */
-    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
     protected Boolean allowMajorUpdates;
 
     /**
@@ -98,7 +97,7 @@ public class UpdatePropertiesMojo
      *
      * @since 2.4
      */
-    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
     protected Boolean allowMinorUpdates;
 
     /**
@@ -106,9 +105,9 @@ public class UpdatePropertiesMojo
      *
      * @since 2.4
      */
-    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     protected Boolean allowIncrementalUpdates;
-    
+
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
@@ -152,8 +151,9 @@ public class UpdatePropertiesMojo
 
             if ( canUpdateProperty )
             {
-                int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates);
-                updatePropertyToNewestVersion(pom, property, version, currentVersion, allowDowngrade, segment);
+                int segment =
+                    determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+                updatePropertyToNewestVersion( pom, property, version, currentVersion, allowDowngrade, segment );
             }
 
         }

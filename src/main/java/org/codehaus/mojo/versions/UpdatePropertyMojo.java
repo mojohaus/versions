@@ -35,7 +35,7 @@ import java.util.Map;
  * @author Eric Pabst
  * @since 1.3
  */
-@Mojo(name = "update-property", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "update-property", requiresProject = true, requiresDirectInvocation = true )
 public class UpdatePropertyMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -47,24 +47,24 @@ public class UpdatePropertyMojo
      * 
      * @since 1.3
      */
-    @Parameter (property = "property")
+    @Parameter( property = "property" )
     private String property = null;
 
     /**
      * The new version to set the property to (can be a version range to find a version within).
      * <ul>
-     *   <li><code>1.0</code>x >= 1.0. The default Maven meaning for 1.0 is everything (,) but with 1.0 recommended.</li>
-     *   <li><code>[1.0,2.0)</code> Versions 1.0 (included) to 2.0 (not included)</li>
-     *   <li><code>[1.0,2.0]</code> Versions 1.0 to 2.0 (both included)</li>
-     *   <li><code>[1.5,)</code> Versions 1.5 and higher</li>
-     *   <li><code>(,1.0],[1.2,)</code> Versions up to 1.0 (included) and 1.2 or higher</li>
+     * <li><code>1.0</code>x >= 1.0. The default Maven meaning for 1.0 is everything (,) but with 1.0 recommended.</li>
+     * <li><code>[1.0,2.0)</code> Versions 1.0 (included) to 2.0 (not included)</li>
+     * <li><code>[1.0,2.0]</code> Versions 1.0 to 2.0 (both included)</li>
+     * <li><code>[1.5,)</code> Versions 1.5 and higher</li>
+     * <li><code>(,1.0],[1.2,)</code> Versions up to 1.0 (included) and 1.2 or higher</li>
      * </ul>
      * If you like to define version to be used exactly you have to use something like this:
      * <code>-DnewVersion=[19.0]</code> otherwise a newer existing version will be used.
      * 
      * @since 1.3
      */
-    @Parameter (property = "newVersion")
+    @Parameter( property = "newVersion" )
     private String newVersion = null;
 
     /**
@@ -72,16 +72,16 @@ public class UpdatePropertyMojo
      *
      * @since 1.0-alpha-2
      */
-    @Parameter (property = "autoLinkItems", defaultValue = "true")
+    @Parameter( property = "autoLinkItems", defaultValue = "true" )
     private boolean autoLinkItems;
 
     /**
-     * If a property points to a version like <code>1.2.3-SNAPSHOT</code>
-     * and your repo contains a version like <code>1.1.0</code> without
-     * settings this to <code>true</code> the property will not being changed.
+     * If a property points to a version like <code>1.2.3-SNAPSHOT</code> and your repo contains a version like
+     * <code>1.1.0</code> without settings this to <code>true</code> the property will not being changed.
+     * 
      * @since 3.0.0
      */
-    @Parameter(property = "allowDowngrade", defaultValue = "false")
+    @Parameter( property = "allowDowngrade", defaultValue = "false" )
     private boolean allowDowngrade;
 
     /**
@@ -89,7 +89,7 @@ public class UpdatePropertyMojo
      *
      * @since 2.4
      */
-    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
     protected Boolean allowMajorUpdates;
 
     /**
@@ -97,7 +97,7 @@ public class UpdatePropertyMojo
      *
      * @since 2.4
      */
-    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
     protected Boolean allowMinorUpdates;
 
     /**
@@ -105,9 +105,9 @@ public class UpdatePropertyMojo
      *
      * @since 2.4
      */
-    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     protected Boolean allowIncrementalUpdates;
-    
+
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
@@ -139,7 +139,7 @@ public class UpdatePropertyMojo
                 continue;
             }
 
-            int segment = determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates);
+            int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
             updatePropertyToNewestVersion( pom, property, version, currentVersion, allowDowngrade, segment );
 
         }

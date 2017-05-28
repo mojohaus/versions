@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * @author Paul Gier
  * @since 1.0-alpha-3
  */
-@Mojo(name = "unlock-snapshots", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "unlock-snapshots", requiresProject = true, requiresDirectInvocation = true )
 public class UnlockSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

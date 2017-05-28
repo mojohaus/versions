@@ -47,8 +47,8 @@ public class PluginUpdatesReport
 {
 
     /**
-     * Report formats (html and/or xml).
-     * HTML by default.
+     * Report formats (html and/or xml). HTML by default.
+     * 
      * @parameter
      */
     private String[] formats = new String[] { "html" };
@@ -111,19 +111,21 @@ public class PluginUpdatesReport
                 getHelper().lookupPluginsUpdates( plugins, getAllowSnapshots() );
             Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates =
                 getHelper().lookupPluginsUpdates( pluginManagement, getAllowSnapshots() );
-            for (String format : formats)
+            for ( String format : formats )
             {
-                if ("html".equals(format))
+                if ( "html".equals( format ) )
                 {
-                    PluginUpdatesRenderer renderer = new PluginUpdatesRenderer(sink, getI18n(), getOutputName(), locale,
-                            pluginUpdates, pluginManagementUpdates);
+                    PluginUpdatesRenderer renderer =
+                        new PluginUpdatesRenderer( sink, getI18n(), getOutputName(), locale, pluginUpdates,
+                                                   pluginManagementUpdates );
                     renderer.render();
-                } else if ("xml".equals(format))
+                }
+                else if ( "xml".equals( format ) )
                 {
-                    String outputFile = getProject().getBuild().getDirectory() + File.separator + getOutputName()
-                            + ".xml";
-                    PluginUpdatesXmlRenderer xmlGenerator = new PluginUpdatesXmlRenderer(pluginUpdates,
-                            pluginManagementUpdates, outputFile);
+                    String outputFile =
+                        getProject().getBuild().getDirectory() + File.separator + getOutputName() + ".xml";
+                    PluginUpdatesXmlRenderer xmlGenerator =
+                        new PluginUpdatesXmlRenderer( pluginUpdates, pluginManagementUpdates, outputFile );
                     xmlGenerator.render();
                 }
             }

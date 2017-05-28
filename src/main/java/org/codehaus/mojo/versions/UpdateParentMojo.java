@@ -39,7 +39,7 @@ import javax.xml.stream.XMLStreamException;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo(name= "update-parent", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "update-parent", requiresProject = true, requiresDirectInvocation = true )
 public class UpdateParentMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -51,7 +51,7 @@ public class UpdateParentMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter ( property = "parentVersion", defaultValue = "null")
+    @Parameter( property = "parentVersion", defaultValue = "null" )
     protected String parentVersion = null;
 
     // -------------------------- OTHER METHODS --------------------------

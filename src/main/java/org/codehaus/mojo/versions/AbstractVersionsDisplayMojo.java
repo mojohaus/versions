@@ -1,10 +1,5 @@
 package org.codehaus.mojo.versions;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,6 +19,11 @@ import java.util.Set;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.FileUtils;
@@ -41,7 +41,7 @@ public abstract class AbstractVersionsDisplayMojo
      *
      * @since 2.2
      */
-    @Parameter(property = "versions.outputFile")
+    @Parameter( property = "versions.outputFile" )
     private File outputFile;
 
     /**
@@ -49,7 +49,7 @@ public abstract class AbstractVersionsDisplayMojo
      *
      * @since 2.2
      */
-    @Parameter(property = "versions.logOutput", defaultValue = "true")
+    @Parameter( property = "versions.logOutput", defaultValue = "true" )
     private boolean logOutput;
 
     /**
@@ -57,7 +57,7 @@ public abstract class AbstractVersionsDisplayMojo
      *
      * @since 2.2
      */
-    @Parameter(property = "outputEncoding", defaultValue = "${project.reporting.outputEncoding}")
+    @Parameter( property = "outputEncoding", defaultValue = "${project.reporting.outputEncoding}" )
     private String outputEncoding;
 
     private boolean outputFileError = false;

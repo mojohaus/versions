@@ -45,7 +45,7 @@ public class RevertMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter (defaultValue = "${project}", required = true, readonly = true)
+    @Parameter( defaultValue = "${project}", required = true, readonly = true )
     private MavenProject project;
 
     public void execute()

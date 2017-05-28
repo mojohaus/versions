@@ -54,7 +54,7 @@ public class ResolveRangesMojo
      *
      * @since 1.3
      */
-    @Parameter(property = "processProperties", defaultValue = "true")
+    @Parameter( property = "processProperties", defaultValue = "true" )
     private boolean processProperties;
 
     /**
@@ -63,7 +63,7 @@ public class ResolveRangesMojo
      * @parameter property="includeProperties"
      * @since 1.3
      */
-    @Parameter(property = "includeProperties")
+    @Parameter( property = "includeProperties" )
     private String includeProperties = null;
 
     /**
@@ -71,7 +71,7 @@ public class ResolveRangesMojo
      *
      * @since 1.3
      */
-    @Parameter(property = "excludeProperties")
+    @Parameter( property = "excludeProperties" )
     private String excludeProperties = null;
 
     // ------------------------------ FIELDS ------------------------------
@@ -95,8 +95,7 @@ public class ResolveRangesMojo
     {
         // Note we have to get the dependencies from the model because the dependencies in the
         // project may have already had their range resolved [MNG-4138]
-        if ( hasDependencyManagement()
-            && hasDependenciesInDependencyManagement()
+        if ( hasDependencyManagement() && hasDependenciesInDependencyManagement()
             && isProcessingDependencyManagement() )
         {
             getLog().debug( "processing dependencyManagement of " + getProject().getId() );
@@ -227,8 +226,8 @@ public class ResolveRangesMojo
                         }
                         else
                         {
-                            getLog().debug( "Could not find the version tag for dependency " + artifact + " in project " + getProject().getId() + " so unable to set version to "
-                                + artifactVersion );
+                            getLog().debug( "Could not find the version tag for dependency " + artifact + " in project "
+                                + getProject().getId() + " so unable to set version to " + artifactVersion );
                         }
                     }
                 }

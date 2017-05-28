@@ -44,7 +44,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Paul Gier
  * @since 1.0-alpha-3
  */
-@Mojo(name= "lock-snapshots", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "lock-snapshots", requiresProject = true, requiresDirectInvocation = true )
 public class LockSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -85,7 +85,7 @@ public class LockSnapshotsMojo
     private void lockSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException
     {
-        for (Dependency dep : dependencies)
+        for ( Dependency dep : dependencies )
         {
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
@@ -187,10 +187,10 @@ public class LockSnapshotsMojo
 
         try
         {
-            Artifact depArtifact = artifactFactory.createDependencyArtifact(
-                    dep.getGroupId(), dep.getArtifactId(),
-                    VersionRange.createFromVersionSpec(dep.getVersion()),
-                    dep.getType(), dep.getClassifier(), dep.getScope());
+            Artifact depArtifact =
+                artifactFactory.createDependencyArtifact( dep.getGroupId(), dep.getArtifactId(),
+                                                          VersionRange.createFromVersionSpec( dep.getVersion() ),
+                                                          dep.getType(), dep.getClassifier(), dep.getScope() );
             resolver.resolve( depArtifact, getProject().getRemoteArtifactRepositories(), localRepository );
 
             lockedVersion = depArtifact.getVersion();

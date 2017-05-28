@@ -60,7 +60,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      *
      * @since 1.0-beta-1
      */
-    @Parameter (property = "includes")
+    @Parameter( property = "includes" )
     private String includesList = null;
 
     /**
@@ -71,7 +71,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      *
      * @since 1.0-beta-1
      */
-    @Parameter (property = "excludes")
+    @Parameter( property = "excludes" )
     private String excludesList = null;
 
     /**
@@ -97,7 +97,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter(property = "processDependencies", defaultValue = "true")
+    @Parameter( property = "processDependencies", defaultValue = "true" )
     private boolean processDependencies;
 
     /**
@@ -105,7 +105,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    @Parameter( property = "processDependencyManagement", defaultValue = "true" )
     private boolean processDependencyManagement;
 
     /**
@@ -113,7 +113,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      *
      * @since 2.3
      */
-    @Parameter(property = "processParent", defaultValue = "false")
+    @Parameter( property = "processParent", defaultValue = "false" )
     private boolean processParent = false;
 
     /**
@@ -135,7 +135,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter(property = "excludeReactor", defaultValue = "true")
+    @Parameter( property = "excludeReactor", defaultValue = "true" )
     private boolean excludeReactor;
 
     /**
@@ -232,7 +232,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         return artifact;
     }
 
-    protected Artifact toArtifact( Parent model ) throws MojoExecutionException
+    protected Artifact toArtifact( Parent model )
+        throws MojoExecutionException
     {
         Dependency d = new Dependency();
         d.setArtifactId( model.getArtifactId() );
@@ -240,10 +241,11 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         d.setVersion( model.getVersion() );
         d.setType( "pom" );
         d.setScope( Artifact.SCOPE_COMPILE );
-        return this.toArtifact( d);
+        return this.toArtifact( d );
     }
 
-    protected String toString( MavenProject project ) {
+    protected String toString( MavenProject project )
+    {
         StringBuilder buf = new StringBuilder();
 
         buf.append( project.getGroupId() );
@@ -384,13 +386,15 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
         return result;
     }
-    
+
     /**
      * Indicates whether any includes were specified via the 'includes' or 'includesList' options.
+     * 
      * @return true if includes were specified, false otherwise.
      */
-    protected boolean hasIncludes() {
-    	return includes != null || includesList != null;
+    protected boolean hasIncludes()
+    {
+        return includes != null || includesList != null;
     }
 
     private ArtifactFilter getIncludesArtifactFilter()

@@ -40,7 +40,7 @@ import java.util.Iterator;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo(name = "use-next-versions", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "use-next-versions", requiresProject = true, requiresDirectInvocation = true )
 public class UseNextVersionsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -97,8 +97,7 @@ public class UseNextVersionsMojo
             }
 
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
-            ArtifactVersions versions =
-                getHelper().lookupArtifactVersions( artifact, false );
+            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
             ArtifactVersion[] newer = versions.getNewerVersions( version, Boolean.TRUE.equals( allowSnapshots ) );
             if ( newer.length > 0 )
             {

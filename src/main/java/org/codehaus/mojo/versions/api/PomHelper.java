@@ -169,7 +169,7 @@ public class PomHelper
      */
     public static boolean setPropertyVersion( final ModifiedPomXMLEventReader pom, final String profileId,
                                               final String property, final String value )
-                                                  throws XMLStreamException
+        throws XMLStreamException
     {
         Stack<String> stack = new Stack<String>();
         String path = "";
@@ -467,10 +467,10 @@ public class PomHelper
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if something went wrong.
      */
-    public static boolean setDependencyVersion(final ModifiedPomXMLEventReader pom, final String groupId,
-                                               final String artifactId, final String oldVersion,
-                                               final String newVersion, final Model model)
-                                                    throws XMLStreamException
+    public static boolean setDependencyVersion( final ModifiedPomXMLEventReader pom, final String groupId,
+                                                final String artifactId, final String oldVersion,
+                                                final String newVersion, final Model model )
+        throws XMLStreamException
     {
         Stack<String> stack = new Stack<String>();
         String path = "";
@@ -481,7 +481,8 @@ public class PomHelper
                                                         "/project/artifactId", "/project/version" ) );
         Map<String, String> implicitProperties = new HashMap<String, String>();
 
-        for (Map.Entry<Object, Object> entry : model.getProperties().entrySet()) {
+        for ( Map.Entry<Object, Object> entry : model.getProperties().entrySet() )
+        {
             implicitProperties.put( (String) entry.getKey(), (String) entry.getValue() );
         }
 
@@ -772,7 +773,7 @@ public class PomHelper
      */
     public static boolean setPluginVersion( final ModifiedPomXMLEventReader pom, final String groupId,
                                             final String artifactId, final String oldVersion, final String newVersion )
-                                                throws XMLStreamException
+        throws XMLStreamException
     {
         Stack<String> stack = new Stack<String>();
         String path = "";
@@ -990,7 +991,7 @@ public class PomHelper
      */
     private static void addPluginAssociations( VersionsHelper helper, ExpressionEvaluator expressionEvaluator,
                                                Map<String, PropertyVersionsBuilder> result, List<Plugin> plugins )
-                                                   throws ExpressionEvaluationException
+        throws ExpressionEvaluationException
     {
         if ( plugins == null )
         {
@@ -1047,7 +1048,7 @@ public class PomHelper
     private static void addReportPluginAssociations( VersionsHelper helper, ExpressionEvaluator expressionEvaluator,
                                                      Map<String, PropertyVersionsBuilder> result,
                                                      List<ReportPlugin> reportPlugins )
-                                                         throws ExpressionEvaluationException
+        throws ExpressionEvaluationException
     {
         if ( reportPlugins == null )
         {
@@ -1103,7 +1104,7 @@ public class PomHelper
     private static void addDependencyAssocations( VersionsHelper helper, ExpressionEvaluator expressionEvaluator,
                                                   Map<String, PropertyVersionsBuilder> result,
                                                   List<Dependency> dependencies, boolean usePluginRepositories )
-                                                      throws ExpressionEvaluationException
+        throws ExpressionEvaluationException
     {
         if ( dependencies == null )
         {

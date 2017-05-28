@@ -79,7 +79,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-3
      */
-    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    @Parameter( defaultValue = "${project}", required = true, readonly = true )
     private MavenProject project;
 
     /**
@@ -102,7 +102,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-3
      */
-    @Parameter (defaultValue = "${project.reporting.outputDirectory}", required = true)
+    @Parameter( defaultValue = "${project.reporting.outputDirectory}", required = true )
     private File outputDirectory;
 
     /**
@@ -110,7 +110,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-3
      */
-    @Parameter (property = "versions.skip")
+    @Parameter( property = "versions.skip" )
     private boolean skip;
 
     /**
@@ -124,19 +124,19 @@ public abstract class AbstractVersionsReport
     /**
      * @since 1.0-alpha-3
      */
-    @Parameter(defaultValue = "${project.remoteArtifactRepositories}", readonly = true)
+    @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
     protected List remoteArtifactRepositories;
 
     /**
      * @since 1.0-alpha-3
      */
-    @Parameter(defaultValue = "${project.pluginArtifactRepositories}", readonly = true)
+    @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
     protected List remotePluginRepositories;
 
     /**
      * @since 1.0-alpha-1
      */
-    @Parameter(defaultValue = "${localRepository}", readonly = true)
+    @Parameter( defaultValue = "${localRepository}", readonly = true )
     protected ArtifactRepository localRepository;
 
     /**
@@ -148,7 +148,7 @@ public abstract class AbstractVersionsReport
     /**
      * @since 1.0-alpha-3
      */
-    @Parameter (defaultValue = "${settings}", readonly = true)
+    @Parameter( defaultValue = "${settings}", readonly = true )
     private Settings settings;
 
     /**
@@ -156,7 +156,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-3
      */
-    @Parameter (property = "maven.version.rules.serverId", defaultValue = "serverId")
+    @Parameter( property = "maven.version.rules.serverId", defaultValue = "serverId" )
     private String serverId;
 
     /**
@@ -164,7 +164,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-3
      */
-    @Parameter(property = "maven.version.rules")
+    @Parameter( property = "maven.version.rules" )
     private String rulesUri;
 
     /**
@@ -174,7 +174,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-1
      */
-    @Parameter (property = "comparisonMethod")
+    @Parameter( property = "comparisonMethod" )
     protected String comparisonMethod;
 
     /**
@@ -182,7 +182,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-3
      */
-    @Parameter (property = "allowSnapshots", defaultValue = "false")
+    @Parameter( property = "allowSnapshots", defaultValue = "false" )
     protected boolean allowSnapshots;
 
     /**
@@ -195,7 +195,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-beta-1
      */
-    @Parameter(defaultValue = "${session}", required = true, readonly = true)
+    @Parameter( defaultValue = "${session}", required = true, readonly = true )
     protected MavenSession session;
 
     @Component
@@ -268,7 +268,7 @@ public abstract class AbstractVersionsReport
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  boolean allowingSnapshots, boolean usePluginRepositories )
-                                                     throws MavenReportException
+        throws MavenReportException
     {
         boolean includeSnapshots = this.allowSnapshots;
         if ( allowingSnapshots )

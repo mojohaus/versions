@@ -19,6 +19,11 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -36,11 +41,6 @@ import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -258,7 +258,7 @@ public interface VersionsHelper
     Map<Property, PropertyVersions> getVersionPropertiesMap( MavenProject project, Property[] propertyDefinitions,
                                                              String includeProperties, String excludeProperties,
                                                              boolean autoLinkItems )
-                                                                 throws MojoExecutionException;
+        throws MojoExecutionException;
 
     /**
      * Attempts to resolve the artifact.

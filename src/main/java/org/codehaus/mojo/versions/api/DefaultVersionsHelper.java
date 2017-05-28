@@ -90,7 +90,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
-
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
  *
@@ -200,7 +199,7 @@ public class DefaultVersionsHelper
                                   List remotePluginRepositories, ArtifactRepository localRepository,
                                   WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
                                   Log log, MavenSession mavenSession, PathTranslator pathTranslator )
-                                      throws MojoExecutionException
+        throws MojoExecutionException
     {
         this.artifactFactory = artifactFactory;
         this.artifactResolver = artifactResolver;
@@ -284,7 +283,7 @@ public class DefaultVersionsHelper
 
     private static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
                                         Log logger )
-                                            throws MojoExecutionException
+        throws MojoExecutionException
     {
         RuleSet ruleSet = new RuleSet();
         if ( rulesUri != null && rulesUri.trim().length() != 0 )
@@ -660,7 +659,7 @@ public class DefaultVersionsHelper
      */
     public ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots,
                                                    boolean usePluginRepositories )
-                                                       throws ArtifactMetadataRetrievalException
+        throws ArtifactMetadataRetrievalException
     {
         ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
 
@@ -674,8 +673,7 @@ public class DefaultVersionsHelper
      */
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies,
                                                                         boolean usePluginRepositories )
-                                                                            throws ArtifactMetadataRetrievalException,
-                                                                            InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         // Create the request for details collection for parallel lookup...
         final List<Callable<DependencyArtifactVersions>> requestsForDetails =
@@ -830,7 +828,7 @@ public class DefaultVersionsHelper
                                                                     Property[] propertyDefinitions,
                                                                     String includeProperties, String excludeProperties,
                                                                     boolean autoLinkItems )
-                                                                        throws MojoExecutionException
+        throws MojoExecutionException
     {
         Map<String, Property> properties = new HashMap<String, Property>();
         if ( propertyDefinitions != null )
@@ -871,16 +869,16 @@ public class DefaultVersionsHelper
                 }
             }
         }
-        
+
         List<String> includePropertiesList = getSplittedProperties( includeProperties );
-        List<String> excludePropertiesList = getSplittedProperties( excludeProperties ); 
+        List<String> excludePropertiesList = getSplittedProperties( excludeProperties );
 
         getLog().debug( "Searching for properties associated with builders" );
         Iterator<Property> i = properties.values().iterator();
         while ( i.hasNext() )
         {
             Property property = i.next();
-            
+
             getLog().debug( "includePropertiesList:" + includePropertiesList + " property: " + property.getName() );
             getLog().debug( "excludePropertiesList:" + excludePropertiesList + " property: " + property.getName() );
             if ( !includePropertiesList.isEmpty() && !includePropertiesList.contains( property.getName() ) )
@@ -950,9 +948,11 @@ public class DefaultVersionsHelper
         return propertyVersions;
     }
 
-    private List<String> getSplittedProperties(String commaSeparatedProperties) {
-        List<String> propertiesList = Collections.emptyList(); 
-        if (StringUtils.isNotEmpty( commaSeparatedProperties ) ) {
+    private List<String> getSplittedProperties( String commaSeparatedProperties )
+    {
+        List<String> propertiesList = Collections.emptyList();
+        if ( StringUtils.isNotEmpty( commaSeparatedProperties ) )
+        {
             String[] splittedProps = StringUtils.split( commaSeparatedProperties, "," );
             propertiesList = Arrays.asList( StringUtils.stripAll( splittedProps ) );
         }

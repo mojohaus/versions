@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo(name = "use-next-snapshots", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "use-next-snapshots", requiresProject = true, requiresDirectInvocation = true )
 public class UseNextSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -56,7 +56,7 @@ public class UseNextSnapshotsMojo
      *
      * @since 1.0-beta-1
      */
-    @Parameter(property = "allowMajorUpdates", defaultValue = "false")
+    @Parameter( property = "allowMajorUpdates", defaultValue = "false" )
     private boolean allowMajorUpdates;
 
     /**
@@ -64,7 +64,7 @@ public class UseNextSnapshotsMojo
      *
      * @since 1.0-beta-1
      */
-    @Parameter(property = "allowMinorUpdates", defaultValue = "false")
+    @Parameter( property = "allowMinorUpdates", defaultValue = "false" )
     private boolean allowMinorUpdates;
 
     /**
@@ -72,7 +72,7 @@ public class UseNextSnapshotsMojo
      *
      * @since 1.0-beta-1
      */
-    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     private boolean allowIncrementalUpdates;
 
     // ------------------------------ FIELDS ------------------------------

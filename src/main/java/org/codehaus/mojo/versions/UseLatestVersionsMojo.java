@@ -143,14 +143,14 @@ public class UseLatestVersionsMojo
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
 
-            ArtifactVersion[] newerVersions =
-                versions.getNewerVersions( version, segment, allowSnapshots );
+            ArtifactVersion[] newerVersions = versions.getNewerVersions( version, segment, allowSnapshots );
 
             ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
             if ( filteredVersions.length > 0 )
             {
                 String newVersion = filteredVersions[filteredVersions.length - 1].toString();
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion, getProject().getModel() ) )
+                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion,
+                                                     getProject().getModel() ) )
                 {
                     getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
                 }

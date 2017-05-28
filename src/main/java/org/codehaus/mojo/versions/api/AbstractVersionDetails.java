@@ -1,7 +1,5 @@
 package org.codehaus.mojo.versions.api;
 
-import org.apache.commons.cli.HelpFormatter;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,16 +19,16 @@ import org.apache.commons.cli.HelpFormatter;
  * under the License.
  */
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Base class for {@link org.codehaus.mojo.versions.api.VersionDetails}.
@@ -203,12 +201,14 @@ public abstract class AbstractVersionDetails
             }
             if ( ( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 ) )
             {
-                System.out.println( "( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 )  lower:" + lower + " upper:" + upper );
+                System.out.println( "( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 )  lower:" + lower
+                    + " upper:" + upper );
                 continue;
             }
             if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
             {
-                System.out.println( "!includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() )  includeSnapshots: " + includeSnapshots );
+                System.out.println( "!includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() )  includeSnapshots: "
+                    + includeSnapshots );
                 continue;
             }
             if ( latest == null )
@@ -220,7 +220,7 @@ public abstract class AbstractVersionDetails
                 latest = candidate;
             }
             System.out.println( "result: " + latest.toString() );
-            
+
         }
         return latest;
     }

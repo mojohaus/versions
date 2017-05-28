@@ -63,7 +63,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo (name="set", requiresProject = true, requiresDirectInvocation = true, aggregator = true)
+@Mojo( name = "set", requiresProject = true, requiresDirectInvocation = true, aggregator = true )
 public class SetMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -75,7 +75,7 @@ public class SetMojo
      *
      * @since 1.0-beta-1
      */
-    @Parameter(property = "newVersion")
+    @Parameter( property = "newVersion" )
     private String newVersion;
 
     /**
@@ -83,7 +83,7 @@ public class SetMojo
      *
      * @since 1.2
      */
-    @Parameter(property = "groupId", defaultValue = "${project.groupId}")
+    @Parameter( property = "groupId", defaultValue = "${project.groupId}" )
     private String groupId;
 
     /**
@@ -91,7 +91,7 @@ public class SetMojo
      *
      * @since 1.2
      */
-    @Parameter(property = "artifactId", defaultValue = "${project.artifactId}")
+    @Parameter( property = "artifactId", defaultValue = "${project.artifactId}" )
     private String artifactId;
 
     /**
@@ -99,7 +99,7 @@ public class SetMojo
      *
      * @since 1.2
      */
-    @Parameter(property = "oldVersion", defaultValue = "${project.version}")
+    @Parameter( property = "oldVersion", defaultValue = "${project.version}" )
     private String oldVersion;
 
     /**
@@ -107,7 +107,7 @@ public class SetMojo
      *
      * @since 1.3
      */
-    @Parameter(property = "updateMatchingVersions", defaultValue = "true")
+    @Parameter( property = "updateMatchingVersions", defaultValue = "true" )
     private boolean updateMatchingVersions;
 
     /**
@@ -115,7 +115,7 @@ public class SetMojo
      *
      * @since 1.3
      */
-    @Parameter(property = "processParent", defaultValue = "true")
+    @Parameter( property = "processParent", defaultValue = "true" )
     private boolean processParent;
 
     /**
@@ -123,7 +123,7 @@ public class SetMojo
      *
      * @since 1.3
      */
-    @Parameter(property = "processProject", defaultValue = "true")
+    @Parameter( property = "processProject", defaultValue = "true" )
     private boolean processProject;
 
     /**
@@ -131,7 +131,7 @@ public class SetMojo
      *
      * @since 1.3
      */
-    @Parameter(property = "processDependencies", defaultValue = "true")
+    @Parameter( property = "processDependencies", defaultValue = "true" )
     private boolean processDependencies;
 
     /**
@@ -139,7 +139,7 @@ public class SetMojo
      *
      * @since 1.3
      */
-    @Parameter(property = "processPlugins", defaultValue = "true")
+    @Parameter( property = "processPlugins", defaultValue = "true" )
     private boolean processPlugins;
 
     /**
@@ -155,7 +155,7 @@ public class SetMojo
      *
      * @since 2.10
      */
-    @Parameter(property = "removeSnapshot", defaultValue = "false")
+    @Parameter( property = "removeSnapshot", defaultValue = "false" )
     private boolean removeSnapshot;
 
     /**
@@ -163,7 +163,7 @@ public class SetMojo
      *
      * @since 2.10
      */
-    @Parameter(property = "nextSnapshot", defaultValue = "false")
+    @Parameter( property = "nextSnapshot", defaultValue = "false" )
     private boolean nextSnapshot;
 
     /**
@@ -193,17 +193,19 @@ public class SetMojo
             throw new MojoExecutionException( "Project version is inherited from parent." );
         }
 
-        if ( removeSnapshot == true && nextSnapshot == false ) {
+        if ( removeSnapshot && !nextSnapshot )
+        {
             String version = getVersion();
             String release = version;
-            if (version.endsWith( SNAPSHOT)) {
+            if ( version.endsWith( SNAPSHOT ) )
+            {
                 release = version.substring( 0, version.indexOf( SNAPSHOT ) );
                 newVersion = release;
-                getLog().info("SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion);
+                getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );
             }
         }
 
-        if ( removeSnapshot == false && nextSnapshot == true )
+        if ( !removeSnapshot && nextSnapshot )
         {
             boolean havingSnapshot = false;
             String version = getVersion();
@@ -298,9 +300,8 @@ public class SetMojo
                                  StringUtils.isBlank( oldVersion ) || "*".equals( oldVersion ) ? "" : m.getVersion() );
                 }
             }
-            if ( !found && RegexUtils.getWildcardScore(groupId) == 0
-            		&& RegexUtils.getWildcardScore(artifactId) == 0
-            		&& RegexUtils.getWildcardScore(oldVersion) == 0 )
+            if ( !found && RegexUtils.getWildcardScore( groupId ) == 0 && RegexUtils.getWildcardScore( artifactId ) == 0
+                && RegexUtils.getWildcardScore( oldVersion ) == 0 )
             {
                 applyChange( project, reactor, files, groupId, artifactId, oldVersion );
             }
@@ -423,7 +424,7 @@ public class SetMojo
 
         final File moduleProjectFile;
 
-        if ( projectBaseDir.equals(moduleDir) )
+        if ( projectBaseDir.equals( moduleDir ) )
         {
             moduleProjectFile = project.getFile();
         }

@@ -255,12 +255,11 @@ public class DisplayDependencyUpdatesMojo
             }
             else
             {
-                ArtifactVersion newestVersion = versions.getNewestVersion( versions.getArtifact().getVersionRange(),
-                                                                           allowSnapshots );
+                ArtifactVersion newestVersion =
+                    versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null ? null
-                                : versions.getNewestUpdate( newestVersion, UpdateScope.ANY,
-                                                            allowSnapshots );
+                                : versions.getNewestUpdate( newestVersion, UpdateScope.ANY, allowSnapshots );
                 if ( latest != null
                     && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
                 {

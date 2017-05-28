@@ -82,7 +82,7 @@ public class PropertyVersions
     private static SortedSet<ArtifactVersion> resolveAssociatedVersions( VersionsHelper helper,
                                                                          Set<ArtifactAssociation> associations,
                                                                          VersionComparator versionComparator )
-                                                                             throws ArtifactMetadataRetrievalException
+        throws ArtifactMetadataRetrievalException
     {
         SortedSet<ArtifactVersion> versions = null;
         for ( ArtifactAssociation association : associations )
@@ -310,16 +310,18 @@ public class PropertyVersions
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
                                              List reactorProjects, VersionsHelper helper )
-            throws MojoExecutionException {
-        return getNewestVersion(currentVersion, property, allowSnapshots, reactorProjects, helper, false, -1);
+        throws MojoExecutionException
+    {
+        return getNewestVersion( currentVersion, property, allowSnapshots, reactorProjects, helper, false, -1 );
     }
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper, boolean allowDowngrade, int segment )
-                                                 throws MojoExecutionException
+                                             List reactorProjects, VersionsHelper helper, boolean allowDowngrade,
+                                             int segment )
+        throws MojoExecutionException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && allowSnapshots;
-        helper.getLog().debug("getNewestVersion(): includeSnapshots='" + includeSnapshots + "'");
+        helper.getLog().debug( "getNewestVersion(): includeSnapshots='" + includeSnapshots + "'" );
         helper.getLog().debug( "Property ${" + property.getName() + "}: Set of valid available versions is "
             + Arrays.asList( getVersions( includeSnapshots ) ) );
         VersionRange range;
@@ -351,14 +353,16 @@ public class PropertyVersions
             lowerBoundArtifactVersion = helper.createArtifactVersion( currentVersion );
             helper.getLog().debug( "lowerBoundArtifactVersion: " + lowerBoundArtifactVersion.toString() );
         }
-        
+
         ArtifactVersion upperBound = null;
-        if (segment != -1) {
-            upperBound = getVersionComparator().incrementSegment(lowerBoundArtifactVersion, segment);
+        if ( segment != -1 )
+        {
+            upperBound = getVersionComparator().incrementSegment( lowerBoundArtifactVersion, segment );
             helper.getLog().debug( "Property ${" + property.getName() + "}: upperBound is: " + upperBound );
         }
-        ArtifactVersion result = getNewestVersion(range, lowerBoundArtifactVersion, upperBound, includeSnapshots, false, false);
-        
+        ArtifactVersion result =
+            getNewestVersion( range, lowerBoundArtifactVersion, upperBound, includeSnapshots, false, false );
+
         helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
 
         if ( property.isSearchReactor() )
@@ -413,14 +417,16 @@ public class PropertyVersions
         return result;
     }
 
-    private ArtifactVersion getNewestVersion(String currentVersion, VersionsHelper helper, int segment,
-                                             boolean includeSnapshots, VersionRange range) {
-        ArtifactVersion lowerBound = helper.createArtifactVersion(currentVersion);
+    private ArtifactVersion getNewestVersion( String currentVersion, VersionsHelper helper, int segment,
+                                              boolean includeSnapshots, VersionRange range )
+    {
+        ArtifactVersion lowerBound = helper.createArtifactVersion( currentVersion );
         ArtifactVersion upperBound = null;
-        if (segment != -1) {
-            upperBound = getVersionComparator().incrementSegment(lowerBound, segment);
+        if ( segment != -1 )
+        {
+            upperBound = getVersionComparator().incrementSegment( lowerBound, segment );
         }
-        return getNewestVersion(range, lowerBound, upperBound, includeSnapshots, false, false);
+        return getNewestVersion( range, lowerBound, upperBound, includeSnapshots, false, false );
     }
 
     private final class PropertyVersionComparator

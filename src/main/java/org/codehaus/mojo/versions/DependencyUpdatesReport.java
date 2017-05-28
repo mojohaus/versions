@@ -50,8 +50,8 @@ public class DependencyUpdatesReport
 {
 
     /**
-     * Report formats (html and/or xml).
-     * HTML by default.
+     * Report formats (html and/or xml). HTML by default.
+     * 
      * @parameter expression="${versions.report.formats}"
      */
     private String[] formats = new String[] { "html" };
@@ -95,22 +95,22 @@ public class DependencyUpdatesReport
                 getHelper().lookupDependenciesUpdates( dependencies, false );
             Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
                 getHelper().lookupDependenciesUpdates( dependencyManagement, false );
-            for (String format : formats)
+            for ( String format : formats )
             {
-                if ("html".equals(format))
+                if ( "html".equals( format ) )
                 {
-                    DependencyUpdatesRenderer renderer = new DependencyUpdatesRenderer(sink, getI18n(), getOutputName(),
-                            locale,
-                            dependencyUpdates,
-                            dependencyManagementUpdates);
+                    DependencyUpdatesRenderer renderer =
+                        new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
+                                                       dependencyManagementUpdates );
                     renderer.render();
 
-                } else if ("xml".equals(format))
+                }
+                else if ( "xml".equals( format ) )
                 {
-                    String outputFile = getProject().getBuild().getDirectory() + File.separator + getOutputName()
-                            + ".xml";
-                    DependencyUpdatesXmlRenderer xmlGenerator = new DependencyUpdatesXmlRenderer(dependencyUpdates,
-                            dependencyManagementUpdates, outputFile);
+                    String outputFile =
+                        getProject().getBuild().getDirectory() + File.separator + getOutputName() + ".xml";
+                    DependencyUpdatesXmlRenderer xmlGenerator =
+                        new DependencyUpdatesXmlRenderer( dependencyUpdates, dependencyManagementUpdates, outputFile );
                     xmlGenerator.render();
                 }
             }

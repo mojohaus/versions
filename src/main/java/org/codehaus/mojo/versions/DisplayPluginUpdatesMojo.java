@@ -101,7 +101,7 @@ import java.util.regex.Pattern;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo(name = "display-plugin-updates", requiresProject = true, requiresDirectInvocation = false)
+@Mojo( name = "display-plugin-updates", requiresProject = true, requiresDirectInvocation = false )
 public class DisplayPluginUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
@@ -423,9 +423,10 @@ public class DisplayPluginUpdatesMojo
                 {
                     // ignore
                 }
-                interpolatedModel = modelInterpolator.interpolate( originalModel, null,
-                                                                   new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
-                                                                   false );
+                interpolatedModel =
+                    modelInterpolator.interpolate( originalModel, null,
+                                                   new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
+                                                   false );
             }
             catch ( ModelInterpolationException e )
             {
@@ -511,14 +512,14 @@ public class DisplayPluginUpdatesMojo
             {
                 // now we want to find the newest version that is compatible with the invoking version of Maven
                 ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, true );
-                ArtifactVersion[] newerVersions =
-                    artifactVersions.getVersions( this.allowSnapshots );
+                ArtifactVersion[] newerVersions = artifactVersions.getVersions( this.allowSnapshots );
                 ArtifactVersion minRequires = null;
                 for ( int j = newerVersions.length - 1; j >= 0; j-- )
                 {
-                    Artifact probe = artifactFactory.createDependencyArtifact( groupId, artifactId,
-                                                                               VersionRange.createFromVersion( newerVersions[j].toString() ),
-                                                                               "pom", null, "runtime" );
+                    Artifact probe =
+                        artifactFactory.createDependencyArtifact( groupId, artifactId,
+                                                                  VersionRange.createFromVersion( newerVersions[j].toString() ),
+                                                                  "pom", null, "runtime" );
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
@@ -1342,7 +1343,7 @@ public class DisplayPluginUpdatesMojo
      */
     private Object findExtension( MavenProject project, String role, String roleHint, Settings settings,
                                   ArtifactRepository localRepository )
-                                      throws LifecycleExecutionException, PluginNotFoundException
+        throws LifecycleExecutionException, PluginNotFoundException
     {
         Object pluginComponent = null;
 
@@ -1503,7 +1504,7 @@ public class DisplayPluginUpdatesMojo
                                            Map<String, String> parentBuildPlugins,
                                            Map<String, String> parentReportPlugins,
                                            Set<String> pluginsWithVersionsSpecified )
-                                               throws MojoExecutionException
+        throws MojoExecutionException
     {
         Map<String, Plugin> plugins = new HashMap<String, Plugin>();
 
@@ -1540,9 +1541,10 @@ public class DisplayPluginUpdatesMojo
         Model originalModel;
         try
         {
-            originalModel = modelInterpolator.interpolate( getProject().getOriginalModel(), getProject().getBasedir(),
-                                                           new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
-                                                           true );
+            originalModel =
+                modelInterpolator.interpolate( getProject().getOriginalModel(), getProject().getBasedir(),
+                                               new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
+                                               true );
         }
         catch ( ModelInterpolationException e )
         {

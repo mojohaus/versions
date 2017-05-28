@@ -36,7 +36,7 @@ import org.apache.maven.reporting.MavenReportException;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo(name = "property-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo( name = "property-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class PropertyUpdatesReport
     extends AbstractVersionsReport
 {
@@ -54,7 +54,7 @@ public class PropertyUpdatesReport
      *
      * @since 1.0-beta-1
      */
-    @Parameter(property = "includeProperties")
+    @Parameter( property = "includeProperties" )
     private String includeProperties = null;
 
     /**
@@ -62,7 +62,7 @@ public class PropertyUpdatesReport
      *
      * @since 1.0-beta-1
      */
-    @Parameter(property = "excludeProperties")
+    @Parameter( property = "excludeProperties" )
     private String excludeProperties = null;
 
     /**
@@ -70,7 +70,7 @@ public class PropertyUpdatesReport
      *
      * @since 1.0-beta-1
      */
-    @Parameter(property = "autoLinkItems", defaultValue = "true")
+    @Parameter( property = "autoLinkItems", defaultValue = "true" )
     private boolean autoLinkItems;
 
     /**
@@ -100,9 +100,8 @@ public class PropertyUpdatesReport
         final Map updateSet;
         try
         {
-            updateSet =
-                getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
-                                                     autoLinkItems );
+            updateSet = getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties,
+                                                             excludeProperties, autoLinkItems );
         }
         catch ( MojoExecutionException e )
         {

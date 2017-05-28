@@ -37,7 +37,7 @@ import javax.xml.stream.XMLStreamException;
  * @author Stephen Connolly
  * @since 2.2
  */
-@Mojo(name = "display-parent-updates", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "display-parent-updates", requiresProject = true, requiresDirectInvocation = true )
 public class DisplayParentUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {

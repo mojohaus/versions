@@ -45,7 +45,7 @@ public abstract class UpdateScope
      *
      * @since 1.0-beta-1
      */
-    public static final UpdateScope SUBINCREMENTAL = new UpdateScope( "SUBINCREMENTAL", 0)
+    public static final UpdateScope SUBINCREMENTAL = new UpdateScope( "SUBINCREMENTAL", 0 )
     {
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
@@ -88,7 +88,7 @@ public abstract class UpdateScope
      *
      * @since 1.0-beta-1
      */
-    public static final UpdateScope INCREMENTAL = new UpdateScope( "INCREMENTAL", 1)
+    public static final UpdateScope INCREMENTAL = new UpdateScope( "INCREMENTAL", 1 )
     {
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
@@ -131,7 +131,7 @@ public abstract class UpdateScope
      *
      * @since 1.0-beta-1
      */
-    public static final UpdateScope MINOR = new UpdateScope( "MINOR", 2)
+    public static final UpdateScope MINOR = new UpdateScope( "MINOR", 2 )
     {
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
@@ -174,7 +174,7 @@ public abstract class UpdateScope
      *
      * @since 1.0-beta-1
      */
-    public static final UpdateScope MAJOR = new UpdateScope( "MAJOR", 3)
+    public static final UpdateScope MAJOR = new UpdateScope( "MAJOR", 3 )
     {
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
@@ -213,7 +213,7 @@ public abstract class UpdateScope
      *
      * @since 1.0-beta-1
      */
-    public static final UpdateScope ANY = new UpdateScope( "ANY", 4)
+    public static final UpdateScope ANY = new UpdateScope( "ANY", 4 )
     {
         /** {@inheritDoc} */
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,

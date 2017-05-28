@@ -73,7 +73,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    @Parameter( defaultValue = "${project}", required = true, readonly = true )
     protected MavenProject project;
 
     /**
@@ -97,7 +97,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * @since 1.0-alpha-1
      */
-    @Parameter (defaultValue = "${reactorProjects}", required = true, readonly = true)
+    @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
     protected List reactorProjects;
 
     /**
@@ -111,19 +111,19 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * @since 1.0-alpha-3
      */
-    @Parameter(defaultValue = "${project.remoteArtifactRepositories}", readonly = true)
+    @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
     protected List remoteArtifactRepositories;
 
     /**
      * @since 1.0-alpha-3
      */
-    @Parameter(defaultValue = "${project.pluginArtifactRepositories}", readonly = true)
+    @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
     protected List remotePluginRepositories;
 
     /**
      * @since 1.0-alpha-1
      */
-    @Parameter(defaultValue = "${localRepository}", readonly = true)
+    @Parameter( defaultValue = "${localRepository}", readonly = true )
     protected ArtifactRepository localRepository;
 
     /**
@@ -136,7 +136,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * @since 1.0-alpha-3
      */
-    @Parameter(defaultValue = "${settings}", readonly = true)
+    @Parameter( defaultValue = "${settings}", readonly = true )
     protected Settings settings;
 
     /**
@@ -144,7 +144,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter(property = "maven.version.rules.serverId", defaultValue = "serverId")
+    @Parameter( property = "maven.version.rules.serverId", defaultValue = "serverId" )
     private String serverId;
 
     /**
@@ -152,7 +152,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter(property = "maven.version.rules")
+    @Parameter( property = "maven.version.rules" )
     private String rulesUri;
 
     /**
@@ -160,7 +160,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter(property = "generateBackupPoms", defaultValue = "true")
+    @Parameter( property = "generateBackupPoms", defaultValue = "true" )
     private boolean generateBackupPoms;
 
     /**
@@ -168,7 +168,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter(property = "allowSnapshots", defaultValue = "false")
+    @Parameter( property = "allowSnapshots", defaultValue = "false" )
     protected boolean allowSnapshots;
 
     /**
@@ -181,7 +181,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter(defaultValue = "${session}", required = true, readonly = true)
+    @Parameter( defaultValue = "${session}", required = true, readonly = true )
     protected MavenSession session;
 
     @Component
@@ -227,7 +227,8 @@ public abstract class AbstractVersionsUpdaterMojo
         this.project = project;
     }
 
-    public String getVersion() {
+    public String getVersion()
+    {
         return getProject() == null ? null : getProject().getVersion();
     }
 
@@ -263,7 +264,7 @@ public abstract class AbstractVersionsUpdaterMojo
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
-                                                     throws ArtifactMetadataRetrievalException, MojoExecutionException
+        throws ArtifactMetadataRetrievalException, MojoExecutionException
     {
         boolean includeSnapshots = this.allowSnapshots;
         if ( Boolean.TRUE.equals( allowingSnapshots ) )
@@ -490,11 +491,13 @@ public abstract class AbstractVersionsUpdaterMojo
     }
 
     protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                  PropertyVersions version, String currentVersion, boolean allowDowngrade, int segment )
-                                                      throws MojoExecutionException, XMLStreamException
+                                                  PropertyVersions version, String currentVersion,
+                                                  boolean allowDowngrade, int segment )
+        throws MojoExecutionException, XMLStreamException
     {
-        ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                                                           this.reactorProjects, this.getHelper(), allowDowngrade, segment );
+        ArtifactVersion winner =
+            version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
+                                      this.getHelper(), allowDowngrade, segment );
 
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {

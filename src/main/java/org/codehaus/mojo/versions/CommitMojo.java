@@ -36,7 +36,7 @@ import java.io.IOException;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo(name="commit", requiresProject = true, requiresDirectInvocation = true)
+@Mojo( name = "commit", requiresProject = true, requiresDirectInvocation = true )
 public class CommitMojo
     extends AbstractMojo
 {
@@ -45,7 +45,7 @@ public class CommitMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    @Parameter( defaultValue = "${project}", required = true, readonly = true )
     private MavenProject project;
 
     public void execute()
