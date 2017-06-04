@@ -79,7 +79,7 @@ public class UpdatePropertiesMojo
      * If a property points to a version like <code>1.2.3-SNAPSHOT</code> and your repo contains a version like
      * <code>1.1.0</code> without settings this to <code>true</code> the property will not being changed.
      * 
-     * @since 3.0.0
+     * @since 2.4
      */
     @Parameter( property = "allowDowngrade", defaultValue = "false" )
     private boolean allowDowngrade;
