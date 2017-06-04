@@ -186,7 +186,7 @@ public class CompareDependenciesMojo
                 compareVersions( pom, getProject().getDependencyManagement().getDependencies(), remoteDepsMap );
             totalDiffs.addAll( depManDiffs );
         }
-        if ( isProcessingDependencies() )
+        if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
             List<String> depDiffs = compareVersions( pom, getProject().getDependencies(), remoteDepsMap );
             totalDiffs.addAll( depDiffs );

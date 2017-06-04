@@ -63,7 +63,7 @@ public class UseNextVersionsMojo
             {
                 useNextVersions( pom, getProject().getDependencyManagement().getDependencies() );
             }
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useNextVersions( pom, getProject().getDependencies() );
             }

@@ -97,7 +97,7 @@ public class UseLatestVersionsMojo
                     useLatestVersions( pom, dependencyManagement.getDependencies() );
                 }
             }
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useLatestVersions( pom, getProject().getDependencies() );
             }

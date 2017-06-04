@@ -80,7 +80,7 @@ public class UseDepVersionMojo
                 useDepVersion( pom, getProject().getDependencyManagement().getDependencies() );
             }
 
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useDepVersion( pom, getProject().getDependencies() );
             }

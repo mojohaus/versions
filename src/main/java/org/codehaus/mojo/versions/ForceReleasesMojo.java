@@ -72,7 +72,7 @@ public class ForceReleasesMojo
             {
                 useReleases( pom, getProject().getDependencyManagement().getDependencies() );
             }
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useReleases( pom, getProject().getDependencies() );
             }

@@ -72,11 +72,11 @@ public class UnlockSnapshotsMojo
         {
             unlockSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
         }
-        if ( isProcessingDependencies() )
+        if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
             unlockSnapshots( pom, getProject().getDependencies() );
         }
-        if ( isProcessingParent() )
+        if ( getProject().getParent() != null && isProcessingParent() )
         {
             unlockParentSnapshot( pom, getProject().getParent() );
         }

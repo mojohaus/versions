@@ -63,7 +63,7 @@ public class UseReactorMojo
             {
                 useReactor( pom, getProject().getDependencyManagement().getDependencies() );
             }
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useReactor( pom, getProject().getDependencies() );
             }

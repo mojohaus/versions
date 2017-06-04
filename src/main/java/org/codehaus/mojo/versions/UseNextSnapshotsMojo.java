@@ -100,7 +100,7 @@ public class UseNextSnapshotsMojo
             {
                 useNextSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
             }
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useNextSnapshots( pom, getProject().getDependencies() );
             }

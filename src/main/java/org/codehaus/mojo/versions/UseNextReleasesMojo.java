@@ -70,7 +70,7 @@ public class UseNextReleasesMojo
         {
             useNextReleases( pom, getProject().getDependencyManagement().getDependencies() );
         }
-        if ( isProcessingDependencies() )
+        if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
             useNextReleases( pom, getProject().getDependencies() );
         }

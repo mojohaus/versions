@@ -101,7 +101,7 @@ public class ResolveRangesMojo
             getLog().debug( "processing dependencyManagement of " + getProject().getId() );
             resolveRanges( pom, getProject().getModel().getDependencyManagement().getDependencies() );
         }
-        if ( isProcessingDependencies() )
+        if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
             getLog().debug( "processing dependencies of " + getProject().getId() );
             resolveRanges( pom, getProject().getModel().getDependencies() );

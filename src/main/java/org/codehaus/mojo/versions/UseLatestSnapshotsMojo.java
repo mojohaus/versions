@@ -100,7 +100,7 @@ public class UseLatestSnapshotsMojo
             {
                 useLatestSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
             }
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useLatestSnapshots( pom, getProject().getDependencies() );
             }

@@ -104,7 +104,7 @@ public class UseLatestReleasesMojo
             {
                 useLatestReleases( pom, getProject().getDependencyManagement().getDependencies() );
             }
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useLatestReleases( pom, getProject().getDependencies() );
             }

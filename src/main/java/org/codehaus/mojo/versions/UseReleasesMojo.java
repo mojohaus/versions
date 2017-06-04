@@ -89,7 +89,7 @@ public class UseReleasesMojo
     {
         try
         {
-            if ( isProcessingParent() )
+            if ( getProject().getParent() != null && isProcessingParent() )
             {
                 useReleases( pom, getProject().getParent() );
             }
@@ -99,7 +99,7 @@ public class UseReleasesMojo
                 useReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
                 useReleases( pom, getProject().getDependencyManagement().getDependencies() );
             }
-            if ( isProcessingDependencies() )
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useReleases( pom, getProject().getDependencies() );
             }

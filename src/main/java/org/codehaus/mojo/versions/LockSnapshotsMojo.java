@@ -72,11 +72,11 @@ public class LockSnapshotsMojo
         {
             lockSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
         }
-        if ( isProcessingDependencies() )
+        if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
             lockSnapshots( pom, getProject().getDependencies() );
         }
-        if ( isProcessingParent() )
+        if ( getProject().getParent() != null && isProcessingParent() )
         {
             lockParentSnapshot( pom, getProject().getParent() );
         }
