@@ -23,6 +23,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -358,6 +359,9 @@ public class PropertyVersions
         if ( segment != -1 )
         {
             upperBound = getVersionComparator().incrementSegment( lowerBoundArtifactVersion, segment );
+            if ( !ArtifactUtils.isSnapshot(upperBound.toString()) ) {
+                upperBound = new DefaultArtifactVersion( upperBound.toString() + '-' + Artifact.SNAPSHOT_VERSION );
+            }
             helper.getLog().debug( "Property ${" + property.getName() + "}: upperBound is: " + upperBound );
         }
         ArtifactVersion result =
