@@ -131,7 +131,6 @@ public class DisplayDependencyUpdatesMojo
 
     public boolean isProcessingDependencyManagement()
     {
-        // true if true or null
         return processDependencyManagement;
     }
 
