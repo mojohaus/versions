@@ -106,7 +106,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 2.5
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
-    private Boolean allowMajorUpdates;
+    private boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
@@ -116,7 +116,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 2.5
      */
     @Parameter(property = "allowMinorUpdates", defaultValue = "true")
-    private Boolean allowMinorUpdates;
+    private boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
@@ -126,7 +126,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 2.5
      */
     @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
-    private Boolean allowIncrementalUpdates;
+    private boolean allowIncrementalUpdates;
 
     /**
      * Whether to allow any version change to be allowed. This keeps
@@ -138,7 +138,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 2.5
      */
     @Parameter(property = "allowAnyUpdates", defaultValue = "true")
-    private Boolean allowAnyUpdates;
+    private boolean allowAnyUpdates;
 
     /**
      * Whether to show additional information such as dependencies that do not need updating. Defaults to false.
