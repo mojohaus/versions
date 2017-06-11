@@ -90,7 +90,7 @@ public class UpdatePropertiesMojo
      * @since 2.4
      */
     @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
-    protected Boolean allowMajorUpdates;
+    protected boolean allowMajorUpdates;
 
     /**
      * Whether to allow the minor version number to be changed.
@@ -98,7 +98,7 @@ public class UpdatePropertiesMojo
      * @since 2.4
      */
     @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
-    protected Boolean allowMinorUpdates;
+    protected boolean allowMinorUpdates;
 
     /**
      * Whether to allow the incremental version number to be changed.
@@ -106,7 +106,7 @@ public class UpdatePropertiesMojo
      * @since 2.4
      */
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
-    protected Boolean allowIncrementalUpdates;
+    protected boolean allowIncrementalUpdates;
 
     // -------------------------- STATIC METHODS --------------------------
 
