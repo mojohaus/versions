@@ -69,12 +69,20 @@ class RequiredMavenVersionFinder {
 
     private ArtifactVersion getEnforcerMavenVersion() {
         List<Plugin> buildPlugins = mavenProject.getBuildPlugins();
+        if (null == buildPlugins) {
+            return null;
+        }
+
         Plugin mavenEnforcerPlugin = getMavenEnforcerPlugin(buildPlugins);
         if (null == mavenEnforcerPlugin) {
             return null;
         }
 
         List<PluginExecution> pluginExecutions = mavenEnforcerPlugin.getExecutions();
+        if (null == pluginExecutions) {
+            return null;
+        }
+
         PluginExecution pluginExecutionWithEnforceGoal = getPluginExecutionWithEnforceGoal(pluginExecutions);
         if (null == pluginExecutionWithEnforceGoal) {
             return null;
