@@ -74,6 +74,30 @@ public class ResolveRangesMojo
     @Parameter( property = "excludeProperties" )
     private String excludeProperties = null;
 
+    /**
+     * Whether to allow the major version number to be changed.
+     *
+     * @since 2.5
+     */
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    private boolean allowMajorUpdates;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     *
+     * @since 2.5
+     */
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    private boolean allowMinorUpdates;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     *
+     * @since 2.5
+     */
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    private boolean allowIncrementalUpdates;
+
     // ------------------------------ FIELDS ------------------------------
 
     /**
@@ -253,7 +277,10 @@ public class ResolveRangesMojo
             }
 
             property.setVersion( currentVersion );
-            updatePropertyToNewestVersion( pom, property, version, currentVersion );
+
+            int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+            // TODO: Check if we could add allowDowngrade ? 
+            updatePropertyToNewestVersion( pom, property, version, currentVersion, false, segment );
 
         }
     }

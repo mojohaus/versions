@@ -87,6 +87,30 @@ public class DisplayPropertyUpdatesMojo
     @Parameter( property = "autoLinkItems", defaultValue = "true" )
     private boolean autoLinkItems;
 
+    /**
+     * Whether to allow the major version number to be changed.
+     *
+     * @since 2.5
+     */
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    private boolean allowMajorUpdates;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     *
+     * @since 2.5
+     */
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    private boolean allowMinorUpdates;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     *
+     * @since 2.5
+     */
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    private boolean allowIncrementalUpdates;
+
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
@@ -112,9 +136,9 @@ public class DisplayPropertyUpdatesMojo
                 continue;
             }
 
-            // FIXME: Check the parameters -1 ? correct?
+            int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
             ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                                                               this.reactorProjects, this.getHelper(), false, -1 );
+                                                               this.reactorProjects, this.getHelper(), false, segment );
 
             if ( winner != null && !currentVersion.equals( winner.toString() ) )
             {
