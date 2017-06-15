@@ -80,6 +80,9 @@ public class SetMojo
 
     /**
      * The groupId of the dependency/module to update.
+     * If you like to update modules of a aggregator you 
+     * should set <code>-DgroupId='*'</code> to ignore the
+     * group of the current project.
      *
      * @since 1.2
      */
@@ -88,6 +91,9 @@ public class SetMojo
 
     /**
      * The artifactId of the dependency/module to update.
+     * If you like to update modules of a aggregator you 
+     * should set <code>-DartifactId='*'</code> to ignore the
+     * artifactId of the current project.
      *
      * @since 1.2
      */
@@ -96,7 +102,9 @@ public class SetMojo
 
     /**
      * The version of the dependency/module to update.
-     *
+     * If you are changing an aggregator you should give
+     * <code>-DoldVersion='*'</code> to suppress the check against the
+     * version of the current project.
      * @since 1.2
      */
     @Parameter( property = "oldVersion", defaultValue = "${project.version}" )
