@@ -24,6 +24,7 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
@@ -48,6 +49,14 @@ import java.util.TreeSet;
 public class DependencyUpdatesReport
     extends AbstractVersionsReport
 {
+
+    /**
+     * Whether to process the <code>dependencyManagement</code> in pom or not.
+     * 
+     * @since 2.5
+     */
+    @Parameter( property = "processDependencyManagement", defaultValue = "true" )
+    private boolean processDependencyManagement;
 
     /**
      * Report formats (html and/or xml). HTML by default.
@@ -81,20 +90,28 @@ public class DependencyUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        Set dependencyManagement = new TreeSet( new DependencyComparator() );
-        dependencyManagement.addAll( getProject().getDependencyManagement() == null ? Collections.EMPTY_LIST
-                        : getProject().getDependencyManagement().getDependencies() );
-
         Set dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+
+        Set dependencyManagement = new TreeSet( new DependencyComparator() );
+        dependencyManagement.addAll( getProject().getDependencyManagement() == null ? Collections.emptySet()
+                        : getProject().getDependencyManagement().getDependencies() );
+
+        if ( processDependencyManagement )
+        {
+            dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+        }
 
         try
         {
             Map<Dependency, ArtifactVersions> dependencyUpdates =
                 getHelper().lookupDependenciesUpdates( dependencies, false );
-            Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
-                getHelper().lookupDependenciesUpdates( dependencyManagement, false );
+
+            Map<Dependency, ArtifactVersions> dependencyManagementUpdates = Collections.emptyMap();
+            if ( processDependencyManagement )
+            {
+                dependencyManagementUpdates = getHelper().lookupDependenciesUpdates( dependencyManagement, false );
+            }
             for ( String format : formats )
             {
                 if ( "html".equals( format ) )
