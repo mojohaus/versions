@@ -2,6 +2,13 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Fixed Issue 129][issue-129]
+   
+   dependency-update-report now is able to disable the processing 
+   the transitive dependencies. This can now being enabled/disabled 
+   via processDependencyManagementTransitive. The default is true to 
+   keep backward compatibillity.
+
  * [Fixed Issue 166][issue-166]
    
    Upgraded modello-maven-plugin to 1.9.1
@@ -47,6 +54,7 @@
 [issue-37]: https://github.com/jenkinsci/java-client-api/issues/37
 [issue-46]: https://github.com/jenkinsci/java-client-api/issues/46
 [issue-94]: https://github.com/jenkinsci/java-client-api/issues/94
+[issue-129]: https://github.com/jenkinsci/java-client-api/issues/129
 [issue-162]: https://github.com/jenkinsci/java-client-api/issues/162
 [issue-166]: https://github.com/jenkinsci/java-client-api/issues/166
 [issue-167]: https://github.com/jenkinsci/java-client-api/issues/167

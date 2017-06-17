@@ -1,5 +1,7 @@
 package org.codehaus.mojo.versions;
 
+import org.apache.commons.validator.GenericTypeValidator;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,6 +25,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -57,6 +60,19 @@ public class DependencyUpdatesReport
      */
     @Parameter( property = "processDependencyManagement", defaultValue = "true" )
     private boolean processDependencyManagement;
+
+    /**
+     * Whether to process the depdendencyManagement part transitive or not.
+     * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
+     * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
+     * by default to report also the imported dependencies. 
+     * If processTransitive is set to <code>false</code> the report will only show
+     * updates of the imported pom it self.
+     * 
+     * @since 2.5 Note: Currently in experimental state.
+     */
+    @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
+    private boolean processDependencyManagementTransitive;
 
     /**
      * Report formats (html and/or xml). HTML by default.
@@ -94,8 +110,36 @@ public class DependencyUpdatesReport
         dependencies.addAll( getProject().getDependencies() );
 
         Set dependencyManagement = new TreeSet( new DependencyComparator() );
-        dependencyManagement.addAll( getProject().getDependencyManagement() == null ? Collections.emptySet()
-                        : getProject().getDependencyManagement().getDependencies() );
+
+        if ( processDependencyManagementTransitive )
+        {
+            if ( getProject().getDependencyManagement() != null
+                && getProject().getDependencyManagement().getDependencies() != null )
+            {
+                for ( Dependency dep : getProject().getDependencyManagement().getDependencies() )
+                {
+                    getLog().debug( "Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion()
+                        + ":" + dep.getType() + ":" + dep.getScope() );
+                }
+                dependencyManagement.addAll( getProject().getDependencyManagement().getDependencies() );
+            }
+        }
+        else
+        {
+            if ( getProject().getOriginalModel().getDependencyManagement() != null
+                && getProject().getOriginalModel().getDependencyManagement().getDependencies() != null )
+            {
+                // Using the original model to get the original dependencyManagement entries and
+                // not the interpolated model.
+                // TODO: I'm not 100% sure if this will work correctly in all cases.
+                for ( Dependency dep : getProject().getOriginalModel().getDependencyManagement().getDependencies() )
+                {
+                    getLog().debug( "Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
+                        + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );
+                }
+                dependencyManagement.addAll( getProject().getOriginalModel().getDependencyManagement().getDependencies() );
+            }
+        }
 
         if ( processDependencyManagement )
         {
