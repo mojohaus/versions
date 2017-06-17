@@ -174,7 +174,7 @@ mvn versions:set -DnewVersion=3.6.0
   This means that this module has not been changed to get a new version as you wished by the
   call.
 
-  To get that working you need to add a supplemental command line parameters:
+  To get that working you need to add supplemental command line parameters:
 
 
 +---+
