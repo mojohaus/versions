@@ -59,7 +59,7 @@ public class UpdatePropertyMojo
      * <li><code>[1.5,)</code> Versions 1.5 and higher</li>
      * <li><code>(,1.0],[1.2,)</code> Versions up to 1.0 (included) and 1.2 or higher</li>
      * </ul>
-     * If you like to define version to be used exactly you have to use something like this:
+     * If you like to define the version to be used exactly you have to use something like this:
      * <code>-DnewVersion=[19.0]</code> otherwise a newer existing version will be used.
      * 
      * @since 1.3
@@ -76,8 +76,9 @@ public class UpdatePropertyMojo
     private boolean autoLinkItems;
 
     /**
-     * If a property points to a version like <code>1.2.3-SNAPSHOT</code> and your repo contains a version like
-     * <code>1.1.0</code> without settings this to <code>true</code> the property will not being changed.
+     * If a property points to a version like <code>1.2.3</code> and your repository contains versions like
+     * <code>1.2.3</code> and <code>1.1.0</code> without settings this to <code>true</code> the property will never
+     * being changed back to <code>1.1.0</code> by using <code>-DnewVersion=[1.1.0]</code>.
      * 
      * @since 3.0.0
      */
