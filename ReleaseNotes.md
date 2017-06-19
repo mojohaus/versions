@@ -5,9 +5,9 @@
  * [Fixed Issue 129][issue-129]
    
    dependency-update-report now is able to disable the processing 
-   the transitive dependencies. This can now being enabled/disabled 
-   via processDependencyManagementTransitive. The default is true to 
-   keep backward compatibillity.
+   of the transitive dependencies in the dependencyManagement part.
+   This can be enabled (default)/disabled by setting
+   processDependencyManagementTransitive accordingly.
 
  * [Fixed Issue 166][issue-166]
    
