@@ -348,10 +348,13 @@ public class SetMojo
         // now fake out the triggering change
 
         final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
-        current.getValue().setVersion( newVersion );
+        if (current != null) {
+            if (current.getValue() != null) {
+                current.getValue().setVersion( newVersion );
+            }
+        }
 
         addFile( files, project, current.getKey() );
-
         for ( Map.Entry<String, Model> sourceEntry : reactor.entrySet() )
         {
             final String sourcePath = sourceEntry.getKey();
