@@ -271,6 +271,7 @@ public class SetMojo
                     + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
             }
         }
+        //FIXME: Needed to be replaced with StringUtils.isBlank(..)
         if ( StringUtils.isEmpty( newVersion ) )
         {
             throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
@@ -288,6 +289,10 @@ public class SetMojo
                 new TreeMap<String, Model>( new ReactorDepthComparator( reactorModels ) );
             reactor.putAll( reactorModels );
 
+            for ( Map.Entry<String, Model> item : reactorModels.entrySet() )
+            {
+                getLog().info( "Item: " + item.getKey() + " m:" + item.getValue().getArtifactId() );
+            }
             // set of files to update
             final Set<File> files = new LinkedHashSet<File>();
 
@@ -348,10 +353,9 @@ public class SetMojo
         // now fake out the triggering change
 
         final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
-        if (current != null) {
-            if (current.getValue() != null) {
-                current.getValue().setVersion( newVersion );
-            }
+        if (current == null) {
+            getLog().debug( "No model entry found in reactor." );
+            return;
         }
 
         addFile( files, project, current.getKey() );
