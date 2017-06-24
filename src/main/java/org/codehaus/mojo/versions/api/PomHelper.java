@@ -1446,7 +1446,8 @@ public class PomHelper
         throws IOException
     {
         Map<String, Model> result = new LinkedHashMap<String, Model>();
-        final Model model = getRawModel( project );
+        final Model model = project.getOriginalModel(); 
+//                        getRawModel( project );
         final String path = "";
         result.put( path, model );
         result.putAll( getReactorModels( path, model, project, logger ) );
