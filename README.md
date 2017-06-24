@@ -45,8 +45,8 @@ hard or to be honest impossible.
 
 ## Releasing
 
-* Make sure `gpg-agent` is running.
-* Execute `mvn -B release:prepare release:perform`
+* Make sure 'gpg-agent' is running.
+* Execute 'mvn -B release:prepare release:perform'
 
 For publishing the site do the following:
 

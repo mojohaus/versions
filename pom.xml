@@ -345,11 +345,11 @@
             <phase>generate-sources</phase>
             <goals>
               <!-- Generate the xpp3 reader code -->
-              <goal>xpp3-reader</goal>
+              <!-- <goal>xpp3-reader</goal> -->
               <!-- Generate the xpp3 writer code -->
-              <goal>xpp3-writer</goal>
+              <!-- <goal>xpp3-writer</goal> -->
               <!-- Generate the Java sources for the model itself -->
-              <goal>java</goal>
+              <!-- <goal>java</goal> -->
             </goals>
           </execution>
           <execution>
