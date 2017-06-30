@@ -2,7 +2,7 @@
 
 ## 2.5 (NOT YET RELEASED)
 
- * [Fixed Issue 129][issue-129]
+ * [Fixed Issue 129] [issue-129]
    
    dependency-update-report now is able to disable the processing 
    of the transitive dependencies in the dependencyManagement part.
