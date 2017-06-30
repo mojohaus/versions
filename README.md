@@ -28,10 +28,10 @@ If you like to get your pull request being integrated please squash your
 commits into a single commit which references the issue in the commit message
 exactly like this:
 
-```
+'''
 Fixed #Issue
  o Description.
-```
+'''
 
 This makes it simpler to merge it and this will also close the
 appropriate issue automatically in one go. This makes the life for
