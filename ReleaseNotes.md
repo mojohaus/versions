@@ -2,6 +2,10 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Fixed Issue 177][issue-177]
+   
+   A required class was missing while executing on dependency-updates-report
+   
  * [Fixed Issue 129][issue-129]
    
    dependency-update-report now is able to disable the processing 
@@ -59,3 +63,4 @@
 [issue-166]: https://github.com/jenkinsci/java-client-api/issues/166
 [issue-167]: https://github.com/jenkinsci/java-client-api/issues/167
 [issue-168]: https://github.com/jenkinsci/java-client-api/issues/168
+[issue-177]: https://github.com/jenkinsci/java-client-api/issues/177

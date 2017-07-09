@@ -1,7 +1,5 @@
 package org.codehaus.mojo.versions;
 
-import org.apache.commons.validator.GenericTypeValidator;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,19 +19,6 @@ import org.apache.commons.validator.GenericTypeValidator;
  * under the License.
  */
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.utils.DependencyComparator;
-import org.codehaus.plexus.util.StringUtils;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,6 +26,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.doxia.sink.Sink;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Generates a report of available updates for the dependencies of a project.
