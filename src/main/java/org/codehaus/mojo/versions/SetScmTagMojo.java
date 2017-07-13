@@ -22,7 +22,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Anton Johansson
  * @since 2.5
  */
-@Mojo( name = "set-scm-tag", requiresDirectInvocation = true )
+@Mojo( name = "set-scm-tag", requiresDirectInvocation = true, aggregator = true )
 public class SetScmTagMojo
     extends AbstractVersionsUpdaterMojo
 {
