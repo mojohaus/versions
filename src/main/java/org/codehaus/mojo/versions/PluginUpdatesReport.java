@@ -122,8 +122,13 @@ public class PluginUpdatesReport
                 }
                 else if ( "xml".equals( format ) )
                 {
+                    File outputDir = new File(getProject().getBuild().getDirectory());
+                    if (!outputDir.exists())
+                    {
+                        outputDir.mkdirs();
+                    }
                     String outputFile =
-                        getProject().getBuild().getDirectory() + File.separator + getOutputName() + ".xml";
+                        outputDir.getAbsolutePath() + File.separator + getOutputName() + ".xml";
                     PluginUpdatesXmlRenderer xmlGenerator =
                         new PluginUpdatesXmlRenderer( pluginUpdates, pluginManagementUpdates, outputFile );
                     xmlGenerator.render();

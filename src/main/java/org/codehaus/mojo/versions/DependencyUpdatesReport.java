@@ -165,8 +165,13 @@ public class DependencyUpdatesReport
                 }
                 else if ( "xml".equals( format ) )
                 {
+                   File outputDir = new File(getProject().getBuild().getDirectory());
+                   if (!outputDir.exists())
+                    {
+                        outputDir.mkdirs();
+                    }
                     String outputFile =
-                        getProject().getBuild().getDirectory() + File.separator + getOutputName() + ".xml";
+                        outputDir.getAbsolutePath() + File.separator + getOutputName() + ".xml";
                     DependencyUpdatesXmlRenderer xmlGenerator =
                         new DependencyUpdatesXmlRenderer( dependencyUpdates, dependencyManagementUpdates, outputFile );
                     xmlGenerator.render();
