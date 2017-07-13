@@ -74,8 +74,8 @@ public class DependencyUpdatesReport
     /**
      * Report formats (html and/or xml). HTML by default.
      * 
-     * @parameter expression="${versions.report.formats}"
      */
+    @Parameter( property = "dependencyUpdatesReportFormats", defaultValue = "html" )
     private String[] formats = new String[] { "html" };
 
     /**
