@@ -2,6 +2,10 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Fixed Issue 182][issue-182]
+
+   Add goal for updating the SCM tag in the POM.
+
  * [Fixed Issue 177][issue-177]
    
    A required class was missing while executing on dependency-updates-report
@@ -64,3 +68,4 @@
 [issue-167]: https://github.com/jenkinsci/java-client-api/issues/167
 [issue-168]: https://github.com/jenkinsci/java-client-api/issues/168
 [issue-177]: https://github.com/jenkinsci/java-client-api/issues/177
+[issue-182]: https://github.com/mojohaus/versions-maven-plugin/issues/182
