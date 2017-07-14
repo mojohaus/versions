@@ -54,13 +54,13 @@
   Upgraded cobertura-maven-plugin used in report section
   to 2.7.
    
-[issue-34]: https://github.com/jenkinsci/java-client-api/issues/34
-[issue-37]: https://github.com/jenkinsci/java-client-api/issues/37
-[issue-46]: https://github.com/jenkinsci/java-client-api/issues/46
-[issue-94]: https://github.com/jenkinsci/java-client-api/issues/94
-[issue-129]: https://github.com/jenkinsci/java-client-api/issues/129
-[issue-162]: https://github.com/jenkinsci/java-client-api/issues/162
-[issue-166]: https://github.com/jenkinsci/java-client-api/issues/166
-[issue-167]: https://github.com/jenkinsci/java-client-api/issues/167
-[issue-168]: https://github.com/jenkinsci/java-client-api/issues/168
-[issue-177]: https://github.com/jenkinsci/java-client-api/issues/177
+[issue-34]: https://github.com/mojohaus/versions-maven-plugin/issues/34
+[issue-37]: https://github.com/mojohaus/versions-maven-plugin/issues/37
+[issue-46]: https://github.com/mojohaus/versions-maven-plugin/issues/46
+[issue-94]: https://github.com/mojohaus/versions-maven-plugin/issues/94
+[issue-129]: https://github.com/mojohaus/versions-maven-plugin/issues/129
+[issue-162]: https://github.com/mojohaus/versions-maven-plugin/issues/162
+[issue-166]: https://github.com/mojohaus/versions-maven-plugin/issues/166
+[issue-167]: https://github.com/mojohaus/versions-maven-plugin/issues/167
+[issue-168]: https://github.com/mojohaus/versions-maven-plugin/issues/168
+[issue-177]: https://github.com/mojohaus/versions-maven-plugin/issues/177
