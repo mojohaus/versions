@@ -2,6 +2,11 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Fixed Issue 187][issue-187]
+   
+   create target directory when run dependency update report.
+   Thanks to Ilja Dubinin.
+   
  * [Pull Request #189][pull-189]
 
    Fixed inccorect links. Thanks to Anton Johansson.
@@ -68,4 +73,5 @@
 [issue-167]: https://github.com/mojohaus/versions-maven-plugin/issues/167
 [issue-168]: https://github.com/mojohaus/versions-maven-plugin/issues/168
 [issue-177]: https://github.com/mojohaus/versions-maven-plugin/issues/177
+[issue-187]: https://github.com/mojohaus/versions-maven-plugin/issues/187
 [pull-189]: https://github.com/mojohaus/versions-maven-plugin/pull/189
