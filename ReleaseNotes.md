@@ -2,6 +2,10 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Pull Request #189][pull-189]
+
+   Fixed inccorect links. Thanks to Anton Johansson.
+
  * [Fixed Issue 177][issue-177]
    
    A required class was missing while executing on dependency-updates-report
@@ -64,3 +68,4 @@
 [issue-167]: https://github.com/mojohaus/versions-maven-plugin/issues/167
 [issue-168]: https://github.com/mojohaus/versions-maven-plugin/issues/168
 [issue-177]: https://github.com/mojohaus/versions-maven-plugin/issues/177
+[pull-189]: https://github.com/mojohaus/versions-maven-plugin/pull/189
