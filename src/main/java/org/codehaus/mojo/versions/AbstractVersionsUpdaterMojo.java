@@ -148,7 +148,9 @@ public abstract class AbstractVersionsUpdaterMojo
     private String serverId;
 
     /**
-     * The Wagon URI of a ruleSet file containing the rules that control how to compare version numbers.
+     * URI of a ruleSet file containing the rules that control how to compare
+     * version numbers. The URI could be either a Wagon URI or a classpath URI
+     * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
      *
      * @since 1.0-alpha-3
      */

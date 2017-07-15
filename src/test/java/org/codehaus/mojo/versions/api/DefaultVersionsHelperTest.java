@@ -45,6 +45,7 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.hamcrest.CoreMatchers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,22 +178,36 @@ public class DefaultVersionsHelperTest
         assertTrue( result.isEmpty() );
     }
 
+    public void testIsClasspathUriDetectsClassPathProtocol() throws MojoExecutionException {
+        DefaultVersionsHelper helper = createHelper();
+        String uri = "classpath:/p/a/c/k/a/g/e/resource.res";
 
-    private VersionsHelper createHelper()
+        assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(true));
+    }
+
+    public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws MojoExecutionException {
+        DefaultVersionsHelper helper = createHelper();
+        String uri = "http://10.10.10.10/p/a/c/k/a/g/e/resource.res";
+
+        assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(false));
+    }
+
+
+    private DefaultVersionsHelper createHelper()
         throws MojoExecutionException
     {
         return createHelper( new MavenMetadataSource() );
     }
     
-    private VersionsHelper createHelper( ArtifactMetadataSource metadataSource ) throws MojoExecutionException
+    private DefaultVersionsHelper createHelper( ArtifactMetadataSource metadataSource ) throws MojoExecutionException
     {
         final String resourcePath = "/" + getClass().getPackage().getName().replace( '.', '/' ) + "/rules.xml";
         final String rulesUri = getClass().getResource( resourcePath ).toExternalForm();
-        VersionsHelper helper = createHelper( rulesUri, metadataSource );
+        DefaultVersionsHelper helper = createHelper( rulesUri, metadataSource );
         return helper;
     }
 
-    private VersionsHelper createHelper( String rulesUri, ArtifactMetadataSource metadataSource )
+    private DefaultVersionsHelper createHelper( String rulesUri, ArtifactMetadataSource metadataSource )
         throws MojoExecutionException
     {
         final DefaultWagonManager wagonManager = new DefaultWagonManager()
@@ -204,7 +219,7 @@ public class DefaultVersionsHelperTest
             }
         };
 
-        VersionsHelper helper =
+        DefaultVersionsHelper helper =
             new DefaultVersionsHelper( new DefaultArtifactFactory(), new DefaultArtifactResolver(), metadataSource, new ArrayList(),
                                        new ArrayList(),
                                        new DefaultArtifactRepository( "", "", new DefaultRepositoryLayout() ),

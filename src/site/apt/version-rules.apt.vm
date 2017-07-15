@@ -134,3 +134,40 @@ Version number rules
   ...
 </project>
 ---
+
+  You can provide your ruleset xml file also within a jar, if you want to distribute
+  your ruleset xml as Maven artifact. Therefore you have to declare the containing
+  jar as direct dependency of the <<versions-maven-plugin>> and to use classpath
+  as protocol.
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
+        <configuration>
+          ...
+          <rulesUri>classpath:///package/foo/bar/rules.xml</rulesUri>
+          ...
+        </configuration>
+        <dependencies>
+            <dependency>
+                <groupId>com.mycompany</groupId>
+                <artifactId>version-rules</artifactId>
+                <version>1.0</version>
+            </dependency>
+        </dependencies>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
