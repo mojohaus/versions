@@ -1,5 +1,13 @@
 package org.codehaus.mojo.versions;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -33,7 +41,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.shared.artifact.resolve.ArtifactResolver;
@@ -49,14 +57,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -96,7 +96,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-1
      */
     @Component
-    protected MavenProjectBuilder projectBuilder;
+    protected ProjectBuilder projectBuilder;
 
     /**
      * The artifact metadata source to use.
