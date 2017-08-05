@@ -66,8 +66,11 @@ import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.shared.artifact.resolve.ArtifactResolverException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -178,7 +181,7 @@ public class DisplayPluginUpdatesMojo
         catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException e1 )
         {
             // no much we can do here
-            getLog().error( e.getClass().getSimpleName(), e1 );
+            getLog().error( e1.getClass().getSimpleName(), e1 );
         }
 
         return result;
@@ -405,8 +408,13 @@ public class DisplayPluginUpdatesMojo
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
-                        MavenProject pluginMavenProject =
-                            projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
+                        ProjectBuildingRequest pbr = new DefaultProjectBuildingRequest();
+                        pbr.setLocalRepository( localRepository );
+                        pbr.setPluginArtifactRepositories( remotePluginRepositories );
+                        ProjectBuildingResult build = projectBuilder.build( probe, pbr );
+                        MavenProject pluginMavenProject = build.getProject();
+//                        MavenProject pluginMavenProject =
+//                            projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
                         ArtifactVersion pluginRequires =
                             new DefaultArtifactVersion( getRequiredMavenVersion( pluginMavenProject, "2.0" ) );
                         if ( artifactVersion == null && compare( specMavenVersion, pluginRequires ) >= 0 )
@@ -472,8 +480,14 @@ public class DisplayPluginUpdatesMojo
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
-                        MavenProject mavenProject =
-                            projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
+
+                        ProjectBuildingRequest pbr = new DefaultProjectBuildingRequest();
+                        pbr.setLocalRepository( localRepository );
+                        pbr.setPluginArtifactRepositories( remotePluginRepositories );
+                        ProjectBuildingResult build = projectBuilder.build( probe, pbr );
+                        MavenProject mavenProject = build.getProject();
+//                        MavenProject mavenProject =
+//                            projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
                         ArtifactVersion requires =
                             new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject, "2.0" ) );
                         if ( minMavenVersion == null || compare( minMavenVersion, requires ) < 0 )
