@@ -457,7 +457,7 @@ public class DisplayPluginUpdatesMojo
         Map<ArtifactVersion, Map<String, String>> upgrades =
             new TreeMap<>( new MavenVersionComparator() );
         ArtifactVersion curMavenVersion = runtimeInformation.getApplicationVersion();
-        ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject(), "2.0" ) );
+        ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject() ) );
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
         Iterator<Plugin> i = plugins.iterator();
@@ -509,7 +509,7 @@ public class DisplayPluginUpdatesMojo
                         MavenProject mavenProject =
                             projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
                         ArtifactVersion requires =
-                            new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject, "2.0" ) );
+                            new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject ) );
                         if ( specMavenVersion.compareTo( requires ) >= 0 && artifactVersion == null )
                         {
                             artifactVersion = newerVersions[j];
@@ -555,7 +555,7 @@ public class DisplayPluginUpdatesMojo
                         MavenProject mavenProject =
                             projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
                         ArtifactVersion requires =
-                            new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject, "2.0" ) );
+                            new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject ) );
                         if ( minMavenVersion == null || minMavenVersion.compareTo( requires ) < 0 )
                         {
                             minMavenVersion = requires;
@@ -666,7 +666,7 @@ public class DisplayPluginUpdatesMojo
             }
         }
         logLine( false, "" );
-        boolean noMavenMinVersion = getRequiredMavenVersion( getProject(), null ) == null;
+        boolean noMavenMinVersion = getRequiredMavenVersion( getProject() ) == null;
         boolean noExplicitMavenMinVersion =
             getProject().getPrerequisites() == null || getProject().getPrerequisites().getMaven() == null;
         if ( noMavenMinVersion )
@@ -793,8 +793,9 @@ public class DisplayPluginUpdatesMojo
         return groupId + ":" + artifactId;
     }
 
-    private String getRequiredMavenVersion( MavenProject mavenProject, String defaultValue )
+    private String getRequiredMavenVersion( MavenProject mavenProject)
     {
+        String defaultValue = getMavenVersion(); 
         ArtifactVersion requiredMavenVersion = null;
         while ( mavenProject != null )
         {
@@ -811,6 +812,11 @@ public class DisplayPluginUpdatesMojo
             mavenProject = mavenProject.getParent();
         }
         return requiredMavenVersion == null ? defaultValue : requiredMavenVersion.toString();
+    }
+    
+    private String getMavenVersion()
+    {
+        return session.getExecutionProperties().getProperty("maven.version");
     }
 
     private static final class StackState
