@@ -387,11 +387,9 @@ public class SetMojo
             for ( Map.Entry<String, Model> stringModelEntry : PomHelper.getChildModels( reactor, sourceGroupId,
                                                                                         sourceArtifactId ).entrySet() )
             {
-                final Map.Entry target = (Map.Entry) stringModelEntry;
-                final String targetPath = (String) target.getKey();
-                final Model targetModel = (Model) target.getValue();
+                final Model targetModel = stringModelEntry.getValue();
                 final Parent parent = targetModel.getParent();
-                getLog().debug( "Module: " + targetPath );
+                getLog().debug( "Module: " + stringModelEntry.getKey() );
                 if ( sourceVersion.equals( parent.getVersion() ) )
                 {
                     getLog().debug( "    parent already is "

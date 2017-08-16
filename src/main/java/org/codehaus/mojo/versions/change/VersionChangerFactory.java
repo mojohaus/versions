@@ -123,7 +123,7 @@ public class VersionChangerFactory
     {
         checkState();
 
-        List/* <VersionChanger */ delegates = new ArrayList/* <VersionChanger */();
+        List<VersionChanger> delegates = new ArrayList<VersionChanger>();
 
         if ( processParent )
         {
