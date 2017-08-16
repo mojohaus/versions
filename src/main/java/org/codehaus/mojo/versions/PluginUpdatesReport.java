@@ -24,6 +24,7 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.PluginComparator;
@@ -49,8 +50,8 @@ public class PluginUpdatesReport
     /**
      * Report formats (html and/or xml). HTML by default.
      * 
-     * @parameter
      */
+    @Parameter( property = "pluginUpdatesReportFormats", defaultValue = "html" )
     private String[] formats = new String[] { "html" };
 
     /**
