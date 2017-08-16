@@ -2,6 +2,11 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Fixed Issue 185][issue-185]
+   
+   Unable to set dependencyReportFormat as parameter anymore.
+   Thanks to Ilja Dubinin.
+
  * [Fixed Issue 187][issue-187]
    
    create target directory when run dependency update report.
