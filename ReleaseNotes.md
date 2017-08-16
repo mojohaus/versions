@@ -2,6 +2,10 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Fixed Issue 198][issue-198]
+ 
+   Update version of modules which are not children but part of reactor.
+
  * [Fixed Issue 185][issue-185]
    
    Unable to set dependencyReportFormat as parameter anymore.
