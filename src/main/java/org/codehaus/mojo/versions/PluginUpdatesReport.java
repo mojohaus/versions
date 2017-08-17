@@ -92,13 +92,13 @@ public class PluginUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        Set<Plugin> pluginManagement = new TreeSet<Plugin>( new PluginComparator() );
+        Set<Plugin> pluginManagement = new TreeSet<>( new PluginComparator() );
         if ( haveBuildPluginManagementPlugins() )
         {
             pluginManagement.addAll( getProject().getBuild().getPluginManagement().getPlugins() );
         }
 
-        Set<Plugin> plugins = new TreeSet<Plugin>( new PluginComparator() );
+        Set<Plugin> plugins = new TreeSet<>( new PluginComparator() );
         if ( haveBuildPlugins() )
         {
             plugins.addAll( getProject().getBuild().getPlugins() );
@@ -136,11 +136,7 @@ public class PluginUpdatesReport
                 }
             }
         }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( InvalidVersionSpecificationException | ArtifactMetadataRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }
@@ -158,7 +154,7 @@ public class PluginUpdatesReport
      */
     private static Set<Plugin> removePluginManagment( Set<Plugin> plugins, Set<Plugin> pluginManagement )
     {
-        Set<Plugin> result = new TreeSet<Plugin>( new PluginComparator() );
+        Set<Plugin> result = new TreeSet<>( new PluginComparator() );
         for ( Plugin c : plugins )
         {
             boolean matched = false;

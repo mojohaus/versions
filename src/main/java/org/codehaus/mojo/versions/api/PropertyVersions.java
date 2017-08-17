@@ -73,7 +73,7 @@ public class PropertyVersions
         this.profileId = profileId;
         this.name = name;
         this.helper = helper;
-        this.associations = new TreeSet<ArtifactAssociation>( associations );
+        this.associations = new TreeSet<>( associations );
         this.comparator = new PropertyVersionComparator();
         this.versions = resolveAssociatedVersions( helper, associations, comparator );
 
@@ -115,13 +115,13 @@ public class PropertyVersions
             }
             else
             {
-                versions = new TreeSet<ArtifactVersion>( versionComparator );
+                versions = new TreeSet<>( versionComparator );
                 versions.addAll( Arrays.asList( associatedVersions.getVersions( true ) ) );
             }
         }
         if ( versions == null )
         {
-            versions = new TreeSet<ArtifactVersion>( versionComparator );
+            versions = new TreeSet<>( versionComparator );
         }
         return Collections.unmodifiableSortedSet( versions );
     }
@@ -144,14 +144,13 @@ public class PropertyVersions
 
     private VersionComparator[] lookupComparators()
     {
-        Set result = new HashSet();
-        Iterator i = associations.iterator();
+        Set<VersionComparator> result = new HashSet();
+        Iterator<ArtifactAssociation> i = associations.iterator();
         while ( i.hasNext() )
         {
-            ArtifactAssociation association = (ArtifactAssociation) i.next();
-            result.add( helper.getVersionComparator( association.getArtifact() ) );
+            result.add( helper.getVersionComparator( i.next().getArtifact() ) );
         }
-        return (VersionComparator[]) result.toArray( new VersionComparator[result.size()] );
+        return result.toArray( new VersionComparator[result.size()] );
     }
 
     /**
@@ -167,7 +166,7 @@ public class PropertyVersions
     public ArtifactVersion[] getVersions( Collection<Artifact> artifacts )
         throws MojoExecutionException
     {
-        List<ArtifactVersion> result = new ArrayList<ArtifactVersion>();
+        List<ArtifactVersion> result = new ArrayList<>();
         // go through all the associations
         // see if they are met from the collection
         // add the version if they are
@@ -241,7 +240,7 @@ public class PropertyVersions
         }
         else
         {
-            result = new TreeSet<ArtifactVersion>( getVersionComparator() );
+            result = new TreeSet<>( getVersionComparator() );
             for ( ArtifactVersion candidate : versions )
             {
                 if ( ArtifactUtils.isSnapshot( candidate.toString() ) )

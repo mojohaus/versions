@@ -37,12 +37,12 @@ public class CompositeVersionChanger
 
     public CompositeVersionChanger( VersionChanger[] composites )
     {
-        this.composites = new ArrayList<VersionChanger>( Arrays.asList( composites ) );
+        this.composites = new ArrayList<>( Arrays.asList( composites ) );
     }
 
     public CompositeVersionChanger( List<VersionChanger> composites )
     {
-        this.composites = new ArrayList<VersionChanger>( composites );
+        this.composites = new ArrayList<>( composites );
     }
 
     public void apply( VersionChange versionChange )

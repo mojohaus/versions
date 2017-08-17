@@ -48,8 +48,7 @@ public class PropertyUpdatesRenderer
 
     protected void renderBody()
     {
-        Map<Property, PropertyVersions> allUpdates =
-            new TreeMap<Property, PropertyVersions>( new PropertyComparator() );
+        Map<Property, PropertyVersions> allUpdates = new TreeMap<>( new PropertyComparator() );
         allUpdates.putAll( propertyUpdates );
 
         sink.section1();

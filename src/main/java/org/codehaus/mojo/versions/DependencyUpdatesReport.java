@@ -103,10 +103,10 @@ public class DependencyUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        Set dependencies = new TreeSet( new DependencyComparator() );
+        Set<Dependency> dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
 
-        Set dependencyManagement = new TreeSet( new DependencyComparator() );
+        Set<Dependency> dependencyManagement = new TreeSet( new DependencyComparator() );
 
         if ( processDependencyManagementTransitive )
         {
@@ -178,11 +178,7 @@ public class DependencyUpdatesReport
                 }
             }
         }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( InvalidVersionSpecificationException| ArtifactMetadataRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }
@@ -198,17 +194,17 @@ public class DependencyUpdatesReport
      *         management dependencies.
      * @since 1.0-beta-1
      */
-    private static Set removeDependencyManagment( Set dependencies, Set dependencyManagement )
+    private static Set removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
     {
-        Set result = new TreeSet( new DependencyComparator() );
-        for ( Iterator i = dependencies.iterator(); i.hasNext(); )
+        Set<Dependency> result = new TreeSet( new DependencyComparator() );
+        for ( Iterator<Dependency> i = dependencies.iterator(); i.hasNext(); )
         {
-            Dependency c = (Dependency) i.next();
+            Dependency c = i.next();
             boolean matched = false;
-            Iterator j = dependencyManagement.iterator();
+            Iterator<Dependency> j = dependencyManagement.iterator();
             while ( !matched && j.hasNext() )
             {
-                Dependency t = (Dependency) j.next();
+                Dependency t = j.next();
                 if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
                     && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
                     && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )

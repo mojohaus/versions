@@ -91,7 +91,8 @@
   </issueManagement>
 
   <properties>
-    <mojo.java.target>1.5</mojo.java.target>
+    <mojo.java.target>1.7</mojo.java.target>
+
     <mavenVersion>2.2.1</mavenVersion>
     <wagonVersion>2.12</wagonVersion>
     <doxiaVersion>1.7</doxiaVersion>
@@ -321,7 +322,7 @@
         <artifactId>animal-sniffer-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>check-java15</id>
+            <id>check-java17</id>
             <phase>test</phase>
             <goals>
               <goal>check</goal>
@@ -329,7 +330,7 @@
             <configuration>
               <signature>
                 <groupId>org.codehaus.mojo.signature</groupId>
-                <artifactId>java15</artifactId>
+                <artifactId>java17</artifactId>
                 <version>1.0</version>
               </signature>
             </configuration>

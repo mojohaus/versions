@@ -164,7 +164,7 @@ public class ArtifactVersions
         }
         else
         {
-            result = new TreeSet<ArtifactVersion>( versionComparator );
+            result = new TreeSet<>( versionComparator );
             for ( ArtifactVersion candidate : versions )
             {
                 if ( ArtifactUtils.isSnapshot( candidate.toString() ) )

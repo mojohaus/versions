@@ -190,8 +190,7 @@ public class DisplayPluginUpdatesMojo
                 {
                     try
                     {
-                        Reader reader = ReaderFactory.newXmlReader( superPom );
-                        try
+                        try( Reader reader = ReaderFactory.newXmlReader( superPom ) )
                         {
                             StringBuilder buf = new StringBuilder( IOUtil.toString( reader ) );
                             ModifiedPomXMLEventReader pom = newModifiedPomXER( buf );
@@ -256,16 +255,8 @@ public class DisplayPluginUpdatesMojo
                                 }
                             }
                         }
-                        finally
-                        {
-                            IOUtil.close( reader );
-                        }
                     }
-                    catch ( IOException e )
-                    {
-                        // ignore
-                    }
-                    catch ( XMLStreamException e )
+                    catch ( IOException | XMLStreamException e )
                     {
                         // ignore
                     }
@@ -273,15 +264,7 @@ public class DisplayPluginUpdatesMojo
 
                 return result;
             }
-            catch ( NoSuchMethodException e1 )
-            {
-                // no much we can do here
-            }
-            catch ( InvocationTargetException e1 )
-            {
-                // no much we can do here
-            }
-            catch ( IllegalAccessException e1 )
+            catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException e1 )
             {
                 // no much we can do here
             }
@@ -311,7 +294,7 @@ public class DisplayPluginUpdatesMojo
     private Map<String, String> getPluginManagement( Model model )
     {
         // we want only those parts of pluginManagement that are defined in this project
-        Map<String, String> pluginManagement = new HashMap<String, String>();
+        Map<String, String> pluginManagement = new HashMap<>();
         try
         {
             for ( Plugin plugin : model.getBuild().getPluginManagement().getPlugins() )
@@ -469,10 +452,10 @@ public class DisplayPluginUpdatesMojo
 
         Set<Plugin> plugins = getProjectPlugins( superPomPluginManagement, parentPluginManagement, parentBuildPlugins,
                                                  parentReportPlugins, pluginsWithVersionsSpecified );
-        List<String> updates = new ArrayList<String>();
-        List<String> lockdowns = new ArrayList<String>();
+        List<String> updates = new ArrayList<>();
+        List<String> lockdowns = new ArrayList<>();
         Map<ArtifactVersion, Map<String, String>> upgrades =
-            new TreeMap<ArtifactVersion, Map<String, String>>( new MavenVersionComparator() );
+            new TreeMap<>( new MavenVersionComparator() );
         ArtifactVersion curMavenVersion = runtimeInformation.getApplicationVersion();
         ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject(), "2.0" ) );
         ArtifactVersion minMavenVersion = null;
@@ -556,15 +539,7 @@ public class DisplayPluginUpdatesMojo
                             minRequires = requires;
                         }
                     }
-                    catch ( ArtifactResolutionException e )
-                    {
-                        // ignore bad version
-                    }
-                    catch ( ArtifactNotFoundException e )
-                    {
-                        // ignore bad version
-                    }
-                    catch ( ProjectBuildingException e )
+                    catch ( ArtifactResolutionException | ArtifactNotFoundException | ProjectBuildingException e )
                     {
                         // ignore bad version
                     }
@@ -586,15 +561,7 @@ public class DisplayPluginUpdatesMojo
                             minMavenVersion = requires;
                         }
                     }
-                    catch ( ArtifactResolutionException e )
-                    {
-                        // ignore bad version
-                    }
-                    catch ( ArtifactNotFoundException e )
-                    {
-                        // ignore bad version
-                    }
-                    catch ( ProjectBuildingException e )
+                    catch ( ArtifactResolutionException | ArtifactNotFoundException | ProjectBuildingException e )
                     {
                         // ignore bad version
                     }
@@ -784,7 +751,7 @@ public class DisplayPluginUpdatesMojo
         }
         for ( Map.Entry<ArtifactVersion, Map<String, String>> mavenUpgrade : upgrades.entrySet() )
         {
-            ArtifactVersion mavenUpgradeVersion = (ArtifactVersion) mavenUpgrade.getKey();
+            ArtifactVersion mavenUpgradeVersion = mavenUpgrade.getKey();
             Map<String, String> upgradePlugins = mavenUpgrade.getValue();
             if ( upgradePlugins.isEmpty() || specMavenVersion.compareTo( mavenUpgradeVersion ) >= 0 )
             {
@@ -888,7 +855,7 @@ public class DisplayPluginUpdatesMojo
     private Set<String> findPluginsWithVersionsSpecified( StringBuilder pomContents )
         throws IOException, XMLStreamException
     {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         ModifiedPomXMLEventReader pom = newModifiedPomXER( pomContents );
 
         Pattern pathRegex = Pattern.compile( "/project(/profiles/profile)?"
@@ -1033,7 +1000,7 @@ public class DisplayPluginUpdatesMojo
     private Map<String, Plugin> getLifecyclePlugins( MavenProject project )
         throws MojoExecutionException
     {
-        Map<String, Plugin> lifecyclePlugins = new HashMap<String, Plugin>();
+        Map<String, Plugin> lifecyclePlugins = new HashMap<>();
         try
         {
             Set<Plugin> plugins = getBoundPlugins( project, "clean,deploy,site" );
@@ -1101,15 +1068,7 @@ public class DisplayPluginUpdatesMojo
                 }
                 return result;
             }
-            catch ( NoSuchMethodException e1 )
-            {
-                // no much we can do here
-            }
-            catch ( InvocationTargetException e1 )
-            {
-                // no much we can do here
-            }
-            catch ( IllegalAccessException e1 )
+            catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException e1 )
             {
                 // no much we can do here
             }
@@ -1121,15 +1080,7 @@ public class DisplayPluginUpdatesMojo
             Method getLifecycles = LifecycleExecutor.class.getMethod( "getLifecycles", new Class[0] );
             lifecycles = (List) getLifecycles.invoke( lifecycleExecutor, new Object[0] );
         }
-        catch ( NoSuchMethodException e1 )
-        {
-            // no much we can do here
-        }
-        catch ( InvocationTargetException e1 )
-        {
-            // no much we can do here
-        }
-        catch ( IllegalAccessException e1 )
+        catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException e1 )
         {
             // no much we can do here
         }
@@ -1195,7 +1146,7 @@ public class DisplayPluginUpdatesMojo
         throws PluginNotFoundException, LifecycleExecutionException
 
     {
-        Set<Plugin> plugins = new HashSet<Plugin>();
+        Set<Plugin> plugins = new HashSet<>();
         // first, bind those associated with the packaging
         Map mappings = findMappingsForLifecycle( project, lifecycle );
 
@@ -1400,27 +1351,8 @@ public class DisplayPluginUpdatesMojo
             throw new LifecycleExecutionException( "Internal error in the plugin manager getting plugin '"
                 + plugin.getKey() + "': " + e.getMessage(), e );
         }
-        catch ( PluginVersionResolutionException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( InvalidPluginException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( ArtifactResolutionException e )
-        {
-            throw new LifecycleExecutionException( e.getMessage(), e );
-        }
-        catch ( PluginVersionNotFoundException e )
+        catch ( PluginVersionResolutionException | InvalidVersionSpecificationException | InvalidPluginException //
+            | ArtifactNotFoundException | ArtifactResolutionException |  PluginVersionNotFoundException e )
         {
             throw new LifecycleExecutionException( e.getMessage(), e );
         }
@@ -1438,7 +1370,7 @@ public class DisplayPluginUpdatesMojo
     private List<MavenProject> getParentProjects( MavenProject project )
         throws MojoExecutionException
     {
-        List<MavenProject> parents = new ArrayList<MavenProject>();
+        List<MavenProject> parents = new ArrayList<>();
         while ( project.getParent() != null )
         {
             project = project.getParent();
@@ -1459,22 +1391,22 @@ public class DisplayPluginUpdatesMojo
      * @return the phase to lifecycle map.
      * @throws LifecycleExecutionException the lifecycle execution exception.
      */
-    public Map getPhaseToLifecycleMap( List lifecycles )
+    public Map getPhaseToLifecycleMap( List<Lifecycle> lifecycles )
         throws LifecycleExecutionException
     {
-        Map phaseToLifecycleMap = new HashMap();
+        Map<String, Lifecycle> phaseToLifecycleMap = new HashMap();
 
-        for ( Iterator i = lifecycles.iterator(); i.hasNext(); )
+        for ( Iterator<Lifecycle> i = lifecycles.iterator(); i.hasNext(); )
         {
-            Lifecycle lifecycle = (Lifecycle) i.next();
+            Lifecycle lifecycle = i.next();
 
-            for ( Iterator p = lifecycle.getPhases().iterator(); p.hasNext(); )
+            for ( Iterator<String> p = lifecycle.getPhases().iterator(); p.hasNext(); )
             {
-                String phase = (String) p.next();
+                String phase = p.next();
 
                 if ( phaseToLifecycleMap.containsKey( phase ) )
                 {
-                    Lifecycle prevLifecycle = (Lifecycle) phaseToLifecycleMap.get( phase );
+                    Lifecycle prevLifecycle = phaseToLifecycleMap.get( phase );
                     throw new LifecycleExecutionException( "Phase '" + phase
                         + "' is defined in more than one lifecycle: '" + lifecycle.getId() + "' and '"
                         + prevLifecycle.getId() + "'" );
@@ -1506,7 +1438,7 @@ public class DisplayPluginUpdatesMojo
                                            Set<String> pluginsWithVersionsSpecified )
         throws MojoExecutionException
     {
-        Map<String, Plugin> plugins = new HashMap<String, Plugin>();
+        Map<String, Plugin> plugins = new HashMap<>();
 
         getLog().debug( "Building list of project plugins..." );
 
@@ -1563,7 +1495,7 @@ public class DisplayPluginUpdatesMojo
 
         try
         {
-            List<Plugin> lifecyclePlugins = new ArrayList<Plugin>( getLifecyclePlugins( getProject() ).values() );
+            List<Plugin> lifecyclePlugins = new ArrayList<>( getLifecyclePlugins( getProject() ).values() );
             for ( Iterator<Plugin> i = lifecyclePlugins.iterator(); i.hasNext(); )
             {
                 Plugin lifecyclePlugin = i.next();
@@ -1594,7 +1526,7 @@ public class DisplayPluginUpdatesMojo
 
         try
         {
-            List<Plugin> buildPlugins = new ArrayList<Plugin>( originalModel.getBuild().getPlugins() );
+            List<Plugin> buildPlugins = new ArrayList<>( originalModel.getBuild().getPlugins() );
             for ( Iterator<Plugin> i = buildPlugins.iterator(); i.hasNext(); )
             {
                 Plugin buildPlugin = i.next();
@@ -1618,7 +1550,7 @@ public class DisplayPluginUpdatesMojo
 
         try
         {
-            List<ReportPlugin> reportPlugins = new ArrayList<ReportPlugin>( originalModel.getReporting().getPlugins() );
+            List<ReportPlugin> reportPlugins = new ArrayList<>( originalModel.getReporting().getPlugins() );
             for ( Iterator<ReportPlugin> i = reportPlugins.iterator(); i.hasNext(); )
             {
                 ReportPlugin reportPlugin = i.next();
@@ -1673,7 +1605,7 @@ public class DisplayPluginUpdatesMojo
             }
             debugPluginMap( "after adding reporting plugins for profile " + profile.getId(), plugins );
         }
-        Set<Plugin> result = new TreeSet<Plugin>( new PluginComparator() );
+        Set<Plugin> result = new TreeSet<>( new PluginComparator() );
         result.addAll( plugins.values() );
         return result;
     }
@@ -1818,13 +1750,13 @@ public class DisplayPluginUpdatesMojo
         Set<Plugin> result;
         if ( reportPlugins instanceof LinkedHashSet )
         {
-            result = new LinkedHashSet<Plugin>( reportPlugins.size() );
+            result = new LinkedHashSet<>( reportPlugins.size() );
         }
         else if ( reportPlugins instanceof SortedSet )
         {
             final Comparator<? super ReportPlugin> comparator =
                 ( (SortedSet<ReportPlugin>) reportPlugins ).comparator();
-            result = new TreeSet<Plugin>( new Comparator<Plugin>()
+            result = new TreeSet<>( new Comparator<Plugin>()
             {
                 public int compare( Plugin o1, Plugin o2 )
                 {
@@ -1834,7 +1766,7 @@ public class DisplayPluginUpdatesMojo
         }
         else
         {
-            result = new HashSet<Plugin>( reportPlugins.size() );
+            result = new HashSet<>( reportPlugins.size() );
         }
         for ( ReportPlugin reportPlugin : reportPlugins )
         {
@@ -1845,7 +1777,7 @@ public class DisplayPluginUpdatesMojo
 
     private static List<Plugin> toPlugins( List<ReportPlugin> reportPlugins )
     {
-        List<Plugin> result = new ArrayList<Plugin>( reportPlugins.size() );
+        List<Plugin> result = new ArrayList<>( reportPlugins.size() );
         for ( ReportPlugin reportPlugin : reportPlugins )
         {
             result.add( toPlugin( reportPlugin ) );
@@ -1863,7 +1795,7 @@ public class DisplayPluginUpdatesMojo
         {
             return toPlugins( (List<ReportPlugin>) reportPlugins );
         }
-        return toPlugins( new ArrayList<ReportPlugin>( reportPlugins ) );
+        return toPlugins( new ArrayList<>( reportPlugins ) );
     }
 
     /**
@@ -1903,7 +1835,7 @@ public class DisplayPluginUpdatesMojo
      */
     private Map<String, String> getReportPlugins( Model model, boolean onlyIncludeInherited )
     {
-        Map<String, String> reportPlugins = new HashMap<String, String>();
+        Map<String, String> reportPlugins = new HashMap<>();
         try
         {
             for ( ReportPlugin plugin : model.getReporting().getPlugins() )
