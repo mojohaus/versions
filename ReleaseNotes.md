@@ -2,6 +2,10 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Fixed Issue 197][issue-197]
+ 
+   Java 1.7 as prerequisite.
+
  * [Fixed Issue 198][issue-198]
  
    Update version of modules which are not children but part of reactor.
