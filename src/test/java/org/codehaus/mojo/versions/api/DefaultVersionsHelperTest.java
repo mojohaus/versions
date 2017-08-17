@@ -86,7 +86,8 @@ public class DefaultVersionsHelperTest
         final ArtifactVersion illegal = new DefaultArtifactVersion( "illegalVersion" );
         artifactVersions.add( illegal );
 
-        when( metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) ).thenReturn( artifactVersions );
+        when( metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) )
+            .thenReturn( artifactVersions );
         
         VersionsHelper helper = createHelper( metadataSource );
         
@@ -118,7 +119,8 @@ public class DefaultVersionsHelperTest
         final ArtifactVersion illegal = new DefaultArtifactVersion( "illegalVersion" );
         artifactVersions.add( illegal );
 
-        when(metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) ).thenReturn( artifactVersions );
+        when(metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) )
+            .thenReturn( artifactVersions );
         
         VersionsHelper helper = createHelper( metadataSource );
         

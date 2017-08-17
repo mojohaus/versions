@@ -191,7 +191,7 @@ public class SetMojo
     /**
      * The changes to module coordinates. Guarded by this.
      */
-    private final transient List<VersionChange> sourceChanges = new ArrayList<VersionChange>();
+    private final transient List<VersionChange> sourceChanges = new ArrayList<>();
 
     private synchronized void addChange( String groupId, String artifactId, String oldVersion, String newVersion )
     {
@@ -413,7 +413,7 @@ public class SetMojo
                 }
                 final boolean targetExplicit = PomHelper.isExplicitVersion( targetModel );
                 if ( ( updateMatchingVersions || !targetExplicit ) //
-                    && ( processAllModules || StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) ) )
+                    && ( parent != null && StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) ) )
                 {
                     getLog().debug( "    module is "
                         + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
