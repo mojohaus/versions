@@ -231,11 +231,26 @@ public class PomHelper
     public static boolean setProjectVersion( final ModifiedPomXMLEventReader pom, final String value )
         throws XMLStreamException
     {
+        return setProjectValue( pom, "/project/version", value );
+    }
+
+    /**
+     * Searches the pom re-defining a project value using the given pattern.
+     *
+     * @param pom The pom to modify.
+     * @param pattern The pattern to look for.
+     * @param value The new value of the property.
+     * @return <code>true</code> if a replacement was made.
+     * @throws XMLStreamException if something went wrong.
+     */
+    public static boolean setProjectValue( final ModifiedPomXMLEventReader pom, String pattern, final String value )
+        throws XMLStreamException
+    {
         Stack<String> stack = new Stack<String>();
         String path = "";
         final Pattern matchScopeRegex;
         boolean madeReplacement = false;
-        matchScopeRegex = Pattern.compile( "/project/version" );
+        matchScopeRegex = Pattern.compile( pattern );
 
         pom.rewind();
 
