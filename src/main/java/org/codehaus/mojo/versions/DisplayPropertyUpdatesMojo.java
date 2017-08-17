@@ -119,8 +119,8 @@ public class DisplayPropertyUpdatesMojo
         throws MojoExecutionException, MojoFailureException
     {
         logInit();
-        List<String> current = new ArrayList<String>();
-        List<String> updates = new ArrayList<String>();
+        List<String> current = new ArrayList<>();
+        List<String> updates = new ArrayList<>();
 
         Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,

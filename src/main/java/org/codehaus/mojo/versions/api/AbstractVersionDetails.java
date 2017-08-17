@@ -327,9 +327,8 @@ public abstract class AbstractVersionDetails
                                                 ArtifactVersion upperBound, boolean includeSnapshots,
                                                 boolean includeLower, boolean includeUpper )
     {
-        Set<ArtifactVersion> result;
         final VersionComparator versionComparator = getVersionComparator();
-        result = new TreeSet<ArtifactVersion>( versionComparator );
+        Set<ArtifactVersion> result = new TreeSet<>( versionComparator );
         for ( ArtifactVersion candidate : Arrays.asList( getVersions( includeSnapshots ) ) )
         {
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )

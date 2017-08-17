@@ -78,10 +78,8 @@ public class UseReactorMojo
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
 
-        for ( Object dependency : dependencies )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = (Dependency) dependency;
-
             Artifact artifact = this.toArtifact( dep );
             if ( !isIncluded( artifact ) )
             {

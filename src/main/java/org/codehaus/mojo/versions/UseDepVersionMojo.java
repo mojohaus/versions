@@ -98,7 +98,7 @@ public class UseDepVersionMojo
 
         while ( itr.hasNext() )
         {
-            Dependency dep = (Dependency) itr.next();
+            Dependency dep = itr.next();
 
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {

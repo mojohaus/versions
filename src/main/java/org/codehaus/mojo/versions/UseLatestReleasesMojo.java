@@ -115,18 +115,18 @@ public class UseLatestReleasesMojo
         }
     }
 
-    private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection dependencies )
+    private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         MajorMinorIncrementalFilter majorMinorIncfilter =
             new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
-        Iterator i = dependencies.iterator();
+        Iterator<Dependency> i = dependencies.iterator();
 
         while ( i.hasNext() )
         {
-            Dependency dep = (Dependency) i.next();
+            Dependency dep = i.next();
 
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
@@ -168,7 +168,7 @@ public class UseLatestReleasesMojo
 
     private ArtifactVersion[] filterVersionsWithIncludes( ArtifactVersion[] newer, Artifact artifact )
     {
-        List<ArtifactVersion> filteredNewer = new ArrayList<ArtifactVersion>( newer.length );
+        List<ArtifactVersion> filteredNewer = new ArrayList<>( newer.length );
         for ( int j = 0; j < newer.length; j++ )
         {
             ArtifactVersion artifactVersion = newer[j];
@@ -181,7 +181,7 @@ public class UseLatestReleasesMojo
                 filteredNewer.add( artifactVersion );
             }
         }
-        return (ArtifactVersion[]) filteredNewer.toArray( new ArtifactVersion[filteredNewer.size()] );
+        return filteredNewer.toArray( new ArtifactVersion[filteredNewer.size()] );
     }
 
 }

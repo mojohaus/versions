@@ -94,8 +94,7 @@ public class DependencyUpdatesXmlRenderer
     {
         StringBuilder sb = new StringBuilder();
         sb.append( "<DependencyUpdatesReport>" ).append( NL );
-        Map<Dependency, ArtifactVersions> allUpdates =
-            new TreeMap<Dependency, ArtifactVersions>( new DependencyComparator() );
+        Map<Dependency, ArtifactVersions> allUpdates = new TreeMap<>( new DependencyComparator() );
         allUpdates.putAll( dependencyManagementUpdates );
         allUpdates.putAll( dependencyUpdates );
         sb.append( getSummaryBlock( allUpdates.values() ) );

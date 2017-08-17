@@ -5,6 +5,28 @@
  * [Fixed Issue 182][issue-182]
 
    Add goal for updating the SCM tag in the POM.
+   
+ * [Fixed Issue 197][issue-197]
+ 
+   Java 1.7 as prerequisite.
+
+ * [Fixed Issue 198][issue-198]
+ 
+   Update version of modules which are not children but part of reactor.
+
+ * [Fixed Issue 185][issue-185]
+   
+   Unable to set dependencyReportFormat as parameter anymore.
+   Thanks to Ilja Dubinin.
+
+ * [Fixed Issue 187][issue-187]
+   
+   create target directory when run dependency update report.
+   Thanks to Ilja Dubinin.
+   
+ * [Pull Request #189][pull-189]
+
+   Fixed inccorect links. Thanks to Anton Johansson.
 
  * [Fixed Issue 177][issue-177]
    
@@ -58,6 +80,7 @@
   Upgraded cobertura-maven-plugin used in report section
   to 2.7.
    
+
 [issue-34]: https://github.com/jenkinsci/java-client-api/issues/34
 [issue-37]: https://github.com/jenkinsci/java-client-api/issues/37
 [issue-46]: https://github.com/jenkinsci/java-client-api/issues/46
@@ -69,3 +92,9 @@
 [issue-168]: https://github.com/jenkinsci/java-client-api/issues/168
 [issue-177]: https://github.com/jenkinsci/java-client-api/issues/177
 [issue-182]: https://github.com/mojohaus/versions-maven-plugin/issues/182
+[issue-185]: https://github.com/mojohaus/versions-maven-plugin/issues/185
+[issue-187]: https://github.com/mojohaus/versions-maven-plugin/issues/187
+[pull-189]: https://github.com/mojohaus/versions-maven-plugin/pull/189
+[issue-197]: https://github.com/mojohaus/versions-maven-plugin/issues/197
+[issue-198]: https://github.com/mojohaus/versions-maven-plugin/issues/198
+

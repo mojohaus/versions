@@ -58,8 +58,7 @@ public class PluginUpdatesRenderer
 
     protected void renderBody()
     {
-        Map<Plugin, PluginUpdatesDetails> allUpdates =
-            new TreeMap<Plugin, PluginUpdatesDetails>( new PluginComparator() );
+        Map<Plugin, PluginUpdatesDetails> allUpdates = new TreeMap<>( new PluginComparator() );
         allUpdates.putAll( pluginManagementUpdates );
         allUpdates.putAll( pluginUpdates );
 
