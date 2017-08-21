@@ -5,25 +5,25 @@
  * [Fixed Issue 182][issue-182]
 
    Add goal for updating the SCM tag in the POM.
-   
+
  * [Fixed Issue 197][issue-197]
- 
+
    Java 1.7 as prerequisite.
 
  * [Fixed Issue 198][issue-198]
- 
+
    Update version of modules which are not children but part of reactor.
 
  * [Fixed Issue 185][issue-185]
-   
+
    Unable to set dependencyReportFormat as parameter anymore.
    Thanks to Ilja Dubinin.
 
  * [Fixed Issue 187][issue-187]
-   
+
    create target directory when run dependency update report.
    Thanks to Ilja Dubinin.
-   
+
  * [Pull Request #189][pull-189]
 
    Fixed inccorect links. Thanks to Anton Johansson.
