@@ -48,7 +48,6 @@ import java.util.Map;
 public class UpdateChildModulesMojo
     extends AbstractVersionsUpdaterMojo
 {
-
     /**
      * The groupId that we are updating. Guarded by this.
      */
@@ -129,7 +128,7 @@ public class UpdateChildModulesMojo
                     }
 
                     getLog().debug( "Looking for modules which use "
-                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
+                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent to update it to " + sourceVersion );
 
                     for ( Map.Entry<String, Model> target : PomHelper.getChildModels( reactor, sourceGroupId,
                                                                                       sourceArtifactId ).entrySet() )
@@ -169,8 +168,6 @@ public class UpdateChildModulesMojo
                                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
                                 + sourceVersion );
                             process( moduleProjectFile );
-                            // don't forget to update the cached model
-                            targetModel.setVersion( sourceVersion );
                             didSomething = true;
                         }
                     }
