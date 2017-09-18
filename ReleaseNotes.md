@@ -2,6 +2,11 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+
+ * [Fixed Issue 202][issue-202]
+
+   -DprocessParent=true is ignored by user-reactor mojo.
+
  * [Fixed Issue 182][issue-182]
 
    Add goal for updating the SCM tag in the POM.
