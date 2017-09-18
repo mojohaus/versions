@@ -218,10 +218,9 @@ public class SetMojo
         if ( removeSnapshot && !nextSnapshot )
         {
             String version = getVersion();
-            String release = version;
             if ( version.endsWith( SNAPSHOT ) )
             {
-                release = version.substring( 0, version.indexOf( SNAPSHOT ) );
+                String release = version.substring( 0, version.indexOf( SNAPSHOT ) );
                 newVersion = release;
                 getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );
             }
@@ -313,7 +312,8 @@ public class SetMojo
                 final String mGroupId = PomHelper.getGroupId( m );
                 final String mArtifactId = PomHelper.getArtifactId( m );
                 final String mVersion = PomHelper.getVersion( m );
-                if ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId ).matches()
+                if ((  ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId ).matches() ) //
+                       || (processAllModules) ) //
                     && oldVersionIdRegex.matcher( mVersion ).matches() && !newVersion.equals( mVersion ) )
                 {
                     found = true;
