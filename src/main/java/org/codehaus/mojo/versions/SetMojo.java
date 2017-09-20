@@ -228,12 +228,10 @@ public class SetMojo
 
         if ( !removeSnapshot && nextSnapshot )
         {
-            boolean havingSnapshot = false;
             String version = getVersion();
             String versionWithoutSnapshot = version;
             if ( version.endsWith( SNAPSHOT ) )
             {
-                havingSnapshot = true;
                 versionWithoutSnapshot = version.substring( 0, version.indexOf( SNAPSHOT ) );
             }
             LinkedList<String> numbers = new LinkedList<String>();
@@ -251,10 +249,7 @@ public class SetMojo
             int lastNumber = Integer.parseInt( numbers.removeLast() );
             numbers.addLast( String.valueOf( lastNumber + 1 ) );
             String nextVersion = StringUtils.join( numbers.toArray( new String[0] ), "." );
-            if ( havingSnapshot )
-            {
-                newVersion = nextVersion + "-SNAPSHOT";
-            }
+            newVersion = nextVersion + "-SNAPSHOT";
             getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );
         }
 
