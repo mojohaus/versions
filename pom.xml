@@ -538,5 +538,15 @@
         </plugins>
       </reporting>
     </profile>
+    <profile>
+      <!-- Plenty of javadoc errors with JDK8: https://stackoverflow.com/a/34591533 -->
+      <id>disable-java8-doclint</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <properties>
+        <additionalparam>-Xdoclint:none</additionalparam>
+      </properties>
+    </profile>
   </profiles>
 </project>
