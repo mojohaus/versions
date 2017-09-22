@@ -91,10 +91,6 @@
     </contributor>
   </contributors>
 
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
-
   <scm>
     <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
@@ -314,6 +310,11 @@
           <artifactId>maven-site-plugin</artifactId>
           <version>3.6</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.0.0-M1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -443,6 +444,28 @@
           </filterProperties>
           <mavenOpts>-Xmx256m</mavenOpts>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.0</version>
+                </requireMavenVersion>
+                <requirePluginVersions>
+                  <phases>clean,deploy,site</phases>
+                </requirePluginVersions>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
