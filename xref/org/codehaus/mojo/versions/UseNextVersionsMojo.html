@@ -71,7 +71,7 @@
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>              {
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>                  useNextVersions( pom, getProject().getDependencyManagement().getDependencies() );
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>              }
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>              <strong class="jxr_keyword">if</strong> ( isProcessingDependencies() )
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>              <strong class="jxr_keyword">if</strong> ( getProject().getDependencies() != <strong class="jxr_keyword">null</strong> &amp;&amp; isProcessingDependencies() )
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>              {
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>                  useNextVersions( pom, getProject().getDependencies() );
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>              }
@@ -82,14 +82,14 @@
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>          }
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>      }
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> useNextVersions( ModifiedPomXMLEventReader pom, Collection dependencies )
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> useNextVersions( ModifiedPomXMLEventReader pom, Collection&lt;Dependency&gt; dependencies )
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>          <strong class="jxr_keyword">throws</strong> XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>      {
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>          Iterator i = dependencies.iterator();
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>          Iterator&lt;Dependency&gt; i = dependencies.iterator();
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>          <strong class="jxr_keyword">while</strong> ( i.hasNext() )
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>          {
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>              Dependency dep = (Dependency) i.next();
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>              Dependency dep = i.next();
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>              <strong class="jxr_keyword">if</strong> ( isExcludeReactor() &amp;&amp; isProducedByReactor( dep ) )
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>              {

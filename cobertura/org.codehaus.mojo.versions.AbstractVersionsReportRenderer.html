@@ -12,7 +12,7 @@
 <div class="separator">&nbsp;</div>
 <table class="report">
 <thead><tr>  <td class="heading">Classes in this File</td>  <td class="heading"><a class="dfn" href="help.html" onclick="popupwindow('help.html'); return false;">Line Coverage</a></td>  <td class="heading"><a class="dfn" href="help.html" onclick="popupwindow('help.html'); return false;">Branch Coverage</a></td>  <td class="heading"><a class="dfn" href="help.html" onclick="popupwindow('help.html'); return false;">Complexity</a></td></tr></thead>
-  <tr><td><a href="org.codehaus.mojo.versions.AbstractVersionsReportRenderer.html">AbstractVersionsReportRenderer</a></td><td><table cellpadding="0px" cellspacing="0px" class="percentgraph"><tr class="percentgraph"><td align="right" class="percentgraph" width="40">0%</td><td class="percentgraph"><div class="percentgraph"><div class="greenbar" style="width:0px"><span class="text">0/496</span></div></div></td></tr></table></td><td><table cellpadding="0px" cellspacing="0px" class="percentgraph"><tr class="percentgraph"><td align="right" class="percentgraph" width="40">0%</td><td class="percentgraph"><div class="percentgraph"><div class="greenbar" style="width:0px"><span class="text">0/176</span></div></div></td></tr></table></td><td class="value"><span class="hidden">4.913043478260869;</span>4.913</td></tr>
+  <tr><td><a href="org.codehaus.mojo.versions.AbstractVersionsReportRenderer.html">AbstractVersionsReportRenderer</a></td><td><table cellpadding="0px" cellspacing="0px" class="percentgraph"><tr class="percentgraph"><td align="right" class="percentgraph" width="40">0%</td><td class="percentgraph"><div class="percentgraph"><div class="greenbar" style="width:0px"><span class="text">0/509</span></div></div></td></tr></table></td><td><table cellpadding="0px" cellspacing="0px" class="percentgraph"><tr class="percentgraph"><td align="right" class="percentgraph" width="40">0%</td><td class="percentgraph"><div class="percentgraph"><div class="greenbar" style="width:0px"><span class="text">0/202</span></div></div></td></tr></table></td><td class="value"><span class="hidden">4.913043478260869;</span>4.913</td></tr>
 
 </table>
 <div class="separator">&nbsp;</div>
@@ -229,8 +229,7 @@
 <tr>  <td class="numLine">&nbsp;113</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;114</td>  <td class="nbHitsUncovered"><a title="Line 114: Conditional coverage 0% (0/12) [each condition: 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 114: Conditional coverage 0% (0/12) [each condition: 0%, 0%, 0%, 0%, 0%, 0%].">        <span class="keyword">return</span> v1 == v2 || ( v1 != <span class="keyword">null</span> &amp;&amp; v1.equals( v2 ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;115</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;            || ( v1 != <span class="keyword">null</span> &amp;&amp; v2 != <span class="keyword">null</span> &amp;&amp; v1.toString().equals( v2.toString() ) );</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;115</td>  <td class="nbHitsUncovered"><a title="Line 115: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 115: Conditional coverage 0% (0/2).">            || ( v1 != <span class="keyword">null</span> &amp;&amp; v2 != <span class="keyword">null</span> &amp;&amp; v1.toString().equals( v2.toString() ) );</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;116</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;117</td>  <td class="nbHits">&nbsp;</td>
@@ -652,18 +651,12 @@
 <tr>  <td class="numLine">&nbsp;429</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;430</td>  <td class="nbHitsUncovered"><a title="Line 430: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 430: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">                <span class="keyword">boolean</span> bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;431</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;432</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;433</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;434</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;435</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;436</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MAJOR ) );</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;431</td>  <td class="nbHitsUncovered"><a title="Line 431: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 431: Conditional coverage 0% (0/2).">                    || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;432</td>  <td class="nbHitsUncovered"><a title="Line 432: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 432: Conditional coverage 0% (0/2).">                    || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;433</td>  <td class="nbHitsUncovered"><a title="Line 433: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 433: Conditional coverage 0% (0/2).">                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;434</td>  <td class="nbHitsUncovered"><a title="Line 434: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 434: Conditional coverage 0% (0/2).">                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MINOR ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;435</td>  <td class="nbHitsUncovered"><a title="Line 435: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 435: Conditional coverage 0% (0/2).">                    || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;436</td>  <td class="nbHitsUncovered"><a title="Line 436: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 436: Conditional coverage 0% (0/2).">                    || equals( versions[i], details.getNewestUpdate( UpdateScope.MAJOR ) );</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;437</td>  <td class="nbHitsUncovered"><a title="Line 437: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 437: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( bold )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;438</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
@@ -1010,18 +1003,12 @@
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;699</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                <span class="keyword">boolean</span> allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;700</td>  <td class="nbHitsUncovered"><a title="Line 700: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 700: Conditional coverage 0% (0/14) [each condition: 0%, 0%, 0%, 0%, 0%, 0%, 0%].">                <span class="keyword">boolean</span> bold = equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )</a></span></pre></td></tr>
-<tr>  <td class="numLine">&nbsp;701</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;702</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;703</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;704</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;705</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) )</pre></td></tr>
-<tr>  <td class="numLine">&nbsp;706</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;701</td>  <td class="nbHitsUncovered"><a title="Line 701: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 701: Conditional coverage 0% (0/2).">                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;702</td>  <td class="nbHitsUncovered"><a title="Line 702: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 702: Conditional coverage 0% (0/2).">                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;703</td>  <td class="nbHitsUncovered"><a title="Line 703: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 703: Conditional coverage 0% (0/2).">                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;704</td>  <td class="nbHitsUncovered"><a title="Line 704: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 704: Conditional coverage 0% (0/2).">                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MINOR ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;705</td>  <td class="nbHitsUncovered"><a title="Line 705: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 705: Conditional coverage 0% (0/2).">                    || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) )</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;706</td>  <td class="nbHitsUncovered"><a title="Line 706: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 706: Conditional coverage 0% (0/2).">                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.MAJOR ) );</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;707</td>  <td class="nbHitsUncovered"><a title="Line 707: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 707: Conditional coverage 0% (0/2).">                <span class="keyword">if</span> ( !allowed )</a></span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;708</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                {</pre></td></tr>
@@ -1166,7 +1153,7 @@
   <td class="src"><pre class="src">&nbsp;    {</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;817</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        VersionRange range;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;818</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set&lt;String&gt; rangeVersions = <span class="keyword">new</span> HashSet&lt;String&gt;();</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;818</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        Set&lt;String&gt; rangeVersions = <span class="keyword">new</span> HashSet&lt;&gt;();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;819</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        ArtifactVersion[] tmp;</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;820</td>  <td class="nbHitsUncovered"><a title="Line 820: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 820: Conditional coverage 0% (0/2).">        <span class="keyword">if</span> ( property.getVersion() != <span class="keyword">null</span> )</a></span></pre></td></tr>
@@ -1209,6 +1196,6 @@
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 5/31/17 9:37 PM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 23/09/17 12:06 PM.</div>
 </body>
 </html>

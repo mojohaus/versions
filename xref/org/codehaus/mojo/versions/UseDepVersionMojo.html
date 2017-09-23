@@ -88,7 +88,7 @@
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>                  useDepVersion( pom, getProject().getDependencyManagement().getDependencies() );
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>              }
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>              <strong class="jxr_keyword">if</strong> ( isProcessingDependencies() )
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>              <strong class="jxr_keyword">if</strong> ( getProject().getDependencies() != <strong class="jxr_keyword">null</strong> &amp;&amp; isProcessingDependencies() )
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>              {
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>                  useDepVersion( pom, getProject().getDependencies() );
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>              }
@@ -106,7 +106,7 @@
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>          <strong class="jxr_keyword">while</strong> ( itr.hasNext() )
 <a class="jxr_linenumber" name="L100" href="#L100">100</a>         {
-<a class="jxr_linenumber" name="L101" href="#L101">101</a>             Dependency dep = (Dependency) itr.next();
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>             Dependency dep = itr.next();
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> 
 <a class="jxr_linenumber" name="L103" href="#L103">103</a>             <strong class="jxr_keyword">if</strong> ( isExcludeReactor() &amp;&amp; isProducedByReactor( dep ) )
 <a class="jxr_linenumber" name="L104" href="#L104">104</a>             {
