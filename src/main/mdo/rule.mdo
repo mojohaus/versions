@@ -145,6 +145,16 @@ under the License.
           </association>
         </field>
         <field>
+          <name>versionComparators</name>
+          <version>2.0+</version>
+          <type>List</type>
+          <description>List of VersionComparators to be used in this RuleSet.</description>
+          <association>
+            <type>VersionComparator</type>
+            <multiplicity>*</multiplicity>
+          </association>
+        </field>
+        <field>
           <name>rules</name>
           <required>true</required>
           <version>1.0+</version>
@@ -222,6 +232,42 @@ under the License.
         buf.append( " (" );
         buf.append( type );
         buf.append( ")" );
+        return buf.toString();
+    }]]></code>
+        </codeSegment>
+      </codeSegments>
+    </class>
+    <class xsd.compositor="sequence">
+      <name>VersionComparator</name>
+      <version>2.0+</version>
+      <description>A user-defined VersionComparator.</description>
+      <fields>
+        <field xml.attribute="true">
+          <name>name</name>
+          <version>2.0+</version>
+          <required>true</required>
+          <type>String</type>
+          <description>The name of this VersionComparator when used in this RuleSet.</description>
+        </field>
+        <field xml.attribute="true">
+          <name>comparatorClass</name>
+          <version>2.0+</version>
+          <required>true</required>
+          <type>String</type>
+          <description>The class of this VersionComparator.  It must have an accessible constructor with no arguments.</description>
+        </field>
+      </fields>
+      <codeSegments>
+        <codeSegment>
+          <version>2.0+</version>
+          <code><![CDATA[public String toString()
+    {
+        StringBuilder buf = new StringBuilder( 128 );
+        buf.append( "VersionComparator[name = \"" );
+        buf.append( name );
+        buf.append( "\", comparatorClass = \"" );
+        buf.append( comparatorClass );
+        buf.append( "\"]" );
         return buf.toString();
     }]]></code>
         </codeSegment>

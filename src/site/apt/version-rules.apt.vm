@@ -55,6 +55,28 @@ Version number rules
 
     [<<<numeric>>>] An alternative version numbering scheme with no "special" qualifiers.
     
+  For version numbering schemes that do not follow these conventions, it is also possible to specify customized schemes
+  by following these steps: 
+  
+    * Implement the VersionComparator interface, or extending the AbstractVersionComparator.
+
+    * Declare a mapping between a name and a VersionComparator instance in the versionComparators element.
+
+    * Place the version comparator in the project classpath.
+
+---
+<ruleset comparisonMethod="maven"
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+  <versionComparators>
+    <versionComparator name="myVersionComparator" comparatorClass="org.codehaus.mojo.versions.ordering.MyVersionComparator" />
+  </versionComparators>
+  <rules>
+    <rule groupId="*.maven" comparisonMethod="myVersionComparator"/>
+  </rules>
+</ruleset>
+---
+
   The <<<versions-maven-plugin>>> will assume that all version numbers follow the <<<maven>>> scheme unless you tell
   it otherwise.
 

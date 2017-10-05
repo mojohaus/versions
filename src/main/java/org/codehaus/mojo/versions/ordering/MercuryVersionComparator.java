@@ -30,7 +30,6 @@ import java.util.StringTokenizer;
  *
  * @author Stephen Connolly
  * @since 1.0-alpha-3
- * @deprecated
  */
 public class MercuryVersionComparator
     extends AbstractVersionComparator

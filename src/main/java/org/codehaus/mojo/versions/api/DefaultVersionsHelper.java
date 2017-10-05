@@ -305,6 +305,14 @@ public class DefaultVersionsHelper
                                                        settings);
             }
 
+            for (org.codehaus.mojo.versions.model.VersionComparator ruleSetVersionComparator : loadedRules.getVersionComparators()) {
+                try {
+                    VersionComparators.addVersionComparator(ruleSetVersionComparator.getName(), (VersionComparator) Class.forName(ruleSetVersionComparator.getComparatorClass()).getConstructor().newInstance());
+                } catch (Exception e) {
+                    throw new MojoExecutionException("Exception thrown while setting up version comparator", e);
+                }
+            }
+            ruleSet.setVersionComparators(loadedRules.getVersionComparators());
             ruleSet.setIgnoreVersions(loadedRules.getIgnoreVersions());
             ruleSet.setRules(loadedRules.getRules());
         }

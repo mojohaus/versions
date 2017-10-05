@@ -1,5 +1,10 @@
 package org.codehaus.mojo.versions.ordering;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,20 +27,22 @@ package org.codehaus.mojo.versions.ordering;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * Utility.
  *
  * @author Stephen Connolly
  * @since 1.0-alpha-3
- * @deprecated
- * Note: This comparator should be replaced by using the one of Maven core instead.
  */
 public final class VersionComparators
 {
     private static final Pattern SNAPSHOT_PATTERN = Pattern.compile( "(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$" );
+
+    private static final VersionComparator defaultVersionComparator = new MavenVersionComparator();
+    private static final Map<String, VersionComparator> versionComparators = new HashMap<>();
+    static {
+        addVersionComparator("numeric", new NumericVersionComparator());
+        addVersionComparator("mercury", new MercuryVersionComparator());
+    }
 
     private VersionComparators()
     {
@@ -45,21 +52,14 @@ public final class VersionComparators
     /**
      * Returns the version comparator to use.
      *
-     * @param comparisonMethod the comparison method.
+     * @param comparisonMethod the comparison method (case insensitive).
      * @return the version comparator to use.
      * @since 1.0-alpha-1
      */
     public static VersionComparator getVersionComparator( String comparisonMethod )
     {
-        if ( "numeric".equalsIgnoreCase( comparisonMethod ) )
-        {
-            return new NumericVersionComparator();
-        }
-        else if ( "mercury".equalsIgnoreCase( comparisonMethod ) )
-        {
-            return new MercuryVersionComparator();
-        }
-        return new MavenVersionComparator();
+        VersionComparator versionComparator = versionComparators.get(comparisonMethod.toLowerCase());
+        return (versionComparator == null) ? defaultVersionComparator : versionComparator;
     }
 
     public static String alphaNumIncrement( String token )
@@ -176,5 +176,9 @@ public final class VersionComparators
         {
             return new DefaultArtifactVersion( destination.toString() + "-SNAPSHOT" );
         }
+    }
+
+    public static void addVersionComparator(String comparisonMethod, VersionComparator versionComparator) {
+        versionComparators.put(comparisonMethod.toLowerCase(), versionComparator);
     }
 }

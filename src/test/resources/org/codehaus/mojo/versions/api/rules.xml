@@ -6,6 +6,9 @@
     <ignoreVersion type="regex">.*-beta</ignoreVersion>
     <ignoreVersion type="illegalType">illegalVersion</ignoreVersion>
   </ignoreVersions>
+  <versionComparators>
+    <versionComparator name="mercury2" comparatorClass="org.codehaus.mojo.versions.ordering.MercuryVersionComparator" />
+  </versionComparators>
   <rules>
     <rule groupId="*.maven" comparisonMethod="mercury"/>
     <rule groupId="com.mycompany" comparisonMethod="numeric"/>
@@ -18,5 +21,6 @@
       </ignoreVersions>
     </rule>
     <rule groupId="com.mycompany.maven" artifactId="old-maven-plugin" comparisonMethod="mercury"/>
+    <rule groupId="com.mycompany.maven" artifactId="mercury2" comparisonMethod="mercury2" />
   </rules>
 </ruleset>

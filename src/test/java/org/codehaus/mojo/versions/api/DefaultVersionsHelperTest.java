@@ -161,6 +161,8 @@ public class DefaultVersionsHelperTest
                       helper.getVersionComparator( "com.mycompany.maven", "new-maven-plugin" ) );
         assertEquals( VersionComparators.getVersionComparator( "mercury" ),
                       helper.getVersionComparator( "com.mycompany.maven", "old-maven-plugin" ) );
+        assertEquals( VersionComparators.getVersionComparator( "mercury2" ),
+                helper.getVersionComparator( "com.mycompany.maven", "mercury2" ) );
     }
 
 
