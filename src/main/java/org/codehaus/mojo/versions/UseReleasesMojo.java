@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
@@ -59,6 +60,17 @@ public class UseReleasesMojo
      */
     @Parameter( property = "allowRangeMatching", defaultValue = "false" )
     private boolean allowRangeMatching;
+
+    /**
+     * Whether to to pad the version with zero(es) for minor and incremental version in order for range matching to work when
+     * only looking for a matching build number
+     *
+     * If set, 1 and 1.1 become 1.1.0 and do not range match for 1.1.1, but do match for 1.1.0-2
+     *
+     * @since 2.6
+     */
+    @Parameter( property = "padVersionForRangeMatching", defaultValue = "false" )
+    private boolean padVersionForRangeMatching;
 
     /**
      * Whether to fail if a SNAPSHOT could not be replaced
@@ -160,8 +172,18 @@ public class UseReleasesMojo
             else
             {
                 ArtifactVersion finalVersion = null;
+                if ( padVersionForRangeMatching )
+                {
+                    String paddedReleaseVersion = getPaddedArtifactVersion(releaseVersion);
+                    if (!paddedReleaseVersion.equals(releaseVersion)) {
+                        getLog().info("Padded version " + releaseVersion + " to " + paddedReleaseVersion + " for project " + toString(project));
+                        releaseVersion= paddedReleaseVersion;
+                    }
+                }
+
                 for ( ArtifactVersion proposedVersion : versions.getVersions( false ) )
                 {
+
                     if ( proposedVersion.toString().startsWith( releaseVersion ) )
                     {
                         getLog().debug( "Found matching version for " + toString( project ) + " to version "
@@ -235,6 +257,15 @@ public class UseReleasesMojo
         throws XMLStreamException
     {
         ArtifactVersion finalVersion = null;
+        if ( padVersionForRangeMatching )
+        {
+            String paddedReleaseVersion = getPaddedArtifactVersion(releaseVersion);
+            if (!paddedReleaseVersion.equals(releaseVersion)) {
+                getLog().info("Padded version " + releaseVersion + " to " + paddedReleaseVersion + " for dependency " + toString(dep));
+                releaseVersion= paddedReleaseVersion;
+            }
+        }
+
         for ( ArtifactVersion proposedVersion : versions.getVersions( false ) )
         {
             if ( proposedVersion.toString().startsWith( releaseVersion ) )
@@ -279,6 +310,22 @@ public class UseReleasesMojo
         {
             throw new NoSuchElementException( "No matching release of " + toString( dep ) + " found for update." );
         }
+    }
+
+    private String getPaddedArtifactVersion(String stringVersion) {
+
+        ArtifactVersion artifactVersion = new DefaultArtifactVersion(stringVersion);
+
+        if (artifactVersion.getMinorVersion() == 0 && artifactVersion.getIncrementalVersion() == 0 )
+        {
+            artifactVersion = new DefaultArtifactVersion(artifactVersion.getMajorVersion() + ".0.0");
+        }
+        else if (artifactVersion.getIncrementalVersion() == 0)
+        {
+            artifactVersion = new DefaultArtifactVersion(artifactVersion.getMajorVersion() + "." + artifactVersion.getMinorVersion() + ".0");
+        }
+
+        return artifactVersion.toString();
     }
 
 }
