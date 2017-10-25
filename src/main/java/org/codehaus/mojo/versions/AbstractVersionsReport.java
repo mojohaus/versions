@@ -19,6 +19,9 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.util.List;
+import java.util.Locale;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -43,10 +46,6 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.plexus.i18n.I18N;
-
-import java.io.File;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Base class for all versions reports.
@@ -253,6 +252,7 @@ public abstract class AbstractVersionsReport
      * @param locale the locale to generate the report for.
      * @param sink the report formatting tool.
      * @throws MavenReportException when things go wrong.
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
      */
     protected abstract void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException, MojoExecutionException;
@@ -263,9 +263,11 @@ public abstract class AbstractVersionsReport
      * @param artifact The artifact.
      * @param versionRange The version range.
      * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
+     * @param usePluginRepositories {@code true} to use plugin repositories; {@code false} to use dependency
+     * repositories.
      * @return The latest version of the specified artifact that matches the specified version range or
      *         <code>null</code> if no matching version could be found.
-     * @throws MojoExecutionException If the artifact metadata could not be found.
+     * @throws MavenReportException If the artifact metadata could not be found.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,

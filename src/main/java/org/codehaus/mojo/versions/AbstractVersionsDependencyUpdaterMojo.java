@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
@@ -141,7 +140,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the project/dependencies section of the pom be processed.
      *
-     * @return returns <code>true if the project/dependencies section of the pom should be processed.
+     * @return returns {@code true} if the project/dependencies section of the pom should be processed.
      * @since 1.0-alpha-3
      */
     public boolean isProcessingDependencies()
@@ -152,7 +151,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the project/dependencyManagement section of the pom be processed.
      *
-     * @return returns <code>true if the project/dependencyManagement section of the pom should be processed.
+     * @return returns {@code true} if the project/dependencyManagement section of the pom should be processed.
      * @since 1.0-alpha-3
      */
     public boolean isProcessingDependencyManagement()
@@ -163,7 +162,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the project/parent section of the pom be processed.
      *
-     * @return returns <code>true if the project/parent section of the pom should be processed.
+     * @return returns {@code true} if the project/parent section of the pom should be processed.
      * @since 2.3
      */
     public boolean isProcessingParent()
@@ -174,7 +173,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the artifacts produced in the current reactor be excluded from processing.
      *
-     * @return returns <code>true if the artifacts produced in the current reactor should be excluded from processing.
+     * @return returns {@code true} if the artifacts produced in the current reactor should be excluded from processing.
      * @since 1.0-alpha-3
      */
     public boolean isExcludeReactor()
@@ -185,8 +184,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Try to find the dependency artifact that matches the given dependency.
      *
-     * @param dependency
-     * @return
+     * @param dependency the dependency to find a match for
+     * @return the matching artifact or null if no matching artifact exists
      * @since 1.0-alpha-3
      */
     protected Artifact findArtifact( Dependency dependency )
@@ -210,8 +209,9 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Try to find the dependency artifact that matches the given dependency.
      *
-     * @param dependency
-     * @return
+     * @param dependency the dependency to find a match for
+     * @return the matching artifact, newly created if needed
+     * @throws org.apache.maven.plugin.MojoExecutionException if the dependency version specification is invalid
      * @since 1.0-alpha-3
      */
     protected Artifact toArtifact( Dependency dependency )
@@ -290,10 +290,10 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     }
 
     /**
-     * Returns <code>true</code> if the dependency is produced by the current reactor.
+     * Returns {@code true} if the dependency is produced by the current reactor.
      *
      * @param dependency the dependency to heck.
-     * @return <code>true</code> if the dependency is produced by the current reactor.
+     * @return {@code true} if the dependency is produced by the current reactor.
      * @since 1.0-alpha-3
      */
     protected boolean isProducedByReactor( Dependency dependency )
@@ -389,7 +389,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     /**
      * Indicates whether any includes were specified via the 'includes' or 'includesList' options.
-     * 
+     *
      * @return true if includes were specified, false otherwise.
      */
     protected boolean hasIncludes()

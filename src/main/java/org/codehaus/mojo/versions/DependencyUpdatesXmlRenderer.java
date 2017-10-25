@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.reporting.MavenReportException;
@@ -36,7 +35,7 @@ import org.codehaus.mojo.versions.utils.DependencyComparator;
 /**
  * XML renderer for DependencyUpdatesReport creates an xml file in target directory and writes report about available
  * dependency/dependency management updates.
- * 
+ *
  * @author Illia Dubinin
  * @since 2.4
  */
@@ -86,7 +85,7 @@ public class DependencyUpdatesXmlRenderer
 
     /**
      * Makes report file with given name in target directory.
-     * 
+     *
      * @throws MavenReportException if something went wrong
      */
     public void render()
@@ -117,8 +116,8 @@ public class DependencyUpdatesXmlRenderer
 
     /**
      * Method wraps value in xml tag. In ex: to wrap foo in tag bar you have to pass foo as value and bar as tag. As a
-     * result you will get: <bar>foo</bar>
-     * 
+     * result you will get: {@code <bar>foo</bar>}
+     *
      * @param value - string to wrap
      * @param tag - name of tag
      * @return value wrapped in xml tag
@@ -132,7 +131,7 @@ public class DependencyUpdatesXmlRenderer
     /**
      * Returns summary of dependency analysis result in xml format: current version, next available, next incremental,
      * next minor and next major versions.
-     * 
+     *
      * @param allUpdates all dependencies versions
      * @return summary in xml format
      */
@@ -180,7 +179,7 @@ public class DependencyUpdatesXmlRenderer
      * Returns xml report for current dependency state with following info: current version, next available version,
      * next incremental/minor/major if available and status ('incremental available', 'minor available', 'major
      * available' or 'no new available')
-     * 
+     *
      * @param versions version info for dependency
      * @return xml reports about current possible updates.
      */

@@ -27,9 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.stream.XMLStreamException;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -90,9 +88,7 @@ public class CompareDependenciesMojo
     protected boolean updateDependencies;
 
     /**
-     * Update dependency versions stored in properties
-     *
-     * @parameter property="updatePropertyVersions" default-value="false"
+     * Update dependency versions stored in properties.
      */
     @Parameter( property = "updatePropertyVersions", defaultValue = "false" )
     protected boolean updatePropertyVersions;

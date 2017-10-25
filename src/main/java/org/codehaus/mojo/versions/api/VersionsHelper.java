@@ -18,12 +18,10 @@ package org.codehaus.mojo.versions.api;
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -50,6 +48,7 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
  */
 public interface VersionsHelper
 {
+
     /**
      * Gets the logger used by this helper.
      *
@@ -109,7 +108,7 @@ public interface VersionsHelper
      * @since 1.0-alpha-3
      */
     Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange version, String type,
-                                       String classifier, String scope, boolean optional );
+            String classifier, String scope, boolean optional );
 
     /**
      * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code>.
@@ -124,7 +123,7 @@ public interface VersionsHelper
      * @since 1.0-beta-1
      */
     Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
-                                       String classifier, String scope );
+            String classifier, String scope );
 
     /**
      * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code> which extracts the
@@ -136,7 +135,7 @@ public interface VersionsHelper
      * @since 1.0-alpha-3
      */
     Artifact createDependencyArtifact( Dependency dependency )
-        throws InvalidVersionSpecificationException;
+            throws InvalidVersionSpecificationException;
 
     /**
      * Takes a {@link List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a
@@ -163,13 +162,13 @@ public interface VersionsHelper
      *
      * @param artifact The artifact to look for versions of.
      * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
-     *            consult the repositories for normal dependencies.
+     * consult the repositories for normal dependencies.
      * @return The details of the available artifact versions.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      * @since 1.0-alpha-3
      */
     ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException;
+            throws ArtifactMetadataRetrievalException;
 
     /**
      * Looks up the updates of an artifact.
@@ -181,7 +180,7 @@ public interface VersionsHelper
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      */
     ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException;
+            throws ArtifactMetadataRetrievalException;
 
     /**
      * Looks up the updates for a set of dependencies.
@@ -190,10 +189,11 @@ public interface VersionsHelper
      * @param usePluginRepositories Search the plugin repositories.
      * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.api.ArtifactVersions}.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws InvalidVersionSpecificationException If the version specification for a dependency is invalid
      * @since 1.0-beta-1
      */
     Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
+            throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
      * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency.
@@ -202,10 +202,11 @@ public interface VersionsHelper
      * @param usePluginRepositories Search the plugin repositories.
      * @return The details of updates to the dependency.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws InvalidVersionSpecificationException If the version specification for the dependency is invalid
      * @since 1.0-beta-1
      */
     ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
+            throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
      * Looks up the updates for a set of plugins.
@@ -214,10 +215,11 @@ public interface VersionsHelper
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.PluginUpdatesDetails}.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws InvalidVersionSpecificationException If the version specification for a plugin is invalid
      * @since 1.0-beta-1
      */
     Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
+            throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
      * Looks up the updates for a plugin.
@@ -230,7 +232,7 @@ public interface VersionsHelper
      * @since 1.0-beta-1
      */
     PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
+            throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**
      * Returns an {@link ExpressionEvaluator} for the specified project.
@@ -252,21 +254,23 @@ public interface VersionsHelper
      * @param excludeProperties A comma separated list of properties to exclude.
      * @param autoLinkItems whether to automatically infer associations
      * @return a map of {@link org.codehaus.mojo.versions.api.PropertyVersions} values keyed by
-     *         {@link org.codehaus.mojo.versions.Property} instances.
+     * {@link org.codehaus.mojo.versions.Property} instances.
      * @throws MojoExecutionException if something goes wrong.
      */
     Map<Property, PropertyVersions> getVersionPropertiesMap( MavenProject project, Property[] propertyDefinitions,
-                                                             String includeProperties, String excludeProperties,
-                                                             boolean autoLinkItems )
-        throws MojoExecutionException;
+            String includeProperties, String excludeProperties,
+            boolean autoLinkItems )
+            throws MojoExecutionException;
 
     /**
      * Attempts to resolve the artifact.
      *
      * @param artifact The artifact to resolve.
      * @param usePluginRepositories whether to resolve from the plugin repositories or the regular repositories.
+     * @throws ArtifactResolutionException If unable to resolve the artifact for reasons other than it does not exist.
+     * @throws ArtifactNotFoundException If the artifact does not exist.
      * @since 1.3
      */
     void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactResolutionException, ArtifactNotFoundException;
+            throws ArtifactResolutionException, ArtifactNotFoundException;
 }

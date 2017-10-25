@@ -24,16 +24,15 @@ import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
  * Scopes of version updates.
+ * <p>
+ * <b>TODO:</b> Convert this class to a Java 1.5 enum once we move to Java 1.5
  *
  * @author Stephen Connolly
- * @todo convert this class to a Java 1.5 enum once we move to Java 1.5
  * @since 1.0-beta-1
  */
 public abstract class UpdateScope
@@ -245,7 +244,6 @@ public abstract class UpdateScope
      * @param currentVersion The current version.
      * @param includeSnapshots Whether to include snapshots.
      * @return The next version within this scope or <code>null</code> if there is no version within this scope.
-     * @throws ArtifactMetadataRetrievalException if there was a problem retrieving the list of available versions.
      */
     public abstract ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                      boolean includeSnapshots );
@@ -280,7 +278,7 @@ public abstract class UpdateScope
 
     /**
      * Returns the name of this enum constant, exactly as declared in its enum declaration.
-     * <p/>
+     * <p>
      * <b>Most programmers should use the {@link #toString} method in preference to this one, as the toString method may
      * return a more user-friendly name.</b> This method is designed primarily for use in specialized situations where
      * correctness depends on getting the exact name, which will not vary from release to release.
@@ -295,7 +293,7 @@ public abstract class UpdateScope
     /**
      * The ordinal of this enumeration constant (its position in the enum declaration, where the initial constant is
      * assigned an ordinal of zero).
-     * <p/>
+     * <p>
      * Most programmers will have no use for this field.
      */
     private final int ordinal;
@@ -303,7 +301,7 @@ public abstract class UpdateScope
     /**
      * Returns the ordinal of this enumeration constant (its position in its enum declaration, where the initial
      * constant is assigned an ordinal of zero).
-     * <p/>
+     * <p>
      * Most programmers will have no use for this method.
      *
      * @return the ordinal of this enumeration constant
@@ -365,7 +363,7 @@ public abstract class UpdateScope
     /**
      * Compares this enum with the specified object for order. Returns a negative integer, zero, or a positive integer
      * as this object is less than, equal to, or greater than the specified object.
-     * <p/>
+     * <p>
      * Enum constants are only comparable to other enum constants of the same enum type. The natural order implemented
      * by this method is the order in which the constants are declared.
      */

@@ -19,6 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -49,13 +55,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -258,15 +257,17 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param artifact The artifact.
      * @param versionRange The version range.
      * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
-     * @param usePluginRepositories
+     * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
+     * consult the repositories for normal dependencies.
      * @return The latest version of the specified artifact that matches the specified version range or
      *         <code>null</code> if no matching version could be found.
      * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
+     * @throws org.apache.maven.plugin.MojoExecutionException If unable to load rules.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, MojoExecutionException
+            throws ArtifactMetadataRetrievalException, MojoExecutionException
     {
         boolean includeSnapshots = this.allowSnapshots;
         if ( Boolean.TRUE.equals( allowingSnapshots ) )
@@ -400,6 +401,8 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws MojoExecutionException If things go wrong.
      * @throws MojoFailureException If things go wrong.
      * @throws javax.xml.stream.XMLStreamException If things go wrong.
+     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException If the artifact metadata could not
+     * be found.
      * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
@@ -452,9 +455,9 @@ public abstract class AbstractVersionsUpdaterMojo
      * Based on the passed flags, determines which segment is unchangable. This can be used when determining an upper
      * bound for the "latest" version.
      *
-     * @param allowMajorUpdates
-     * @param allowMinorUpdates
-     * @param allowIncrementalUpdates
+     * @param allowMajorUpdates {@code true} to allow major updates; {@code false} otherwise
+     * @param allowMinorUpdates {@code true} to allow minor updates; {@code false} otherwise
+     * @param allowIncrementalUpdates {@code true} to allow incremental updates; {@code false} otherwise
      * @return Returns the segment that is unchangable. If any segment can change, returns -1.
      */
     protected int determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,

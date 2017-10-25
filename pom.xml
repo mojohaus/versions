@@ -444,6 +444,15 @@
           <mavenOpts>-Xmx256m</mavenOpts>
         </configuration>
       </plugin>
+      <plugin>
+        <!-- duplicated from reporting to allow configuration to be used with
+          "mvn javadoc:javadoc" as well as "mvn site" -->
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>${mojo.java.target}</source>
+          <excludePackageNames>org.codehaus.mojo.versions.model</excludePackageNames>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -454,10 +463,12 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
           <source>${mojo.java.target}</source>
+          <excludePackageNames>org.codehaus.mojo.versions.model</excludePackageNames>
         </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-invoker-plugin</artifactId>
+        <version>3.0.0</version>
         <reportSets>
           <reportSet>
             <reports>
