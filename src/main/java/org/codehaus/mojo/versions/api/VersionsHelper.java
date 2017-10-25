@@ -84,7 +84,7 @@ public interface VersionsHelper
     ArtifactFactory getArtifactFactory();
 
     /**
-     * Shorthand method for <code>getArtifactFactory().createPluginArtifact(...)</code>.
+     * Shorthand method for {@code getArtifactFactory().createPluginArtifact(...)}.
      *
      * @param groupId The group Id.
      * @param artifactId The artifact Id.
@@ -95,7 +95,7 @@ public interface VersionsHelper
     Artifact createPluginArtifact( String groupId, String artifactId, VersionRange version );
 
     /**
-     * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code>.
+     * Shorthand method for {@code getArtifactFactory().createDependencyArtifact(...)}.
      *
      * @param groupId The group id.
      * @param artifactId The artifact id.
@@ -111,7 +111,7 @@ public interface VersionsHelper
             String classifier, String scope, boolean optional );
 
     /**
-     * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code>.
+     * Shorthand method for {@code getArtifactFactory().createDependencyArtifact(...)}.
      *
      * @param groupId The group id.
      * @param artifactId The artifact id.
@@ -126,8 +126,8 @@ public interface VersionsHelper
             String classifier, String scope );
 
     /**
-     * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code> which extracts the
-     * parameters from the Dependency instance.
+     * Shorthand method for {@code getArtifactFactory().createDependencyArtifact(...)} which extracts the parameters
+     * from the Dependency instance.
      *
      * @param dependency The dependency to create the artifact for.
      * @return The corresponding dependency artifact.
@@ -161,7 +161,7 @@ public interface VersionsHelper
      * appropriate remote repositories.
      *
      * @param artifact The artifact to look for versions of.
-     * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
+     * @param usePluginRepositories {@code true} will consult the pluginRepositories, while {@code false} will
      * consult the repositories for normal dependencies.
      * @return The details of the available artifact versions.
      * @throws ArtifactMetadataRetrievalException When things go wrong.

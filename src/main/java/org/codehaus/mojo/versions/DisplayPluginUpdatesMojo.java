@@ -923,7 +923,7 @@ public class DisplayPluginUpdatesMojo
      * Gets the build plugins of a specific project.
      *
      * @param model the model to get the build plugins from.
-     * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be inherited by
+     * @param onlyIncludeInherited {@code true} to only return the plugins definitions that will be inherited by
      *            child projects.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
@@ -1828,7 +1828,7 @@ public class DisplayPluginUpdatesMojo
      * Gets the report plugins of a specific project.
      *
      * @param model the model to get the report plugins from.
-     * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be inherited by
+     * @param onlyIncludeInherited {@code true} to only return the plugins definitions that will be inherited by
      *            child projects.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1

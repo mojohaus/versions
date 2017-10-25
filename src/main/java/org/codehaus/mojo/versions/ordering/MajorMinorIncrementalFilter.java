@@ -28,8 +28,8 @@ import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 /**
  * This class will handle the edge cases where a version update would have happened based on the usage of version ranges
  * to limit the replacement of the versions. We have currently the following scenario: The user defined
- * <code>allowMajorUpdates=false</code> and <code>allowMinorUpdates=true</code>. An given artifact
- * <code>groupId:artifactId:2.0.8</code> and a repository which contains the following versions of this artifact:
+ * {@code allowMajorUpdates=false} and {@code allowMinorUpdates=true}. An given artifact
+ * {@code groupId:artifactId:2.0.8} and a repository which contains the following versions of this artifact:
  * <ul>
  * <li>2.0.11</li>
  * <li>2.1.0-M1</li>
@@ -39,13 +39,13 @@ import org.codehaus.mojo.versions.api.AbstractVersionDetails;
  * <li>3.1.0</li>
  * <li>3.3.0</li>
  * </ul>
- * The {@link AbstractVersionDetails#getNewerVersions(String, int, boolean)} will use an upper version of
- * <code>2.1.0</code> to limit the versions to use. The result of this would be using <code>2.1.0-M1</code> which
- * contradicts the wish of the user of not updating the minor version. The root cause of this is the comparison of Maven
- * versions which will defined <code>2.1.0-M1</code> as less than <code>2.1.0</code>. The method
- * {@link #filter(ArtifactVersion, ArtifactVersion[])} will filter out those versions which violate the configuration
+ * The {@link AbstractVersionDetails#getNewerVersions(String, int, boolean)} will use an upper version of {@code 2.1.0}
+ * to limit the versions to use. The result of this would be using {@code 2.1.0-M1} which contradicts the wish of the
+ * user of not updating the minor version. The root cause of this is the comparison of Maven versions which will defined
+ * {@code 2.1.0-M1} as less than {@code 2.1.0}. The method {@link #filter(ArtifactVersion, ArtifactVersion[])} will
+ * filter out those versions which violate the configuration
  * {@link #allowMajorUpdates}, {@link #allowMinorUpdates} {@link #allowIncrementalUpdates}.
- * 
+ *
  * @author Karl Heinz Marbaise
  */
 public class MajorMinorIncrementalFilter

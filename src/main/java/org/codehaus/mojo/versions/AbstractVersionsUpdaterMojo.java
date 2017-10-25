@@ -149,7 +149,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * URI of a ruleSet file containing the rules that control how to compare
      * version numbers. The URI could be either a Wagon URI or a classpath URI
-     * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
+     * (e.g. {@code classpath:///package/sub/package/rules.xml}).
      *
      * @since 1.0-alpha-3
      */
@@ -256,11 +256,11 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @param artifact The artifact.
      * @param versionRange The version range.
-     * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
-     * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
+     * @param allowingSnapshots {@code null} for no override, otherwise the local override to apply.
+     * @param usePluginRepositories {@code true} will consult the pluginRepositories, while {@code false} will
      * consult the repositories for normal dependencies.
      * @return The latest version of the specified artifact that matches the specified version range or
-     *         <code>null</code> if no matching version could be found.
+     *         {@code null} if no matching version could be found.
      * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
      * @throws org.apache.maven.plugin.MojoExecutionException If unable to load rules.
      * @since 1.0-alpha-1
@@ -288,7 +288,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @param pom The pom.
      * @param property The property.
-     * @return The value as defined in the pom or <code>null</code> if not defined.
+     * @return The value as defined in the pom or {@code null} if not defined.
      * @since 1.0-alpha-1
      */
     protected String getPropertyValue( StringBuilder pom, String property )
@@ -409,12 +409,12 @@ public abstract class AbstractVersionsUpdaterMojo
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
 
     /**
-     * Returns <code>true</code> if the update should be applied.
+     * Returns {@code true} if the update should be applied.
      *
      * @param artifact The artifact.
      * @param currentVersion The current version of the artifact.
      * @param updateVersion The proposed new version of the artifact.
-     * @return <code>true</code> if the update should be applied.
+     * @return {@code true} if the update should be applied.
      * @since 1.0-alpha-1
      */
     protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )

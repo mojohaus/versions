@@ -82,8 +82,8 @@ public abstract class UpdateScope
     };
 
     /**
-     * Incremental version updates, that is the third segment of the version number, for example <code>1.0.0.15</code>
-     * to <code>1.0.1.0</code>.
+     * Incremental version updates, that is the third segment of the version number, for example {@code 1.0.0.15}
+     * to {@code 1.0.1.0}.
      *
      * @since 1.0-beta-1
      */
@@ -125,8 +125,8 @@ public abstract class UpdateScope
     };
 
     /**
-     * Minor version updates, that is the second segment of the version number, for example <code>1.0.0.15</code> to
-     * <code>1.1.0.0</code>.
+     * Minor version updates, that is the second segment of the version number, for example {@code 1.0.0.15} to
+     * {@code 1.1.0.0}.
      *
      * @since 1.0-beta-1
      */
@@ -168,8 +168,8 @@ public abstract class UpdateScope
     };
 
     /**
-     * Major version updates, that is the first segment of the version number, for example <code>1.0.0.15</code> to
-     * <code>2.0.0.0</code>.
+     * Major version updates, that is the first segment of the version number, for example {@code 1.0.0.15} to
+     * {@code 2.0.0.0}.
      *
      * @since 1.0-beta-1
      */
@@ -243,7 +243,7 @@ public abstract class UpdateScope
      * @param versionDetails The versions to select from.
      * @param currentVersion The current version.
      * @param includeSnapshots Whether to include snapshots.
-     * @return The next version within this scope or <code>null</code> if there is no version within this scope.
+     * @return The next version within this scope or {@code null} if there is no version within this scope.
      */
     public abstract ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                      boolean includeSnapshots );
@@ -254,7 +254,7 @@ public abstract class UpdateScope
      * @param versionDetails The versions to select from.
      * @param currentVersion The current version.
      * @param includeSnapshots Whether to include snapshots.
-     * @return The newest version within this scope or <code>null</code> if there is no version within this scope.
+     * @return The newest version within this scope or {@code null} if there is no version within this scope.
      */
     public abstract ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                      boolean includeSnapshots );

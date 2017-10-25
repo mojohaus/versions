@@ -32,8 +32,8 @@ import java.util.Map;
 
 /**
  * Set a property to a given version without any sanity checks. Please be careful this can lead to changes which might
- * not build anymore. The sanity checks are done by other goals like <code>update-properties</code> or
- * <code>update-property</code> etc. they are not done here. So use this goal with care.
+ * not build anymore. The sanity checks are done by other goals like {@code update-properties} or
+ * {@code update-property} etc. they are not done here. So use this goal with care.
  *
  * @author Karl Heinz Marbaise
  * @since 2.5

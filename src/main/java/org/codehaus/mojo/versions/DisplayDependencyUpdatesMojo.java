@@ -101,7 +101,7 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * Whether to allow the major version number to be changed.
-     * You need to set {@link #allowAnyUpdates} to <code>false</code> to
+     * You need to set {@link #allowAnyUpdates} to {@code false} to
      * get this configuration gets control. 
      * @since 2.5
      */
@@ -110,7 +110,7 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * Whether to allow the minor version number to be changed.
-     * You need to set {@link #allowMajorUpdates} to <code>false</code> to
+     * You need to set {@link #allowMajorUpdates} to {@code false} to
      * get this configuration gets control. 
      *
      * @since 2.5
@@ -120,7 +120,7 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * Whether to allow the incremental version number to be changed.
-     * You need to set {@link #allowMinorUpdates} to <code>false</code> to
+     * You need to set {@link #allowMinorUpdates} to {@code false} to
      * get this configuration gets control. 
      *
      * @since 2.5

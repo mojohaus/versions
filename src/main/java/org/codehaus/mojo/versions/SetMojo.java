@@ -81,7 +81,7 @@ public class SetMojo
     /**
      * The groupId of the dependency/module to update.
      * If you like to update modules of a aggregator you 
-     * should set <code>-DgroupId='*'</code> to ignore the
+     * should set {@code -DgroupId='*'} to ignore the
      * group of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
      * expansion through the shell.
@@ -94,7 +94,7 @@ public class SetMojo
     /**
      * The artifactId of the dependency/module to update.
      * If you like to update modules of a aggregator you 
-     * should set <code>-DartifactId='*'</code> to ignore the
+     * should set {@code -DartifactId='*'} to ignore the
      * artifactId of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
      * expansion through the shell.
@@ -107,7 +107,7 @@ public class SetMojo
     /**
      * The version of the dependency/module to update.
      * If you are changing an aggregator you should give
-     * <code>-DoldVersion='*'</code> to suppress the check against the
+     * {@code -DoldVersion='*'} to suppress the check against the
      * version of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
      * expansion through the shell.
@@ -165,7 +165,7 @@ public class SetMojo
     private Prompter prompter;
 
     /**
-     * Whether to remove <code>-SNAPSHOT</code> from the existing version.
+     * Whether to remove {@code -SNAPSHOT} from the existing version.
      *
      * @since 2.10
      */
@@ -173,7 +173,7 @@ public class SetMojo
     private boolean removeSnapshot;
 
     /**
-     * Whether to add next version number and <code>-SNAPSHOT</code> to the existing version.
+     * Whether to add next version number and {@code -SNAPSHOT} to the existing version.
      *
      * @since 2.10
      */

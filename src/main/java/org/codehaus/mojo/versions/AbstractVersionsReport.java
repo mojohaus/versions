@@ -161,7 +161,7 @@ public abstract class AbstractVersionsReport
     /**
      * URI of a ruleSet file containing the rules that control how to compare
      * version numbers. The URI could be either a Wagon URI or a classpath URI
-     * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
+     * (e.g. {@code classpath:///package/sub/package/rules.xml}).
      *
      * @since 1.0-alpha-3
      */
@@ -169,8 +169,8 @@ public abstract class AbstractVersionsReport
     private String rulesUri;
 
     /**
-     * The versioning rule to use when comparing versions. Valid values are <code>maven</code>, <code>numeric</code>
-     * which will handle long version numbers provided all components are numeric, or <code>mercury</code> which will
+     * The versioning rule to use when comparing versions. Valid values are {@code maven}, {@code numeric}
+     * which will handle long version numbers provided all components are numeric, or {@code mercury} which will
      * use the mercury version number comparison rules.
      *
      * @since 1.0-alpha-1
@@ -262,11 +262,11 @@ public abstract class AbstractVersionsReport
      *
      * @param artifact The artifact.
      * @param versionRange The version range.
-     * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
+     * @param allowingSnapshots {@code null} for no override, otherwise the local override to apply.
      * @param usePluginRepositories {@code true} to use plugin repositories; {@code false} to use dependency
      * repositories.
      * @return The latest version of the specified artifact that matches the specified version range or
-     *         <code>null</code> if no matching version could be found.
+     *         {@code null} if no matching version could be found.
      * @throws MavenReportException If the artifact metadata could not be found.
      * @since 1.0-alpha-1
      */

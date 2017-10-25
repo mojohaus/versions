@@ -50,7 +50,7 @@ public final class WagonUtils
      * {@link org.apache.maven.settings.Settings} into a {@link org.apache.maven.wagon.proxy.ProxyInfo}.
      *
      * @param settings The settings to use.
-     * @return The proxy details from the settings or <code>null</code> if the settings do not define a proxy.
+     * @return The proxy details from the settings or {@code null} if the settings do not define a proxy.
      */
     public static ProxyInfo getProxyInfo( Settings settings )
     {
