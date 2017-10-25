@@ -2,6 +2,9 @@
 
 ## 2.5 (NOT YET RELEASED)
 
+ * [Fixed Issue 208][issue-208]
+
+   Fix Javadoc lint warnings.
 
  * [Fixed Issue 202][issue-202]
 

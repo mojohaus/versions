@@ -72,8 +72,8 @@ public class Property
     private boolean searchReactor;
 
     /**
-     * When {@link #searchReactor} is <code>true</code> and a property version can be entirely satisfied from the
-     * reactor and this setting is <code>true</code> then the reactor version will be specified irrespective of any
+     * When {@link #searchReactor} is {@code true} and a property version can be entirely satisfied from the
+     * reactor and this setting is {@code true} then the reactor version will be specified irrespective of any
      * other settings (including {@link #banSnapshots}).
      *
      * @parameter default-value="true"

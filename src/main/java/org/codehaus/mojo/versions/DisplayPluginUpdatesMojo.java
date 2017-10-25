@@ -19,6 +19,31 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
 import org.apache.maven.BuildFailureException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
@@ -68,32 +93,6 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
 
 /**
  * Displays all plugins that have newer versions available.
@@ -923,7 +922,7 @@ public class DisplayPluginUpdatesMojo
      * Gets the build plugins of a specific project.
      *
      * @param model the model to get the build plugins from.
-     * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be inherited by
+     * @param onlyIncludeInherited {@code true} to only return the plugins definitions that will be inherited by
      *            child projects.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
@@ -994,7 +993,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @param project the project to get the lifecycle plugins from.
      * @return The map of effective plugin versions keyed by coordinates.
-     * @throws org.apache.maven.plugin.MojoExecutionException if things go wrong.
+     * @throws MojoExecutionException if things go wrong.
      * @since 1.0-alpha-1
      */
     private Map<String, Plugin> getLifecyclePlugins( MavenProject project )
@@ -1036,7 +1035,7 @@ public class DisplayPluginUpdatesMojo
      * @param project the project
      * @param thePhases the the phases
      * @return the bound plugins
-     * @throws org.apache.maven.plugin.PluginNotFoundException the plugin not found exception
+     * @throws PluginNotFoundException the plugin not found exception
      * @throws LifecycleExecutionException the lifecycle execution exception
      * @throws IllegalAccessException the illegal access exception
      */
@@ -1364,7 +1363,7 @@ public class DisplayPluginUpdatesMojo
      *
      * @param project The maven project to get the parents of
      * @return the parent projects of the specified project, with the root project first.
-     * @throws org.apache.maven.plugin.MojoExecutionException if the super-pom could not be created.
+     * @throws MojoExecutionException if the super-pom could not be created.
      * @since 1.0-alpha-1
      */
     private List<MavenProject> getParentProjects( MavenProject project )
@@ -1429,7 +1428,7 @@ public class DisplayPluginUpdatesMojo
      * @param parentReportPlugins the parent pom's report plugins.
      * @param pluginsWithVersionsSpecified the plugin coords that have a version defined in the project.
      * @return the set of plugins used by the project.
-     * @throws org.apache.maven.plugin.MojoExecutionException if things go wrong.
+     * @throws MojoExecutionException if things go wrong.
      */
     private Set<Plugin> getProjectPlugins( Map<String, String> superPomPluginManagement,
                                            Map<String, String> parentPluginManagement,
@@ -1828,7 +1827,7 @@ public class DisplayPluginUpdatesMojo
      * Gets the report plugins of a specific project.
      *
      * @param model the model to get the report plugins from.
-     * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be inherited by
+     * @param onlyIncludeInherited {@code true} to only return the plugins definitions that will be inherited by
      *            child projects.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
