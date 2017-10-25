@@ -19,6 +19,11 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.xml.stream.XMLStreamException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -33,13 +38,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import java.util.Collection;
-import java.util.NoSuchElementException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Replaces any -SNAPSHOT versions with the corresponding release version (if it has been released).
@@ -79,9 +77,9 @@ public class UseReleasesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )

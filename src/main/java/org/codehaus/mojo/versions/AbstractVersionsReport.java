@@ -252,7 +252,7 @@ public abstract class AbstractVersionsReport
      * @param locale the locale to generate the report for.
      * @param sink the report formatting tool.
      * @throws MavenReportException when things go wrong.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
+     * @throws MojoExecutionException when things go wrong.
      */
     protected abstract void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException, MojoExecutionException;

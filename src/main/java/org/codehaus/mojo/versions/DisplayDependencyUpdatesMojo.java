@@ -19,6 +19,13 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.xml.stream.XMLStreamException;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -35,15 +42,6 @@ import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Displays all dependencies that have newer versions available.
@@ -102,7 +100,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the major version number to be changed.
      * You need to set {@link #allowAnyUpdates} to {@code false} to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      * @since 2.5
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
@@ -111,7 +109,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the minor version number to be changed.
      * You need to set {@link #allowMajorUpdates} to {@code false} to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -121,7 +119,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the incremental version number to be changed.
      * You need to set {@link #allowMinorUpdates} to {@code false} to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -255,8 +253,8 @@ public class DisplayDependencyUpdatesMojo
     // --------------------- Interface Mojo ---------------------
 
     /**
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException when things go wrong in a very bad way
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()
      * @since 1.0-alpha-1
      */
@@ -455,9 +453,9 @@ public class DisplayDependencyUpdatesMojo
                 }
                 logLine( false, "" );
             }
-        }        
-        
-        
+        }
+
+
         if ( withUpdates.isEmpty() )
         {
             if ( !usingCurrent.isEmpty() )
@@ -480,9 +478,9 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */

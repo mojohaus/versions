@@ -19,17 +19,6 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.mojo.versions.Property;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,6 +29,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
  * Manages a property that is associated with one or more artifacts.
@@ -160,7 +159,7 @@ public class PropertyVersions
      * @return The versions that can be resolved from the supplied Artifact instances or an empty array if no version
      *         can be resolved (i.e. the property is not associated with any of the supplied artifacts or the property
      *         is also associated to an artifact that has not been provided).
-     * @throws org.apache.maven.plugin.MojoExecutionException When things go wrong.
+     * @throws MojoExecutionException When things go wrong.
      * @since 1.0-alpha-3
      */
     public ArtifactVersion[] getVersions( Collection<Artifact> artifacts )

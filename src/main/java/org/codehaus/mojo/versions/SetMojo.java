@@ -31,9 +31,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-
 import javax.xml.stream.XMLStreamException;
-
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
@@ -80,7 +78,7 @@ public class SetMojo
 
     /**
      * The groupId of the dependency/module to update.
-     * If you like to update modules of a aggregator you 
+     * If you like to update modules of a aggregator you
      * should set {@code -DgroupId='*'} to ignore the
      * group of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
@@ -93,7 +91,7 @@ public class SetMojo
 
     /**
      * The artifactId of the dependency/module to update.
-     * If you like to update modules of a aggregator you 
+     * If you like to update modules of a aggregator you
      * should set {@code -DartifactId='*'} to ignore the
      * artifactId of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
@@ -204,8 +202,8 @@ public class SetMojo
     /**
      * Called when this mojo is executed.
      *
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong.
+     * @throws MojoExecutionException when things go wrong.
+     * @throws MojoFailureException when things go wrong.
      */
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -467,9 +465,9 @@ public class SetMojo
      * Updates the pom file.
      *
      * @param pom The pom file to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong.
-     * @throws javax.xml.stream.XMLStreamException when things go wrong.
+     * @throws MojoExecutionException when things go wrong.
+     * @throws MojoFailureException when things go wrong.
+     * @throws XMLStreamException when things go wrong.
      */
     protected synchronized void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException

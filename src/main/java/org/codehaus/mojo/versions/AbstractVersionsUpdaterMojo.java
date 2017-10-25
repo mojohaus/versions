@@ -262,7 +262,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return The latest version of the specified artifact that matches the specified version range or
      *         {@code null} if no matching version could be found.
      * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
-     * @throws org.apache.maven.plugin.MojoExecutionException If unable to load rules.
+     * @throws MojoExecutionException If unable to load rules.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
@@ -400,9 +400,8 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param pom The pom to update.
      * @throws MojoExecutionException If things go wrong.
      * @throws MojoFailureException If things go wrong.
-     * @throws javax.xml.stream.XMLStreamException If things go wrong.
-     * @throws org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException If the artifact metadata could not
-     * be found.
+     * @throws XMLStreamException If things go wrong.
+     * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
      * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )

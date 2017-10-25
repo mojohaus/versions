@@ -20,9 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import java.util.Collection;
-
 import javax.xml.stream.XMLStreamException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -49,9 +47,9 @@ public class UseReactorMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )

@@ -211,7 +211,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      *
      * @param dependency the dependency to find a match for
      * @return the matching artifact, newly created if needed
-     * @throws org.apache.maven.plugin.MojoExecutionException if the dependency version specification is invalid
+     * @throws MojoExecutionException if the dependency version specification is invalid
      * @since 1.0-alpha-3
      */
     protected Artifact toArtifact( Dependency dependency )

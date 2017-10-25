@@ -116,9 +116,9 @@ public class CompareDependenciesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the plugin itself
-     * @throws org.apache.maven.plugin.MojoFailureException The plugin detected an error in the build
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws MojoExecutionException Something wrong with the plugin itself
+     * @throws MojoFailureException The plugin detected an error in the build
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )

@@ -78,10 +78,10 @@ public final class WagonUtils
      * @param settings The settings to use.
      * @param logger The logger to use.
      * @return The wagon to connect to the url.
-     * @throws org.apache.maven.wagon.UnsupportedProtocolException if the protocol is not supported.
-     * @throws org.apache.maven.artifact.manager.WagonConfigurationException if the wagon cannot be configured.
-     * @throws org.apache.maven.wagon.ConnectionException If the connection cannot be established.
-     * @throws org.apache.maven.wagon.authentication.AuthenticationException If the connection cannot be authenticated.
+     * @throws UnsupportedProtocolException if the protocol is not supported.
+     * @throws WagonConfigurationException if the wagon cannot be configured.
+     * @throws ConnectionException If the connection cannot be established.
+     * @throws AuthenticationException If the connection cannot be authenticated.
      */
     public static Wagon createWagon( String serverId, String url, WagonManager wagonManager, Settings settings,
                                      Log logger )
