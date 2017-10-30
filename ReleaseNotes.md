@@ -1,6 +1,10 @@
 # Release Notes
 
-## 2.5 (NOT YET RELEASED)
+## 2.6
+
+ * [Fixed Issue 215][issue-215]
+
+## 2.5
 
 
  * [Fixed Issue 202][issue-202]
@@ -99,6 +103,8 @@
 [issue-182]: https://github.com/mojohaus/versions-maven-plugin/issues/182
 [issue-185]: https://github.com/mojohaus/versions-maven-plugin/issues/185
 [issue-187]: https://github.com/mojohaus/versions-maven-plugin/issues/187
+[issue-202]: https://github.com/mojohaus/versions-maven-plugin/issues/202
+[issue-215]: https://github.com/mojohaus/versions-maven-plugin/issues/215
 [pull-189]: https://github.com/mojohaus/versions-maven-plugin/pull/189
 [issue-197]: https://github.com/mojohaus/versions-maven-plugin/issues/197
 [issue-198]: https://github.com/mojohaus/versions-maven-plugin/issues/198
