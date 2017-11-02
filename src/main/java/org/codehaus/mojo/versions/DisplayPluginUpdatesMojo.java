@@ -38,10 +38,16 @@ import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.mapping.LifecycleMapping;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Prerequisites;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.apache.maven.plugin.*;
+import org.apache.maven.plugin.InvalidPluginException;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.PluginManager;
+import org.apache.maven.plugin.PluginManagerException;
+import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.version.PluginVersionNotFoundException;
 import org.apache.maven.plugin.version.PluginVersionResolutionException;
@@ -71,7 +77,22 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -774,8 +795,21 @@ public class DisplayPluginUpdatesMojo
 
     private String getRequiredMavenVersion( MavenProject mavenProject, String defaultValue )
     {
-        ArtifactVersion requiredMavenVersion = new RequiredMavenVersionFinder(mavenProject).find();
-
+        ArtifactVersion requiredMavenVersion = null;
+        while ( mavenProject != null )
+        {
+            final Prerequisites prerequisites = mavenProject.getPrerequisites();
+            final String mavenVersion = prerequisites == null ? null : prerequisites.getMaven();
+            if ( mavenVersion != null )
+            {
+                final ArtifactVersion v = new DefaultArtifactVersion( mavenVersion );
+                if ( requiredMavenVersion == null || requiredMavenVersion.compareTo( v ) < 0 )
+                {
+                    requiredMavenVersion = v;
+                }
+            }
+            mavenProject = mavenProject.getParent();
+        }
         return requiredMavenVersion == null ? defaultValue : requiredMavenVersion.toString();
     }
 
