@@ -114,7 +114,7 @@ class RequiredMavenVersionFinder {
     private PluginExecution getPluginExecutionWithEnforceGoal(List<PluginExecution> executions) {
         for (PluginExecution pluginExecution : executions) {
             List<String> goals = pluginExecution.getGoals();
-            if (goals.contains("enforce")) {
+            if (goals != null && goals.contains("enforce")) {
                 return pluginExecution;
             }
         }
