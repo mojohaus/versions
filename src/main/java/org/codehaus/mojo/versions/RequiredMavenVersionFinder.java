@@ -28,7 +28,7 @@ class RequiredMavenVersionFinder {
     }
 
     ArtifactVersion find() {
-        ArtifactVersion childMavenVersion = getHighestArtifactVersion(getPrerequisitesMavenVersion(), getEnforcerMavenVersion());
+        ArtifactVersion childMavenVersion = getHighestNonNullArtifactVersion(getPrerequisitesMavenVersion(), getEnforcerMavenVersion());
 
         if (!mavenProject.hasParent()) {
             return childMavenVersion;
@@ -36,7 +36,23 @@ class RequiredMavenVersionFinder {
 
         ArtifactVersion parentMavenVersion = new RequiredMavenVersionFinder(mavenProject.getParent()).find();
 
-        return getHighestArtifactVersion(childMavenVersion, parentMavenVersion);
+        return getHighestNonNullArtifactVersion(childMavenVersion, parentMavenVersion);
+    }
+
+    private ArtifactVersion getHighestNonNullArtifactVersion(ArtifactVersion firstMavenVersion, ArtifactVersion secondMavenVersion) {
+        if (null == firstMavenVersion && null == secondMavenVersion) {
+            return null;
+        }
+        if (null == firstMavenVersion) {
+            return secondMavenVersion;
+        }
+        if (null == secondMavenVersion) {
+            return firstMavenVersion;
+        }
+        if (firstMavenVersion.compareTo(secondMavenVersion) < 0) {
+            return secondMavenVersion;
+        }
+        return firstMavenVersion;
     }
 
     private ArtifactVersion getPrerequisitesMavenVersion() {
@@ -44,12 +60,10 @@ class RequiredMavenVersionFinder {
         if (null == prerequisites) {
             return null;
         }
-
         String prerequisitesMavenValue = prerequisites.getMaven();
         if (null == prerequisitesMavenValue) {
             return null;
         }
-
         return new DefaultArtifactVersion(prerequisitesMavenValue);
     }
 
@@ -119,25 +133,5 @@ class RequiredMavenVersionFinder {
             }
         }
         return null;
-    }
-
-    private ArtifactVersion getHighestArtifactVersion(ArtifactVersion firstMavenVersion, ArtifactVersion secondMavenVersion) {
-        if (null == firstMavenVersion && null == secondMavenVersion) {
-            return null;
-        }
-
-        if (null == firstMavenVersion) {
-            return secondMavenVersion;
-        }
-
-        if (null == secondMavenVersion) {
-            return firstMavenVersion;
-        }
-
-        if (firstMavenVersion.compareTo(secondMavenVersion) < 0) {
-            return secondMavenVersion;
-        }
-
-        return firstMavenVersion;
     }
 }
