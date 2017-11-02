@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-property-002</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+
+  <name>set-property based on issue-142</name>
+  <description>Added new set-property goal to be able to set a property to a 
+    given version. Only versionModule.</description>
+  <properties>
+    <versionModuleTest>1.2.3-SNAPSHOT</versionModuleTest>
+    <versionModule>1.2.3-SNAPSHOT</versionModule>
+  </properties>
+
+    <dependencies>
+      <dependency>
+        <groupId>test.package</groupId>
+        <artifactId>module</artifactId>
+        <version>${versionModule}</version>
+      </dependency>
+      <dependency>
+        <groupId>test.package</groupId>
+        <artifactId>moduleTest</artifactId>
+        <version>${versionModuleTest}</version>
+      </dependency>
+    </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>2.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

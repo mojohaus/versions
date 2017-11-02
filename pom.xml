@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
-  <version>2.5-SNAPSHOT</version>
+  <version>2.6-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
@@ -24,6 +24,17 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <distributionManagement>
+    <repository>
+      <id>ossrh-staging</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+    <snapshotRepository>
+      <id>ossrh-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <developers>
     <developer>
@@ -73,6 +84,11 @@
     <contributor>
       <name>Erik Schepers</name>
     </contributor>
+    <contributor>
+      <name>Anton Johansson</name>
+      <email>antoon.johansson@gmail.com</email>
+      <timezone>+1</timezone>
+    </contributor>
   </contributors>
 
   <prerequisites>
@@ -83,7 +99,7 @@
     <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
     <url>https://github.com/mojohaus/versions-maven-plugin</url>
-    <tag>HEAD</tag>
+    <tag>versions-maven-plugin-2.5</tag>
   </scm>
   <issueManagement>
     <system>github</system>
@@ -91,7 +107,8 @@
   </issueManagement>
 
   <properties>
-    <mojo.java.target>1.5</mojo.java.target>
+    <mojo.java.target>1.7</mojo.java.target>
+
     <mavenVersion>2.2.1</mavenVersion>
     <wagonVersion>2.12</wagonVersion>
     <doxiaVersion>1.7</doxiaVersion>
@@ -151,7 +168,7 @@
     <dependency>
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-impl</artifactId>
-      <version>2.2</version>
+      <version>3.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
@@ -275,7 +292,7 @@
         <plugin>
           <groupId>org.codehaus.modello</groupId>
           <artifactId>modello-maven-plugin</artifactId>
-          <version>1.8.3</version>
+          <version>1.9.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -321,7 +338,7 @@
         <artifactId>animal-sniffer-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>check-java15</id>
+            <id>check-java17</id>
             <phase>test</phase>
             <goals>
               <goal>check</goal>
@@ -329,7 +346,7 @@
             <configuration>
               <signature>
                 <groupId>org.codehaus.mojo.signature</groupId>
-                <artifactId>java15</artifactId>
+                <artifactId>java17</artifactId>
                 <version>1.0</version>
               </signature>
             </configuration>
@@ -452,7 +469,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.1</version>
+        <version>2.4</version>
         <reportSets>
           <reportSet>
             <reports>

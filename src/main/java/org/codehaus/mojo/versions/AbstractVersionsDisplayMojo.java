@@ -81,11 +81,11 @@ public abstract class AbstractVersionsDisplayMojo
                 Set<String> files = (Set<String>) getPluginContext().get( key );
                 if ( files == null )
                 {
-                    files = new LinkedHashSet<String>();
+                    files = new LinkedHashSet<>();
                 }
                 else
                 {
-                    files = new LinkedHashSet<String>( files );
+                    files = new LinkedHashSet<>( files );
                 }
                 if ( !files.contains( outputFileName ) )
                 {

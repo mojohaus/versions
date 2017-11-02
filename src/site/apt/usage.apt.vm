@@ -48,6 +48,8 @@ Usage
     * {{{./update-parent-mojo.html}versions:update-parent}}
 
     * {{{./update-properties-mojo.html}versions:update-properties}}
+    
+    * {{{./set-property-mojo.html}versions:set-property}}
 
     * {{{./use-latest-releases-mojo.html}versions:use-latest-releases}}
 

@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-rules-via-classpath-001</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <name>GH-193: Fail if resource is not found</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>localhost</groupId>
+      <artifactId>version-rules</artifactId>
+      <version>3.0.1</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>@project.groupId@</groupId>
+        <artifactId>@project.artifactId@</artifactId>
+        <version>@project.version@</version>
+        <configuration>
+          <rulesUri>classpath:///package/foo/bar/rule-set.xml</rulesUri>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

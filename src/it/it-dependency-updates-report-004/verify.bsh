@@ -1,0 +1,39 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+try
+{
+    File file = new File( basedir, "target/site/dependency-updates-report.html" );
+    String buf = FileUtils.fileRead( file, "UTF-8" );
+
+    String result = buf.toString()
+            .replaceAll( "<[^>]+>", " " )
+            .replaceAll( "&[^;]+;", " " )
+            .replaceAll( "\\s+", " " );
+
+    if ( !result.contains( "localhost dummy-api 1.1 jar 1.1.0-2 1.1.1 1.2 2.0" ) )
+    {
+        System.out.println( "Did not pick up updated in Dependency Management section" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( !result.contains( "localhost dummy-impl 1.1 jar 1.2 2.0" ) )
+    {
+        System.out.println( "Did not pick up updated in Dependency Management section" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+    if ( !result.contains( "This project does not declare any dependencies." ) )
+    {
+        System.out.println( "Dependency Management should have processed" );
+        System.out.println( "Result = \"" + result +"\"" );
+        return false;
+    }
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;

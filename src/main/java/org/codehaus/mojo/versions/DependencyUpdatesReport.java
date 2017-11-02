@@ -19,17 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.utils.DependencyComparator;
-import org.codehaus.plexus.util.StringUtils;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
@@ -37,6 +26,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.doxia.sink.Sink;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Generates a report of available updates for the dependencies of a project.
@@ -50,10 +51,31 @@ public class DependencyUpdatesReport
 {
 
     /**
+     * Whether to process the <code>dependencyManagement</code> in pom or not.
+     * 
+     * @since 2.5
+     */
+    @Parameter( property = "processDependencyManagement", defaultValue = "true" )
+    private boolean processDependencyManagement;
+
+    /**
+     * Whether to process the depdendencyManagement part transitive or not.
+     * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
+     * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
+     * by default to report also the imported dependencies. 
+     * If processTransitive is set to <code>false</code> the report will only show
+     * updates of the imported pom it self.
+     * 
+     * @since 2.5 Note: Currently in experimental state.
+     */
+    @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
+    private boolean processDependencyManagementTransitive;
+
+    /**
      * Report formats (html and/or xml). HTML by default.
      * 
-     * @parameter expression="${versions.report.formats}"
      */
+    @Parameter( property = "dependencyUpdatesReportFormats", defaultValue = "html" )
     private String[] formats = new String[] { "html" };
 
     /**
@@ -81,20 +103,56 @@ public class DependencyUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        Set dependencyManagement = new TreeSet( new DependencyComparator() );
-        dependencyManagement.addAll( getProject().getDependencyManagement() == null ? Collections.EMPTY_LIST
-                        : getProject().getDependencyManagement().getDependencies() );
-
-        Set dependencies = new TreeSet( new DependencyComparator() );
+        Set<Dependency> dependencies = new TreeSet( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
-        dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+
+        Set<Dependency> dependencyManagement = new TreeSet( new DependencyComparator() );
+
+        if ( processDependencyManagementTransitive )
+        {
+            if ( getProject().getDependencyManagement() != null
+                && getProject().getDependencyManagement().getDependencies() != null )
+            {
+                for ( Dependency dep : getProject().getDependencyManagement().getDependencies() )
+                {
+                    getLog().debug( "Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion()
+                        + ":" + dep.getType() + ":" + dep.getScope() );
+                }
+                dependencyManagement.addAll( getProject().getDependencyManagement().getDependencies() );
+            }
+        }
+        else
+        {
+            if ( getProject().getOriginalModel().getDependencyManagement() != null
+                && getProject().getOriginalModel().getDependencyManagement().getDependencies() != null )
+            {
+                // Using the original model to get the original dependencyManagement entries and
+                // not the interpolated model.
+                // TODO: I'm not 100% sure if this will work correctly in all cases.
+                for ( Dependency dep : getProject().getOriginalModel().getDependencyManagement().getDependencies() )
+                {
+                    getLog().debug( "Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
+                        + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );
+                }
+                dependencyManagement.addAll( getProject().getOriginalModel().getDependencyManagement().getDependencies() );
+            }
+        }
+
+        if ( processDependencyManagement )
+        {
+            dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+        }
 
         try
         {
             Map<Dependency, ArtifactVersions> dependencyUpdates =
                 getHelper().lookupDependenciesUpdates( dependencies, false );
-            Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
-                getHelper().lookupDependenciesUpdates( dependencyManagement, false );
+
+            Map<Dependency, ArtifactVersions> dependencyManagementUpdates = Collections.emptyMap();
+            if ( processDependencyManagement )
+            {
+                dependencyManagementUpdates = getHelper().lookupDependenciesUpdates( dependencyManagement, false );
+            }
             for ( String format : formats )
             {
                 if ( "html".equals( format ) )
@@ -107,19 +165,20 @@ public class DependencyUpdatesReport
                 }
                 else if ( "xml".equals( format ) )
                 {
+                   File outputDir = new File(getProject().getBuild().getDirectory());
+                   if (!outputDir.exists())
+                    {
+                        outputDir.mkdirs();
+                    }
                     String outputFile =
-                        getProject().getBuild().getDirectory() + File.separator + getOutputName() + ".xml";
+                        outputDir.getAbsolutePath() + File.separator + getOutputName() + ".xml";
                     DependencyUpdatesXmlRenderer xmlGenerator =
                         new DependencyUpdatesXmlRenderer( dependencyUpdates, dependencyManagementUpdates, outputFile );
                     xmlGenerator.render();
                 }
             }
         }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( InvalidVersionSpecificationException| ArtifactMetadataRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }
@@ -135,17 +194,17 @@ public class DependencyUpdatesReport
      *         management dependencies.
      * @since 1.0-beta-1
      */
-    private static Set removeDependencyManagment( Set dependencies, Set dependencyManagement )
+    private static Set removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
     {
-        Set result = new TreeSet( new DependencyComparator() );
-        for ( Iterator i = dependencies.iterator(); i.hasNext(); )
+        Set<Dependency> result = new TreeSet( new DependencyComparator() );
+        for ( Iterator<Dependency> i = dependencies.iterator(); i.hasNext(); )
         {
-            Dependency c = (Dependency) i.next();
+            Dependency c = i.next();
             boolean matched = false;
-            Iterator j = dependencyManagement.iterator();
+            Iterator<Dependency> j = dependencyManagement.iterator();
             while ( !matched && j.hasNext() )
             {
-                Dependency t = (Dependency) j.next();
+                Dependency t = j.next();
                 if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
                     && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
                     && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )

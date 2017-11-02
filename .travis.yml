@@ -1,7 +1,6 @@
 language: java
 jdk:
-  - openjdk6
-  - oraclejdk7
+  - openjdk7
   - oraclejdk8
 # We don't need an install before
 # we run the unit and integration tests.
