@@ -795,21 +795,8 @@ public class DisplayPluginUpdatesMojo
 
     private String getRequiredMavenVersion( MavenProject mavenProject, String defaultValue )
     {
-        ArtifactVersion requiredMavenVersion = null;
-        while ( mavenProject != null )
-        {
-            final Prerequisites prerequisites = mavenProject.getPrerequisites();
-            final String mavenVersion = prerequisites == null ? null : prerequisites.getMaven();
-            if ( mavenVersion != null )
-            {
-                final ArtifactVersion v = new DefaultArtifactVersion( mavenVersion );
-                if ( requiredMavenVersion == null || requiredMavenVersion.compareTo( v ) < 0 )
-                {
-                    requiredMavenVersion = v;
-                }
-            }
-            mavenProject = mavenProject.getParent();
-        }
+        ArtifactVersion requiredMavenVersion = new RequiredMavenVersionFinder(mavenProject).find();
+
         return requiredMavenVersion == null ? defaultValue : requiredMavenVersion.toString();
     }
 
