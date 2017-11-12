@@ -385,7 +385,10 @@ public class DisplayDependencyUpdatesMojo
                     if ( allowIncrementalUpdates )
                     {
                         result = UpdateScope.INCREMENTAL;
-                    }
+                    }else
+					{
+						result = UpdateScope.SUBINCREMENTAL;
+					} 
                 }
             }
         }
