@@ -35,7 +35,7 @@ import java.util.Map;
  * @author Eric Pabst
  * @since 1.3
  */
-@Mojo( name = "update-property", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "update-property", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UpdatePropertyMojo
     extends AbstractVersionsUpdaterMojo
 {

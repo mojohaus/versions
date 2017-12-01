@@ -101,7 +101,7 @@ import java.util.regex.Pattern;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "display-plugin-updates", requiresProject = true, requiresDirectInvocation = false )
+@Mojo( name = "display-plugin-updates", requiresProject = true, requiresDirectInvocation = false, threadSafe = true )
 public class DisplayPluginUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {

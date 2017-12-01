@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-latest-releases", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "use-latest-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseLatestReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "use-latest-snapshots", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "use-latest-snapshots", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseLatestSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

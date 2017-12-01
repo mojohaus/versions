@@ -45,7 +45,7 @@ import java.util.Map;
  * @author Stephen Connolly
  * @since 1.0-alpha-2
  */
-@Mojo( name = "update-child-modules", requiresProject = true, requiresDirectInvocation = true, aggregator = true )
+@Mojo( name = "update-child-modules", requiresProject = true, requiresDirectInvocation = true, aggregator = true, threadSafe = true )
 public class UpdateChildModulesMojo
     extends AbstractVersionsUpdaterMojo
 {

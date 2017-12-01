@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-next-releases", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "use-next-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseNextReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

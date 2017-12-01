@@ -46,7 +46,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-latest-versions", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "use-latest-versions", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseLatestVersionsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

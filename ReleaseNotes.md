@@ -2,6 +2,12 @@
 
 ## 2.6
 
+ * [Fixed Issue 219][issue-219]
+   
+   Added threadSafe=true to goals to prevent
+   warning in Maven builds if you start Maven
+   via: mvn -T ..
+
  * [Fixed Issue 215][issue-215]
 
 ## 2.5
@@ -105,6 +111,7 @@
 [issue-187]: https://github.com/mojohaus/versions-maven-plugin/issues/187
 [issue-202]: https://github.com/mojohaus/versions-maven-plugin/issues/202
 [issue-215]: https://github.com/mojohaus/versions-maven-plugin/issues/215
+[issue-219]: https://github.com/mojohaus/versions-maven-plugin/issues/219
 [pull-189]: https://github.com/mojohaus/versions-maven-plugin/pull/189
 [issue-197]: https://github.com/mojohaus/versions-maven-plugin/issues/197
 [issue-198]: https://github.com/mojohaus/versions-maven-plugin/issues/198
