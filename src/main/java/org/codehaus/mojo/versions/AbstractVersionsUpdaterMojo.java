@@ -19,6 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -49,13 +55,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -150,7 +149,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * URI of a ruleSet file containing the rules that control how to compare
      * version numbers. The URI could be either a Wagon URI or a classpath URI
-     * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
+     * (e.g. {@code classpath:///package/sub/package/rules.xml}).
      *
      * @since 1.0-alpha-3
      */
@@ -257,16 +256,18 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @param artifact The artifact.
      * @param versionRange The version range.
-     * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
-     * @param usePluginRepositories
+     * @param allowingSnapshots {@code null} for no override, otherwise the local override to apply.
+     * @param usePluginRepositories {@code true} will consult the pluginRepositories, while {@code false} will
+     * consult the repositories for normal dependencies.
      * @return The latest version of the specified artifact that matches the specified version range or
-     *         <code>null</code> if no matching version could be found.
+     *         {@code null} if no matching version could be found.
      * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
+     * @throws MojoExecutionException If unable to load rules.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, MojoExecutionException
+            throws ArtifactMetadataRetrievalException, MojoExecutionException
     {
         boolean includeSnapshots = this.allowSnapshots;
         if ( Boolean.TRUE.equals( allowingSnapshots ) )
@@ -287,7 +288,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @param pom The pom.
      * @param property The property.
-     * @return The value as defined in the pom or <code>null</code> if not defined.
+     * @return The value as defined in the pom or {@code null} if not defined.
      * @since 1.0-alpha-1
      */
     protected String getPropertyValue( StringBuilder pom, String property )
@@ -399,19 +400,20 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param pom The pom to update.
      * @throws MojoExecutionException If things go wrong.
      * @throws MojoFailureException If things go wrong.
-     * @throws javax.xml.stream.XMLStreamException If things go wrong.
+     * @throws XMLStreamException If things go wrong.
+     * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
      * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
 
     /**
-     * Returns <code>true</code> if the update should be applied.
+     * Returns {@code true} if the update should be applied.
      *
      * @param artifact The artifact.
      * @param currentVersion The current version of the artifact.
      * @param updateVersion The proposed new version of the artifact.
-     * @return <code>true</code> if the update should be applied.
+     * @return {@code true} if the update should be applied.
      * @since 1.0-alpha-1
      */
     protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
@@ -452,9 +454,9 @@ public abstract class AbstractVersionsUpdaterMojo
      * Based on the passed flags, determines which segment is unchangable. This can be used when determining an upper
      * bound for the "latest" version.
      *
-     * @param allowMajorUpdates
-     * @param allowMinorUpdates
-     * @param allowIncrementalUpdates
+     * @param allowMajorUpdates {@code true} to allow major updates; {@code false} otherwise
+     * @param allowMinorUpdates {@code true} to allow minor updates; {@code false} otherwise
+     * @param allowIncrementalUpdates {@code true} to allow incremental updates; {@code false} otherwise
      * @return Returns the segment that is unchangable. If any segment can change, returns -1.
      */
     protected int determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,

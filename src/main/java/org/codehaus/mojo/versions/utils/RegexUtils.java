@@ -116,8 +116,8 @@ public final class RegexUtils
      * Converts a wildcard rule to a regex rule.
      *
      * @param wildcardRule the wildcard rule.
-     * @param exactMatch <code>true</code> results in an regex that will match the entire string, while
-     *            <code>false</code> will match the start of the string.
+     * @param exactMatch {@code true} results in an regex that will match the entire string, while
+     *            {@code false} will match the start of the string.
      * @return The regex rule.
      */
     public static String convertWildcardsToRegex( String wildcardRule, boolean exactMatch )

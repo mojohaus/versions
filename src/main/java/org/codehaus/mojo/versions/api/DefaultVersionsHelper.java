@@ -19,6 +19,27 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -65,28 +86,6 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -180,7 +179,7 @@ public class DefaultVersionsHelper
      * Constructs a new {@link DefaultVersionsHelper}.
      *
      * @param artifactFactory The artifact factory.
-     * @param artifactResolver
+     * @param artifactResolver The object responsible for getting the artifact.
      * @param artifactMetadataSource The artifact metadata source to use.
      * @param remoteArtifactRepositories The remote artifact repositories to consult.
      * @param remotePluginRepositories The remote plugin repositories to consult.
@@ -191,8 +190,8 @@ public class DefaultVersionsHelper
      * @param rulesUri The URL to retrieve the versioning rules from.
      * @param log The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
      * @param mavenSession The maven session information.
-     * @param pathTranslator The path translator component. @throws org.apache.maven.plugin.MojoExecutionException If
-     *            things go wrong.
+     * @param pathTranslator The path translator component.
+     * @throws MojoExecutionException If unable to load rules.
      * @since 1.0-alpha-3
      */
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,

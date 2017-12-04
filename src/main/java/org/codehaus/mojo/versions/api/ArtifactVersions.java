@@ -82,12 +82,12 @@ public class ArtifactVersions
     }
 
     /**
-     * Checks if the version is in the range (and ensures that the range respects the <code>-!</code> syntax to rule out
+     * Checks if the version is in the range (and ensures that the range respects the {@code -!} syntax to rule out
      * any qualifiers from range boundaries).
      *
      * @param version the version to check.
      * @param range the range to check.
-     * @return <code>true</code> if and only if the version is in the range.
+     * @return {@code true} if and only if the version is in the range.
      * @since 1.3
      */
     public static boolean isVersionInRange( ArtifactVersion version, VersionRange range )

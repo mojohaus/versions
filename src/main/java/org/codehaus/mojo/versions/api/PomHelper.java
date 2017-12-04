@@ -19,6 +19,30 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -43,32 +67,6 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Helper class for modifying pom files.
@@ -140,7 +138,7 @@ public class PomHelper
      * @param profileId The profile in which to modify the property.
      * @param property The property to modify.
      * @param value The new value of the property.
-     * @return <code>true</code> if a replacement was made.
+     * @return {@code true} if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
     public static boolean setPropertyVersion( final ModifiedPomXMLEventReader pom, final String profileId,
@@ -225,7 +223,7 @@ public class PomHelper
      *
      * @param pom The pom to modify.
      * @param value The new value of the property.
-     * @return <code>true</code> if a replacement was made.
+     * @return {@code true} if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
     public static boolean setProjectVersion( final ModifiedPomXMLEventReader pom, final String value )
@@ -240,7 +238,7 @@ public class PomHelper
      * @param pom The pom to modify.
      * @param pattern The pattern to look for.
      * @param value The new value of the property.
-     * @return <code>true</code> if a replacement was made.
+     * @return {@code true} if a replacement was made.
      * @throws XMLStreamException if something went wrong.
      */
     public static boolean setProjectValue( final ModifiedPomXMLEventReader pom, String pattern, final String value )
@@ -290,7 +288,7 @@ public class PomHelper
      * Retrieves the project version from the pom.
      *
      * @param pom The pom.
-     * @return the project version or <code>null</code> if the project version is not defined (i.e. inherited from
+     * @return the project version or {@code null} if the project version is not defined (i.e. inherited from
      *         parent version).
      * @throws XMLStreamException if something went wrong.
      */
@@ -339,7 +337,7 @@ public class PomHelper
      *
      * @param pom The pom to modify.
      * @param value The new value of the property.
-     * @return <code>true</code> if a replacement was made.
+     * @return {@code true} if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
     public static boolean setProjectParentVersion( final ModifiedPomXMLEventReader pom, final String value )
@@ -390,7 +388,7 @@ public class PomHelper
      *
      * @param pom The pom.
      * @param helper The helper (used to create the artifact).
-     * @return The parent artifact or <code>null</code> if no parent is specified.
+     * @return The parent artifact or {@code null} if no parent is specified.
      * @throws XMLStreamException if something went wrong.
      */
     public static Artifact getProjectParent( final ModifiedPomXMLEventReader pom, VersionsHelper helper )
@@ -455,7 +453,7 @@ public class PomHelper
      * @param oldVersion The old version of the dependency.
      * @param newVersion The new version of the dependency.
      * @param model The model to get the project properties from.
-     * @return <code>true</code> if a replacement was made.
+     * @return {@code true} if a replacement was made.
      * @throws XMLStreamException if something went wrong.
      */
     public static boolean setDependencyVersion( final ModifiedPomXMLEventReader pom, final String groupId,
@@ -759,7 +757,7 @@ public class PomHelper
      * @param artifactId The artifactId of the dependency.
      * @param oldVersion The old version of the dependency.
      * @param newVersion The new version of the dependency.
-     * @return <code>true</code> if a replacement was made.
+     * @return {@code true} if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
     public static boolean setPluginVersion( final ModifiedPomXMLEventReader pom, final String groupId,
@@ -1379,6 +1377,7 @@ public class PomHelper
     /**
      * Finds the local root of the specified project.
      *
+     * @param builder the builder to build the parent project.
      * @param project The project to find the local root for.
      * @param localRepository the local repo.
      * @param globalProfileManager the global profile manager.
@@ -1532,12 +1531,12 @@ public class PomHelper
     }
 
     /**
-     * Returns the model that has the specified groupId and artifactId or <code>null</code> if no such model exists.
+     * Returns the model that has the specified groupId and artifactId or {@code null} if no such model exists.
      *
      * @param reactor The map of models keyed by path.
      * @param groupId The groupId to match.
      * @param artifactId The artifactId to match.
-     * @return The model or <code>null</code> if the model was not in the reactor.
+     * @return The model or {@code null} if the model was not in the reactor.
      */
     public static Model getModel( Map<String, Model> reactor, String groupId, String artifactId )
     {
@@ -1546,12 +1545,12 @@ public class PomHelper
     }
 
     /**
-     * Returns the model that has the specified groupId and artifactId or <code>null</code> if no such model exists.
+     * Returns the model that has the specified groupId and artifactId or {@code null} if no such model exists.
      *
      * @param reactor The map of models keyed by path.
      * @param groupId The groupId to match.
      * @param artifactId The artifactId to match.
-     * @return The model entry or <code>null</code> if the model was not in the reactor.
+     * @return The model entry or {@code null} if the model was not in the reactor.
      */
     public static Map.Entry<String, Model> getModelEntry( Map<String, Model> reactor, String groupId,
                                                           String artifactId )
@@ -1621,9 +1620,9 @@ public class PomHelper
     /**
      * Reads imported POMs from the dependency management section.
      *
-     * @param pom
+     * @param pom the POM file to read
      * @return a non-null list of {@link Dependency} for each imported POM
-     * @throws XMLStreamException
+     * @throws XMLStreamException when things go wrong
      * @see <a href="https://github.com/mojohaus/versions-maven-plugin/issues/134">bug #134</a>
      * @since 2.4
      */

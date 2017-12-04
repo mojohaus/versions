@@ -19,22 +19,21 @@ package org.codehaus.mojo.versions.rewriting;
  * under the License.
  */
 
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
+import java.io.IOException;
+import java.io.StringReader;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import java.io.IOException;
-import java.io.StringReader;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
  * Represents the modified pom file. Note: implementations of the StAX API (JSR-173) are not good round-trip rewriting
- * <b>while</b> keeping all unchanged bytes in the file as is. For example, the StAX API specifies that <code>CR</code>
- * characters will be stripped. Current implementations do not keep &quot; and &apos; characters consistent.
+ * <b>while</b> keeping all unchanged bytes in the file as is. For example, the StAX API specifies that {@code CR}
+ * characters will be stripped. Current implementations do not keep " and ' characters consistent.
  *
  * @author Stephen Connolly
  */
@@ -405,9 +404,9 @@ public class ModifiedPomXMLEventReader
     }
 
     /**
-     * Returns <code>true</code> if nextEnd is including the start of and end element.
+     * Returns {@code true} if nextEnd is including the start of and end element.
      *
-     * @return <code>true</code> if nextEnd is including the start of and end element.
+     * @return {@code true} if nextEnd is including the start of and end element.
      */
     private boolean nextEndIncludesNextEndElement()
     {
@@ -415,9 +414,9 @@ public class ModifiedPomXMLEventReader
     }
 
     /**
-     * Returns <code>true</code> if nextEnd is including the start of the next event.
+     * Returns {@code true} if nextEnd is including the start of the next event.
      *
-     * @return <code>true</code> if nextEnd is including the start of the next event.
+     * @return {@code true} if nextEnd is including the start of the next event.
      */
     private boolean nextEndIncludesNextEvent()
     {
@@ -468,10 +467,10 @@ public class ModifiedPomXMLEventReader
     }
 
     /**
-     * Returns <code>true</code> if the specified mark is defined.
+     * Returns {@code true} if the specified mark is defined.
      *
      * @param index The mark.
-     * @return <code>true</code> if the specified mark is defined.
+     * @return {@code true} if the specified mark is defined.
      */
     public boolean hasMark( int index )
     {

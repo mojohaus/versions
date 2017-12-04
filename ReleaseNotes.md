@@ -10,6 +10,8 @@
 
  * [Fixed Issue 215][issue-215]
 
+ * [Fixed Issue 208][issue-208]
+
 ## 2.5
 
 

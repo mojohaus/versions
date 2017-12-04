@@ -51,8 +51,8 @@ public class DependencyUpdatesReport
 {
 
     /**
-     * Whether to process the <code>dependencyManagement</code> in pom or not.
-     * 
+     * Whether to process the {@code dependencyManagement} in pom or not.
+     *
      * @since 2.5
      */
     @Parameter( property = "processDependencyManagement", defaultValue = "true" )
@@ -60,12 +60,10 @@ public class DependencyUpdatesReport
 
     /**
      * Whether to process the depdendencyManagement part transitive or not.
-     * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
-     * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
-     * by default to report also the imported dependencies. 
-     * If processTransitive is set to <code>false</code> the report will only show
-     * updates of the imported pom it self.
-     * 
+     * In case of {@code <type>pom</type>} and
+     * {@code <scope>import</scope>} this means by default to report also the imported dependencies. If
+     * processTransitive is set to {@code false} the report will only show updates of the imported pom it self.
+     *
      * @since 2.5 Note: Currently in experimental state.
      */
     @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
@@ -73,7 +71,7 @@ public class DependencyUpdatesReport
 
     /**
      * Report formats (html and/or xml). HTML by default.
-     * 
+     *
      */
     @Parameter( property = "dependencyUpdatesReportFormats", defaultValue = "html" )
     private String[] formats = new String[] { "html" };
