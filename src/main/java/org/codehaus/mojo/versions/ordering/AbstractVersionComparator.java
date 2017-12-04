@@ -82,7 +82,7 @@ public abstract class AbstractVersionComparator
      * Returns true if this object is the same type of comparator as the parameter.
      *
      * @param obj the reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
+     * @return {@code true} if this object is the same as the obj argument; {@code false} otherwise.
      * @see #hashCode()
      * @see java.util.Hashtable
      */

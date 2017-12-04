@@ -1,11 +1,8 @@
 package org.codehaus.mojo.versions;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-
 import java.io.IOException;
-
 import javax.xml.stream.XMLStreamException;
-
+import static org.apache.commons.lang.StringUtils.isBlank;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Scm;
@@ -38,8 +35,8 @@ public class SetScmTagMojo
     /**
      * Called when this mojo is executed.
      *
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong.
+     * @throws MojoExecutionException when things go wrong.
+     * @throws MojoFailureException when things go wrong.
      */
 	@Override
     public void execute()

@@ -27,9 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.stream.XMLStreamException;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -90,9 +88,7 @@ public class CompareDependenciesMojo
     protected boolean updateDependencies;
 
     /**
-     * Update dependency versions stored in properties
-     *
-     * @parameter property="updatePropertyVersions" default-value="false"
+     * Update dependency versions stored in properties.
      */
     @Parameter( property = "updatePropertyVersions", defaultValue = "false" )
     protected boolean updatePropertyVersions;
@@ -120,9 +116,9 @@ public class CompareDependenciesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the plugin itself
-     * @throws org.apache.maven.plugin.MojoFailureException The plugin detected an error in the build
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws MojoExecutionException Something wrong with the plugin itself
+     * @throws MojoFailureException The plugin detected an error in the build
+     * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )

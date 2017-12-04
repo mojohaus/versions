@@ -76,8 +76,8 @@ public class UpdatePropertiesMojo
     private boolean autoLinkItems;
 
     /**
-     * If a property points to a version like <code>1.2.3-SNAPSHOT</code> and your repo contains a version like
-     * <code>1.1.0</code> without settings this to <code>true</code> the property will not being changed.
+     * If a property points to a version like {@code 1.2.3-SNAPSHOT} and your repo contains a version like
+     * {@code 1.1.0} without settings this to {@code true} the property will not being changed.
      * 
      * @since 2.4
      */
