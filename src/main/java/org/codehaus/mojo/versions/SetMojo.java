@@ -356,6 +356,12 @@ public class SetMojo
         // now fake out the triggering change
 
         final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
+        if ( current == null )
+        {
+            getLog().debug( "We couldn't find module based on groupId:" + groupId + " artifactId:" + artifactId
+                + " oldVersion:" + oldVersion );
+            return;
+        }
         current.getValue().setVersion( newVersion );
 
         addFile( files, project, current.getKey() );
