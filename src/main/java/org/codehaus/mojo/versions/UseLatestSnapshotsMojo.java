@@ -34,9 +34,7 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -104,6 +102,17 @@ public class UseLatestSnapshotsMojo
             {
                 useLatestSnapshots( pom, getProject().getDependencies() );
             }
+            if ( getProject().getParent() != null && isProcessingParent() )
+            {
+                Dependency dependency = new Dependency();
+                dependency.setArtifactId(getProject().getParent().getArtifactId());
+                dependency.setGroupId(getProject().getParent().getGroupId());
+                dependency.setVersion(getProject().getParent().getVersion());
+                dependency.setType("pom");
+                List list = new ArrayList();
+                list.add(dependency);
+                useLatestSnapshots( pom, list);
+            }
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
@@ -163,6 +172,13 @@ public class UseLatestSnapshotsMojo
                 }
                 if ( latestVersion != null )
                 {
+                    if(artifact.equals(getProject().getParentArtifact()) && isProcessingParent())
+                    {
+                        if ( PomHelper.setProjectParentVersion( pom, latestVersion.toString() ) )
+                        {
+                            getLog().debug( "Made parent update from " + version + " to " + latestVersion.toString() );
+                        }
+                    }
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
                                                          latestVersion, getProject().getModel() ) )
                     {
