@@ -95,11 +95,11 @@ class RequiredMavenVersionFinder {
         }
 
         String versionTagValue = versionTag.getValue();
-        if (null == versionTagValue) {
+        if (null == versionTagValue || "".equals(versionTagValue)) {
             return null;
         }
 
-        return new DefaultArtifactVersion(versionTagValue);
+        return processMavenVersionRange(versionTagValue);
     }
 
     private Plugin getMavenEnforcerPlugin(List<Plugin> buildPlugins) {
@@ -139,5 +139,85 @@ class RequiredMavenVersionFinder {
         }
 
         return firstMavenVersion;
+    }
+
+    /**
+     * The below method implements the specification found at https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html
+     */
+    private ArtifactVersion processMavenVersionRange(String versionRange) {
+
+        int openIndicesCount = 0;
+        int closeIndicesCount = 0;
+
+        for (int i = 0; i < versionRange.length(); i++) {
+            char character = versionRange.charAt(i);
+
+            if ('(' == character || '[' == character) {
+                openIndicesCount++;
+            } else if (')' == character || ']' == character) {
+                closeIndicesCount++;
+            }
+        }
+
+        if (openIndicesCount != closeIndicesCount) {
+            return null;
+        }
+
+        if (openIndicesCount == 0) {
+            return new DefaultArtifactVersion(versionRange);
+        }
+
+        if (!((versionRange.charAt(0) == '[' || versionRange.charAt(0) == '(') && (versionRange.charAt(versionRange.length() - 1) == ']' || versionRange.charAt(versionRange.length() - 1) == ')'))) {
+            return null;
+        }
+
+        if (openIndicesCount != 1) {
+            return null;
+        }
+
+        String innerString = versionRange.substring(1, versionRange.length() - 1);
+
+        int commaIndex = innerString.indexOf(',');
+
+        if (commaIndex == -1) {
+            if (versionRange.charAt(0) == '[' && versionRange.charAt(versionRange.length() - 1) == ']') {
+                return new DefaultArtifactVersion(innerString);
+            }
+            else {
+                return null;
+            }
+        }
+
+        if (commaIndex == 0) {
+            return null;
+        }
+
+        if (commaIndex == innerString.length() - 1) {
+            String minimumVersion = innerString.substring(0, innerString.length() - 1);
+
+            if (versionRange.charAt(0) == '[' && versionRange.charAt(versionRange.length() - 1) == ')') {
+                return new DefaultArtifactVersion(minimumVersion);
+            }
+
+            if (versionRange.charAt(0) == '(' && versionRange.charAt(versionRange.length() - 1) == ')') {
+                // this is actually wrong - the Maven version should be higher than this, the Maven version cannot be equal to this, but the Maven Enforcer plugin should capture this
+                return new DefaultArtifactVersion(minimumVersion);
+            }
+
+            return null;
+        }
+
+        String minimumVersion = innerString.substring(0, commaIndex);
+
+        if (versionRange.charAt(0) == '[') {
+            return new DefaultArtifactVersion(minimumVersion);
+        }
+
+        if (versionRange.charAt(0) == '(') {
+            // this is actually wrong - the Maven version should be higher than this, the Maven version cannot be equal to this, but the Maven Enforcer plugin should capture this
+            return new DefaultArtifactVersion(minimumVersion);
+        }
+
+        return null;
     }
 }

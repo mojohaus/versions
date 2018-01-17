@@ -77,9 +77,9 @@ public class RequiredMavenVersionFinderTest {
     @Test
     public void findReturnsNotNullWhenPrerequisitesMavenVersionIsNotNull() {
         String mavenVersion = "1";
-        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(mavenVersion);
         when(mavenProject.getPrerequisites()).thenReturn(prerequisites);
         when(prerequisites.getMaven()).thenReturn(mavenVersion);
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(mavenVersion);
         assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
     }
 
@@ -199,8 +199,7 @@ public class RequiredMavenVersionFinderTest {
         assertNull(new RequiredMavenVersionFinder(mavenProject).find());
     }
 
-    @Test
-    public void findReturnsNullWhenVersionTagValueIsNull() {
+    private void findReturnsValueWhenVersionTagValueIsSet(String mavenVersionRange) {
         ArrayList<Plugin> buildPlugins = new ArrayList<>();
         buildPlugins.add(enforcerPlugin);
         when(mavenProject.getBuildPlugins()).thenReturn(buildPlugins);
@@ -214,29 +213,161 @@ public class RequiredMavenVersionFinderTest {
         when(configurationTag.getChild("rules")).thenReturn(rulesTag);
         when(rulesTag.getChild("requireMavenVersion")).thenReturn(requireMavenVersionTag);
         when(requireMavenVersionTag.getChild("version")).thenReturn(versionTag);
-        when(versionTag.getValue()).thenReturn(null);
+        when(versionTag.getValue()).thenReturn(mavenVersionRange);
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueIsNull() {
+        findReturnsValueWhenVersionTagValueIsSet(null);
         assertNull(new RequiredMavenVersionFinder(mavenProject).find());
     }
 
     @Test
-    public void findReturnsValueWhenVersionTagValueIsNotNull() {
-        ArrayList<Plugin> buildPlugins = new ArrayList<>();
-        buildPlugins.add(enforcerPlugin);
-        when(mavenProject.getBuildPlugins()).thenReturn(buildPlugins);
-        ArrayList<PluginExecution> pluginExecutions = new ArrayList<>();
-        pluginExecutions.add(pluginExecution);
-        ArrayList<String> goals = new ArrayList<>();
-        goals.add("enforce");
-        when(pluginExecution.getGoals()).thenReturn(goals);
-        when(enforcerPlugin.getExecutions()).thenReturn(pluginExecutions);
-        when(pluginExecution.getConfiguration()).thenReturn(configurationTag);
-        when(configurationTag.getChild("rules")).thenReturn(rulesTag);
-        when(rulesTag.getChild("requireMavenVersion")).thenReturn(requireMavenVersionTag);
-        when(requireMavenVersionTag.getChild("version")).thenReturn(versionTag);
-        String mavenVersion = "1";
-        when(versionTag.getValue()).thenReturn(mavenVersion);
-        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(mavenVersion);
+    public void findReturnsValueWhenVersionTagValueIsValidSimpleRange() {
+        String mavenVersionRange = "1.0";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(mavenVersionRange);
         assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenVersionTagValueSetsExact() {
+        String mavenVersionRange = "[1.0]";
+        String minimumVersion = "1.0";
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(minimumVersion);
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueSetsInclusiveMax() {
+        String mavenVersionRange = "(,1.0]";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueSetsExclusiveMax() {
+        String mavenVersionRange = "(,1.0)";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenVersionTagValueSetsInclusiveMin() {
+        String mavenVersionRange = "[1.0,)";
+        String minimumVersion = "1.0";
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(minimumVersion);
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenVersionTagValueSetsExclusiveMin() {
+        String mavenVersionRange = "(1.0,)";
+        String minimumVersion = "1.0";
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(minimumVersion);
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenVersionTagValueSetsExclusiveMinExclusiveMax() {
+        String mavenVersionRange = "(1.0,2.0)";
+        String minimumVersion = "1.0";
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(minimumVersion);
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenVersionTagValueSetsInclusiveMinInclusiveMax() {
+        String mavenVersionRange = "[1.0,2.0]";
+        String minimumVersion = "1.0";
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(minimumVersion);
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenVersionTagValueSetsInclusiveMinExclusiveMax() {
+        String mavenVersionRange = "[1.0,2.0)";
+        String minimumVersion = "1.0";
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(minimumVersion);
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenVersionTagValueSetsExclusiveMinInclusiveMax() {
+        String mavenVersionRange = "(1.0,2.0]";
+        String minimumVersion = "1.0";
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(minimumVersion);
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueSetsInclusiveLowerMaxInclusiveHigherMin() {
+        String mavenVersionRange = "(,1.0],[1.2,)";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueSetsExclusiveLowerMaxExclusiveHigherMin() {
+        String mavenVersionRange = "(,1.1),(1.1,)";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueSetsInclusiveLowerMaxExclusiveHigherMin() {
+        String mavenVersionRange = "(,1.1],(1.1,)";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueSetsExclusiveLowerMaxInclusiveHigherMin() {
+        String mavenVersionRange = "(,1.1),[1.1,)";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueOpenCharsCountGreaterThanCloseCharCount() {
+        String mavenVersionRange = "(1.0";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueOpenCharsCountLessThanCloseCharCount() {
+        String mavenVersionRange = "1.0)";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueDoesNotStartWithAnOpenChar() {
+        String mavenVersionRange = "1.0()";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueDoesNotEndWithAnCloseChar() {
+        String mavenVersionRange = "()1.0";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsNullWhenVersionTagValueOpenAndCloseTagsNotSameWhenNoComma() {
+        String mavenVersionRange = "(1.0]";
+        findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        assertNull(new RequiredMavenVersionFinder(mavenProject).find());
     }
 
     @Test
@@ -250,10 +381,10 @@ public class RequiredMavenVersionFinderTest {
     public void findReturnsChildVersionWhenChildWithVersionAndParentWithoutVersion() {
         when(mavenProject.hasParent()).thenReturn(true);
         when(mavenProject.getParent()).thenReturn(parentMavenProject);
-        String childMavenVersion = "1";
-        DefaultArtifactVersion childArtifactVersion = new DefaultArtifactVersion(childMavenVersion);
         when(mavenProject.getPrerequisites()).thenReturn(prerequisites);
+        String childMavenVersion = "1";
         when(prerequisites.getMaven()).thenReturn(childMavenVersion);
+        DefaultArtifactVersion childArtifactVersion = new DefaultArtifactVersion(childMavenVersion);
         assertEquals(childArtifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
     }
 
@@ -261,10 +392,10 @@ public class RequiredMavenVersionFinderTest {
     public void findReturnsParentVersionWhenChildWithoutVersionAndParentWithVersion() {
         when(mavenProject.hasParent()).thenReturn(true);
         when(mavenProject.getParent()).thenReturn(parentMavenProject);
-        String parentMavenVersion = "1";
-        DefaultArtifactVersion parentArtifactVersion = new DefaultArtifactVersion(parentMavenVersion);
         when(parentMavenProject.getPrerequisites()).thenReturn(parentPrerequisites);
+        String parentMavenVersion = "1";
         when(parentPrerequisites.getMaven()).thenReturn(parentMavenVersion);
+        DefaultArtifactVersion parentArtifactVersion = new DefaultArtifactVersion(parentMavenVersion);
         assertEquals(parentArtifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
     }
 
@@ -272,13 +403,13 @@ public class RequiredMavenVersionFinderTest {
     public void findReturnsChildVersionWhenChildWithMatchingVersionAndParentWithMatchingVersion() {
         when(mavenProject.hasParent()).thenReturn(true);
         when(mavenProject.getParent()).thenReturn(parentMavenProject);
-        String childMavenVersion = "1";
-        DefaultArtifactVersion childArtifactVersion = new DefaultArtifactVersion(childMavenVersion);
         when(mavenProject.getPrerequisites()).thenReturn(prerequisites);
+        String childMavenVersion = "1";
         when(prerequisites.getMaven()).thenReturn(childMavenVersion);
-        String parentMavenVersion = "1";
         when(parentMavenProject.getPrerequisites()).thenReturn(parentPrerequisites);
+        String parentMavenVersion = "1";
         when(parentPrerequisites.getMaven()).thenReturn(parentMavenVersion);
+        DefaultArtifactVersion childArtifactVersion = new DefaultArtifactVersion(childMavenVersion);
         assertEquals(childArtifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
     }
 
@@ -290,8 +421,8 @@ public class RequiredMavenVersionFinderTest {
         DefaultArtifactVersion childArtifactVersion = new DefaultArtifactVersion(childMavenVersion);
         when(mavenProject.getPrerequisites()).thenReturn(prerequisites);
         when(prerequisites.getMaven()).thenReturn(childMavenVersion);
-        String parentMavenVersion = "1";
         when(parentMavenProject.getPrerequisites()).thenReturn(parentPrerequisites);
+        String parentMavenVersion = "1";
         when(parentPrerequisites.getMaven()).thenReturn(parentMavenVersion);
         assertEquals(childArtifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
     }
@@ -300,13 +431,13 @@ public class RequiredMavenVersionFinderTest {
     public void findReturnsParentVersionWhenChildWithLowerVersionAndParentWithHigherVersion() {
         when(mavenProject.hasParent()).thenReturn(true);
         when(mavenProject.getParent()).thenReturn(parentMavenProject);
-        String childMavenVersion = "1";
         when(mavenProject.getPrerequisites()).thenReturn(prerequisites);
+        String childMavenVersion = "1";
         when(prerequisites.getMaven()).thenReturn(childMavenVersion);
-        String parentMavenVersion = "2";
-        DefaultArtifactVersion parentArtifactVersion = new DefaultArtifactVersion(parentMavenVersion);
         when(parentMavenProject.getPrerequisites()).thenReturn(parentPrerequisites);
+        String parentMavenVersion = "2";
         when(parentPrerequisites.getMaven()).thenReturn(parentMavenVersion);
+        DefaultArtifactVersion parentArtifactVersion = new DefaultArtifactVersion(parentMavenVersion);
         assertEquals(parentArtifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
     }
 }
