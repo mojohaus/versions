@@ -71,7 +71,7 @@ class RequiredMavenVersionFinder {
         }
 
         List<PluginExecution> pluginExecutionsWithEnforceGoal = getPluginExecutionsWithEnforceGoal(pluginExecutions);
-        if (null == pluginExecutionsWithEnforceGoal) {
+        if (pluginExecutionsWithEnforceGoal.isEmpty()) {
             return null;
         }
         
@@ -110,14 +110,14 @@ class RequiredMavenVersionFinder {
                 pluginExecutions.add(pluginExecution);
             }
         }
-        return !pluginExecutions.isEmpty() ? pluginExecutions : null;
+        return pluginExecutions;
     }
 
     private Xpp3Dom getRequireMavenVersionTag(List<PluginExecution> executions) {
         for (PluginExecution pluginExecution : executions) {
             Xpp3Dom configurationTag = (Xpp3Dom) pluginExecution.getConfiguration();
             if (null == configurationTag) {
-                return null;
+                continue;
             }
 
             Xpp3Dom rulesTag = configurationTag.getChild("rules");

@@ -35,9 +35,15 @@ public class RequiredMavenVersionFinderTest {
     @Mock
     private PluginExecution pluginExecution;
     @Mock
+    private PluginExecution otherPluginExecution;
+    @Mock
     private Xpp3Dom configurationTag;
     @Mock
+    private Xpp3Dom otherConfigurationTag;
+    @Mock
     private Xpp3Dom rulesTag;
+    @Mock
+    private Xpp3Dom otherRulesTag;
     @Mock
     private Xpp3Dom requireMavenVersionTag;
     @Mock
@@ -226,6 +232,87 @@ public class RequiredMavenVersionFinderTest {
     public void findReturnsValueWhenVersionTagValueIsValidSimpleRange() {
         String mavenVersionRange = "1.0";
         findReturnsValueWhenVersionTagValueIsSet(mavenVersionRange);
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenSecondEnforcerExecutionIsValidAndFirstEnforcerExecutionHasNoConfigurationTag() {
+        String mavenVersionRange = "1.0";
+        ArrayList<Plugin> buildPlugins = new ArrayList<>();
+        buildPlugins.add(enforcerPlugin);
+        when(mavenProject.getBuildPlugins()).thenReturn(buildPlugins);
+        ArrayList<PluginExecution> pluginExecutions = new ArrayList<>();
+        pluginExecutions.add(otherPluginExecution);
+        pluginExecutions.add(pluginExecution);
+        ArrayList<String> goals = new ArrayList<>();
+        ArrayList<String> otherGoals = new ArrayList<>();
+        goals.add("enforce");
+        otherGoals.add("enforce");
+        when(pluginExecution.getGoals()).thenReturn(goals);
+        when(otherPluginExecution.getGoals()).thenReturn(otherGoals);
+        when(enforcerPlugin.getExecutions()).thenReturn(pluginExecutions);
+        when(pluginExecution.getConfiguration()).thenReturn(configurationTag);
+        when(otherPluginExecution.getConfiguration()).thenReturn(null);
+        when(configurationTag.getChild("rules")).thenReturn(rulesTag);
+        when(rulesTag.getChild("requireMavenVersion")).thenReturn(requireMavenVersionTag);
+        when(requireMavenVersionTag.getChild("version")).thenReturn(versionTag);
+        when(versionTag.getValue()).thenReturn(mavenVersionRange);
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenSecondEnforcerExecutionIsValidAndFirstEnforcerExecutionHasNoRulesTag() {
+        String mavenVersionRange = "1.0";
+        ArrayList<Plugin> buildPlugins = new ArrayList<>();
+        buildPlugins.add(enforcerPlugin);
+        when(mavenProject.getBuildPlugins()).thenReturn(buildPlugins);
+        ArrayList<PluginExecution> pluginExecutions = new ArrayList<>();
+        pluginExecutions.add(otherPluginExecution);
+        pluginExecutions.add(pluginExecution);
+        ArrayList<String> goals = new ArrayList<>();
+        ArrayList<String> otherGoals = new ArrayList<>();
+        goals.add("enforce");
+        otherGoals.add("enforce");
+        when(pluginExecution.getGoals()).thenReturn(goals);
+        when(otherPluginExecution.getGoals()).thenReturn(otherGoals);
+        when(enforcerPlugin.getExecutions()).thenReturn(pluginExecutions);
+        when(pluginExecution.getConfiguration()).thenReturn(configurationTag);
+        when(otherPluginExecution.getConfiguration()).thenReturn(otherConfigurationTag);
+        when(configurationTag.getChild("rules")).thenReturn(rulesTag);
+        when(otherConfigurationTag.getChild("rules")).thenReturn(null);
+        when(rulesTag.getChild("requireMavenVersion")).thenReturn(requireMavenVersionTag);
+        when(requireMavenVersionTag.getChild("version")).thenReturn(versionTag);
+        when(versionTag.getValue()).thenReturn(mavenVersionRange);
+        DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(mavenVersionRange);
+        assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
+    }
+
+    @Test
+    public void findReturnsValueWhenSecondEnforcerExecutionIsValidAndFirstEnforcerExecutionHasNoRequireMavenVersionTag() {
+        String mavenVersionRange = "1.0";
+        ArrayList<Plugin> buildPlugins = new ArrayList<>();
+        buildPlugins.add(enforcerPlugin);
+        when(mavenProject.getBuildPlugins()).thenReturn(buildPlugins);
+        ArrayList<PluginExecution> pluginExecutions = new ArrayList<>();
+        pluginExecutions.add(otherPluginExecution);
+        pluginExecutions.add(pluginExecution);
+        ArrayList<String> goals = new ArrayList<>();
+        ArrayList<String> otherGoals = new ArrayList<>();
+        goals.add("enforce");
+        otherGoals.add("enforce");
+        when(pluginExecution.getGoals()).thenReturn(goals);
+        when(otherPluginExecution.getGoals()).thenReturn(otherGoals);
+        when(enforcerPlugin.getExecutions()).thenReturn(pluginExecutions);
+        when(pluginExecution.getConfiguration()).thenReturn(configurationTag);
+        when(otherPluginExecution.getConfiguration()).thenReturn(otherConfigurationTag);
+        when(configurationTag.getChild("rules")).thenReturn(rulesTag);
+        when(otherConfigurationTag.getChild("rules")).thenReturn(otherRulesTag);
+        when(rulesTag.getChild("requireMavenVersion")).thenReturn(requireMavenVersionTag);
+        when(otherRulesTag.getChild("requireMavenVersion")).thenReturn(null);
+        when(requireMavenVersionTag.getChild("version")).thenReturn(versionTag);
+        when(versionTag.getValue()).thenReturn(mavenVersionRange);
         DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(mavenVersionRange);
         assertEquals(artifactVersion, new RequiredMavenVersionFinder(mavenProject).find());
     }
