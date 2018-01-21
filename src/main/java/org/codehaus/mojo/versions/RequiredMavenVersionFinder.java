@@ -8,6 +8,7 @@ import org.apache.maven.model.Prerequisites;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -69,22 +70,12 @@ class RequiredMavenVersionFinder {
             return null;
         }
 
-        PluginExecution pluginExecutionWithEnforceGoal = getPluginExecutionWithEnforceGoal(pluginExecutions);
-        if (null == pluginExecutionWithEnforceGoal) {
+        List<PluginExecution> pluginExecutionsWithEnforceGoal = getPluginExecutionsWithEnforceGoal(pluginExecutions);
+        if (pluginExecutionsWithEnforceGoal.isEmpty()) {
             return null;
         }
-
-        Xpp3Dom configurationTag = (Xpp3Dom) pluginExecutionWithEnforceGoal.getConfiguration();
-        if (null == configurationTag) {
-            return null;
-        }
-
-        Xpp3Dom rulesTag = configurationTag.getChild("rules");
-        if (null == rulesTag) {
-            return null;
-        }
-
-        Xpp3Dom requireMavenVersionTag = rulesTag.getChild("requireMavenVersion");
+        
+        Xpp3Dom requireMavenVersionTag = getRequireMavenVersionTag(pluginExecutionsWithEnforceGoal);
         if (null == requireMavenVersionTag) {
             return null;
         }
@@ -111,12 +102,35 @@ class RequiredMavenVersionFinder {
         return null;
     }
 
-    private PluginExecution getPluginExecutionWithEnforceGoal(List<PluginExecution> executions) {
+    private List<PluginExecution> getPluginExecutionsWithEnforceGoal(List<PluginExecution> executions) {
+        List<PluginExecution> pluginExecutions = new ArrayList<>();
         for (PluginExecution pluginExecution : executions) {
             List<String> goals = pluginExecution.getGoals();
             if (goals != null && goals.contains("enforce")) {
-                return pluginExecution;
+                pluginExecutions.add(pluginExecution);
             }
+        }
+        return pluginExecutions;
+    }
+
+    private Xpp3Dom getRequireMavenVersionTag(List<PluginExecution> executions) {
+        for (PluginExecution pluginExecution : executions) {
+            Xpp3Dom configurationTag = (Xpp3Dom) pluginExecution.getConfiguration();
+            if (null == configurationTag) {
+                continue;
+            }
+
+            Xpp3Dom rulesTag = configurationTag.getChild("rules");
+            if (null == rulesTag) {
+                continue;
+            }
+
+            Xpp3Dom requireMavenVersionTag = rulesTag.getChild("requireMavenVersion");
+            if (null == requireMavenVersionTag) {
+                continue;
+            }
+
+            return requireMavenVersionTag;
         }
         return null;
     }
