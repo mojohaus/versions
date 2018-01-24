@@ -38,7 +38,6 @@ import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.mapping.LifecycleMapping;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.model.Prerequisites;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
@@ -80,7 +79,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -89,7 +87,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -270,7 +267,7 @@ public class DisplayPluginUpdatesMojo
             }
         }
         getLog().debug( "Using Maven 2.x strategy to determine superpom defined plugins" );
-        Map<String, String> superPomPluginManagement = new HashMap();
+        Map<String, String> superPomPluginManagement = new HashMap<>();
         try
         {
             MavenProject superProject =
@@ -473,7 +470,7 @@ public class DisplayPluginUpdatesMojo
             {
                 version = parentPluginManagement.get( coords );
             }
-            getLog().debug( new StringBuilder().append( "Checking " ).append( coords ).append( " for updates newer than " ).append( version ).toString() );
+            getLog().debug( "Checking " + coords + " for updates newer than " + version );
             String effectiveVersion = version;
 
             VersionRange versionRange;
@@ -795,7 +792,7 @@ public class DisplayPluginUpdatesMojo
 
     private String getRequiredMavenVersion( MavenProject mavenProject, String defaultValue )
     {
-        ArtifactVersion requiredMavenVersion = new RequiredMavenVersionFinder(mavenProject).find();
+        ArtifactVersion requiredMavenVersion = new RequiredMavenVersionFinder( mavenProject ).find();
 
         return requiredMavenVersion == null ? defaultValue : requiredMavenVersion.toString();
     }
@@ -917,7 +914,7 @@ public class DisplayPluginUpdatesMojo
      */
     private Map<String, String> getBuildPlugins( Model model, boolean onlyIncludeInherited )
     {
-        Map<String, String> buildPlugins = new HashMap();
+        Map<String, String> buildPlugins = new HashMap<>();
         try
         {
             for ( Plugin plugin : model.getBuild().getPlugins() )
@@ -1060,7 +1057,7 @@ public class DisplayPluginUpdatesMojo
                 // no much we can do here
             }
         }
-        List lifecycles = null;
+        List<Lifecycle> lifecycles = null;
         getLog().debug( "Using Maven 2.0.10+ strategy to determine lifecycle defined plugins" );
         try
         {
@@ -1104,10 +1101,10 @@ public class DisplayPluginUpdatesMojo
      * @throws BuildFailureException the build failure exception
      * @throws LifecycleExecutionException the lifecycle execution exception
      */
-    private Lifecycle getLifecycleForPhase( List lifecycles, String phase )
+    private Lifecycle getLifecycleForPhase( List<Lifecycle> lifecycles, String phase )
         throws BuildFailureException, LifecycleExecutionException
     {
-        Lifecycle lifecycle = (Lifecycle) getPhaseToLifecycleMap( lifecycles ).get( phase );
+        Lifecycle lifecycle = getPhaseToLifecycleMap( lifecycles ).get( phase );
 
         if ( lifecycle == null )
         {
@@ -1378,15 +1375,13 @@ public class DisplayPluginUpdatesMojo
      * @return the phase to lifecycle map.
      * @throws LifecycleExecutionException the lifecycle execution exception.
      */
-    public Map getPhaseToLifecycleMap( List<Lifecycle> lifecycles )
+    public Map<String, Lifecycle> getPhaseToLifecycleMap( List<Lifecycle> lifecycles )
         throws LifecycleExecutionException
     {
-        Map<String, Lifecycle> phaseToLifecycleMap = new HashMap();
+        Map<String, Lifecycle> phaseToLifecycleMap = new HashMap<>();
 
-        for ( Iterator<Lifecycle> i = lifecycles.iterator(); i.hasNext(); )
+        for ( Lifecycle lifecycle : lifecycles )
         {
-            Lifecycle lifecycle = i.next();
-
             for ( Iterator<String> p = lifecycle.getPhases().iterator(); p.hasNext(); )
             {
                 String phase = p.next();
@@ -1723,45 +1718,6 @@ public class DisplayPluginUpdatesMojo
         return plugin;
     }
 
-    private static ReportPlugin toReportPlugin( Plugin plugin )
-    {
-        ReportPlugin reportPlugin = new ReportPlugin();
-        reportPlugin.setGroupId( plugin.getGroupId() );
-        reportPlugin.setArtifactId( plugin.getArtifactId() );
-        reportPlugin.setVersion( plugin.getVersion() );
-        return reportPlugin;
-    }
-
-    private static Set<Plugin> toPlugins( Set<ReportPlugin> reportPlugins )
-    {
-        Set<Plugin> result;
-        if ( reportPlugins instanceof LinkedHashSet )
-        {
-            result = new LinkedHashSet<>( reportPlugins.size() );
-        }
-        else if ( reportPlugins instanceof SortedSet )
-        {
-            final Comparator<? super ReportPlugin> comparator =
-                ( (SortedSet<ReportPlugin>) reportPlugins ).comparator();
-            result = new TreeSet<>( new Comparator<Plugin>()
-            {
-                public int compare( Plugin o1, Plugin o2 )
-                {
-                    return comparator.compare( toReportPlugin( o1 ), toReportPlugin( o2 ) );
-                }
-            } );
-        }
-        else
-        {
-            result = new HashSet<>( reportPlugins.size() );
-        }
-        for ( ReportPlugin reportPlugin : reportPlugins )
-        {
-            result.add( toPlugin( reportPlugin ) );
-        }
-        return result;
-    }
-
     private static List<Plugin> toPlugins( List<ReportPlugin> reportPlugins )
     {
         List<Plugin> result = new ArrayList<>( reportPlugins.size() );
@@ -1770,19 +1726,6 @@ public class DisplayPluginUpdatesMojo
             result.add( toPlugin( reportPlugin ) );
         }
         return result;
-    }
-
-    private static Collection<Plugin> toPlugins( Collection<ReportPlugin> reportPlugins )
-    {
-        if ( reportPlugins instanceof Set )
-        {
-            return toPlugins( (Set<ReportPlugin>) reportPlugins );
-        }
-        if ( reportPlugins instanceof List )
-        {
-            return toPlugins( (List<ReportPlugin>) reportPlugins );
-        }
-        return toPlugins( new ArrayList<>( reportPlugins ) );
     }
 
     /**

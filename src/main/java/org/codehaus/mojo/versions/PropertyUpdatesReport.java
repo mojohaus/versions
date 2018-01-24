@@ -28,6 +28,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.mojo.versions.api.PropertyVersions;
 
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
@@ -97,7 +98,7 @@ public class PropertyUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        final Map updateSet;
+        final Map<Property, PropertyVersions> updateSet;
         try
         {
             updateSet = getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties,

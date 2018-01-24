@@ -25,7 +25,6 @@ import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
 import org.codehaus.plexus.i18n.I18N;
 
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -80,7 +79,7 @@ public class PropertyUpdatesRenderer
         sink.section1_();
     }
 
-    private void renderSummaryTable( String titleKey, Map contents, String emptyKey )
+    private void renderSummaryTable( String titleKey, Map<Property, PropertyVersions> contents, String emptyKey )
     {
         sink.section2();
         sink.sectionTitle2();
@@ -100,16 +99,15 @@ public class PropertyUpdatesRenderer
         sink.section2_();
     }
 
-    private void renderSummaryTotalsTable( Map allUpdates )
+    private void renderSummaryTotalsTable( Map<Property, PropertyVersions> allUpdates )
     {
         int numInc = 0;
         int numMin = 0;
         int numMaj = 0;
         int numAny = 0;
         int numCur = 0;
-        for ( Iterator iterator = allUpdates.values().iterator(); iterator.hasNext(); )
+        for ( PropertyVersions details : allUpdates.values() )
         {
-            PropertyVersions details = (PropertyVersions) iterator.next();
             if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
             {
                 numAny++;

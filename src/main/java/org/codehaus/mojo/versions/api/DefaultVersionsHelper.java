@@ -711,16 +711,15 @@ public class DefaultVersionsHelper
     /**
      * {@inheritDoc}
      */
-    public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies,
+    public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                         boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         // Create the request for details collection for parallel lookup...
         final List<Callable<DependencyArtifactVersions>> requestsForDetails =
             new ArrayList<Callable<DependencyArtifactVersions>>( dependencies.size() );
-        for ( final Object dependency1 : dependencies )
+        for ( final Dependency dependency : dependencies )
         {
-            final Dependency dependency = (Dependency) dependency1;
             requestsForDetails.add( new DependencyLookup( dependency, usePluginRepositories ) );
         }
 

@@ -483,7 +483,7 @@ public abstract class AbstractVersionsReportRenderer
         sink.table_();
     }
 
-    protected void renderDependencySummaryTable( Map map )
+    protected void renderDependencySummaryTable( Map<Dependency, ArtifactVersions> map )
     {
         renderDependencySummaryTable( map, true, true, true );
     }
@@ -613,7 +613,6 @@ public abstract class AbstractVersionsReportRenderer
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        VersionRange range = null;
         ArtifactVersion[] artifactVersions = versions.getAllUpdates( UpdateScope.ANY );
         Set<String> rangeVersions = getVersionsInRange( property, versions, artifactVersions );
         if ( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )

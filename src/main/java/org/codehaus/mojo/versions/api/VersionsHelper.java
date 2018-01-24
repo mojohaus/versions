@@ -192,7 +192,8 @@ public interface VersionsHelper
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      * @since 1.0-beta-1
      */
-    Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set dependencies, boolean usePluginRepositories )
+    Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
+                                                                 boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
 
     /**

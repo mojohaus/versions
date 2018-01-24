@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -79,14 +78,14 @@ public class UpdateChildModulesMojo
 
         try
         {
-            final Map reactor = PomHelper.getReactorModels( getProject(), getLog() );
-            List order = new ArrayList( reactor.keySet() );
-            Collections.sort( order, new Comparator()
+            final Map<String, Model> reactor = PomHelper.getReactorModels( getProject(), getLog() );
+            List<String> order = new ArrayList<>( reactor.keySet() );
+            Collections.sort( order, new Comparator<String>()
             {
-                public int compare( Object o1, Object o2 )
+                public int compare( String o1, String o2 )
                 {
-                    Model m1 = (Model) reactor.get( o1 );
-                    Model m2 = (Model) reactor.get( o2 );
+                    Model m1 = reactor.get( o1 );
+                    Model m2 = reactor.get( o2 );
                     int d1 = PomHelper.getReactorParentCount( reactor, m1 );
                     int d2 = PomHelper.getReactorParentCount( reactor, m2 );
                     if ( d1 < d2 )
@@ -101,11 +100,9 @@ public class UpdateChildModulesMojo
                 }
             } );
 
-            Iterator i = order.iterator();
-            while ( i.hasNext() )
+            for ( String sourcePath : order )
             {
-                String sourcePath = (String) i.next();
-                Model sourceModel = (Model) reactor.get( sourcePath );
+                Model sourceModel = reactor.get( sourcePath );
 
                 getLog().debug( sourcePath.length() == 0 ? "Processing root module as parent"
                                 : "Processing " + sourcePath + " as a parent." );
@@ -134,13 +131,10 @@ public class UpdateChildModulesMojo
                     getLog().debug( "Looking for modules which use "
                         + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
 
-                    Iterator j =
-                        PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet().iterator();
-
-                    while ( j.hasNext() )
+                    for ( Map.Entry<String, Model> target : PomHelper.getChildModels( reactor, sourceGroupId,
+                                                                                      sourceArtifactId ).entrySet() )
                     {
-                        Map.Entry target = (Map.Entry) j.next();
-                        String targetPath = (String) target.getKey();
+                        String targetPath = target.getKey();
 
                         File moduleDir = new File( getProject().getBasedir(), targetPath );
 
@@ -157,7 +151,7 @@ public class UpdateChildModulesMojo
                             moduleProjectFile = moduleDir;
                         }
 
-                        Model targetModel = (Model) target.getValue();
+                        Model targetModel = target.getValue();
                         final Parent parent = targetModel.getParent();
                         if ( sourceVersion.equals( parent.getVersion() ) )
                         {

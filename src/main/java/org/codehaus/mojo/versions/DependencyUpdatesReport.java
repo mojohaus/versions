@@ -103,10 +103,10 @@ public class DependencyUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        Set<Dependency> dependencies = new TreeSet( new DependencyComparator() );
+        Set<Dependency> dependencies = new TreeSet<>( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
 
-        Set<Dependency> dependencyManagement = new TreeSet( new DependencyComparator() );
+        Set<Dependency> dependencyManagement = new TreeSet<>( new DependencyComparator() );
 
         if ( processDependencyManagementTransitive )
         {
@@ -194,12 +194,11 @@ public class DependencyUpdatesReport
      *         management dependencies.
      * @since 1.0-beta-1
      */
-    private static Set removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
+    private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
     {
-        Set<Dependency> result = new TreeSet( new DependencyComparator() );
-        for ( Iterator<Dependency> i = dependencies.iterator(); i.hasNext(); )
+        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
+        for ( Dependency c : dependencies )
         {
-            Dependency c = i.next();
             boolean matched = false;
             Iterator<Dependency> j = dependencyManagement.iterator();
             while ( !matched && j.hasNext() )

@@ -394,8 +394,8 @@ public class DisplayDependencyUpdatesMojo
 
     private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
     {
-        List<String> withUpdates = new ArrayList();
-        List<String> usingCurrent = new ArrayList();
+        List<String> withUpdates = new ArrayList<>();
+        List<String> usingCurrent = new ArrayList<>();
         Iterator i = updates.values().iterator();
         while ( i.hasNext() )
         {
