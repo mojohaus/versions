@@ -506,11 +506,11 @@ public class DisplayPluginUpdatesMojo
                             projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
                         ArtifactVersion requires =
                             new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject, "2.0" ) );
-                        if ( specMavenVersion.compareTo( requires ) >= 0 && artifactVersion == null )
+                        if ( compare( specMavenVersion, requires ) >= 0 && artifactVersion == null )
                         {
                             artifactVersion = newerVersions[j];
                         }
-                        if ( effectiveVersion == null && curMavenVersion.compareTo( requires ) >= 0 )
+                        if ( effectiveVersion == null && compare( curMavenVersion, requires ) >= 0 )
                         {
                             // version was unspecified, current version of maven thinks it should use this
                             effectiveVersion = newerVersions[j].toString();
@@ -520,7 +520,7 @@ public class DisplayPluginUpdatesMojo
                             // no need to look at any older versions.
                             break;
                         }
-                        if ( minRequires == null || minRequires.compareTo( requires ) > 0 )
+                        if ( minRequires == null || compare( minRequires, requires ) > 0 )
                         {
                             Map<String, String> upgradePlugins = upgrades.get( requires );
                             if ( upgradePlugins == null )
@@ -552,7 +552,7 @@ public class DisplayPluginUpdatesMojo
                             projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
                         ArtifactVersion requires =
                             new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject, "2.0" ) );
-                        if ( minMavenVersion == null || minMavenVersion.compareTo( requires ) < 0 )
+                        if ( minMavenVersion == null || compare( minMavenVersion, requires ) < 0 )
                         {
                             minMavenVersion = requires;
                         }
@@ -677,7 +677,7 @@ public class DisplayPluginUpdatesMojo
         {
             ArtifactVersion explicitMavenVersion =
                 new DefaultArtifactVersion( getProject().getPrerequisites().getMaven() );
-            if ( explicitMavenVersion.compareTo( specMavenVersion ) < 0 )
+            if ( compare( explicitMavenVersion, specMavenVersion ) < 0 )
             {
                 logLine( true, "Project's effective minimum Maven (from parent) is: " + specMavenVersion );
                 logLine( true, "Project defines minimum Maven version as: " + explicitMavenVersion );
@@ -709,7 +709,7 @@ public class DisplayPluginUpdatesMojo
                 getLog().warn( "A Maven Enforcer rule can be used to enforce this if you have not already set one up" );
                 getLog().warn( "See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html" );
             }
-            else if ( minMavenVersion != null && specMavenVersion.compareTo( minMavenVersion ) < 0 )
+            else if ( minMavenVersion != null && compare( specMavenVersion, minMavenVersion ) < 0 )
             {
                 getLog().warn( "Project (which is a Maven Plugin) targets Maven " + specMavenVersion + " or newer" );
                 getLog().warn( "but requires Maven " + minMavenVersion + " or newer to build." );
@@ -732,7 +732,7 @@ public class DisplayPluginUpdatesMojo
                 logLine( true, "See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html" );
                 logLine( true, "Using the minimum version of Maven: " + minMavenVersion );
             }
-            else if ( minMavenVersion != null && specMavenVersion.compareTo( minMavenVersion ) < 0 )
+            else if ( minMavenVersion != null && compare( specMavenVersion, minMavenVersion ) < 0 )
             {
                 logLine( true, "Project requires an incorrect minimum version of Maven." );
                 logLine( true, "Update the pom.xml to contain maven-enforcer-plugin to" );
@@ -749,7 +749,7 @@ public class DisplayPluginUpdatesMojo
         {
             ArtifactVersion mavenUpgradeVersion = mavenUpgrade.getKey();
             Map<String, String> upgradePlugins = mavenUpgrade.getValue();
-            if ( upgradePlugins.isEmpty() || specMavenVersion.compareTo( mavenUpgradeVersion ) >= 0 )
+            if ( upgradePlugins.isEmpty() || compare( specMavenVersion, mavenUpgradeVersion ) >= 0 )
             {
                 continue;
             }
@@ -1765,4 +1765,9 @@ public class DisplayPluginUpdatesMojo
         // do nothing
     }
 
+    @SuppressWarnings( "unchecked" )
+    private static int compare( ArtifactVersion a, ArtifactVersion b )
+    {
+        return a.compareTo( b );
+    }
 }
