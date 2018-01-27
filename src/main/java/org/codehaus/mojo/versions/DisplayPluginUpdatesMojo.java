@@ -529,21 +529,13 @@ public class DisplayPluginUpdatesMojo
                 newVersion = artifactVersion != null ? artifactVersion.toString()
                                 : ( version != null ? version
                                                 : ( effectiveVersion != null ? effectiveVersion : "(unknown)" ) );
-                StringBuilder buf = new StringBuilder( compactKey( groupId, artifactId ) );
-                buf.append( ' ' );
-                int padding = WARN_PAD_SIZE - newVersion.length() - ( version != null ? FROM_SUPER_POM.length() : 0 );
-                while ( buf.length() < padding )
-                {
-                    buf.append( '.' );
-                }
-                buf.append( ' ' );
                 if ( version != null )
                 {
-                    buf.append( FROM_SUPER_POM );
                     superPomDrivingMinVersion = true;
                 }
-                buf.append( newVersion );
-                lockdowns.add( buf.toString() );
+
+                lockdowns.add( pad( compactKey( groupId, artifactId ), WARN_PAD_SIZE,
+                                    superPomDrivingMinVersion ? FROM_SUPER_POM : "", newVersion ) );
             }
             else if ( artifactVersion != null )
             {
@@ -556,18 +548,8 @@ public class DisplayPluginUpdatesMojo
             if ( version != null && artifactVersion != null && newVersion != null && effectiveVersion != null
                 && new DefaultArtifactVersion( effectiveVersion ).compareTo( new DefaultArtifactVersion( newVersion ) ) < 0 )
             {
-                StringBuilder buf = new StringBuilder( compactKey( groupId, artifactId ) );
-                buf.append( ' ' );
-                int padding = INFO_PAD_SIZE - version.length() - newVersion.length() - 4;
-                while ( buf.length() < padding )
-                {
-                    buf.append( '.' );
-                }
-                buf.append( ' ' );
-                buf.append( effectiveVersion );
-                buf.append( " -> " );
-                buf.append( newVersion );
-                updates.add( buf.toString() );
+                updates.add( pad( compactKey( groupId, artifactId ), INFO_PAD_SIZE,
+                                  effectiveVersion, " -> ", newVersion ) );
             }
         }
         logLine( false, "" );
@@ -580,7 +562,7 @@ public class DisplayPluginUpdatesMojo
             logLine( false, "The following plugin updates are available:" );
             for ( String update : updates )
             {
-                logLine( false, "  " + update );
+                logLine( false, update );
             }
         }
         logLine( false, "" );
@@ -593,7 +575,7 @@ public class DisplayPluginUpdatesMojo
             getLog().warn( "The following plugins do not have their version specified:" );
             for ( String lockdown : lockdowns )
             {
-                getLog().warn( "  " + lockdown );
+                getLog().warn( lockdown );
             }
         }
         logLine( false, "" );
@@ -692,21 +674,33 @@ public class DisplayPluginUpdatesMojo
             logLine( false, "Require Maven " + mavenUpgradeVersion + " to use the following plugin updates:" );
             for ( Map.Entry<String, String> entry : upgradePlugins.entrySet() )
             {
-                StringBuilder buf = new StringBuilder( "  " );
-                buf.append( entry.getKey() );
-                buf.append( ' ' );
-                String s = entry.getValue();
-                int padding = INFO_PAD_SIZE - s.length() + 2;
-                while ( buf.length() < padding )
-                {
-                    buf.append( '.' );
-                }
-                buf.append( ' ' );
-                buf.append( s );
-                logLine( false, buf.toString() );
+                logLine( false, pad( entry.getKey(), INFO_PAD_SIZE, entry.getValue() ) );
             }
         }
         logLine( false, "" );
+    }
+
+    private final static String pad( String start, int len, String...ends )
+    {
+        StringBuilder buf = new StringBuilder( len );
+        buf.append( "  " );
+        buf.append( start );
+        int padding = len;
+        for ( String end : ends )
+        {
+            padding -= end.length();
+        }
+        buf.append( ' ' );
+        while ( buf.length() < padding )
+        {
+            buf.append( '.' );
+        }
+        buf.append( ' ' );
+        for ( String end : ends )
+        {
+            buf.append( end );
+        }
+        return buf.toString();
     }
 
     private Map<String, String> getParentsPlugins( List<MavenProject> parents )
