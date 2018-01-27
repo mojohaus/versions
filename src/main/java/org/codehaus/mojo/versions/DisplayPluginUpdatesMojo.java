@@ -380,13 +380,16 @@ public class DisplayPluginUpdatesMojo
 
         Set<Plugin> plugins = getProjectPlugins( superPomPluginManagement, parentPlugins, parentBuildPlugins,
                                                  parentReportPlugins, pluginsWithVersionsSpecified );
+
         List<String> updates = new ArrayList<>();
         List<String> lockdowns = new ArrayList<>();
-        Map<ArtifactVersion, Map<String, String>> upgrades = new TreeMap<>( new MavenVersionComparator() );
         ArtifactVersion curMavenVersion = runtimeInformation.getApplicationVersion();
         ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject(), "2.0" ) );
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
+        // if Maven prerequisite upgraded to a version, Map<plugin compact key, latest compatible plugin vesion>
+        Map<ArtifactVersion, Map<String, String>> upgrades = new TreeMap<>( new MavenVersionComparator() );
+
         for ( Plugin plugin : plugins )
         {
             String groupId = plugin.getGroupId();
@@ -401,25 +404,24 @@ public class DisplayPluginUpdatesMojo
             getLog().debug( "Checking " + coords + " for updates newer than " + version );
             String effectiveVersion = version;
 
-            VersionRange versionRange;
-            boolean unspecified = version == null;
+            Artifact artifactRange;
             try
             {
-                versionRange = unspecified ? VersionRange.createFromVersionSpec( "[0,)" )
+                boolean unspecified = ( version == null );
+                VersionRange versionRange = unspecified ? VersionRange.createFromVersionSpec( "[0,)" )
                                 : VersionRange.createFromVersionSpec( version );
+                artifactRange = artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
             }
             catch ( InvalidVersionSpecificationException e )
             {
                 throw new MojoExecutionException( "Invalid version range specification: " + version, e );
             }
 
-            Artifact artifact = artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
-
             ArtifactVersion artifactVersion = null;
             try
             {
-                // now we want to find the newest version that is compatible with the invoking version of Maven
-                ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, true );
+                // now we want to find the newest versions and check their Maven version prerequisite
+                ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifactRange, true );
                 ArtifactVersion[] newerVersions = artifactVersions.getVersions( this.allowSnapshots );
                 ArtifactVersion minRequires = null;
                 for ( int j = newerVersions.length - 1; j >= 0; j-- )
@@ -431,37 +433,41 @@ public class DisplayPluginUpdatesMojo
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
-                        MavenProject mavenProject =
+                        MavenProject pluginMavenProject =
                             projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
-                        ArtifactVersion requires =
-                            new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject, "2.0" ) );
-                        if ( compare( specMavenVersion, requires ) >= 0 && artifactVersion == null )
+                        ArtifactVersion pluginRequires =
+                            new DefaultArtifactVersion( getRequiredMavenVersion( pluginMavenProject, "2.0" ) );
+                        if ( artifactVersion == null && compare( specMavenVersion, pluginRequires ) >= 0 )
                         {
+                            // ok, newer version compatible with current specMavenVersion
                             artifactVersion = newerVersions[j];
                         }
-                        if ( effectiveVersion == null && compare( curMavenVersion, requires ) >= 0 )
+                        if ( effectiveVersion == null && compare( curMavenVersion, pluginRequires ) >= 0 )
                         {
                             // version was unspecified, current version of maven thinks it should use this
                             effectiveVersion = newerVersions[j].toString();
                         }
                         if ( artifactVersion != null && effectiveVersion != null )
                         {
-                            // no need to look at any older versions.
+                            // no need to look at any older versions: latest compatible found
                             break;
                         }
-                        if ( minRequires == null || compare( minRequires, requires ) > 0 )
+                        // newer version not compatible with current specMavenVersion: track opportunity if Maven spec
+                        // upgrade
+                        if ( minRequires == null || compare( minRequires, pluginRequires ) > 0 )
                         {
-                            Map<String, String> upgradePlugins = upgrades.get( requires );
+                            Map<String, String> upgradePlugins = upgrades.get( pluginRequires );
                             if ( upgradePlugins == null )
                             {
-                                upgrades.put( requires, upgradePlugins = new LinkedHashMap<String, String>() );
+                                upgrades.put( pluginRequires, upgradePlugins = new LinkedHashMap<String, String>() );
                             }
+
                             String upgradePluginKey = compactKey( groupId, artifactId );
                             if ( !upgradePlugins.containsKey( upgradePluginKey ) )
                             {
                                 upgradePlugins.put( upgradePluginKey, newerVersions[j].toString() );
                             }
-                            minRequires = requires;
+                            minRequires = pluginRequires;
                         }
                     }
                     catch ( ArtifactResolutionException | ArtifactNotFoundException | ProjectBuildingException e )
@@ -517,7 +523,7 @@ public class DisplayPluginUpdatesMojo
             getLog().debug( "[" + coords + "].specified=" + pluginsWithVersionsSpecified.contains( coords ) );
             if ( version == null || !pluginsWithVersionsSpecified.contains( coords ) )
             {
-                version = superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
+                version = superPomPluginManagement.get( coords );
                 getLog().debug( "[" + coords + "].superPom.version=" + version );
 
                 newVersion = artifactVersion != null ? artifactVersion.toString()
