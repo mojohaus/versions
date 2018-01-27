@@ -39,7 +39,7 @@ Versions Maven Plugin
   produces a report of those dependencies which have newer versions available.
 
   * {{{./display-plugin-updates-mojo.html}versions:display-plugin-updates}} scans a project's plugins and produces a
-  report of those plugins which have newer versions available.
+  report of those plugins which have newer versions available, taking care of Maven version prerequisites.
 
   * {{{./display-property-updates-mojo.html}versions:display-property-updates}} scans a projectand produces a report of
   those properties which are used to control artifact versions and which properies have newer versions available.

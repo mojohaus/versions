@@ -93,7 +93,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
- * Displays all plugins that have newer versions available.
+ * Displays all plugins that have newer versions available, taking care of Maven version prerequisites.
  *
  * @author Stephen Connolly
  * @since 1.0-alpha-1
@@ -589,7 +589,7 @@ public class DisplayPluginUpdatesMojo
             getLog().debug( "[" + coords + "].specified=" + pluginsWithVersionsSpecified.contains( coords ) );
             if ( version == null || !pluginsWithVersionsSpecified.contains( coords ) )
             {
-                version = (String) superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
+                version = superPomPluginManagement.get( ArtifactUtils.versionlessKey( artifact ) );
                 getLog().debug( "[" + coords + "].superPom.version=" + version );
 
                 newVersion = artifactVersion != null ? artifactVersion.toString()
