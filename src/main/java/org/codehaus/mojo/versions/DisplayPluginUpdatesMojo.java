@@ -369,85 +369,16 @@ public class DisplayPluginUpdatesMojo
         Map<String, String> superPomPluginManagement = getSuperPomPluginManagement();
         getLog().debug( "superPom plugins = " + superPomPluginManagement );
 
-        Map<String, String> parentPluginManagement = new HashMap<String, String>();
-        Map<String, String> parentBuildPlugins = new HashMap<String, String>();
-        Map<String, String> parentReportPlugins = new HashMap<String, String>();
-
         List<MavenProject> parents = getParentProjects( getProject() );
+        Map<String, String> parentPlugins = getParentsPlugins( parents );
+        // TODO remove, not used any more (found while extracting getParentsPlugins method and
+        //      renaming parentPluginManagement to parentPlugins)
+        // NOTICE: getProjectPlugins() takes profiles while getParentPlugins does not
+        //         there is probably a little inconsistency (if plugins configured in profiles of parents)
+        Map<String, String> parentBuildPlugins = new HashMap<String, String>();
+        Map<String, String> parentReportPlugins = new HashMap<String, String>(); 
 
-        for ( MavenProject parentProject : parents )
-        {
-            getLog().debug( "Processing parent: " + parentProject.getGroupId() + ":" + parentProject.getArtifactId()
-                + ":" + parentProject.getVersion() + " -> " + parentProject.getFile() );
-
-            StringWriter writer = new StringWriter();
-            boolean havePom = false;
-            Model interpolatedModel;
-            try
-            {
-                Model originalModel = parentProject.getOriginalModel();
-                if ( originalModel == null )
-                {
-                    getLog().warn( "project.getOriginalModel()==null for  " + parentProject.getGroupId() + ":"
-                        + parentProject.getArtifactId() + ":" + parentProject.getVersion()
-                        + " is null, substituting project.getModel()" );
-                    originalModel = parentProject.getModel();
-                }
-                try
-                {
-                    new MavenXpp3Writer().write( writer, originalModel );
-                    writer.close();
-                    havePom = true;
-                }
-                catch ( IOException e )
-                {
-                    // ignore
-                }
-                interpolatedModel =
-                    modelInterpolator.interpolate( originalModel, null,
-                                                   new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
-                                                   false );
-            }
-            catch ( ModelInterpolationException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
-            if ( havePom )
-            {
-                try
-                {
-                    Set<String> withVersionSpecified =
-                        findPluginsWithVersionsSpecified( new StringBuilder( writer.toString() ) );
-                    Map<String, String> map = getPluginManagement( interpolatedModel );
-                    map.keySet().retainAll( withVersionSpecified );
-                    parentPluginManagement.putAll( map );
-
-                    map = getBuildPlugins( interpolatedModel, true );
-                    map.keySet().retainAll( withVersionSpecified );
-                    parentPluginManagement.putAll( map );
-
-                    map = getReportPlugins( interpolatedModel, true );
-                    map.keySet().retainAll( withVersionSpecified );
-                    parentPluginManagement.putAll( map );
-                }
-                catch ( IOException e )
-                {
-                    throw new MojoExecutionException( e.getMessage(), e );
-                }
-                catch ( XMLStreamException e )
-                {
-                    throw new MojoExecutionException( e.getMessage(), e );
-                }
-            }
-            else
-            {
-                parentPluginManagement.putAll( getPluginManagement( interpolatedModel ) );
-                parentPluginManagement.putAll( getBuildPlugins( interpolatedModel, true ) );
-                parentPluginManagement.putAll( getReportPlugins( interpolatedModel, true ) );
-            }
-        }
-
-        Set<Plugin> plugins = getProjectPlugins( superPomPluginManagement, parentPluginManagement, parentBuildPlugins,
+        Set<Plugin> plugins = getProjectPlugins( superPomPluginManagement, parentPlugins, parentBuildPlugins,
                                                  parentReportPlugins, pluginsWithVersionsSpecified );
         List<String> updates = new ArrayList<>();
         List<String> lockdowns = new ArrayList<>();
@@ -456,10 +387,8 @@ public class DisplayPluginUpdatesMojo
         ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject(), "2.0" ) );
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
-        Iterator<Plugin> i = plugins.iterator();
-        while ( i.hasNext() )
+        for ( Plugin plugin : plugins )
         {
-            Plugin plugin = i.next();
             String groupId = plugin.getGroupId();
             String artifactId = plugin.getArtifactId();
             String version = plugin.getVersion();
@@ -467,7 +396,7 @@ public class DisplayPluginUpdatesMojo
 
             if ( version == null )
             {
-                version = parentPluginManagement.get( coords );
+                version = parentPlugins.get( coords );
             }
             getLog().debug( "Checking " + coords + " for updates newer than " + version );
             String effectiveVersion = version;
@@ -772,6 +701,85 @@ public class DisplayPluginUpdatesMojo
             }
         }
         logLine( false, "" );
+    }
+
+    private Map<String, String> getParentsPlugins( List<MavenProject> parents )
+        throws MojoExecutionException
+    {
+        Map<String, String> parentPlugins = new HashMap<String, String>();
+        for ( MavenProject parentProject : parents )
+        {
+            getLog().debug( "Processing parent: " + parentProject.getGroupId() + ":" + parentProject.getArtifactId()
+                + ":" + parentProject.getVersion() + " -> " + parentProject.getFile() );
+
+            StringWriter writer = new StringWriter();
+            boolean havePom = false;
+            Model interpolatedModel;
+            try
+            {
+                Model originalModel = parentProject.getOriginalModel();
+                if ( originalModel == null )
+                {
+                    getLog().warn( "project.getOriginalModel()==null for  " + parentProject.getGroupId() + ":"
+                        + parentProject.getArtifactId() + ":" + parentProject.getVersion()
+                        + " is null, substituting project.getModel()" );
+                    originalModel = parentProject.getModel();
+                }
+                try
+                {
+                    new MavenXpp3Writer().write( writer, originalModel );
+                    writer.close();
+                    havePom = true;
+                }
+                catch ( IOException e )
+                {
+                    // ignore
+                }
+                interpolatedModel =
+                    modelInterpolator.interpolate( originalModel, null,
+                                                   new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
+                                                   false );
+            }
+            catch ( ModelInterpolationException e )
+            {
+                throw new MojoExecutionException( e.getMessage(), e );
+            }
+            if ( havePom )
+            {
+                try
+                {
+                    Set<String> withVersionSpecified =
+                        findPluginsWithVersionsSpecified( new StringBuilder( writer.toString() ) );
+
+                    Map<String, String> map = getPluginManagement( interpolatedModel );
+                    map.keySet().retainAll( withVersionSpecified );
+                    parentPlugins.putAll( map );
+
+                    map = getBuildPlugins( interpolatedModel, true );
+                    map.keySet().retainAll( withVersionSpecified );
+                    parentPlugins.putAll( map );
+
+                    map = getReportPlugins( interpolatedModel, true );
+                    map.keySet().retainAll( withVersionSpecified );
+                    parentPlugins.putAll( map );
+                }
+                catch ( IOException e )
+                {
+                    throw new MojoExecutionException( e.getMessage(), e );
+                }
+                catch ( XMLStreamException e )
+                {
+                    throw new MojoExecutionException( e.getMessage(), e );
+                }
+            }
+            else
+            {
+                parentPlugins.putAll( getPluginManagement( interpolatedModel ) );
+                parentPlugins.putAll( getBuildPlugins( interpolatedModel, true ) );
+                parentPlugins.putAll( getReportPlugins( interpolatedModel, true ) );
+            }
+        }
+        return parentPlugins;
     }
 
     private boolean isMavenPluginProject()
