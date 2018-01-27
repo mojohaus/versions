@@ -26,7 +26,8 @@
 Checking for new plugin updates
 
   The <<<display-plugin-updates>>> goal will check all the plugins and reports used in your project and display a list
-  of those plugins with newer versions available.
+  of those plugins with newer versions available, first staying with the same Maven version prerequisite, then
+  additional options if you update the Maven version prerequisite.
 
   Here are some examples of what this looks like:
 
@@ -58,7 +59,7 @@ mvn versions:display-plugin-updates
 [INFO] Project defines minimum Maven version as: 2.0.6
 [INFO] Plugins require minimum Maven version of: 2.2.1
 [INFO]
-[WARNING] Project (which is a Maven Plugin) targets Maven 2.0.6 or newer
+[WARNING] Project (which is a Maven plugin) targets Maven 2.0.6 or newer
 [WARNING] but requires Maven 2.2.1 or newer to build.
 [WARNING] This may or may not be a problem. A Maven Enforcer rule can help
 [WARNING] enforce that the correct version of Maven is used to build this plugin.

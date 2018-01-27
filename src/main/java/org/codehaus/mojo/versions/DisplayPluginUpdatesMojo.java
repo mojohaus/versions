@@ -617,7 +617,7 @@ public class DisplayPluginUpdatesMojo
         {
             if ( noMavenMinVersion )
             {
-                getLog().warn( "Project (which is a Maven Plugin) does not define required minimum version of Maven." );
+                getLog().warn( "Project (which is a Maven plugin) does not define required minimum version of Maven." );
                 getLog().warn( "Update the pom.xml to contain" );
                 getLog().warn( "    <prerequisites>" );
                 getLog().warn( "      <maven><!-- minimum version of Maven that the plugin works with --></maven>" );
@@ -628,7 +628,7 @@ public class DisplayPluginUpdatesMojo
             }
             else if ( minMavenVersion != null && compare( specMavenVersion, minMavenVersion ) < 0 )
             {
-                getLog().warn( "Project (which is a Maven Plugin) targets Maven " + specMavenVersion + " or newer" );
+                getLog().warn( "Project (which is a Maven plugin) targets Maven " + specMavenVersion + " or newer" );
                 getLog().warn( "but requires Maven " + minMavenVersion + " or newer to build." );
                 getLog().warn( "This may or may not be a problem. A Maven Enforcer rule can help " );
                 getLog().warn( "enforce that the correct version of Maven is used to build this plugin." );
@@ -645,7 +645,7 @@ public class DisplayPluginUpdatesMojo
             {
                 logLine( true, "Project does not define required minimum version of Maven." );
                 logLine( true, "Update the pom.xml to contain maven-enforcer-plugin to" );
-                logLine( true, "force the maven version which is needed to build this project." );
+                logLine( true, "force the Maven version which is needed to build this project." );
                 logLine( true, "See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html" );
                 logLine( true, "Using the minimum version of Maven: " + minMavenVersion );
             }
@@ -653,7 +653,7 @@ public class DisplayPluginUpdatesMojo
             {
                 logLine( true, "Project requires an incorrect minimum version of Maven." );
                 logLine( true, "Update the pom.xml to contain maven-enforcer-plugin to" );
-                logLine( true, "force the maven version which is needed to build this project." );
+                logLine( true, "force the Maven version which is needed to build this project." );
                 logLine( true, "See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html" );
                 logLine( true, "Using the minimum version of Maven: " + specMavenVersion );
             }
