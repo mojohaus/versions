@@ -180,7 +180,7 @@ public class DisplayPluginUpdatesMojo
                 Map<String, String> result = new LinkedHashMap<String, String>( plugins.size() );
                 for ( Plugin plugin : plugins )
                 {
-                    result.put( getPluginCoords( plugin ), getPluginVersion( plugin ) );
+                    result.put( plugin.getKey(), plugin.getVersion() );
                 }
                 URL superPom = getClass().getClassLoader().getResource( "org/apache/maven/model/pom-4.0.0.xml" );
                 if ( superPom != null )
@@ -242,9 +242,9 @@ public class DisplayPluginUpdatesMojo
                                                             ? PomHelper.APACHE_MAVEN_PLUGINS_GROUPID
                                                             : curState.groupId );
                                             plugin.setVersion( curState.version );
-                                            if ( !result.containsKey( getPluginCoords( plugin ) ) )
+                                            if ( !result.containsKey( plugin.getKey() ) )
                                             {
-                                                result.put( getPluginCoords( plugin ), getPluginVersion( plugin ) );
+                                                result.put( plugin.getKey(), plugin.getVersion() );
                                             }
                                         }
                                     }
@@ -296,8 +296,8 @@ public class DisplayPluginUpdatesMojo
         {
             for ( Plugin plugin : model.getBuild().getPluginManagement().getPlugins() )
             {
-                String coord = getPluginCoords( plugin );
-                String version = getPluginVersion( plugin );
+                String coord = plugin.getKey();
+                String version = plugin.getVersion();
                 if ( version != null )
                 {
                     pluginManagement.put( coord, version );
@@ -316,8 +316,8 @@ public class DisplayPluginUpdatesMojo
                 {
                     for ( Plugin plugin : profile.getBuild().getPluginManagement().getPlugins() )
                     {
-                        String coord = getPluginCoords( plugin );
-                        String version = getPluginVersion( plugin );
+                        String coord = plugin.getKey();
+                        String version = plugin.getVersion();
                         if ( version != null )
                         {
                             pluginManagement.put( coord, version );
@@ -451,8 +451,7 @@ public class DisplayPluginUpdatesMojo
                                                  parentReportPlugins, pluginsWithVersionsSpecified );
         List<String> updates = new ArrayList<>();
         List<String> lockdowns = new ArrayList<>();
-        Map<ArtifactVersion, Map<String, String>> upgrades =
-            new TreeMap<>( new MavenVersionComparator() );
+        Map<ArtifactVersion, Map<String, String>> upgrades = new TreeMap<>( new MavenVersionComparator() );
         ArtifactVersion curMavenVersion = runtimeInformation.getApplicationVersion();
         ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject(), "2.0" ) );
         ArtifactVersion minMavenVersion = null;
@@ -460,10 +459,10 @@ public class DisplayPluginUpdatesMojo
         Iterator<Plugin> i = plugins.iterator();
         while ( i.hasNext() )
         {
-            Object plugin = i.next();
-            String groupId = getPluginGroupId( plugin );
-            String artifactId = getPluginArtifactId( plugin );
-            String version = getPluginVersion( plugin );
+            Plugin plugin = i.next();
+            String groupId = plugin.getGroupId();
+            String artifactId = plugin.getArtifactId();
+            String version = plugin.getVersion();
             String coords = ArtifactUtils.versionlessKey( groupId, artifactId );
 
             if ( version == null )
@@ -919,8 +918,8 @@ public class DisplayPluginUpdatesMojo
         {
             for ( Plugin plugin : model.getBuild().getPlugins() )
             {
-                String coord = getPluginCoords( plugin );
-                String version = getPluginVersion( plugin );
+                String coord = plugin.getKey();
+                String version = plugin.getVersion();
                 if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
                 {
                     buildPlugins.put( coord, version );
@@ -939,8 +938,8 @@ public class DisplayPluginUpdatesMojo
                 {
                     for ( Plugin plugin : profile.getBuild().getPlugins() )
                     {
-                        String coord = getPluginCoords( plugin );
-                        String version = getPluginVersion( plugin );
+                        String coord = plugin.getKey();
+                        String version = plugin.getVersion();
                         if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
                         {
                             buildPlugins.put( coord, version );
@@ -990,7 +989,7 @@ public class DisplayPluginUpdatesMojo
             Set<Plugin> plugins = getBoundPlugins( project, "clean,deploy,site" );
             for ( Plugin plugin : plugins )
             {
-                lifecyclePlugins.put( getPluginCoords( plugin ), plugin );
+                lifecyclePlugins.put( plugin.getKey(), plugin );
             }
         }
         catch ( PluginNotFoundException e )
@@ -1132,12 +1131,10 @@ public class DisplayPluginUpdatesMojo
     {
         Set<Plugin> plugins = new HashSet<>();
         // first, bind those associated with the packaging
-        Map mappings = findMappingsForLifecycle( project, lifecycle );
+        Map<?,?> mappings = findMappingsForLifecycle( project, lifecycle );
 
-        Iterator iter = mappings.entrySet().iterator();
-        while ( iter.hasNext() )
+        for ( Map.Entry<?,?> entry : mappings.entrySet() )
         {
-            Map.Entry entry = (Map.Entry) iter.next();
             String value = (String) entry.getValue();
             String[] tokens = value.split( ":" );
 
@@ -1171,11 +1168,11 @@ public class DisplayPluginUpdatesMojo
      * @throws LifecycleExecutionException the lifecycle execution exception
      * @throws PluginNotFoundException the plugin not found exception
      */
-    private Map findMappingsForLifecycle( MavenProject project, Lifecycle lifecycle )
+    private Map<?,?> findMappingsForLifecycle( MavenProject project, Lifecycle lifecycle )
         throws LifecycleExecutionException, PluginNotFoundException
     {
         String packaging = project.getPackaging();
-        Map mappings = null;
+        Map<?,?> mappings = null;
 
         LifecycleMapping m = (LifecycleMapping) findExtension( project, LifecycleMapping.ROLE, packaging,
                                                                session.getSettings(), session.getLocalRepository() );
@@ -1184,7 +1181,7 @@ public class DisplayPluginUpdatesMojo
             mappings = m.getPhases( lifecycle.getId() );
         }
 
-        Map defaultMappings = lifecycle.getDefaultPhases();
+        Map<?,?> defaultMappings = lifecycle.getDefaultPhases();
 
         if ( mappings == null )
         {
@@ -1282,7 +1279,7 @@ public class DisplayPluginUpdatesMojo
     {
         Object pluginComponent = null;
 
-        for ( Iterator i = project.getBuildPlugins().iterator(); i.hasNext() && pluginComponent == null; )
+        for ( Iterator<?> i = project.getBuildPlugins().iterator(); i.hasNext() && pluginComponent == null; )
         {
             Plugin plugin = (Plugin) i.next();
 
@@ -1382,10 +1379,8 @@ public class DisplayPluginUpdatesMojo
 
         for ( Lifecycle lifecycle : lifecycles )
         {
-            for ( Iterator<String> p = lifecycle.getPhases().iterator(); p.hasNext(); )
+            for ( String phase : (List<String>) lifecycle.getPhases() )
             {
-                String phase = p.next();
-
                 if ( phaseToLifecycleMap.containsKey( phase ) )
                 {
                     Lifecycle prevLifecycle = phaseToLifecycleMap.get( phase );
@@ -1481,7 +1476,7 @@ public class DisplayPluginUpdatesMojo
             for ( Iterator<Plugin> i = lifecyclePlugins.iterator(); i.hasNext(); )
             {
                 Plugin lifecyclePlugin = i.next();
-                if ( getPluginVersion( lifecyclePlugin ) != null )
+                if ( lifecyclePlugin.getVersion() != null )
                 {
                     // version comes from lifecycle, therefore cannot modify
                     i.remove();
@@ -1489,7 +1484,7 @@ public class DisplayPluginUpdatesMojo
                 else
                 {
                     // lifecycle leaves version open
-                    String parentVersion = parentPluginManagement.get( getPluginCoords( lifecyclePlugin ) );
+                    String parentVersion = parentPluginManagement.get( lifecyclePlugin.getKey() );
                     if ( parentVersion != null )
                     {
                         // parent controls version
@@ -1512,9 +1507,9 @@ public class DisplayPluginUpdatesMojo
             for ( Iterator<Plugin> i = buildPlugins.iterator(); i.hasNext(); )
             {
                 Plugin buildPlugin = i.next();
-                if ( getPluginVersion( buildPlugin ) == null )
+                if ( buildPlugin.getVersion() == null )
                 {
-                    String parentVersion = parentPluginManagement.get( getPluginCoords( buildPlugin ) );
+                    String parentVersion = parentPluginManagement.get( buildPlugin.getKey() );
                     if ( parentVersion != null )
                     {
                         // parent controls version
@@ -1536,9 +1531,9 @@ public class DisplayPluginUpdatesMojo
             for ( Iterator<ReportPlugin> i = reportPlugins.iterator(); i.hasNext(); )
             {
                 ReportPlugin reportPlugin = i.next();
-                if ( getPluginVersion( reportPlugin ) == null )
+                if ( reportPlugin.getVersion() == null )
                 {
-                    String parentVersion = parentPluginManagement.get( getPluginCoords( reportPlugin ) );
+                    String parentVersion = parentPluginManagement.get( reportPlugin.getKey() );
                     if ( parentVersion != null )
                     {
                         // parent controls version
@@ -1605,22 +1600,22 @@ public class DisplayPluginUpdatesMojo
     {
         for ( Plugin plugin : projectPlugins )
         {
-            String coord = getPluginCoords( plugin );
-            String version = getPluginVersion( plugin );
+            String coord = plugin.getKey();
+            String version = plugin.getVersion();
             String parentVersion = parentDefinitions.get( coord );
             if ( version == null
-                && ( !plugins.containsKey( coord ) || getPluginVersion( plugins.get( coord ) ) == null )
+                && ( !plugins.containsKey( coord ) || plugins.get( coord ).getVersion() == null )
                 && parentVersion != null )
             {
                 Plugin parentPlugin = new Plugin();
-                parentPlugin.setGroupId( getPluginGroupId( plugin ) );
-                parentPlugin.setArtifactId( getPluginArtifactId( plugin ) );
+                parentPlugin.setGroupId( plugin.getGroupId() );
+                parentPlugin.setArtifactId( plugin.getArtifactId() );
                 parentPlugin.setVersion( parentVersion );
                 plugins.put( coord, parentPlugin );
             }
             else if ( parentVersion == null || !parentVersion.equals( version ) )
             {
-                if ( !plugins.containsKey( coord ) || getPluginVersion( plugins.get( coord ) ) == null )
+                if ( !plugins.containsKey( coord ) || plugins.get( coord ).getVersion() == null )
                 {
                     plugins.put( coord, plugin );
                 }
@@ -1639,21 +1634,19 @@ public class DisplayPluginUpdatesMojo
      * @param plugins a map with keys being the {@link String} corresponding to the versionless artifact key and values
      *            being {@link Plugin} or {@link ReportPlugin}.
      */
-    private void debugPluginMap( String description, Map plugins )
+    private void debugPluginMap( String description, Map<String, Plugin> plugins )
     {
         if ( getLog().isDebugEnabled() )
         {
-            Set sorted = new TreeSet( new PluginComparator() );
+            Set<Plugin> sorted = new TreeSet<>( new PluginComparator() );
             sorted.addAll( plugins.values() );
             StringBuilder buf = new StringBuilder( description );
-            Iterator i = sorted.iterator();
-            while ( i.hasNext() )
+            for ( Plugin plugin : sorted )
             {
-                Object plugin = i.next();
                 buf.append( "\n    " );
-                buf.append( getPluginCoords( plugin ) );
+                buf.append( plugin.getKey() );
                 buf.append( ":" );
-                buf.append( getPluginVersion( plugin ) );
+                buf.append( plugin.getVersion() );
             }
             getLog().debug( buf.toString() );
         }
@@ -1663,50 +1656,23 @@ public class DisplayPluginUpdatesMojo
      * Logs at debug level a map of plugin versions keyed by versionless key.
      *
      * @param description log description
-     * @param plugins a map with keys being the {@link String} corresponding to the versionless artifact key and values
+     * @param pluginVersions a map with keys being the {@link String} corresponding to the versionless artifact key and values
      *            being {@link String} plugin version.
      */
-    private void debugVersionMap( String description, Map plugins )
+    private void debugVersionMap( String description, Map<String, String> pluginVersions )
     {
         if ( getLog().isDebugEnabled() )
         {
             StringBuilder buf = new StringBuilder( description );
-            Iterator i = plugins.entrySet().iterator();
-            while ( i.hasNext() )
+            for ( Map.Entry<String, String> pluginVersion : pluginVersions.entrySet() )
             {
-                Map.Entry plugin = (Map.Entry) i.next();
                 buf.append( "\n    " );
-                buf.append( plugin.getKey() );
+                buf.append( pluginVersion.getKey() );
                 buf.append( ":" );
-                buf.append( plugin.getValue() );
+                buf.append( pluginVersion.getValue() );
             }
             getLog().debug( buf.toString() );
         }
-    }
-
-    /**
-     * Returns the coordinates of a plugin.
-     *
-     * @param plugin The plugin
-     * @return The groupId and artifactId separated by a colon.
-     * @since 1.0-alpha-1
-     */
-    private static String getPluginCoords( Object plugin )
-    {
-        return getPluginGroupId( plugin ) + ":" + getPluginArtifactId( plugin );
-    }
-
-    /**
-     * Returns the ArtifactId of a {@link Plugin} or {@link ReportPlugin}
-     *
-     * @param plugin the {@link Plugin} or {@link ReportPlugin}
-     * @return the ArtifactId of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0-alpha-1
-     */
-    private static String getPluginArtifactId( Object plugin )
-    {
-        return plugin instanceof ReportPlugin ? ( (ReportPlugin) plugin ).getArtifactId()
-                        : ( (Plugin) plugin ).getArtifactId();
     }
 
     private static Plugin toPlugin( ReportPlugin reportPlugin )
@@ -1729,32 +1695,6 @@ public class DisplayPluginUpdatesMojo
     }
 
     /**
-     * Returns the GroupId of a {@link Plugin} or {@link ReportPlugin}
-     *
-     * @param plugin the {@link Plugin} or {@link ReportPlugin}
-     * @return the GroupId of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0-alpha-1
-     */
-    private static String getPluginGroupId( Object plugin )
-    {
-        return plugin instanceof ReportPlugin ? ( (ReportPlugin) plugin ).getGroupId()
-                        : ( (Plugin) plugin ).getGroupId();
-    }
-
-    /**
-     * Returns the Version of a {@link Plugin} or {@link ReportPlugin}
-     *
-     * @param plugin the {@link Plugin} or {@link ReportPlugin}
-     * @return the Version of the {@link Plugin} or {@link ReportPlugin}
-     * @since 1.0-alpha-1
-     */
-    private static String getPluginVersion( Object plugin )
-    {
-        return plugin instanceof ReportPlugin ? ( (ReportPlugin) plugin ).getVersion()
-                        : ( (Plugin) plugin ).getVersion();
-    }
-
-    /**
      * Gets the report plugins of a specific project.
      *
      * @param model the model to get the report plugins from.
@@ -1770,8 +1710,8 @@ public class DisplayPluginUpdatesMojo
         {
             for ( ReportPlugin plugin : model.getReporting().getPlugins() )
             {
-                String coord = getPluginCoords( plugin );
-                String version = getPluginVersion( plugin );
+                String coord = plugin.getKey();
+                String version = plugin.getVersion();
                 if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
                 {
                     reportPlugins.put( coord, version );
@@ -1790,8 +1730,8 @@ public class DisplayPluginUpdatesMojo
                 {
                     for ( ReportPlugin plugin : profile.getReporting().getPlugins() )
                     {
-                        String coord = getPluginCoords( plugin );
-                        String version = getPluginVersion( plugin );
+                        String coord = plugin.getKey();
+                        String version = plugin.getVersion();
                         if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
                         {
                             reportPlugins.put( coord, version );
