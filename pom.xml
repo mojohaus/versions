@@ -98,8 +98,8 @@
   <scm>
     <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
-    <url>https://github.com/mojohaus/versions-maven-plugin</url>
-    <tag>versions-maven-plugin-2.5</tag>
+    <url>https://github.com/mojohaus/versions-maven-plugin/tree/${project.scm.tag}</url>
+    <tag>master</tag>
   </scm>
   <issueManagement>
     <system>github</system>
