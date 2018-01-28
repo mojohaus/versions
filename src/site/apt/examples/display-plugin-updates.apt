@@ -336,7 +336,7 @@ mvn versions:display-plugin-updates
 [INFO] No plugins require a newer version of Maven than specified by the pom.
 [INFO]
 [INFO] Require Maven 2.0.9 to use the following plugin updates:
-[INFO]   maven-javadoc-plugin ............................................ 2.8
+[INFO]   maven-javadoc-plugin .................................... 2.7 ->  2.8
 [INFO]
 [INFO] Require Maven 2.1.0 to use the following plugin updates:
 [INFO]   maven-site-plugin ...................................... 2.0 -> 2.1.1
