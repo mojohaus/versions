@@ -381,14 +381,14 @@ public class DisplayPluginUpdatesMojo
         Set<Plugin> plugins = getProjectPlugins( superPomPluginManagement, parentPlugins, parentBuildPlugins,
                                                  parentReportPlugins, pluginsWithVersionsSpecified );
 
-        List<String> updates = new ArrayList<>();
-        List<String> lockdowns = new ArrayList<>();
+        List<String> pluginUpdates = new ArrayList<>();
+        List<String> pluginLockdowns = new ArrayList<>();
         ArtifactVersion curMavenVersion = runtimeInformation.getApplicationVersion();
         ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject(), "2.0" ) );
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
         // if Maven prerequisite upgraded to a version, Map<plugin compact key, latest compatible plugin vesion>
-        Map<ArtifactVersion, Map<String, String>> upgrades = new TreeMap<>( new MavenVersionComparator() );
+        Map<ArtifactVersion, Map<String, String>> mavenUpgrades = new TreeMap<>( new MavenVersionComparator() );
 
         for ( Plugin plugin : plugins )
         {
@@ -456,16 +456,19 @@ public class DisplayPluginUpdatesMojo
                         // upgrade
                         if ( minRequires == null || compare( minRequires, pluginRequires ) > 0 )
                         {
-                            Map<String, String> upgradePlugins = upgrades.get( pluginRequires );
+                            Map<String, String> upgradePlugins = mavenUpgrades.get( pluginRequires );
                             if ( upgradePlugins == null )
                             {
-                                upgrades.put( pluginRequires, upgradePlugins = new LinkedHashMap<String, String>() );
+                                mavenUpgrades.put( pluginRequires,
+                                                   upgradePlugins = new LinkedHashMap<String, String>() );
                             }
 
                             String upgradePluginKey = compactKey( groupId, artifactId );
                             if ( !upgradePlugins.containsKey( upgradePluginKey ) )
                             {
-                                upgradePlugins.put( upgradePluginKey, newerVersions[j].toString() );
+                                upgradePlugins.put( upgradePluginKey,
+                                                    pad( upgradePluginKey, INFO_PAD_SIZE,
+                                                         effectiveVersion, " -> ", newerVersions[j].toString() ) );
                             }
                             minRequires = pluginRequires;
                         }
@@ -534,7 +537,7 @@ public class DisplayPluginUpdatesMojo
                     superPomDrivingMinVersion = true;
                 }
 
-                lockdowns.add( pad( compactKey( groupId, artifactId ), WARN_PAD_SIZE,
+                pluginLockdowns.add( pad( compactKey( groupId, artifactId ), WARN_PAD_SIZE,
                                     superPomDrivingMinVersion ? FROM_SUPER_POM : "", newVersion ) );
             }
             else if ( artifactVersion != null )
@@ -548,37 +551,46 @@ public class DisplayPluginUpdatesMojo
             if ( version != null && artifactVersion != null && newVersion != null && effectiveVersion != null
                 && new DefaultArtifactVersion( effectiveVersion ).compareTo( new DefaultArtifactVersion( newVersion ) ) < 0 )
             {
-                updates.add( pad( compactKey( groupId, artifactId ), INFO_PAD_SIZE,
+                pluginUpdates.add( pad( compactKey( groupId, artifactId ), INFO_PAD_SIZE,
                                   effectiveVersion, " -> ", newVersion ) );
             }
         }
+
+        // info on each plugin gathered: now it's time to display the result!
+        //
         logLine( false, "" );
-        if ( updates.isEmpty() )
+
+        // updates keeping currently defined Maven version minimum
+        if ( pluginUpdates.isEmpty() )
         {
             logLine( false, "All plugins with a version specified are using the latest versions." );
         }
         else
         {
             logLine( false, "The following plugin updates are available:" );
-            for ( String update : updates )
+            for ( String update : pluginUpdates )
             {
                 logLine( false, update );
             }
         }
         logLine( false, "" );
-        if ( lockdowns.isEmpty() )
+
+        // has every plugin a specified version?
+        if ( pluginLockdowns.isEmpty() )
         {
             logLine( false, "All plugins have a version specified." );
         }
         else
         {
             getLog().warn( "The following plugins do not have their version specified:" );
-            for ( String lockdown : lockdowns )
+            for ( String lockdown : pluginLockdowns )
             {
                 getLog().warn( lockdown );
             }
         }
         logLine( false, "" );
+
+        // information on minimum Maven version
         boolean noMavenMinVersion = getRequiredMavenVersion( getProject(), null ) == null;
         boolean noExplicitMavenMinVersion =
             getProject().getPrerequisites() == null || getProject().getPrerequisites().getMaven() == null;
@@ -662,7 +674,9 @@ public class DisplayPluginUpdatesMojo
                 logLine( false, "No plugins require a newer version of Maven than specified by the pom." );
             }
         }
-        for ( Map.Entry<ArtifactVersion, Map<String, String>> mavenUpgrade : upgrades.entrySet() )
+
+        // updates if minimum Maven version is changed
+        for ( Map.Entry<ArtifactVersion, Map<String, String>> mavenUpgrade : mavenUpgrades.entrySet() )
         {
             ArtifactVersion mavenUpgradeVersion = mavenUpgrade.getKey();
             Map<String, String> upgradePlugins = mavenUpgrade.getValue();
@@ -674,7 +688,7 @@ public class DisplayPluginUpdatesMojo
             logLine( false, "Require Maven " + mavenUpgradeVersion + " to use the following plugin updates:" );
             for ( Map.Entry<String, String> entry : upgradePlugins.entrySet() )
             {
-                logLine( false, pad( entry.getKey(), INFO_PAD_SIZE, entry.getValue() ) );
+                logLine( false, entry.getValue() );
             }
         }
         logLine( false, "" );
