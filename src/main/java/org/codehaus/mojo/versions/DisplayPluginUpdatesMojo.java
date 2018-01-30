@@ -466,9 +466,19 @@ public class DisplayPluginUpdatesMojo
                             String upgradePluginKey = compactKey( groupId, artifactId );
                             if ( !upgradePlugins.containsKey( upgradePluginKey ) )
                             {
-                                upgradePlugins.put( upgradePluginKey,
-                                                    pad( upgradePluginKey, INFO_PAD_SIZE,
-                                                         effectiveVersion, " -> ", newerVersions[j].toString() ) );
+                                String newer = newerVersions[j].toString();
+                                if ( newer.equals( effectiveVersion ) )
+                                {
+                                    // plugin version configured that require a Maven version higher than spec
+                                    upgradePlugins.put( upgradePluginKey,
+                                                        pad( upgradePluginKey, INFO_PAD_SIZE, newer ) );
+                                }
+                                else
+                                {
+                                    // plugin that can be upgraded
+                                    upgradePlugins.put( upgradePluginKey, pad( upgradePluginKey, INFO_PAD_SIZE,
+                                                                               effectiveVersion, " -> ", newer ) );
+                                }
                             }
                             minRequires = pluginRequires;
                         }
