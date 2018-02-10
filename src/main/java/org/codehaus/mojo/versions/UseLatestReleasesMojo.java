@@ -108,6 +108,17 @@ public class UseLatestReleasesMojo
             {
                 useLatestReleases( pom, getProject().getDependencies() );
             }
+            if ( getProject().getParent() != null && isProcessingParent() )
+            {
+                Dependency dependency = new Dependency();
+                dependency.setArtifactId(getProject().getParent().getArtifactId());
+                dependency.setGroupId(getProject().getParent().getGroupId());
+                dependency.setVersion(getProject().getParent().getVersion());
+                dependency.setType("pom");
+                List list = new ArrayList();
+                list.add(dependency);
+                useLatestReleases( pom, list);
+            }
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
@@ -156,6 +167,15 @@ public class UseLatestReleasesMojo
                 if ( filteredVersions.length > 0 )
                 {
                     String newVersion = filteredVersions[filteredVersions.length - 1].toString();
+                    if(getProject().getParent() != null){
+                        if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
+                        {
+                            if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
+                            {
+                                getLog().debug( "Made parent update from " + version + " to " + newVersion.toString() );
+                            }
+                        }
+                    }
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
                                                          newVersion, getProject().getModel() ) )
                     {
