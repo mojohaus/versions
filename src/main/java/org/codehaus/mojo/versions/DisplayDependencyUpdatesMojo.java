@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -53,10 +54,9 @@ import javax.xml.stream.XMLStreamException;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false )
+@Mojo(name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false)
 public class DisplayDependencyUpdatesMojo
-    extends AbstractVersionsDisplayMojo
-{
+        extends AbstractVersionsDisplayMojo {
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -72,7 +72,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 1.2
      */
-    @Parameter( property = "processDependencyManagement", defaultValue = "true" )
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
     private boolean processDependencyManagement;
 
     /**
@@ -80,7 +80,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 1.2
      */
-    @Parameter( property = "processDependencies", defaultValue = "true" )
+    @Parameter(property = "processDependencies", defaultValue = "true")
     private boolean processDependencies;
 
     /**
@@ -88,7 +88,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "processPluginDependencies", defaultValue = "true" )
+    @Parameter(property = "processPluginDependencies", defaultValue = "true")
     private boolean processPluginDependencies;
 
     /**
@@ -96,13 +96,14 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "processPluginDependenciesInPluginManagement", defaultValue = "true" )
+    @Parameter(property = "processPluginDependenciesInPluginManagement", defaultValue = "true")
     private boolean processPluginDependenciesInPluginManagement;
 
     /**
      * Whether to allow the major version number to be changed.
      * You need to set {@link #allowAnyUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
+     *
      * @since 2.5
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
@@ -111,7 +112,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the minor version number to be changed.
      * You need to set {@link #allowMajorUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -121,7 +122,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the incremental version number to be changed.
      * You need to set {@link #allowMinorUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -134,8 +135,9 @@ public class DisplayDependencyUpdatesMojo
      * If you set this to false you can control changes in version
      * number by {@link #allowMajorUpdates}, {@link #allowMinorUpdates} or
      * {@link #allowIncrementalUpdates}.
-     * @deprecated This will be removed with version 3.0.0
+     *
      * @since 2.5
+     * @deprecated This will be removed with version 3.0.0
      */
     @Parameter(property = "allowAnyUpdates", defaultValue = "true")
     private boolean allowAnyUpdates;
@@ -145,23 +147,23 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.1
      */
-    @Parameter( property = "verbose", defaultValue = "false" )
+    @Parameter(property = "verbose", defaultValue = "false")
     private boolean verbose;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
-    private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )
-    {
-        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
-        if ( build.getPluginManagement() != null )
-        {
-            for ( Plugin plugin : build.getPluginManagement().getPlugins() )
-            {
-                if ( plugin.getDependencies() != null && !plugin.getDependencies().isEmpty() )
-                {
-                    for ( Dependency pluginDependency : plugin.getDependencies() )
-                    {
-                        result.add( pluginDependency );
+    private Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement(Build build) throws MojoExecutionException {
+        Set<Dependency> result = new TreeSet<>(new DependencyComparator());
+        if (build.getPluginManagement() != null) {
+            for (Plugin plugin : build.getPluginManagement().getPlugins()) {
+                if (plugin.getDependencies() != null && !plugin.getDependencies().isEmpty()) {
+                    for (Dependency pluginDependency : plugin.getDependencies()) {
+                        Artifact artifact = this.toArtifact(pluginDependency);
+                        if (!isIncluded(artifact)) {
+                            continue;
+                        }
+
+                        result.add(pluginDependency);
                     }
                 }
             }
@@ -169,16 +171,17 @@ public class DisplayDependencyUpdatesMojo
         return result;
     }
 
-    private static Set<Dependency> extractDependenciesFromPlugins( List<Plugin> plugins )
-    {
-        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
-        for ( Plugin plugin : plugins )
-        {
-            if ( plugin.getDependencies() != null && !plugin.getDependencies().isEmpty() )
-            {
-                for ( Dependency pluginDependency : plugin.getDependencies() )
-                {
-                    result.add( pluginDependency );
+    private Set<Dependency> extractDependenciesFromPlugins(List<Plugin> plugins) throws MojoExecutionException {
+        Set<Dependency> result = new TreeSet<>(new DependencyComparator());
+        for (Plugin plugin : plugins) {
+            if (plugin.getDependencies() != null && !plugin.getDependencies().isEmpty()) {
+                for (Dependency pluginDependency : plugin.getDependencies()) {
+                    Artifact artifact = this.toArtifact(pluginDependency);
+                    if (!isIncluded(artifact)) {
+                        continue;
+                    }
+
+                    result.add(pluginDependency);
                 }
             }
         }
@@ -189,64 +192,54 @@ public class DisplayDependencyUpdatesMojo
      * Returns a set of dependencies where the dependencies which are defined in the dependency management section have
      * been filtered out.
      *
-     * @param dependencies The set of dependencies.
+     * @param dependencies         The set of dependencies.
      * @param dependencyManagement The set of dependencies from the dependency management section.
      * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency
-     *         management dependencies.
+     * management dependencies.
      * @since 1.0-beta-1
      */
-    private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
-    {
-        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
-        for ( Iterator<Dependency> i = dependencies.iterator(); i.hasNext(); )
-        {
+    private static Set<Dependency> removeDependencyManagment(Set<Dependency> dependencies, Set<Dependency> dependencyManagement) {
+        Set<Dependency> result = new TreeSet<>(new DependencyComparator());
+        for (Iterator<Dependency> i = dependencies.iterator(); i.hasNext(); ) {
             Dependency c = i.next();
             boolean matched = false;
             Iterator<Dependency> j = dependencyManagement.iterator();
-            while ( !matched && j.hasNext() )
-            {
-                Dependency t =j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
-                    && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
-                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )
-                    && ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) )
-                    && ( c.getVersion() == null || t.getVersion() == null
-                        || StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
-                {
+            while (!matched && j.hasNext()) {
+                Dependency t = j.next();
+                if (StringUtils.equals(t.getGroupId(), c.getGroupId())
+                        && StringUtils.equals(t.getArtifactId(), c.getArtifactId())
+                        && (t.getScope() == null || StringUtils.equals(t.getScope(), c.getScope()))
+                        && (t.getClassifier() == null || StringUtils.equals(t.getClassifier(), c.getClassifier()))
+                        && (c.getVersion() == null || t.getVersion() == null
+                        || StringUtils.equals(t.getVersion(), c.getVersion()))) {
                     matched = true;
                     break;
                 }
             }
-            if ( !matched )
-            {
-                result.add( c );
+            if (!matched) {
+                result.add(c);
             }
         }
         return result;
     }
 
-    public boolean isProcessingDependencyManagement()
-    {
+    public boolean isProcessingDependencyManagement() {
         return processDependencyManagement;
     }
 
-    public boolean isProcessingDependencies()
-    {
+    public boolean isProcessingDependencies() {
         return processDependencies;
     }
 
-    public boolean isProcessingPluginDependencies()
-    {
+    public boolean isProcessingPluginDependencies() {
         return processPluginDependencies;
     }
 
-    public boolean isProcessPluginDependenciesInDependencyManagement()
-    {
+    public boolean isProcessPluginDependenciesInDependencyManagement() {
         return processPluginDependenciesInPluginManagement;
     }
 
-    public boolean isVerbose()
-    {
+    public boolean isVerbose() {
         return verbose;
     }
 
@@ -256,134 +249,122 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()
      * @since 1.0-alpha-1
      */
     public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
+            throws MojoExecutionException, MojoFailureException {
         logInit();
 
-        Set<Dependency> dependencyManagement = new TreeSet<>( new DependencyComparator() );
-        if ( getProject().getDependencyManagement() != null )
-        {
+        Set<Dependency> dependencyManagement = new TreeSet<>(new DependencyComparator());
+        if (getProject().getDependencyManagement() != null) {
 
             List<Dependency> dependenciesFromPom = getProject().getDependencyManagement().getDependencies();
-            for ( Dependency dependency : dependenciesFromPom )
-            {
-                getLog().debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
-                    + ":" + dependency.getVersion() );
-                if ( dependency.getVersion() == null )
-                {
+            for (Dependency dependency : dependenciesFromPom) {
+                getLog().debug("dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
+                        + ":" + dependency.getVersion());
+                if (dependency.getVersion() == null) {
                     // get parent and get the information from there.
-                    if ( getProject().hasParent() )
-                    {
-                        getLog().debug( "Reading parent dependencyManagement information" );
-                        if ( getProject().getParent().getDependencyManagement() != null )
-                        {
+                    if (getProject().hasParent()) {
+                        getLog().debug("Reading parent dependencyManagement information");
+                        if (getProject().getParent().getDependencyManagement() != null) {
                             List<Dependency> parentDeps =
-                                getProject().getParent().getDependencyManagement().getDependencies();
-                            for ( Dependency parentDep : parentDeps )
-                            {
+                                    getProject().getParent().getDependencyManagement().getDependencies();
+                            for (Dependency parentDep : parentDeps) {
                                 // only groupId && artifactId needed cause version is null
-                                if ( dependency.getGroupId().equals( parentDep.getGroupId() )
-                                    && dependency.getArtifactId().equals( parentDep.getArtifactId() )
-                                    && dependency.getType().equals( parentDep.getType() ) )
-                                {
-                                    dependencyManagement.add( parentDep );
+                                if (dependency.getGroupId().equals(parentDep.getGroupId())
+                                        && dependency.getArtifactId().equals(parentDep.getArtifactId())
+                                        && dependency.getType().equals(parentDep.getType())) {
+
+                                    Artifact artifact = this.toArtifact(parentDep);
+                                    if (!isIncluded(artifact)) {
+                                        continue;
+                                    }
+
+                                    dependencyManagement.add(parentDep);
                                 }
                             }
                         }
-                    }
-                    else
-                    {
+                    } else {
                         String message = "We can't get the version for the dependency " + dependency.getGroupId() + ":"
-                            + dependency.getArtifactId() + " cause there does not exist a parent.";
-                        getLog().error( message );
+                                + dependency.getArtifactId() + " cause there does not exist a parent.";
+                        getLog().error(message);
                         // Throw error cause we will not able to get a version for a dependency.
-                        throw new MojoExecutionException( message );
+                        throw new MojoExecutionException(message);
                     }
-                }
-                else
-                {
-                    dependencyManagement.add( dependency );
+                } else {
+                    Artifact artifact = this.toArtifact(dependency);
+                    if (!isIncluded(artifact)) {
+                        continue;
+                    }
+
+                    dependencyManagement.add(dependency);
                 }
             }
         }
 
-        Set<Dependency> dependencies = new TreeSet<>( new DependencyComparator() );
-        dependencies.addAll( getProject().getDependencies() );
+        Set<Dependency> dependencies = new TreeSet<>(new DependencyComparator());
 
-        if ( isProcessingDependencyManagement() )
-        {
-            dependencies = removeDependencyManagment( dependencies, dependencyManagement );
+        for (Object obj : getProject().getDependencies()) {
+            Dependency dependency = (Dependency) obj;
+
+            Artifact artifact = this.toArtifact(dependency);
+            if (!isIncluded(artifact)) {
+                continue;
+            }
+
+            dependencies.add(dependency);
         }
 
-        Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
-
-        if ( isProcessingPluginDependencies() )
-        {
-            pluginDependencies = extractDependenciesFromPlugins( getProject().getBuildPlugins() );
+        if (isProcessingDependencyManagement()) {
+            dependencies = removeDependencyManagment(dependencies, dependencyManagement);
         }
 
-        Set<Dependency> pluginDependenciesInPluginManagement = new TreeSet<>( new DependencyComparator() );
-        if ( isProcessPluginDependenciesInDependencyManagement() )
-        {
+        Set<Dependency> pluginDependencies = new TreeSet<>(new DependencyComparator());
+
+        if (isProcessingPluginDependencies()) {
+            pluginDependencies = extractDependenciesFromPlugins(getProject().getBuildPlugins());
+        }
+
+        Set<Dependency> pluginDependenciesInPluginManagement = new TreeSet<>(new DependencyComparator());
+        if (isProcessPluginDependenciesInDependencyManagement()) {
             pluginDependenciesInPluginManagement =
-                extractPluginDependenciesFromPluginsInPluginManagement( getProject().getBuild() );
+                    extractPluginDependenciesFromPluginsInPluginManagement(getProject().getBuild());
         }
 
-        try
-        {
-            if ( isProcessingDependencyManagement() )
-            {
-                logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
-                            "Dependency Management" );
+        try {
+            if (isProcessingDependencyManagement()) {
+                logUpdates(getHelper().lookupDependenciesUpdates(dependencyManagement, false),
+                        "Dependency Management");
             }
-            if ( isProcessingDependencies() )
-            {
-                logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
+            if (isProcessingDependencies()) {
+                logUpdates(getHelper().lookupDependenciesUpdates(dependencies, false), "Dependencies");
             }
-            if ( isProcessPluginDependenciesInDependencyManagement() )
-            {
-                logUpdates( getHelper().lookupDependenciesUpdates( pluginDependenciesInPluginManagement, false ),
-                            "pluginManagement of plugins" );
+            if (isProcessPluginDependenciesInDependencyManagement()) {
+                logUpdates(getHelper().lookupDependenciesUpdates(pluginDependenciesInPluginManagement, false),
+                        "pluginManagement of plugins");
             }
-            if ( isProcessingPluginDependencies() )
-            {
-                logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
+            if (isProcessingPluginDependencies()) {
+                logUpdates(getHelper().lookupDependenciesUpdates(pluginDependencies, false), "Plugin Dependencies");
             }
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (InvalidVersionSpecificationException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
+        } catch (ArtifactMetadataRetrievalException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private UpdateScope calculateUpdateScope()
-    {
+    private UpdateScope calculateUpdateScope() {
         UpdateScope result = UpdateScope.ANY;
-        if ( !allowAnyUpdates )
-        {
-            if ( allowMajorUpdates )
-            {
+        if (!allowAnyUpdates) {
+            if (allowMajorUpdates) {
                 result = UpdateScope.MAJOR;
-            }
-            else
-            {
-                if ( allowMinorUpdates )
-                {
+            } else {
+                if (allowMinorUpdates) {
                     result = UpdateScope.MINOR;
-                }
-                else
-                {
-                    if ( allowIncrementalUpdates )
-                    {
+                } else {
+                    if (allowIncrementalUpdates) {
                         result = UpdateScope.INCREMENTAL;
                     }
                 }
@@ -392,103 +373,81 @@ public class DisplayDependencyUpdatesMojo
         return result;
     }
 
-    private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
-    {
+    private void logUpdates(Map<Dependency, ArtifactVersions> updates, String section) {
         List<String> withUpdates = new ArrayList<>();
         List<String> usingCurrent = new ArrayList<>();
         Iterator i = updates.values().iterator();
-        while ( i.hasNext() )
-        {
+        while (i.hasNext()) {
             ArtifactVersions versions = (ArtifactVersions) i.next();
-            String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
+            String left = "  " + ArtifactUtils.versionlessKey(versions.getArtifact()) + " ";
             final String current;
             ArtifactVersion latest;
-            if ( versions.isCurrentVersionDefined() )
-            {
+            if (versions.isCurrentVersionDefined()) {
                 current = versions.getCurrentVersion().toString();
-                latest = versions.getNewestUpdate( calculateUpdateScope(), allowSnapshots );
-            }
-            else
-            {
+                latest = versions.getNewestUpdate(calculateUpdateScope(), allowSnapshots);
+            } else {
                 ArtifactVersion newestVersion =
-                    versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
+                        versions.getNewestVersion(versions.getArtifact().getVersionRange(), allowSnapshots);
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null ? null
-                                : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
-                if ( latest != null
-                    && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
-                {
+                        : versions.getNewestUpdate(newestVersion, calculateUpdateScope(), allowSnapshots);
+                if (latest != null
+                        && ArtifactVersions.isVersionInRange(latest, versions.getArtifact().getVersionRange())) {
                     latest = null;
                 }
             }
-            String right = " " + ( latest == null ? current : current + " -> " + latest.toString() );
+            String right = " " + (latest == null ? current : current + " -> " + latest.toString());
             List<String> t = latest == null ? usingCurrent : withUpdates;
-            if ( right.length() + left.length() + 3 > INFO_PAD_SIZE )
-            {
-                t.add( left + "..." );
-                t.add( StringUtils.leftPad( right, INFO_PAD_SIZE ) );
+            if (right.length() + left.length() + 3 > INFO_PAD_SIZE) {
+                t.add(left + "...");
+                t.add(StringUtils.leftPad(right, INFO_PAD_SIZE));
 
-            }
-            else
-            {
-                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE - right.length(), "." ) + right );
+            } else {
+                t.add(StringUtils.rightPad(left, INFO_PAD_SIZE - right.length(), ".") + right);
             }
         }
 
-        if ( isVerbose() )
-        {
-            if ( usingCurrent.isEmpty() )
-            {
-                if ( !withUpdates.isEmpty() )
-                {
-                    logLine( false, "No dependencies in " + section + " are using the newest version." );
-                    logLine( false, "" );
+        if (isVerbose()) {
+            if (usingCurrent.isEmpty()) {
+                if (!withUpdates.isEmpty()) {
+                    logLine(false, "No dependencies in " + section + " are using the newest version.");
+                    logLine(false, "");
                 }
-            }
-            else
-            {
-                logLine( false, "The following dependencies in " + section + " are using the newest version:" );
+            } else {
+                logLine(false, "The following dependencies in " + section + " are using the newest version:");
                 i = usingCurrent.iterator();
-                while ( i.hasNext() )
-                {
-                    logLine( false, (String) i.next() );
+                while (i.hasNext()) {
+                    logLine(false, (String) i.next());
                 }
-                logLine( false, "" );
-            }
-        }        
-        
-        
-        if ( withUpdates.isEmpty() )
-        {
-            if ( !usingCurrent.isEmpty() )
-            {
-                logLine( false, "No dependencies in " + section + " have newer versions." );
-                logLine( false, "" );
+                logLine(false, "");
             }
         }
-        else
-        {
-            logLine( false, "The following dependencies in " + section + " have newer versions:" );
-            i = withUpdates.iterator();
-            while ( i.hasNext() )
-            {
-                logLine( false, (String) i.next() );
+
+        if (withUpdates.isEmpty()) {
+            if (!usingCurrent.isEmpty()) {
+                logLine(false, "No dependencies in " + section + " have newer versions.");
+                logLine(false, "");
             }
-            logLine( false, "" );
+        } else {
+            logLine(false, "The following dependencies in " + section + " have newer versions:");
+            i = withUpdates.iterator();
+            while (i.hasNext()) {
+                logLine(false, (String) i.next());
+            }
+            logLine(false, "");
         }
     }
 
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException {
         // do nothing
     }
 
