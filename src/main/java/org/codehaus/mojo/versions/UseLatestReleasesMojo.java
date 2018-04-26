@@ -180,7 +180,7 @@ public class UseLatestReleasesMojo
                         {
                             if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
                             {
-                                getLog().debug( "Made parent update from " + version + " to " + newVersion.toString() );
+                                getLog().info( "Made parent update from " + version + " to " + newVersion.toString() );
                             }
                         }
                     }
