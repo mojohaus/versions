@@ -86,6 +86,14 @@ public class UseLatestReleasesMojo
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     protected boolean allowIncrementalUpdates;
 
+    /**
+     * Whether to allow update the snapshot version with latest release
+     *
+     * @since 2.6
+     */
+    @Parameter( property = "updateSnapshotsDependencies", defaultValue = "false" )
+    protected boolean updateSnapshotsDependencies;
+
     // ------------------------------ METHODS --------------------------
 
     /**
@@ -147,7 +155,7 @@ public class UseLatestReleasesMojo
 
             String version = dep.getVersion();
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
-            if ( !versionMatcher.matches() )
+            if (updateSnapshotsDependencies || !versionMatcher.matches())
             {
                 Artifact artifact = this.toArtifact( dep );
                 if ( !isIncluded( artifact ) )
