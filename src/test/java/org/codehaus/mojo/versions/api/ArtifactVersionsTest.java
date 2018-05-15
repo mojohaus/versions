@@ -48,7 +48,6 @@ public class ArtifactVersionsTest
             new ArtifactVersions( artifact, Arrays.asList( versions ), new MavenVersionComparator() );
         assertEquals( "artifact", instance.getArtifactId() );
         assertEquals( "group", instance.getGroupId() );
-        System.out.println( Arrays.asList( instance.getVersions() ) );
         assertArrayEquals(
             versions( "1.0", "1.0.1", "1.1", "3.0" ),
             instance.getVersions() );
