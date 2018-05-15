@@ -33,10 +33,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-/**
- * Created by IntelliJ IDEA. User: user Date: 10-Feb-2009 Time: 18:33:04 To change this template use File | Settings |
- * File Templates.
- */
 public class ArtifactVersionsTest
 {
 
