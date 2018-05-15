@@ -8,15 +8,18 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class SeparatePatternsForIncludesAnExcludesTest
-    extends TestCase
 {
 
     AbstractVersionsDependencyUpdaterMojo mojo;
 
-    protected void setUp()
+    @Before
+    public void setUp()
         throws Exception
     {
         mojo = new AbstractVersionsDependencyUpdaterMojo()
@@ -28,12 +31,14 @@ public class SeparatePatternsForIncludesAnExcludesTest
         };
     }
 
+    @Test
     public void testSeparatePatternsWithNull()
     {
         List patterns = mojo.separatePatterns( null );
         assertEquals( 0, patterns.size() );
     }
 
+    @Test
     public void testSeparatePatternsWithSinglePattern()
     {
         List patterns = mojo.separatePatterns( "group:artifact:type:version" );
@@ -41,6 +46,7 @@ public class SeparatePatternsForIncludesAnExcludesTest
         assertEquals( "group:artifact:type:version", patterns.get( 0 ) );
     }
 
+    @Test
     public void testSeparatePatternWithSingleRange()
     {
         List patterns = mojo.separatePatterns( "group:artifact:type:[1.0.2,2.0.0]" );
@@ -52,6 +58,7 @@ public class SeparatePatternsForIncludesAnExcludesTest
         assertEquals( "group:artifact:type:(1.0.2,2.0.0]", patterns.get( 0 ) );
     }
 
+    @Test
     public void testSeparatePatternWithSeveralPatternsAndRanges()
     {
         List patterns = mojo.separatePatterns( "group:artifact:type:[1.0.2,2.0.0),group2:artifact:type:(1.0.2,2.0.0]" );
@@ -60,6 +67,7 @@ public class SeparatePatternsForIncludesAnExcludesTest
         assertEquals( "group2:artifact:type:(1.0.2,2.0.0]", patterns.get( 1 ) );
     }
 
+    @Test
     public void testSeparatePatternsWithTwoCommaSeparatedPatterns()
     {
         List patterns = mojo.separatePatterns( "group:artifact:type:version,group:artifact:type:version2" );
@@ -68,6 +76,7 @@ public class SeparatePatternsForIncludesAnExcludesTest
         assertEquals( "group:artifact:type:version2", patterns.get( 1 ) );
     }
 
+    @Test
     public void testSeparatePatternsWithSeveralCommaSeparatedPatterns()
     {
         List patterns =

@@ -19,14 +19,16 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
-import junit.framework.TestCase;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class MercuryVersionComparatorTest
-    extends TestCase
 {
     private MercuryVersionComparator instance = new MercuryVersionComparator();
 
+    @Test
     public void testSegmentCounting()
         throws Exception
     {
@@ -38,6 +40,7 @@ public class MercuryVersionComparatorTest
         assertEquals( 0, instance.getSegmentCount( new DefaultArtifactVersion( "" ) ) );
     }
 
+    @Test
     public void testSegmentIncrementing()
         throws Exception
     {

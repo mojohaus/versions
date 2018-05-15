@@ -19,25 +19,28 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
+import org.junit.Test;
 
 import java.util.Arrays;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by IntelliJ IDEA. User: user Date: 10-Feb-2009 Time: 18:33:04 To change this template use File | Settings |
  * File Templates.
  */
 public class ArtifactVersionsTest
-    extends TestCase
 {
 
+    @Test
     public void testSmokes()
         throws Exception
     {
@@ -67,25 +70,4 @@ public class ArtifactVersionsTest
         assertNull(
             instance.getNewestVersion( new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ) ) );
     }
-
-    private static void assertArrayEquals( ArtifactVersion[] expected, ArtifactVersion[] actual )
-    {
-        try
-        {
-            assertEquals( "array length", expected.length, actual.length );
-            for ( int i = 0; i < expected.length; i++ )
-            {
-                assertEquals( "item[" + i + "]", expected[i].toString(), actual[i].toString() );
-            }
-        }
-        catch ( AssertionFailedError e )
-        {
-            final AssertionFailedError error = new AssertionFailedError(
-                "expected: " + Arrays.asList( expected ) + " but was: " + Arrays.asList( actual ) );
-            error.initCause( e );
-            throw error;
-
-        }
-    }
-
 }

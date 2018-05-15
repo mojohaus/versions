@@ -19,8 +19,6 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import junit.framework.TestCase;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.manager.DefaultWagonManager;
@@ -46,6 +44,7 @@ import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +52,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.mockito.Mockito.any;
@@ -66,9 +68,9 @@ import static org.mockito.Mockito.same;
  * Test {@link DefaultVersionsHelper}
  */
 public class DefaultVersionsHelperTest
-    extends TestCase
 {
-    
+
+    @Test
     public void testPerRuleVersionsIgnored() throws Exception
     {
         final ArtifactMetadataSource metadataSource = mock( ArtifactMetadataSource.class );
@@ -99,7 +101,8 @@ public class DefaultVersionsHelperTest
         assertEquals( 3, actual.size() );
         assertThat( actual, hasItems( three, oneTwoHundred, illegal ) );
     }
-    
+
+    @Test
     public void testGlobalRuleVersionsIgnored() throws Exception
     {
         final ArtifactMetadataSource metadataSource = mock( ArtifactMetadataSource.class );
@@ -132,7 +135,8 @@ public class DefaultVersionsHelperTest
         assertEquals( 4, actual.size() );
         assertThat( actual, hasItems( one, two, three, illegal ) );
     }
-    
+
+    @Test
     public void testWildcardMatching()
         throws Exception
     {
@@ -143,6 +147,7 @@ public class DefaultVersionsHelperTest
         assertTrue( DefaultVersionsHelper.exactMatch( "c*oo*r", "com.foo.bar" ) );
     }
 
+    @Test
     public void testRuleSets()
         throws Exception
     {
@@ -164,6 +169,7 @@ public class DefaultVersionsHelperTest
     }
 
 
+    @Test
     public void testMVERSIONS159_ExcludedAndNotIncluded()
         throws MojoExecutionException
     {
@@ -178,6 +184,7 @@ public class DefaultVersionsHelperTest
         assertTrue( result.isEmpty() );
     }
 
+    @Test
     public void testIsClasspathUriDetectsClassPathProtocol() throws MojoExecutionException {
         DefaultVersionsHelper helper = createHelper();
         String uri = "classpath:/p/a/c/k/a/g/e/resource.res";
@@ -185,6 +192,7 @@ public class DefaultVersionsHelperTest
         assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(true));
     }
 
+    @Test
     public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws MojoExecutionException {
         DefaultVersionsHelper helper = createHelper();
         String uri = "http://10.10.10.10/p/a/c/k/a/g/e/resource.res";
