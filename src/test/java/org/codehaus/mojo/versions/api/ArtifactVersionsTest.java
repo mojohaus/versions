@@ -44,10 +44,7 @@ public class ArtifactVersionsTest
     public void testSmokes()
         throws Exception
     {
-        ArtifactVersion[] versions =
-            new ArtifactVersion[]{new DefaultArtifactVersion( "1.0" ), new DefaultArtifactVersion( "3.0" ),
-                new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "1.0" ),
-                new DefaultArtifactVersion( "1.0.1" ),};
+        ArtifactVersion[] versions = versions( "1.0", "3.0", "1.1", "1.0", "1.0.1" );
         final DefaultArtifact artifact =
             new DefaultArtifact( "group", "artifact", VersionRange.createFromVersionSpec( "[1.0,3.0]" ), "foo", "bar",
                                  "jar", new DefaultArtifactHandler() );
@@ -57,17 +54,25 @@ public class ArtifactVersionsTest
         assertEquals( "group", instance.getGroupId() );
         System.out.println( Arrays.asList( instance.getVersions() ) );
         assertArrayEquals(
-            new ArtifactVersion[]{new DefaultArtifactVersion( "1.0" ), new DefaultArtifactVersion( "1.0.1" ),
-                new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ),}, instance.getVersions() );
-        assertArrayEquals( new ArtifactVersion[]{new DefaultArtifactVersion( "3.0" ),},
+            versions( "1.0", "1.0.1", "1.1", "3.0" ),
+            instance.getVersions() );
+        assertArrayEquals( versions( "3.0" ),
                            instance.getVersions( new DefaultArtifactVersion( "1.1" ), null ) );
         assertArrayEquals(
-            new ArtifactVersion[]{new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ),},
+            versions( "1.1", "3.0" ),
             instance.getVersions( new DefaultArtifactVersion( "1.0.1" ), null ) );
         assertEquals( new DefaultArtifactVersion( "1.1" ).toString(),
                       instance.getNewestVersion( new DefaultArtifactVersion( "1.0" ),
                                                  new DefaultArtifactVersion( "3.0" ) ).toString() );
         assertNull(
             instance.getNewestVersion( new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ) ) );
+    }
+
+    private ArtifactVersion[] versions(String... versions) {
+        ArtifactVersion[] artifactVersions = new ArtifactVersion[versions.length];
+        for ( int i = 0; i < versions.length; i++ ) {
+            artifactVersions[i] = new DefaultArtifactVersion( versions[i] );
+        }
+        return artifactVersions;
     }
 }
