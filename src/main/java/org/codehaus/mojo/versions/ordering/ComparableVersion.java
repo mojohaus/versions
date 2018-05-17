@@ -48,11 +48,11 @@ public class ComparableVersion
 
     private interface Item
     {
-        static final int INTEGER_ITEM = 0;
+        int INTEGER_ITEM = 0;
 
-        static final int STRING_ITEM = 1;
+        int STRING_ITEM = 1;
 
-        static final int LIST_ITEM = 2;
+        int LIST_ITEM = 2;
 
         int compareTo( Item item );
 
