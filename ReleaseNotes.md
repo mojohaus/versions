@@ -2,6 +2,12 @@
 
 ## 2.6
 
+ * [Pull Request #252][pull-252]
+
+   Thanks to Edward Maxwell-Lyte <2248005+edwardmlyte@users.noreply.github.com>
+
+   Minor spelling corrections
+
  * [Fixed Issue 157][issue-157]
 
     Document the end of versioning limitations in Maven 3.x
@@ -149,3 +155,4 @@
 [issue-256]: https://github.com/mojohaus/versions-maven-plugin/issues/256
 
 [pull-189]: https://github.com/mojohaus/versions-maven-plugin/pull/189
+[pull-252]: https://github.com/mojohaus/versions-maven-plugin/pull/252
