@@ -56,9 +56,9 @@ public class ArtifactVersionsTest
         assertArrayEquals(
             versions( "1.1", "3.0" ),
             instance.getVersions( new DefaultArtifactVersion( "1.0.1" ), null ) );
-        assertEquals( new DefaultArtifactVersion( "1.1" ).toString(),
+        assertEquals( new DefaultArtifactVersion( "1.1" ),
                       instance.getNewestVersion( new DefaultArtifactVersion( "1.0" ),
-                                                 new DefaultArtifactVersion( "3.0" ) ).toString() );
+                                                 new DefaultArtifactVersion( "3.0" ) ) );
         assertNull(
             instance.getNewestVersion( new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ) ) );
     }
