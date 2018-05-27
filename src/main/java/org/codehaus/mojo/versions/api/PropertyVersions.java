@@ -28,6 +28,7 @@ import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import java.util.ArrayList;
@@ -345,6 +346,7 @@ public class PropertyVersions
         ArtifactVersion lowerBoundArtifactVersion = null;
         if ( allowDowngrade )
         {
+            lowerBoundArtifactVersion = getLowerBound(helper, currentVersion, segment);
             helper.getLog().debug( "lowerBoundArtifactVersion is null based on allowDowngrade:" + allowDowngrade );
         }
         else
@@ -507,6 +509,45 @@ public class PropertyVersions
             return result;
         }
 
+    }
+
+
+    private ArtifactVersion getLowerBound(VersionsHelper helper,
+            String currentVersion, int segment)
+    {
+        ArtifactVersion version = helper.createArtifactVersion(currentVersion);
+        int segmentCount = getVersionComparator().getSegmentCount(version);
+        if (segment < 0 || segment > segmentCount)
+        {
+            throw new InvalidSegmentException(segment, segmentCount,
+                    currentVersion);
+        }
+
+        StringBuilder newVersion = new StringBuilder();
+        newVersion.append(segment >= 0 ? version.getMajorVersion() : 0);
+        if (segmentCount > 0)
+        {
+            newVersion.append(".")
+                    .append(segment >= 1 ? version.getMinorVersion() : 0);
+        }
+        if (segmentCount > 1)
+        {
+            newVersion.append(".")
+                    .append(segment >= 2 ? version.getIncrementalVersion() : 0);
+        }
+        if (segmentCount > 2)
+        {
+            if (version.getQualifier() != null)
+            {
+                newVersion.append("-")
+                        .append(segment >= 3 ? version.getQualifier() : "0");
+            } else
+            {
+                newVersion.append("-")
+                        .append(segment >= 3 ? version.getBuildNumber() : "0");
+            }
+        }
+        return helper.createArtifactVersion(newVersion.toString());
     }
 
 }
