@@ -346,7 +346,10 @@ public class PropertyVersions
         ArtifactVersion lowerBoundArtifactVersion = null;
         if ( allowDowngrade )
         {
-            lowerBoundArtifactVersion = getLowerBound(helper, currentVersion, segment);
+            if ( segment != -1 )
+            {
+                lowerBoundArtifactVersion = getLowerBound(helper, currentVersion, segment);
+            }
             helper.getLog().debug( "lowerBoundArtifactVersion is null based on allowDowngrade:" + allowDowngrade );
         }
         else
