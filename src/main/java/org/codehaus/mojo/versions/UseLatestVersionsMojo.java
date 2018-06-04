@@ -20,8 +20,10 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -46,7 +48,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-latest-versions", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "use-latest-versions", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseLatestVersionsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -101,6 +103,17 @@ public class UseLatestVersionsMojo
             {
                 useLatestVersions( pom, getProject().getDependencies() );
             }
+            if ( getProject().getParent() != null && isProcessingParent() )
+            {
+                Dependency dependency = new Dependency();
+                dependency.setArtifactId(getProject().getParent().getArtifactId());
+                dependency.setGroupId(getProject().getParent().getGroupId());
+                dependency.setVersion(getProject().getParent().getVersion());
+                dependency.setType("pom");
+                List list = new ArrayList();
+                list.add(dependency);
+                useLatestVersions( pom, list);
+            }
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
@@ -149,10 +162,20 @@ public class UseLatestVersionsMojo
             if ( filteredVersions.length > 0 )
             {
                 String newVersion = filteredVersions[filteredVersions.length - 1].toString();
+                if(getProject().getParent() != null){
+                    if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
+                    {
+                        if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
+                        {
+                            getLog().debug( "Made parent update from " + version + " to " + newVersion.toString() );
+                        }
+                    }
+                }
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion,
-                                                     getProject().getModel() ) )
+                        getProject().getModel() ) )
                 {
-                    getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+
                 }
             }
 

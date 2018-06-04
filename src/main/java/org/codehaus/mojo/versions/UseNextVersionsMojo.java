@@ -40,7 +40,7 @@ import java.util.Iterator;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-next-versions", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "use-next-versions", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseNextVersionsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

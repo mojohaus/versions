@@ -63,7 +63,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "set", requiresProject = true, requiresDirectInvocation = true, aggregator = true )
+@Mojo( name = "set", requiresProject = true, requiresDirectInvocation = true, aggregator = true, threadSafe = true )
 public class SetMojo
     extends AbstractVersionsUpdaterMojo
 {

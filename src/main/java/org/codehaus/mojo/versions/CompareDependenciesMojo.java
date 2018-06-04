@@ -52,7 +52,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Paul Gier
  * @since 1.3
  */
-@Mojo( name = "compare-dependencies", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "compare-dependencies", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class CompareDependenciesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

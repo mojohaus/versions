@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -183,10 +182,8 @@ public abstract class AbstractVersionDetails
     {
         ArtifactVersion latest = null;
         final VersionComparator versionComparator = getVersionComparator();
-        Iterator i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
-        while ( i.hasNext() )
+        for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
         {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
@@ -232,10 +229,8 @@ public abstract class AbstractVersionDetails
 
     public final boolean containsVersion( String version )
     {
-        Iterator i = Arrays.asList( getVersions( true ) ).iterator();
-        while ( i.hasNext() )
+        for ( ArtifactVersion candidate : getVersions( true ) )
         {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
             if ( version.equals( candidate.toString() ) )
             {
                 return true;
@@ -283,10 +278,8 @@ public abstract class AbstractVersionDetails
     {
         ArtifactVersion oldest = null;
         final VersionComparator versionComparator = getVersionComparator();
-        Iterator i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
-        while ( i.hasNext() )
+        for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
         {
-            ArtifactVersion candidate = (ArtifactVersion) i.next();
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;

@@ -33,7 +33,7 @@ import java.util.TreeMap;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.utils.PluginComparator;;
+import org.codehaus.mojo.versions.utils.PluginComparator;
 
 /**
  * XML renderer for PluginUpdatesReport creates an xml file in target directory and writes report about available

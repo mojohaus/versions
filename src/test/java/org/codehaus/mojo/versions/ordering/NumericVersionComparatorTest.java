@@ -19,11 +19,13 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
-import junit.framework.TestCase;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class NumericVersionComparatorTest
-    extends TestCase
 {
     private NumericVersionComparator instance = new NumericVersionComparator();
 
@@ -31,6 +33,7 @@ public class NumericVersionComparatorTest
         return instance.compare( new DefaultArtifactVersion( v1 ), new DefaultArtifactVersion( v2 ) );
     }
 
+    @Test
     public void testSmokes()
         throws Exception
     {
@@ -41,6 +44,7 @@ public class NumericVersionComparatorTest
         assertTrue( instanceCompare( "1.0.0.0", "1.0.0.0.0" ) > 0 );
     }
 
+    @Test
     public void testBigValues()
         throws Exception
     {
@@ -49,6 +53,7 @@ public class NumericVersionComparatorTest
         assertTrue( instanceCompare( "1.100000000000000000000000.0", "1.100000000000000000000000.0" ) == 0 );
     }
 
+    @Test
     public void testStringValues()
         throws Exception
     {
@@ -70,6 +75,7 @@ public class NumericVersionComparatorTest
         assertTrue( instanceCompare( "1.a.0", "1.a.0.b" ) < 0 );
     }
 
+    @Test
     public void testQualifiers()
         throws Exception
     {
@@ -80,6 +86,7 @@ public class NumericVersionComparatorTest
         assertTrue( instanceCompare( "1.0.10", "1.0-alpha.10" ) > 0 );
     }
 
+    @Test
     public void testSegmentCounting()
         throws Exception
     {
@@ -91,6 +98,7 @@ public class NumericVersionComparatorTest
         assertEquals( 0, instance.getSegmentCount( new DefaultArtifactVersion( "" ) ) );
     }
 
+    @Test
     public void testSegmentIncrementing()
         throws Exception
     {

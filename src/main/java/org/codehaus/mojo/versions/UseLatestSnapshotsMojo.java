@@ -37,6 +37,8 @@ import javax.xml.stream.XMLStreamException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +48,7 @@ import java.util.regex.Pattern;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "use-latest-snapshots", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "use-latest-snapshots", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseLatestSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -103,6 +105,17 @@ public class UseLatestSnapshotsMojo
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useLatestSnapshots( pom, getProject().getDependencies() );
+            }
+            if ( getProject().getParent() != null && isProcessingParent() )
+            {
+                Dependency dependency = new Dependency();
+                dependency.setArtifactId(getProject().getParent().getArtifactId());
+                dependency.setGroupId(getProject().getParent().getGroupId());
+                dependency.setVersion(getProject().getParent().getVersion());
+                dependency.setType("pom");
+                List list = new ArrayList();
+                list.add(dependency);
+                useLatestSnapshots( pom, list);
             }
         }
         catch ( ArtifactMetadataRetrievalException e )
@@ -163,6 +176,16 @@ public class UseLatestSnapshotsMojo
                 }
                 if ( latestVersion != null )
                 {
+                    if(getProject().getParent() != null){
+                        if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
+                        {
+                            if ( PomHelper.setProjectParentVersion( pom, latestVersion.toString() ) )
+                            {
+                                getLog().debug( "Made parent update from " + version + " to " + latestVersion.toString() );
+                            }
+                        }
+                    }
+
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
                                                          latestVersion, getProject().getModel() ) )
                     {

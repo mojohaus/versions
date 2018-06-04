@@ -30,6 +30,9 @@ Version number rules
 
 * Introduction
 
+  <<Notice:>> The limitations explained in this paragraph were true in Maven 2.x, but have been <<fixed>> in Maven 3.x (see
+  {{{https://cwiki.apache.org/confluence/display/MAVENOLD/Versioning}Maven Versioning Wiki page}} for more details)
+
   The current implementation of
   {{{http://maven.apache.org/ref/current/maven-artifact/xref/org/apache/maven/artifact/versioning/DefaultArtifactVersion.html}<<<DefaultArtifactVersion>>>}}
   in the core of Maven expects that version numbers will have a very specific format:

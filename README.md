@@ -6,56 +6,8 @@ This is the [versions-maven-plugin](http://www.mojohaus.org/versions-maven-plugi
 [![Maven Central](https://img.shields.io/maven-central/v/org.codehaus.mojo/versions-maven-plugin.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.codehaus.mojo%22%20AND%20a%3A%22versions-maven-plugin%22)
 [![Build Status](https://travis-ci.org/mojohaus/versions-maven-plugin.svg?branch=master)](https://travis-ci.org/mojohaus/versions-maven-plugin)
 
-# Contribution
 
-## Creating Issues
-
-If you find a problem please create an 
-[issue in the ticket system](https://github.com/mojohaus/versions-maven-plugin/issues)
-and describe what is going wrong or what you expect to happen.
-If you have a full working example or a log file this is also helpful.
-You should of course describe only a single issue in a single ticket and not 
-mixing up several different things into a single issue.
-
-## Creating a Pull Request
-
-Before you create a pull request it is necessary to create an issue in
-the [ticket system before](https://github.com/mojohaus/versions-maven-plugin/issues)
-and describe what the problem is or what kind of feature you would like
-to add. Afterwards you can create an appropriate pull request.
-
-If you like to get your pull request being integrated please squash your
-commits into a single commit which references the issue in the commit message
-exactly like this:
-
-```
-Fixed #Issue
- o Description.
-```
-
-This makes it simpler to merge it and this will also close the
-appropriate issue automatically in one go. This makes the life for
-the maintainers a little bit easier.
-
-A pull request has to fulfill only a single ticket and should never
-create/add/fix several issues in one, cause otherwise the history is hard to
-read and to understand and makes the maintenance of the issues and pull request
-hard or to be honest impossible.
-
-
-## Releasing
-
-* Make sure `gpg-agent` is running.
-* Execute `mvn -B release:prepare release:perform`
-
-For publishing the site do the following:
-
-```
-cd target/checkout
-mvn verify site site:stage scm-publish:publish-scm
-```
-
-## Contribution
+## Contributing
 
 ### Creating Issues
 
@@ -93,3 +45,16 @@ hard or to be honest impossible.
 
 Furthermore it is necessary to create appropriate entries into the `ReleaseNotes.md`
 file as well.
+
+
+## Releasing
+
+* Make sure `gpg-agent` is running.
+* Execute `mvn -B release:prepare release:perform`
+
+For publishing the site do the following:
+
+```
+cd target/checkout
+mvn verify site site:stage scm-publish:publish-scm
+```

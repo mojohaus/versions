@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import junit.framework.TestCase;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
+import org.junit.Test;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -34,14 +34,17 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Stack;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 /**
  * Basic tests for rewriting XML with a StAX (JSR-173) implementation.
  *
  * @author Stephen Connolly
  */
 public class RewriteWithStAXTest
-    extends TestCase
 {
+    @Test
     public void testBasic()
         throws Exception
     {
@@ -68,6 +71,7 @@ public class RewriteWithStAXTest
         assertFalse( "StAX implementation is not good enough", input.equals( output ) );
     }
 
+    @Test
     public void testReplace()
         throws Exception
     {
@@ -105,6 +109,7 @@ public class RewriteWithStAXTest
         assertEquals( expected, output.toString() );
     }
 
+    @Test
     public void testReplaceFancy()
         throws Exception
     {

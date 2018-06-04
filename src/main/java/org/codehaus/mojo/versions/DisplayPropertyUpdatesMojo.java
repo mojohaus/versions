@@ -40,7 +40,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "display-property-updates", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "display-property-updates", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class DisplayPropertyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {

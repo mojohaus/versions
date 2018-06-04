@@ -9,7 +9,7 @@ try
 
     Pattern p1 = Pattern.compile( "\\QRequire Maven 2.0.9 to use the following plugin updates:\\E" );
     Matcher m1 = p1.matcher( buf.toString() );
-    Pattern p2 = Pattern.compile( "\\Qlocalhost:dummy-maven-plugin\\E\\s*\\.*\\s*3\\.1" );
+    Pattern p2 = Pattern.compile( "\\Qlocalhost:dummy-maven-plugin\\E\\s*\\.*\\s*\\Q1.0 -> 3.1\\E" );
     Matcher m2 = p2.matcher( buf.toString() );
     if ( !m1.find() || !m2.find() || m2.start() < m1.start() )
     {

@@ -195,7 +195,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return null;
         }
-        Iterator iter = getProject().getDependencyArtifacts().iterator();
+        Iterator<?> iter = getProject().getDependencyArtifacts().iterator();
         while ( iter.hasNext() )
         {
             Artifact artifact = (Artifact) iter.next();
@@ -298,7 +298,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     protected boolean isProducedByReactor( Dependency dependency )
     {
-        Iterator iter = reactorProjects.iterator();
+        Iterator<?> iter = reactorProjects.iterator();
         while ( iter.hasNext() )
         {
             MavenProject project = (MavenProject) iter.next();
@@ -401,7 +401,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     {
         if ( includesFilter == null && ( includes != null || includesList != null ) )
         {
-            List patterns = new ArrayList();
+            List<String> patterns = new ArrayList<>();
             if ( this.includesList != null )
             {
                 patterns.addAll( separatePatterns( includesList ) );
@@ -419,7 +419,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     {
         if ( excludesFilter == null && ( excludes != null || excludesList != null ) )
         {
-            List patterns = new ArrayList();
+            List<String> patterns = new ArrayList<>();
             if ( excludesList != null )
             {
                 patterns.addAll( separatePatterns( excludesList ) );
@@ -440,14 +440,14 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @param includeString the string to parse
      * @return list of patterns
      */
-    protected List separatePatterns( String includeString )
+    protected List<String> separatePatterns( String includeString )
     {
         if ( includeString == null )
         {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
-        List patterns = new ArrayList();
+        List<String> patterns = new ArrayList<>();
         int indexOf = nextCommaIndex( includeString );
         while ( indexOf >= 0 )
         {
