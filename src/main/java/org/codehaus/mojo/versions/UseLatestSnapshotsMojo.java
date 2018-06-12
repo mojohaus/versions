@@ -30,6 +30,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -128,6 +129,8 @@ public class UseLatestSnapshotsMojo
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+        MajorMinorIncrementalFilter majorMinorIncfilter =
+                new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         Iterator<Dependency> i = dependencies.iterator();
 
@@ -152,6 +155,8 @@ public class UseLatestSnapshotsMojo
                     continue;
                 }
 
+                ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
+
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 final VersionComparator versionComparator = versions.getVersionComparator();
                 final DefaultArtifactVersion lowerBound = new DefaultArtifactVersion( version );
@@ -165,17 +170,27 @@ public class UseLatestSnapshotsMojo
                 getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
                 getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
+
                 String latestVersion = null;
+                ArrayList snapshotsOnly = new ArrayList();
+
                 for ( int j = 0; j < newer.length; j++ )
                 {
                     String newVersion = newer[j].toString();
                     if ( matchSnapshotRegex.matcher( newVersion ).matches() )
                     {
-                        latestVersion = newVersion;
+                        snapshotsOnly.add(newer[j]);
                     }
                 }
-                if ( latestVersion != null )
+                getLog().debug( "Snapshot Only versions " + snapshotsOnly.toString());
+
+                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion,(ArtifactVersion[]) snapshotsOnly.toArray(new ArtifactVersion[snapshotsOnly.size()]));
+                getLog().debug( "Filtered versions " + Arrays.asList( filteredVersions ) );
+
+
+                if ( filteredVersions.length > 0 )
                 {
+                    latestVersion = filteredVersions[filteredVersions.length - 1].toString();
                     if(getProject().getParent() != null){
                         if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
                         {
