@@ -106,6 +106,14 @@ public class MajorMinorIncrementalFilter
                     }
                 }
             }
+            else if(selectedVersion.getQualifier() != null){
+                if(selectedVersion.getQualifier().contentEquals("SNAPSHOT")){
+                    if ( !versionsToUse.contains( artifactVersion ) )
+                    {
+                            versionsToUse.add( artifactVersion );
+                    }
+                }
+            }
             else
             {
                 if ( allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates )
@@ -116,7 +124,6 @@ public class MajorMinorIncrementalFilter
                     }
                 }
             }
-
         }
         return versionsToUse.toArray( new ArtifactVersion[versionsToUse.size()] );
 
