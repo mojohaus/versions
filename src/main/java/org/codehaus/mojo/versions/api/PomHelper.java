@@ -46,7 +46,6 @@ import javax.xml.stream.events.XMLEvent;
  */
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
@@ -57,10 +56,7 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.profiles.ProfileManager;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuilder;
-import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
@@ -1212,19 +1208,6 @@ public class PomHelper
      * Returns a set of all child modules for a project, including any defined in profiles (ignoring profile
      * activation).
      *
-     * @param project The project.
-     * @param logger The logger to use.
-     * @return the set of all child modules of the project.
-     */
-    public static Set<String> getAllChildModules( MavenProject project, Log logger )
-    {
-        return getAllChildModules( project.getOriginalModel(), logger );
-    }
-
-    /**
-     * Returns a set of all child modules for a project, including any defined in profiles (ignoring profile
-     * activation).
-     *
      * @param model The project model.
      * @param logger The logger to use.
      * @return the set of all child modules of the project.
@@ -1374,55 +1357,6 @@ public class PomHelper
             targetGroupId = model.getParent().getGroupId();
         }
         return targetGroupId;
-    }
-
-    /**
-     * Finds the local root of the specified project.
-     *
-     * @param project The project to find the local root for.
-     * @param localRepository the local repo.
-     * @param globalProfileManager the global profile manager.
-     * @param logger The logger to log to.
-     * @return The local root (note this may be the project passed as an argument).
-     */
-    public static MavenProject getLocalRoot( ProjectBuilder builder, MavenProject project,
-                                             ArtifactRepository localRepository, ProfileManager globalProfileManager,
-                                             Log logger )
-    {
-        logger.info( "Searching for local aggregator root..." );
-        while ( true )
-        {
-            final File parentDir = project.getBasedir().getParentFile();
-            if ( parentDir != null && parentDir.isDirectory() )
-            {
-                logger.debug( "Checking to see if " + parentDir + " is an aggregator parent" );
-                File parent = new File( parentDir, "pom.xml" );
-                if ( parent.isFile() )
-                {
-                    try
-                    {
-                        final MavenProject parentProject =
-                            builder.build( parent, localRepository, globalProfileManager );
-                        if ( getAllChildModules( parentProject, logger ).contains( project.getBasedir().getName() ) )
-                        {
-                            logger.debug( parentDir + " is an aggregator parent" );
-                            project = parentProject;
-                            continue;
-                        }
-                        else
-                        {
-                            logger.debug( parentDir + " is not an aggregator parent" );
-                        }
-                    }
-                    catch ( ProjectBuildingException e )
-                    {
-                        logger.warn( e );
-                    }
-                }
-            }
-            logger.debug( "Local aggregation root is " + project.getBasedir() );
-            return project;
-        }
     }
 
     /**

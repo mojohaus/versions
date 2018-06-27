@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -30,6 +31,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -44,6 +46,12 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 public class UseReactorMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
+
+    /**
+     * @since 1.0-alpha-1
+     */
+    @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
+    protected List reactorProjects;
 
     // ------------------------------ METHODS --------------------------
 

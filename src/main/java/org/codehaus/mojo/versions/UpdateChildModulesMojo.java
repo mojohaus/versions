@@ -155,13 +155,13 @@ public class UpdateChildModulesMojo
                         final Parent parent = targetModel.getParent();
                         if ( sourceVersion.equals( parent.getVersion() ) )
                         {
-                            getLog().debug( "Module: " + childModelEntry.getKey() + " parent is "
+                            getLog().debug( "Module: " + targetPath + " parent is "
                                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
                                 + sourceVersion );
                         }
                         else
                         {
-                            getLog().info( "Module: " + childModelEntry.getKey() );
+                            getLog().info( "Module: " + targetPath );
                             getLog().info( "    parent was "
                                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
                                 + parent.getVersion() );

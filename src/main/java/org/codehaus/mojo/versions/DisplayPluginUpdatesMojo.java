@@ -51,6 +51,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.execution.RuntimeInformation;
 import org.apache.maven.lifecycle.Lifecycle;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.lifecycle.LifecycleExecutor;
@@ -58,6 +59,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.building.DefaultModelBuildingRequest;
 import org.apache.maven.model.interpolation.ModelInterpolator;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -66,11 +68,7 @@ import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.project.ProjectBuildingResult;
+import org.apache.maven.project.*;
 import org.apache.maven.shared.artifact.resolve.ArtifactResolverException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -134,6 +132,12 @@ public class DisplayPluginUpdatesMojo
     @Component
     private PluginManager pluginManager;
 
+    /**
+     * @since 1.3
+     */
+    @Component
+    private RuntimeInformation runtimeInformation;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
@@ -151,14 +155,13 @@ public class DisplayPluginUpdatesMojo
         try
         {
             Method getPluginsBoundByDefaultToAllLifecycles =
-                LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles",
-                                                   new Class[] { String.class } );
+                LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles", String.class );
             Set<Plugin> plugins =
                 (Set<Plugin>) getPluginsBoundByDefaultToAllLifecycles.invoke( lifecycleExecutor, new Object[] {
                     getProject().getPackaging() } );
             // we need to provide a copy with the version blanked out so that inferring from super-pom
             // works as for 2.x as 3.x fills in the version on us!
-            result = new LinkedHashMap<String, String>( plugins.size() );
+            result = new LinkedHashMap<>( plugins.size() );
             for ( Plugin plugin : plugins )
             {
                 result.put( plugin.getKey(), plugin.getVersion() );
@@ -197,7 +200,7 @@ public class DisplayPluginUpdatesMojo
 
             Pattern pathRegex = Pattern.compile( "/project(/profiles/profile)?"
                 + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );
-            Stack<StackState> pathStack = new Stack<StackState>();
+            Stack<StackState> pathStack = new Stack<>();
             StackState curState = null;
             while ( pom.hasNext() )
             {
@@ -332,11 +335,7 @@ public class DisplayPluginUpdatesMojo
         {
             pluginsWithVersionsSpecified = findPluginsWithVersionsSpecified( getProject() );
         }
-        catch ( XMLStreamException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-        catch ( IOException e )
+        catch ( XMLStreamException | IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
@@ -350,9 +349,8 @@ public class DisplayPluginUpdatesMojo
         //      renaming parentPluginManagement to parentPlugins)
         // NOTICE: getProjectPlugins() takes profiles while getParentPlugins does not
         //         there is probably a little inconsistency (if plugins configured in profiles of parents)
-        Map<String, String> parentBuildPlugins = new HashMap<String, String>();
-        Map<String, String> parentReportPlugins = new HashMap<String, String>();
-
+        Map<String, String> parentBuildPlugins = new HashMap<>();
+        Map<String, String> parentReportPlugins = new HashMap<>();
         Set<Plugin> plugins = getProjectPlugins( superPomPluginManagement, parentPlugins, parentBuildPlugins,
                                                  parentReportPlugins, pluginsWithVersionsSpecified );
 
@@ -440,7 +438,7 @@ public class DisplayPluginUpdatesMojo
                             if ( upgradePlugins == null )
                             {
                                 mavenUpgrades.put( pluginRequires,
-                                                   upgradePlugins = new LinkedHashMap<String, String>() );
+                                                   upgradePlugins = new LinkedHashMap<>() );
                             }
 
                             String upgradePluginKey = compactKey( groupId, artifactId );
@@ -698,7 +696,7 @@ public class DisplayPluginUpdatesMojo
         logLine( false, "" );
     }
 
-    private final static String pad( String start, int len, String...ends )
+    private static String pad( String start, int len, String...ends )
     {
         StringBuilder buf = new StringBuilder( len );
         buf.append( "  " );
@@ -724,7 +722,7 @@ public class DisplayPluginUpdatesMojo
     private Map<String, String> getParentsPlugins( List<MavenProject> parents )
         throws MojoExecutionException
     {
-        Map<String, String> parentPlugins = new HashMap<String, String>();
+        Map<String, String> parentPlugins = new HashMap<>();
         for ( MavenProject parentProject : parents )
         {
             getLog().debug( "Processing parent: " + parentProject.getGroupId() + ":" + parentProject.getArtifactId()
@@ -733,35 +731,28 @@ public class DisplayPluginUpdatesMojo
             StringWriter writer = new StringWriter();
             boolean havePom = false;
             Model interpolatedModel;
+            Model originalModel = parentProject.getOriginalModel();
+            if ( originalModel == null )
+            {
+                getLog().warn( "project.getOriginalModel()==null for  " + parentProject.getGroupId() + ":"
+                    + parentProject.getArtifactId() + ":" + parentProject.getVersion()
+                    + " is null, substituting project.getModel()" );
+                originalModel = parentProject.getModel();
+            }
             try
             {
-                Model originalModel = parentProject.getOriginalModel();
-                if ( originalModel == null )
-                {
-                    getLog().warn( "project.getOriginalModel()==null for  " + parentProject.getGroupId() + ":"
-                        + parentProject.getArtifactId() + ":" + parentProject.getVersion()
-                        + " is null, substituting project.getModel()" );
-                    originalModel = parentProject.getModel();
-                }
-                try
-                {
-                    new MavenXpp3Writer().write( writer, originalModel );
-                    writer.close();
-                    havePom = true;
-                }
-                catch ( IOException e )
-                {
-                    // ignore
-                }
-                interpolatedModel =
-                    modelInterpolator.interpolate( originalModel, null,
-                                                   new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
-                                                   false );
+                new MavenXpp3Writer().write( writer, originalModel );
+                writer.close();
+                havePom = true;
             }
-            catch ( ModelInterpolationException e )
+            catch ( IOException e )
             {
-                throw new MojoExecutionException( e.getMessage(), e );
+                // ignore
             }
+            interpolatedModel =
+                    modelInterpolator.interpolateModel( originalModel, null,
+                                                        new DefaultModelBuildingRequest().setSystemProperties( getProject().getProperties() ),
+                                                        new SimpleModelProblemCollector() );
             if ( havePom )
             {
                 try
@@ -781,11 +772,7 @@ public class DisplayPluginUpdatesMojo
                     map.keySet().retainAll( withVersionSpecified );
                     parentPlugins.putAll( map );
                 }
-                catch ( IOException e )
-                {
-                    throw new MojoExecutionException( e.getMessage(), e );
-                }
-                catch ( XMLStreamException e )
+                catch ( IOException | XMLStreamException e )
                 {
                     throw new MojoExecutionException( e.getMessage(), e );
                 }
@@ -1059,14 +1046,13 @@ public class DisplayPluginUpdatesMojo
         try
         {
             Method getPluginsBoundByDefaultToAllLifecycles =
-                LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles",
-                                                   new Class[] { String.class } );
+                LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles", String.class );
             Set<Plugin> plugins =
                 (Set<Plugin>) getPluginsBoundByDefaultToAllLifecycles.invoke( lifecycleExecutor, new Object[] {
                     project.getPackaging() == null ? "jar" : project.getPackaging() } );
             // we need to provide a copy with the version blanked out so that inferring from super-pom
             // works as for 2.x as 3.x fills in the version on us!
-            result = new LinkedHashSet<Plugin>( plugins.size() );
+            result = new LinkedHashSet<>( plugins.size() );
             for ( Plugin plugin : plugins )
             {
                 Plugin dup = new Plugin();
@@ -1126,7 +1112,7 @@ public class DisplayPluginUpdatesMojo
 
         for ( Lifecycle lifecycle : lifecycles )
         {
-            for ( String phase : (List<String>) lifecycle.getPhases() )
+            for ( String phase : lifecycle.getPhases() )
             {
                 if ( phaseToLifecycleMap.containsKey( phase ) )
                 {
@@ -1185,7 +1171,7 @@ public class DisplayPluginUpdatesMojo
         debugVersionMap( "super-pom version map", superPomPluginManagement );
         debugVersionMap( "parent version map", parentPluginManagement );
 
-        Map<String, String> excludePluginManagement = new HashMap<String, String>( superPomPluginManagement );
+        Map<String, String> excludePluginManagement = new HashMap<>( superPomPluginManagement );
         excludePluginManagement.putAll( parentPluginManagement );
 
         debugVersionMap( "aggregate version map", excludePluginManagement );
@@ -1194,18 +1180,9 @@ public class DisplayPluginUpdatesMojo
 
         debugVersionMap( "final aggregate version map", excludePluginManagement );
 
-        Model originalModel;
-        try
-        {
-            originalModel =
-                modelInterpolator.interpolate( getProject().getOriginalModel(), getProject().getBasedir(),
-                                               new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
-                                               true );
-        }
-        catch ( ModelInterpolationException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+        Model originalModel = modelInterpolator.interpolateModel( getProject().getOriginalModel(), getProject().getBasedir(),
+                                                                  new DefaultModelBuildingRequest().setSystemProperties( getProject().getProperties() ).setProcessPlugins( true ),
+                                                                  new SimpleModelProblemCollector() );
         try
         {
             addProjectPlugins( plugins, originalModel.getBuild().getPluginManagement().getPlugins(),

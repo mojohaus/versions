@@ -22,7 +22,6 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.manager.DefaultWagonManager;
-import org.apache.maven.artifact.manager.WagonConfigurationException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -30,14 +29,13 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.path.DefaultPathTranslator;
+import org.apache.maven.project.path.DefaultPathTranslator;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.shared.artifact.resolve.internal.DefaultArtifactResolver;
-import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.file.FileWagon;
 import org.apache.maven.wagon.repository.Repository;
@@ -49,11 +47,9 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItem;
+import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
@@ -218,7 +214,6 @@ public class DefaultVersionsHelperTest
         final DefaultWagonManager wagonManager = new DefaultWagonManager()
         {
             public Wagon getWagon( Repository repository )
-                throws UnsupportedProtocolException, WagonConfigurationException
             {
                 return new FileWagon();
             }
