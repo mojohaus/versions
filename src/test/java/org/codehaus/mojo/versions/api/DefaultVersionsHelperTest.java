@@ -19,19 +19,6 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItems;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.manager.DefaultWagonManager;
@@ -55,16 +42,32 @@ import org.apache.maven.wagon.providers.file.FileWagon;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.matchers.JUnitMatchers.hasItems;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.same;
 
 /**
  * Test {@link DefaultVersionsHelper}
  */
 public class DefaultVersionsHelperTest
-    extends TestCase
 {
-    
+
+    @Test
     public void testPerRuleVersionsIgnored() throws Exception
     {
         final ArtifactMetadataSource metadataSource = mock( ArtifactMetadataSource.class );
@@ -83,7 +86,8 @@ public class DefaultVersionsHelperTest
         final ArtifactVersion illegal = new DefaultArtifactVersion( "illegalVersion" );
         artifactVersions.add( illegal );
 
-        when( metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) ).thenReturn( artifactVersions );
+        when( metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) )
+            .thenReturn( artifactVersions );
         
         VersionsHelper helper = createHelper( metadataSource );
         
@@ -94,7 +98,8 @@ public class DefaultVersionsHelperTest
         assertEquals( 3, actual.size() );
         assertThat( actual, hasItems( three, oneTwoHundred, illegal ) );
     }
-    
+
+    @Test
     public void testGlobalRuleVersionsIgnored() throws Exception
     {
         final ArtifactMetadataSource metadataSource = mock( ArtifactMetadataSource.class );
@@ -115,7 +120,8 @@ public class DefaultVersionsHelperTest
         final ArtifactVersion illegal = new DefaultArtifactVersion( "illegalVersion" );
         artifactVersions.add( illegal );
 
-        when(metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) ).thenReturn( artifactVersions );
+        when(metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) )
+            .thenReturn( artifactVersions );
         
         VersionsHelper helper = createHelper( metadataSource );
         
@@ -126,7 +132,8 @@ public class DefaultVersionsHelperTest
         assertEquals( 4, actual.size() );
         assertThat( actual, hasItems( one, two, three, illegal ) );
     }
-    
+
+    @Test
     public void testWildcardMatching()
         throws Exception
     {
@@ -137,6 +144,7 @@ public class DefaultVersionsHelperTest
         assertTrue( DefaultVersionsHelper.exactMatch( "c*oo*r", "com.foo.bar" ) );
     }
 
+    @Test
     public void testRuleSets()
         throws Exception
     {
@@ -158,6 +166,7 @@ public class DefaultVersionsHelperTest
     }
 
 
+    @Test
     public void testMVERSIONS159_ExcludedAndNotIncluded()
         throws MojoExecutionException
     {
@@ -172,22 +181,38 @@ public class DefaultVersionsHelperTest
         assertTrue( result.isEmpty() );
     }
 
+    @Test
+    public void testIsClasspathUriDetectsClassPathProtocol() throws MojoExecutionException {
+        DefaultVersionsHelper helper = createHelper();
+        String uri = "classpath:/p/a/c/k/a/g/e/resource.res";
 
-    private VersionsHelper createHelper()
+        assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(true));
+    }
+
+    @Test
+    public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws MojoExecutionException {
+        DefaultVersionsHelper helper = createHelper();
+        String uri = "http://10.10.10.10/p/a/c/k/a/g/e/resource.res";
+
+        assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(false));
+    }
+
+
+    private DefaultVersionsHelper createHelper()
         throws MojoExecutionException
     {
         return createHelper( new MavenMetadataSource() );
     }
     
-    private VersionsHelper createHelper( ArtifactMetadataSource metadataSource ) throws MojoExecutionException
+    private DefaultVersionsHelper createHelper( ArtifactMetadataSource metadataSource ) throws MojoExecutionException
     {
         final String resourcePath = "/" + getClass().getPackage().getName().replace( '.', '/' ) + "/rules.xml";
         final String rulesUri = getClass().getResource( resourcePath ).toExternalForm();
-        VersionsHelper helper = createHelper( rulesUri, metadataSource );
+        DefaultVersionsHelper helper = createHelper( rulesUri, metadataSource );
         return helper;
     }
 
-    private VersionsHelper createHelper( String rulesUri, ArtifactMetadataSource metadataSource )
+    private DefaultVersionsHelper createHelper( String rulesUri, ArtifactMetadataSource metadataSource )
         throws MojoExecutionException
     {
         final DefaultWagonManager wagonManager = new DefaultWagonManager()
@@ -204,7 +229,7 @@ public class DefaultVersionsHelperTest
             }
         };
 
-        VersionsHelper helper =
+        DefaultVersionsHelper helper =
             new DefaultVersionsHelper( new DefaultArtifactFactory(), new DefaultArtifactResolver(), metadataSource, new ArrayList<ArtifactRepository>(),
                                        new ArrayList<ArtifactRepository>(),
                                        new DefaultArtifactRepository( "", "", new DefaultRepositoryLayout() ),

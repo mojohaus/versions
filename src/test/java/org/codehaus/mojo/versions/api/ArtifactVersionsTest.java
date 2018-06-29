@@ -19,32 +19,28 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
+import org.junit.Test;
 
 import java.util.Arrays;
 
-/**
- * Created by IntelliJ IDEA. User: user Date: 10-Feb-2009 Time: 18:33:04 To change this template use File | Settings |
- * File Templates.
- */
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 public class ArtifactVersionsTest
-    extends TestCase
 {
 
+    @Test
     public void testSmokes()
         throws Exception
     {
-        ArtifactVersion[] versions =
-            new ArtifactVersion[]{new DefaultArtifactVersion( "1.0" ), new DefaultArtifactVersion( "3.0" ),
-                new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "1.0" ),
-                new DefaultArtifactVersion( "1.0.1" ),};
+        ArtifactVersion[] versions = versions( "1.0", "3.0", "1.1", "1.0", "1.0.1" );
         final DefaultArtifact artifact =
             new DefaultArtifact( "group", "artifact", VersionRange.createFromVersionSpec( "[1.0,3.0]" ), "foo", "bar",
                                  "jar", new DefaultArtifactHandler() );
@@ -52,40 +48,26 @@ public class ArtifactVersionsTest
             new ArtifactVersions( artifact, Arrays.asList( versions ), new MavenVersionComparator() );
         assertEquals( "artifact", instance.getArtifactId() );
         assertEquals( "group", instance.getGroupId() );
-        System.out.println( Arrays.asList( instance.getVersions() ) );
         assertArrayEquals(
-            new ArtifactVersion[]{new DefaultArtifactVersion( "1.0" ), new DefaultArtifactVersion( "1.0.1" ),
-                new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ),}, instance.getVersions() );
-        assertArrayEquals( new ArtifactVersion[]{new DefaultArtifactVersion( "3.0" ),},
+            versions( "1.0", "1.0.1", "1.1", "3.0" ),
+            instance.getVersions() );
+        assertArrayEquals( versions( "3.0" ),
                            instance.getVersions( new DefaultArtifactVersion( "1.1" ), null ) );
         assertArrayEquals(
-            new ArtifactVersion[]{new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ),},
+            versions( "1.1", "3.0" ),
             instance.getVersions( new DefaultArtifactVersion( "1.0.1" ), null ) );
-        assertEquals( new DefaultArtifactVersion( "1.1" ).toString(),
+        assertEquals( new DefaultArtifactVersion( "1.1" ),
                       instance.getNewestVersion( new DefaultArtifactVersion( "1.0" ),
-                                                 new DefaultArtifactVersion( "3.0" ) ).toString() );
+                                                 new DefaultArtifactVersion( "3.0" ) ) );
         assertNull(
             instance.getNewestVersion( new DefaultArtifactVersion( "1.1" ), new DefaultArtifactVersion( "3.0" ) ) );
     }
 
-    private static void assertArrayEquals( ArtifactVersion[] expected, ArtifactVersion[] actual )
-    {
-        try
-        {
-            assertEquals( "array length", expected.length, actual.length );
-            for ( int i = 0; i < expected.length; i++ )
-            {
-                assertEquals( "item[" + i + "]", expected[i].toString(), actual[i].toString() );
-            }
+    private ArtifactVersion[] versions(String... versions) {
+        ArtifactVersion[] artifactVersions = new ArtifactVersion[versions.length];
+        for ( int i = 0; i < versions.length; i++ ) {
+            artifactVersions[i] = new DefaultArtifactVersion( versions[i] );
         }
-        catch ( AssertionFailedError e )
-        {
-            final AssertionFailedError error = new AssertionFailedError(
-                "expected: " + Arrays.asList( expected ) + " but was: " + Arrays.asList( actual ) );
-            error.initCause( e );
-            throw error;
-
-        }
+        return artifactVersions;
     }
-
 }

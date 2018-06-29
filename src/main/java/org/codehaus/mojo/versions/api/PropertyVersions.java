@@ -40,6 +40,7 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
@@ -74,7 +75,7 @@ public class PropertyVersions
         this.profileId = profileId;
         this.name = name;
         this.helper = helper;
-        this.associations = new TreeSet<ArtifactAssociation>( associations );
+        this.associations = new TreeSet<>( associations );
         this.comparator = new PropertyVersionComparator();
         this.versions = resolveAssociatedVersions( helper, associations, comparator );
 
@@ -116,13 +117,13 @@ public class PropertyVersions
             }
             else
             {
-                versions = new TreeSet<ArtifactVersion>( versionComparator );
+                versions = new TreeSet<>( versionComparator );
                 versions.addAll( Arrays.asList( associatedVersions.getVersions( true ) ) );
             }
         }
         if ( versions == null )
         {
-            versions = new TreeSet<ArtifactVersion>( versionComparator );
+            versions = new TreeSet<>( versionComparator );
         }
         return Collections.unmodifiableSortedSet( versions );
     }
@@ -145,14 +146,13 @@ public class PropertyVersions
 
     private VersionComparator[] lookupComparators()
     {
-        Set<VersionComparator> result = new HashSet<VersionComparator>();
+        Set<VersionComparator> result = new HashSet<>();
         Iterator<ArtifactAssociation> i = associations.iterator();
         while ( i.hasNext() )
         {
-            ArtifactAssociation association = i.next();
-            result.add( helper.getVersionComparator( association.getArtifact() ) );
+            result.add( helper.getVersionComparator( i.next().getArtifact() ) );
         }
-        return (VersionComparator[]) result.toArray( new VersionComparator[result.size()] );
+        return result.toArray( new VersionComparator[result.size()] );
     }
 
     /**
@@ -168,7 +168,7 @@ public class PropertyVersions
     public ArtifactVersion[] getVersions( Collection<Artifact> artifacts )
         throws MojoExecutionException
     {
-        List<ArtifactVersion> result = new ArrayList<ArtifactVersion>();
+        List<ArtifactVersion> result = new ArrayList<>();
         // go through all the associations
         // see if they are met from the collection
         // add the version if they are
@@ -242,7 +242,7 @@ public class PropertyVersions
         }
         else
         {
-            result = new TreeSet<ArtifactVersion>( getVersionComparator() );
+            result = new TreeSet<>( getVersionComparator() );
             for ( ArtifactVersion candidate : versions )
             {
                 if ( ArtifactUtils.isSnapshot( candidate.toString() ) )
@@ -347,6 +347,10 @@ public class PropertyVersions
         ArtifactVersion lowerBoundArtifactVersion = null;
         if ( allowDowngrade )
         {
+            if ( segment != -1 )
+            {
+                lowerBoundArtifactVersion = getLowerBound(helper, currentVersion, segment);
+            }
             helper.getLog().debug( "lowerBoundArtifactVersion is null based on allowDowngrade:" + allowDowngrade );
         }
         else
@@ -509,6 +513,45 @@ public class PropertyVersions
             return result;
         }
 
+    }
+
+
+    private ArtifactVersion getLowerBound(VersionsHelper helper,
+            String currentVersion, int segment)
+    {
+        ArtifactVersion version = helper.createArtifactVersion(currentVersion);
+        int segmentCount = getVersionComparator().getSegmentCount(version);
+        if (segment < 0 || segment > segmentCount)
+        {
+            throw new InvalidSegmentException(segment, segmentCount,
+                    currentVersion);
+        }
+
+        StringBuilder newVersion = new StringBuilder();
+        newVersion.append(segment >= 0 ? version.getMajorVersion() : 0);
+        if (segmentCount > 0)
+        {
+            newVersion.append(".")
+                    .append(segment >= 1 ? version.getMinorVersion() : 0);
+        }
+        if (segmentCount > 1)
+        {
+            newVersion.append(".")
+                    .append(segment >= 2 ? version.getIncrementalVersion() : 0);
+        }
+        if (segmentCount > 2)
+        {
+            if (version.getQualifier() != null)
+            {
+                newVersion.append("-")
+                        .append(segment >= 3 ? version.getQualifier() : "0");
+            } else
+            {
+                newVersion.append("-")
+                        .append(segment >= 3 ? version.getBuildNumber() : "0");
+            }
+        }
+        return helper.createArtifactVersion(newVersion.toString());
     }
 
 }

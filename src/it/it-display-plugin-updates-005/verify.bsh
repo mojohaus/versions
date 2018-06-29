@@ -14,11 +14,11 @@ try
         return false;
     }
 
-    p = Pattern.compile( "\\Qmaven-deploy-plugin ...................................... 2.3 ->\\E" );
+    p = Pattern.compile( "maven-deploy-plugin \\.+ 2\\.3 ->" );
     m = p.matcher( buf.toString() );
     if ( !m.find() )
     {
-        System.out.println( "cannot update of deploy plugin");
+        System.out.println( "cannot find update of deploy plugin");
         return false;
     }   
 }

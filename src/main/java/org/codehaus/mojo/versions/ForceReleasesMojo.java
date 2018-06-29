@@ -42,7 +42,7 @@ import javax.xml.stream.XMLStreamException;
  * @author Stephen Connolly
  * @since 2.2
  */
-@Mojo( name = "force-releases", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "force-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class ForceReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

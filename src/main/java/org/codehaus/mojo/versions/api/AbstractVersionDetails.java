@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -183,10 +182,8 @@ public abstract class AbstractVersionDetails
     {
         ArtifactVersion latest = null;
         final VersionComparator versionComparator = getVersionComparator();
-        Iterator<ArtifactVersion> i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
-        while ( i.hasNext() )
+        for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
         {
-            ArtifactVersion candidate = i.next();
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
@@ -232,13 +229,13 @@ public abstract class AbstractVersionDetails
 
     public final boolean containsVersion( String version )
     {
-        ArtifactVersion[] versions = getVersions (true);
-        for ( ArtifactVersion item : versions )
+        for ( ArtifactVersion candidate : getVersions( true ) )
         {
-            if (version.equals( item.toString() )) {
+            if ( version.equals( candidate.toString() ) )
+            {
                 return true;
             }
-                
+
         }
         return false;
     }
@@ -282,10 +279,8 @@ public abstract class AbstractVersionDetails
     {
         ArtifactVersion oldest = null;
         final VersionComparator versionComparator = getVersionComparator();
-        Iterator<ArtifactVersion> i = Arrays.asList( getVersions( includeSnapshots ) ).iterator();
-        while ( i.hasNext() )
+        for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
         {
-            ArtifactVersion candidate = i.next();
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
@@ -326,9 +321,8 @@ public abstract class AbstractVersionDetails
                                                 ArtifactVersion upperBound, boolean includeSnapshots,
                                                 boolean includeLower, boolean includeUpper )
     {
-        Set<ArtifactVersion> result;
         final VersionComparator versionComparator = getVersionComparator();
-        result = new TreeSet<ArtifactVersion>( versionComparator );
+        Set<ArtifactVersion> result = new TreeSet<>( versionComparator );
         for ( ArtifactVersion candidate : Arrays.asList( getVersions( includeSnapshots ) ) )
         {
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )

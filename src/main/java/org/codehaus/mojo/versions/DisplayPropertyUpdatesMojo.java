@@ -40,7 +40,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "display-property-updates", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "display-property-updates", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class DisplayPropertyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
@@ -119,8 +119,8 @@ public class DisplayPropertyUpdatesMojo
         throws MojoExecutionException, MojoFailureException
     {
         logInit();
-        List<String> current = new ArrayList<String>();
-        List<String> updates = new ArrayList<String>();
+        List<String> current = new ArrayList<>();
+        List<String> updates = new ArrayList<>();
 
         Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,

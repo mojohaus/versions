@@ -178,7 +178,7 @@ mvn versions:set -DnewVersion=3.6.0
 
 
 +---+
-mvn version:set -DnewVersion=3.6.0 -DoldVersion=* -DgroupId=* -DartifactId=*
+mvn versions:set -DnewVersion=3.6.0 -DoldVersion=* -DgroupId=* -DartifactId=*
 +---+
 
   This is needed otherwise the filter for the versions (via <<-DoldVersion=*>>) would have

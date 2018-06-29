@@ -100,25 +100,13 @@ public class PomHelper
     public static Model getRawModel( File moduleProjectFile )
         throws IOException
     {
-        FileInputStream input = null;
-        try
+        try (FileInputStream input = new FileInputStream( moduleProjectFile ))
         {
-            input = new FileInputStream( moduleProjectFile );
-            MavenXpp3Reader reader = new MavenXpp3Reader();
-            return reader.read( input );
+            return new MavenXpp3Reader().read( input );
         }
         catch ( XmlPullParserException e )
         {
-            IOException ioe = new IOException( e.getMessage() );
-            ioe.initCause( e );
-            throw ioe;
-        }
-        finally
-        {
-            if ( input != null )
-            {
-                input.close();
-            }
+            throw new IOException( e.getMessage(), e );
         }
     }
 
@@ -132,25 +120,13 @@ public class PomHelper
     public static Model getRawModel( ModifiedPomXMLEventReader modifiedPomXMLEventReader )
         throws IOException
     {
-        StringReader stringReader = null;
-        try
+        try (StringReader stringReader = new StringReader( modifiedPomXMLEventReader.asStringBuilder().toString() ))
         {
-            stringReader = new StringReader( modifiedPomXMLEventReader.asStringBuilder().toString() );
-            MavenXpp3Reader reader = new MavenXpp3Reader();
-            return reader.read( stringReader );
+            return new MavenXpp3Reader().read( stringReader );
         }
         catch ( XmlPullParserException e )
         {
-            IOException ioe = new IOException( e.getMessage() );
-            ioe.initCause( e );
-            throw ioe;
-        }
-        finally
-        {
-            if ( stringReader != null )
-            {
-                stringReader.close();
-            }
+            throw new IOException( e.getMessage(), e );
         }
     }
 
@@ -252,11 +228,26 @@ public class PomHelper
     public static boolean setProjectVersion( final ModifiedPomXMLEventReader pom, final String value )
         throws XMLStreamException
     {
+        return setProjectValue( pom, "/project/version", value );
+    }
+
+    /**
+     * Searches the pom re-defining a project value using the given pattern.
+     *
+     * @param pom The pom to modify.
+     * @param pattern The pattern to look for.
+     * @param value The new value of the property.
+     * @return <code>true</code> if a replacement was made.
+     * @throws XMLStreamException if something went wrong.
+     */
+    public static boolean setProjectValue( final ModifiedPomXMLEventReader pom, String pattern, final String value )
+        throws XMLStreamException
+    {
         Stack<String> stack = new Stack<String>();
         String path = "";
         final Pattern matchScopeRegex;
         boolean madeReplacement = false;
-        matchScopeRegex = Pattern.compile( "/project/version" );
+        matchScopeRegex = Pattern.compile( pattern );
 
         pom.rewind();
 
@@ -402,7 +393,7 @@ public class PomHelper
     public static Artifact getProjectParent( final ModifiedPomXMLEventReader pom, VersionsHelper helper )
         throws XMLStreamException
     {
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern matchScopeRegex = Pattern.compile( "/project/parent((/groupId)|(/artifactId)|(/version))" );
         String groupId = null;
@@ -529,7 +520,7 @@ public class PomHelper
             }
         }
 
-        stack = new Stack<String>();
+        stack = new Stack<>();
         path = "";
         boolean inMatchScope = false;
         boolean madeReplacement = false;
@@ -772,7 +763,7 @@ public class PomHelper
                                             final String artifactId, final String oldVersion, final String newVersion )
         throws XMLStreamException
     {
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern matchScopeRegex;
         final Pattern matchTargetRegex;
@@ -885,7 +876,7 @@ public class PomHelper
         Model model = getRawModel( project );
         Map<String, PropertyVersionsBuilder> result = new TreeMap<String, PropertyVersionsBuilder>();
 
-        Set<String> activeProfiles = new TreeSet<String>();
+        Set<String> activeProfiles = new TreeSet<>();
         for ( Profile profile : (List<Profile>) project.getActiveProfiles() )
         {
             activeProfiles.add( profile.getId() );
@@ -1379,7 +1370,7 @@ public class PomHelper
     public static Map<String, Model> getReactorModels( MavenProject project, Log logger )
         throws IOException
     {
-        Map<String, Model> result = new LinkedHashMap<String, Model>();
+        Map<String, Model> result = new LinkedHashMap<>();
         final Model model = getRawModel( project );
         final String path = "";
         result.put( path, model );
@@ -1404,8 +1395,8 @@ public class PomHelper
         {
             path += '/';
         }
-        Map<String, Model> result = new LinkedHashMap<String, Model>();
-        Map<String, Model> childResults = new LinkedHashMap<String, Model>();
+        Map<String, Model> result = new LinkedHashMap<>();
+        Map<String, Model> childResults = new LinkedHashMap<>();
 
         File baseDir = path.length() > 0 ? new File( project.getBasedir(), path ) : project.getBasedir();
 
@@ -1544,15 +1535,9 @@ public class PomHelper
     public static StringBuilder readXmlFile( File outFile )
         throws IOException
     {
-        Reader reader = ReaderFactory.newXmlReader( outFile );
-
-        try
+        try( Reader reader = ReaderFactory.newXmlReader( outFile ) )
         {
             return new StringBuilder( IOUtil.toString( reader ) );
-        }
-        finally
-        {
-            IOUtil.close( reader );
         }
     }
 
@@ -1588,9 +1573,9 @@ public class PomHelper
         String typeElement = "type";
         String scopeElement = "scope";
         Set<String> recognizedElements =
-            new HashSet<String>( Arrays.asList( groupIdElement, artifactIdElement, versionElement, typeElement,
+            new HashSet<>( Arrays.asList( groupIdElement, artifactIdElement, versionElement, typeElement,
                                                 scopeElement ) );
-        Map<String, String> depData = new HashMap<String, String>();
+        Map<String, String> depData = new HashMap<>();
 
         pom.rewind();
 

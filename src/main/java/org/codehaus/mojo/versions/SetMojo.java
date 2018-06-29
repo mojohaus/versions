@@ -63,7 +63,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo (name="set", requiresProject = true, requiresDirectInvocation = true, aggregator = true, threadSafe = true)
+@Mojo( name = "set", requiresProject = true, requiresDirectInvocation = true, aggregator = true, threadSafe = true )
 public class SetMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -181,9 +181,17 @@ public class SetMojo
     private boolean nextSnapshot;
 
     /**
+     * Whether to process all modules whereas they have parent/child or not.
+     *
+     * @since 2.5
+     */
+    @Parameter( property = "processAllModules", defaultValue = "false" )
+    private boolean processAllModules;
+
+    /**
      * The changes to module coordinates. Guarded by this.
      */
-    private final transient List<VersionChange> sourceChanges = new ArrayList<VersionChange>();
+    private final transient List<VersionChange> sourceChanges = new ArrayList<>();
 
     private synchronized void addChange( String groupId, String artifactId, String oldVersion, String newVersion )
     {
@@ -210,10 +218,9 @@ public class SetMojo
         if ( removeSnapshot && !nextSnapshot )
         {
             String version = getVersion();
-            String release = version;
             if ( version.endsWith( SNAPSHOT ) )
             {
-                release = version.substring( 0, version.indexOf( SNAPSHOT ) );
+                String release = version.substring( 0, version.indexOf( SNAPSHOT ) );
                 newVersion = release;
                 getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );
             }
@@ -307,7 +314,8 @@ public class SetMojo
                 final String mGroupId = PomHelper.getGroupId( m );
                 final String mArtifactId = PomHelper.getArtifactId( m );
                 final String mVersion = PomHelper.getVersion( m );
-                if ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId ).matches()
+                if ((  ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId ).matches() ) //
+                       || (processAllModules) ) //
                     && oldVersionIdRegex.matcher( mVersion ).matches() && !newVersion.equals( mVersion ) )
                 {
                     found = true;
@@ -389,14 +397,14 @@ public class SetMojo
             getLog().debug( "Looking for modules which use "
                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
 
-            for ( Map.Entry<String, Model> stringModelEntry : PomHelper.getChildModels( reactor, sourceGroupId,
+            for ( Map.Entry<String, Model> stringModelEntry : processAllModules ? reactor.entrySet() : //
+                                                                    PomHelper.getChildModels( reactor, sourceGroupId,
                                                                                         sourceArtifactId ).entrySet() )
             {
-                final String targetPath = stringModelEntry.getKey();
                 final Model targetModel = stringModelEntry.getValue();
                 final Parent parent = targetModel.getParent();
-                getLog().debug( "Module: " + targetPath );
-                if ( sourceVersion.equals( parent.getVersion() ) )
+                getLog().debug( "Module: " + stringModelEntry.getKey() );
+                if ( parent != null && sourceVersion.equals( parent.getVersion() ) )
                 {
                     getLog().debug( "    parent already is "
                         + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + sourceVersion );
@@ -404,13 +412,13 @@ public class SetMojo
                 else
                 {
                     getLog().debug( "    parent is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                        + ":" + parent.getVersion() );
+                        + ":" + ( parent == null ? "" : parent.getVersion() ));
                     getLog().debug( "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
                         + ":" + sourceVersion );
                 }
                 final boolean targetExplicit = PomHelper.isExplicitVersion( targetModel );
-                if ( ( updateMatchingVersions || !targetExplicit )
-                    && StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) )
+                if ( ( updateMatchingVersions || !targetExplicit ) //
+                    && ( parent != null && StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) ) )
                 {
                     getLog().debug( "    module is "
                         + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),

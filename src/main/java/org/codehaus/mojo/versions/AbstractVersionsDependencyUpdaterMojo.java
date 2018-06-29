@@ -303,7 +303,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
                 return true;
             }
         }
-        
+
         return false;
 
     }
@@ -398,7 +398,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     {
         if ( includesFilter == null && ( includes != null || includesList != null ) )
         {
-            List<String> patterns = new ArrayList<String>();
+            List<String> patterns = new ArrayList<>();
             if ( this.includesList != null )
             {
                 patterns.addAll( separatePatterns( includesList ) );
@@ -416,7 +416,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     {
         if ( excludesFilter == null && ( excludes != null || excludesList != null ) )
         {
-            List<String> patterns = new ArrayList<String>();
+            List<String> patterns = new ArrayList<>();
             if ( excludesList != null )
             {
                 patterns.addAll( separatePatterns( excludesList ) );
@@ -444,7 +444,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
             return Collections.emptyList();
         }
 
-        List<String> patterns = new ArrayList<String>();
+        List<String> patterns = new ArrayList<>();
         int indexOf = nextCommaIndex( includeString );
         while ( indexOf >= 0 )
         {

@@ -30,6 +30,9 @@ Version number rules
 
 * Introduction
 
+  <<Notice:>> The limitations explained in this paragraph were true in Maven 2.x, but have been <<fixed>> in Maven 3.x (see
+  {{{https://cwiki.apache.org/confluence/display/MAVENOLD/Versioning}Maven Versioning Wiki page}} for more details)
+
   The current implementation of
   {{{http://maven.apache.org/ref/current/maven-artifact/xref/org/apache/maven/artifact/versioning/DefaultArtifactVersion.html}<<<DefaultArtifactVersion>>>}}
   in the core of Maven expects that version numbers will have a very specific format:
@@ -126,6 +129,43 @@ Version number rules
           <rulesUri>http://www.mycompany.com/maven-version-rules.xml</rulesUri>
           ...
         </configuration>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+  You can provide your ruleset xml file also within a jar, if you want to distribute
+  your ruleset xml as Maven artifact. Therefore you have to declare the containing
+  jar as direct dependency of the <<versions-maven-plugin>> and to use classpath
+  as protocol.
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
+        <configuration>
+          ...
+          <rulesUri>classpath:///package/foo/bar/rules.xml</rulesUri>
+          ...
+        </configuration>
+        <dependencies>
+            <dependency>
+                <groupId>com.mycompany</groupId>
+                <artifactId>version-rules</artifactId>
+                <version>1.0</version>
+            </dependency>
+        </dependencies>
       </plugin>
       ...
     </plugins>

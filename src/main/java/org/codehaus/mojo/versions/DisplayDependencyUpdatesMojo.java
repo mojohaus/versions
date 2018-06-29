@@ -152,7 +152,7 @@ public class DisplayDependencyUpdatesMojo
 
     private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )
     {
-        Set<Dependency> result = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
         if ( build.getPluginManagement() != null )
         {
             for ( Plugin plugin : build.getPluginManagement().getPlugins() )
@@ -171,7 +171,7 @@ public class DisplayDependencyUpdatesMojo
 
     private static Set<Dependency> extractDependenciesFromPlugins( List<Plugin> plugins )
     {
-        Set<Dependency> result = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
         for ( Plugin plugin : plugins )
         {
             if ( plugin.getDependencies() != null && !plugin.getDependencies().isEmpty() )
@@ -197,15 +197,15 @@ public class DisplayDependencyUpdatesMojo
      */
     private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
     {
-        Set<Dependency> result = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
         for ( Iterator<Dependency> i = dependencies.iterator(); i.hasNext(); )
         {
-            Dependency c = (Dependency) i.next();
+            Dependency c = i.next();
             boolean matched = false;
             Iterator<Dependency> j = dependencyManagement.iterator();
             while ( !matched && j.hasNext() )
             {
-                Dependency t = (Dependency) j.next();
+                Dependency t =j.next();
                 if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
                     && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
                     && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )
@@ -265,7 +265,7 @@ public class DisplayDependencyUpdatesMojo
     {
         logInit();
 
-        Set<Dependency> dependencyManagement = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> dependencyManagement = new TreeSet<>( new DependencyComparator() );
         if ( getProject().getDependencyManagement() != null )
         {
 
@@ -312,7 +312,7 @@ public class DisplayDependencyUpdatesMojo
             }
         }
 
-        Set<Dependency> dependencies = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> dependencies = new TreeSet<>( new DependencyComparator() );
         dependencies.addAll( getProject().getDependencies() );
 
         if ( isProcessingDependencyManagement() )
@@ -320,14 +320,14 @@ public class DisplayDependencyUpdatesMojo
             dependencies = removeDependencyManagment( dependencies, dependencyManagement );
         }
 
-        Set<Dependency> pluginDependencies = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
 
         if ( isProcessingPluginDependencies() )
         {
             pluginDependencies = extractDependenciesFromPlugins( getProject().getBuildPlugins() );
         }
 
-        Set<Dependency> pluginDependenciesInPluginManagement = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> pluginDependenciesInPluginManagement = new TreeSet<>( new DependencyComparator() );
         if ( isProcessPluginDependenciesInDependencyManagement() )
         {
             pluginDependenciesInPluginManagement =
@@ -394,8 +394,8 @@ public class DisplayDependencyUpdatesMojo
 
     private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
     {
-        List withUpdates = new ArrayList();
-        List usingCurrent = new ArrayList();
+        List<String> withUpdates = new ArrayList<>();
+        List<String> usingCurrent = new ArrayList<>();
         Iterator i = updates.values().iterator();
         while ( i.hasNext() )
         {
