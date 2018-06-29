@@ -43,7 +43,7 @@ import javax.xml.stream.XMLStreamException;
  * @author Paul Gier
  * @since 1.0-alpha-3
  */
-@Mojo( name = "unlock-snapshots", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "unlock-snapshots", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UnlockSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

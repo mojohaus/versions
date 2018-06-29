@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -46,11 +45,10 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-alpha-2
  */
-@Mojo( name = "update-child-modules", requiresProject = true, requiresDirectInvocation = true, aggregator = true )
+@Mojo( name = "update-child-modules", requiresProject = true, requiresDirectInvocation = true, aggregator = true, threadSafe = true )
 public class UpdateChildModulesMojo
     extends AbstractVersionsUpdaterMojo
 {
-
     /**
      * The groupId that we are updating. Guarded by this.
      */
@@ -81,13 +79,13 @@ public class UpdateChildModulesMojo
         try
         {
             final Map<String, Model> reactor = PomHelper.getReactorModels( getProject(), getLog() );
-            List<String> order = new ArrayList<String>( reactor.keySet() );
+            List<String> order = new ArrayList<>( reactor.keySet() );
             Collections.sort( order, new Comparator<String>()
             {
                 public int compare( String o1, String o2 )
                 {
-                    Model m1 = (Model) reactor.get( o1 );
-                    Model m2 = (Model) reactor.get( o2 );
+                    Model m1 = reactor.get( o1 );
+                    Model m2 = reactor.get( o2 );
                     int d1 = PomHelper.getReactorParentCount( reactor, m1 );
                     int d2 = PomHelper.getReactorParentCount( reactor, m2 );
                     if ( d1 < d2 )
@@ -102,10 +100,9 @@ public class UpdateChildModulesMojo
                 }
             } );
 
-            for ( String item : order )
+            for ( String sourcePath : order )
             {
-                String sourcePath = item;
-                Model sourceModel = (Model) reactor.get( sourcePath );
+                Model sourceModel = reactor.get( sourcePath );
 
                 getLog().debug( sourcePath.length() == 0 ? "Processing root module as parent"
                                 : "Processing " + sourcePath + " as a parent." );
@@ -132,13 +129,14 @@ public class UpdateChildModulesMojo
                     }
 
                     getLog().debug( "Looking for modules which use "
-                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
+                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent to update it to " + sourceVersion );
 
-                    Map<String, Model> childModels =
-                        PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId );
-                    for ( Entry<String, Model> childModelEntry : childModels.entrySet() )
+                    for ( Map.Entry<String, Model> childModelEntry : PomHelper.getChildModels( reactor, sourceGroupId,
+                                                                                      sourceArtifactId ).entrySet() )
                     {
-                        File moduleDir = new File( getProject().getBasedir(), childModelEntry.getKey() );
+                        String targetPath = childModelEntry.getKey();
+
+                        File moduleDir = new File( getProject().getBasedir(), targetPath );
 
                         File moduleProjectFile;
 
@@ -171,8 +169,6 @@ public class UpdateChildModulesMojo
                                 + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
                                 + sourceVersion );
                             process( moduleProjectFile );
-                            // don't forget to update the cached model
-                            targetModel.setVersion( sourceVersion );
                             didSomething = true;
                         }
                     }

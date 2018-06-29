@@ -47,7 +47,7 @@ import javax.xml.stream.XMLStreamException;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-releases", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "use-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

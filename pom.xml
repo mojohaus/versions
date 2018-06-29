@@ -19,11 +19,22 @@
   <inceptionYear>2008</inceptionYear>
   <licenses>
     <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <distributionManagement>
+    <repository>
+      <id>ossrh-staging</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+    <snapshotRepository>
+      <id>ossrh-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <developers>
     <developer>
@@ -73,6 +84,11 @@
     <contributor>
       <name>Erik Schepers</name>
     </contributor>
+    <contributor>
+      <name>Anton Johansson</name>
+      <email>antoon.johansson@gmail.com</email>
+      <timezone>+1</timezone>
+    </contributor>
   </contributors>
 
   <prerequisites>
@@ -82,8 +98,8 @@
   <scm>
     <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
-    <url>https://github.com/mojohaus/versions-maven-plugin</url>
-    <tag>HEAD</tag>
+    <url>https://github.com/mojohaus/versions-maven-plugin/tree/${project.scm.tag}</url>
+    <tag>master</tag>
   </scm>
   <issueManagement>
     <system>github</system>
@@ -91,7 +107,8 @@
   </issueManagement>
 
   <properties>
-    <mojo.java.target>1.5</mojo.java.target>
+    <mojo.java.target>1.7</mojo.java.target>
+
     <mavenVersion>3.0</mavenVersion>
     <wagonVersion>2.12</wagonVersion>
     <doxiaVersion>1.7</doxiaVersion>
@@ -273,6 +290,11 @@
       <version>1.9.5</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-compat</artifactId>
+      <version>3.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -327,7 +349,7 @@
         <artifactId>animal-sniffer-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>check-java15</id>
+            <id>check-java17</id>
             <phase>test</phase>
             <goals>
               <goal>check</goal>
@@ -335,7 +357,7 @@
             <configuration>
               <signature>
                 <groupId>org.codehaus.mojo.signature</groupId>
-                <artifactId>java15</artifactId>
+                <artifactId>java17</artifactId>
                 <version>1.0</version>
               </signature>
             </configuration>

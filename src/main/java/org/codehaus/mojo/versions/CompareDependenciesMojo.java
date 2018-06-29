@@ -54,7 +54,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Paul Gier
  * @since 1.3
  */
-@Mojo( name = "compare-dependencies", requiresProject = true, requiresDirectInvocation = true )
+@Mojo( name = "compare-dependencies", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class CompareDependenciesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -249,7 +249,7 @@ public class CompareDependenciesMojo
                                           Map<String, Dependency> remoteDependencies )
         throws MojoExecutionException, XMLStreamException
     {
-        List<String> updates = new ArrayList<String>();
+        List<String> updates = new ArrayList<>();
         for ( Dependency dep : dependencies )
         {
             Artifact artifact = this.toArtifact( dep );
@@ -294,7 +294,7 @@ public class CompareDependenciesMojo
                                                  Map<String, Dependency> remoteDependencies )
         throws XMLStreamException
     {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for ( Map.Entry<Property, PropertyVersions> entry : versionProperties.entrySet() )
         {
             Property property = entry.getKey();
@@ -368,12 +368,9 @@ public class CompareDependenciesMojo
             reportOutputFile.getParentFile().mkdirs();
         }
 
-        FileWriter fw = null;
-        PrintWriter pw = null;
-        try
+        try( FileWriter fw = new FileWriter( reportOutputFile ); //
+            PrintWriter pw = new PrintWriter( fw ) )
         {
-            fw = new FileWriter( reportOutputFile );
-            pw = new PrintWriter( fw );
             pw.println( "The following differences were found:" );
             pw.println();
             if ( dependenciesUpdate.size() == 0 )
@@ -401,32 +398,11 @@ public class CompareDependenciesMojo
                     pw.println( "  " + propertyUpdate );
                 }
             }
-            pw.close();
-            fw.close();
         }
         catch ( IOException e )
         {
             throw new MojoExecutionException( "Unable to write report file. ", e );
         }
-        finally
-        {
-            if ( pw != null )
-            {
-                pw.close();
-            }
-            if ( fw != null )
-            {
-                try
-                {
-                    fw.close();
-                }
-                catch ( IOException io )
-                {
-                    // Ignore
-                }
-            }
-        }
-
     }
 
     /**

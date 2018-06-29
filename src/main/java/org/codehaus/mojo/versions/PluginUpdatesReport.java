@@ -24,6 +24,7 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.utils.PluginComparator;
@@ -49,8 +50,8 @@ public class PluginUpdatesReport
     /**
      * Report formats (html and/or xml). HTML by default.
      * 
-     * @parameter
      */
+    @Parameter( property = "pluginUpdatesReportFormats", defaultValue = "html" )
     private String[] formats = new String[] { "html" };
 
     /**
@@ -91,13 +92,13 @@ public class PluginUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        Set<Plugin> pluginManagement = new TreeSet<Plugin>( new PluginComparator() );
+        Set<Plugin> pluginManagement = new TreeSet<>( new PluginComparator() );
         if ( haveBuildPluginManagementPlugins() )
         {
             pluginManagement.addAll( getProject().getBuild().getPluginManagement().getPlugins() );
         }
 
-        Set<Plugin> plugins = new TreeSet<Plugin>( new PluginComparator() );
+        Set<Plugin> plugins = new TreeSet<>( new PluginComparator() );
         if ( haveBuildPlugins() )
         {
             plugins.addAll( getProject().getBuild().getPlugins() );
@@ -122,19 +123,20 @@ public class PluginUpdatesReport
                 }
                 else if ( "xml".equals( format ) )
                 {
+                    File outputDir = new File(getProject().getBuild().getDirectory());
+                    if (!outputDir.exists())
+                    {
+                        outputDir.mkdirs();
+                    }
                     String outputFile =
-                        getProject().getBuild().getDirectory() + File.separator + getOutputName() + ".xml";
+                        outputDir.getAbsolutePath() + File.separator + getOutputName() + ".xml";
                     PluginUpdatesXmlRenderer xmlGenerator =
                         new PluginUpdatesXmlRenderer( pluginUpdates, pluginManagementUpdates, outputFile );
                     xmlGenerator.render();
                 }
             }
         }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( InvalidVersionSpecificationException | ArtifactMetadataRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }
@@ -152,7 +154,7 @@ public class PluginUpdatesReport
      */
     private static Set<Plugin> removePluginManagment( Set<Plugin> plugins, Set<Plugin> pluginManagement )
     {
-        Set<Plugin> result = new TreeSet<Plugin>( new PluginComparator() );
+        Set<Plugin> result = new TreeSet<>( new PluginComparator() );
         for ( Plugin c : plugins )
         {
             boolean matched = false;

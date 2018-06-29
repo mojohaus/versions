@@ -814,7 +814,7 @@ public abstract class AbstractVersionsReportRenderer
                                             ArtifactVersion[] artifactVersions )
     {
         VersionRange range;
-        Set<String> rangeVersions = new HashSet<String>();
+        Set<String> rangeVersions = new HashSet<>();
         ArtifactVersion[] tmp;
         if ( property.getVersion() != null )
         {

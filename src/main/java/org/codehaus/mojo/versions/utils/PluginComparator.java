@@ -30,7 +30,7 @@ import java.util.Comparator;
  * @since 1.0-beta-1
  */
 public class PluginComparator
-    implements Comparator
+    implements Comparator<Object>
 {
 
     /**
