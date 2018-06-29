@@ -37,6 +37,7 @@ import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.shared.artifact.resolve.internal.DefaultArtifactResolver;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.file.FileWagon;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.mojo.versions.Property;
@@ -213,6 +214,12 @@ public class DefaultVersionsHelperTest
     {
         final DefaultWagonManager wagonManager = new DefaultWagonManager()
         {
+            @Override
+            public AuthenticationInfo getAuthenticationInfo( String id )
+            {
+                return new AuthenticationInfo();
+            }
+
             public Wagon getWagon( Repository repository )
             {
                 return new FileWagon();
