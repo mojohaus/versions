@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -44,7 +45,7 @@ import java.util.regex.Pattern;
  */
 @Mojo( name = "force-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class ForceReleasesMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends ParentUpdatingDependencyUpdateMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -56,31 +57,12 @@ public class ForceReleasesMojo
 
     // ------------------------------ METHODS --------------------------
 
-    /**
-     * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
-     */
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+
+    @Override
+    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
     {
-        try
-        {
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
-            {
-                useReleases( pom, getProject().getDependencyManagement().getDependencies() );
-            }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useReleases( pom, getProject().getDependencies() );
-            }
-        }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+        useReleases(pom, dependencies);
     }
 
     private void useReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
@@ -113,11 +95,7 @@ public class ForceReleasesMojo
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 if ( versions.containsVersion( releaseVersion ) )
                 {
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         releaseVersion, getProject().getModel() ) )
-                    {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
-                    }
+                    setVersion(pom, dep, version, artifact, new DefaultArtifactVersion(releaseVersion));
                 }
                 else
                 {
@@ -126,10 +104,8 @@ public class ForceReleasesMojo
                     {
                         getLog().info( "No release of " + toString( dep ) + " to force." );
                     }
-                    else if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                              v[v.length - 1].toString(), getProject().getModel() ) )
-                    {
-                        getLog().info( "Reverted " + toString( dep ) + " to version " + v[v.length - 1].toString() );
+                    else {
+                        setVersion(pom, dep, version, artifact, v[v.length - 1]);
                     }
                 }
             }

@@ -28,11 +28,9 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -51,8 +49,7 @@ import java.util.regex.Pattern;
  * @since 1.0-alpha-3
  */
 @Mojo( name = "use-latest-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
-public class UseLatestReleasesMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+public class UseLatestReleasesMojo extends ParentUpdatingDependencyUpdateMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -88,42 +85,11 @@ public class UseLatestReleasesMojo
 
     // ------------------------------ METHODS --------------------------
 
-    /**
-     * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
-     */
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+    @Override
+    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+          throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
     {
-        try
-        {
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
-            {
-                useLatestReleases( pom, getProject().getDependencyManagement().getDependencies() );
-            }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useLatestReleases( pom, getProject().getDependencies() );
-            }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                Dependency dependency = new Dependency();
-                dependency.setArtifactId(getProject().getParent().getArtifactId());
-                dependency.setGroupId(getProject().getParent().getGroupId());
-                dependency.setVersion(getProject().getParent().getVersion());
-                dependency.setType("pom");
-                List list = new ArrayList();
-                list.add(dependency);
-                useLatestReleases( pom, list);
-            }
-        }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+        useLatestReleases(pom, dependencies);
     }
 
     private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
@@ -166,21 +132,7 @@ public class UseLatestReleasesMojo
                 ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newer );
                 if ( filteredVersions.length > 0 )
                 {
-                    String newVersion = filteredVersions[filteredVersions.length - 1].toString();
-                    if(getProject().getParent() != null){
-                        if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
-                        {
-                            if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
-                            {
-                                getLog().debug( "Made parent update from " + version + " to " + newVersion.toString() );
-                            }
-                        }
-                    }
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         newVersion, getProject().getModel() ) )
-                    {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
-                    }
+                    setVersion(pom, dep, version, artifact, filteredVersions[filteredVersions.length - 1]);
                 }
             }
         }

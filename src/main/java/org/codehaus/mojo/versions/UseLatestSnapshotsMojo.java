@@ -25,11 +25,9 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -38,7 +36,6 @@ import javax.xml.stream.XMLStreamException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,7 +48,7 @@ import java.util.regex.Pattern;
  */
 @Mojo( name = "use-latest-snapshots", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseLatestSnapshotsMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends ParentUpdatingDependencyUpdateMojo
 {
 
     /**
@@ -87,42 +84,11 @@ public class UseLatestSnapshotsMojo
 
     // ------------------------------ METHODS --------------------------
 
-    /**
-     * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
-     */
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+    @Override
+    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+          throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
     {
-        try
-        {
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
-            {
-                useLatestSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
-            }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useLatestSnapshots( pom, getProject().getDependencies() );
-            }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                Dependency dependency = new Dependency();
-                dependency.setArtifactId(getProject().getParent().getArtifactId());
-                dependency.setGroupId(getProject().getParent().getGroupId());
-                dependency.setVersion(getProject().getParent().getVersion());
-                dependency.setType("pom");
-                List list = new ArrayList();
-                list.add(dependency);
-                useLatestSnapshots( pom, list);
-            }
-        }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+        useLatestSnapshots(pom, dependencies);
     }
 
     private void useLatestSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
@@ -171,7 +137,6 @@ public class UseLatestSnapshotsMojo
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
                 getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
 
-                String latestVersion = null;
                 ArrayList snapshotsOnly = new ArrayList();
 
                 for ( int j = 0; j < newer.length; j++ )
@@ -190,22 +155,7 @@ public class UseLatestSnapshotsMojo
 
                 if ( filteredVersions.length > 0 )
                 {
-                    latestVersion = filteredVersions[filteredVersions.length - 1].toString();
-                    if(getProject().getParent() != null){
-                        if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
-                        {
-                            if ( PomHelper.setProjectParentVersion( pom, latestVersion.toString() ) )
-                            {
-                                getLog().debug( "Made parent update from " + version + " to " + latestVersion.toString() );
-                            }
-                        }
-                    }
-
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         latestVersion, getProject().getModel() ) )
-                    {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + latestVersion );
-                    }
+                    setVersion(pom, dep, version, artifact, filteredVersions[filteredVersions.length - 1]);
                 }
             }
         }

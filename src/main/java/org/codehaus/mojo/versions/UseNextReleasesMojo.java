@@ -24,10 +24,8 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -44,7 +42,7 @@ import java.util.regex.Pattern;
  */
 @Mojo( name = "use-next-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseNextReleasesMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends ParentUpdatingDependencyUpdateMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -56,24 +54,11 @@ public class UseNextReleasesMojo
 
     // ------------------------------ METHODS --------------------------
 
-    /**
-     * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
-     */
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
+    @Override
+    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+          throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
     {
-        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
-        {
-            useNextReleases( pom, getProject().getDependencyManagement().getDependencies() );
-        }
-        if ( getProject().getDependencies() != null && isProcessingDependencies() )
-        {
-            useNextReleases( pom, getProject().getDependencies() );
-        }
+        useNextReleases(pom, dependencies);
     }
 
     private void useNextReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
@@ -106,12 +91,7 @@ public class UseNextReleasesMojo
                 ArtifactVersion[] newer = versions.getNewerVersions( version, false );
                 if ( newer.length > 0 )
                 {
-                    String newVersion = newer[0].toString();
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         newVersion, getProject().getModel() ) )
-                    {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
-                    }
+                    setVersion(pom, dep, version, artifact, newer[0]);
                 }
             }
         }

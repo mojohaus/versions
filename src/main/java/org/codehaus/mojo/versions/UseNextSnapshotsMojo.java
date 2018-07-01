@@ -25,11 +25,9 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -48,7 +46,7 @@ import java.util.regex.Pattern;
  */
 @Mojo( name = "use-next-snapshots", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseNextSnapshotsMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends ParentUpdatingDependencyUpdateMojo
 {
 
     /**
@@ -84,31 +82,12 @@ public class UseNextSnapshotsMojo
 
     // ------------------------------ METHODS --------------------------
 
-    /**
-     * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
-     */
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+
+    @Override
+    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
     {
-        try
-        {
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
-            {
-                useNextSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
-            }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useNextSnapshots( pom, getProject().getDependencies() );
-            }
-        }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+        useNextSnapshots(pom, dependencies);
     }
 
     private void useNextSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
@@ -152,21 +131,24 @@ public class UseNextSnapshotsMojo
                 getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
                 getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
-                for ( int j = 0; j < newer.length; j++ )
-                {
-                    String newVersion = newer[j].toString();
-                    if ( matchSnapshotRegex.matcher( newVersion ).matches() )
-                    {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             newVersion, getProject().getModel() ) )
-                        {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
-                        }
-                        break;
-                    }
+
+                final ArtifactVersion newVersion = chooseVersion(newer);
+                if (newVersion != null) {
+                   setVersion(pom, dep, dep.getVersion(), artifact, newVersion);
                 }
             }
         }
+    }
+
+    private ArtifactVersion chooseVersion(ArtifactVersion[] versions) {
+        for (ArtifactVersion version : versions) {
+            final String newVersion = version.toString();
+            if (matchSnapshotRegex.matcher(newVersion).matches()) {
+                return version;
+            }
+        }
+
+        return null;
     }
 
 }

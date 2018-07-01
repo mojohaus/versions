@@ -20,10 +20,8 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -50,7 +48,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  */
 @Mojo( name = "use-latest-versions", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseLatestVersionsMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends ParentUpdatingDependencyUpdateMojo
 {
     /**
      * Whether to allow the major version number to be changed.
@@ -85,6 +83,7 @@ public class UseLatestVersionsMojo
      * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
+    @Override
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
@@ -99,30 +98,22 @@ public class UseLatestVersionsMojo
                     useLatestVersions( pom, dependencyManagement.getDependencies() );
                 }
             }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
+            else
             {
-                useLatestVersions( pom, getProject().getDependencies() );
-            }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                Dependency dependency = new Dependency();
-                dependency.setArtifactId(getProject().getParent().getArtifactId());
-                dependency.setGroupId(getProject().getParent().getGroupId());
-                dependency.setVersion(getProject().getParent().getVersion());
-                dependency.setType("pom");
-                List list = new ArrayList();
-                list.add(dependency);
-                useLatestVersions( pom, list);
+                super.update(pom);
             }
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( ArtifactMetadataRetrievalException | IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+    }
+
+    @Override
+    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+          throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    {
+        useLatestVersions(pom, dependencies);
     }
 
     private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
@@ -161,22 +152,7 @@ public class UseLatestVersionsMojo
             ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
             if ( filteredVersions.length > 0 )
             {
-                String newVersion = filteredVersions[filteredVersions.length - 1].toString();
-                if(getProject().getParent() != null){
-                    if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
-                    {
-                        if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
-                        {
-                            getLog().debug( "Made parent update from " + version + " to " + newVersion.toString() );
-                        }
-                    }
-                }
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion,
-                        getProject().getModel() ) )
-                {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
-
-                }
+                setVersion(pom, dep, version, artifact, filteredVersions[filteredVersions.length - 1]);
             }
 
         }

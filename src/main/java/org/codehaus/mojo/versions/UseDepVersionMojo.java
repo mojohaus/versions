@@ -26,13 +26,14 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -41,7 +42,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  */
 @Mojo( name = "use-dep-version", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
 public class UseDepVersionMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends ParentUpdatingDependencyUpdateMojo
 {
 
     /**
@@ -57,10 +58,9 @@ public class UseDepVersionMojo
     @Parameter( property = "forceVersion", defaultValue = "false" )
     protected boolean forceVersion;
 
-    @SuppressWarnings( "unchecked" )
     @Override
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
+        throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
 
         if ( depVersion == null || depVersion.equals( "" ) )
@@ -73,22 +73,14 @@ public class UseDepVersionMojo
             throw new IllegalArgumentException( "The use-specific-version goal is intended to be used with a single artifact. Please specify a value for the 'includes' parameter, or use -DforceVersion=true to override this check." );
         }
 
-        try
-        {
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
-            {
-                useDepVersion( pom, getProject().getDependencyManagement().getDependencies() );
-            }
+        super.update(pom);
+    }
 
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useDepVersion( pom, getProject().getDependencies() );
-            }
-        }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+    @Override
+    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    {
+        useDepVersion(pom, dependencies);
     }
 
     private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
@@ -123,12 +115,7 @@ public class UseDepVersionMojo
                 }
 
                 String version = dep.getVersion();
-
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, depVersion,
-                                                     getProject().getModel() ) )
-                {
-                    getLog().info( "Updated " + toString( dep ) + " to version " + depVersion );
-                }
+                setVersion(pom, dep, version, artifact, new DefaultArtifactVersion(version));
             }
         }
     }

@@ -22,11 +22,19 @@
     is not compatible with project minimum version, not really a proposed
     upgrade
 
- * [Fixed Issue 237][issue-237]
+ * [Fixed Issue 237][issue-237] and [Fixed Issue 288][issue-288]
 
-   Thanks to Julian Di Leonardo <DiJu519@users.noreply.github.com>
+   Thanks to Julian Di Leonardo <DiJu519@users.noreply.github.com> and [Adam Voss](https://github.com/adamvoss)
 
-   Adding parent processing to UseLatestVersion/UseLatestSnapshot/UseLatestRelease
+   Added parent processing to:
+     - UseLatestVersion
+     - UseLatestSnapshot
+     - UseLatestRelease
+     - ForceReleases
+     - UseDepVersion
+     - UseNextReleases
+     - UseNextSnapshots
+     - UseNextVersions
 
  * [Fixed Issue 190][issue-190]
 
@@ -153,6 +161,7 @@
 [issue-198]: https://github.com/mojohaus/versions-maven-plugin/issues/198
 [issue-237]: https://github.com/mojohaus/versions-maven-plugin/issues/237
 [issue-256]: https://github.com/mojohaus/versions-maven-plugin/issues/256
+[issue-288]: https://github.com/mojohaus/versions-maven-plugin/issues/288
 
 [pull-189]: https://github.com/mojohaus/versions-maven-plugin/pull/189
 [pull-252]: https://github.com/mojohaus/versions-maven-plugin/pull/252
