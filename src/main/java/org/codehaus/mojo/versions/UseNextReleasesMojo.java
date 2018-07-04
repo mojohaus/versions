@@ -22,15 +22,14 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.change.VersionChange;
 
-import javax.xml.stream.XMLStreamException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,24 +54,15 @@ public class UseNextReleasesMojo
     // ------------------------------ METHODS --------------------------
 
     @Override
-    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
-          throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    Collection<VersionChange> getVersionChanges(Collection<ArtifactIdentifier> artifacts) throws MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        useNextReleases(pom, dependencies);
-    }
+        final List<VersionChange> versionsToChange = new ArrayList<>();
 
-    private void useNextReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
-    {
-        Iterator<Dependency> i = dependencies.iterator();
-
-        while ( i.hasNext() )
+        for ( ArtifactIdentifier dep : artifacts )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+                getLog().info( "Ignoring reactor dependency: " + dep );
                 continue;
             }
 
@@ -80,8 +70,8 @@ public class UseNextReleasesMojo
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( !versionMatcher.matches() )
             {
-                getLog().debug( "Looking for newer versions of " + toString( dep ) );
-                Artifact artifact = this.toArtifact( dep );
+                getLog().debug( "Looking for newer versions of " + dep );
+                Artifact artifact = dep.getArtifact( getProject(), getHelper() );
                 if ( !isIncluded( artifact ) )
                 {
                     continue;
@@ -91,10 +81,12 @@ public class UseNextReleasesMojo
                 ArtifactVersion[] newer = versions.getNewerVersions( version, false );
                 if ( newer.length > 0 )
                 {
-                    setVersion(pom, dep, version, artifact, newer[0]);
+                    final VersionChange versionChange = new VersionChange( artifact.getGroupId(), artifact.getArtifactId(), version, newer[0].toString() );
+                    versionsToChange.add( versionChange );
                 }
             }
         }
+        return versionsToChange;
     }
 
 }

@@ -23,18 +23,16 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.change.VersionChange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import javax.xml.stream.XMLStreamException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,26 +82,17 @@ public class UseNextSnapshotsMojo
 
 
     @Override
-    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
-            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    Collection<VersionChange> getVersionChanges(Collection<ArtifactIdentifier> artifacts) throws MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        useNextSnapshots(pom, dependencies);
-    }
+        final Collection<VersionChange> versionsToChange = new ArrayList<>();
 
-    private void useNextSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
-    {
-        int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+        final int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
-        Iterator<Dependency> i = dependencies.iterator();
-
-        while ( i.hasNext() )
+        for ( ArtifactIdentifier dep : artifacts )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+                getLog().info( "Ignoring reactor dependency: " + dep );
                 continue;
             }
 
@@ -111,8 +100,8 @@ public class UseNextSnapshotsMojo
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( !versionMatcher.matches() )
             {
-                getLog().debug( "Looking for next snapshot of " + toString( dep ) );
-                Artifact artifact = this.toArtifact( dep );
+                getLog().debug( "Looking for next snapshot of " + dep );
+                Artifact artifact = dep.getArtifact( getProject(), getHelper() );
                 if ( !isIncluded( artifact ) )
                 {
                     continue;
@@ -123,21 +112,24 @@ public class UseNextSnapshotsMojo
                 final DefaultArtifactVersion lowerBound = new DefaultArtifactVersion( version );
                 if ( segment + 1 > versionComparator.getSegmentCount( lowerBound ) )
                 {
-                    getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
+                    getLog().info( "Ignoring " + dep + " as the version number is too short" );
                     continue;
                 }
                 ArtifactVersion upperBound =
                     segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
-                getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
+                getLog().info( "Upper bound: " + (upperBound == null ? "none" : upperBound.toString()) );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
                 getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
 
-                final ArtifactVersion newVersion = chooseVersion(newer);
-                if (newVersion != null) {
-                   setVersion(pom, dep, dep.getVersion(), artifact, newVersion);
+                final ArtifactVersion newVersion = chooseVersion( newer );
+                if ( newVersion != null )
+                {
+                    final VersionChange versionChange = new VersionChange( artifact.getGroupId(), artifact.getArtifactId(), dep.getVersion(), newVersion.toString() );
+                    versionsToChange.add( versionChange );
                 }
             }
         }
+        return versionsToChange;
     }
 
     private ArtifactVersion chooseVersion(ArtifactVersion[] versions) {

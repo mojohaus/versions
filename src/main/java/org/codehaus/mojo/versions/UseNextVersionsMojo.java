@@ -22,15 +22,13 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.change.VersionChange;
 
-import javax.xml.stream.XMLStreamException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Replaces any version with the latest version.
@@ -45,44 +43,36 @@ public class UseNextVersionsMojo
 
     // ------------------------------ METHODS --------------------------
 
-
     @Override
-    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
-            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    Collection<VersionChange> getVersionChanges(Collection<ArtifactIdentifier> artifacts) throws MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        useNextVersions(pom, dependencies);
-    }
+        final Collection<VersionChange> versionsToChange = new ArrayList<>();
 
-    private void useNextVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
-    {
-        Iterator<Dependency> i = dependencies.iterator();
-
-        while ( i.hasNext() )
+        for ( ArtifactIdentifier dep : artifacts )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+                getLog().info( "Ignoring reactor dependency: " + dep );
                 continue;
             }
 
             String version = dep.getVersion();
-            Artifact artifact = this.toArtifact( dep );
+            Artifact artifact = dep.getArtifact( getProject(), getHelper() );
             if ( !isIncluded( artifact ) )
             {
                 continue;
             }
 
-            getLog().debug( "Looking for newer versions of " + toString( dep ) );
+            getLog().debug( "Looking for newer versions of " + dep );
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
             ArtifactVersion[] newer = versions.getNewerVersions( version, Boolean.TRUE.equals( allowSnapshots ) );
             if ( newer.length > 0 )
             {
-                setVersion(pom, dep, version, artifact, newer[0]);
+                final VersionChange versionChange = new VersionChange( artifact.getGroupId(), artifact.getArtifactId(), version, newer[0].toString() );
+                versionsToChange.add( versionChange );
             }
         }
+        return versionsToChange;
     }
 
 }

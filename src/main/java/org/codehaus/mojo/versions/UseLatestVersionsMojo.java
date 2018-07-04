@@ -20,8 +20,8 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -29,7 +29,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -37,6 +36,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.change.VersionChange;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -91,16 +91,16 @@ public class UseLatestVersionsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                DependencyManagement dependencyManagement =
+                final DependencyManagement dependencyManagement =
                     PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
-                    useLatestVersions( pom, dependencyManagement.getDependencies() );
+                    setDependencyVersions( pom, dependencyManagement.getDependencies() );
                 }
             }
             else
             {
-                super.update(pom);
+                super.update( pom );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -110,32 +110,24 @@ public class UseLatestVersionsMojo
     }
 
     @Override
-    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
-          throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    Collection<VersionChange> getVersionChanges(Collection<ArtifactIdentifier> artifacts) throws MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        useLatestVersions(pom, dependencies);
-    }
+        final Collection<VersionChange> versionsToChange = new ArrayList<>();
 
-    private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
-    {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         MajorMinorIncrementalFilter majorMinorIncfilter =
-            new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
-        Iterator<Dependency> i = dependencies.iterator();
+                new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
-        while ( i.hasNext() )
+        for ( ArtifactIdentifier dep : artifacts )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+                getLog().info( "Ignoring reactor dependency: " + dep.toString() );
                 continue;
             }
 
             String version = dep.getVersion();
-            Artifact artifact = this.toArtifact( dep );
+            Artifact artifact = dep.getArtifact( getProject(), getHelper() );
             if ( !isIncluded( artifact ) )
             {
                 continue;
@@ -144,7 +136,7 @@ public class UseLatestVersionsMojo
             ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
             getLog().debug( "Selected version:" + selectedVersion.toString() );
 
-            getLog().debug( "Looking for newer versions of " + toString( dep ) );
+            getLog().debug( "Looking for newer versions of " + dep );
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
 
             ArtifactVersion[] newerVersions = versions.getNewerVersions( version, segment, allowSnapshots );
@@ -152,10 +144,11 @@ public class UseLatestVersionsMojo
             ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
             if ( filteredVersions.length > 0 )
             {
-                setVersion(pom, dep, version, artifact, filteredVersions[filteredVersions.length - 1]);
+                final VersionChange versionChange = new VersionChange( artifact.getGroupId(), artifact.getArtifactId(), version, filteredVersions[filteredVersions.length - 1].toString() );
+                versionsToChange.add( versionChange );
             }
-
         }
+        return versionsToChange;
     }
 
 }

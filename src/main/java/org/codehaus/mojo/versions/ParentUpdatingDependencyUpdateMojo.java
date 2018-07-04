@@ -1,22 +1,35 @@
 package org.codehaus.mojo.versions;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.codehaus.mojo.versions.api.PomHelper;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.codehaus.mojo.versions.change.VersionChange;
+import org.codehaus.mojo.versions.change.VersionChanger;
+import org.codehaus.mojo.versions.change.VersionChangerFactory;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-public abstract class ParentUpdatingDependencyUpdateMojo extends AbstractVersionsDependencyUpdaterMojo
+abstract class ParentUpdatingDependencyUpdateMojo extends AbstractVersionsDependencyUpdaterMojo
 {
+    /**
+     * Whether to process the plugins sections of the project: plugins, report plugins, and plugin management.
+     *
+     * @since FIXME
+     */
+    @Parameter( property = "processPlugins", defaultValue = "false" )
+    private boolean processPlugins;
+
+    abstract Collection<VersionChange> getVersionChanges(Collection<ArtifactIdentifier> artifacts)
+            throws MojoExecutionException, ArtifactMetadataRetrievalException;
+
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
@@ -31,12 +44,31 @@ public abstract class ParentUpdatingDependencyUpdateMojo extends AbstractVersion
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                setVersions( pom, getProject().getDependencyManagement().getDependencies() );
+                setDependencyVersions( pom, getProject().getDependencyManagement().getDependencies() );
             }
+
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
-                setVersions( pom, getProject().getDependencies() );
+                setDependencyVersions( pom, getProject().getDependencies() );
             }
+
+            if ( getProject().getBuildPlugins() != null && processPlugins )
+            {
+                setPluginVersions(pom, getProject().getBuildPlugins());
+            }
+
+            if ( getProject().getPluginManagement() != null
+                    && getProject().getPluginManagement().getPlugins() != null
+                    && processPlugins )
+            {
+                setPluginVersions(pom, getProject().getPluginManagement().getPlugins());
+            }
+
+            if (getProject().getReportPlugins() != null && processPlugins)
+            {
+                setReportPluginVersions(pom, getProject().getReportPlugins());
+            }
+
             if ( getProject().getParent() != null && isProcessingParent() )
             {
                 final Dependency dependency = new Dependency();
@@ -44,7 +76,7 @@ public abstract class ParentUpdatingDependencyUpdateMojo extends AbstractVersion
                 dependency.setGroupId(getProject().getParent().getGroupId());
                 dependency.setVersion(getProject().getParent().getVersion());
                 dependency.setType("pom");
-                setVersions( pom, Collections.singleton(dependency));
+                setDependencyVersions( pom, Collections.singleton(dependency));
             }
         }
         catch ( ArtifactMetadataRetrievalException e )
@@ -53,26 +85,91 @@ public abstract class ParentUpdatingDependencyUpdateMojo extends AbstractVersion
         }
     }
 
-    protected abstract void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
-            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException;
-
-    protected void setVersion(ModifiedPomXMLEventReader pom, Dependency dep, String version, Artifact artifact, ArtifactVersion artifactVersion) throws XMLStreamException
+    final void setDependencyVersions(ModifiedPomXMLEventReader pom, Iterable<Dependency> dependencies)
+            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
     {
-        final String newVersion = artifactVersion.toString();
-        if(getProject().getParent() != null){
-            if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
-            {
-                if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
-                {
-                    getLog().debug( "Made parent change from " + version + " to " + newVersion.toString() );
-                }
-            }
+        final Iterable<VersionChange> versionsToChange = getVersionChanges(dependenciesToArtifactReferences(dependencies));
+
+        for (VersionChange versionChange : versionsToChange)
+        {
+            changeVersion(pom, versionChange);
+        }
+    }
+
+    private void setPluginVersions(ModifiedPomXMLEventReader pom, Iterable<Plugin> plugins)
+            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    {
+        final Iterable<VersionChange> versionsToChange = getVersionChanges(pluginsToArtifactReferences(plugins));
+
+        for (VersionChange versionChange : versionsToChange)
+        {
+            changeVersion(pom, versionChange);
+        }
+    }
+
+    private void setReportPluginVersions(ModifiedPomXMLEventReader pom, Iterable<ReportPlugin> plugins)
+            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    {
+        final Iterable<VersionChange> versionsToChange = getVersionChanges(reportPluginsToArtifactReferences(plugins));
+
+        for (VersionChange versionChange : versionsToChange) {
+            changeVersion(pom, versionChange);
+        }
+    }
+
+    private void changeVersion(ModifiedPomXMLEventReader pom, VersionChange versionChange) throws XMLStreamException
+    {
+        final VersionChangerFactory versionChangerFactory = new VersionChangerFactory();
+        versionChangerFactory.setPom(pom);
+        versionChangerFactory.setModel(getProject().getModel());
+        versionChangerFactory.setLog(getLog());
+
+        final VersionChanger versionChanger =
+                versionChangerFactory.newVersionChanger(
+                        isProcessingParent(),
+                        false,
+                        isProcessingDependencies(),
+                        processPlugins);
+
+        versionChanger.apply(versionChange);
+    }
+
+    private Collection<ArtifactIdentifier> dependenciesToArtifactReferences(Iterable<Dependency> dependencies)
+    {
+        // Lack of reification or functional 'map' demands this method
+        final Collection<ArtifactIdentifier> ret = new ArrayList<>();
+
+        for (Dependency dependency : dependencies)
+        {
+            ret.add(new DependencyArtifactIdentifier(dependency));
         }
 
-        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                             newVersion, getProject().getModel() ) )
+        return ret;
+    }
+
+    private Collection<ArtifactIdentifier> pluginsToArtifactReferences(Iterable<Plugin> plugins)
+    {
+        // Lack of reification or functional 'map' demands this method
+        final Collection<ArtifactIdentifier> ret = new ArrayList<>();
+
+        for (Plugin plugin : plugins)
         {
-            getLog().info( "Changed " + toString( dep ) + " to version " + newVersion );
+            ret.add(new PluginArtifactIdentifier(plugin));
         }
+
+        return ret;
+    }
+
+    private Collection<ArtifactIdentifier> reportPluginsToArtifactReferences(Iterable<ReportPlugin> plugins)
+    {
+        // Lack of reification or functional 'map' demands this method
+        final Collection<ArtifactIdentifier> ret = new ArrayList<>();
+
+        for (ReportPlugin plugin : plugins)
+        {
+            ret.add(new ReportPluginArtifactIdentifier(plugin));
+        }
+
+        return ret;
     }
 }

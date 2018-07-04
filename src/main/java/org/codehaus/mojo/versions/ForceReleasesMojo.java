@@ -23,17 +23,13 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.change.VersionChange;
 
-import javax.xml.stream.XMLStreamException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,24 +55,16 @@ public class ForceReleasesMojo
 
 
     @Override
-    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
-            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    Collection<VersionChange> getVersionChanges(Collection<ArtifactIdentifier> artifacts)
+        throws MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        useReleases(pom, dependencies);
-    }
+        final Collection<VersionChange> versionsToChange = new ArrayList<>();
 
-    private void useReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
-    {
-        Iterator<Dependency> i = dependencies.iterator();
-
-        while ( i.hasNext() )
+        for ( ArtifactIdentifier dep : artifacts )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+                getLog().info( "Ignoring reactor dependency: " + dep );
                 continue;
             }
 
@@ -85,31 +73,35 @@ public class ForceReleasesMojo
             if ( versionMatcher.matches() )
             {
                 String releaseVersion = versionMatcher.group( 1 );
-                Artifact artifact = this.toArtifact( dep );
+                Artifact artifact = dep.getArtifact( getProject(), getHelper() );
                 if ( !isIncluded( artifact ) )
                 {
                     continue;
                 }
 
-                getLog().debug( "Looking for a release of " + toString( dep ) );
+                getLog().debug( "Looking for a release of " + dep );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 if ( versions.containsVersion( releaseVersion ) )
                 {
-                    setVersion(pom, dep, version, artifact, new DefaultArtifactVersion(releaseVersion));
+                    final VersionChange versionChange = new VersionChange( artifact.getGroupId(), artifact.getArtifactId(), version, new DefaultArtifactVersion( releaseVersion ).toString() );
+                    versionsToChange.add( versionChange );
                 }
                 else
                 {
                     ArtifactVersion[] v = versions.getVersions( false );
                     if ( v.length == 0 )
                     {
-                        getLog().info( "No release of " + toString( dep ) + " to force." );
+                        getLog().info( "No release of " + dep + " to force." );
                     }
-                    else {
-                        setVersion(pom, dep, version, artifact, v[v.length - 1]);
+                    else
+                    {
+                        final VersionChange versionChange = new VersionChange( artifact.getGroupId(), artifact.getArtifactId(), version, v[v.length - 1].toString() );
+                        versionsToChange.add( versionChange );
                     }
                 }
             }
         }
+        return versionsToChange;
     }
 
 }

@@ -19,21 +19,20 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.change.VersionChange;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -77,28 +76,20 @@ public class UseDepVersionMojo
     }
 
     @Override
-    protected void setVersions(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
-            throws ArtifactMetadataRetrievalException, XMLStreamException, MojoExecutionException
+    Collection<VersionChange> getVersionChanges(Collection<ArtifactIdentifier> artifacts)
+            throws MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        useDepVersion(pom, dependencies);
-    }
+        final Collection<VersionChange> versionsToChange = new ArrayList<>();
 
-    private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws MojoExecutionException, XMLStreamException, ArtifactMetadataRetrievalException
-    {
-        Iterator<Dependency> itr = dependencies.iterator();
-
-        while ( itr.hasNext() )
+        for ( ArtifactIdentifier dep : artifacts )
         {
-            Dependency dep = itr.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+                getLog().info( "Ignoring reactor dependency: " + dep );
                 continue;
             }
 
-            Artifact artifact = this.toArtifact( dep );
+            Artifact artifact = dep.getArtifact( getProject(), getHelper() );
 
             if ( isIncluded( artifact ) )
             {
@@ -109,14 +100,16 @@ public class UseDepVersionMojo
                     if ( !versions.containsVersion( depVersion ) )
                     {
                         throw new MojoExecutionException( String.format( "Version %s is not available for artifact %s:%s",
-                                                                         depVersion, artifact.getGroupId(),
-                                                                         artifact.getArtifactId() ) );
+                                depVersion, artifact.getGroupId(),
+                                artifact.getArtifactId() ) );
                     }
                 }
 
                 String version = dep.getVersion();
-                setVersion(pom, dep, version, artifact, new DefaultArtifactVersion(version));
+                final VersionChange versionChange = new VersionChange( artifact.getGroupId(), artifact.getArtifactId(), version, new DefaultArtifactVersion( version ).toString() );
+                versionsToChange.add( versionChange );
             }
         }
+        return versionsToChange;
     }
 }

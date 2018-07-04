@@ -52,6 +52,12 @@
 
  * [Fixed Issue 215][issue-215]
 
+ * [Fixed Issue 8][issue-8]
+
+   _Thanks to [Adam Voss](https://github.com/adamvoss)_
+
+   Many of the goals can now update plugins if you set the `processPlugins` property.
+
 ## 2.5
 
 
@@ -139,6 +145,7 @@
    
 
 
+[issue-8]: https://github.com/mojohaus/versions-maven-plugin/issues/8
 [issue-34]: https://github.com/mojohaus/versions-maven-plugin/issues/34
 [issue-37]: https://github.com/mojohaus/versions-maven-plugin/issues/37
 [issue-46]: https://github.com/mojohaus/versions-maven-plugin/issues/46

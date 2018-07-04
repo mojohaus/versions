@@ -22,13 +22,11 @@ package org.codehaus.mojo.versions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -185,26 +183,11 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Try to find the dependency artifact that matches the given dependency.
      *
-     * @param dependency
-     * @return
      * @since 1.0-alpha-3
      */
     protected Artifact findArtifact( Dependency dependency )
     {
-        if ( getProject().getDependencyArtifacts() == null )
-        {
-            return null;
-        }
-        Iterator<?> iter = getProject().getDependencyArtifacts().iterator();
-        while ( iter.hasNext() )
-        {
-            Artifact artifact = (Artifact) iter.next();
-            if ( compare( artifact, dependency ) )
-            {
-                return artifact;
-            }
-        }
-        return null;
+        return DependencyArtifactIdentifier.findArtifact(dependency, getProject().getDependencyArtifacts());
     }
 
     /**
@@ -217,19 +200,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     protected Artifact toArtifact( Dependency dependency )
         throws MojoExecutionException
     {
-        Artifact artifact = findArtifact( dependency );
-        if ( artifact == null )
-        {
-            try
-            {
-                return getHelper().createDependencyArtifact( dependency );
-            }
-            catch ( InvalidVersionSpecificationException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
-        }
-        return artifact;
+        return new DependencyArtifactIdentifier(dependency).getArtifact(getProject(), getHelper());
     }
 
     protected Artifact toArtifact( Parent model )
@@ -298,10 +269,20 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     protected boolean isProducedByReactor( Dependency dependency )
     {
-        Iterator<?> iter = reactorProjects.iterator();
-        while ( iter.hasNext() )
+        return isProducedByReactor(new DependencyArtifactIdentifier(dependency));
+    }
+
+    /**
+     * Returns <code>true</code> if the dependency is produced by the current reactor.
+     *
+     * @param dependency the dependency to heck.
+     * @return <code>true</code> if the dependency is produced by the current reactor.
+     */
+    boolean isProducedByReactor( ArtifactIdentifier dependency )
+    {
+        for ( Object reactorProject : reactorProjects )
         {
-            MavenProject project = (MavenProject) iter.next();
+            final MavenProject project = (MavenProject) reactorProject;
             if ( compare( project, dependency ) )
             {
                 return true;
@@ -318,46 +299,10 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @param dep the dependency
      * @return true if project and dep refer to the same artifact
      */
-    private boolean compare( MavenProject project, Dependency dep )
+    private static boolean compare( MavenProject project, ArtifactIdentifier dep )
     {
-        if ( !StringUtils.equals( project.getGroupId(), dep.getGroupId() ) )
-        {
-            return false;
-        }
-        if ( !StringUtils.equals( project.getArtifactId(), dep.getArtifactId() ) )
-        {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Compare and artifact to a dependency. Returns true only if the groupId, artifactId, type, and classifier are all
-     * equal.
-     *
-     * @param artifact
-     * @param dep
-     * @return true if artifact and dep refer to the same artifact
-     */
-    private boolean compare( Artifact artifact, Dependency dep )
-    {
-        if ( !StringUtils.equals( artifact.getGroupId(), dep.getGroupId() ) )
-        {
-            return false;
-        }
-        if ( !StringUtils.equals( artifact.getArtifactId(), dep.getArtifactId() ) )
-        {
-            return false;
-        }
-        if ( !StringUtils.equals( artifact.getType(), dep.getType() ) )
-        {
-            return false;
-        }
-        if ( !StringUtils.equals( artifact.getClassifier(), dep.getClassifier() ) )
-        {
-            return false;
-        }
-        return true;
+        return StringUtils.equals( project.getGroupId(), dep.getGroupId() )
+                && StringUtils.equals( project.getArtifactId(), dep.getArtifactId() );
     }
 
     /**
