@@ -1,11 +1,28 @@
 language: java
+env:
+  - MAVEN_VERSION=3.0.5
+  - MAVEN_VERSION=3.1.1
+  - MAVEN_VERSION=3.2.5
+  - MAVEN_VERSION=3.3.1
+  - MAVEN_VERSION=3.3.9
+  - MAVEN_VERSION=3.5.0
+  - MAVEN_VERSION=3.5.2
+  - MAVEN_VERSION=3.5.3
+  - MAVEN_VERSION=3.5.4
+  - MAVEN_VERSION=3.6.0
+  - MAVEN_VERSION=3.6.1
+  - MAVEN_VERSION=3.6.2
+
+install:
+  - "mvn -N io.takari:maven:wrapper -Dmaven=${MAVEN_VERSION} -Dhttps.protocols=TLSv1.2"
+
+script:
+  - "./mvnw --show-version --errors --batch-mode -Prun-its clean verify -Dhttps.protocols=TLSv1.2"
 jdk:
-  - openjdk7
-  - oraclejdk8
-# We don't need an install before
-# we run the unit and integration tests.
-install: true
-script: "mvn --show-version --errors --batch-mode -Prun-its clean verify"
+ - openjdk8
+ - openjdk11
+ - openjdk13
+
 cache:
     directories:
     - $HOME/.m2

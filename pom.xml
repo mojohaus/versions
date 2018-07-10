@@ -114,7 +114,7 @@
     <doxiaVersion>1.7</doxiaVersion>
     <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
-    <sitePluginVersion>3.6</sitePluginVersion>
+    <sitePluginVersion>3.8.2</sitePluginVersion>
   </properties>
 
   <dependencies>
