@@ -1,0 +1,8 @@
+org.codehaus.mojo.versions
+org.codehaus.mojo.versions.api
+org.codehaus.mojo.versions.change
+org.codehaus.mojo.versions.ordering
+org.codehaus.mojo.versions.rewriting
+org.codehaus.mojo.versions.utils
+org.codehaus.mojo.versions.model
+org.codehaus.mojo.versions.model.io.xpp3
