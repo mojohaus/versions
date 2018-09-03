@@ -106,22 +106,11 @@ public class MajorMinorIncrementalFilter
                     }
                 }
             }
-            else if(selectedVersion.getQualifier() != null){
-                if(selectedVersion.getQualifier().contentEquals("SNAPSHOT")){
-                    if ( !versionsToUse.contains( artifactVersion ) )
-                    {
-                            versionsToUse.add( artifactVersion );
-                    }
-                }
-            }
-            else
-            {
-                if ( allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates )
+            else {
+                // build number or qualifier.  Will already be sorted and higher
+                if ( !versionsToUse.contains( artifactVersion ) )
                 {
-                    if ( !versionsToUse.contains( artifactVersion ) )
-                    {
                         versionsToUse.add( artifactVersion );
-                    }
                 }
             }
         }
