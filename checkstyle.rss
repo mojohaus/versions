@@ -26,7 +26,7 @@ under the License.
     <copyright>&#169;2008 - 2018 MojoHaus</copyright>
     <item>
       <title>File: 92,
-             Errors: 631,
+             Errors: 620,
              Warnings: 359,
              Infos: 5
       </title>
@@ -60,20 +60,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.DisplayDependencyUpdatesMojo.java">org/codehaus/mojo/versions/DisplayDependencyUpdatesMojo.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  5
-                </td>
-                <td>
-                  10
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.ForceReleasesMojo.java">org/codehaus/mojo/versions/ForceReleasesMojo.java</a>
                 </td>
                 <td>
@@ -84,6 +70,20 @@ under the License.
                 </td>
                 <td>
                   1
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.DisplayDependencyUpdatesMojo.java">org/codehaus/mojo/versions/DisplayDependencyUpdatesMojo.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  5
+                </td>
+                <td>
+                  10
                 </td>
               </tr>
                           <tr>
@@ -200,20 +200,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.RequiredMavenVersionFinder.java">org/codehaus/mojo/versions/RequiredMavenVersionFinder.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  226
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator.java">org/codehaus/mojo/versions/utils/VersionsExpressionEvaluator.java</a>
                 </td>
                 <td>
@@ -224,6 +210,20 @@ under the License.
                 </td>
                 <td>
                   0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.RequiredMavenVersionFinder.java">org/codehaus/mojo/versions/RequiredMavenVersionFinder.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  226
                 </td>
               </tr>
                           <tr>
@@ -326,20 +326,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.ordering.VersionComparators.java">org/codehaus/mojo/versions/ordering/VersionComparators.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  1
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.UseLatestSnapshotsMojo.java">org/codehaus/mojo/versions/UseLatestSnapshotsMojo.java</a>
                 </td>
                 <td>
@@ -350,6 +336,20 @@ under the License.
                 </td>
                 <td>
                   31
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.ordering.VersionComparators.java">org/codehaus/mojo/versions/ordering/VersionComparators.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  1
+                </td>
+                <td>
+                  0
                 </td>
               </tr>
                           <tr>
@@ -578,20 +578,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.api.VersionDetails.java">org/codehaus/mojo/versions/api/VersionDetails.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  2
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.utils.WagonUtils.java">org/codehaus/mojo/versions/utils/WagonUtils.java</a>
                 </td>
                 <td>
@@ -606,7 +592,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.DisplayPropertyUpdatesMojo.java">org/codehaus/mojo/versions/DisplayPropertyUpdatesMojo.java</a>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.api.VersionDetails.java">org/codehaus/mojo/versions/api/VersionDetails.java</a>
                 </td>
                 <td>
                   0
@@ -627,6 +613,20 @@ under the License.
                 </td>
                 <td>
                   16
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.DisplayPropertyUpdatesMojo.java">org/codehaus/mojo/versions/DisplayPropertyUpdatesMojo.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  2
                 </td>
                 <td>
                   0
@@ -914,6 +914,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.utils.DependencyComparator.java">org/codehaus/mojo/versions/utils/DependencyComparator.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.CompareDependenciesMojo.java">org/codehaus/mojo/versions/CompareDependenciesMojo.java</a>
                 </td>
                 <td>
@@ -938,20 +952,6 @@ under the License.
                 </td>
                 <td>
                   6
-                </td>
-              </tr>
-                          <tr>
-                <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.utils.DependencyComparator.java">org/codehaus/mojo/versions/utils/DependencyComparator.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
                 </td>
               </tr>
                           <tr>
@@ -998,20 +998,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.ordering.VersionComparator.java">org/codehaus/mojo/versions/ordering/VersionComparator.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.PluginUpdatesRenderer.java">org/codehaus/mojo/versions/PluginUpdatesRenderer.java</a>
                 </td>
                 <td>
@@ -1022,6 +1008,20 @@ under the License.
                 </td>
                 <td>
                   1
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.ordering.VersionComparator.java">org/codehaus/mojo/versions/ordering/VersionComparator.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
                 </td>
               </tr>
                           <tr>
@@ -1236,20 +1236,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.api.UpdateScope.java">org/codehaus/mojo/versions/api/UpdateScope.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  5
-                </td>
-                <td>
-                  2
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.change.ParentVersionChanger.java">org/codehaus/mojo/versions/change/ParentVersionChanger.java</a>
                 </td>
                 <td>
@@ -1260,6 +1246,20 @@ under the License.
                 </td>
                 <td>
                   0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.api.UpdateScope.java">org/codehaus/mojo/versions/api/UpdateScope.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  5
+                </td>
+                <td>
+                  2
                 </td>
               </tr>
                           <tr>
@@ -1278,20 +1278,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.PropertyUpdatesReport.java">org/codehaus/mojo/versions/PropertyUpdatesReport.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  1
-                </td>
-                <td>
-                  1
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.utils.ContextualLog.java">org/codehaus/mojo/versions/utils/ContextualLog.java</a>
                 </td>
                 <td>
@@ -1302,6 +1288,20 @@ under the License.
                 </td>
                 <td>
                   0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://www.mojohaus.org/versions-maven-plugin//checkstyle.html#org.codehaus.mojo.versions.PropertyUpdatesReport.java">org/codehaus/mojo/versions/PropertyUpdatesReport.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  1
+                </td>
+                <td>
+                  1
                 </td>
               </tr>
                           <tr>
@@ -1329,7 +1329,7 @@ under the License.
                   1
                 </td>
                 <td>
-                  13
+                  2
                 </td>
               </tr>
                       </tbody>
