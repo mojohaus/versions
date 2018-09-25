@@ -1,5 +1,7 @@
 package org.codehaus.mojo.versions;
 
+import java.io.IOException;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -27,6 +29,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -77,7 +80,11 @@ public class UseDepVersionMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                useDepVersion( pom, getProject().getDependencyManagement().getDependencies() );
+                DependencyManagement dependencyManagement = PomHelper.getRawModel( getProject() ).getDependencyManagement();
+                if ( dependencyManagement != null )
+                {
+                    useDepVersion( pom, dependencyManagement.getDependencies() );
+                }
             }
 
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
@@ -87,6 +94,8 @@ public class UseDepVersionMojo
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
+            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
             throw new MojoExecutionException( e.getMessage(), e );
         }
     }
