@@ -110,13 +110,13 @@ public class UseLatestSnapshotsMojo
             if ( getProject().getParent() != null && isProcessingParent() )
             {
                 Dependency dependency = new Dependency();
-                dependency.setArtifactId(getProject().getParent().getArtifactId());
-                dependency.setGroupId(getProject().getParent().getGroupId());
-                dependency.setVersion(getProject().getParent().getVersion());
+                dependency.setArtifactId( getProject().getParent().getArtifactId() );
+                dependency.setGroupId( getProject().getParent().getGroupId() );
+                dependency.setVersion( getProject().getParent().getVersion() );
                 dependency.setType("pom");
                 List list = new ArrayList();
                 list.add(dependency);
-                useLatestSnapshots( pom, list);
+                useLatestSnapshots( pom, list );
             }
         }
         catch ( ArtifactMetadataRetrievalException e )
@@ -132,12 +132,8 @@ public class UseLatestSnapshotsMojo
         MajorMinorIncrementalFilter majorMinorIncfilter =
                 new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
-        Iterator<Dependency> i = dependencies.iterator();
-
-        while ( i.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
@@ -145,7 +141,7 @@ public class UseLatestSnapshotsMojo
             }
 
             String version = dep.getVersion();
-            Matcher versionMatcher = matchSnapshotRegex.matcher( version );
+            Matcher versionMatcher = matchSnapshotRegex.matcher(version);
             if ( !versionMatcher.matches() )
             {
                 getLog().debug( "Looking for latest snapshot of " + toString( dep ) );
@@ -167,7 +163,7 @@ public class UseLatestSnapshotsMojo
                 }
                 ArtifactVersion upperBound =
                     segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
-                getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
+                getLog().info( "Upper bound: " + (upperBound == null ? "none" : upperBound.toString() ) );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
                 getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
 
@@ -179,20 +175,23 @@ public class UseLatestSnapshotsMojo
                     String newVersion = newer[j].toString();
                     if ( matchSnapshotRegex.matcher( newVersion ).matches() )
                     {
-                        snapshotsOnly.add(newer[j]);
+                        snapshotsOnly.add( newer[j] );
                     }
                 }
-                getLog().debug( "Snapshot Only versions " + snapshotsOnly.toString());
+                getLog().debug("Snapshot Only versions " + snapshotsOnly.toString());
 
-                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion,(ArtifactVersion[]) snapshotsOnly.toArray(new ArtifactVersion[snapshotsOnly.size()]));
+                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion,
+                                                                                (ArtifactVersion[]) snapshotsOnly.toArray(
+                                                                                    new ArtifactVersion[snapshotsOnly.size()] ) );
                 getLog().debug( "Filtered versions " + Arrays.asList( filteredVersions ) );
 
 
                 if ( filteredVersions.length > 0 )
                 {
                     latestVersion = filteredVersions[filteredVersions.length - 1].toString();
-                    if(getProject().getParent() != null){
-                        if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
+                    if ( getProject().getParent() != null )
+                    {
+                        if ( artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent() )
                         {
                             if ( PomHelper.setProjectParentVersion( pom, latestVersion.toString() ) )
                             {

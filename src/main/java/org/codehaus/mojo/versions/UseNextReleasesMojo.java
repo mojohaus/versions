@@ -79,12 +79,8 @@ public class UseNextReleasesMojo
     private void useNextReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        Iterator<Dependency> i = dependencies.iterator();
-
-        while ( i.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
@@ -109,6 +105,7 @@ public class UseNextReleasesMojo
                     String newVersion = newer[0].toString();
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
                                                          newVersion, getProject().getModel() ) )
+
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
                     }

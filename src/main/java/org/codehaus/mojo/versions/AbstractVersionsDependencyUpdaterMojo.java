@@ -298,12 +298,9 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     protected boolean isProducedByReactor( Dependency dependency )
     {
-        Iterator<?> iter = reactorProjects.iterator();
-        while ( iter.hasNext() )
-        {
-            MavenProject project = (MavenProject) iter.next();
-            if ( compare( project, dependency ) )
-            {
+        for ( Object reactorProject : reactorProjects ) {
+            MavenProject project = (MavenProject) reactorProject;
+            if ( compare(project, dependency) ) {
                 return true;
             }
         }
