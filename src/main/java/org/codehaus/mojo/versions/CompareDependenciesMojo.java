@@ -166,6 +166,7 @@ public class CompareDependenciesMojo
         }
 
         Map<String, Dependency> remoteDepsMap = new HashMap<String, Dependency>();
+        remoteDepsMap.put(remoteDependency.getManagementKey(), remoteDependency);
         if ( !ignoreRemoteDependencyManagement )
         {
             List<Dependency> remoteProjectDepMgmtDeps = ( remoteMavenProject.getDependencyManagement() == null ) ? null
