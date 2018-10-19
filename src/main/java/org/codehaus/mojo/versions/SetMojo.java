@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -188,6 +189,22 @@ public class SetMojo
     @Parameter( property = "processAllModules", defaultValue = "false" )
     private boolean processAllModules;
 
+    @Parameter(required = true, defaultValue = "${session}")
+    private MavenSession session;
+
+    /**
+     * Base directory of the project.
+     */
+    @Parameter (defaultValue="${project.basedir}")
+    private File basedir;    
+
+    /**
+     * This will cause the assembly to run only at the top of a given module tree. That is, run in the project
+     * contained in the same folder where the mvn execution was launched.
+     */
+    @Parameter( property = "runOnlyAtExecutionRoot", defaultValue = "false" )
+    private boolean runOnlyAtExecutionRoot;
+
     /**
      * The changes to module coordinates. Guarded by this.
      */
@@ -210,6 +227,13 @@ public class SetMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        getLog().debug( "runOnlyAtExecutionRoot: [" +  runOnlyAtExecutionRoot +  "]");
+        if (runOnlyAtExecutionRoot && !isThisTheExecutionRoot())
+        {
+            getLog().info( "Skipping the assembly in this project because it's not the Execution Root" );
+            return;
+        }
+        
         if ( getProject().getOriginalModel().getVersion() == null )
         {
             throw new MojoExecutionException( "Project version is inherited from parent." );
@@ -493,6 +517,27 @@ public class SetMojo
             throw new MojoExecutionException( e.getMessage(), e );
         }
         log.clearContext();
+    }
+    
+    /**
+     * Returns true if the current project is located at the Execution Root Directory (where mvn was launched)
+     * @return
+     */
+    protected boolean isThisTheExecutionRoot()
+    {
+        ContextualLog log = new DelegatingContextualLog( getLog() );
+        log.debug("Root Folder:" + session.getExecutionRootDirectory());
+        log.debug("Current Folder:"+ basedir );
+        boolean result = session.getExecutionRootDirectory().equalsIgnoreCase(basedir.toString());
+        if (result)
+        {
+            log.debug( "This is the execution root." );
+        }
+        else
+        {
+            log.debug( "This is NOT the execution root." );
+        }
+        return result;
     }
 
 }
