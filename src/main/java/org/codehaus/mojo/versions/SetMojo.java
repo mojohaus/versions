@@ -529,14 +529,7 @@ public class SetMojo
         log.debug("Root Folder:" + session.getExecutionRootDirectory());
         log.debug("Current Folder:"+ basedir );
         boolean result = session.getExecutionRootDirectory().equalsIgnoreCase(basedir.toString());
-        if (result)
-        {
-            log.debug( "This is the execution root." );
-        }
-        else
-        {
-            log.debug( "This is NOT the execution root." );
-        }
+        log.debug( "This is the execution root?" + result);
         return result;
     }
 
