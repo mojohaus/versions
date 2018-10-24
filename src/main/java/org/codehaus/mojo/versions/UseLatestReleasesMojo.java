@@ -133,12 +133,8 @@ public class UseLatestReleasesMojo
         MajorMinorIncrementalFilter majorMinorIncfilter =
             new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
-        Iterator<Dependency> i = dependencies.iterator();
-
-        while ( i.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
@@ -167,8 +163,9 @@ public class UseLatestReleasesMojo
                 if ( filteredVersions.length > 0 )
                 {
                     String newVersion = filteredVersions[filteredVersions.length - 1].toString();
-                    if(getProject().getParent() != null){
-                        if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
+                    if ( getProject().getParent() != null )
+                    {
+                        if ( artifact.getId().equals( getProject().getParentArtifact().getId() ) && isProcessingParent() )
                         {
                             if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
                             {

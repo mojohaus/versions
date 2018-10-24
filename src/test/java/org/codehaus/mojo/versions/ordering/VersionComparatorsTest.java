@@ -60,7 +60,7 @@ public class VersionComparatorsTest
     }
 
     public void assertLater(String version, VersionComparator instance) {
-        ArtifactVersion v1 = new DefaultArtifactVersion( version);
+        ArtifactVersion v1 = new DefaultArtifactVersion( version );
         int count = instance.getSegmentCount( v1 );
         for (int i = 0; i < count; i++) {
             ArtifactVersion v2 = instance.incrementSegment( v1, i );

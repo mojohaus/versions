@@ -22,6 +22,8 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 
+import java.util.Objects;
+
 /**
  * Created by IntelliJ IDEA.
  *
@@ -37,7 +39,7 @@ final class DefaultArtifactAssociation
 
     DefaultArtifactAssociation( Artifact artifact, boolean usePluginRepositories )
     {
-        artifact.getClass(); // throw NPE if null;
+        Objects.requireNonNull( artifact );
         this.artifact = artifact;
         this.usePluginRepositories = usePluginRepositories;
     }

@@ -94,12 +94,8 @@ public class UseDepVersionMojo
     private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws MojoExecutionException, XMLStreamException, ArtifactMetadataRetrievalException
     {
-        Iterator<Dependency> itr = dependencies.iterator();
-
-        while ( itr.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = itr.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );

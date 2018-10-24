@@ -131,12 +131,9 @@ public class UseLatestVersionsMojo
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         MajorMinorIncrementalFilter majorMinorIncfilter =
             new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
-        Iterator<Dependency> i = dependencies.iterator();
 
-        while ( i.hasNext() )
+        for ( Dependency dep : dependencies )
         {
-            Dependency dep = i.next();
-
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
@@ -162,19 +159,18 @@ public class UseLatestVersionsMojo
             if ( filteredVersions.length > 0 )
             {
                 String newVersion = filteredVersions[filteredVersions.length - 1].toString();
-                if(getProject().getParent() != null){
-                    if(artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent())
+                if ( getProject().getParent() != null )
+                {
+                    if ( artifact.getId().equals( getProject().getParentArtifact().getId() ) && isProcessingParent() )
                     {
-                        if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
-                        {
-                            getLog().debug( "Made parent update from " + version + " to " + newVersion.toString() );
+                        if ( PomHelper.setProjectParentVersion( pom, newVersion ) ) {
+                            getLog().debug("Made parent update from " + version + " to " + newVersion);
                         }
                     }
                 }
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion,
-                        getProject().getModel() ) )
-                {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+                                                     getProject().getModel() ) ) {
+                    getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
 
                 }
             }

@@ -357,11 +357,7 @@ public class DisplayPluginUpdatesMojo
         {
             pluginsWithVersionsSpecified = findPluginsWithVersionsSpecified( getProject() );
         }
-        catch ( XMLStreamException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-        catch ( IOException e )
+        catch ( XMLStreamException | IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
@@ -704,7 +700,7 @@ public class DisplayPluginUpdatesMojo
         logLine( false, "" );
     }
 
-    private final static String pad( String start, int len, String...ends )
+    private static String pad( String start, int len, String...ends )
     {
         StringBuilder buf = new StringBuilder( len );
         buf.append( "  " );
@@ -787,11 +783,7 @@ public class DisplayPluginUpdatesMojo
                     map.keySet().retainAll( withVersionSpecified );
                     parentPlugins.putAll( map );
                 }
-                catch ( IOException e )
-                {
-                    throw new MojoExecutionException( e.getMessage(), e );
-                }
-                catch ( XMLStreamException e )
+                catch ( IOException | XMLStreamException e )
                 {
                     throw new MojoExecutionException( e.getMessage(), e );
                 }

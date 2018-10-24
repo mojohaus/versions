@@ -25,6 +25,7 @@ import org.codehaus.mojo.versions.api.UpdateScope;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Details of a plugin's updates.
@@ -39,8 +40,8 @@ public class PluginUpdatesDetails
 
     public PluginUpdatesDetails( ArtifactVersions artifactVersions, Map dependencyVersions, boolean includeSnapshots )
     {
-        artifactVersions.getClass(); // throw NPE if null
-        dependencyVersions.getClass(); // throw NPE if null
+        Objects.requireNonNull( artifactVersions );
+        Objects.requireNonNull( dependencyVersions );
         this.artifactVersions = artifactVersions;
         this.dependencyVersions = dependencyVersions;
         this.includeSnapshots = includeSnapshots;
