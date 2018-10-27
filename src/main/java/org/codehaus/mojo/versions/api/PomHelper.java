@@ -147,7 +147,7 @@ public class PomHelper
                                               final String property, final String value )
         throws XMLStreamException
     {
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern propertyRegex;
         final Pattern matchScopeRegex;
@@ -246,7 +246,7 @@ public class PomHelper
     public static boolean setProjectValue( final ModifiedPomXMLEventReader pom, String pattern, final String value )
         throws XMLStreamException
     {
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern matchScopeRegex;
         boolean madeReplacement = false;
@@ -297,7 +297,7 @@ public class PomHelper
     public static String getProjectVersion( final ModifiedPomXMLEventReader pom )
         throws XMLStreamException
     {
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern matchScopeRegex = Pattern.compile( "/project/version" );
 
@@ -345,7 +345,7 @@ public class PomHelper
     public static boolean setProjectParentVersion( final ModifiedPomXMLEventReader pom, final String value )
         throws XMLStreamException
     {
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern matchScopeRegex;
         boolean madeReplacement = false;
@@ -463,14 +463,14 @@ public class PomHelper
                                                 final String newVersion, final Model model )
         throws XMLStreamException
     {
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
 
         Set<String> implicitPaths =
-            new HashSet<String>( Arrays.<String>asList( "/project/parent/groupId", "/project/parent/artifactId",
-                                                        "/project/parent/version", "/project/groupId",
-                                                        "/project/artifactId", "/project/version" ) );
-        Map<String, String> implicitProperties = new HashMap<String, String>();
+            new HashSet<>(Arrays.asList("/project/parent/groupId", "/project/parent/artifactId",
+                                        "/project/parent/version", "/project/groupId",
+                                        "/project/artifactId", "/project/version"));
+        Map<String, String> implicitProperties = new HashMap<>();
 
         for ( Map.Entry<Object, Object> entry : model.getProperties().entrySet() )
         {
@@ -877,7 +877,7 @@ public class PomHelper
     {
         ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator( project );
         Model model = getRawModel( project );
-        Map<String, PropertyVersionsBuilder> result = new TreeMap<String, PropertyVersionsBuilder>();
+        Map<String, PropertyVersionsBuilder> result = new TreeMap<>();
 
         Set<String> activeProfiles = new TreeSet<>();
         for ( Profile profile : (List<Profile>) project.getActiveProfiles() )
@@ -1232,7 +1232,7 @@ public class PomHelper
     public static Set<String> getAllChildModules( Model model, Log logger )
     {
         logger.debug( "Finding child modules..." );
-        Set<String> childModules = new TreeSet<String>();
+        Set<String> childModules = new TreeSet<>();
         childModules.addAll( model.getModules() );
         for ( Profile profile : model.getProfiles() )
         {
@@ -1516,7 +1516,7 @@ public class PomHelper
      */
     public static Map<String, Model> getChildModels( Map<String, Model> reactor, String groupId, String artifactId )
     {
-        final Map<String, Model> result = new LinkedHashMap<String, Model>();
+        final Map<String, Model> result = new LinkedHashMap<>();
         for ( Map.Entry<String, Model> entry : reactor.entrySet() )
         {
             final String path = entry.getKey();
@@ -1630,8 +1630,8 @@ public class PomHelper
     public static List<Dependency> readImportedPOMsFromDependencyManagementSection( ModifiedPomXMLEventReader pom )
         throws XMLStreamException
     {
-        List<Dependency> importedPOMs = new ArrayList<Dependency>();
-        Stack<String> stack = new Stack<String>();
+        List<Dependency> importedPOMs = new ArrayList<>();
+        Stack<String> stack = new Stack<>();
 
         String groupIdElement = "groupId";
         String artifactIdElement = "artifactId";

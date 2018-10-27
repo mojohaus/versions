@@ -210,7 +210,7 @@ public class RewriteWithStAXTest
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
         ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
 
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
 
         while ( eventReader.hasNext() )

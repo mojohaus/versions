@@ -234,7 +234,7 @@ public class SetMojo
             {
                 versionWithoutSnapshot = version.substring( 0, version.indexOf( SNAPSHOT ) );
             }
-            LinkedList<String> numbers = new LinkedList<String>();
+            LinkedList<String> numbers = new LinkedList<>();
             if ( versionWithoutSnapshot.contains( "." ) )
             {
                 // Chop the version into numbers by splitting on the dot (.)
@@ -286,12 +286,11 @@ public class SetMojo
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
-            final SortedMap<String, Model> reactor =
-                new TreeMap<String, Model>( new ReactorDepthComparator( reactorModels ) );
+            final SortedMap<String, Model> reactor = new TreeMap<>(new ReactorDepthComparator(reactorModels));
             reactor.putAll( reactorModels );
 
             // set of files to update
-            final Set<File> files = new LinkedHashSet<File>();
+            final Set<File> files = new LinkedHashSet<>();
 
             getLog().info( "Processing change of " + groupId + ":" + artifactId + ":" + oldVersion + " -> "
                 + newVersion );

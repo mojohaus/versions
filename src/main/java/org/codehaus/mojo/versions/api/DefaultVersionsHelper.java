@@ -487,7 +487,7 @@ public class DefaultVersionsHelper
      */
     private List<IgnoreVersion> getIgnoredVersions( Artifact artifact )
     {
-        final List<IgnoreVersion> ret = new ArrayList<IgnoreVersion>();
+        final List<IgnoreVersion> ret = new ArrayList<>();
 
         for ( final IgnoreVersion ignoreVersion : ruleSet.getIgnoreVersions() )
         {
@@ -677,7 +677,7 @@ public class DefaultVersionsHelper
      */
     public Set<Artifact> extractArtifacts( Collection<MavenProject> mavenProjects )
     {
-        Set<Artifact> result = new HashSet<Artifact>();
+        Set<Artifact> result = new HashSet<>();
         for ( MavenProject project : mavenProjects )
         {
             result.add( project.getArtifact() );
@@ -717,14 +717,14 @@ public class DefaultVersionsHelper
     {
         // Create the request for details collection for parallel lookup...
         final List<Callable<DependencyArtifactVersions>> requestsForDetails =
-            new ArrayList<Callable<DependencyArtifactVersions>>( dependencies.size() );
+            new ArrayList<>( dependencies.size() );
         for ( final Dependency dependency : dependencies )
         {
             requestsForDetails.add( new DependencyLookup( dependency, usePluginRepositories ) );
         }
 
         final Map<Dependency, ArtifactVersions> dependencyUpdates =
-            new TreeMap<Dependency, ArtifactVersions>( new DependencyComparator() );
+            new TreeMap<>(new DependencyComparator());
 
         // Lookup details in parallel...
         final ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
@@ -782,14 +782,14 @@ public class DefaultVersionsHelper
     {
         // Create the request for details collection for parallel lookup...
         final List<Callable<PluginPluginUpdatesDetails>> requestsForDetails =
-            new ArrayList<Callable<PluginPluginUpdatesDetails>>( plugins.size() );
+            new ArrayList<>(plugins.size());
         for ( final Plugin plugin : plugins )
         {
             requestsForDetails.add( new PluginLookup( plugin, allowSnapshots ) );
         }
 
         final Map<Plugin, PluginUpdatesDetails> pluginUpdates =
-            new TreeMap<Plugin, PluginUpdatesDetails>( new PluginComparator() );
+            new TreeMap<>(new PluginComparator());
 
         // Lookup details in parallel...
         final ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
@@ -841,7 +841,7 @@ public class DefaultVersionsHelper
             lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
                                     true );
 
-        Set<Dependency> pluginDependencies = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> pluginDependencies = new TreeSet<>(new DependencyComparator());
         if ( plugin.getDependencies() != null )
         {
             pluginDependencies.addAll( plugin.getDependencies() );
@@ -869,7 +869,7 @@ public class DefaultVersionsHelper
                                                                     boolean autoLinkItems )
         throws MojoExecutionException
     {
-        Map<String, Property> properties = new HashMap<String, Property>();
+        Map<String, Property> properties = new HashMap<>();
         if ( propertyDefinitions != null )
         {
             for ( Property propertyDefinition : propertyDefinitions )
@@ -877,7 +877,7 @@ public class DefaultVersionsHelper
                 properties.put( propertyDefinition.getName(), propertyDefinition );
             }
         }
-        Map<String, PropertyVersionsBuilder> builders = new HashMap<String, PropertyVersionsBuilder>();
+        Map<String, PropertyVersionsBuilder> builders = new HashMap<>();
         if ( autoLinkItems )
         {
             final PropertyVersionsBuilder[] propertyVersionsBuilders;
@@ -933,7 +933,7 @@ public class DefaultVersionsHelper
         }
         i = properties.values().iterator();
         Map<Property, PropertyVersions> propertyVersions =
-            new LinkedHashMap<Property, PropertyVersions>( properties.size() );
+            new LinkedHashMap<>(properties.size());
         while ( i.hasNext() )
         {
             Property property = i.next();

@@ -165,7 +165,7 @@ public class CompareDependenciesMojo
             throw new MojoExecutionException( "Unable to build remote project " + remoteArtifact, e );
         }
 
-        Map<String, Dependency> remoteDepsMap = new HashMap<String, Dependency>();
+        Map<String, Dependency> remoteDepsMap = new HashMap<>();
         if ( !ignoreRemoteDependencyManagement )
         {
             List<Dependency> remoteProjectDepMgmtDeps = ( remoteMavenProject.getDependencyManagement() == null ) ? null
@@ -178,8 +178,8 @@ public class CompareDependenciesMojo
             mapDependencies( remoteDepsMap, remoteProjectDeps );
         }
 
-        List<String> totalDiffs = new ArrayList<String>();
-        List<String> propertyDiffs = new ArrayList<String>();
+        List<String> totalDiffs = new ArrayList<>();
+        List<String> propertyDiffs = new ArrayList<>();
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
             List<String> depManDiffs =

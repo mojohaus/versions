@@ -83,8 +83,7 @@ public class PluginUpdatesXmlRenderer
     {
         StringBuilder sb = new StringBuilder();
         sb.append( "<PluginUpdatesReport>" ).append( NL );
-        Map<Plugin, PluginUpdatesDetails> allUpdates =
-            new TreeMap<Plugin, PluginUpdatesDetails>( new PluginComparator() );
+        Map<Plugin, PluginUpdatesDetails> allUpdates = new TreeMap<>(new PluginComparator());
         allUpdates.putAll( pluginManagementUpdates );
         allUpdates.putAll( pluginUpdates );
         sb.append( getSummaryBlock( allUpdates ) );
@@ -106,7 +105,7 @@ public class PluginUpdatesXmlRenderer
 
     private static String getSummaryBlock( Map<Plugin, PluginUpdatesDetails> allUpdates )
     {
-        Collection<ArtifactVersions> allVersions = new ArrayList<ArtifactVersions>();
+        Collection<ArtifactVersions> allVersions = new ArrayList<>();
         for ( PluginUpdatesDetails details : allUpdates.values() )
         {
             allVersions.add( details.getArtifactVersions() );

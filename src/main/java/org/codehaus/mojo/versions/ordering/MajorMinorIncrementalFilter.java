@@ -73,7 +73,7 @@ public class MajorMinorIncrementalFilter
      */
     public ArtifactVersion[] filter( ArtifactVersion selectedVersion, ArtifactVersion[] newerVersions )
     {
-        List<ArtifactVersion> versionsToUse = new LinkedList<ArtifactVersion>();
+        List<ArtifactVersion> versionsToUse = new LinkedList<>();
         for ( ArtifactVersion artifactVersion : newerVersions )
         {
             if ( artifactVersion.getMajorVersion() != selectedVersion.getMajorVersion() )

@@ -177,7 +177,7 @@ public class DisplayPluginUpdatesMojo
                         getProject().getPackaging() } );
                 // we need to provide a copy with the version blanked out so that inferring from super-pom
                 // works as for 2.x as 3.x fills in the version on us!
-                Map<String, String> result = new LinkedHashMap<String, String>( plugins.size() );
+                Map<String, String> result = new LinkedHashMap<>(plugins.size());
                 for ( Plugin plugin : plugins )
                 {
                     result.put( plugin.getKey(), plugin.getVersion() );
@@ -194,7 +194,7 @@ public class DisplayPluginUpdatesMojo
 
                             Pattern pathRegex = Pattern.compile( "/project(/profiles/profile)?"
                                 + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );
-                            Stack<StackState> pathStack = new Stack<StackState>();
+                            Stack<StackState> pathStack = new Stack<>();
                             StackState curState = null;
                             while ( pom.hasNext() )
                             {
@@ -371,8 +371,8 @@ public class DisplayPluginUpdatesMojo
         //      renaming parentPluginManagement to parentPlugins)
         // NOTICE: getProjectPlugins() takes profiles while getParentPlugins does not
         //         there is probably a little inconsistency (if plugins configured in profiles of parents)
-        Map<String, String> parentBuildPlugins = new HashMap<String, String>();
-        Map<String, String> parentReportPlugins = new HashMap<String, String>(); 
+        Map<String, String> parentBuildPlugins = new HashMap<>();
+        Map<String, String> parentReportPlugins = new HashMap<>();
 
         Set<Plugin> plugins = getProjectPlugins( superPomPluginManagement, parentPlugins, parentBuildPlugins,
                                                  parentReportPlugins, pluginsWithVersionsSpecified );
@@ -456,7 +456,7 @@ public class DisplayPluginUpdatesMojo
                             if ( upgradePlugins == null )
                             {
                                 mavenUpgrades.put( pluginRequires,
-                                                   upgradePlugins = new LinkedHashMap<String, String>() );
+                                                   upgradePlugins = new LinkedHashMap<>() );
                             }
 
                             String upgradePluginKey = compactKey( groupId, artifactId );
@@ -726,7 +726,7 @@ public class DisplayPluginUpdatesMojo
     private Map<String, String> getParentsPlugins( List<MavenProject> parents )
         throws MojoExecutionException
     {
-        Map<String, String> parentPlugins = new HashMap<String, String>();
+        Map<String, String> parentPlugins = new HashMap<>();
         for ( MavenProject parentProject : parents )
         {
             getLog().debug( "Processing parent: " + parentProject.getGroupId() + ":" + parentProject.getArtifactId()
@@ -867,7 +867,7 @@ public class DisplayPluginUpdatesMojo
 
         Pattern pathRegex = Pattern.compile( "/project(/profiles/profile)?"
             + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );
-        Stack<StackState> pathStack = new Stack<StackState>();
+        Stack<StackState> pathStack = new Stack<>();
         StackState curState = null;
         while ( pom.hasNext() )
         {
@@ -1065,7 +1065,7 @@ public class DisplayPluginUpdatesMojo
                         project.getPackaging() == null ? "jar" : project.getPackaging() } );
                 // we need to provide a copy with the version blanked out so that inferring from super-pom
                 // works as for 2.x as 3.x fills in the version on us!
-                Set<Plugin> result = new LinkedHashSet<Plugin>( plugins.size() );
+                Set<Plugin> result = new LinkedHashSet<>(plugins.size());
                 for ( Plugin plugin : plugins )
                 {
                     Plugin dup = new Plugin();
@@ -1092,7 +1092,7 @@ public class DisplayPluginUpdatesMojo
             // no much we can do here
         }
 
-        Set<Plugin> allPlugins = new HashSet<Plugin>();
+        Set<Plugin> allPlugins = new HashSet<>();
 
         // lookup the bindings for all the passed in phases
         for ( String lifecyclePhase : thePhases.split( "," ) )
@@ -1462,7 +1462,7 @@ public class DisplayPluginUpdatesMojo
         debugVersionMap( "super-pom version map", superPomPluginManagement );
         debugVersionMap( "parent version map", parentPluginManagement );
 
-        Map<String, String> excludePluginManagement = new HashMap<String, String>( superPomPluginManagement );
+        Map<String, String> excludePluginManagement = new HashMap<>(superPomPluginManagement);
         excludePluginManagement.putAll( parentPluginManagement );
 
         debugVersionMap( "aggregate version map", excludePluginManagement );
