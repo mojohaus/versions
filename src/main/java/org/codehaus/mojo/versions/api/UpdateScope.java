@@ -406,14 +406,14 @@ public abstract class UpdateScope
      */
     public static UpdateScope valueOf( String name )
     {
-        UpdateScope result = (UpdateScope) levelConstants.get( name );
-        if ( result != null )
-        {
-            return result;
-        }
         if ( name == null )
         {
             throw new NullPointerException( "Name is null" );
+        }
+        UpdateScope result = levelConstants.get( name );
+        if ( result != null )
+        {
+            return result;
         }
         throw new IllegalArgumentException( "No enum const " + UpdateScope.class.getName() + "." + name );
     }
@@ -464,11 +464,11 @@ public abstract class UpdateScope
         }
     }
 
-    private static final Map levelConstants;
+    private static final Map<String, UpdateScope> levelConstants;
 
     static
     {
-        Map map = new HashMap( 5 );
+        Map<String, UpdateScope> map = new HashMap<>( 5 );
         map.put( SUBINCREMENTAL.name(), SUBINCREMENTAL );
         map.put( INCREMENTAL.name(), INCREMENTAL );
         map.put( MINOR.name(), MINOR );
