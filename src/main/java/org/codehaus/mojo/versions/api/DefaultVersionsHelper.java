@@ -388,11 +388,8 @@ public class DefaultVersionsHelper
         catch (UnsupportedProtocolException e) {
             throw new MojoExecutionException("Unsupported protocol for " + rulesUri, e);
         }
-        catch (ConnectionException e) {
+        catch (IOException | ConnectionException e) {
             throw new MojoExecutionException("Could not establish connection to " + rulesUri, e);
-        }
-        catch (IOException e) {
-            throw new MojoExecutionException("Could not load specified rules from " + rulesUri, e);
         }
 
         return loadedRules;
@@ -740,17 +737,11 @@ public class DefaultVersionsHelper
                 dependencyUpdates.put( dav.getDependency(), dav.getArtifactVersions() );
             }
         }
-        catch ( final ExecutionException ee )
+        catch ( ExecutionException | InterruptedException ee )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
                 + ": " + ee.getMessage(), ee );
-        }
-        catch ( final InterruptedException ie )
-        {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
-                + ": " + ie.getMessage(), ie );
-        }
-        finally
+        } finally
         {
             executor.shutdownNow();
         }
@@ -805,17 +796,11 @@ public class DefaultVersionsHelper
                 pluginUpdates.put( pud.getPlugin(), pud.getPluginUpdatesDetails() );
             }
         }
-        catch ( final ExecutionException ee )
+        catch ( ExecutionException | InterruptedException ee )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
                 + ee.getMessage(), ee );
-        }
-        catch ( final InterruptedException ie )
-        {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
-                + ie.getMessage(), ie );
-        }
-        finally
+        } finally
         {
             executor.shutdownNow();
         }
@@ -885,11 +870,7 @@ public class DefaultVersionsHelper
             {
                 propertyVersionsBuilders = PomHelper.getPropertyVersionsBuilders( this, project );
             }
-            catch ( ExpressionEvaluationException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
-            catch ( IOException e )
+            catch ( ExpressionEvaluationException | IOException e )
             {
                 throw new MojoExecutionException( e.getMessage(), e );
             }

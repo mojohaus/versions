@@ -335,11 +335,7 @@ public abstract class AbstractVersionsUpdaterMojo
                 writeFile( outFile, input );
             }
         }
-        catch ( IOException e )
-        {
-            getLog().error( e );
-        }
-        catch ( XMLStreamException e )
+        catch ( IOException | XMLStreamException e )
         {
             getLog().error( e );
         }
@@ -429,14 +425,9 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
         }
-        catch ( ArtifactResolutionException e )
+        catch ( ArtifactNotFoundException | ArtifactResolutionException e )
         {
             getLog().warn( "Not updating version: could not resolve " + artifact.toString(), e );
-            return false;
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            getLog().warn( "Not updating version: could not find " + artifact.toString(), e );
             return false;
         }
 

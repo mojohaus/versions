@@ -1020,13 +1020,9 @@ public class DisplayPluginUpdatesMojo
         {
             throw new MojoExecutionException( "Could not find plugin", e );
         }
-        catch ( LifecycleExecutionException e )
+        catch ( IllegalAccessException | LifecycleExecutionException e )
         {
             throw new MojoExecutionException( "Could not determine lifecycle", e );
-        }
-        catch ( IllegalAccessException e )
-        {
-            throw new MojoExecutionException( "Could not determine lifecycles", e );
         }
         catch ( NullPointerException e )
         {
