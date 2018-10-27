@@ -292,7 +292,8 @@ public class DisplayPluginUpdatesMojo
     {
         // we want only those parts of pluginManagement that are defined in this project
         Map<String, String> pluginManagement = new HashMap<>();
-        try
+
+        if ( model.getBuild().getPluginManagement() != null )
         {
             for ( Plugin plugin : model.getBuild().getPluginManagement().getPlugins() )
             {
@@ -304,35 +305,20 @@ public class DisplayPluginUpdatesMojo
                 }
             }
         }
-        catch ( NullPointerException e )
+        for ( Profile profile : model.getProfiles() )
         {
-            // guess there are no plugins here
-        }
-        try
-        {
-            for ( Profile profile : model.getProfiles() )
+            if ( profile.getBuild().getPluginManagement() != null)
             {
-                try
+                for ( Plugin plugin : profile.getBuild().getPluginManagement().getPlugins() )
                 {
-                    for ( Plugin plugin : profile.getBuild().getPluginManagement().getPlugins() )
+                    String coord = plugin.getKey();
+                    String version = plugin.getVersion();
+                    if ( version != null )
                     {
-                        String coord = plugin.getKey();
-                        String version = plugin.getVersion();
-                        if ( version != null )
-                        {
-                            pluginManagement.put( coord, version );
-                        }
+                        pluginManagement.put( coord, version );
                     }
                 }
-                catch ( NullPointerException e )
-                {
-                    // guess there are no plugins here
-                }
             }
-        }
-        catch ( NullPointerException e )
-        {
-            // guess there are no profiles here
         }
 
         return pluginManagement;
@@ -938,9 +924,18 @@ public class DisplayPluginUpdatesMojo
     private Map<String, String> getBuildPlugins( Model model, boolean onlyIncludeInherited )
     {
         Map<String, String> buildPlugins = new HashMap<>();
-        try
+        for ( Plugin plugin : model.getBuild().getPlugins() )
         {
-            for ( Plugin plugin : model.getBuild().getPlugins() )
+            String coord = plugin.getKey();
+            String version = plugin.getVersion();
+            if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
+            {
+                buildPlugins.put( coord, version );
+            }
+        }
+        for ( Profile profile : model.getProfiles() )
+        {
+            for ( Plugin plugin : profile.getBuild().getPlugins() )
             {
                 String coord = plugin.getKey();
                 String version = plugin.getVersion();
@@ -949,36 +944,6 @@ public class DisplayPluginUpdatesMojo
                     buildPlugins.put( coord, version );
                 }
             }
-        }
-        catch ( NullPointerException e )
-        {
-            // guess there are no plugins here
-        }
-        try
-        {
-            for ( Profile profile : model.getProfiles() )
-            {
-                try
-                {
-                    for ( Plugin plugin : profile.getBuild().getPlugins() )
-                    {
-                        String coord = plugin.getKey();
-                        String version = plugin.getVersion();
-                        if ( version != null && ( !onlyIncludeInherited || getPluginInherited( plugin ) ) )
-                        {
-                            buildPlugins.put( coord, version );
-                        }
-                    }
-                }
-                catch ( NullPointerException e )
-                {
-                    // guess there are no plugins here
-                }
-            }
-        }
-        catch ( NullPointerException e )
-        {
-            // guess there are no profiles here
         }
         return buildPlugins;
     }
@@ -1479,14 +1444,10 @@ public class DisplayPluginUpdatesMojo
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
-        try
+        if (originalModel.getBuild().getPluginManagement() != null)
         {
             addProjectPlugins( plugins, originalModel.getBuild().getPluginManagement().getPlugins(),
                                excludePluginManagement );
-        }
-        catch ( NullPointerException e )
-        {
-            // guess there are no plugins here
         }
         debugPluginMap( "after adding local pluginManagement", plugins );
 
@@ -1521,7 +1482,7 @@ public class DisplayPluginUpdatesMojo
             // using maven 3.x or newer
         }
 
-        try
+        if ( originalModel.getBuild().getPlugins() != null )
         {
             List<Plugin> buildPlugins = new ArrayList<>( originalModel.getBuild().getPlugins() );
             for ( Iterator<Plugin> i = buildPlugins.iterator(); i.hasNext(); )
@@ -1539,13 +1500,9 @@ public class DisplayPluginUpdatesMojo
             }
             addProjectPlugins( plugins, buildPlugins, parentBuildPlugins );
         }
-        catch ( NullPointerException e )
-        {
-            // guess there are no plugins here
-        }
         debugPluginMap( "after adding build plugins", plugins );
 
-        try
+        if ( originalModel.getReporting() != null )
         {
             List<ReportPlugin> reportPlugins = new ArrayList<>( originalModel.getReporting().getPlugins() );
             for ( Iterator<ReportPlugin> i = reportPlugins.iterator(); i.hasNext(); )
@@ -1563,42 +1520,26 @@ public class DisplayPluginUpdatesMojo
             }
             addProjectPlugins( plugins, toPlugins( reportPlugins ), parentReportPlugins );
         }
-        catch ( NullPointerException e )
-        {
-            // guess there are no plugins here
-        }
         debugPluginMap( "after adding reporting plugins", plugins );
 
         for ( Profile profile : originalModel.getProfiles() )
         {
-            try
+            if ( profile.getBuild().getPluginManagement() != null )
             {
                 addProjectPlugins( plugins, profile.getBuild().getPluginManagement().getPlugins(),
                                    excludePluginManagement );
             }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
-            }
             debugPluginMap( "after adding build pluginManagement for profile " + profile.getId(), plugins );
 
-            try
+            if ( profile.getBuild().getPlugins() != null )
             {
                 addProjectPlugins( plugins, profile.getBuild().getPlugins(), parentBuildPlugins );
             }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
-            }
             debugPluginMap( "after adding build plugins for profile " + profile.getId(), plugins );
 
-            try
+            if ( profile.getReporting() != null )
             {
                 addProjectPlugins( plugins, toPlugins( profile.getReporting().getPlugins() ), parentReportPlugins );
-            }
-            catch ( NullPointerException e )
-            {
-                // guess there are no plugins here
             }
             debugPluginMap( "after adding reporting plugins for profile " + profile.getId(), plugins );
         }
@@ -1726,7 +1667,7 @@ public class DisplayPluginUpdatesMojo
     private Map<String, String> getReportPlugins( Model model, boolean onlyIncludeInherited )
     {
         Map<String, String> reportPlugins = new HashMap<>();
-        try
+        if ( model.getReporting() != null )
         {
             for ( ReportPlugin plugin : model.getReporting().getPlugins() )
             {
@@ -1738,15 +1679,12 @@ public class DisplayPluginUpdatesMojo
                 }
             }
         }
-        catch ( NullPointerException e )
-        {
-            // guess there are no plugins here
-        }
-        try
+
+        if ( model.getProfiles() != null )
         {
             for ( Profile profile : model.getProfiles() )
             {
-                try
+                if ( profile.getReporting() != null )
                 {
                     for ( ReportPlugin plugin : profile.getReporting().getPlugins() )
                     {
@@ -1758,15 +1696,7 @@ public class DisplayPluginUpdatesMojo
                         }
                     }
                 }
-                catch ( NullPointerException e )
-                {
-                    // guess there are no plugins here
-                }
             }
-        }
-        catch ( NullPointerException e )
-        {
-            // guess there are no profiles here
         }
         return reportPlugins;
     }
