@@ -19,11 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
@@ -500,4 +496,15 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         return nextRangeStartDelimiterIndex;
     }
 
+    protected List<Dependency> filterDependenciesWithoutVersion(List<Dependency> dependencies) {
+        final ArrayList<Dependency> result = new ArrayList<>();
+        for (Dependency dep: dependencies) {
+            if (null == dep.getVersion()) {
+                getLog().info("Dependency without version will be ignored: " + toString(dep));
+                continue;
+            }
+            result.add(dep);
+        }
+        return result;
+    }
 }

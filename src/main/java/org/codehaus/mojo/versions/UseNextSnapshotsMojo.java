@@ -36,7 +36,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -98,7 +98,7 @@ public class UseNextSnapshotsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                useNextSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
+                useNextSnapshots( pom, filterDependenciesWithoutVersion(getProject().getDependencyManagement().getDependencies()) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
@@ -125,6 +125,7 @@ public class UseNextSnapshotsMojo
             }
 
             String version = dep.getVersion();
+            Objects.requireNonNull(version, "Dependency without version: " + toString(dep));
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( !versionMatcher.matches() )
             {

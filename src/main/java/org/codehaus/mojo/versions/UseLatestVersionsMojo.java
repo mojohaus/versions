@@ -20,10 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -96,7 +93,7 @@ public class UseLatestVersionsMojo
                     PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
-                    useLatestVersions( pom, dependencyManagement.getDependencies() );
+                    useLatestVersions( pom, filterDependenciesWithoutVersion(dependencyManagement.getDependencies()) );
                 }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
@@ -141,6 +138,7 @@ public class UseLatestVersionsMojo
             }
 
             String version = dep.getVersion();
+            Objects.requireNonNull(version, "Dependency without version: " + toString(dep));
             Artifact artifact = this.toArtifact( dep );
             if ( !isIncluded( artifact ) )
             {

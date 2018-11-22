@@ -32,7 +32,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * Replaces any version with the latest version.
@@ -61,7 +61,7 @@ public class UseNextVersionsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                useNextVersions( pom, getProject().getDependencyManagement().getDependencies() );
+                useNextVersions( pom, filterDependenciesWithoutVersion(getProject().getDependencyManagement().getDependencies()) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
@@ -85,6 +85,7 @@ public class UseNextVersionsMojo
             }
 
             String version = dep.getVersion();
+            Objects.requireNonNull(version, "Dependency without version: " + toString(dep));
             Artifact artifact = this.toArtifact( dep );
             if ( !isIncluded( artifact ) )
             {

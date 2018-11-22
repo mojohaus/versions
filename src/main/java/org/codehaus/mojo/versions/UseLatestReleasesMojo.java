@@ -37,10 +37,7 @@ import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -102,7 +99,7 @@ public class UseLatestReleasesMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                useLatestReleases( pom, getProject().getDependencyManagement().getDependencies() );
+                useLatestReleases( pom, filterDependenciesWithoutVersion(getProject().getDependencyManagement().getDependencies()) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
@@ -142,6 +139,7 @@ public class UseLatestReleasesMojo
             }
 
             String version = dep.getVersion();
+            Objects.requireNonNull(version, "Dependency without version: " + toString(dep));
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( !versionMatcher.matches() )
             {
