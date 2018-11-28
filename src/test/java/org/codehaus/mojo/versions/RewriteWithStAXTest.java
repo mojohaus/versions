@@ -19,8 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.xml.stream.XMLEventReader;
@@ -36,6 +38,10 @@ import java.util.Stack;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Basic tests for rewriting XML with a StAX (JSR-173) implementation.
@@ -44,6 +50,8 @@ import static org.junit.Assert.assertFalse;
  */
 public class RewriteWithStAXTest
 {
+    private Log log;
+
     @Test
     public void testBasic()
         throws Exception
@@ -87,7 +95,7 @@ public class RewriteWithStAXTest
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
-        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
+        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory, "test", log );
         while ( eventReader.hasNext() )
         {
             XMLEvent event = eventReader.nextEvent();
@@ -208,7 +216,7 @@ public class RewriteWithStAXTest
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
-        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
+        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory, "test", log );
 
         Stack<String> stack = new Stack<String>();
         String path = "";
@@ -298,5 +306,30 @@ public class RewriteWithStAXTest
 
         assertEquals( expected, output.toString() );
     }
+
+    @Test
+    public void testInvalidXmlLogsError()
+        throws Exception
+    {
+        String input = " <?xml version='1.0' encoding='utf-8'?>\n" + "<project>\n\r\n\r\n\r\n\r" + "  <parent>\r\n"
+            + "    <groupId xmlns='foo'>org.codehaus.mojo</groupId>\n"
+            + "    <artifactId>mojo-&amp;sandbox-parent</artifactId>\n" + "    <version>5-SNAPSHOT</version>\r"
+            + "  </parent>\r" + "<build/></project>";
+
+        StringBuilder output = new StringBuilder( input );
+
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
+        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory, "test", log );
+        assertFalse( eventReader.hasNext() );
+        verify(log).error(eq("Unable to parse pom.xml file at test"), any(Throwable.class));
+    }
+
+    @Before
+    public void setup()
+    {
+        log = mock(Log.class);
+    }
+
 
 }

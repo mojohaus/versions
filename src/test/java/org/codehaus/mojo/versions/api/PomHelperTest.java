@@ -3,9 +3,12 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import javax.xml.stream.XMLInputFactory;
 import java.io.File;
@@ -24,6 +27,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class PomHelperTest
 {
+    private Log log;
+
     /**
      * Tests if imported POMs are properly read from dependency management section. Such logic is required to resolve
      * <a href="https://github.com/mojohaus/versions-maven-plugin/issues/134">bug #134</a>
@@ -40,7 +45,7 @@ public class PomHelperTest
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
 
-        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory );
+        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory, "test", log );
 
         List<Dependency> dependencies = PomHelper.readImportedPOMsFromDependencyManagementSection( pom );
 
@@ -70,7 +75,7 @@ public class PomHelperTest
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
 
-        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory );
+        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory, "test", log );
 
         String oldVersion = PomHelper.getProjectVersion( pom );
 
@@ -181,6 +186,12 @@ public class PomHelperTest
     {
         assertTrue( PomHelper.isVersionOverlap( "[1.0.0,2.0.0]", "1.0.8" ) );
 
+    }
+
+    @Before
+    public void setup()
+    {
+        log = Mockito.mock(Log.class);
     }
 
 }

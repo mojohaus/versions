@@ -190,7 +190,7 @@ public class DisplayPluginUpdatesMojo
                         try( Reader reader = ReaderFactory.newXmlReader( superPom ) )
                         {
                             StringBuilder buf = new StringBuilder( IOUtil.toString( reader ) );
-                            ModifiedPomXMLEventReader pom = newModifiedPomXER( buf );
+                            ModifiedPomXMLEventReader pom = newModifiedPomXER( getProject().getFile().getAbsolutePath(), buf );
 
                             Pattern pathRegex = Pattern.compile( "/project(/profiles/profile)?"
                                 + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );
@@ -769,7 +769,7 @@ public class DisplayPluginUpdatesMojo
                 try
                 {
                     Set<String> withVersionSpecified =
-                        findPluginsWithVersionsSpecified( new StringBuilder( writer.toString() ) );
+                        findPluginsWithVersionsSpecified( parentProject, new StringBuilder( writer.toString() ) );
 
                     Map<String, String> map = getPluginManagement( interpolatedModel );
                     map.keySet().retainAll( withVersionSpecified );
@@ -850,20 +850,21 @@ public class DisplayPluginUpdatesMojo
     private Set<String> findPluginsWithVersionsSpecified( MavenProject project )
         throws IOException, XMLStreamException
     {
-        return findPluginsWithVersionsSpecified( PomHelper.readXmlFile( project.getFile() ) );
+        return findPluginsWithVersionsSpecified( project, PomHelper.readXmlFile( project.getFile() ) );
     }
 
     /**
      * Returns a set of Strings which correspond to the plugin coordinates where there is a version specified.
      *
+     * @param project The Maven project (for logging purposes)
      * @param pomContents The project to get the plugins with versions specified.
      * @return a set of Strings which correspond to the plugin coordinates where there is a version specified.
      */
-    private Set<String> findPluginsWithVersionsSpecified( StringBuilder pomContents )
+    private Set<String> findPluginsWithVersionsSpecified( MavenProject project, StringBuilder pomContents )
         throws IOException, XMLStreamException
     {
         Set<String> result = new HashSet<>();
-        ModifiedPomXMLEventReader pom = newModifiedPomXER( pomContents );
+        ModifiedPomXMLEventReader pom = newModifiedPomXER( project.getFile().getAbsolutePath(), pomContents );
 
         Pattern pathRegex = Pattern.compile( "/project(/profiles/profile)?"
             + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin" );

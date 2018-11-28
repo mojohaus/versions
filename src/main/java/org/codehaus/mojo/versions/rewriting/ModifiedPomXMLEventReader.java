@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.rewriting;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.stream.XMLEventReader;
@@ -119,6 +120,16 @@ public class ModifiedPomXMLEventReader
      */
     private XMLEventReader backing;
 
+    /**
+     * Field path
+     */
+    private String path;
+
+    /**
+     * Field log
+     */
+    private Log log;
+
     // --------------------------- CONSTRUCTORS ---------------------------
 
     /**
@@ -126,13 +137,17 @@ public class ModifiedPomXMLEventReader
      *
      * @param pom of type StringBuilder
      * @param factory of type XMLInputFactory
+     * @param path of the file being rewritten, for logging purposes
+     * @param log to log messages into
      * @throws XMLStreamException when
      */
-    public ModifiedPomXMLEventReader( StringBuilder pom, XMLInputFactory factory )
+    public ModifiedPomXMLEventReader( StringBuilder pom, XMLInputFactory factory, String path, Log log )
         throws XMLStreamException
     {
         this.pom = pom;
         this.factory = factory;
+        this.path = path;
+        this.log = log;
         rewind();
     }
 
@@ -374,6 +389,7 @@ public class ModifiedPomXMLEventReader
         }
         catch ( XMLStreamException e )
         {
+            log.error("Unable to parse pom.xml file at " + path, e);
             return false;
         }
     }
