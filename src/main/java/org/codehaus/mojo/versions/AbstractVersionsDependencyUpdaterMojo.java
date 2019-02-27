@@ -28,6 +28,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Parent;
@@ -91,6 +92,15 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     @Parameter
     private String[] excludes = null;
+
+
+    /**
+     * a scope to use to filter the artifacts matching the asked scope or better
+     *
+     * @since 2.8
+     */
+    @Parameter(property = "scope")
+    private String scope = null;
 
     /**
      * Whether to process the dependencies section of the project.
@@ -381,6 +391,12 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
             result = result && excludesFilter.include( artifact );
         }
 
+        ArtifactFilter scopeFilter = this.getScopeArtifactFilter();
+
+        if (scopeFilter != null) {
+            result = result && scopeFilter.include(artifact);
+        }
+
         return result;
     }
 
@@ -429,6 +445,14 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         }
         return excludesFilter;
     }
+
+    private ArtifactFilter getScopeArtifactFilter() {
+        if (scope == null) {
+            return null;
+        }
+        return new ScopeArtifactFilter(scope);
+    }
+
 
     /**
      * To handle multiple includes with version range like "group:artifact:jar:[1.0.0,2.2)", we have to use a parsing a

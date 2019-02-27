@@ -8,7 +8,12 @@ try
 
     if ( buf.indexOf( "2.0.10 -> 2.0.9" ) < 0 )
     {
-        System.err.println( "Version diff in maven artifact not found" );
+        System.err.println( "Version diff in maven artifact not found. it should be processed because its scope is compile" );
+        return false;
+    }
+    if ( buf.indexOf( "4.0 -> 4.1" ) > 0 )
+    {
+        System.err.println( "Version diff in junit artifact found. it should be excluded because its scope is test" );
         return false;
     }
 }

@@ -6,8 +6,11 @@
   <artifactId>it-compare-dependencies-001</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <name>compare dependency versions</name>
-
+  <name>#123 add scope filter property</name>
+  <description>
+    the scope filter property to allow excluding artifacts based on scope:
+    junit is set to test scope and we ask a comparison in scope compile
+  </description>
   <dependencyManagement>
 
     <dependencies>
@@ -20,7 +23,8 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.1</version>
+        <version>4.0</version>
+        <scope>test</scope>
       </dependency>
 
     </dependencies>
