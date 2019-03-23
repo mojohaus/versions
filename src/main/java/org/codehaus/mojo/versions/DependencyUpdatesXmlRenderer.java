@@ -168,7 +168,7 @@ public class DependencyUpdatesXmlRenderer
         }
 
         String result = "\t<summary>%n" + "\t\t<usingLastVersion>%d</usingLastVersion>%n"
-            + "\t\t<nextVersionAlailable>%d</nextVersionAlailable>%n"
+            + "\t\t<nextVersionAvailable>%d</nextVersionAvailable>%n"
             + "\t\t<nextIncremetalAvailable>%d</nextIncremetalAvailable>%n"
             + "\t\t<nextMinorAvailable>%d</nextMinorAvailable>%n" + "\t\t<nextMajorAvailable>%d</nextMajorAvailable>%n"
             + "\t</summary>%n";
