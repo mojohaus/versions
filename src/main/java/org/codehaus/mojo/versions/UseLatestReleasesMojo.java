@@ -103,6 +103,7 @@ public class UseLatestReleasesMojo
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
                 useLatestReleases( pom, getProject().getDependencyManagement().getDependencies() );
+                useLatestReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
