@@ -19,6 +19,18 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -36,14 +48,13 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.xml.stream.XMLStreamException;
+import static java.util.Arrays.asList;
+import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
+import static org.apache.maven.artifact.Artifact.SCOPE_IMPORT;
+import static org.apache.maven.artifact.Artifact.SCOPE_PROVIDED;
+import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
+import static org.apache.maven.artifact.Artifact.SCOPE_SYSTEM;
+import static org.apache.maven.artifact.Artifact.SCOPE_TEST;
 
 /**
  * Displays all dependencies that have newer versions available.
@@ -66,6 +77,19 @@ public class DisplayDependencyUpdatesMojo
      * @since 1.0-alpha-1
      */
     private static final int INFO_PAD_SIZE = 72;
+
+    /**
+     * Find any whitespace in a string.
+     */
+    private static final Pattern ALL_WHITESPACE = Pattern.compile("\\s+");
+    /**
+     * Keyword for scopes inclusion: include all scopes
+     */
+    private static final String SCOPES_KEYWORD_ALL = "all";
+    /**
+     * Keyword for dependencyManagement scopes inclusion: include dependency with null scope, i.e.: no scope given in dependencyManagement section.
+     */
+    private static final String SCOPES_KEYWORD_NULL = "null";
 
     /**
      * Whether to process the dependencyManagement section of the project.
@@ -102,7 +126,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the major version number to be changed.
      * You need to set {@link #allowAnyUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      * @since 2.5
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
@@ -111,7 +135,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the minor version number to be changed.
      * You need to set {@link #allowMajorUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -121,7 +145,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the incremental version number to be changed.
      * You need to set {@link #allowMinorUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -147,6 +171,33 @@ public class DisplayDependencyUpdatesMojo
      */
     @Parameter( property = "verbose", defaultValue = "false" )
     private boolean verbose;
+
+    /**
+     * comma-separates list of <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope">maven dependency scopes</a>
+     * (inbetween whitespace allowed) or just the keyword &quot;all&quot; (the default).
+     * Only dependencies with the resolved scope (i.e.: after aplying dependencyManagement) will get checked.
+     * For some use-cases it might be usefull to exclude some, most notably: system and provided.
+     * The resulting dependencyScopes param would in this case be: "compile, runtime, test, import"
+     *
+     * @since 2.8
+     */
+    @Parameter( property = "dependencyScopes", defaultValue = "all" )
+    private String dependencyScopes;
+
+    /**
+     * comma-separates list of <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope">maven dependency scopes</a>
+     * and the additional keyword &quot;null&quot; (inbetween whitespace allowed) or just the keyword &quot;all&quot; (the default).
+     * <p>
+     * Only dependencyManagement-dependencies in this scope will get checked.
+     * </p>
+     * <p>
+     * <strong>WARNING: </strong>dependencies in the dependencyManagement section will have a null-scope if not explicitly set!
+     * </p>
+     *
+     * @since 2.8
+     */
+    @Parameter( property = "dependencyManagementScopes", defaultValue = "all" )
+    private String dependencyManagementScopes;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -255,9 +306,63 @@ public class DisplayDependencyUpdatesMojo
     // --------------------- Interface Mojo ---------------------
 
     /**
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()
+     * parses a comma-separated string of scopes with optional whitespace inbetween.
+     * Also cares for our internal scope keywords: {@link #SCOPES_KEYWORD_ALL} and {@link #SCOPES_KEYWORD_NULL}.
+     */
+    private static Set<String> parseScopesString( String scopesString ) {
+        Set<String> result = new HashSet<>();
+
+        String normalizedScopesString = ( scopesString == null ? SCOPES_KEYWORD_ALL : scopesString )
+                .trim()
+                .toLowerCase( Locale.US) ;
+
+        if ( SCOPES_KEYWORD_ALL.equals(scopesString) ) {
+            result.addAll(asList(SCOPE_COMPILE,
+                                 SCOPE_PROVIDED,
+                                 SCOPE_RUNTIME,
+                                 SCOPE_TEST,
+                                 SCOPE_SYSTEM,
+                                 SCOPE_IMPORT,
+                                 SCOPES_KEYWORD_NULL));
+        } else {
+            String[] scopes = ALL_WHITESPACE
+                    .matcher( normalizedScopesString ).replaceAll( "" )
+                    .split(",");
+
+            result.addAll( asList( scopes ) );
+        }
+
+        return result;
+    }
+
+    private Set<Dependency> removeUnwantedScopes( Set<Dependency> dependencies, String scopesString ) {
+        TreeSet<Dependency> filtered = new TreeSet<>( new DependencyComparator() );
+
+        Set<String> scopes = parseScopesString( scopesString );
+        getLog().debug( "Scopes: " + scopes );
+
+        for ( Dependency dependency : dependencies ) {
+            boolean inScope = isInScope(scopes, dependency);
+            getLog().debug( "Dependency:" + dependency + " with scope: " + dependency.getScope() + ", include: " + inScope );
+            if ( inScope ) {
+                filtered.add( dependency );
+            }
+        }
+
+        return filtered;
+    }
+
+    /**
+     * treats dependencies with null scope as if having a scope of &quot;null&qout; (see {@link #SCOPES_KEYWORD_NULL}.
+     */
+    private static boolean isInScope( Set<String> scopes, Dependency dependency ) {
+        return scopes.contains( String.valueOf( dependency.getScope() ) );
+    }
+
+    /**
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @see AbstractVersionsUpdaterMojo#execute()
      * @since 1.0-alpha-1
      */
     public void execute()
@@ -273,7 +378,7 @@ public class DisplayDependencyUpdatesMojo
             for ( Dependency dependency : dependenciesFromPom )
             {
                 getLog().debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
-                    + ":" + dependency.getVersion() );
+                    + ":" + dependency.getVersion() + ":" + dependency.getScope() );
                 if ( dependency.getVersion() == null )
                 {
                     // get parent and get the information from there.
@@ -320,7 +425,7 @@ public class DisplayDependencyUpdatesMojo
             dependencies = removeDependencyManagment( dependencies, dependencyManagement );
         }
 
-        Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
+		Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
 
         if ( isProcessingPluginDependencies() )
         {
@@ -338,11 +443,13 @@ public class DisplayDependencyUpdatesMojo
         {
             if ( isProcessingDependencyManagement() )
             {
+                dependencyManagement = removeUnwantedScopes( dependencyManagement, dependencyManagementScopes );
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
                             "Dependency Management" );
             }
             if ( isProcessingDependencies() )
             {
+                dependencies = removeUnwantedScopes( dependencies, dependencyScopes );
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
             }
             if ( isProcessPluginDependenciesInDependencyManagement() )
@@ -365,7 +472,7 @@ public class DisplayDependencyUpdatesMojo
         }
     }
 
-    private UpdateScope calculateUpdateScope()
+	private UpdateScope calculateUpdateScope()
     {
         UpdateScope result = UpdateScope.ANY;
         if ( !allowAnyUpdates )
@@ -455,9 +562,9 @@ public class DisplayDependencyUpdatesMojo
                 }
                 logLine( false, "" );
             }
-        }        
-        
-        
+        }
+
+
         if ( withUpdates.isEmpty() )
         {
             if ( !usingCurrent.isEmpty() )
@@ -480,10 +587,10 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @throws MojoExecutionException when things go wrong
+     * @throws MojoFailureException when things go wrong in a very bad way
+     * @throws XMLStreamException when things go wrong with XML streaming
+     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
