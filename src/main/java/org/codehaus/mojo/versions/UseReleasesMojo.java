@@ -283,7 +283,7 @@ public class UseReleasesMojo
                 }
             }
 
-            if ( PomHelper.setPropertyVersion( pom, propertyVersions.getProfileId(), propertyVersions.getName(), finalVersion.toString() ) )
+            if ( finalVersion != null && PomHelper.setPropertyVersion( pom, propertyVersions.getProfileId(), propertyVersions.getName(), finalVersion.toString() ) )
             {
                 getLog().info( "Updated ${" + propertyVersions.getName() + "} from " + currentVersion + " to " + finalVersion );
             }
