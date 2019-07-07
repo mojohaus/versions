@@ -106,6 +106,9 @@ public class UseNextVersionsMojo
                                                      getProject().getModel() ) )
                 {
                     getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+
+                    this.getChangeRecorder().recordUpdate( "useNextVersions", dep.getGroupId(),
+                            dep.getArtifactId(), version, newVersion );
                 }
             }
         }

@@ -164,3 +164,6 @@ Versions Maven Plugin
   * {{{./examples/use-releases.html}Replacing -SNAPSHOT versions with their corresponding releases}}
 
   * {{{./examples/set.html}Changing the project version}}
+
+  * {{{./examples/recording-changes.html}Recording version changes}}
+

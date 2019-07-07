@@ -19,10 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -143,8 +145,17 @@ public class UpdatePropertyMojo
             }
 
             int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
-            updatePropertyToNewestVersion( pom, property, version, currentVersion, allowDowngrade, segment );
+            ArtifactVersion targetVersion = updatePropertyToNewestVersion( pom, property, version, currentVersion,
+                    allowDowngrade, segment );
 
+            if (targetVersion != null)
+            {
+                for ( final ArtifactAssociation association : version.getAssociations() )
+                {
+                    this.getChangeRecorder().recordUpdate( "updateProperty", association.getGroupId(),
+                            association.getArtifactId(), currentVersion, targetVersion.toString() );
+                }
+            }
         }
     }
 

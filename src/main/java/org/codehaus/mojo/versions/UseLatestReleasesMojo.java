@@ -182,6 +182,9 @@ public class UseLatestReleasesMojo
                                                          newVersion, getProject().getModel() ) )
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+
+                        this.getChangeRecorder().recordUpdate( "useLatestReleases", dep.getGroupId(),
+                                dep.getArtifactId(), version, newVersion );
                     }
                 }
             }

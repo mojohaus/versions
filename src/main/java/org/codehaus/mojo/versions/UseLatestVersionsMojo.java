@@ -163,10 +163,14 @@ public class UseLatestVersionsMojo
                 String newVersion = filteredVersions[filteredVersions.length - 1].toString();
                 if ( getProject().getParent() != null )
                 {
-                    if ( artifact.getId().equals( getProject().getParentArtifact().getId() ) && isProcessingParent() )
+                    final Artifact parentArtifact = getProject().getParentArtifact();
+                    if ( artifact.getId().equals( parentArtifact.getId() ) && isProcessingParent() )
                     {
                         if ( PomHelper.setProjectParentVersion( pom, newVersion ) ) {
                             getLog().debug("Made parent update from " + version + " to " + newVersion);
+
+                            this.getChangeRecorder().recordUpdate( "useLatestVersions", parentArtifact.getGroupId(),
+                                    parentArtifact.getArtifactId(), version, newVersion );
                         }
                     }
                 }
@@ -174,6 +178,8 @@ public class UseLatestVersionsMojo
                                                      getProject().getModel() ) ) {
                     getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
 
+                    this.getChangeRecorder().recordUpdate( "useLatestVersions", dep.getGroupId(),
+                            dep.getArtifactId(), version, newVersion );
                 }
             }
 

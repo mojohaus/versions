@@ -44,6 +44,9 @@ import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.recording.ChangeRecorderNull;
+import org.codehaus.mojo.versions.recording.ChangeRecorderXML;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
@@ -53,6 +56,7 @@ import org.codehaus.stax2.XMLInputFactory2;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -191,6 +195,27 @@ public abstract class AbstractVersionsUpdaterMojo
 
     @Component
     protected ArtifactResolver artifactResolver;
+    /**
+     * The format used to record changes. If "none" is specified, no changes are recorded.
+     *
+     * @since 2.8
+     */
+    @Parameter( property = "changeRecorderFormat",
+                defaultValue = "none" )
+    private String changeRecorderFormat = "none";
+    /**
+     * The output file used to record changes.
+     *
+     * @since 2.8
+     */
+    @Parameter( property = "changeRecorderOutputFile",
+                defaultValue = "${project.build.directory}/versions-changes.xml" )
+    private File changeRecorderOutputFile;
+    /**
+     * The change recorder implementation.
+     */
+
+    private ChangeRecorder changeRecorder;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -335,6 +360,8 @@ public abstract class AbstractVersionsUpdaterMojo
                 }
                 writeFile( outFile, input );
             }
+
+            this.saveChangeRecorderResults();
         }
         catch ( IOException | XMLStreamException e )
         {
@@ -504,16 +531,9 @@ public abstract class AbstractVersionsUpdaterMojo
         return segment;
     }
 
-    protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                  PropertyVersions version, String currentVersion )
-        throws MojoExecutionException, XMLStreamException
-    {
-        updatePropertyToNewestVersion( pom, property, version, currentVersion, false, -1 );
-    }
-
-    protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                  PropertyVersions version, String currentVersion,
-                                                  boolean allowDowngrade, int segment )
+    protected ArtifactVersion updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
+                                                             PropertyVersions version, String currentVersion,
+                                                             boolean allowDowngrade, int segment )
         throws MojoExecutionException, XMLStreamException
     {
         ArtifactVersion winner =
@@ -527,6 +547,67 @@ public abstract class AbstractVersionsUpdaterMojo
         else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
         {
             getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
+        }
+
+        return winner;
+    }
+
+    /**
+     * Configure and return the change recorder.
+     *
+     * @return The change recorder
+     * @throws MojoExecutionException If the provided change recorder format is not valid
+     */
+
+    protected ChangeRecorder getChangeRecorder() throws MojoExecutionException
+    {
+        if ( this.changeRecorder == null )
+        {
+            if ( "none".equals( this.changeRecorderFormat ) )
+            {
+                this.changeRecorder = ChangeRecorderNull.create();
+            }
+            else if ( "xml".equals( this.changeRecorderFormat ) )
+            {
+                this.changeRecorder = ChangeRecorderXML.create();
+            }
+            else
+            {
+                throw new MojoExecutionException( "Only 'xml' or 'none' formats are supported for change recordings" );
+            }
+        }
+
+        return this.changeRecorder;
+    }
+
+    /**
+     * Save all of the changes recorded by the change recorder.
+     *
+     * @throws IOException On I/O errors
+     */
+
+    protected void saveChangeRecorderResults() throws IOException
+    {
+        /*
+         * Nobody did anything that required a change recorder.
+         */
+
+        if ( this.changeRecorder == null )
+        {
+            return;
+        }
+
+        if ( "none".equals( this.changeRecorderFormat ) )
+        {
+            return;
+        }
+
+        this.getLog().debug( "writing change record to " + this.changeRecorderOutputFile );
+
+        this.changeRecorderOutputFile.getParentFile().mkdirs();
+        try ( FileOutputStream outputStream = new FileOutputStream( this.changeRecorderOutputFile ) )
+        {
+            this.changeRecorder.serialize( outputStream );
         }
     }
 }

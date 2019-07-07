@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -36,9 +37,11 @@ import java.util.Map;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "update-properties", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
-public class UpdatePropertiesMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+@Mojo( name = "update-properties",
+       requiresProject = true,
+       requiresDirectInvocation = true,
+       threadSafe = true )
+public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -72,16 +75,18 @@ public class UpdatePropertiesMojo
      *
      * @since 1.0-alpha-2
      */
-    @Parameter( property = "autoLinkItems", defaultValue = "true" )
+    @Parameter( property = "autoLinkItems",
+                defaultValue = "true" )
     private boolean autoLinkItems;
 
     /**
      * If a property points to a version like <code>1.2.3-SNAPSHOT</code> and your repo contains a version like
      * <code>1.1.0</code> without settings this to <code>true</code> the property will not being changed.
-     * 
+     *
      * @since 2.4
      */
-    @Parameter( property = "allowDowngrade", defaultValue = "false" )
+    @Parameter( property = "allowDowngrade",
+                defaultValue = "false" )
     private boolean allowDowngrade;
 
     /**
@@ -89,7 +94,8 @@ public class UpdatePropertiesMojo
      *
      * @since 2.4
      */
-    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    @Parameter( property = "allowMajorUpdates",
+                defaultValue = "true" )
     protected boolean allowMajorUpdates;
 
     /**
@@ -97,7 +103,8 @@ public class UpdatePropertiesMojo
      *
      * @since 2.4
      */
-    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    @Parameter( property = "allowMinorUpdates",
+                defaultValue = "true" )
     protected boolean allowMinorUpdates;
 
     /**
@@ -105,7 +112,8 @@ public class UpdatePropertiesMojo
      *
      * @since 2.4
      */
-    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    @Parameter( property = "allowIncrementalUpdates",
+                defaultValue = "true" )
     protected boolean allowIncrementalUpdates;
 
     // -------------------------- STATIC METHODS --------------------------
@@ -115,17 +123,15 @@ public class UpdatePropertiesMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException when things go wrong in a very bad way
-     * @throws XMLStreamException when things go wrong with XML streaming
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+    protected void update( ModifiedPomXMLEventReader pom ) throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        Map<Property, PropertyVersions> propertyVersions =
-            this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
-                                                      autoLinkItems );
+        Map<Property, PropertyVersions> propertyVersions = this.getHelper().getVersionPropertiesMap( getProject(),
+                properties, includeProperties, excludeProperties, autoLinkItems );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property property = entry.getKey();
@@ -141,9 +147,8 @@ public class UpdatePropertiesMojo
             {
                 if ( !( isIncluded( association.getArtifact() ) ) )
                 {
-                    getLog().info( "Not updating the property ${" + property.getName()
-                        + "} because it is used by artifact " + association.getArtifact().toString()
-                        + " and that artifact is not included in the list of " + " allowed artifacts to be updated." );
+                    getLog().info(
+                            "Not updating the property ${" + property.getName() + "} because it is used by artifact " + association.getArtifact().toString() + " and that artifact is not included in the list of " + " allowed artifacts to be updated." );
                     canUpdateProperty = false;
                     break;
                 }
@@ -151,9 +156,22 @@ public class UpdatePropertiesMojo
 
             if ( canUpdateProperty )
             {
-                int segment =
-                    determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
-                updatePropertyToNewestVersion( pom, property, version, currentVersion, allowDowngrade, segment );
+                int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                        allowIncrementalUpdates );
+                ArtifactVersion targetVersion = updatePropertyToNewestVersion( pom, property, version, currentVersion,
+                        allowDowngrade, segment );
+
+                if (targetVersion != null)
+                {
+                    for ( final ArtifactAssociation association : version.getAssociations() )
+                    {
+                        if ( ( isIncluded( association.getArtifact() ) ) )
+                        {
+                            this.getChangeRecorder().recordUpdate( "updateProperty", association.getGroupId(),
+                                    association.getArtifactId(), currentVersion, targetVersion.toString() );
+                        }
+                    }
+                }
             }
 
         }
