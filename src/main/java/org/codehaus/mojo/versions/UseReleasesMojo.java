@@ -129,8 +129,9 @@ public class UseReleasesMojo
                 throw new MojoExecutionException( "Invalid version range specification: " + version, e );
             }
 
-            Artifact artifact = artifactFactory.createDependencyArtifact( getProject().getParent().getGroupId(),
-                                                                          getProject().getParent().getArtifactId(),
+            final MavenProject parent = getProject().getParent();
+            Artifact artifact = artifactFactory.createDependencyArtifact( parent.getGroupId(),
+                                                                          parent.getArtifactId(),
                                                                           versionRange, "pom", null, null );
             if ( !isIncluded( artifact ) )
             {
@@ -175,6 +176,9 @@ public class UseReleasesMojo
                     if ( PomHelper.setProjectParentVersion( pom, finalVersion.toString() ) )
                     {
                         getLog().info( "Updated " + toString( project ) + " to version " + finalVersion );
+
+                        this.getChangeRecorder().recordUpdate( "useReleases", parent.getGroupId(),
+                                parent.getArtifactId(), version, finalVersion.toString() );
                     }
                 }
                 else
@@ -242,8 +246,7 @@ public class UseReleasesMojo
     }
 
     private void rangeMatching( ModifiedPomXMLEventReader pom, Dependency dep, String version, String releaseVersion,
-                                ArtifactVersions versions )
-        throws XMLStreamException
+                                ArtifactVersions versions ) throws XMLStreamException, MojoExecutionException
     {
         ArtifactVersion finalVersion = null;
         for ( ArtifactVersion proposedVersion : versions.getVersions( false ) )
@@ -261,6 +264,9 @@ public class UseReleasesMojo
                                                  finalVersion.toString(), getProject().getModel() ) )
             {
                 getLog().info( "Updated " + toString( dep ) + " to version " + finalVersion );
+
+                this.getChangeRecorder().recordUpdate( "useReleases", dep.getGroupId(),
+                        dep.getArtifactId(), version, finalVersion.toString() );
             }
         }
         else
@@ -275,8 +281,7 @@ public class UseReleasesMojo
     }
 
     private void noRangeMatching( ModifiedPomXMLEventReader pom, Dependency dep, String version, String releaseVersion,
-                                  ArtifactVersions versions )
-        throws XMLStreamException
+                                  ArtifactVersions versions ) throws XMLStreamException, MojoExecutionException
     {
         if ( versions.containsVersion( releaseVersion ) )
         {
@@ -284,6 +289,9 @@ public class UseReleasesMojo
                                                  getProject().getModel() ) )
             {
                 getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
+
+                this.getChangeRecorder().recordUpdate( "useReleases", dep.getGroupId(),
+                        dep.getArtifactId(), version, releaseVersion );
             }
         }
         else if ( failIfNotReplaced )

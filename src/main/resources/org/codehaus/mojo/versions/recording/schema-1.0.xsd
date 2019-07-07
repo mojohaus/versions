@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        elementFormDefault="qualified"
+        xmlns:u="http://www.mojohaus.org/versions-maven-plugin/schema/updates/1.0"
+        targetNamespace="http://www.mojohaus.org/versions-maven-plugin/schema/updates/1.0">
+
+    <annotation>
+        <documentation>
+            The 'update' element specifies a single version change. The 'kind' attribute describes the
+            operation that produced the version update, such as unlocking a snapshot version or upgrading to the next
+            release.
+        </documentation>
+    </annotation>
+
+    <element name="update">
+        <complexType>
+            <attribute name="kind" type="NMTOKEN" use="required"/>
+            <attribute name="groupId" type="NMTOKEN" use="required"/>
+            <attribute name="artifactId" type="NMTOKEN" use="required"/>
+            <attribute name="oldVersion" type="NMTOKEN" use="required"/>
+            <attribute name="newVersion" type="NMTOKEN" use="required"/>
+        </complexType>
+    </element>
+
+    <annotation>
+        <documentation>The 'updates' element specifies a set of version changes that occurred.</documentation>
+    </annotation>
+
+    <element name="updates">
+        <complexType>
+            <sequence minOccurs="0" maxOccurs="unbounded">
+                <element ref="u:update"/>
+            </sequence>
+        </complexType>
+    </element>
+
+</schema>

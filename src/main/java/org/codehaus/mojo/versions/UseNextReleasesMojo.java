@@ -113,6 +113,9 @@ public class UseNextReleasesMojo
 
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+
+                        this.getChangeRecorder().recordUpdate( "useNextReleases", dep.getGroupId(),
+                                dep.getArtifactId(), version, newVersion );
                     }
                 }
             }

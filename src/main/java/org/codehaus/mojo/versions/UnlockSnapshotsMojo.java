@@ -42,9 +42,11 @@ import java.util.regex.Pattern;
  * @author Paul Gier
  * @since 1.0-alpha-3
  */
-@Mojo( name = "unlock-snapshots", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
-public class UnlockSnapshotsMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+@Mojo( name = "unlock-snapshots",
+       requiresProject = true,
+       requiresDirectInvocation = true,
+       threadSafe = true )
+public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -59,12 +61,11 @@ public class UnlockSnapshotsMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException when things go wrong in a very bad way
-     * @throws XMLStreamException when things go wrong with XML streaming
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+    protected void update( ModifiedPomXMLEventReader pom ) throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
 
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
@@ -81,8 +82,7 @@ public class UnlockSnapshotsMojo
         }
     }
 
-    private void unlockSnapshots( ModifiedPomXMLEventReader pom, List<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException
+    private void unlockSnapshots( ModifiedPomXMLEventReader pom, List<Dependency> dependencies ) throws XMLStreamException, MojoExecutionException
     {
         for ( Dependency dep : dependencies )
         {
@@ -109,16 +109,17 @@ public class UnlockSnapshotsMojo
             {
                 String unlockedVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                                                     unlockedVersion, getProject().getModel() ) )
+                        unlockedVersion, getProject().getModel() ) )
                 {
+                    getChangeRecorder().recordUpdate( "unlockSnapshot", dep.getGroupId(), dep.getArtifactId(),
+                            dep.getVersion(), unlockedVersion );
                     getLog().info( "Unlocked " + toString( dep ) + " to version " + unlockedVersion );
                 }
             }
         }
     }
 
-    private void unlockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent )
-        throws XMLStreamException, MojoExecutionException
+    private void unlockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent ) throws XMLStreamException, MojoExecutionException
     {
         if ( parent == null )
         {
@@ -143,6 +144,8 @@ public class UnlockSnapshotsMojo
             {
                 getLog().info( "Unlocked parent " + parentArtifact + " to version "
                     + unlockedParentVersion );
+                getChangeRecorder().recordUpdate( "unlockParentVersion", parentArtifact.getGroupId(),
+                        parentArtifact.getArtifactId(), parentArtifact.getVersion(), unlockedParentVersion );
             }
         }
     }
