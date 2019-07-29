@@ -19,9 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.util.Locale;
-import java.util.Map;
-
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -29,6 +26,10 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+
+import java.io.File;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
@@ -41,6 +42,14 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 public class PropertyUpdatesReport
     extends AbstractVersionsReport
 {
+
+    /**
+     * Report formats (html and/or xml). HTML by default.
+     *
+     * @since 2.8
+     */
+    @Parameter( property = "propertyUpdatesReportFormats", defaultValue = "html" )
+    private String[] formats;
 
     /**
      * Any restrictions that apply to specific properties.
@@ -108,9 +117,31 @@ public class PropertyUpdatesReport
         {
             throw new MavenReportException( e.getMessage(), e );
         }
-        PropertyUpdatesRenderer renderer =
-            new PropertyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, updateSet );
-        renderer.render();
+
+        for ( String format : formats )
+        {
+            if ( "html".equals( format ) )
+            {
+                PropertyUpdatesRenderer renderer =
+                    new PropertyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, updateSet );
+                renderer.render();
+            }
+            else if ( "xml".equals( format ) )
+            {
+                File outputDir = new File(getProject().getBuild().getDirectory());
+                if (!outputDir.exists())
+                {
+                    outputDir.mkdirs();
+                }
+                String outputFile = outputDir.getAbsolutePath() + File.separator + getOutputName() + ".xml";
+                PropertyUpdatesXmlRenderer renderer = new PropertyUpdatesXmlRenderer(updateSet, outputFile);
+                renderer.render();
+            }
+            else
+            {
+                throw new MavenReportException("Unsupported report format: " + format);
+            }
+        }
     }
 
     /**
