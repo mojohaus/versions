@@ -414,9 +414,15 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return <code>true</code> if the update should be applied.
      * @since 1.0-alpha-1
      */
-    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
+    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean forceUpdate )
     {
         getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
+
+        if ( forceUpdate == Boolean.TRUE )
+        {
+            getLog().info( "Force update enabled. LATEST or RELEASE versions will be overwritten with real version" );
+            return true;
+        }
 
         if ( updateVersion == null )
         {
