@@ -39,6 +39,8 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
+import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -55,6 +57,8 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -65,6 +69,10 @@ import java.util.List;
 public abstract class AbstractVersionsUpdaterMojo
     extends AbstractMojo
 {
+
+    private static final String END_RANGE_CHARS = "])";
+
+    private static final String START_RANGE_CHARS = "[(";
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -177,6 +185,16 @@ public abstract class AbstractVersionsUpdaterMojo
      * Our versions helper.
      */
     private VersionsHelper helper;
+
+    /**
+     * Artifact filter to determine if artifact should be included
+     */
+    private PatternIncludesArtifactFilter includesFilter;
+
+    /**
+     * Artifact filter to determine if artifact should be excluded
+     */
+    private PatternExcludesArtifactFilter excludesFilter;
 
     /**
      * The Maven Session.
@@ -512,5 +530,75 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
         }
+    }
+
+    /**
+     * To handle multiple includes with version range like "group:artifact:jar:[1.0.0,2.2)", we have to use a parsing a
+     * little bit more complex than split().
+     *
+     * @param includeString the string to parse
+     * @return list of patterns
+     */
+    protected List<String> separatePatterns( String includeString )
+    {
+        if ( includeString == null )
+        {
+            return Collections.emptyList();
+        }
+
+        List<String> patterns = new ArrayList<>();
+        int indexOf = nextCommaIndex( includeString );
+        while ( indexOf >= 0 )
+        {
+            patterns.add( includeString.substring( 0, indexOf ) );
+            includeString = includeString.substring( indexOf + 1 );
+            indexOf = nextCommaIndex( includeString );
+        }
+        patterns.add( includeString );
+
+        return patterns;
+    }
+
+    private int nextCommaIndex( final String includeString )
+    {
+
+        int indexOfComma = includeString.indexOf( ',' );
+        int nextRangeStartDelimiterIndex = findFirstChar( includeString, START_RANGE_CHARS );
+        if ( nextRangeStartDelimiterIndex >= 0 )
+        {
+            if ( !( indexOfComma >= 0 && indexOfComma < nextRangeStartDelimiterIndex ) )
+            {
+                int nextStopDelimiterIndex = findFirstChar( includeString, END_RANGE_CHARS );
+
+                // recursive call
+                int tmp = nextCommaIndex( includeString.substring( nextStopDelimiterIndex + 1 ) );
+                indexOfComma = ( tmp >= 0 ) ? nextStopDelimiterIndex + 1 + tmp : -1;
+            }
+        }
+        return indexOfComma;
+
+    }
+
+    private int findFirstChar( final String includeString, final String chars )
+    {
+        int nextRangeStartDelimiterIndex = -1;
+
+        char[] delimiters = chars.toCharArray();
+        for ( int i = 0; i < delimiters.length; i++ )
+        {
+            int index = includeString.indexOf( delimiters[i] );
+            if ( index >= 0 && nextRangeStartDelimiterIndex >= 0 )
+            {
+                nextRangeStartDelimiterIndex = Math.min( index, nextRangeStartDelimiterIndex );
+            }
+            else
+            {
+                if ( index >= 0 )
+                {
+                    nextRangeStartDelimiterIndex = index;
+                }
+            }
+        }
+        return nextRangeStartDelimiterIndex;
     }
 }

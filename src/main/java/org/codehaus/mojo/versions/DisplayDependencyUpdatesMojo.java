@@ -19,8 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Build;
@@ -30,6 +32,10 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
+import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
+import org.apache.maven.shared.artifact.filter.StrictPatternExcludesArtifactFilter;
+import org.apache.maven.shared.artifact.filter.StrictPatternIncludesArtifactFilter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -148,6 +154,58 @@ public class DisplayDependencyUpdatesMojo
     @Parameter( property = "verbose", defaultValue = "false" )
     private boolean verbose;
 
+    /**
+     * A comma-separated list of artifacts to filter the serialized dependency tree by, or <code>null</code> not to
+     * filter the dependency tree. The filter syntax is:
+     *
+     * <pre>
+     * [groupId]:[artifactId]:[type]:[version]
+     * </pre>
+     *
+     * where each pattern segment is optional and supports full and partial <code>*</code> wildcards. An empty pattern
+     * segment is treated as an implicit wildcard.
+     * <p>
+     * For example, <code>org.apache.*</code> will match all artifacts whose group id starts with
+     * <code>org.apache.</code>, and <code>:::*-SNAPSHOT</code> will match all snapshot artifacts.
+     * </p>
+     *
+     * @see StrictPatternIncludesArtifactFilter
+     * @since 2.8
+     */
+    @Parameter( property = "includes" )
+    private String includesList;
+
+    /**
+     * A comma-separated list of artifacts to filter from the serialized dependency tree, or <code>null</code> not to
+     * filter any artifacts from the dependency tree. The filter syntax is:
+     *
+     * <pre>
+     * [groupId]:[artifactId]:[type]:[version]
+     * </pre>
+     *
+     * where each pattern segment is optional and supports full and partial <code>*</code> wildcards. An empty pattern
+     * segment is treated as an implicit wildcard.
+     * <p>
+     * For example, <code>org.apache.*</code> will match all artifacts whose group id starts with
+     * <code>org.apache.</code>, and <code>:::*-SNAPSHOT</code> will match all snapshot artifacts.
+     * </p>
+     *
+     * @see StrictPatternExcludesArtifactFilter
+     * @since 2.8
+     */
+    @Parameter( property = "excludes" )
+    private String excludesList;
+
+    /**
+     * Artifact filter to determine if artifact should be included
+     */
+    private PatternIncludesArtifactFilter includesFilter;
+
+    /**
+     * Artifact filter to determine if artifact should be excluded
+     */
+    private PatternExcludesArtifactFilter excludesFilter;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )
@@ -252,6 +310,75 @@ public class DisplayDependencyUpdatesMojo
 
     // ------------------------ INTERFACE METHODS ------------------------
 
+    private Set<Dependency> removeFilteredDependencies( Set<Dependency> dependencies ) throws MojoExecutionException, InvalidVersionSpecificationException {
+        TreeSet<Dependency> filtered = new TreeSet<>( new DependencyComparator() );
+
+        for ( Dependency dependency : dependencies ) {
+            boolean isIncluded = isIncluded( getHelper().createDependencyArtifact( dependency ) );
+            getLog().debug( "Dependency:" + dependency + ", include: " + isIncluded );
+            if ( isIncluded ) {
+                filtered.add( dependency );
+            }
+        }
+
+        return filtered;
+    }
+
+    /**
+     * Determine if the artifact is included in the list of artifacts to be processed.
+     *
+     * @param artifact The artifact we want to check.
+     * @return true if the artifact should be processed, false otherwise.
+     */
+    protected boolean isIncluded( Artifact artifact )
+    {
+        boolean result = true;
+
+        ArtifactFilter includesFilter = this.getIncludesArtifactFilter();
+
+        if ( includesFilter != null )
+        {
+            result = includesFilter.include( artifact );
+        }
+
+        ArtifactFilter excludesFilter = this.getExcludesArtifactFilter();
+
+        if ( excludesFilter != null )
+        {
+            result = result && excludesFilter.include( artifact );
+        }
+
+        return result;
+    }
+
+    private ArtifactFilter getIncludesArtifactFilter()
+    {
+        if ( includesFilter == null && includesList != null )
+        {
+            List<String> patterns = new ArrayList<>();
+            if ( this.includesList != null )
+            {
+                patterns.addAll( separatePatterns( includesList ) );
+            }
+            includesFilter = new PatternIncludesArtifactFilter( patterns );
+        }
+        return includesFilter;
+    }
+
+    private ArtifactFilter getExcludesArtifactFilter()
+    {
+        if ( excludesFilter == null && excludesList != null )
+        {
+            List<String> patterns = new ArrayList<>();
+            if ( excludesList != null )
+            {
+                patterns.addAll( separatePatterns( excludesList ) );
+            }
+            excludesFilter = new PatternExcludesArtifactFilter( patterns );
+        }
+        return excludesFilter;
+    }
+
     // --------------------- Interface Mojo ---------------------
 
     /**
@@ -338,20 +465,24 @@ public class DisplayDependencyUpdatesMojo
         {
             if ( isProcessingDependencyManagement() )
             {
+                dependencyManagement = removeFilteredDependencies( dependencyManagement );
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
                             "Dependency Management" );
             }
             if ( isProcessingDependencies() )
             {
+                dependencies = removeFilteredDependencies( dependencies );
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
             }
             if ( isProcessPluginDependenciesInDependencyManagement() )
             {
+                pluginDependenciesInPluginManagement = removeFilteredDependencies( dependencies );
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependenciesInPluginManagement, false ),
                             "pluginManagement of plugins" );
             }
             if ( isProcessingPluginDependencies() )
             {
+                pluginDependencies = removeFilteredDependencies( dependencies );
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
             }
         }

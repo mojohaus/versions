@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,10 +46,6 @@ import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 public abstract class AbstractVersionsDependencyUpdaterMojo
     extends AbstractVersionsUpdaterMojo
 {
-
-    private static final String END_RANGE_CHARS = "])";
-
-    private static final String START_RANGE_CHARS = "[(";
 
     /**
      * A comma separated list of artifact patterns to include. Follows the pattern
@@ -399,7 +394,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     /**
      * Indicates whether any includes were specified via the 'includes' or 'includesList' options.
-     * 
+     *
      * @return true if includes were specified, false otherwise.
      */
     protected boolean hasIncludes()
@@ -442,75 +437,4 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         }
         return excludesFilter;
     }
-
-    /**
-     * To handle multiple includes with version range like "group:artifact:jar:[1.0.0,2.2)", we have to use a parsing a
-     * little bit more complex than split().
-     *
-     * @param includeString the string to parse
-     * @return list of patterns
-     */
-    protected List<String> separatePatterns( String includeString )
-    {
-        if ( includeString == null )
-        {
-            return Collections.emptyList();
-        }
-
-        List<String> patterns = new ArrayList<>();
-        int indexOf = nextCommaIndex( includeString );
-        while ( indexOf >= 0 )
-        {
-            patterns.add( includeString.substring( 0, indexOf ) );
-            includeString = includeString.substring( indexOf + 1 );
-            indexOf = nextCommaIndex( includeString );
-        }
-        patterns.add( includeString );
-
-        return patterns;
-    }
-
-    private int nextCommaIndex( final String includeString )
-    {
-
-        int indexOfComma = includeString.indexOf( ',' );
-        int nextRangeStartDelimiterIndex = findFirstChar( includeString, START_RANGE_CHARS );
-        if ( nextRangeStartDelimiterIndex >= 0 )
-        {
-            if ( !( indexOfComma >= 0 && indexOfComma < nextRangeStartDelimiterIndex ) )
-            {
-                int nextStopDelimiterIndex = findFirstChar( includeString, END_RANGE_CHARS );
-
-                // recursive call
-                int tmp = nextCommaIndex( includeString.substring( nextStopDelimiterIndex + 1 ) );
-                indexOfComma = ( tmp >= 0 ) ? nextStopDelimiterIndex + 1 + tmp : -1;
-            }
-        }
-        return indexOfComma;
-
-    }
-
-    private int findFirstChar( final String includeString, final String chars )
-    {
-        int nextRangeStartDelimiterIndex = -1;
-
-        char[] delimiters = chars.toCharArray();
-        for ( int i = 0; i < delimiters.length; i++ )
-        {
-            int index = includeString.indexOf( delimiters[i] );
-            if ( index >= 0 && nextRangeStartDelimiterIndex >= 0 )
-            {
-                nextRangeStartDelimiterIndex = Math.min( index, nextRangeStartDelimiterIndex );
-            }
-            else
-            {
-                if ( index >= 0 )
-                {
-                    nextRangeStartDelimiterIndex = index;
-                }
-            }
-        }
-        return nextRangeStartDelimiterIndex;
-    }
-
 }
