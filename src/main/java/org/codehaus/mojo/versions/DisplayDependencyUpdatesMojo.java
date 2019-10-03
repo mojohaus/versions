@@ -476,13 +476,13 @@ public class DisplayDependencyUpdatesMojo
             }
             if ( isProcessPluginDependenciesInDependencyManagement() )
             {
-                pluginDependenciesInPluginManagement = removeFilteredDependencies( dependencies );
+                pluginDependenciesInPluginManagement = removeFilteredDependencies( pluginDependenciesInPluginManagement );
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependenciesInPluginManagement, false ),
                             "pluginManagement of plugins" );
             }
             if ( isProcessingPluginDependencies() )
             {
-                pluginDependencies = removeFilteredDependencies( dependencies );
+                pluginDependencies = removeFilteredDependencies( pluginDependencies );
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
             }
         }
