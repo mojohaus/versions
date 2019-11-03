@@ -72,6 +72,12 @@ public class CompareDependenciesMojo
     protected String remotePom;
 
     /**
+     * Ignore the list of exclude properties
+     */
+    @Parameter(property = "ignoreExcludesProperty", defaultValue = "false")
+    protected boolean ignoreExcludesProperty;
+
+    /**
      * Ignore the list of remote dependencies and only compare the remote dependencyManagement
      */
     @Parameter( property = "ignoreRemoteDependencies", defaultValue = "false" )
@@ -280,6 +286,14 @@ public class CompareDependenciesMojo
 
     }
 
+    private boolean isExclude(PropertyVersions version) {
+        for (ArtifactAssociation association: version.getAssociations()) {
+            if (!isIncluded(association.getArtifact()))
+                return true;
+        }
+        return false;
+    }
+
     /**
      * Updates the properties holding a version if necessary.
      */
@@ -293,6 +307,13 @@ public class CompareDependenciesMojo
         {
             Property property = entry.getKey();
             PropertyVersions version = entry.getValue();
+
+            if (ignoreExcludesProperty) {
+                if (isExclude(version)) {
+                    getLog().warn("Ignoring property ${" + property.getName() + "}");
+                    continue;
+                }
+            }
 
             String candidateVersion = computeCandidateVersion( remoteDependencies, property, version );
             if ( candidateVersion != null )
