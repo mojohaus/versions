@@ -72,6 +72,13 @@ public class CompareDependenciesMojo
     protected String remotePom;
 
     /**
+     * Allow downgrade version
+     */
+    @Parameter(property = "upliftVersionChecker", defaultValue = "false")
+    protected boolean upliftVersionChecker;
+
+
+    /**
      * Ignore the list of exclude properties
      */
     @Parameter(property = "ignoreExcludesProperty", defaultValue = "false")
@@ -269,11 +276,12 @@ public class CompareDependenciesMojo
                     updates.add( buf.toString() );
                     if ( !reportMode )
                     {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(),
-                                                             dep.getVersion(), remoteVersion,
-                                                             getProject().getModel() ) )
-                        {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + remoteVersion );
+                        if (upliftVersionChecker && !upliftChecker(dep.getVersion(), remoteVersion)) {
+                            getLog().debug("Not Updating " + toString(dep) + " to version " + remoteVersion);
+                        } else if (PomHelper.setDependencyVersion(pom, dep.getGroupId(), dep.getArtifactId(),
+                                dep.getVersion(), remoteVersion,
+                                getProject().getModel())) {
+                            getLog().info("Updated " + toString(dep) + " to version " + remoteVersion);
                         }
                     }
 
@@ -291,6 +299,18 @@ public class CompareDependenciesMojo
             if (!isIncluded(association.getArtifact()))
                 return true;
         }
+        return false;
+    }
+
+    private boolean upliftChecker(String originalVersion, String candidateVersion) {
+        String[] splitCandidateVersion = candidateVersion.split("-");
+        String[] splitOriginalVersion = originalVersion.split("-");
+
+        if (splitCandidateVersion.length == 3 && splitOriginalVersion.length == 3) {
+            return splitCandidateVersion[1].concat(splitCandidateVersion[2])
+                    .compareTo(splitOriginalVersion[1].concat(splitOriginalVersion[2])) >= 0;
+        }
+
         return false;
     }
 
@@ -316,17 +336,20 @@ public class CompareDependenciesMojo
             }
 
             String candidateVersion = computeCandidateVersion( remoteDependencies, property, version );
+            String originalVersion = version.getAssociations()[0].getArtifact().getVersion(); // Yekes
+
             if ( candidateVersion != null )
             {
-                String originalVersion = version.getAssociations()[0].getArtifact().getVersion(); // Yekes
-                if ( !candidateVersion.equals( originalVersion ) ) // Update needed
+                if (upliftVersionChecker && !upliftChecker(originalVersion,candidateVersion)) {
+                    getLog().warn("Not updating ${" + property.getName() + "} from " + originalVersion + " to "
+                            + candidateVersion);
+                } else if (!candidateVersion.equals(originalVersion)) // Update needed
                 {
-                    result.add( writeDiffMessage( property.getName(), originalVersion, candidateVersion ).toString() );
-                    if ( !reportMode
-                        && PomHelper.setPropertyVersion( pom, null, property.getName(), candidateVersion ) )
-                    {
-                        getLog().info( "Updated ${" + property.getName() + "} from " + originalVersion + " to "
-                            + candidateVersion );
+                    result.add(writeDiffMessage(property.getName(), originalVersion, candidateVersion).toString());
+                    if (!reportMode
+                            && PomHelper.setPropertyVersion(pom, null, property.getName(), candidateVersion)) {
+                        getLog().info("Updated ${" + property.getName() + "} from " + originalVersion + " to "
+                                + candidateVersion);
                     }
                 }
             }
