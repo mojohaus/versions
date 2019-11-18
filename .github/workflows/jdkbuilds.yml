@@ -2,15 +2,13 @@ name: JDKBuilds
 
 on:
   push:
-    branches-ignore:
-      - 'gh-pages'
     branches:
       - master
       - '*'
+      - '!gh-pages'
   pull_request:
     branches:
       - '*'
-
 jobs:
   openjdk:
     strategy:
