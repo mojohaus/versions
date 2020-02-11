@@ -21,7 +21,7 @@ package org.codehaus.mojo.versions;
 
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -34,8 +34,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Stack;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Basic tests for rewriting XML with a StAX (JSR-173) implementation.
@@ -68,7 +68,7 @@ public class RewriteWithStAXTest
 
         String output = new String( dest.toByteArray(), "utf-8" );
 
-        assertFalse( "StAX implementation is not good enough", input.equals( output ) );
+        assertFalse( input.equals( output ), "StAX implementation is not good enough" );
     }
 
     @Test

@@ -6,22 +6,23 @@ import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.Prerequisites;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for RequiredMavenVersionFinder.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RequiredMavenVersionFinderTest {
 
     @Mock
@@ -53,20 +54,20 @@ public class RequiredMavenVersionFinderTest {
     @Mock
     private Prerequisites parentPrerequisites;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        when(mavenProject.getPrerequisites()).thenReturn(null);
-        when(mavenProject.getBuildPlugins()).thenReturn(null);
-        when(mavenProject.hasParent()).thenReturn(false);
-        when(prerequisites.getMaven()).thenReturn(null);
-        when(nonEnforcerPlugin.getArtifactId()).thenReturn(null);
-        when(enforcerPlugin.getArtifactId()).thenReturn("maven-enforcer-plugin");
-        when(enforcerPlugin.getExecutions()).thenReturn(null);
-        when(pluginExecution.getGoals()).thenReturn(null);
-        when(parentMavenProject.getPrerequisites()).thenReturn(null);
-        when(parentMavenProject.getBuildPlugins()).thenReturn(null);
-        when(parentMavenProject.hasParent()).thenReturn(false);
-        when(parentPrerequisites.getMaven()).thenReturn(null);
+        lenient().when(mavenProject.getPrerequisites()).thenReturn(null);
+        lenient().when(mavenProject.getBuildPlugins()).thenReturn(null);
+        lenient().when(mavenProject.hasParent()).thenReturn(false);
+        lenient().when(prerequisites.getMaven()).thenReturn(null);
+        lenient().when(nonEnforcerPlugin.getArtifactId()).thenReturn(null);
+        lenient().when(enforcerPlugin.getArtifactId()).thenReturn("maven-enforcer-plugin");
+        lenient().when(enforcerPlugin.getExecutions()).thenReturn(null);
+        lenient().when(pluginExecution.getGoals()).thenReturn(null);
+        lenient().when(parentMavenProject.getPrerequisites()).thenReturn(null);
+        lenient().when(parentMavenProject.getBuildPlugins()).thenReturn(null);
+        lenient().when(parentMavenProject.hasParent()).thenReturn(false);
+        lenient().when(parentPrerequisites.getMaven()).thenReturn(null);
     }
 
     @Test

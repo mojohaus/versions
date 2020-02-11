@@ -21,9 +21,9 @@ package org.codehaus.mojo.versions.ordering;
 
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VersionComparatorsTest
 {
@@ -64,7 +64,7 @@ public class VersionComparatorsTest
         int count = instance.getSegmentCount( v1 );
         for (int i = 0; i < count; i++) {
             ArtifactVersion v2 = instance.incrementSegment( v1, i );
-            assertTrue(v1.toString() + " < " + v2.toString(), instance.compare( v1, v2 ) < 0);
+            assertTrue( instance.compare( v1, v2 ) < 0, v1.toString() + " < " + v2.toString() );
         }
     }
 }

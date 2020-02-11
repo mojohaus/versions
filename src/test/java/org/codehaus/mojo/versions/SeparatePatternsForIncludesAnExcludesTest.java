@@ -8,17 +8,17 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SeparatePatternsForIncludesAnExcludesTest
 {
 
     AbstractVersionsDependencyUpdaterMojo mojo;
 
-    @Before
+    @BeforeEach
     public void setUp()
         throws Exception
     {

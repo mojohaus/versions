@@ -5,7 +5,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.stream.XMLInputFactory;
 import java.io.File;
@@ -13,11 +13,11 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the methods of {@link PomHelper}.
@@ -76,7 +76,7 @@ public class PomHelperTest
 
         String newVersion = "1";
 
-        assertTrue( "The pom has been modified", PomHelper.setProjectVersion( pom, newVersion ) );
+        assertTrue( PomHelper.setProjectVersion( pom, newVersion ), "The pom has been modified" );
 
         assertEquals( newVersion, PomHelper.getProjectVersion( pom ) );
 

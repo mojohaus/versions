@@ -44,7 +44,7 @@ import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +53,9 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.mock;
@@ -151,15 +151,18 @@ public class DefaultVersionsHelperTest
     {
         VersionsHelper helper = createHelper();
 
-        assertEquals( "no match gives default", VersionComparators.getVersionComparator( "maven" ),
-                      helper.getVersionComparator( "net.foo", "bar" ) );
-        assertEquals( "matches wildcard", VersionComparators.getVersionComparator( "mercury" ),
-                      helper.getVersionComparator( "org.apache.maven", "plugins" ) );
-        assertEquals( "exact match wins over initial match", VersionComparators.getVersionComparator( "mercury" ),
-                      helper.getVersionComparator( "com.mycompany.custom.maven", "plugins" ) );
-        assertEquals( "non-wildcard prefix wins over wildcard prefix match",
-                      VersionComparators.getVersionComparator( "maven" ),
-                      helper.getVersionComparator( "com.mycompany.maven.plugins", "plugins" ) );
+        assertEquals( VersionComparators.getVersionComparator( "maven" ),
+                      helper.getVersionComparator( "net.foo", "bar" ),
+                      "no match gives default" );
+        assertEquals( VersionComparators.getVersionComparator( "mercury" ),
+                      helper.getVersionComparator( "org.apache.maven", "plugins" ),
+                      "matches wildcard" );
+        assertEquals( VersionComparators.getVersionComparator( "mercury" ),
+                      helper.getVersionComparator( "com.mycompany.custom.maven", "plugins" ),
+                      "exact match wins over initial match" );
+        assertEquals( VersionComparators.getVersionComparator( "maven" ),
+                      helper.getVersionComparator( "com.mycompany.maven.plugins", "plugins" ),
+                      "non-wildcard prefix wins over wildcard prefix match" );
         assertEquals( VersionComparators.getVersionComparator( "maven" ),
                       helper.getVersionComparator( "com.mycompany.maven", "new-maven-plugin" ) );
         assertEquals( VersionComparators.getVersionComparator( "mercury" ),
