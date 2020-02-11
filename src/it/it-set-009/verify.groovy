@@ -1,4 +1,4 @@
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
