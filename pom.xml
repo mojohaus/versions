@@ -107,7 +107,7 @@
   </issueManagement>
 
   <properties>
-    <mojo.java.target>1.7</mojo.java.target>
+    <mojo.java.target>1.8</mojo.java.target>
 
     <mavenVersion>2.2.1</mavenVersion>
     <wagonVersion>2.12</wagonVersion>
@@ -117,6 +117,17 @@
     <sitePluginVersion>3.6</sitePluginVersion>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.6.1</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
@@ -274,14 +285,38 @@
       <version>2.6</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!--
+     ! New maven-it-extension including dependencies needed to write IT tests.
+     -->
+    <dependency>
+      <groupId>org.apache.maven.jupiter.extension</groupId>
+      <artifactId>maven-jupiter-extension</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.jupiter.extension</groupId>
+      <artifactId>maven-it-assertions</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.13.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
+      <version>1.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -290,6 +325,17 @@
       <version>1.3</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -449,7 +495,61 @@
           </filterProperties>
           <mavenOpts>-Xmx256m</mavenOpts>
         </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <phase>EMPTY</phase>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <phase>EMPTY</phase>
+          </execution>
+          <execution>
+            <id>install-artifacts</id>
+            <!--                <phase>EMPTY</phase>-->
+            <goals>
+              <goal>install</goal>
+            </goals>
+            <configuration>
+              <!--
+               ! !!Hack!!
+               ! This location is currently hard coded within the maven-it-extension
+               -->
+              <localRepositoryPath>${project.build.directory}/invoker-repo</localRepositoryPath>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.2</version>
+        <configuration>
+          <reuseForks>true</reuseForks>
+          <includes>
+            <include>**/*IT.java</include>
+          </includes>
+          <systemProperties>
+            <maven.version>${maven.version}</maven.version>
+            <maven.home>${maven.home}</maven.home>
+          </systemProperties>
+          <properties>
+            <configurationParameters>
+              junit.jupiter.execution.parallel.enabled = true
+              junit.jupiter.execution.parallel.mode.default = concurrent
+            </configurationParameters>
+          </properties>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 
