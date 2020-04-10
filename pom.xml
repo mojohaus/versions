@@ -472,28 +472,28 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.2.1</version>
         <configuration>
-          <projectsDirectory>src/it</projectsDirectory>
-          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
-          <settingsFile>src/it/settings.xml</settingsFile>
-          <showErrors>true</showErrors>
-          <streamLogs>true</streamLogs>
+<!--          <projectsDirectory>src/it</projectsDirectory>-->
+<!--          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>-->
+<!--          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>-->
+<!--          <settingsFile>src/it/settings.xml</settingsFile>-->
+<!--          <showErrors>true</showErrors>-->
+<!--          <streamLogs>true</streamLogs>-->
           <!--
             ! There seemed to be a problem with the indepance of the IT's
             ! here. So we can't use more than one thread.
             ! TODO: Dive more deeply into this problem.
           -->
-          <parallelThreads>1</parallelThreads>
-          <pomIncludes>
-            <pomInclude>*/pom.xml</pomInclude>
-          </pomIncludes>
-          <postBuildHookScript>verify</postBuildHookScript>
-          <filterProperties>
-            <repository.proxy.url>${repository.proxy.url}</repository.proxy.url>
-          </filterProperties>
-          <mavenOpts>-Xmx256m</mavenOpts>
+<!--          <parallelThreads>1</parallelThreads>-->
+<!--          <pomIncludes>-->
+<!--            <pomInclude>*/pom.xml</pomInclude>-->
+<!--          </pomIncludes>-->
+<!--          <postBuildHookScript>verify</postBuildHookScript>-->
+<!--          <filterProperties>-->
+<!--            <repository.proxy.url>${repository.proxy.url}</repository.proxy.url>-->
+<!--          </filterProperties>-->
+<!--          <mavenOpts>-Xmx256m</mavenOpts>-->
         </configuration>
         <executions>
           <execution>
@@ -510,11 +510,7 @@
             <goals>
               <goal>install</goal>
             </goals>
-            <configuration>
-              <!--
-               ! !!Hack!!
-               ! This location is currently hard coded within the maven-it-extension
-               -->
+            <configuration combine.children="override">
               <localRepositoryPath>${project.build.directory}/invoker-repo</localRepositoryPath>
             </configuration>
           </execution>
@@ -525,7 +521,6 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>2.22.2</version>
         <configuration>
-          <reuseForks>true</reuseForks>
           <includes>
             <include>**/*IT.java</include>
           </includes>
@@ -533,12 +528,12 @@
             <maven.version>${maven.version}</maven.version>
             <maven.home>${maven.home}</maven.home>
           </systemProperties>
-          <properties>
-            <configurationParameters>
-              junit.jupiter.execution.parallel.enabled = true
-              junit.jupiter.execution.parallel.mode.default = concurrent
-            </configurationParameters>
-          </properties>
+<!--          <properties>-->
+<!--            <configurationParameters>-->
+<!--              junit.jupiter.execution.parallel.enabled = true-->
+<!--              junit.jupiter.execution.parallel.mode.default = concurrent-->
+<!--            </configurationParameters>-->
+<!--          </properties>-->
         </configuration>
         <executions>
           <execution>
@@ -551,6 +546,20 @@
       </plugin>
 
     </plugins>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>false</filtering>
+      </testResource>
+      <!--
+       ! Currently those tests do need to be filtered.
+      -->
+      <testResource>
+        <directory>src/test/resources-its</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+
   </build>
 
   <reporting>
