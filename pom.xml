@@ -302,7 +302,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven.jupiter.extension</groupId>
-      <artifactId>maven-it-assertions</artifactId>
+      <artifactId>maven-it-assertj</artifactId>
       <version>0.1.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
