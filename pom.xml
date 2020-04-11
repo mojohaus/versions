@@ -497,14 +497,6 @@
         </configuration>
         <executions>
           <execution>
-            <id>integration-test</id>
-            <phase>EMPTY</phase>
-          </execution>
-          <execution>
-            <id>verify</id>
-            <phase>EMPTY</phase>
-          </execution>
-          <execution>
             <id>install-artifacts</id>
             <!--                <phase>EMPTY</phase>-->
             <goals>
@@ -524,7 +516,11 @@
           <includes>
             <include>**/*IT.java</include>
           </includes>
+          <trimStackTrace>false</trimStackTrace>
           <systemProperties>
+            <project.groupId>${project.groupId}</project.groupId>
+            <project.artifactId>${project.artifactId}</project.artifactId>
+            <project.version>${project.version}</project.version>
             <maven.version>${maven.version}</maven.version>
             <maven.home>${maven.home}</maven.home>
           </systemProperties>
