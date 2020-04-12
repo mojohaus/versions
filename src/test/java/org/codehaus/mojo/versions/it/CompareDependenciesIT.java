@@ -11,7 +11,9 @@ import static org.apache.maven.assertj.MavenITAssertions.assertThat;
 class CompareDependenciesIT
 {
 
-    @MavenTest( goals = {"${project.groupId}:${project.artifactId}:${project.version}:compare-dependencies"},
+    private static final String VERSIONS_PLUGIN = "${project.groupId}:${project.artifactId}:${project.version}";
+    
+    @MavenTest( goals = {VERSIONS_PLUGIN + ":compare-dependencies"},
                 systemProperties = {"remotePom=localhost:dummy-bom-pom:1.0", "reportOutputFile=target/depDiffs.txt"} )
     void it_compare_dependencies_001( MavenExecutionResult result, MavenProjectResult mavenProjectResult )
     {
@@ -29,7 +31,7 @@ class CompareDependenciesIT
                     "  none" ) );
     }
 
-    @MavenTest( goals = {"${project.groupId}:${project.artifactId}:${project.version}:compare-dependencies"},
+    @MavenTest( goals = {VERSIONS_PLUGIN + ":compare-dependencies"},
                 systemProperties = {"remotePom=localhost:dummy-bom-pom:1.0", "reportMode=false", "updatePropertyVersions=true"} )
     void it_compare_dependencies_002( MavenExecutionResult result, MavenProjectResult mavenProjectResult )
     {
@@ -46,7 +48,7 @@ class CompareDependenciesIT
                     "",
                     "  none" ) );
     }
-    @MavenTest( goals = {"${project.groupId}:${project.artifactId}:${project.version}:compare-dependencies"},
+    @MavenTest( goals = {VERSIONS_PLUGIN + ":compare-dependencies"},
                 systemProperties = {"remotePom=localhost:dummy-bom-maven-mismatch:1.0", "reportMode=false", "updatePropertyVersions=true"} )
     void it_compare_dependencies_003( MavenExecutionResult result, MavenProjectResult mavenProjectResult )
     {
@@ -64,7 +66,7 @@ class CompareDependenciesIT
                     "  none" ) );
     }
 
-    @MavenTest( goals = {"${project.groupId}:${project.artifactId}:${project.version}:compare-dependencies"},
+    @MavenTest( goals = {VERSIONS_PLUGIN + ":compare-dependencies"},
                 systemProperties = {
             "remotePom=localhost:dummy-bom-pom:1.0",
             "reportMode=true",
@@ -87,7 +89,7 @@ class CompareDependenciesIT
                         "  junit.version ............................................ 4.8 -> 4.1" ) );
     }
 
-    @MavenTest( goals = {"${project.groupId}:${project.artifactId}:${project.version}:compare-dependencies"},
+    @MavenTest( goals = {VERSIONS_PLUGIN + ":compare-dependencies"},
                 systemProperties = {
             "remotePom=localhost:dummy-bom-pom:1.0",
             "reportMode=true",
