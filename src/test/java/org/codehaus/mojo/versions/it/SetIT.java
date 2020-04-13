@@ -47,10 +47,10 @@ class SetIT
     @MavenTest( goals = {VERSIONS_PLUGIN + ":set"},
                 systemProperties = {"newVersion=2.3"} )
     void set_001_issue_76 (MavenExecutionResult result) {
-        assertThat( result ).isSuccessful()
-            .project().hasModule( "xx" ).hasPom().
-              .hasPom().withVersion("2.3")
-                       .hasDependencies().with;
+        assertThat( result ).isSuccessful();
+//            .project().hasModule( "xx" ).hasPom().
+//              .hasPom().withVersion("2.3")
+//                       .hasDependencies().with;
 
         /*
         invoker.goals=${project.groupId}:${project.artifactId}:${project.version}:set -DnewVersion=2.3

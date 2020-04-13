@@ -1,6 +1,7 @@
 package org.codehaus.mojo.versions.it;
 
 import org.apache.maven.jupiter.extension.MavenIT;
+import org.apache.maven.jupiter.extension.MavenOptions;
 import org.apache.maven.jupiter.extension.MavenTest;
 import org.apache.maven.jupiter.maven.MavenExecutionResult;
 import org.apache.maven.jupiter.maven.MavenProjectResult;
@@ -12,8 +13,9 @@ class CompareDependenciesIT
 {
 
     private static final String VERSIONS_PLUGIN = "${project.groupId}:${project.artifactId}:${project.version}";
-    
-    @MavenTest( goals = {VERSIONS_PLUGIN + ":compare-dependencies"},
+
+
+    @MavenTest( options = {MavenOptions.SETTINGS, "settings.xml"}, goals={VERSIONS_PLUGIN + ":compare-dependencies"},
                 systemProperties = {"remotePom=localhost:dummy-bom-pom:1.0", "reportOutputFile=target/depDiffs.txt"} )
     void it_compare_dependencies_001( MavenExecutionResult result, MavenProjectResult mavenProjectResult )
     {
