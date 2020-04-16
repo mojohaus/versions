@@ -295,15 +295,15 @@
      ! New maven-it-extension including dependencies needed to write IT tests.
      -->
     <dependency>
-      <groupId>org.apache.maven.jupiter.extension</groupId>
-      <artifactId>maven-jupiter-extension</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <groupId>com.soebes.itf.jupiter.extension</groupId>
+      <artifactId>itf-jupiter-extension</artifactId>
+      <version>0.2.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven.jupiter.extension</groupId>
-      <artifactId>maven-it-assertj</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <groupId>com.soebes.itf.jupiter.extension</groupId>
+      <artifactId>itf-assertj</artifactId>
+      <version>0.2.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>

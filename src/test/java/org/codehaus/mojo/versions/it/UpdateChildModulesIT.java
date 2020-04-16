@@ -1,17 +1,17 @@
 package org.codehaus.mojo.versions.it;
 
-import org.apache.maven.jupiter.extension.MavenIT;
-import org.apache.maven.jupiter.extension.MavenProject;
-import org.apache.maven.jupiter.extension.MavenRepository;
-import org.apache.maven.jupiter.extension.MavenTest;
-import org.apache.maven.jupiter.maven.MavenExecutionResult;
+import static com.soebes.itf.extension.assertj.MavenITAssertions.assertThat;
+
+import com.soebes.itf.jupiter.extension.MavenIT;
+import com.soebes.itf.jupiter.extension.MavenProject;
+import com.soebes.itf.jupiter.extension.MavenRepository;
+import com.soebes.itf.jupiter.extension.MavenTest;
+import com.soebes.itf.jupiter.maven.MavenExecutionResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
-
-import static org.apache.maven.assertj.MavenExecutionResultAssert.assertThat;
 
 @TestMethodOrder( MethodOrderer.OrderAnnotation.class)
 @MavenIT
@@ -21,7 +21,7 @@ class UpdateChildModulesIT
     @MavenRepository
     @MavenProject
     class One {
-        @MavenTest( options = {"-o"}, goals = { "validate" })
+        @MavenTest(options = {"-o"}, goals = { "validate" })
         @Order( 10)
         void first_test( MavenExecutionResult result) {
             assertThat(result).isSuccessful();

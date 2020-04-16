@@ -1,18 +1,17 @@
 package org.codehaus.mojo.versions.it;
 
-import org.apache.maven.jupiter.extension.MavenIT;
-import org.apache.maven.jupiter.extension.MavenOptions;
-import org.apache.maven.jupiter.extension.MavenProject;
-import org.apache.maven.jupiter.extension.MavenTest;
-import org.apache.maven.jupiter.maven.MavenExecutionResult;
-import org.apache.maven.jupiter.maven.MavenProjectResult;
+import static com.soebes.itf.extension.assertj.MavenITAssertions.assertThat;
+
+import com.soebes.itf.jupiter.extension.MavenIT;
+import com.soebes.itf.jupiter.extension.MavenOptions;
+import com.soebes.itf.jupiter.extension.MavenProject;
+import com.soebes.itf.jupiter.extension.MavenTest;
+import com.soebes.itf.jupiter.maven.MavenExecutionResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
-
-import static org.apache.maven.assertj.MavenITAssertions.assertThat;
 
 @MavenIT
 class SetIT
@@ -27,8 +26,8 @@ class SetIT
     class set_001
     {
 
-        @MavenTest( options = MavenOptions.NON_RECURSIVE, goals = {VERSIONS_PLUGIN + ":set"},
-                    systemProperties = {"newVersion=2.0"} )
+        @MavenTest(options = MavenOptions.NON_RECURSIVE, goals = {VERSIONS_PLUGIN + ":set"},
+                   systemProperties = {"newVersion=2.0"} )
         @Order( 10 )
         void first( MavenExecutionResult result )
         {

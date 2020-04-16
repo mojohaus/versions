@@ -1,12 +1,12 @@
 package org.codehaus.mojo.versions.it;
 
-import org.apache.maven.jupiter.extension.MavenIT;
-import org.apache.maven.jupiter.extension.MavenOptions;
-import org.apache.maven.jupiter.extension.MavenTest;
-import org.apache.maven.jupiter.maven.MavenExecutionResult;
-import org.apache.maven.jupiter.maven.MavenProjectResult;
+import static com.soebes.itf.extension.assertj.MavenITAssertions.assertThat;
 
-import static org.apache.maven.assertj.MavenITAssertions.assertThat;
+import com.soebes.itf.jupiter.extension.MavenIT;
+import com.soebes.itf.jupiter.extension.MavenOptions;
+import com.soebes.itf.jupiter.extension.MavenTest;
+import com.soebes.itf.jupiter.maven.MavenExecutionResult;
+import com.soebes.itf.jupiter.maven.MavenProjectResult;
 
 @MavenIT
 class CompareDependenciesIT
@@ -15,8 +15,8 @@ class CompareDependenciesIT
     private static final String VERSIONS_PLUGIN = "${project.groupId}:${project.artifactId}:${project.version}";
 
 
-    @MavenTest( options = {MavenOptions.SETTINGS, "settings.xml"}, goals={VERSIONS_PLUGIN + ":compare-dependencies"},
-                systemProperties = {"remotePom=localhost:dummy-bom-pom:1.0", "reportOutputFile=target/depDiffs.txt"} )
+    @MavenTest(options = {MavenOptions.SETTINGS, "settings.xml"}, goals={VERSIONS_PLUGIN + ":compare-dependencies"},
+               systemProperties = {"remotePom=localhost:dummy-bom-pom:1.0", "reportOutputFile=target/depDiffs.txt"} )
     void it_compare_dependencies_001( MavenExecutionResult result, MavenProjectResult mavenProjectResult )
     {
         assertThat( result ).isSuccessful()
