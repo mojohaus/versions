@@ -115,6 +115,7 @@
     <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.6</sitePluginVersion>
+    <itf.extension>0.3.0</itf.extension>
   </properties>
 
   <dependencyManagement>
@@ -297,13 +298,13 @@
     <dependency>
       <groupId>com.soebes.itf.jupiter.extension</groupId>
       <artifactId>itf-jupiter-extension</artifactId>
-      <version>0.2.0</version>
+      <version>${itf.extension}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.soebes.itf.jupiter.extension</groupId>
       <artifactId>itf-assertj</artifactId>
-      <version>0.2.0</version>
+      <version>${itf.extension}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -470,41 +471,15 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-invoker-plugin</artifactId>
-        <version>3.2.1</version>
-        <configuration>
-<!--          <projectsDirectory>src/it</projectsDirectory>-->
-<!--          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>-->
-<!--          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>-->
-<!--          <settingsFile>src/it/settings.xml</settingsFile>-->
-<!--          <showErrors>true</showErrors>-->
-<!--          <streamLogs>true</streamLogs>-->
-          <!--
-            ! There seemed to be a problem with the indepance of the IT's
-            ! here. So we can't use more than one thread.
-            ! TODO: Dive more deeply into this problem.
-          -->
-<!--          <parallelThreads>1</parallelThreads>-->
-<!--          <pomIncludes>-->
-<!--            <pomInclude>*/pom.xml</pomInclude>-->
-<!--          </pomIncludes>-->
-<!--          <postBuildHookScript>verify</postBuildHookScript>-->
-<!--          <filterProperties>-->
-<!--            <repository.proxy.url>${repository.proxy.url}</repository.proxy.url>-->
-<!--          </filterProperties>-->
-<!--          <mavenOpts>-Xmx256m</mavenOpts>-->
-        </configuration>
+        <groupId>com.soebes.itf.jupiter.extension</groupId>
+        <artifactId>itf-maven-plugin</artifactId>
+        <version>${itf.extension}</version>
         <executions>
           <execution>
-            <id>install-artifacts</id>
-            <!--                <phase>EMPTY</phase>-->
+            <id>installing</id>
             <goals>
               <goal>install</goal>
             </goals>
-            <configuration combine.children="override">
-              <localRepositoryPath>${project.build.directory}/invoker-repo</localRepositoryPath>
-            </configuration>
           </execution>
         </executions>
       </plugin>
