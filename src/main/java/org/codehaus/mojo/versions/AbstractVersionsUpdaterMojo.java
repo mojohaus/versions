@@ -44,11 +44,14 @@ import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.api.VersionsProvider;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -192,6 +195,21 @@ public abstract class AbstractVersionsUpdaterMojo
     @Component
     protected ArtifactResolver artifactResolver;
 
+    @Parameter(defaultValue = "${repositorySystemSession}", readonly = true)
+    private RepositorySystemSession repositorySystemSession;
+
+    @Component
+    private RepositorySystem repositorySystem;
+
+    /**
+     * Whether to use the {@link RepositorySystem} instead of {@link org.apache.maven.project.artifact.MavenMetadataSource}.
+     * This flag should be used with newer Maven versions(3.x+) for better Artifact version resolution.
+     *
+     * @since 2.8
+     */
+    @Parameter( property = "useRepositorySystem", defaultValue = "false" )
+    protected boolean useRepositorySystem;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     public VersionsHelper getHelper()
@@ -199,10 +217,12 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         if ( helper == null )
         {
-            helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource,
-                                                remoteArtifactRepositories, remotePluginRepositories, localRepository,
-                                                wagonManager, settings, serverId, rulesUri, getLog(), session,
-                                                pathTranslator );
+            VersionsProvider versionsProvider = new VersionsProvider(getLog(), repositorySystemSession, repositorySystem,
+                    artifactMetadataSource, useRepositorySystem);
+            helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, versionsProvider,
+                    remoteArtifactRepositories, remotePluginRepositories, localRepository,
+                    wagonManager, settings, serverId, rulesUri, getLog(), session,
+                    pathTranslator );
         }
         return helper;
     }

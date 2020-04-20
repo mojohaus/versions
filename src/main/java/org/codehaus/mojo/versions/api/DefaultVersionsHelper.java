@@ -116,9 +116,9 @@ public class DefaultVersionsHelper
     /**
      * The artifact metadata source to use.
      *
-     * @since 1.0-alpha-3
+     * @since 2.8
      */
-    private final ArtifactMetadataSource artifactMetadataSource;
+    private final VersionsProvider versionsProvider;
 
     /**
      * The local repository to consult.
@@ -181,7 +181,7 @@ public class DefaultVersionsHelper
      *
      * @param artifactFactory The artifact factory.
      * @param artifactResolver
-     * @param artifactMetadataSource The artifact metadata source to use.
+     * @param versionsProvider The VersionsProvider used to resolve artifact versions
      * @param remoteArtifactRepositories The remote artifact repositories to consult.
      * @param remotePluginRepositories The remote plugin repositories to consult.
      * @param localRepository The local repository to consult.
@@ -195,19 +195,19 @@ public class DefaultVersionsHelper
      *            things go wrong.
      * @since 1.0-alpha-3
      */
-    public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
-                                  ArtifactMetadataSource artifactMetadataSource, List remoteArtifactRepositories,
-                                  List remotePluginRepositories, ArtifactRepository localRepository,
-                                  WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
-                                  Log log, MavenSession mavenSession, PathTranslator pathTranslator )
-        throws MojoExecutionException
+    public DefaultVersionsHelper(ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
+                                 VersionsProvider versionsProvider, List remoteArtifactRepositories,
+                                 List remotePluginRepositories, ArtifactRepository localRepository,
+                                 WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
+                                 Log log, MavenSession mavenSession, PathTranslator pathTranslator )
+            throws MojoExecutionException
     {
         this.artifactFactory = artifactFactory;
         this.artifactResolver = artifactResolver;
         this.mavenSession = mavenSession;
         this.pathTranslator = pathTranslator;
         this.ruleSet = loadRuleSet( serverId, settings, wagonManager, rulesUri, log );
-        this.artifactMetadataSource = artifactMetadataSource;
+        this.versionsProvider = versionsProvider;
         this.localRepository = localRepository;
         this.remoteArtifactRepositories = remoteArtifactRepositories;
         this.remotePluginRepositories = remotePluginRepositories;
@@ -428,8 +428,7 @@ public class DefaultVersionsHelper
         throws ArtifactMetadataRetrievalException
     {
         List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
-        final List<ArtifactVersion> versions =
-            artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
+        final List<ArtifactVersion> versions = versionsProvider.fetchArtifactVersions(artifact, localRepository, remoteRepositories);
         final List<IgnoreVersion> ignoredVersions = getIgnoredVersions( artifact );
         if ( !ignoredVersions.isEmpty() )
         {

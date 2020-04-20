@@ -111,6 +111,7 @@
 
     <mavenVersion>2.2.1</mavenVersion>
     <wagonVersion>2.12</wagonVersion>
+    <aetherVersion>1.0.2.v20150114</aetherVersion>
     <doxiaVersion>1.7</doxiaVersion>
     <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
@@ -184,6 +185,18 @@
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-file</artifactId>
       <version>${wagonVersion}</version>
+    </dependency>
+
+    <!-- Aether -->
+    <dependency>
+      <groupId>org.eclipse.aether</groupId>
+      <artifactId>aether-api</artifactId>
+      <version>${aetherVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.aether</groupId>
+      <artifactId>aether-util</artifactId>
+      <version>${aetherVersion}</version>
     </dependency>
 
     <!-- Doxia -->
