@@ -115,7 +115,7 @@
     <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.6</sitePluginVersion>
-    <itf.extension>0.3.0</itf.extension>
+    <itf.extension>0.4.0</itf.extension>
   </properties>
 
   <dependencyManagement>
