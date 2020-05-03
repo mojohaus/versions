@@ -583,28 +583,6 @@
           or run integration tests: mvn -Prun-its
       -->
       <id>run-its</id>
-      <build>
-        <defaultGoal>verify</defaultGoal>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-invoker-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>integration-test</id>
-                <goals>
-                  <goal>install</goal>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <streamLogs>false</streamLogs>
-                  <debug>true</debug>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
       <reporting>
         <plugins>
           <plugin>
