@@ -31,14 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     container: "maven:3.6.2-jdk-8-slim"
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: 'Test'
         run: mvn --show-version --errors --batch-mode -Prun-its clean verify
   windows:
     name: 'Windows'
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: 'Set up JDK 8'
         uses: actions/setup-java@v1
         with:
@@ -50,7 +50,7 @@ jobs:
     name: 'Mac OS'
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: 'Set up JDK 8'
         uses: actions/setup-java@v1
         with:
