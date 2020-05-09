@@ -574,7 +574,7 @@ public class DisplayPluginUpdatesMojo
         else
         {
             logLine( false, "The following plugin updates are available:" );
-            for ( String update : pluginUpdates )
+            for ( String update : new TreeSet<>(pluginUpdates) )
             {
                 logLine( false, update );
             }
@@ -589,7 +589,7 @@ public class DisplayPluginUpdatesMojo
         else
         {
             getLog().warn( "The following plugins do not have their version specified:" );
-            for ( String lockdown : pluginLockdowns )
+            for ( String lockdown : new TreeSet<>(pluginLockdowns) )
             {
                 getLog().warn( lockdown );
             }
