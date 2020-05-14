@@ -84,6 +84,12 @@ public class UseNextVersionsMojo
                 continue;
             }
 
+            if ( isHandledByProperty( dep ) )
+            {
+                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+                continue;
+            }
+
             String version = dep.getVersion();
             Artifact artifact = this.toArtifact( dep );
             if ( !isIncluded( artifact ) )

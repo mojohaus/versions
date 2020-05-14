@@ -87,6 +87,12 @@ public class UseNextReleasesMojo
                 continue;
             }
 
+            if ( isHandledByProperty( dep ) )
+            {
+                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+                continue;
+            }
+
             String version = dep.getVersion();
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( !versionMatcher.matches() )

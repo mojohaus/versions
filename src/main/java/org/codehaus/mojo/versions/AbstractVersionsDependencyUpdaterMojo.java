@@ -183,6 +183,18 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     }
 
     /**
+     * Should the dependency be updated itself or is it handled by properties.
+     * 
+     * @param dependency
+     * @return true if the version starts with '${'
+     * @since 2.8
+     */
+    protected boolean isHandledByProperty(Dependency dependency) {
+		String version = dependency.getVersion();
+		return version.startsWith("${");
+	}
+
+    /**
      * Try to find the dependency artifact that matches the given dependency.
      *
      * @param dependency
