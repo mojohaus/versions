@@ -92,6 +92,12 @@ public class UnlockSnapshotsMojo
                 continue;
             }
 
+            if ( isHandledByProperty( dep ) )
+            {
+                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+                continue;
+            }
+
             if ( !isIncluded( this.toArtifact( dep ) ) )
             {
                 continue;

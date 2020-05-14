@@ -214,6 +214,12 @@ public class ResolveRangesMojo
                 continue;
             }
 
+            if ( isHandledByProperty( dep ) )
+            {
+                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+                continue;
+            }
+
             Matcher versionMatcher = matchRangeRegex.matcher( dep.getVersion() );
 
             if ( versionMatcher.find() )

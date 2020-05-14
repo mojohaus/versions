@@ -102,6 +102,12 @@ public class UseDepVersionMojo
                 continue;
             }
 
+            if ( isHandledByProperty( dep ) )
+            {
+                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+                continue;
+            }
+
             Artifact artifact = this.toArtifact( dep );
 
             if ( isIncluded( artifact ) )
