@@ -250,7 +250,7 @@
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>woodstox-core-asl</artifactId>
-      <version>4.2.0</version>
+      <version>4.4.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
