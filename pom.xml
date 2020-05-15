@@ -192,11 +192,6 @@
       <artifactId>doxia-core</artifactId>
       <version>${doxiaVersion}</version>
     </dependency>
-    <!--dependency>
-      <groupId>org.apache.maven.doxia</groupId>
-      <artifactId>doxia-module-xhtml</artifactId>
-      <version>${doxiaVersion}</version>
-    </dependency-->
     <dependency>
       <groupId>org.apache.maven.doxia</groupId>
       <artifactId>doxia-sink-api</artifactId>
@@ -204,11 +199,6 @@
     </dependency>
 
     <!-- Doxia-sitetools -->
-    <!--dependency>
-      <groupId>org.apache.maven.doxia</groupId>
-      <artifactId>doxia-decoration-model</artifactId>
-      <version>${doxia-sitetoolsVersion}</version>
-    </dependency-->
     <dependency>
       <groupId>org.apache.maven.doxia</groupId>
       <artifactId>doxia-site-renderer</artifactId>
@@ -262,12 +252,6 @@
       <artifactId>woodstox-core-asl</artifactId>
       <version>4.2.0</version>
     </dependency>
-    <!-- Duplicated by javax.xml.stream:stax-api:1.0-2 dependency of woodstox-core-asl
-    <dependency>
-      <groupId>stax</groupId>
-      <artifactId>stax-api</artifactId>
-      <version>1.0.1</version>
-    </dependency-->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
