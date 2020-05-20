@@ -110,7 +110,7 @@
     <mojo.java.target>1.7</mojo.java.target>
 
     <mavenVersion>2.2.1</mavenVersion>
-    <wagonVersion>2.12</wagonVersion>
+    <wagonVersion>3.4.0</wagonVersion>
     <doxiaVersion>1.7</doxiaVersion>
     <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
