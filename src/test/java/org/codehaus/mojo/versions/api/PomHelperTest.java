@@ -35,12 +35,13 @@ public class PomHelperTest
         throws Exception
     {
         URL url = getClass().getResource( "PomHelperTest.dependencyManagementBOMs.pom.xml" );
-        StringBuilder input = PomHelper.readXmlFile( new File( url.getPath() ) );
+        File file = new File( url.getPath() );
+        StringBuilder input = PomHelper.readXmlFile( file );
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
 
-        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory );
+        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory, file.getAbsolutePath() );
 
         List<Dependency> dependencies = PomHelper.readImportedPOMsFromDependencyManagementSection( pom );
 
@@ -65,12 +66,13 @@ public class PomHelperTest
         throws Exception
     {
         URL url = getClass().getResource( "PomHelperTest.testLongProperties.pom.xml" );
-        StringBuilder input = PomHelper.readXmlFile( new File( url.getPath() ) );
+        File file = new File( url.getPath() );
+        StringBuilder input = PomHelper.readXmlFile( file );
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
 
-        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory );
+        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory, file.getAbsolutePath() );
 
         String oldVersion = PomHelper.getProjectVersion( pom );
 
