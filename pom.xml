@@ -231,17 +231,6 @@
       <version>1.0</version>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-i18n</artifactId>
-      <version>1.0-beta-10</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.codehaus.plexus</groupId>
-          <artifactId>plexus-component-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>woodstox-core-asl</artifactId>
       <version>4.4.1</version>
