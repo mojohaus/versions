@@ -87,7 +87,7 @@ public class RewriteWithStAXTest
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
-        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
+        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory, null );
         while ( eventReader.hasNext() )
         {
             XMLEvent event = eventReader.nextEvent();
@@ -208,7 +208,7 @@ public class RewriteWithStAXTest
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
-        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory );
+        ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory, null );
 
         Stack<String> stack = new Stack<String>();
         String path = "";

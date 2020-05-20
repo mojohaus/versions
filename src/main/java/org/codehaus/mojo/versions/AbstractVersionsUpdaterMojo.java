@@ -309,7 +309,7 @@ public abstract class AbstractVersionsUpdaterMojo
         try
         {
             StringBuilder input = PomHelper.readXmlFile( outFile );
-            ModifiedPomXMLEventReader newPom = newModifiedPomXER( input );
+            ModifiedPomXMLEventReader newPom = newModifiedPomXER( input, outFile.getAbsolutePath() );
 
             update( newPom );
 
@@ -354,16 +354,17 @@ public abstract class AbstractVersionsUpdaterMojo
      * Creates a {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader} from a StringBuilder.
      *
      * @param input The XML to read and modify.
+     * @param path Path pointing to the source of the XML
      * @return The {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader}.
      */
-    protected final ModifiedPomXMLEventReader newModifiedPomXER( StringBuilder input )
+    protected final ModifiedPomXMLEventReader newModifiedPomXER( StringBuilder input, String path )
     {
         ModifiedPomXMLEventReader newPom = null;
         try
         {
             XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
             inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
-            newPom = new ModifiedPomXMLEventReader( input, inputFactory );
+            newPom = new ModifiedPomXMLEventReader( input, inputFactory, path );
         }
         catch ( XMLStreamException e )
         {
