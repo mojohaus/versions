@@ -34,7 +34,7 @@ import java.io.StringReader;
 /**
  * Represents the modified pom file. Note: implementations of the StAX API (JSR-173) are not good round-trip rewriting
  * <b>while</b> keeping all unchanged bytes in the file as is. For example, the StAX API specifies that <code>CR</code>
- * characters will be stripped. Current implementations do not keep &quot; and &apos; characters consistent.
+ * characters will be stripped. Current implementations do not keep &quot; and ' characters consistent.
  *
  * @author Stephen Connolly
  */

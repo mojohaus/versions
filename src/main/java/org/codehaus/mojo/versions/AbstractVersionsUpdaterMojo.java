@@ -258,10 +258,11 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param artifact The artifact.
      * @param versionRange The version range.
      * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
-     * @param usePluginRepositories
+     * @param usePluginRepositories Use plugin repositories
      * @return The latest version of the specified artifact that matches the specified version range or
      *         <code>null</code> if no matching version could be found.
      * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
+     * @throws MojoExecutionException if something goes wrong.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
@@ -401,6 +402,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws MojoExecutionException If things go wrong.
      * @throws MojoFailureException If things go wrong.
      * @throws javax.xml.stream.XMLStreamException If things go wrong.
+     * @throws ArtifactMetadataRetrievalException if something goes wrong.
      * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
@@ -453,9 +455,9 @@ public abstract class AbstractVersionsUpdaterMojo
      * Based on the passed flags, determines which segment is unchangable. This can be used when determining an upper
      * bound for the "latest" version.
      *
-     * @param allowMajorUpdates
-     * @param allowMinorUpdates
-     * @param allowIncrementalUpdates
+     * @param allowMajorUpdates Allow major updates
+     * @param allowMinorUpdates Allow minor updates
+     * @param allowIncrementalUpdates Allow incremental updates
      * @return Returns the segment that is unchangable. If any segment can change, returns -1.
      */
     protected int determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,
