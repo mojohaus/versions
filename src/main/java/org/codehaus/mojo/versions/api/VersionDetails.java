@@ -103,7 +103,7 @@ public interface VersionDetails
      * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true> if the upper bound is inclusive.
+     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return all available versions within the specified version range.
      * @since 1.0-beta-1
      */
@@ -119,7 +119,7 @@ public interface VersionDetails
      * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true> if the upper bound is inclusive.
+     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return all available versions within the specified version range.
      * @since 1.0-beta-1
      */
@@ -158,7 +158,7 @@ public interface VersionDetails
      * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true> if the upper bound is inclusive.
+     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
@@ -175,7 +175,7 @@ public interface VersionDetails
      * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true> if the upper bound is inclusive.
+     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
@@ -233,7 +233,7 @@ public interface VersionDetails
      * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true> if the upper bound is inclusive.
+     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return the oldest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-beta-1
      */
@@ -249,7 +249,7 @@ public interface VersionDetails
      * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true> if the upper bound is inclusive.
+     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return the oldest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-beta-1
      */

@@ -91,8 +91,6 @@ public class CompareDependenciesMojo
 
     /**
      * Update dependency versions stored in properties
-     *
-     * @parameter property="updatePropertyVersions" default-value="false"
      */
     @Parameter( property = "updatePropertyVersions", defaultValue = "false" )
     protected boolean updatePropertyVersions;

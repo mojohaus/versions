@@ -1572,9 +1572,9 @@ public class PomHelper
     /**
      * Reads imported POMs from the dependency management section.
      *
-     * @param pom
+     * @param pom POM
      * @return a non-null list of {@link Dependency} for each imported POM
-     * @throws XMLStreamException
+     * @throws XMLStreamException XML stream exception
      * @see <a href="https://github.com/mojohaus/versions-maven-plugin/issues/134">bug #134</a>
      * @since 2.4
      */

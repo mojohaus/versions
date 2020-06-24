@@ -190,6 +190,7 @@ public interface VersionsHelper
      * @param usePluginRepositories Search the plugin repositories.
      * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.api.ArtifactVersions}.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws InvalidVersionSpecificationException if something goes wrong.
      * @since 1.0-beta-1
      */
     Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
@@ -203,6 +204,7 @@ public interface VersionsHelper
      * @param usePluginRepositories Search the plugin repositories.
      * @return The details of updates to the dependency.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws InvalidVersionSpecificationException if something goes wrong.
      * @since 1.0-beta-1
      */
     ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
@@ -215,6 +217,7 @@ public interface VersionsHelper
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.PluginUpdatesDetails}.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws InvalidVersionSpecificationException if something goes wrong.
      * @since 1.0-beta-1
      */
     Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
@@ -266,6 +269,8 @@ public interface VersionsHelper
      *
      * @param artifact The artifact to resolve.
      * @param usePluginRepositories whether to resolve from the plugin repositories or the regular repositories.
+     * @throws ArtifactResolutionException if something goes wrong.
+     * @throws ArtifactNotFoundException if something goes wrong.
      * @since 1.3
      */
     void resolveArtifact( Artifact artifact, boolean usePluginRepositories )

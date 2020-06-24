@@ -253,6 +253,7 @@ public abstract class AbstractVersionsReport
      * @param locale the locale to generate the report for.
      * @param sink the report formatting tool.
      * @throws MavenReportException when things go wrong.
+     * @throws MojoExecutionException if something goes wrong.
      */
     protected abstract void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException, MojoExecutionException;
@@ -263,9 +264,10 @@ public abstract class AbstractVersionsReport
      * @param artifact The artifact.
      * @param versionRange The version range.
      * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
+     * @param usePluginRepositories Use plugin repositories
      * @return The latest version of the specified artifact that matches the specified version range or
      *         <code>null</code> if no matching version could be found.
-     * @throws MojoExecutionException If the artifact metadata could not be found.
+     * @throws MavenReportException If the artifact metadata could not be found.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,

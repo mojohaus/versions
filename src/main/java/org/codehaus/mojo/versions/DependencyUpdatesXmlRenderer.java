@@ -117,7 +117,7 @@ public class DependencyUpdatesXmlRenderer
 
     /**
      * Method wraps value in xml tag. In ex: to wrap foo in tag bar you have to pass foo as value and bar as tag. As a
-     * result you will get: <bar>foo</bar>
+     * result you will get: &lt;bar&gt;foo&lt;/bar&gt;
      * 
      * @param value - string to wrap
      * @param tag - name of tag
