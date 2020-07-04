@@ -144,7 +144,7 @@ public class CompareDependenciesMojo
     {
         if ( this.ignoreRemoteDependencies && this.ignoreRemoteDependencyManagement )
         {
-            throw new MojoFailureException( " ignoreRemoteDependencies and ignoreRemoteDependencyManagement"
+            throw new MojoFailureException( " ignoreRemoteDependencies and ignoreRemoteDependencyManagement "
                                                 + "are both set to true.  At least one of these needs to be false " );
         }
 
