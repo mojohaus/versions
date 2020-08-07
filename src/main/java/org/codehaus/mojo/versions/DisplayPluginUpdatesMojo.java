@@ -70,6 +70,8 @@ import org.codehaus.plexus.util.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -769,7 +771,7 @@ public class DisplayPluginUpdatesMojo
                 try
                 {
                     Set<String> withVersionSpecified =
-                        findPluginsWithVersionsSpecified( new StringBuilder( writer.toString() ), parentProject.getFile().getAbsolutePath() );
+                        findPluginsWithVersionsSpecified( new StringBuilder( writer.toString() ), getSafeProjectPathInfo(parentProject) );
 
                     Map<String, String> map = getPluginManagement( interpolatedModel );
                     map.keySet().retainAll( withVersionSpecified );
@@ -796,6 +798,17 @@ public class DisplayPluginUpdatesMojo
             }
         }
         return parentPlugins;
+    }
+    
+    private String getSafeProjectPathInfo(MavenProject project) {
+        File file = project.getFile();
+        if (file != null) {
+            return file.getAbsolutePath();
+        }
+        else {
+            // path is used only as information in error message, we can fallback to project artifact info here
+            return project.toString();
+        }
     }
 
     private boolean isMavenPluginProject()
@@ -850,7 +863,7 @@ public class DisplayPluginUpdatesMojo
     private Set<String> findPluginsWithVersionsSpecified( MavenProject project )
         throws IOException, XMLStreamException
     {
-        return findPluginsWithVersionsSpecified( PomHelper.readXmlFile( project.getFile() ), project.getFile().getAbsolutePath() );
+        return findPluginsWithVersionsSpecified( PomHelper.readXmlFile( project.getFile() ), getSafeProjectPathInfo(project) );
     }
 
     /**
