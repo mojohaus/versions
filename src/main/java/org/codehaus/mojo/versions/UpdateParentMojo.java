@@ -54,6 +54,15 @@ public class UpdateParentMojo
     @Parameter( property = "parentVersion", defaultValue = "null" )
     protected String parentVersion = null;
 
+    /**
+     * If the parent points to a version like <code>1.2.3-SNAPSHOT</code> and your repo contains a version like
+     * <code>1.1.0</code> without settings this to <code>true</code> the parent version will not being changed.
+     *
+     * @since 2.9
+     */
+    @Parameter( property = "allowDowngrade", defaultValue = "false" )
+    private boolean allowDowngrade = false;
+
     // -------------------------- OTHER METHODS --------------------------
 
     /**
@@ -111,7 +120,7 @@ public class UpdateParentMojo
             throw new MojoExecutionException( e.getMessage(), e );
         }
 
-        if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion ) )
+        if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion, allowDowngrade ) )
         {
             return;
         }
