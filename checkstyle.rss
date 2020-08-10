@@ -23,11 +23,11 @@ under the License.
     <link>http://www.mojohaus.org/versions-maven-plugin/</link>
     <description>Versions Maven Plugin - Checkstyle report</description>
     <language>en-us</language>
-    <copyright>&#169;2008 - 2018 MojoHaus</copyright>
+    <copyright>&#169;2008 - 2020 MojoHaus</copyright>
     <item>
       <title>File: 92,
-             Errors: 620,
-             Warnings: 359,
+             Errors: 643,
+             Warnings: 335,
              Infos: 5
       </title>
             <link>http://www.mojohaus.org/versions-maven-plugin//checkstyle.html</link>
@@ -69,7 +69,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  1
+                  2
                 </td>
               </tr>
                           <tr>
@@ -83,7 +83,7 @@ under the License.
                   5
                 </td>
                 <td>
-                  10
+                  11
                 </td>
               </tr>
                           <tr>
@@ -97,7 +97,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  4
                 </td>
               </tr>
                           <tr>
@@ -164,7 +164,7 @@ under the License.
                   2
                 </td>
                 <td>
-                  15
+                  12
                 </td>
                 <td>
                   0
@@ -335,7 +335,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  31
+                  16
                 </td>
               </tr>
                           <tr>
@@ -629,7 +629,7 @@ under the License.
                   2
                 </td>
                 <td>
-                  0
+                  4
                 </td>
               </tr>
                           <tr>
@@ -654,7 +654,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  5
+                  0
                 </td>
                 <td>
                   1
@@ -699,7 +699,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  0
+                  2
                 </td>
               </tr>
                           <tr>
@@ -710,7 +710,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  1
                 </td>
                 <td>
                   131
@@ -769,7 +769,7 @@ under the License.
                   1
                 </td>
                 <td>
-                  8
+                  9
                 </td>
               </tr>
                           <tr>
@@ -783,7 +783,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  1
+                  5
                 </td>
               </tr>
                           <tr>
@@ -794,7 +794,7 @@ under the License.
                   2
                 </td>
                 <td>
-                  10
+                  4
                 </td>
                 <td>
                   0
@@ -811,7 +811,7 @@ under the License.
                   1
                 </td>
                 <td>
-                  4
+                  5
                 </td>
               </tr>
                           <tr>
@@ -909,7 +909,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  21
+                  16
                 </td>
               </tr>
                           <tr>
@@ -979,7 +979,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  16
+                  31
                 </td>
               </tr>
                           <tr>
@@ -990,10 +990,10 @@ under the License.
                   1
                 </td>
                 <td>
-                  3
+                  0
                 </td>
                 <td>
-                  9
+                  13
                 </td>
               </tr>
                           <tr>
@@ -1035,7 +1035,7 @@ under the License.
                   1
                 </td>
                 <td>
-                  1
+                  2
                 </td>
               </tr>
                           <tr>
@@ -1063,7 +1063,7 @@ under the License.
                   2
                 </td>
                 <td>
-                  0
+                  2
                 </td>
               </tr>
                           <tr>
@@ -1161,7 +1161,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  22
+                  14
                 </td>
               </tr>
                           <tr>
@@ -1259,7 +1259,7 @@ under the License.
                   5
                 </td>
                 <td>
-                  2
+                  3
                 </td>
               </tr>
                           <tr>
@@ -1312,10 +1312,10 @@ under the License.
                   0
                 </td>
                 <td>
-                  10
+                  5
                 </td>
                 <td>
-                  0
+                  13
                 </td>
               </tr>
                           <tr>

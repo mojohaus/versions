@@ -34,87 +34,85 @@
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.apache.maven.artifact.versioning.VersionRange;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.codehaus.mojo.versions.ordering.MercuryVersionComparator;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.codehaus.mojo.versions.ordering.NumericVersionComparator;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.hamcrest.CoreMatchers;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hamcrest.Matchers;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.hamcrest.Matchers;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.util.Arrays;
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> java.util.Arrays;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertArrayEquals;
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertEquals;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertNull;
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertThat;
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../org/codehaus/mojo/versions/api/ArtifactVersionsTest.html">ArtifactVersionsTest</a>
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  {
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>      @Test
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> test4DigitVersions() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>          ArtifactVersion[] versions = versions( <span class="jxr_string">"1.0.0.1"</span>, <span class="jxr_string">"1.0.0.2"</span>, <span class="jxr_string">"2.121.2.1"</span>, <span class="jxr_string">"2.100.0.1"</span>, <span class="jxr_string">"3.1.0.1"</span>, <span class="jxr_string">"1.1.1"</span>);
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>          <strong class="jxr_keyword">final</strong> DefaultArtifact artifact =
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>                  <strong class="jxr_keyword">new</strong> DefaultArtifact( <span class="jxr_string">"group"</span>, <span class="jxr_string">"artifact"</span>, VersionRange.createFromVersionSpec( <span class="jxr_string">"[1.0,3.0]"</span> ), <span class="jxr_string">"foo"</span>, <span class="jxr_string">"bar"</span>,
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>                                       <span class="jxr_string">"jar"</span>, <strong class="jxr_keyword">new</strong> DefaultArtifactHandler() );
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>          <em class="jxr_comment">// TODO This should also work for the MavenVersionComparator when using maven 3.x libraries</em>
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>          ArtifactVersions instance =
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>                  <strong class="jxr_keyword">new</strong> ArtifactVersions(artifact, Arrays.asList( versions ), <strong class="jxr_keyword">new</strong> MercuryVersionComparator() );
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>          assertEquals( <span class="jxr_string">"artifact"</span>, instance.getArtifactId() );
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>          assertEquals( <span class="jxr_string">"group"</span>, instance.getGroupId() );
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>          assertThat(instance.getVersions(),
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>                     Matchers.arrayContaining(versions( <span class="jxr_string">"1.0.0.1"</span>, <span class="jxr_string">"1.0.0.2"</span>, <span class="jxr_string">"1.1.1"</span>, <span class="jxr_string">"2.100.0.1"</span>, <span class="jxr_string">"2.121.2.1"</span>,
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>                                                        <span class="jxr_string">"3.1.0.1"</span> )));
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>          assertThat(instance.getVersions( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1"</span> ), <strong class="jxr_keyword">null</strong> ),
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>                     Matchers.arrayContaining(versions(<span class="jxr_string">"1.1.1"</span>, <span class="jxr_string">"2.100.0.1"</span>, <span class="jxr_string">"2.121.2.1"</span>, <span class="jxr_string">"3.1.0.1"</span>)));
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>          assertThat(instance.getVersions( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.0.0.2"</span> ), <strong class="jxr_keyword">null</strong> ),
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>                            <em class="jxr_comment">//Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));</em>
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>                     Matchers.arrayContaining(versions(<span class="jxr_string">"1.1.1"</span>, <span class="jxr_string">"2.100.0.1"</span>, <span class="jxr_string">"2.121.2.1"</span>, <span class="jxr_string">"3.1.0.1"</span>)));
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>          assertEquals( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"2.121.2.1"</span> ),
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>                        instance.getNewestVersion( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.0"</span> ),
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>                                                   <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"3.0"</span> ) ) );
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>          assertNull(
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>                  instance.getNewestVersion( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1.1"</span> ),
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>                                             <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"2.0"</span> ) ) );
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>      }
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>      @Test
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testSmokes()
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>          <strong class="jxr_keyword">throws</strong> Exception
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>      {
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>          ArtifactVersion[] versions = versions( <span class="jxr_string">"1.0"</span>, <span class="jxr_string">"3.0"</span>, <span class="jxr_string">"1.1"</span>, <span class="jxr_string">"1.0"</span>, <span class="jxr_string">"1.0.1"</span> );
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>          <strong class="jxr_keyword">final</strong> DefaultArtifact artifact =
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>              <strong class="jxr_keyword">new</strong> DefaultArtifact( <span class="jxr_string">"group"</span>, <span class="jxr_string">"artifact"</span>, VersionRange.createFromVersionSpec( <span class="jxr_string">"[1.0,3.0]"</span> ), <span class="jxr_string">"foo"</span>, <span class="jxr_string">"bar"</span>,
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>                                   <span class="jxr_string">"jar"</span>, <strong class="jxr_keyword">new</strong> DefaultArtifactHandler() );
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>          ArtifactVersions instance =
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>              <strong class="jxr_keyword">new</strong> ArtifactVersions( artifact, Arrays.asList( versions ), <strong class="jxr_keyword">new</strong> MavenVersionComparator() );
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>          assertEquals( <span class="jxr_string">"artifact"</span>, instance.getArtifactId() );
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>          assertEquals( <span class="jxr_string">"group"</span>, instance.getGroupId() );
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>          assertArrayEquals(
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>              versions( <span class="jxr_string">"1.0"</span>, <span class="jxr_string">"1.0.1"</span>, <span class="jxr_string">"1.1"</span>, <span class="jxr_string">"3.0"</span> ),
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>              instance.getVersions() );
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>          assertArrayEquals( versions( <span class="jxr_string">"3.0"</span> ),
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>                             instance.getVersions( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1"</span> ), <strong class="jxr_keyword">null</strong> ) );
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>          assertArrayEquals(
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>              versions( <span class="jxr_string">"1.1"</span>, <span class="jxr_string">"3.0"</span> ),
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>              instance.getVersions( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.0.1"</span> ), <strong class="jxr_keyword">null</strong> ) );
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>          assertEquals( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1"</span> ),
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>                        instance.getNewestVersion( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.0"</span> ),
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>                                                   <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"3.0"</span> ) ) );
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>          assertNull(
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>              instance.getNewestVersion( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1"</span> ), <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"3.0"</span> ) ) );
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>      }
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  
-<a class="jxr_linenumber" name="L100" href="#L100">100</a>     <strong class="jxr_keyword">private</strong> ArtifactVersion[] versions(String... versions) {
-<a class="jxr_linenumber" name="L101" href="#L101">101</a>         ArtifactVersion[] artifactVersions = <strong class="jxr_keyword">new</strong> ArtifactVersion[versions.length];
-<a class="jxr_linenumber" name="L102" href="#L102">102</a>         <strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = 0; i &lt; versions.length; i++ ) {
-<a class="jxr_linenumber" name="L103" href="#L103">103</a>             artifactVersions[i] = <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( versions[i] );
-<a class="jxr_linenumber" name="L104" href="#L104">104</a>         }
-<a class="jxr_linenumber" name="L105" href="#L105">105</a>         <strong class="jxr_keyword">return</strong> artifactVersions;
-<a class="jxr_linenumber" name="L106" href="#L106">106</a>     }
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> }
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertArrayEquals;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertEquals;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertNull;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertThat;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../org/codehaus/mojo/versions/api/ArtifactVersionsTest.html">ArtifactVersionsTest</a>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  {
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      @Test
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> test4DigitVersions() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>          ArtifactVersion[] versions = versions( <span class="jxr_string">"1.0.0.1"</span>, <span class="jxr_string">"1.0.0.2"</span>, <span class="jxr_string">"2.121.2.1"</span>, <span class="jxr_string">"2.100.0.1"</span>, <span class="jxr_string">"3.1.0.1"</span>, <span class="jxr_string">"1.1.1"</span>);
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>          <strong class="jxr_keyword">final</strong> DefaultArtifact artifact =
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>                  <strong class="jxr_keyword">new</strong> DefaultArtifact( <span class="jxr_string">"group"</span>, <span class="jxr_string">"artifact"</span>, VersionRange.createFromVersionSpec( <span class="jxr_string">"[1.0,3.0]"</span> ), <span class="jxr_string">"foo"</span>, <span class="jxr_string">"bar"</span>,
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>                                       <span class="jxr_string">"jar"</span>, <strong class="jxr_keyword">new</strong> DefaultArtifactHandler() );
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>          <em class="jxr_comment">// TODO This should also work for the MavenVersionComparator when using maven 3.x libraries</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>          ArtifactVersions instance =
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>                  <strong class="jxr_keyword">new</strong> ArtifactVersions(artifact, Arrays.asList( versions ), <strong class="jxr_keyword">new</strong> MercuryVersionComparator() );
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>          assertEquals( <span class="jxr_string">"artifact"</span>, instance.getArtifactId() );
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>          assertEquals( <span class="jxr_string">"group"</span>, instance.getGroupId() );
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>          assertThat(instance.getVersions(),
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>                     Matchers.arrayContaining(versions( <span class="jxr_string">"1.0.0.1"</span>, <span class="jxr_string">"1.0.0.2"</span>, <span class="jxr_string">"1.1.1"</span>, <span class="jxr_string">"2.100.0.1"</span>, <span class="jxr_string">"2.121.2.1"</span>,
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>                                                        <span class="jxr_string">"3.1.0.1"</span> )));
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>          assertThat(instance.getVersions( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1"</span> ), <strong class="jxr_keyword">null</strong> ),
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>                     Matchers.arrayContaining(versions(<span class="jxr_string">"1.1.1"</span>, <span class="jxr_string">"2.100.0.1"</span>, <span class="jxr_string">"2.121.2.1"</span>, <span class="jxr_string">"3.1.0.1"</span>)));
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>          assertThat(instance.getVersions( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.0.0.2"</span> ), <strong class="jxr_keyword">null</strong> ),
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>                            <em class="jxr_comment">//Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>                     Matchers.arrayContaining(versions(<span class="jxr_string">"1.1.1"</span>, <span class="jxr_string">"2.100.0.1"</span>, <span class="jxr_string">"2.121.2.1"</span>, <span class="jxr_string">"3.1.0.1"</span>)));
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>          assertEquals( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"2.121.2.1"</span> ),
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>                        instance.getNewestVersion( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.0"</span> ),
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>                                                   <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"3.0"</span> ) ) );
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>          assertNull(
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>                  instance.getNewestVersion( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1.1"</span> ),
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>                                             <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"2.0"</span> ) ) );
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>      }
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      @Test
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testSmokes()
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>          <strong class="jxr_keyword">throws</strong> Exception
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      {
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>          ArtifactVersion[] versions = versions( <span class="jxr_string">"1.0"</span>, <span class="jxr_string">"3.0"</span>, <span class="jxr_string">"1.1"</span>, <span class="jxr_string">"1.0"</span>, <span class="jxr_string">"1.0.1"</span> );
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>          <strong class="jxr_keyword">final</strong> DefaultArtifact artifact =
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>              <strong class="jxr_keyword">new</strong> DefaultArtifact( <span class="jxr_string">"group"</span>, <span class="jxr_string">"artifact"</span>, VersionRange.createFromVersionSpec( <span class="jxr_string">"[1.0,3.0]"</span> ), <span class="jxr_string">"foo"</span>, <span class="jxr_string">"bar"</span>,
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>                                   <span class="jxr_string">"jar"</span>, <strong class="jxr_keyword">new</strong> DefaultArtifactHandler() );
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>          ArtifactVersions instance =
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>              <strong class="jxr_keyword">new</strong> ArtifactVersions( artifact, Arrays.asList( versions ), <strong class="jxr_keyword">new</strong> MavenVersionComparator() );
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>          assertEquals( <span class="jxr_string">"artifact"</span>, instance.getArtifactId() );
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>          assertEquals( <span class="jxr_string">"group"</span>, instance.getGroupId() );
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>          assertArrayEquals(
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>              versions( <span class="jxr_string">"1.0"</span>, <span class="jxr_string">"1.0.1"</span>, <span class="jxr_string">"1.1"</span>, <span class="jxr_string">"3.0"</span> ),
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>              instance.getVersions() );
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>          assertArrayEquals( versions( <span class="jxr_string">"3.0"</span> ),
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>                             instance.getVersions( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1"</span> ), <strong class="jxr_keyword">null</strong> ) );
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>          assertArrayEquals(
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>              versions( <span class="jxr_string">"1.1"</span>, <span class="jxr_string">"3.0"</span> ),
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>              instance.getVersions( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.0.1"</span> ), <strong class="jxr_keyword">null</strong> ) );
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>          assertEquals( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1"</span> ),
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>                        instance.getNewestVersion( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.0"</span> ),
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>                                                   <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"3.0"</span> ) ) );
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>          assertNull(
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>              instance.getNewestVersion( <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"1.1"</span> ), <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( <span class="jxr_string">"3.0"</span> ) ) );
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      }
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>      <strong class="jxr_keyword">private</strong> ArtifactVersion[] versions(String... versions) {
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          ArtifactVersion[] artifactVersions = <strong class="jxr_keyword">new</strong> ArtifactVersion[versions.length];
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>         <strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = 0; i &lt; versions.length; i++ ) {
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>             artifactVersions[i] = <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( versions[i] );
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         }
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>         <strong class="jxr_keyword">return</strong> artifactVersions;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>     }
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2018 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

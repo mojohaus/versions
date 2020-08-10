@@ -1385,322 +1385,273 @@
 <a class="jxr_linenumber" name="L1377" href="#L1377">1377</a>     }
 <a class="jxr_linenumber" name="L1378" href="#L1378">1378</a> 
 <a class="jxr_linenumber" name="L1379" href="#L1379">1379</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1380" href="#L1380">1380</a> <em class="jxr_javadoccomment">     * Finds the local root of the specified project.</em>
+<a class="jxr_linenumber" name="L1380" href="#L1380">1380</a> <em class="jxr_javadoccomment">     * Builds a map of raw models keyed by module path.</em>
 <a class="jxr_linenumber" name="L1381" href="#L1381">1381</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1382" href="#L1382">1382</a> <em class="jxr_javadoccomment">     * @param project The project to find the local root for.</em>
-<a class="jxr_linenumber" name="L1383" href="#L1383">1383</a> <em class="jxr_javadoccomment">     * @param localRepository the local repo.</em>
-<a class="jxr_linenumber" name="L1384" href="#L1384">1384</a> <em class="jxr_javadoccomment">     * @param globalProfileManager the global profile manager.</em>
-<a class="jxr_linenumber" name="L1385" href="#L1385">1385</a> <em class="jxr_javadoccomment">     * @param logger The logger to log to.</em>
-<a class="jxr_linenumber" name="L1386" href="#L1386">1386</a> <em class="jxr_javadoccomment">     * @return The local root (note this may be the project passed as an argument).</em>
-<a class="jxr_linenumber" name="L1387" href="#L1387">1387</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1388" href="#L1388">1388</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> MavenProject getLocalRoot( MavenProjectBuilder builder, MavenProject project,
-<a class="jxr_linenumber" name="L1389" href="#L1389">1389</a>                                              ArtifactRepository localRepository, ProfileManager globalProfileManager,
-<a class="jxr_linenumber" name="L1390" href="#L1390">1390</a>                                              Log logger )
-<a class="jxr_linenumber" name="L1391" href="#L1391">1391</a>     {
-<a class="jxr_linenumber" name="L1392" href="#L1392">1392</a>         logger.info( <span class="jxr_string">"Searching for local aggregator root..."</span> );
-<a class="jxr_linenumber" name="L1393" href="#L1393">1393</a>         <strong class="jxr_keyword">while</strong> ( <strong class="jxr_keyword">true</strong> )
-<a class="jxr_linenumber" name="L1394" href="#L1394">1394</a>         {
-<a class="jxr_linenumber" name="L1395" href="#L1395">1395</a>             <strong class="jxr_keyword">final</strong> File parentDir = project.getBasedir().getParentFile();
-<a class="jxr_linenumber" name="L1396" href="#L1396">1396</a>             <strong class="jxr_keyword">if</strong> ( parentDir != <strong class="jxr_keyword">null</strong> &amp;&amp; parentDir.isDirectory() )
-<a class="jxr_linenumber" name="L1397" href="#L1397">1397</a>             {
-<a class="jxr_linenumber" name="L1398" href="#L1398">1398</a>                 logger.debug( <span class="jxr_string">"Checking to see if "</span> + parentDir + <span class="jxr_string">" is an aggregator parent"</span> );
-<a class="jxr_linenumber" name="L1399" href="#L1399">1399</a>                 File parent = <strong class="jxr_keyword">new</strong> File( parentDir, <span class="jxr_string">"pom.xml"</span> );
-<a class="jxr_linenumber" name="L1400" href="#L1400">1400</a>                 <strong class="jxr_keyword">if</strong> ( parent.isFile() )
-<a class="jxr_linenumber" name="L1401" href="#L1401">1401</a>                 {
-<a class="jxr_linenumber" name="L1402" href="#L1402">1402</a>                     <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L1403" href="#L1403">1403</a>                     {
-<a class="jxr_linenumber" name="L1404" href="#L1404">1404</a>                         <strong class="jxr_keyword">final</strong> MavenProject parentProject =
-<a class="jxr_linenumber" name="L1405" href="#L1405">1405</a>                             builder.build( parent, localRepository, globalProfileManager );
-<a class="jxr_linenumber" name="L1406" href="#L1406">1406</a>                         <strong class="jxr_keyword">if</strong> ( getAllChildModules( parentProject, logger ).contains( project.getBasedir().getName() ) )
-<a class="jxr_linenumber" name="L1407" href="#L1407">1407</a>                         {
-<a class="jxr_linenumber" name="L1408" href="#L1408">1408</a>                             logger.debug( parentDir + <span class="jxr_string">" is an aggregator parent"</span> );
-<a class="jxr_linenumber" name="L1409" href="#L1409">1409</a>                             project = parentProject;
-<a class="jxr_linenumber" name="L1410" href="#L1410">1410</a>                             <strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L1411" href="#L1411">1411</a>                         }
-<a class="jxr_linenumber" name="L1412" href="#L1412">1412</a>                         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L1413" href="#L1413">1413</a>                         {
-<a class="jxr_linenumber" name="L1414" href="#L1414">1414</a>                             logger.debug( parentDir + <span class="jxr_string">" is not an aggregator parent"</span> );
-<a class="jxr_linenumber" name="L1415" href="#L1415">1415</a>                         }
-<a class="jxr_linenumber" name="L1416" href="#L1416">1416</a>                     }
-<a class="jxr_linenumber" name="L1417" href="#L1417">1417</a>                     <strong class="jxr_keyword">catch</strong> ( ProjectBuildingException e )
-<a class="jxr_linenumber" name="L1418" href="#L1418">1418</a>                     {
-<a class="jxr_linenumber" name="L1419" href="#L1419">1419</a>                         logger.warn( e );
-<a class="jxr_linenumber" name="L1420" href="#L1420">1420</a>                     }
-<a class="jxr_linenumber" name="L1421" href="#L1421">1421</a>                 }
-<a class="jxr_linenumber" name="L1422" href="#L1422">1422</a>             }
-<a class="jxr_linenumber" name="L1423" href="#L1423">1423</a>             logger.debug( <span class="jxr_string">"Local aggregation root is "</span> + project.getBasedir() );
-<a class="jxr_linenumber" name="L1424" href="#L1424">1424</a>             <strong class="jxr_keyword">return</strong> project;
-<a class="jxr_linenumber" name="L1425" href="#L1425">1425</a>         }
-<a class="jxr_linenumber" name="L1426" href="#L1426">1426</a>     }
+<a class="jxr_linenumber" name="L1382" href="#L1382">1382</a> <em class="jxr_javadoccomment">     * @param project The project to build from.</em>
+<a class="jxr_linenumber" name="L1383" href="#L1383">1383</a> <em class="jxr_javadoccomment">     * @param logger The logger for logging.</em>
+<a class="jxr_linenumber" name="L1384" href="#L1384">1384</a> <em class="jxr_javadoccomment">     * @return A map of raw models keyed by path relative to the project's basedir.</em>
+<a class="jxr_linenumber" name="L1385" href="#L1385">1385</a> <em class="jxr_javadoccomment">     * @throws IOException if things go wrong.</em>
+<a class="jxr_linenumber" name="L1386" href="#L1386">1386</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1387" href="#L1387">1387</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, Model&gt; getReactorModels( MavenProject project, Log logger )
+<a class="jxr_linenumber" name="L1388" href="#L1388">1388</a>         <strong class="jxr_keyword">throws</strong> IOException
+<a class="jxr_linenumber" name="L1389" href="#L1389">1389</a>     {
+<a class="jxr_linenumber" name="L1390" href="#L1390">1390</a>         Map&lt;String, Model&gt; result = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L1391" href="#L1391">1391</a>         <strong class="jxr_keyword">final</strong> Model model = getRawModel( project );
+<a class="jxr_linenumber" name="L1392" href="#L1392">1392</a>         <strong class="jxr_keyword">final</strong> String path = <span class="jxr_string">""</span>;
+<a class="jxr_linenumber" name="L1393" href="#L1393">1393</a>         result.put( path, model );
+<a class="jxr_linenumber" name="L1394" href="#L1394">1394</a>         result.putAll( getReactorModels( path, model, project, logger ) );
+<a class="jxr_linenumber" name="L1395" href="#L1395">1395</a>         <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L1396" href="#L1396">1396</a>     }
+<a class="jxr_linenumber" name="L1397" href="#L1397">1397</a> 
+<a class="jxr_linenumber" name="L1398" href="#L1398">1398</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1399" href="#L1399">1399</a> <em class="jxr_javadoccomment">     * Builds a sub-map of raw models keyed by module path.</em>
+<a class="jxr_linenumber" name="L1400" href="#L1400">1400</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1401" href="#L1401">1401</a> <em class="jxr_javadoccomment">     * @param path The relative path to base the sub-map on.</em>
+<a class="jxr_linenumber" name="L1402" href="#L1402">1402</a> <em class="jxr_javadoccomment">     * @param model The model at the relative path.</em>
+<a class="jxr_linenumber" name="L1403" href="#L1403">1403</a> <em class="jxr_javadoccomment">     * @param project The project to build from.</em>
+<a class="jxr_linenumber" name="L1404" href="#L1404">1404</a> <em class="jxr_javadoccomment">     * @param logger The logger for logging.</em>
+<a class="jxr_linenumber" name="L1405" href="#L1405">1405</a> <em class="jxr_javadoccomment">     * @return A map of raw models keyed by path relative to the project's basedir.</em>
+<a class="jxr_linenumber" name="L1406" href="#L1406">1406</a> <em class="jxr_javadoccomment">     * @throws IOException if things go wrong.</em>
+<a class="jxr_linenumber" name="L1407" href="#L1407">1407</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1408" href="#L1408">1408</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, Model&gt; getReactorModels( String path, Model model, MavenProject project, Log logger )
+<a class="jxr_linenumber" name="L1409" href="#L1409">1409</a>         <strong class="jxr_keyword">throws</strong> IOException
+<a class="jxr_linenumber" name="L1410" href="#L1410">1410</a>     {
+<a class="jxr_linenumber" name="L1411" href="#L1411">1411</a>         <strong class="jxr_keyword">if</strong> ( path.length() &gt; 0 &amp;&amp; !path.endsWith( <span class="jxr_string">"/"</span> ) )
+<a class="jxr_linenumber" name="L1412" href="#L1412">1412</a>         {
+<a class="jxr_linenumber" name="L1413" href="#L1413">1413</a>             path += '/';
+<a class="jxr_linenumber" name="L1414" href="#L1414">1414</a>         }
+<a class="jxr_linenumber" name="L1415" href="#L1415">1415</a>         Map&lt;String, Model&gt; result = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L1416" href="#L1416">1416</a>         Map&lt;String, Model&gt; childResults = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L1417" href="#L1417">1417</a> 
+<a class="jxr_linenumber" name="L1418" href="#L1418">1418</a>         File baseDir = path.length() &gt; 0 ? <strong class="jxr_keyword">new</strong> File( project.getBasedir(), path ) : project.getBasedir();
+<a class="jxr_linenumber" name="L1419" href="#L1419">1419</a> 
+<a class="jxr_linenumber" name="L1420" href="#L1420">1420</a>         Set&lt;String&gt; childModules = getAllChildModules( model, logger );
+<a class="jxr_linenumber" name="L1421" href="#L1421">1421</a> 
+<a class="jxr_linenumber" name="L1422" href="#L1422">1422</a>         removeMissingChildModules( logger, baseDir, childModules );
+<a class="jxr_linenumber" name="L1423" href="#L1423">1423</a> 
+<a class="jxr_linenumber" name="L1424" href="#L1424">1424</a>         <strong class="jxr_keyword">for</strong> ( String moduleName : childModules )
+<a class="jxr_linenumber" name="L1425" href="#L1425">1425</a>         {
+<a class="jxr_linenumber" name="L1426" href="#L1426">1426</a>             String modulePath = path + moduleName;
 <a class="jxr_linenumber" name="L1427" href="#L1427">1427</a> 
-<a class="jxr_linenumber" name="L1428" href="#L1428">1428</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1429" href="#L1429">1429</a> <em class="jxr_javadoccomment">     * Builds a map of raw models keyed by module path.</em>
-<a class="jxr_linenumber" name="L1430" href="#L1430">1430</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1431" href="#L1431">1431</a> <em class="jxr_javadoccomment">     * @param project The project to build from.</em>
-<a class="jxr_linenumber" name="L1432" href="#L1432">1432</a> <em class="jxr_javadoccomment">     * @param logger The logger for logging.</em>
-<a class="jxr_linenumber" name="L1433" href="#L1433">1433</a> <em class="jxr_javadoccomment">     * @return A map of raw models keyed by path relative to the project's basedir.</em>
-<a class="jxr_linenumber" name="L1434" href="#L1434">1434</a> <em class="jxr_javadoccomment">     * @throws IOException if things go wrong.</em>
-<a class="jxr_linenumber" name="L1435" href="#L1435">1435</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1436" href="#L1436">1436</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, Model&gt; getReactorModels( MavenProject project, Log logger )
-<a class="jxr_linenumber" name="L1437" href="#L1437">1437</a>         <strong class="jxr_keyword">throws</strong> IOException
-<a class="jxr_linenumber" name="L1438" href="#L1438">1438</a>     {
-<a class="jxr_linenumber" name="L1439" href="#L1439">1439</a>         Map&lt;String, Model&gt; result = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
-<a class="jxr_linenumber" name="L1440" href="#L1440">1440</a>         <strong class="jxr_keyword">final</strong> Model model = getRawModel( project );
-<a class="jxr_linenumber" name="L1441" href="#L1441">1441</a>         <strong class="jxr_keyword">final</strong> String path = <span class="jxr_string">""</span>;
-<a class="jxr_linenumber" name="L1442" href="#L1442">1442</a>         result.put( path, model );
-<a class="jxr_linenumber" name="L1443" href="#L1443">1443</a>         result.putAll( getReactorModels( path, model, project, logger ) );
-<a class="jxr_linenumber" name="L1444" href="#L1444">1444</a>         <strong class="jxr_keyword">return</strong> result;
-<a class="jxr_linenumber" name="L1445" href="#L1445">1445</a>     }
-<a class="jxr_linenumber" name="L1446" href="#L1446">1446</a> 
-<a class="jxr_linenumber" name="L1447" href="#L1447">1447</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1448" href="#L1448">1448</a> <em class="jxr_javadoccomment">     * Builds a sub-map of raw models keyed by module path.</em>
-<a class="jxr_linenumber" name="L1449" href="#L1449">1449</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1450" href="#L1450">1450</a> <em class="jxr_javadoccomment">     * @param path The relative path to base the sub-map on.</em>
-<a class="jxr_linenumber" name="L1451" href="#L1451">1451</a> <em class="jxr_javadoccomment">     * @param model The model at the relative path.</em>
-<a class="jxr_linenumber" name="L1452" href="#L1452">1452</a> <em class="jxr_javadoccomment">     * @param project The project to build from.</em>
-<a class="jxr_linenumber" name="L1453" href="#L1453">1453</a> <em class="jxr_javadoccomment">     * @param logger The logger for logging.</em>
-<a class="jxr_linenumber" name="L1454" href="#L1454">1454</a> <em class="jxr_javadoccomment">     * @return A map of raw models keyed by path relative to the project's basedir.</em>
-<a class="jxr_linenumber" name="L1455" href="#L1455">1455</a> <em class="jxr_javadoccomment">     * @throws IOException if things go wrong.</em>
-<a class="jxr_linenumber" name="L1456" href="#L1456">1456</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1457" href="#L1457">1457</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, Model&gt; getReactorModels( String path, Model model, MavenProject project, Log logger )
-<a class="jxr_linenumber" name="L1458" href="#L1458">1458</a>         <strong class="jxr_keyword">throws</strong> IOException
-<a class="jxr_linenumber" name="L1459" href="#L1459">1459</a>     {
-<a class="jxr_linenumber" name="L1460" href="#L1460">1460</a>         <strong class="jxr_keyword">if</strong> ( path.length() &gt; 0 &amp;&amp; !path.endsWith( <span class="jxr_string">"/"</span> ) )
-<a class="jxr_linenumber" name="L1461" href="#L1461">1461</a>         {
-<a class="jxr_linenumber" name="L1462" href="#L1462">1462</a>             path += '/';
-<a class="jxr_linenumber" name="L1463" href="#L1463">1463</a>         }
-<a class="jxr_linenumber" name="L1464" href="#L1464">1464</a>         Map&lt;String, Model&gt; result = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
-<a class="jxr_linenumber" name="L1465" href="#L1465">1465</a>         Map&lt;String, Model&gt; childResults = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
-<a class="jxr_linenumber" name="L1466" href="#L1466">1466</a> 
-<a class="jxr_linenumber" name="L1467" href="#L1467">1467</a>         File baseDir = path.length() &gt; 0 ? <strong class="jxr_keyword">new</strong> File( project.getBasedir(), path ) : project.getBasedir();
-<a class="jxr_linenumber" name="L1468" href="#L1468">1468</a> 
-<a class="jxr_linenumber" name="L1469" href="#L1469">1469</a>         Set&lt;String&gt; childModules = getAllChildModules( model, logger );
-<a class="jxr_linenumber" name="L1470" href="#L1470">1470</a> 
-<a class="jxr_linenumber" name="L1471" href="#L1471">1471</a>         removeMissingChildModules( logger, baseDir, childModules );
-<a class="jxr_linenumber" name="L1472" href="#L1472">1472</a> 
-<a class="jxr_linenumber" name="L1473" href="#L1473">1473</a>         <strong class="jxr_keyword">for</strong> ( String moduleName : childModules )
-<a class="jxr_linenumber" name="L1474" href="#L1474">1474</a>         {
-<a class="jxr_linenumber" name="L1475" href="#L1475">1475</a>             String modulePath = path + moduleName;
-<a class="jxr_linenumber" name="L1476" href="#L1476">1476</a> 
-<a class="jxr_linenumber" name="L1477" href="#L1477">1477</a>             File moduleDir = <strong class="jxr_keyword">new</strong> File( baseDir, moduleName );
-<a class="jxr_linenumber" name="L1478" href="#L1478">1478</a> 
-<a class="jxr_linenumber" name="L1479" href="#L1479">1479</a>             File moduleProjectFile;
-<a class="jxr_linenumber" name="L1480" href="#L1480">1480</a> 
-<a class="jxr_linenumber" name="L1481" href="#L1481">1481</a>             <strong class="jxr_keyword">if</strong> ( moduleDir.isDirectory() )
-<a class="jxr_linenumber" name="L1482" href="#L1482">1482</a>             {
-<a class="jxr_linenumber" name="L1483" href="#L1483">1483</a>                 moduleProjectFile = <strong class="jxr_keyword">new</strong> File( moduleDir, <span class="jxr_string">"pom.xml"</span> );
-<a class="jxr_linenumber" name="L1484" href="#L1484">1484</a>             }
-<a class="jxr_linenumber" name="L1485" href="#L1485">1485</a>             <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L1486" href="#L1486">1486</a>             {
-<a class="jxr_linenumber" name="L1487" href="#L1487">1487</a>                 <em class="jxr_comment">// i don't think this should ever happen... but just in case</em>
-<a class="jxr_linenumber" name="L1488" href="#L1488">1488</a>                 <em class="jxr_comment">// the module references the file-name</em>
-<a class="jxr_linenumber" name="L1489" href="#L1489">1489</a>                 moduleProjectFile = moduleDir;
-<a class="jxr_linenumber" name="L1490" href="#L1490">1490</a>             }
-<a class="jxr_linenumber" name="L1491" href="#L1491">1491</a> 
-<a class="jxr_linenumber" name="L1492" href="#L1492">1492</a>             <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L1493" href="#L1493">1493</a>             {
-<a class="jxr_linenumber" name="L1494" href="#L1494">1494</a>                 <em class="jxr_comment">// the aim of this goal is to fix problems when the project cannot be parsed by Maven</em>
-<a class="jxr_linenumber" name="L1495" href="#L1495">1495</a>                 <em class="jxr_comment">// so we have to work with the raw model and not the interpolated parsed model from maven</em>
-<a class="jxr_linenumber" name="L1496" href="#L1496">1496</a>                 Model moduleModel = getRawModel( moduleProjectFile );
-<a class="jxr_linenumber" name="L1497" href="#L1497">1497</a>                 result.put( modulePath, moduleModel );
-<a class="jxr_linenumber" name="L1498" href="#L1498">1498</a>                 childResults.putAll( getReactorModels( modulePath, moduleModel, project, logger ) );
-<a class="jxr_linenumber" name="L1499" href="#L1499">1499</a>             }
-<a class="jxr_linenumber" name="L1500" href="#L1500">1500</a>             <strong class="jxr_keyword">catch</strong> ( IOException e )
-<a class="jxr_linenumber" name="L1501" href="#L1501">1501</a>             {
-<a class="jxr_linenumber" name="L1502" href="#L1502">1502</a>                 logger.debug( <span class="jxr_string">"Could not parse "</span> + moduleProjectFile.getPath(), e );
-<a class="jxr_linenumber" name="L1503" href="#L1503">1503</a>             }
-<a class="jxr_linenumber" name="L1504" href="#L1504">1504</a>         }
-<a class="jxr_linenumber" name="L1505" href="#L1505">1505</a>         result.putAll( childResults ); <em class="jxr_comment">// more efficient update order if all children are added after siblings</em>
-<a class="jxr_linenumber" name="L1506" href="#L1506">1506</a>         <strong class="jxr_keyword">return</strong> result;
-<a class="jxr_linenumber" name="L1507" href="#L1507">1507</a>     }
-<a class="jxr_linenumber" name="L1508" href="#L1508">1508</a> 
-<a class="jxr_linenumber" name="L1509" href="#L1509">1509</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1510" href="#L1510">1510</a> <em class="jxr_javadoccomment">     * Returns all the models that have a specified groupId and artifactId as parent.</em>
-<a class="jxr_linenumber" name="L1511" href="#L1511">1511</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1512" href="#L1512">1512</a> <em class="jxr_javadoccomment">     * @param reactor The map of models keyed by path.</em>
-<a class="jxr_linenumber" name="L1513" href="#L1513">1513</a> <em class="jxr_javadoccomment">     * @param groupId The groupId of the parent.</em>
-<a class="jxr_linenumber" name="L1514" href="#L1514">1514</a> <em class="jxr_javadoccomment">     * @param artifactId The artifactId of the parent.</em>
-<a class="jxr_linenumber" name="L1515" href="#L1515">1515</a> <em class="jxr_javadoccomment">     * @return a map of models that have a specified groupId and artifactId as parent keyed by path.</em>
-<a class="jxr_linenumber" name="L1516" href="#L1516">1516</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1517" href="#L1517">1517</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, Model&gt; getChildModels( Map&lt;String, Model&gt; reactor, String groupId, String artifactId )
-<a class="jxr_linenumber" name="L1518" href="#L1518">1518</a>     {
-<a class="jxr_linenumber" name="L1519" href="#L1519">1519</a>         <strong class="jxr_keyword">final</strong> Map&lt;String, Model&gt; result = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;String, Model&gt;();
-<a class="jxr_linenumber" name="L1520" href="#L1520">1520</a>         <strong class="jxr_keyword">for</strong> ( Map.Entry&lt;String, Model&gt; entry : reactor.entrySet() )
-<a class="jxr_linenumber" name="L1521" href="#L1521">1521</a>         {
-<a class="jxr_linenumber" name="L1522" href="#L1522">1522</a>             <strong class="jxr_keyword">final</strong> String path = entry.getKey();
-<a class="jxr_linenumber" name="L1523" href="#L1523">1523</a>             <strong class="jxr_keyword">final</strong> Model model = entry.getValue();
-<a class="jxr_linenumber" name="L1524" href="#L1524">1524</a>             <strong class="jxr_keyword">final</strong> Parent parent = model.getParent();
-<a class="jxr_linenumber" name="L1525" href="#L1525">1525</a>             <strong class="jxr_keyword">if</strong> ( parent != <strong class="jxr_keyword">null</strong> &amp;&amp; groupId.equals( parent.getGroupId() )
-<a class="jxr_linenumber" name="L1526" href="#L1526">1526</a>                 &amp;&amp; artifactId.equals( parent.getArtifactId() ) )
-<a class="jxr_linenumber" name="L1527" href="#L1527">1527</a>             {
-<a class="jxr_linenumber" name="L1528" href="#L1528">1528</a>                 result.put( path, model );
-<a class="jxr_linenumber" name="L1529" href="#L1529">1529</a>             }
-<a class="jxr_linenumber" name="L1530" href="#L1530">1530</a>         }
-<a class="jxr_linenumber" name="L1531" href="#L1531">1531</a>         <strong class="jxr_keyword">return</strong> result;
-<a class="jxr_linenumber" name="L1532" href="#L1532">1532</a>     }
-<a class="jxr_linenumber" name="L1533" href="#L1533">1533</a> 
-<a class="jxr_linenumber" name="L1534" href="#L1534">1534</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1535" href="#L1535">1535</a> <em class="jxr_javadoccomment">     * Returns the model that has the specified groupId and artifactId or &lt;code&gt;null&lt;/code&gt; if no such model exists.</em>
-<a class="jxr_linenumber" name="L1536" href="#L1536">1536</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1537" href="#L1537">1537</a> <em class="jxr_javadoccomment">     * @param reactor The map of models keyed by path.</em>
-<a class="jxr_linenumber" name="L1538" href="#L1538">1538</a> <em class="jxr_javadoccomment">     * @param groupId The groupId to match.</em>
-<a class="jxr_linenumber" name="L1539" href="#L1539">1539</a> <em class="jxr_javadoccomment">     * @param artifactId The artifactId to match.</em>
-<a class="jxr_linenumber" name="L1540" href="#L1540">1540</a> <em class="jxr_javadoccomment">     * @return The model or &lt;code&gt;null&lt;/code&gt; if the model was not in the reactor.</em>
-<a class="jxr_linenumber" name="L1541" href="#L1541">1541</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1542" href="#L1542">1542</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Model getModel( Map&lt;String, Model&gt; reactor, String groupId, String artifactId )
-<a class="jxr_linenumber" name="L1543" href="#L1543">1543</a>     {
-<a class="jxr_linenumber" name="L1544" href="#L1544">1544</a>         Map.Entry&lt;String, Model&gt; entry = getModelEntry( reactor, groupId, artifactId );
-<a class="jxr_linenumber" name="L1545" href="#L1545">1545</a>         <strong class="jxr_keyword">return</strong> entry == <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">null</strong> : entry.getValue();
-<a class="jxr_linenumber" name="L1546" href="#L1546">1546</a>     }
-<a class="jxr_linenumber" name="L1547" href="#L1547">1547</a> 
-<a class="jxr_linenumber" name="L1548" href="#L1548">1548</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1549" href="#L1549">1549</a> <em class="jxr_javadoccomment">     * Returns the model that has the specified groupId and artifactId or &lt;code&gt;null&lt;/code&gt; if no such model exists.</em>
-<a class="jxr_linenumber" name="L1550" href="#L1550">1550</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1551" href="#L1551">1551</a> <em class="jxr_javadoccomment">     * @param reactor The map of models keyed by path.</em>
-<a class="jxr_linenumber" name="L1552" href="#L1552">1552</a> <em class="jxr_javadoccomment">     * @param groupId The groupId to match.</em>
-<a class="jxr_linenumber" name="L1553" href="#L1553">1553</a> <em class="jxr_javadoccomment">     * @param artifactId The artifactId to match.</em>
-<a class="jxr_linenumber" name="L1554" href="#L1554">1554</a> <em class="jxr_javadoccomment">     * @return The model entry or &lt;code&gt;null&lt;/code&gt; if the model was not in the reactor.</em>
-<a class="jxr_linenumber" name="L1555" href="#L1555">1555</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1556" href="#L1556">1556</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Map.Entry&lt;String, Model&gt; getModelEntry( Map&lt;String, Model&gt; reactor, String groupId,
-<a class="jxr_linenumber" name="L1557" href="#L1557">1557</a>                                                           String artifactId )
-<a class="jxr_linenumber" name="L1558" href="#L1558">1558</a>     {
-<a class="jxr_linenumber" name="L1559" href="#L1559">1559</a>         <strong class="jxr_keyword">for</strong> ( Map.Entry&lt;String, Model&gt; entry : reactor.entrySet() )
-<a class="jxr_linenumber" name="L1560" href="#L1560">1560</a>         {
-<a class="jxr_linenumber" name="L1561" href="#L1561">1561</a>             Model model = entry.getValue();
-<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a>             <strong class="jxr_keyword">if</strong> ( groupId.equals( getGroupId( model ) ) &amp;&amp; artifactId.equals( getArtifactId( model ) ) )
-<a class="jxr_linenumber" name="L1563" href="#L1563">1563</a>             {
-<a class="jxr_linenumber" name="L1564" href="#L1564">1564</a>                 <strong class="jxr_keyword">return</strong> entry;
-<a class="jxr_linenumber" name="L1565" href="#L1565">1565</a>             }
-<a class="jxr_linenumber" name="L1566" href="#L1566">1566</a>         }
-<a class="jxr_linenumber" name="L1567" href="#L1567">1567</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L1568" href="#L1568">1568</a>     }
-<a class="jxr_linenumber" name="L1569" href="#L1569">1569</a> 
-<a class="jxr_linenumber" name="L1570" href="#L1570">1570</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> <em class="jxr_javadoccomment">     * Returns a count of how many parents a model has in the reactor.</em>
-<a class="jxr_linenumber" name="L1572" href="#L1572">1572</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> <em class="jxr_javadoccomment">     * @param reactor The map of models keyed by path.</em>
-<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> <em class="jxr_javadoccomment">     * @param model The model.</em>
-<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> <em class="jxr_javadoccomment">     * @return The number of parents of this model in the reactor.</em>
-<a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1577" href="#L1577">1577</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> getReactorParentCount( Map&lt;String, Model&gt; reactor, Model model )
-<a class="jxr_linenumber" name="L1578" href="#L1578">1578</a>     {
-<a class="jxr_linenumber" name="L1579" href="#L1579">1579</a>         <strong class="jxr_keyword">if</strong> ( model.getParent() == <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L1580" href="#L1580">1580</a>         {
-<a class="jxr_linenumber" name="L1581" href="#L1581">1581</a>             <strong class="jxr_keyword">return</strong> 0;
-<a class="jxr_linenumber" name="L1582" href="#L1582">1582</a>         }
-<a class="jxr_linenumber" name="L1583" href="#L1583">1583</a>         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L1584" href="#L1584">1584</a>         {
-<a class="jxr_linenumber" name="L1585" href="#L1585">1585</a>             Model parentModel = getModel( reactor, model.getParent().getGroupId(), model.getParent().getArtifactId() );
-<a class="jxr_linenumber" name="L1586" href="#L1586">1586</a>             <strong class="jxr_keyword">if</strong> ( parentModel != <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L1587" href="#L1587">1587</a>             {
-<a class="jxr_linenumber" name="L1588" href="#L1588">1588</a>                 <strong class="jxr_keyword">return</strong> getReactorParentCount( reactor, parentModel ) + 1;
-<a class="jxr_linenumber" name="L1589" href="#L1589">1589</a>             }
-<a class="jxr_linenumber" name="L1590" href="#L1590">1590</a>             <strong class="jxr_keyword">return</strong> 0;
-<a class="jxr_linenumber" name="L1591" href="#L1591">1591</a>         }
-<a class="jxr_linenumber" name="L1592" href="#L1592">1592</a>     }
-<a class="jxr_linenumber" name="L1593" href="#L1593">1593</a> 
-<a class="jxr_linenumber" name="L1594" href="#L1594">1594</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1595" href="#L1595">1595</a> <em class="jxr_javadoccomment">     * Reads a file into a String.</em>
-<a class="jxr_linenumber" name="L1596" href="#L1596">1596</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1597" href="#L1597">1597</a> <em class="jxr_javadoccomment">     * @param outFile The file to read.</em>
-<a class="jxr_linenumber" name="L1598" href="#L1598">1598</a> <em class="jxr_javadoccomment">     * @return String The content of the file.</em>
-<a class="jxr_linenumber" name="L1599" href="#L1599">1599</a> <em class="jxr_javadoccomment">     * @throws java.io.IOException when things go wrong.</em>
-<a class="jxr_linenumber" name="L1600" href="#L1600">1600</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1601" href="#L1601">1601</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> StringBuilder readXmlFile( File outFile )
-<a class="jxr_linenumber" name="L1602" href="#L1602">1602</a>         <strong class="jxr_keyword">throws</strong> IOException
-<a class="jxr_linenumber" name="L1603" href="#L1603">1603</a>     {
-<a class="jxr_linenumber" name="L1604" href="#L1604">1604</a>         <strong class="jxr_keyword">try</strong>( Reader reader = ReaderFactory.newXmlReader( outFile ) )
-<a class="jxr_linenumber" name="L1605" href="#L1605">1605</a>         {
-<a class="jxr_linenumber" name="L1606" href="#L1606">1606</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> StringBuilder( IOUtil.toString( reader ) );
-<a class="jxr_linenumber" name="L1607" href="#L1607">1607</a>         }
-<a class="jxr_linenumber" name="L1608" href="#L1608">1608</a>     }
-<a class="jxr_linenumber" name="L1609" href="#L1609">1609</a> 
-<a class="jxr_linenumber" name="L1610" href="#L1610">1610</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1611" href="#L1611">1611</a> <em class="jxr_javadoccomment">     * Returns the GAV coordinates of a model.</em>
-<a class="jxr_linenumber" name="L1612" href="#L1612">1612</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1613" href="#L1613">1613</a> <em class="jxr_javadoccomment">     * @param model the model.</em>
-<a class="jxr_linenumber" name="L1614" href="#L1614">1614</a> <em class="jxr_javadoccomment">     * @return the GAV coordinates of a model.</em>
-<a class="jxr_linenumber" name="L1615" href="#L1615">1615</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1616" href="#L1616">1616</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String getGAV( Model model )
-<a class="jxr_linenumber" name="L1617" href="#L1617">1617</a>     {
-<a class="jxr_linenumber" name="L1618" href="#L1618">1618</a>         <strong class="jxr_keyword">return</strong> getGroupId( model ) + <span class="jxr_string">":"</span> + getArtifactId( model ) + <span class="jxr_string">":"</span> + getVersion( model );
-<a class="jxr_linenumber" name="L1619" href="#L1619">1619</a>     }
-<a class="jxr_linenumber" name="L1620" href="#L1620">1620</a> 
-<a class="jxr_linenumber" name="L1621" href="#L1621">1621</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1622" href="#L1622">1622</a> <em class="jxr_javadoccomment">     * Reads imported POMs from the dependency management section.</em>
-<a class="jxr_linenumber" name="L1623" href="#L1623">1623</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L1624" href="#L1624">1624</a> <em class="jxr_javadoccomment">     * @param pom</em>
-<a class="jxr_linenumber" name="L1625" href="#L1625">1625</a> <em class="jxr_javadoccomment">     * @return a non-null list of {@link Dependency} for each imported POM</em>
-<a class="jxr_linenumber" name="L1626" href="#L1626">1626</a> <em class="jxr_javadoccomment">     * @throws XMLStreamException</em>
-<a class="jxr_linenumber" name="L1627" href="#L1627">1627</a> <em class="jxr_javadoccomment">     * @see &lt;a href="https://github.com/mojohaus/versions-maven-plugin/issues/134"&gt;bug #134&lt;/a&gt;</em>
-<a class="jxr_linenumber" name="L1628" href="#L1628">1628</a> <em class="jxr_javadoccomment">     * @since 2.4</em>
-<a class="jxr_linenumber" name="L1629" href="#L1629">1629</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L1630" href="#L1630">1630</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> List&lt;Dependency&gt; readImportedPOMsFromDependencyManagementSection( ModifiedPomXMLEventReader pom )
-<a class="jxr_linenumber" name="L1631" href="#L1631">1631</a>         <strong class="jxr_keyword">throws</strong> XMLStreamException
-<a class="jxr_linenumber" name="L1632" href="#L1632">1632</a>     {
-<a class="jxr_linenumber" name="L1633" href="#L1633">1633</a>         List&lt;Dependency&gt; importedPOMs = <strong class="jxr_keyword">new</strong> ArrayList&lt;Dependency&gt;();
-<a class="jxr_linenumber" name="L1634" href="#L1634">1634</a>         Stack&lt;String&gt; stack = <strong class="jxr_keyword">new</strong> Stack&lt;String&gt;();
-<a class="jxr_linenumber" name="L1635" href="#L1635">1635</a> 
-<a class="jxr_linenumber" name="L1636" href="#L1636">1636</a>         String groupIdElement = <span class="jxr_string">"groupId"</span>;
-<a class="jxr_linenumber" name="L1637" href="#L1637">1637</a>         String artifactIdElement = <span class="jxr_string">"artifactId"</span>;
-<a class="jxr_linenumber" name="L1638" href="#L1638">1638</a>         String versionElement = <span class="jxr_string">"version"</span>;
-<a class="jxr_linenumber" name="L1639" href="#L1639">1639</a>         String typeElement = <span class="jxr_string">"type"</span>;
-<a class="jxr_linenumber" name="L1640" href="#L1640">1640</a>         String scopeElement = <span class="jxr_string">"scope"</span>;
-<a class="jxr_linenumber" name="L1641" href="#L1641">1641</a>         Set&lt;String&gt; recognizedElements =
-<a class="jxr_linenumber" name="L1642" href="#L1642">1642</a>             <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;( Arrays.asList( groupIdElement, artifactIdElement, versionElement, typeElement,
-<a class="jxr_linenumber" name="L1643" href="#L1643">1643</a>                                                 scopeElement ) );
-<a class="jxr_linenumber" name="L1644" href="#L1644">1644</a>         Map&lt;String, String&gt; depData = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;();
-<a class="jxr_linenumber" name="L1645" href="#L1645">1645</a> 
-<a class="jxr_linenumber" name="L1646" href="#L1646">1646</a>         pom.rewind();
-<a class="jxr_linenumber" name="L1647" href="#L1647">1647</a> 
-<a class="jxr_linenumber" name="L1648" href="#L1648">1648</a>         String depMgmtDependencyPath = <span class="jxr_string">"/project/dependencyManagement/dependencies/dependency"</span>;
-<a class="jxr_linenumber" name="L1649" href="#L1649">1649</a> 
-<a class="jxr_linenumber" name="L1650" href="#L1650">1650</a>         <strong class="jxr_keyword">while</strong> ( pom.hasNext() )
-<a class="jxr_linenumber" name="L1651" href="#L1651">1651</a>         {
-<a class="jxr_linenumber" name="L1652" href="#L1652">1652</a>             XMLEvent event = pom.nextEvent();
-<a class="jxr_linenumber" name="L1653" href="#L1653">1653</a> 
-<a class="jxr_linenumber" name="L1654" href="#L1654">1654</a>             <strong class="jxr_keyword">if</strong> ( event.isStartElement() )
-<a class="jxr_linenumber" name="L1655" href="#L1655">1655</a>             {
-<a class="jxr_linenumber" name="L1656" href="#L1656">1656</a>                 <strong class="jxr_keyword">final</strong> String elementName = event.asStartElement().getName().getLocalPart();
-<a class="jxr_linenumber" name="L1657" href="#L1657">1657</a>                 String parent = <span class="jxr_string">""</span>;
-<a class="jxr_linenumber" name="L1658" href="#L1658">1658</a>                 <strong class="jxr_keyword">if</strong> ( !stack.isEmpty() )
-<a class="jxr_linenumber" name="L1659" href="#L1659">1659</a>                 {
-<a class="jxr_linenumber" name="L1660" href="#L1660">1660</a>                     parent = stack.peek();
-<a class="jxr_linenumber" name="L1661" href="#L1661">1661</a>                 }
-<a class="jxr_linenumber" name="L1662" href="#L1662">1662</a>                 String currentPath = parent + <span class="jxr_string">"/"</span> + elementName;
-<a class="jxr_linenumber" name="L1663" href="#L1663">1663</a>                 stack.push( currentPath );
-<a class="jxr_linenumber" name="L1664" href="#L1664">1664</a> 
-<a class="jxr_linenumber" name="L1665" href="#L1665">1665</a>                 <strong class="jxr_keyword">if</strong> ( currentPath.startsWith( depMgmtDependencyPath ) &amp;&amp; recognizedElements.contains( elementName ) )
-<a class="jxr_linenumber" name="L1666" href="#L1666">1666</a>                 {
-<a class="jxr_linenumber" name="L1667" href="#L1667">1667</a>                     <strong class="jxr_keyword">final</strong> String elementText = pom.getElementText().trim();
-<a class="jxr_linenumber" name="L1668" href="#L1668">1668</a>                     depData.put( elementName, elementText );
-<a class="jxr_linenumber" name="L1669" href="#L1669">1669</a>                     stack.pop();
-<a class="jxr_linenumber" name="L1670" href="#L1670">1670</a>                 }
-<a class="jxr_linenumber" name="L1671" href="#L1671">1671</a>             }
-<a class="jxr_linenumber" name="L1672" href="#L1672">1672</a>             <strong class="jxr_keyword">if</strong> ( event.isEndElement() )
-<a class="jxr_linenumber" name="L1673" href="#L1673">1673</a>             {
-<a class="jxr_linenumber" name="L1674" href="#L1674">1674</a>                 String path = stack.pop();
-<a class="jxr_linenumber" name="L1675" href="#L1675">1675</a>                 <strong class="jxr_keyword">if</strong> ( depMgmtDependencyPath.equals( path ) )
-<a class="jxr_linenumber" name="L1676" href="#L1676">1676</a>                 {
-<a class="jxr_linenumber" name="L1677" href="#L1677">1677</a>                     <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"pom"</span>.equals( depData.get( typeElement ) ) &amp;&amp; <span class="jxr_string">"import"</span>.equals( depData.get( scopeElement ) ) )
-<a class="jxr_linenumber" name="L1678" href="#L1678">1678</a>                     {
-<a class="jxr_linenumber" name="L1679" href="#L1679">1679</a>                         Dependency dependency = <strong class="jxr_keyword">new</strong> Dependency();
-<a class="jxr_linenumber" name="L1680" href="#L1680">1680</a>                         dependency.setGroupId( depData.get( groupIdElement ) );
-<a class="jxr_linenumber" name="L1681" href="#L1681">1681</a>                         dependency.setArtifactId( depData.get( artifactIdElement ) );
-<a class="jxr_linenumber" name="L1682" href="#L1682">1682</a>                         dependency.setVersion( depData.get( versionElement ) );
-<a class="jxr_linenumber" name="L1683" href="#L1683">1683</a>                         dependency.setType( depData.get( typeElement ) );
-<a class="jxr_linenumber" name="L1684" href="#L1684">1684</a>                         dependency.setScope( depData.get( scopeElement ) );
-<a class="jxr_linenumber" name="L1685" href="#L1685">1685</a>                         importedPOMs.add( dependency );
-<a class="jxr_linenumber" name="L1686" href="#L1686">1686</a>                     }
-<a class="jxr_linenumber" name="L1687" href="#L1687">1687</a>                     depData.clear();
-<a class="jxr_linenumber" name="L1688" href="#L1688">1688</a>                 }
-<a class="jxr_linenumber" name="L1689" href="#L1689">1689</a>             }
-<a class="jxr_linenumber" name="L1690" href="#L1690">1690</a>         }
-<a class="jxr_linenumber" name="L1691" href="#L1691">1691</a>         <strong class="jxr_keyword">return</strong> importedPOMs;
-<a class="jxr_linenumber" name="L1692" href="#L1692">1692</a>     }
-<a class="jxr_linenumber" name="L1693" href="#L1693">1693</a> }
+<a class="jxr_linenumber" name="L1428" href="#L1428">1428</a>             File moduleDir = <strong class="jxr_keyword">new</strong> File( baseDir, moduleName );
+<a class="jxr_linenumber" name="L1429" href="#L1429">1429</a> 
+<a class="jxr_linenumber" name="L1430" href="#L1430">1430</a>             File moduleProjectFile;
+<a class="jxr_linenumber" name="L1431" href="#L1431">1431</a> 
+<a class="jxr_linenumber" name="L1432" href="#L1432">1432</a>             <strong class="jxr_keyword">if</strong> ( moduleDir.isDirectory() )
+<a class="jxr_linenumber" name="L1433" href="#L1433">1433</a>             {
+<a class="jxr_linenumber" name="L1434" href="#L1434">1434</a>                 moduleProjectFile = <strong class="jxr_keyword">new</strong> File( moduleDir, <span class="jxr_string">"pom.xml"</span> );
+<a class="jxr_linenumber" name="L1435" href="#L1435">1435</a>             }
+<a class="jxr_linenumber" name="L1436" href="#L1436">1436</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L1437" href="#L1437">1437</a>             {
+<a class="jxr_linenumber" name="L1438" href="#L1438">1438</a>                 <em class="jxr_comment">// i don't think this should ever happen... but just in case</em>
+<a class="jxr_linenumber" name="L1439" href="#L1439">1439</a>                 <em class="jxr_comment">// the module references the file-name</em>
+<a class="jxr_linenumber" name="L1440" href="#L1440">1440</a>                 moduleProjectFile = moduleDir;
+<a class="jxr_linenumber" name="L1441" href="#L1441">1441</a>             }
+<a class="jxr_linenumber" name="L1442" href="#L1442">1442</a> 
+<a class="jxr_linenumber" name="L1443" href="#L1443">1443</a>             <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L1444" href="#L1444">1444</a>             {
+<a class="jxr_linenumber" name="L1445" href="#L1445">1445</a>                 <em class="jxr_comment">// the aim of this goal is to fix problems when the project cannot be parsed by Maven</em>
+<a class="jxr_linenumber" name="L1446" href="#L1446">1446</a>                 <em class="jxr_comment">// so we have to work with the raw model and not the interpolated parsed model from maven</em>
+<a class="jxr_linenumber" name="L1447" href="#L1447">1447</a>                 Model moduleModel = getRawModel( moduleProjectFile );
+<a class="jxr_linenumber" name="L1448" href="#L1448">1448</a>                 result.put( modulePath, moduleModel );
+<a class="jxr_linenumber" name="L1449" href="#L1449">1449</a>                 childResults.putAll( getReactorModels( modulePath, moduleModel, project, logger ) );
+<a class="jxr_linenumber" name="L1450" href="#L1450">1450</a>             }
+<a class="jxr_linenumber" name="L1451" href="#L1451">1451</a>             <strong class="jxr_keyword">catch</strong> ( IOException e )
+<a class="jxr_linenumber" name="L1452" href="#L1452">1452</a>             {
+<a class="jxr_linenumber" name="L1453" href="#L1453">1453</a>                 logger.debug( <span class="jxr_string">"Could not parse "</span> + moduleProjectFile.getPath(), e );
+<a class="jxr_linenumber" name="L1454" href="#L1454">1454</a>             }
+<a class="jxr_linenumber" name="L1455" href="#L1455">1455</a>         }
+<a class="jxr_linenumber" name="L1456" href="#L1456">1456</a>         result.putAll( childResults ); <em class="jxr_comment">// more efficient update order if all children are added after siblings</em>
+<a class="jxr_linenumber" name="L1457" href="#L1457">1457</a>         <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L1458" href="#L1458">1458</a>     }
+<a class="jxr_linenumber" name="L1459" href="#L1459">1459</a> 
+<a class="jxr_linenumber" name="L1460" href="#L1460">1460</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1461" href="#L1461">1461</a> <em class="jxr_javadoccomment">     * Returns all the models that have a specified groupId and artifactId as parent.</em>
+<a class="jxr_linenumber" name="L1462" href="#L1462">1462</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1463" href="#L1463">1463</a> <em class="jxr_javadoccomment">     * @param reactor The map of models keyed by path.</em>
+<a class="jxr_linenumber" name="L1464" href="#L1464">1464</a> <em class="jxr_javadoccomment">     * @param groupId The groupId of the parent.</em>
+<a class="jxr_linenumber" name="L1465" href="#L1465">1465</a> <em class="jxr_javadoccomment">     * @param artifactId The artifactId of the parent.</em>
+<a class="jxr_linenumber" name="L1466" href="#L1466">1466</a> <em class="jxr_javadoccomment">     * @return a map of models that have a specified groupId and artifactId as parent keyed by path.</em>
+<a class="jxr_linenumber" name="L1467" href="#L1467">1467</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1468" href="#L1468">1468</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, Model&gt; getChildModels( Map&lt;String, Model&gt; reactor, String groupId, String artifactId )
+<a class="jxr_linenumber" name="L1469" href="#L1469">1469</a>     {
+<a class="jxr_linenumber" name="L1470" href="#L1470">1470</a>         <strong class="jxr_keyword">final</strong> Map&lt;String, Model&gt; result = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;String, Model&gt;();
+<a class="jxr_linenumber" name="L1471" href="#L1471">1471</a>         <strong class="jxr_keyword">for</strong> ( Map.Entry&lt;String, Model&gt; entry : reactor.entrySet() )
+<a class="jxr_linenumber" name="L1472" href="#L1472">1472</a>         {
+<a class="jxr_linenumber" name="L1473" href="#L1473">1473</a>             <strong class="jxr_keyword">final</strong> String path = entry.getKey();
+<a class="jxr_linenumber" name="L1474" href="#L1474">1474</a>             <strong class="jxr_keyword">final</strong> Model model = entry.getValue();
+<a class="jxr_linenumber" name="L1475" href="#L1475">1475</a>             <strong class="jxr_keyword">final</strong> Parent parent = model.getParent();
+<a class="jxr_linenumber" name="L1476" href="#L1476">1476</a>             <strong class="jxr_keyword">if</strong> ( parent != <strong class="jxr_keyword">null</strong> &amp;&amp; groupId.equals( parent.getGroupId() )
+<a class="jxr_linenumber" name="L1477" href="#L1477">1477</a>                 &amp;&amp; artifactId.equals( parent.getArtifactId() ) )
+<a class="jxr_linenumber" name="L1478" href="#L1478">1478</a>             {
+<a class="jxr_linenumber" name="L1479" href="#L1479">1479</a>                 result.put( path, model );
+<a class="jxr_linenumber" name="L1480" href="#L1480">1480</a>             }
+<a class="jxr_linenumber" name="L1481" href="#L1481">1481</a>         }
+<a class="jxr_linenumber" name="L1482" href="#L1482">1482</a>         <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L1483" href="#L1483">1483</a>     }
+<a class="jxr_linenumber" name="L1484" href="#L1484">1484</a> 
+<a class="jxr_linenumber" name="L1485" href="#L1485">1485</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1486" href="#L1486">1486</a> <em class="jxr_javadoccomment">     * Returns the model that has the specified groupId and artifactId or &lt;code&gt;null&lt;/code&gt; if no such model exists.</em>
+<a class="jxr_linenumber" name="L1487" href="#L1487">1487</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1488" href="#L1488">1488</a> <em class="jxr_javadoccomment">     * @param reactor The map of models keyed by path.</em>
+<a class="jxr_linenumber" name="L1489" href="#L1489">1489</a> <em class="jxr_javadoccomment">     * @param groupId The groupId to match.</em>
+<a class="jxr_linenumber" name="L1490" href="#L1490">1490</a> <em class="jxr_javadoccomment">     * @param artifactId The artifactId to match.</em>
+<a class="jxr_linenumber" name="L1491" href="#L1491">1491</a> <em class="jxr_javadoccomment">     * @return The model or &lt;code&gt;null&lt;/code&gt; if the model was not in the reactor.</em>
+<a class="jxr_linenumber" name="L1492" href="#L1492">1492</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1493" href="#L1493">1493</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Model getModel( Map&lt;String, Model&gt; reactor, String groupId, String artifactId )
+<a class="jxr_linenumber" name="L1494" href="#L1494">1494</a>     {
+<a class="jxr_linenumber" name="L1495" href="#L1495">1495</a>         Map.Entry&lt;String, Model&gt; entry = getModelEntry( reactor, groupId, artifactId );
+<a class="jxr_linenumber" name="L1496" href="#L1496">1496</a>         <strong class="jxr_keyword">return</strong> entry == <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">null</strong> : entry.getValue();
+<a class="jxr_linenumber" name="L1497" href="#L1497">1497</a>     }
+<a class="jxr_linenumber" name="L1498" href="#L1498">1498</a> 
+<a class="jxr_linenumber" name="L1499" href="#L1499">1499</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1500" href="#L1500">1500</a> <em class="jxr_javadoccomment">     * Returns the model that has the specified groupId and artifactId or &lt;code&gt;null&lt;/code&gt; if no such model exists.</em>
+<a class="jxr_linenumber" name="L1501" href="#L1501">1501</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1502" href="#L1502">1502</a> <em class="jxr_javadoccomment">     * @param reactor The map of models keyed by path.</em>
+<a class="jxr_linenumber" name="L1503" href="#L1503">1503</a> <em class="jxr_javadoccomment">     * @param groupId The groupId to match.</em>
+<a class="jxr_linenumber" name="L1504" href="#L1504">1504</a> <em class="jxr_javadoccomment">     * @param artifactId The artifactId to match.</em>
+<a class="jxr_linenumber" name="L1505" href="#L1505">1505</a> <em class="jxr_javadoccomment">     * @return The model entry or &lt;code&gt;null&lt;/code&gt; if the model was not in the reactor.</em>
+<a class="jxr_linenumber" name="L1506" href="#L1506">1506</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1507" href="#L1507">1507</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Map.Entry&lt;String, Model&gt; getModelEntry( Map&lt;String, Model&gt; reactor, String groupId,
+<a class="jxr_linenumber" name="L1508" href="#L1508">1508</a>                                                           String artifactId )
+<a class="jxr_linenumber" name="L1509" href="#L1509">1509</a>     {
+<a class="jxr_linenumber" name="L1510" href="#L1510">1510</a>         <strong class="jxr_keyword">for</strong> ( Map.Entry&lt;String, Model&gt; entry : reactor.entrySet() )
+<a class="jxr_linenumber" name="L1511" href="#L1511">1511</a>         {
+<a class="jxr_linenumber" name="L1512" href="#L1512">1512</a>             Model model = entry.getValue();
+<a class="jxr_linenumber" name="L1513" href="#L1513">1513</a>             <strong class="jxr_keyword">if</strong> ( groupId.equals( getGroupId( model ) ) &amp;&amp; artifactId.equals( getArtifactId( model ) ) )
+<a class="jxr_linenumber" name="L1514" href="#L1514">1514</a>             {
+<a class="jxr_linenumber" name="L1515" href="#L1515">1515</a>                 <strong class="jxr_keyword">return</strong> entry;
+<a class="jxr_linenumber" name="L1516" href="#L1516">1516</a>             }
+<a class="jxr_linenumber" name="L1517" href="#L1517">1517</a>         }
+<a class="jxr_linenumber" name="L1518" href="#L1518">1518</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1519" href="#L1519">1519</a>     }
+<a class="jxr_linenumber" name="L1520" href="#L1520">1520</a> 
+<a class="jxr_linenumber" name="L1521" href="#L1521">1521</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1522" href="#L1522">1522</a> <em class="jxr_javadoccomment">     * Returns a count of how many parents a model has in the reactor.</em>
+<a class="jxr_linenumber" name="L1523" href="#L1523">1523</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1524" href="#L1524">1524</a> <em class="jxr_javadoccomment">     * @param reactor The map of models keyed by path.</em>
+<a class="jxr_linenumber" name="L1525" href="#L1525">1525</a> <em class="jxr_javadoccomment">     * @param model The model.</em>
+<a class="jxr_linenumber" name="L1526" href="#L1526">1526</a> <em class="jxr_javadoccomment">     * @return The number of parents of this model in the reactor.</em>
+<a class="jxr_linenumber" name="L1527" href="#L1527">1527</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1528" href="#L1528">1528</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> getReactorParentCount( Map&lt;String, Model&gt; reactor, Model model )
+<a class="jxr_linenumber" name="L1529" href="#L1529">1529</a>     {
+<a class="jxr_linenumber" name="L1530" href="#L1530">1530</a>         <strong class="jxr_keyword">if</strong> ( model.getParent() == <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L1531" href="#L1531">1531</a>         {
+<a class="jxr_linenumber" name="L1532" href="#L1532">1532</a>             <strong class="jxr_keyword">return</strong> 0;
+<a class="jxr_linenumber" name="L1533" href="#L1533">1533</a>         }
+<a class="jxr_linenumber" name="L1534" href="#L1534">1534</a>         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L1535" href="#L1535">1535</a>         {
+<a class="jxr_linenumber" name="L1536" href="#L1536">1536</a>             Model parentModel = getModel( reactor, model.getParent().getGroupId(), model.getParent().getArtifactId() );
+<a class="jxr_linenumber" name="L1537" href="#L1537">1537</a>             <strong class="jxr_keyword">if</strong> ( parentModel != <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L1538" href="#L1538">1538</a>             {
+<a class="jxr_linenumber" name="L1539" href="#L1539">1539</a>                 <strong class="jxr_keyword">return</strong> getReactorParentCount( reactor, parentModel ) + 1;
+<a class="jxr_linenumber" name="L1540" href="#L1540">1540</a>             }
+<a class="jxr_linenumber" name="L1541" href="#L1541">1541</a>             <strong class="jxr_keyword">return</strong> 0;
+<a class="jxr_linenumber" name="L1542" href="#L1542">1542</a>         }
+<a class="jxr_linenumber" name="L1543" href="#L1543">1543</a>     }
+<a class="jxr_linenumber" name="L1544" href="#L1544">1544</a> 
+<a class="jxr_linenumber" name="L1545" href="#L1545">1545</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1546" href="#L1546">1546</a> <em class="jxr_javadoccomment">     * Reads a file into a String.</em>
+<a class="jxr_linenumber" name="L1547" href="#L1547">1547</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1548" href="#L1548">1548</a> <em class="jxr_javadoccomment">     * @param outFile The file to read.</em>
+<a class="jxr_linenumber" name="L1549" href="#L1549">1549</a> <em class="jxr_javadoccomment">     * @return String The content of the file.</em>
+<a class="jxr_linenumber" name="L1550" href="#L1550">1550</a> <em class="jxr_javadoccomment">     * @throws java.io.IOException when things go wrong.</em>
+<a class="jxr_linenumber" name="L1551" href="#L1551">1551</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1552" href="#L1552">1552</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> StringBuilder readXmlFile( File outFile )
+<a class="jxr_linenumber" name="L1553" href="#L1553">1553</a>         <strong class="jxr_keyword">throws</strong> IOException
+<a class="jxr_linenumber" name="L1554" href="#L1554">1554</a>     {
+<a class="jxr_linenumber" name="L1555" href="#L1555">1555</a>         <strong class="jxr_keyword">try</strong>( Reader reader = ReaderFactory.newXmlReader( outFile ) )
+<a class="jxr_linenumber" name="L1556" href="#L1556">1556</a>         {
+<a class="jxr_linenumber" name="L1557" href="#L1557">1557</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> StringBuilder( IOUtil.toString( reader ) );
+<a class="jxr_linenumber" name="L1558" href="#L1558">1558</a>         }
+<a class="jxr_linenumber" name="L1559" href="#L1559">1559</a>     }
+<a class="jxr_linenumber" name="L1560" href="#L1560">1560</a> 
+<a class="jxr_linenumber" name="L1561" href="#L1561">1561</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> <em class="jxr_javadoccomment">     * Returns the GAV coordinates of a model.</em>
+<a class="jxr_linenumber" name="L1563" href="#L1563">1563</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1564" href="#L1564">1564</a> <em class="jxr_javadoccomment">     * @param model the model.</em>
+<a class="jxr_linenumber" name="L1565" href="#L1565">1565</a> <em class="jxr_javadoccomment">     * @return the GAV coordinates of a model.</em>
+<a class="jxr_linenumber" name="L1566" href="#L1566">1566</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1567" href="#L1567">1567</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String getGAV( Model model )
+<a class="jxr_linenumber" name="L1568" href="#L1568">1568</a>     {
+<a class="jxr_linenumber" name="L1569" href="#L1569">1569</a>         <strong class="jxr_keyword">return</strong> getGroupId( model ) + <span class="jxr_string">":"</span> + getArtifactId( model ) + <span class="jxr_string">":"</span> + getVersion( model );
+<a class="jxr_linenumber" name="L1570" href="#L1570">1570</a>     }
+<a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> 
+<a class="jxr_linenumber" name="L1572" href="#L1572">1572</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> <em class="jxr_javadoccomment">     * Reads imported POMs from the dependency management section.</em>
+<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> <em class="jxr_javadoccomment">     * @param pom POM</em>
+<a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> <em class="jxr_javadoccomment">     * @return a non-null list of {@link Dependency} for each imported POM</em>
+<a class="jxr_linenumber" name="L1577" href="#L1577">1577</a> <em class="jxr_javadoccomment">     * @throws XMLStreamException XML stream exception</em>
+<a class="jxr_linenumber" name="L1578" href="#L1578">1578</a> <em class="jxr_javadoccomment">     * @see &lt;a href="https://github.com/mojohaus/versions-maven-plugin/issues/134"&gt;bug #134&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="L1579" href="#L1579">1579</a> <em class="jxr_javadoccomment">     * @since 2.4</em>
+<a class="jxr_linenumber" name="L1580" href="#L1580">1580</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1581" href="#L1581">1581</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> List&lt;Dependency&gt; readImportedPOMsFromDependencyManagementSection( ModifiedPomXMLEventReader pom )
+<a class="jxr_linenumber" name="L1582" href="#L1582">1582</a>         <strong class="jxr_keyword">throws</strong> XMLStreamException
+<a class="jxr_linenumber" name="L1583" href="#L1583">1583</a>     {
+<a class="jxr_linenumber" name="L1584" href="#L1584">1584</a>         List&lt;Dependency&gt; importedPOMs = <strong class="jxr_keyword">new</strong> ArrayList&lt;Dependency&gt;();
+<a class="jxr_linenumber" name="L1585" href="#L1585">1585</a>         Stack&lt;String&gt; stack = <strong class="jxr_keyword">new</strong> Stack&lt;String&gt;();
+<a class="jxr_linenumber" name="L1586" href="#L1586">1586</a> 
+<a class="jxr_linenumber" name="L1587" href="#L1587">1587</a>         String groupIdElement = <span class="jxr_string">"groupId"</span>;
+<a class="jxr_linenumber" name="L1588" href="#L1588">1588</a>         String artifactIdElement = <span class="jxr_string">"artifactId"</span>;
+<a class="jxr_linenumber" name="L1589" href="#L1589">1589</a>         String versionElement = <span class="jxr_string">"version"</span>;
+<a class="jxr_linenumber" name="L1590" href="#L1590">1590</a>         String typeElement = <span class="jxr_string">"type"</span>;
+<a class="jxr_linenumber" name="L1591" href="#L1591">1591</a>         String scopeElement = <span class="jxr_string">"scope"</span>;
+<a class="jxr_linenumber" name="L1592" href="#L1592">1592</a>         Set&lt;String&gt; recognizedElements =
+<a class="jxr_linenumber" name="L1593" href="#L1593">1593</a>             <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;( Arrays.asList( groupIdElement, artifactIdElement, versionElement, typeElement,
+<a class="jxr_linenumber" name="L1594" href="#L1594">1594</a>                                                 scopeElement ) );
+<a class="jxr_linenumber" name="L1595" href="#L1595">1595</a>         Map&lt;String, String&gt; depData = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L1596" href="#L1596">1596</a> 
+<a class="jxr_linenumber" name="L1597" href="#L1597">1597</a>         pom.rewind();
+<a class="jxr_linenumber" name="L1598" href="#L1598">1598</a> 
+<a class="jxr_linenumber" name="L1599" href="#L1599">1599</a>         String depMgmtDependencyPath = <span class="jxr_string">"/project/dependencyManagement/dependencies/dependency"</span>;
+<a class="jxr_linenumber" name="L1600" href="#L1600">1600</a> 
+<a class="jxr_linenumber" name="L1601" href="#L1601">1601</a>         <strong class="jxr_keyword">while</strong> ( pom.hasNext() )
+<a class="jxr_linenumber" name="L1602" href="#L1602">1602</a>         {
+<a class="jxr_linenumber" name="L1603" href="#L1603">1603</a>             XMLEvent event = pom.nextEvent();
+<a class="jxr_linenumber" name="L1604" href="#L1604">1604</a> 
+<a class="jxr_linenumber" name="L1605" href="#L1605">1605</a>             <strong class="jxr_keyword">if</strong> ( event.isStartElement() )
+<a class="jxr_linenumber" name="L1606" href="#L1606">1606</a>             {
+<a class="jxr_linenumber" name="L1607" href="#L1607">1607</a>                 <strong class="jxr_keyword">final</strong> String elementName = event.asStartElement().getName().getLocalPart();
+<a class="jxr_linenumber" name="L1608" href="#L1608">1608</a>                 String parent = <span class="jxr_string">""</span>;
+<a class="jxr_linenumber" name="L1609" href="#L1609">1609</a>                 <strong class="jxr_keyword">if</strong> ( !stack.isEmpty() )
+<a class="jxr_linenumber" name="L1610" href="#L1610">1610</a>                 {
+<a class="jxr_linenumber" name="L1611" href="#L1611">1611</a>                     parent = stack.peek();
+<a class="jxr_linenumber" name="L1612" href="#L1612">1612</a>                 }
+<a class="jxr_linenumber" name="L1613" href="#L1613">1613</a>                 String currentPath = parent + <span class="jxr_string">"/"</span> + elementName;
+<a class="jxr_linenumber" name="L1614" href="#L1614">1614</a>                 stack.push( currentPath );
+<a class="jxr_linenumber" name="L1615" href="#L1615">1615</a> 
+<a class="jxr_linenumber" name="L1616" href="#L1616">1616</a>                 <strong class="jxr_keyword">if</strong> ( currentPath.startsWith( depMgmtDependencyPath ) &amp;&amp; recognizedElements.contains( elementName ) )
+<a class="jxr_linenumber" name="L1617" href="#L1617">1617</a>                 {
+<a class="jxr_linenumber" name="L1618" href="#L1618">1618</a>                     <strong class="jxr_keyword">final</strong> String elementText = pom.getElementText().trim();
+<a class="jxr_linenumber" name="L1619" href="#L1619">1619</a>                     depData.put( elementName, elementText );
+<a class="jxr_linenumber" name="L1620" href="#L1620">1620</a>                     stack.pop();
+<a class="jxr_linenumber" name="L1621" href="#L1621">1621</a>                 }
+<a class="jxr_linenumber" name="L1622" href="#L1622">1622</a>             }
+<a class="jxr_linenumber" name="L1623" href="#L1623">1623</a>             <strong class="jxr_keyword">if</strong> ( event.isEndElement() )
+<a class="jxr_linenumber" name="L1624" href="#L1624">1624</a>             {
+<a class="jxr_linenumber" name="L1625" href="#L1625">1625</a>                 String path = stack.pop();
+<a class="jxr_linenumber" name="L1626" href="#L1626">1626</a>                 <strong class="jxr_keyword">if</strong> ( depMgmtDependencyPath.equals( path ) )
+<a class="jxr_linenumber" name="L1627" href="#L1627">1627</a>                 {
+<a class="jxr_linenumber" name="L1628" href="#L1628">1628</a>                     <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"pom"</span>.equals( depData.get( typeElement ) ) &amp;&amp; <span class="jxr_string">"import"</span>.equals( depData.get( scopeElement ) ) )
+<a class="jxr_linenumber" name="L1629" href="#L1629">1629</a>                     {
+<a class="jxr_linenumber" name="L1630" href="#L1630">1630</a>                         Dependency dependency = <strong class="jxr_keyword">new</strong> Dependency();
+<a class="jxr_linenumber" name="L1631" href="#L1631">1631</a>                         dependency.setGroupId( depData.get( groupIdElement ) );
+<a class="jxr_linenumber" name="L1632" href="#L1632">1632</a>                         dependency.setArtifactId( depData.get( artifactIdElement ) );
+<a class="jxr_linenumber" name="L1633" href="#L1633">1633</a>                         dependency.setVersion( depData.get( versionElement ) );
+<a class="jxr_linenumber" name="L1634" href="#L1634">1634</a>                         dependency.setType( depData.get( typeElement ) );
+<a class="jxr_linenumber" name="L1635" href="#L1635">1635</a>                         dependency.setScope( depData.get( scopeElement ) );
+<a class="jxr_linenumber" name="L1636" href="#L1636">1636</a>                         importedPOMs.add( dependency );
+<a class="jxr_linenumber" name="L1637" href="#L1637">1637</a>                     }
+<a class="jxr_linenumber" name="L1638" href="#L1638">1638</a>                     depData.clear();
+<a class="jxr_linenumber" name="L1639" href="#L1639">1639</a>                 }
+<a class="jxr_linenumber" name="L1640" href="#L1640">1640</a>             }
+<a class="jxr_linenumber" name="L1641" href="#L1641">1641</a>         }
+<a class="jxr_linenumber" name="L1642" href="#L1642">1642</a>         <strong class="jxr_keyword">return</strong> importedPOMs;
+<a class="jxr_linenumber" name="L1643" href="#L1643">1643</a>     }
+<a class="jxr_linenumber" name="L1644" href="#L1644">1644</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2018 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>
