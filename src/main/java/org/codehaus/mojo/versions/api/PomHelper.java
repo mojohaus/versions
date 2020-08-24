@@ -1356,6 +1356,55 @@ public class PomHelper
     }
 
     /**
+     * Finds the local root of the specified project.
+     *
+     * @param project The project to find the local root for.
+     * @param localRepository the local repo.
+     * @param globalProfileManager the global profile manager.
+     * @param logger The logger to log to.
+     * @return The local root (note this may be the project passed as an argument).
+     */
+    public static MavenProject getLocalRoot( MavenProjectBuilder builder, MavenProject project,
+                                             ArtifactRepository localRepository, ProfileManager globalProfileManager,
+                                             Log logger )
+    {
+        logger.info( "Searching for local aggregator root..." );
+        while ( true )
+        {
+            final File parentDir = project.getBasedir().getParentFile();
+            if ( parentDir != null && parentDir.isDirectory() )
+            {
+                logger.debug( "Checking to see if " + parentDir + " is an aggregator parent" );
+                File parent = new File( parentDir, "pom.xml" );
+                if ( parent.isFile() )
+                {
+                    try
+                    {
+                        final MavenProject parentProject =
+                            builder.build( parent, localRepository, globalProfileManager );
+                        if ( getAllChildModules( parentProject, logger ).contains( project.getBasedir().getName() ) )
+                        {
+                            logger.debug( parentDir + " is an aggregator parent" );
+                            project = parentProject;
+                            continue;
+                        }
+                        else
+                        {
+                            logger.debug( parentDir + " is not an aggregator parent" );
+                        }
+                    }
+                    catch ( ProjectBuildingException e )
+                    {
+                        logger.warn( e );
+                    }
+                }
+            }
+            logger.debug( "Local aggregation root is " + project.getBasedir() );
+            return project;
+        }
+    }
+
+    /**
      * Builds a map of raw models keyed by module path.
      *
      * @param project The project to build from.
