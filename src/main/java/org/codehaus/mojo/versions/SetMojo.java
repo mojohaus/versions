@@ -189,6 +189,16 @@ public class SetMojo
     private boolean processAllModules;
 
     /**
+     * Whether to start processing at the local aggregation root (which might be a parent module
+     * of that module where Maven is executed in, and the version change may affect parent and sibling modules).
+     * Setting to fale makes sure only the module (and it's submodule) where Maven is executed for is affected.
+     *
+     * @since 2.9
+     */
+    @Parameter( property = "processFromLocalAggregationRoot", defaultValue = "true" )
+    private boolean processFromLocalAggregationRoot;
+
+    /**
      * The changes to module coordinates. Guarded by this.
      */
     private final transient List<VersionChange> sourceChanges = new ArrayList<>();
@@ -281,7 +291,13 @@ public class SetMojo
 
         try
         {
-            final MavenProject project = getProject();
+            final MavenProject project;
+            if ( processFromLocalAggregationRoot ) {
+                project = PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
+            }
+            else {
+                project = getProject();
+            }
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
