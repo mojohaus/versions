@@ -373,10 +373,7 @@ public class DefaultVersionsHelper
     }
 
     static boolean isClasspathUri(String uri) {
-        boolean startsWithProtocol = null != uri && uri.startsWith(CLASSPATH_PROTOCOL);
-        boolean hasColonNext = null != uri && uri.charAt(CLASSPATH_PROTOCOL.length()) == ':';
-
-        return startsWithProtocol && hasColonNext;
+        return (uri != null && uri.startsWith(CLASSPATH_PROTOCOL + ":"));
     }
 
     /**
