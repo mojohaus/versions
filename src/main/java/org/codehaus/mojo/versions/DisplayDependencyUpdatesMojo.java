@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Arrays;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -55,7 +56,7 @@ import javax.xml.stream.XMLStreamException;
  */
 @Mojo( name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false, threadSafe = true )
 public class DisplayDependencyUpdatesMojo
-    extends AbstractVersionsDisplayMojo
+        extends AbstractVersionsDisplayMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -102,7 +103,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the major version number to be changed.
      * You need to set {@link #allowAnyUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      * @since 2.5
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
@@ -111,7 +112,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the minor version number to be changed.
      * You need to set {@link #allowMajorUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -121,7 +122,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the incremental version number to be changed.
      * You need to set {@link #allowMinorUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -147,6 +148,15 @@ public class DisplayDependencyUpdatesMojo
      */
     @Parameter( property = "verbose", defaultValue = "false" )
     private boolean verbose;
+
+
+    /**
+     * Limit finding available updates to specific artifacts. Defaults to no limit.
+     *
+     * @since 2.9
+     */
+    @Parameter( property = "includes" )
+    private String includes;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -207,10 +217,10 @@ public class DisplayDependencyUpdatesMojo
             {
                 Dependency t =j.next();
                 if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
-                    && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
-                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )
-                    && ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) )
-                    && ( c.getVersion() == null || t.getVersion() == null
+                        && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
+                        && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )
+                        && ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) )
+                        && ( c.getVersion() == null || t.getVersion() == null
                         || StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
                 {
                     matched = true;
@@ -261,7 +271,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 1.0-alpha-1
      */
     public void execute()
-        throws MojoExecutionException, MojoFailureException
+            throws MojoExecutionException, MojoFailureException
     {
         logInit();
 
@@ -273,7 +283,7 @@ public class DisplayDependencyUpdatesMojo
             for ( Dependency dependency : dependenciesFromPom )
             {
                 getLog().debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
-                    + ":" + dependency.getVersion() );
+                        + ":" + dependency.getVersion() );
                 if ( dependency.getVersion() == null )
                 {
                     // get parent and get the information from there.
@@ -283,13 +293,13 @@ public class DisplayDependencyUpdatesMojo
                         if ( getProject().getParent().getDependencyManagement() != null )
                         {
                             List<Dependency> parentDeps =
-                                getProject().getParent().getDependencyManagement().getDependencies();
+                                    getProject().getParent().getDependencyManagement().getDependencies();
                             for ( Dependency parentDep : parentDeps )
                             {
                                 // only groupId && artifactId needed cause version is null
                                 if ( dependency.getGroupId().equals( parentDep.getGroupId() )
-                                    && dependency.getArtifactId().equals( parentDep.getArtifactId() )
-                                    && dependency.getType().equals( parentDep.getType() ) )
+                                        && dependency.getArtifactId().equals( parentDep.getArtifactId() )
+                                        && dependency.getType().equals( parentDep.getType() ) )
                                 {
                                     dependencyManagement.add( parentDep );
                                 }
@@ -299,7 +309,7 @@ public class DisplayDependencyUpdatesMojo
                     else
                     {
                         String message = "We can't get the version for the dependency " + dependency.getGroupId() + ":"
-                            + dependency.getArtifactId() + " cause there does not exist a parent.";
+                                + dependency.getArtifactId() + " cause there does not exist a parent.";
                         getLog().error( message );
                         // Throw error cause we will not able to get a version for a dependency.
                         throw new MojoExecutionException( message );
@@ -320,18 +330,23 @@ public class DisplayDependencyUpdatesMojo
             dependencies = removeDependencyManagment( dependencies, dependencyManagement );
         }
 
+        dependencyManagement = filterIncludes( dependencyManagement );
+        dependencies = filterIncludes( dependencies );
+
         Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
 
         if ( isProcessingPluginDependencies() )
         {
             pluginDependencies = extractDependenciesFromPlugins( getProject().getBuildPlugins() );
+            pluginDependencies = filterIncludes( pluginDependencies );
         }
 
         Set<Dependency> pluginDependenciesInPluginManagement = new TreeSet<>( new DependencyComparator() );
         if ( isProcessPluginDependenciesInDependencyManagement() )
         {
             pluginDependenciesInPluginManagement =
-                extractPluginDependenciesFromPluginsInPluginManagement( getProject().getBuild() );
+                    extractPluginDependenciesFromPluginsInPluginManagement( getProject().getBuild() );
+            pluginDependenciesInPluginManagement = filterIncludes( pluginDependenciesInPluginManagement );
         }
 
         try
@@ -339,7 +354,7 @@ public class DisplayDependencyUpdatesMojo
             if ( isProcessingDependencyManagement() )
             {
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
-                            "Dependency Management" );
+                        "Dependency Management" );
             }
             if ( isProcessingDependencies() )
             {
@@ -348,7 +363,7 @@ public class DisplayDependencyUpdatesMojo
             if ( isProcessPluginDependenciesInDependencyManagement() )
             {
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependenciesInPluginManagement, false ),
-                            "pluginManagement of plugins" );
+                        "pluginManagement of plugins" );
             }
             if ( isProcessingPluginDependencies() )
             {
@@ -411,12 +426,12 @@ public class DisplayDependencyUpdatesMojo
             else
             {
                 ArtifactVersion newestVersion =
-                    versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
+                        versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null ? null
-                                : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
+                        : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
                 if ( latest != null
-                    && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
+                        && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
                 {
                     latest = null;
                 }
@@ -455,9 +470,9 @@ public class DisplayDependencyUpdatesMojo
                 }
                 logLine( false, "" );
             }
-        }        
-        
-        
+        }
+
+
         if ( withUpdates.isEmpty() )
         {
             if ( !usingCurrent.isEmpty() )
@@ -487,9 +502,104 @@ public class DisplayDependencyUpdatesMojo
      * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         // do nothing
+    }
+
+
+    /**
+     * Filters the set of dependencies by the includes property.
+     *
+     * @return a new Set of dependencies filtered by includes, or the original Set if no includes was specified.
+     */
+    private Set<Dependency> filterIncludes( Set<Dependency> dependencies )
+    {
+        Set<Dependency> filteredDependencies = new TreeSet<>( new DependencyComparator() );
+
+        if ( includes == null )
+        {
+            return dependencies;
+        }
+
+        for ( Dependency dependency : dependencies )
+        {
+
+
+
+            String[] tokens = new String[] {
+                    dependency.getGroupId(),
+                    dependency.getArtifactId(),
+            };
+
+            List<String> patterns = Arrays.asList( includes.split( "," ) );
+
+            getLog().debug( "+ Filtering dependencies by artifact include patterns: " + patterns );
+
+            for( String pattern : patterns)
+            {
+                boolean matched = true;
+                String[] patternTokens = pattern.split( ":" );
+
+                for( int count = 0; count < patternTokens.length; count++ )
+                {
+                    matched = matched && matches( tokens[ count ], patternTokens[ count ] );
+                }
+
+                if( matched ) {
+                    filteredDependencies.add( dependency );
+                }
+            }
+        }
+        return filteredDependencies;
+    }
+
+
+    /**
+     * Gets whether the specified token matches the specified pattern segment.
+     *
+     * @param token
+     *            the token to check
+     * @param pattern
+     *            the pattern segment to match, as defined above
+     * @return <code>true</code> if the specified token is matched by the specified pattern segment
+     */
+    private boolean matches( String token, String pattern )
+    {
+        boolean matches;
+
+        // support full wildcard and implied wildcard
+        if ( "*".equals( pattern ) || pattern.length() == 0 )
+        {
+            matches = true;
+        }
+        // support contains wildcard
+        else if ( pattern.startsWith( "*" ) && pattern.endsWith( "*" ) )
+        {
+            String contains = pattern.substring( 1, pattern.length() - 1 );
+
+            matches = token.contains( contains );
+        }
+        // support leading wildcard
+        else if ( pattern.startsWith( "*" ) )
+        {
+            String suffix = pattern.substring( 1 );
+
+            matches = token.endsWith( suffix );
+        }
+        // support trailing wildcard
+        else if ( pattern.endsWith( "*" ) )
+        {
+            String prefix = pattern.substring( 0, pattern.length() - 1 );
+
+            matches = token.startsWith( prefix );
+        }
+        else
+        {
+            matches = token.equals( pattern );
+        }
+
+        return matches;
     }
 
 }
