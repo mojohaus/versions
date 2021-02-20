@@ -870,7 +870,7 @@ public class DefaultVersionsHelper
                                                                     boolean autoLinkItems )
         throws MojoExecutionException
     {
-        Map<String, Property> properties = new HashMap<String, Property>();
+        Map<String, Property> properties = new TreeMap<String, Property>();
         if ( propertyDefinitions != null )
         {
             for ( Property propertyDefinition : propertyDefinitions )
