@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -212,6 +213,11 @@ public class ResolveRangesMojo
             if ( isExcludeReactor() && isProducedByReactor( dep ) )
             {
                 continue;
+            }
+
+            if ( StringUtils.isBlank( dep.getVersion() ) )
+            {
+                throw new MojoExecutionException( "Found invalid managed dependency " + toString( dep ) + " without a version");
             }
 
             if ( isHandledByProperty( dep ) )
