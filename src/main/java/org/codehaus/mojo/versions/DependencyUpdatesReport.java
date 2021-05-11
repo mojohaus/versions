@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -129,10 +130,24 @@ public class DependencyUpdatesReport
                 // Using the original model to get the original dependencyManagement entries and
                 // not the interpolated model.
                 // TODO: I'm not 100% sure if this will work correctly in all cases.
+
+                // Grab the project properties
+                Properties props = getProject().getProperties();
                 for ( Dependency dep : getProject().getOriginalModel().getDependencyManagement().getDependencies() )
                 {
+                    String version = dep.getVersion();
                     getLog().debug( "Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
-                        + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );
+                        + version + ":" + dep.getType() + ":" + dep.getScope() );
+                    // if the version is referencing a property, dereference it
+                    if ( version.startsWith( "${" ) )
+                    {
+                        String propVersion = props.getProperty( version.substring( 2, version.length() - 1 ) );
+                        if ( propVersion != null )
+                        {
+                            dep.setVersion( propVersion );
+                        }
+                    }
+
                 }
                 dependencyManagement.addAll( getProject().getOriginalModel().getDependencyManagement().getDependencies() );
             }
