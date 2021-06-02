@@ -73,7 +73,7 @@ public class ArtifactVersions
     {
         this.artifact = artifact;
         this.versionComparator = versionComparator;
-        this.versions = new TreeSet<ArtifactVersion>( versionComparator );
+        this.versions = new TreeSet<>( versionComparator );
         this.versions.addAll( versions );
         if ( artifact.getVersion() != null )
         {
@@ -174,7 +174,7 @@ public class ArtifactVersions
                 result.add( candidate );
             }
         }
-        return result.toArray( new ArtifactVersion[result.size()] );
+        return result.toArray( new ArtifactVersion[0] );
     }
 
     public VersionComparator getVersionComparator()
@@ -187,12 +187,7 @@ public class ArtifactVersions
      */
     public String toString()
     {
-        final StringBuilder sb = new StringBuilder();
-        sb.append( "ArtifactVersions" );
-        sb.append( "{artifact=" ).append( artifact );
-        sb.append( ", versions=" ).append( versions );
-        sb.append( ", versionComparator=" ).append( versionComparator );
-        sb.append( '}' );
-        return sb.toString();
+        return "ArtifactVersions" + "{artifact=" + artifact + ", versions=" + versions + ", versionComparator="
+            + versionComparator + '}';
     }
 }

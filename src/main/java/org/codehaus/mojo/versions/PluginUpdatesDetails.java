@@ -23,7 +23,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -64,9 +63,9 @@ public class PluginUpdatesDetails
 
     public boolean isDependencyUpdateAvailable()
     {
-        for ( Iterator i = dependencyVersions.values().iterator(); i.hasNext(); )
+        for ( Object o : dependencyVersions.values() )
         {
-            ArtifactVersions versions = (ArtifactVersions) i.next();
+            ArtifactVersions versions = (ArtifactVersions) o;
             ArtifactVersion[] dependencyUpdates = versions.getAllUpdates( UpdateScope.ANY, includeSnapshots );
             if ( dependencyUpdates != null && dependencyUpdates.length > 0 )
             {

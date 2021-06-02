@@ -207,10 +207,9 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return null;
         }
-        Iterator<?> iter = getProject().getDependencyArtifacts().iterator();
-        while ( iter.hasNext() )
+        for ( Object o : getProject().getDependencyArtifacts() )
         {
-            Artifact artifact = (Artifact) iter.next();
+            Artifact artifact = (Artifact) o;
             if ( compare( artifact, dependency ) )
             {
                 return artifact;
@@ -334,11 +333,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return false;
         }
-        if ( !StringUtils.equals( project.getArtifactId(), dep.getArtifactId() ) )
-        {
-            return false;
-        }
-        return true;
+        return StringUtils.equals( project.getArtifactId(), dep.getArtifactId() );
     }
 
     /**
@@ -363,11 +358,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return false;
         }
-        if ( !StringUtils.equals( artifact.getClassifier(), dep.getClassifier() ) )
-        {
-            return false;
-        }
-        return true;
+        return StringUtils.equals( artifact.getClassifier(), dep.getClassifier() );
     }
 
     /**
@@ -495,9 +486,9 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         int nextRangeStartDelimiterIndex = -1;
 
         char[] delimiters = chars.toCharArray();
-        for ( int i = 0; i < delimiters.length; i++ )
+        for ( char delimiter : delimiters )
         {
-            int index = includeString.indexOf( delimiters[i] );
+            int index = includeString.indexOf( delimiter );
             if ( index >= 0 && nextRangeStartDelimiterIndex >= 0 )
             {
                 nextRangeStartDelimiterIndex = Math.min( index, nextRangeStartDelimiterIndex );

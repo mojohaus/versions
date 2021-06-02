@@ -832,9 +832,9 @@ public abstract class AbstractVersionsReportRenderer
         {
             tmp = artifactVersions;
         }
-        for ( int i = 0; i < tmp.length; i++ )
+        for ( ArtifactVersion artifactVersion : tmp )
         {
-            rangeVersions.add( tmp[i].toString() );
+            rangeVersions.add( artifactVersion.toString() );
         }
         return rangeVersions;
     }

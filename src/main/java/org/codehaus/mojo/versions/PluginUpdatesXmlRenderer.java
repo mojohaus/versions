@@ -83,8 +83,7 @@ public class PluginUpdatesXmlRenderer
     {
         StringBuilder sb = new StringBuilder();
         sb.append( "<PluginUpdatesReport>" ).append( NL );
-        Map<Plugin, PluginUpdatesDetails> allUpdates =
-            new TreeMap<Plugin, PluginUpdatesDetails>( new PluginComparator() );
+        Map<Plugin, PluginUpdatesDetails> allUpdates = new TreeMap<>( new PluginComparator() );
         allUpdates.putAll( pluginManagementUpdates );
         allUpdates.putAll( pluginUpdates );
         sb.append( getSummaryBlock( allUpdates ) );
@@ -106,11 +105,8 @@ public class PluginUpdatesXmlRenderer
 
     private static String getSummaryBlock( Map<Plugin, PluginUpdatesDetails> allUpdates )
     {
-        Collection<ArtifactVersions> allVersions = new ArrayList<ArtifactVersions>();
-        for ( PluginUpdatesDetails details : allUpdates.values() )
-        {
-            allVersions.add( details.getArtifactVersions() );
-        }
+        Collection<ArtifactVersions> allVersions = new ArrayList<>();
+        allUpdates.values().forEach( details -> allVersions.add( details.getArtifactVersions() ) );
         return DependencyUpdatesXmlRenderer.getSummaryBlock( allVersions );
     }
 

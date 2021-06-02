@@ -159,10 +159,7 @@ public class DisplayDependencyUpdatesMojo
             {
                 if ( plugin.getDependencies() != null && !plugin.getDependencies().isEmpty() )
                 {
-                    for ( Dependency pluginDependency : plugin.getDependencies() )
-                    {
-                        result.add( pluginDependency );
-                    }
+                    result.addAll( plugin.getDependencies() );
                 }
             }
         }
@@ -176,10 +173,7 @@ public class DisplayDependencyUpdatesMojo
         {
             if ( plugin.getDependencies() != null && !plugin.getDependencies().isEmpty() )
             {
-                for ( Dependency pluginDependency : plugin.getDependencies() )
-                {
-                    result.add( pluginDependency );
-                }
+                result.addAll( plugin.getDependencies() );
             }
         }
         return result;
@@ -198,20 +192,19 @@ public class DisplayDependencyUpdatesMojo
     private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
     {
         Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
-        for ( Iterator<Dependency> i = dependencies.iterator(); i.hasNext(); )
+        for ( Dependency c : dependencies )
         {
-            Dependency c = i.next();
             boolean matched = false;
             Iterator<Dependency> j = dependencyManagement.iterator();
             while ( !matched && j.hasNext() )
             {
-                Dependency t =j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() )
-                    && StringUtils.equals( t.getArtifactId(), c.getArtifactId() )
-                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) )
-                    && ( t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) )
-                    && ( c.getVersion() == null || t.getVersion() == null
-                        || StringUtils.equals( t.getVersion(), c.getVersion() ) ) )
+                Dependency t = j.next();
+                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) && StringUtils.equals( t.getArtifactId(),
+                                                                                                 c.getArtifactId() )
+                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) ) && (
+                    t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) ) && (
+                    c.getVersion() == null || t.getVersion() == null || StringUtils.equals( t.getVersion(),
+                                                                                            c.getVersion() ) ) )
                 {
                     matched = true;
                     break;
@@ -355,11 +348,7 @@ public class DisplayDependencyUpdatesMojo
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
             }
         }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( InvalidVersionSpecificationException | ArtifactMetadataRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }

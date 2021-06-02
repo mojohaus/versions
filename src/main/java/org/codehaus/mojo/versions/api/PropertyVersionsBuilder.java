@@ -47,9 +47,9 @@ class PropertyVersionsBuilder
 
     private final VersionsHelper helper;
 
-    private final Map<String, Boolean> upperBounds = new LinkedHashMap<String, Boolean>();
+    private final Map<String, Boolean> upperBounds = new LinkedHashMap<>();
 
-    private final Map<String, Boolean> lowerBounds = new LinkedHashMap<String, Boolean>();
+    private final Map<String, Boolean> lowerBounds = new LinkedHashMap<>();
 
     /**
      * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.
@@ -62,7 +62,7 @@ class PropertyVersionsBuilder
     {
         this.profileId = profileId;
         this.name = name;
-        this.associations = new TreeSet<ArtifactAssociation>();
+        this.associations = new TreeSet<>();
         this.helper = helper;
     }
 
@@ -88,7 +88,7 @@ class PropertyVersionsBuilder
 
     public ArtifactAssociation[] getAssociations()
     {
-        return associations.toArray( new ArtifactAssociation[associations.size()] );
+        return associations.toArray( new ArtifactAssociation[0] );
     }
 
     public PropertyVersions newPropertyVersions()
@@ -216,12 +216,12 @@ class PropertyVersionsBuilder
 
     private VersionComparator[] lookupComparators()
     {
-        Set<VersionComparator> result = new HashSet<VersionComparator>();
+        Set<VersionComparator> result = new HashSet<>();
         for ( ArtifactAssociation association : associations )
         {
             result.add( helper.getVersionComparator( association.getArtifact() ) );
         }
-        return result.toArray( new VersionComparator[result.size()] );
+        return result.toArray( new VersionComparator[0] );
     }
 
     private final class PropertyVersionComparator

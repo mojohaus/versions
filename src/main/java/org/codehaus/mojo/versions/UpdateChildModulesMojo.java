@@ -32,8 +32,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -79,24 +77,20 @@ public class UpdateChildModulesMojo
         {
             final Map<String, Model> reactor = PomHelper.getReactorModels( getProject(), getLog() );
             List<String> order = new ArrayList<>( reactor.keySet() );
-            Collections.sort( order, new Comparator<String>()
-            {
-                public int compare( String o1, String o2 )
+            order.sort( ( o1, o2 ) -> {
+                Model m1 = reactor.get( o1 );
+                Model m2 = reactor.get( o2 );
+                int d1 = PomHelper.getReactorParentCount( reactor, m1 );
+                int d2 = PomHelper.getReactorParentCount( reactor, m2 );
+                if ( d1 < d2 )
                 {
-                    Model m1 = reactor.get( o1 );
-                    Model m2 = reactor.get( o2 );
-                    int d1 = PomHelper.getReactorParentCount( reactor, m1 );
-                    int d2 = PomHelper.getReactorParentCount( reactor, m2 );
-                    if ( d1 < d2 )
-                    {
-                        return -1;
-                    }
-                    else if ( d1 > d2 )
-                    {
-                        return 1;
-                    }
-                    return 0;
+                    return -1;
                 }
+                else if ( d1 > d2 )
+                {
+                    return 1;
+                }
+                return 0;
             } );
 
             for ( String sourcePath : order )

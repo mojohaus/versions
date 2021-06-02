@@ -140,18 +140,17 @@ public class PropertyVersions
 
     public ArtifactAssociation[] getAssociations()
     {
-        return associations.toArray( new ArtifactAssociation[associations.size()] );
+        return associations.toArray( new ArtifactAssociation[0] );
     }
 
     private VersionComparator[] lookupComparators()
     {
         Set<VersionComparator> result = new HashSet();
-        Iterator<ArtifactAssociation> i = associations.iterator();
-        while ( i.hasNext() )
+        for ( ArtifactAssociation association : associations )
         {
-            result.add( helper.getVersionComparator( i.next().getArtifact() ) );
+            result.add( helper.getVersionComparator( association.getArtifact() ) );
         }
-        return result.toArray( new VersionComparator[result.size()] );
+        return result.toArray( new VersionComparator[0] );
     }
 
     /**
@@ -262,7 +261,7 @@ public class PropertyVersions
         }
         else
         {
-            final ArtifactVersion[] answer = result.toArray( new ArtifactVersion[result.size()] );
+            final ArtifactVersion[] answer = result.toArray( new ArtifactVersion[0] );
             VersionComparator[] rules = lookupComparators();
             assert rules.length > 0;
             Arrays.sort( answer, rules[0] );
