@@ -1,0 +1,2 @@
+_extends: .github
+tag-template: versions-maven-plugin-$NEXT_MINOR_VERSION
