@@ -405,7 +405,7 @@ public abstract class UpdateScope
      * @return the enum constant of the specified enum type with the specified name
      * @throws IllegalArgumentException if the specified enum type has no constant with the specified name, or the
      *             specified class object does not represent an enum type
-     * @throws NullPointerException if <tt>enumType</tt> or <tt>name</tt> is null
+     * @throws NullPointerException if <code>name</code> is null
      */
     public static UpdateScope valueOf( String name )
     {
