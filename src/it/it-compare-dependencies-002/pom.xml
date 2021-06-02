@@ -9,7 +9,7 @@
   <name>compare dependency versions</name>
 
   <properties>
-    <junit.version>4.8</junit.version>
+    <junit.version>4.13.1</junit.version>
     <another.property>1</another.property>
   </properties>
 
