@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>50</version>
+    <version>63</version>
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
@@ -107,7 +107,8 @@
   </issueManagement>
 
   <properties>
-    <mojo.java.target>1.7</mojo.java.target>
+    <mojo.java.target>1.8</mojo.java.target>
+    <maven.compiler.source>${mojo.java.target}</maven.compiler.source>
 
     <mavenVersion>2.2.1</mavenVersion>
     <wagonVersion>3.4.0</wagonVersion>
@@ -268,29 +269,12 @@
           <artifactId>modello-maven-plugin</artifactId>
           <version>1.11</version>
         </plugin>
-        <!-- TODO remove when upgrading parent to 60 -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>3.2.0</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>3.2.1</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.2.0</version>
-        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.5.1</version>
         <configuration>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
         </configuration>
@@ -308,7 +292,7 @@
         <artifactId>animal-sniffer-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>check-java17</id>
+            <id>check-java18</id>
             <phase>test</phase>
             <goals>
               <goal>check</goal>
@@ -316,7 +300,7 @@
             <configuration>
               <signature>
                 <groupId>org.codehaus.mojo.signature</groupId>
-                <artifactId>java17</artifactId>
+                <artifactId>java18</artifactId>
                 <version>1.0</version>
               </signature>
             </configuration>
@@ -390,7 +374,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
-        <version>3.2.2</version>
         <configuration>
           <projectsDirectory>src/it</projectsDirectory>
           <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
@@ -429,7 +412,6 @@
 
   <reporting>
     <plugins>
-
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
