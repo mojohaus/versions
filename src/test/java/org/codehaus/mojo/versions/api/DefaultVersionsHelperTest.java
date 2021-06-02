@@ -76,7 +76,7 @@ public class DefaultVersionsHelperTest
         when( artifact.getGroupId() ).thenReturn( "com.mycompany.maven" );
         when( artifact.getArtifactId() ).thenReturn( "artifact-one" );
         
-        final List<ArtifactVersion> artifactVersions = new ArrayList<ArtifactVersion>();
+        final List<ArtifactVersion> artifactVersions = new ArrayList<>();
         
         artifactVersions.add( new DefaultArtifactVersion( "one" ) );
         artifactVersions.add( new DefaultArtifactVersion( "two" ) );
@@ -108,7 +108,7 @@ public class DefaultVersionsHelperTest
         when( artifact.getGroupId() ).thenReturn( "other.company" );
         when( artifact.getArtifactId() ).thenReturn( "artifact-two" );
         
-        final List<ArtifactVersion> artifactVersions = new ArrayList<ArtifactVersion>();
+        final List<ArtifactVersion> artifactVersions = new ArrayList<>();
         
         final ArtifactVersion one = new DefaultArtifactVersion( "one" );
         final ArtifactVersion two = new DefaultArtifactVersion( "two" );
