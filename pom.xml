@@ -108,6 +108,7 @@
 
   <properties>
     <mojo.java.target>1.8</mojo.java.target>
+    <maven.compiler.source>${mojo.java.target}</maven.compiler.source>
 
     <mavenVersion>2.2.1</mavenVersion>
     <wagonVersion>3.4.0</wagonVersion>
