@@ -199,12 +199,12 @@ public class DisplayDependencyUpdatesMojo
             while ( !matched && j.hasNext() )
             {
                 Dependency t = j.next();
-                if ( StringUtils.equals( t.getGroupId(), c.getGroupId() ) && StringUtils.equals( t.getArtifactId(),
-                                                                                                 c.getArtifactId() )
-                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), c.getScope() ) ) && (
-                    t.getClassifier() == null || StringUtils.equals( t.getClassifier(), c.getClassifier() ) ) && (
-                    c.getVersion() == null || t.getVersion() == null || StringUtils.equals( t.getVersion(),
-                                                                                            c.getVersion() ) ) )
+                if ( StringUtils.equals( t.getGroupId(), dependency.getGroupId() ) && StringUtils.equals( t.getArtifactId(),
+                                                                                                 dependency.getArtifactId() )
+                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), dependency.getScope() ) ) && (
+                    t.getClassifier() == null || StringUtils.equals( t.getClassifier(), dependency.getClassifier() ) ) && (
+                        dependency.getVersion() == null || t.getVersion() == null || StringUtils.equals( t.getVersion(),
+                                                                                            dependency.getVersion() ) ) )
                 {
                     matched = true;
                     break;
@@ -212,7 +212,7 @@ public class DisplayDependencyUpdatesMojo
             }
             if ( !matched )
             {
-                result.add( c );
+                result.add( dependency );
             }
         }
         return result;
