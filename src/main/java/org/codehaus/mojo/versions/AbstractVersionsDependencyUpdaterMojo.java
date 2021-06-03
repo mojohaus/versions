@@ -209,7 +209,6 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         }
         for ( Artifact dependencyArtifact : (Artifact) getProject().getDependencyArtifacts() )
         {
-            Artifact artifact = (Artifact) o;
             if ( compare( artifact, dependency ) )
             {
                 return artifact;
