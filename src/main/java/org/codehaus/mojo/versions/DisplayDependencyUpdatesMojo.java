@@ -192,7 +192,7 @@ public class DisplayDependencyUpdatesMojo
     private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
     {
         Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
-        for ( Dependency c : dependencies )
+        for ( Dependency dependency : dependencies )
         {
             boolean matched = false;
             Iterator<Dependency> j = dependencyManagement.iterator();
