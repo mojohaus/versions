@@ -332,7 +332,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return false;
         }
-        return StringUtils.equals( project.getArtifactId(), dep.getArtifactId() );
+        return project.getArtifactId().equals( dep.getArtifactId() );
     }
 
     /**
