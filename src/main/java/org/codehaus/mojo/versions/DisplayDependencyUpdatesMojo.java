@@ -196,10 +196,8 @@ public class DisplayDependencyUpdatesMojo
         for ( Dependency dependency : dependencies )
         {
             boolean matched = false;
-            Iterator<Dependency> managedDependencie = dependencyManagement.iterator();
-            while ( !matched && managedDependencie.hasNext() )
+            for ( Dependency managedDependency : dependencyManagement )
             {
-                Dependency managedDependency = managedDependencie.next();
                 if ( dependenciesMatch( dependency, managedDependency ) )
                 {
                     matched = true;
@@ -227,21 +225,21 @@ public class DisplayDependencyUpdatesMojo
             return false;
         }
 
-        if ( managedDependency.getScope() == null || StringUtils.equals( managedDependency.getScope(),
-                dependency.getScope() ) )
+        if ( managedDependency.getScope() == null
+                || Objects.equals( managedDependency.getScope(), dependency.getScope() ) )
         {
             return false;
         }
 
-        if ( managedDependency.getClassifier() == null || StringUtils.equals( managedDependency.getClassifier(),
-                dependency.getClassifier() ) )
+        if ( managedDependency.getClassifier() == null
+                || Objects.equals( managedDependency.getClassifier(), dependency.getClassifier() ) )
         {
             return false;
         }
 
         return dependency.getVersion() == null
                 || managedDependency.getVersion() == null
-                || StringUtils.equals( managedDependency.getVersion(), dependency.getVersion() );
+                || Objects.equals( managedDependency.getVersion(), dependency.getVersion() );
     }
 
     public boolean isProcessingDependencyManagement()
