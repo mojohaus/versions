@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -195,16 +196,11 @@ public class DisplayDependencyUpdatesMojo
         for ( Dependency dependency : dependencies )
         {
             boolean matched = false;
-            Iterator<Dependency> j = dependencyManagement.iterator();
-            while ( !matched && j.hasNext() )
+            Iterator<Dependency> managedDependencie = dependencyManagement.iterator();
+            while ( !matched && managedDependencie.hasNext() )
             {
-                Dependency t = j.next();
-                if ( StringUtils.equals( t.getGroupId(), dependency.getGroupId() ) && StringUtils.equals( t.getArtifactId(),
-                                                                                                 dependency.getArtifactId() )
-                    && ( t.getScope() == null || StringUtils.equals( t.getScope(), dependency.getScope() ) ) && (
-                    t.getClassifier() == null || StringUtils.equals( t.getClassifier(), dependency.getClassifier() ) ) && (
-                        dependency.getVersion() == null || t.getVersion() == null || StringUtils.equals( t.getVersion(),
-                                                                                            dependency.getVersion() ) ) )
+                Dependency managedDependency = managedDependencie.next();
+                if ( dependenciesMatch( dependency, managedDependency ) )
                 {
                     matched = true;
                     break;
@@ -216,6 +212,36 @@ public class DisplayDependencyUpdatesMojo
             }
         }
         return result;
+    }
+
+    // open for tests
+    protected static boolean dependenciesMatch( Dependency dependency, Dependency managedDependency )
+    {
+        if ( ! managedDependency.getGroupId().equals( dependency.getGroupId() ) )
+        {
+            return false;
+        }
+
+        if ( ! managedDependency.getArtifactId().equals( dependency.getArtifactId() ) )
+        {
+            return false;
+        }
+
+        if ( managedDependency.getScope() == null || StringUtils.equals( managedDependency.getScope(),
+                dependency.getScope() ) )
+        {
+            return false;
+        }
+
+        if ( managedDependency.getClassifier() == null || StringUtils.equals( managedDependency.getClassifier(),
+                dependency.getClassifier() ) )
+        {
+            return false;
+        }
+
+        return dependency.getVersion() == null
+                || managedDependency.getVersion() == null
+                || StringUtils.equals( managedDependency.getVersion(), dependency.getVersion() );
     }
 
     public boolean isProcessingDependencyManagement()
