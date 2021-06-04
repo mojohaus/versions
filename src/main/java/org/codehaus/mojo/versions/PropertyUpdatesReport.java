@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -29,6 +30,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.utils.PropertyComparator;
 
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
@@ -98,11 +100,11 @@ public class PropertyUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        final Map<Property, PropertyVersions> updateSet;
+        final Map<Property, PropertyVersions> updateSet = new TreeMap<>( new PropertyComparator() );
         try
         {
-            updateSet = getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties,
-                                                             excludeProperties, autoLinkItems );
+            updateSet.putAll( getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties,
+                                                             excludeProperties, autoLinkItems ));
         }
         catch ( MojoExecutionException e )
         {
