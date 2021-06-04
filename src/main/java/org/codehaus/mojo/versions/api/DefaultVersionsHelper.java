@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -68,6 +69,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -477,6 +479,31 @@ public class DefaultVersionsHelper
             }
         }
         return new ArtifactVersions( artifact, versions, getVersionComparator( artifact ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ArtifactVersions lookupArtifactVersions(Artifact artifact, File propertiesFile)
+            throws ArtifactMetadataRetrievalException {
+        List<ArtifactVersion> versions = new ArrayList<>();
+        try {
+            List<String> contents = FileUtils.readLines(propertiesFile, Charset.defaultCharset());
+            for (String content : contents) {
+                String[] split = content.split(":"); // groupId:artifactId:type:classifier:version
+                if (split.length >= 5) {
+                    String groupId = StringUtils.strip(split[0]);
+                    String artifactId = StringUtils.strip(split[1]);
+                    String version = StringUtils.strip(split[4]);
+                    if (artifact.getGroupId().equals(groupId) && artifact.getArtifactId().equals(artifactId)) {
+                            versions.add(new DefaultArtifactVersion(version));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.warn("Error accessing file " + propertiesFile.getAbsolutePath());
+        }
+        return new ArtifactVersions(artifact, versions, getVersionComparator(artifact));
     }
 
     /**

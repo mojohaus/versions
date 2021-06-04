@@ -19,6 +19,14 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -34,13 +42,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import java.util.Collection;
-import java.util.NoSuchElementException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Replaces any -SNAPSHOT versions with the corresponding release version (if it has been released).
@@ -62,15 +63,19 @@ public class UseReleasesMojo
     private boolean allowRangeMatching;
 
     /**
-     * Whether to to pad the version with zero(es) for minor and incremental version in order for range matching to work when
-     * only looking for a matching build number
+     * Whether to to pad the version with zero(es) for minor and incremental version in order for range matching to work correctly
      *
-     * If set, 1 and 1.1 become 1.1.0 and do not range match for 1.1.1, but do match for 1.1.0-2
+     * Internally 4.2 is not the same as 4.2.0, therefore 4.2 range matching also works for 4.2.1.xy which might not be intended.
+     * If set, 4.2 becomes 4.2.0 and does not range match for 4.2.1
+     * If set, 4 becomes 4.0.0
      *
      * @since 2.6
      */
     @Parameter( property = "padVersionForRangeMatching", defaultValue = "false" )
     private boolean padVersionForRangeMatching;
+
+    @Parameter( property = "dependenciesPropertyFile")
+    private File dependenciesPropertyFile;
 
     /**
      * Whether to fail if a SNAPSHOT could not be replaced
@@ -101,6 +106,15 @@ public class UseReleasesMojo
     {
         try
         {
+
+            if (dependenciesPropertyFile == null)
+            {
+                getLog().info("Using repositories for use-releases");
+            } else
+            {
+                getLog().info("Using file for use-releases: " + dependenciesPropertyFile.getAbsolutePath());
+            }
+
             if ( getProject().getParent() != null && isProcessingParent() )
             {
                 useReleases( pom, getProject().getParent() );
@@ -153,7 +167,7 @@ public class UseReleasesMojo
             // Force releaseVersion version because org.apache.maven.artifact.metadata.MavenMetadataSource does not
             // retrieve release version if provided snapshot version.
             artifact.setVersion( releaseVersion );
-            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+            ArtifactVersions versions = getArtifactVersions(artifact);
             if ( !allowRangeMatching ) // standard behaviour
             {
                 if ( versions.containsVersion( releaseVersion ) )
@@ -239,7 +253,7 @@ public class UseReleasesMojo
                 // Force releaseVersion version because org.apache.maven.artifact.metadata.MavenMetadataSource does not
                 // retrieve release version if provided snapshot version.
                 artifact.setVersion( releaseVersion );
-                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+                ArtifactVersions versions = getArtifactVersions(artifact);
                 if ( !allowRangeMatching ) // standard behaviour
                 {
                     noRangeMatching( pom, dep, version, releaseVersion, versions );
@@ -249,6 +263,18 @@ public class UseReleasesMojo
                     rangeMatching( pom, dep, version, releaseVersion, versions );
                 }
             }
+        }
+    }
+
+    private ArtifactVersions getArtifactVersions(Artifact artifact) throws ArtifactMetadataRetrievalException, MojoExecutionException
+    {
+        if (dependenciesPropertyFile != null)
+        {
+            return getHelper().lookupArtifactVersions(artifact, dependenciesPropertyFile);
+        }
+        else
+        {
+            return getHelper().lookupArtifactVersions( artifact, false );
         }
     }
 
@@ -312,7 +338,7 @@ public class UseReleasesMojo
         }
     }
 
-    private String getPaddedArtifactVersion(String stringVersion) {
+    String getPaddedArtifactVersion(String stringVersion) {
 
         ArtifactVersion artifactVersion = new DefaultArtifactVersion(stringVersion);
 

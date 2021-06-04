@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -169,6 +170,24 @@ public interface VersionsHelper
      * @since 1.0-alpha-3
      */
     ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
+        throws ArtifactMetadataRetrievalException;
+
+
+    /**
+     * Looks up the versions of the specified artifact that are available in either the local repository, or the
+     * appropriate remote repositories.
+     *
+     * Expects the format to be <b><code>groupId:artifactId:type:classifier:version</code></b>
+     *
+     * (As proposed in http://www.mojohaus.org/versions-maven-plugin/compare-dependencies-mojo.html)
+     *
+     * @param artifact The artifact to look for versions of.
+     * @param propertiesFile the file from which the dependencies are to be read
+     * @return The details of the available artifact versions.
+     * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @since 2.6
+     */
+    ArtifactVersions lookupArtifactVersions( Artifact artifact, File propertiesFile )
         throws ArtifactMetadataRetrievalException;
 
     /**
