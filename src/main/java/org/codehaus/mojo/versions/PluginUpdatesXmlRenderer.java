@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.maven.model.Plugin;
 import org.apache.maven.reporting.MavenReportException;
@@ -105,8 +106,9 @@ public class PluginUpdatesXmlRenderer
 
     private static String getSummaryBlock( Map<Plugin, PluginUpdatesDetails> allUpdates )
     {
-        Collection<ArtifactVersions> allVersions = new ArrayList<>();
-        allUpdates.values().forEach( details -> allVersions.add( details.getArtifactVersions() ) );
+        Collection<ArtifactVersions> allVersions = allUpdates.values().stream()
+            .map( details -> details.getArtifactVersions() )
+            .collect( Collectors.toList() );
         return DependencyUpdatesXmlRenderer.getSummaryBlock( allVersions );
     }
 

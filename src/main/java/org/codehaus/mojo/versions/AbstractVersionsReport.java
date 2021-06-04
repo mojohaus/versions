@@ -125,13 +125,13 @@ public abstract class AbstractVersionsReport
      * @since 1.0-alpha-3
      */
     @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
-    protected List remoteArtifactRepositories;
+    protected List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * @since 1.0-alpha-3
      */
     @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
-    protected List remotePluginRepositories;
+    protected List<ArtifactRepository> remotePluginRepositories;
 
     /**
      * @since 1.0-alpha-1

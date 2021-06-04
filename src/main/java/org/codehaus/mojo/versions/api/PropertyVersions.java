@@ -95,11 +95,11 @@ public class PropertyVersions
                 final ArtifactVersion[] artifactVersions = associatedVersions.getVersions( true );
                 // since ArtifactVersion does not override equals, we have to do this the hard way
                 // result.retainAll( Arrays.asList( artifactVersions ) );
-                Iterator j = versions.iterator();
+                Iterator<ArtifactVersion> j = versions.iterator();
                 while ( j.hasNext() )
                 {
                     boolean contains = false;
-                    ArtifactVersion version = (ArtifactVersion) j.next();
+                    ArtifactVersion version = j.next();
                     for ( ArtifactVersion artifactVersion : artifactVersions )
                     {
                         if ( version.compareTo( artifactVersion ) == 0 )

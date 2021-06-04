@@ -21,8 +21,7 @@ package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
-import org.apache.maven.artifact.manager.DefaultWagonManager;
-import org.apache.maven.artifact.manager.WagonConfigurationException;
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -30,19 +29,15 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.project.path.DefaultPathTranslator;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.wagon.UnsupportedProtocolException;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.providers.file.FileWagon;
-import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.codehaus.plexus.PlexusTestCase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -52,9 +47,6 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
@@ -65,7 +57,7 @@ import static org.mockito.Mockito.same;
 /**
  * Test {@link DefaultVersionsHelper}
  */
-public class DefaultVersionsHelperTest
+public class DefaultVersionsHelperTest extends PlexusTestCase
 {
 
     @Test
@@ -169,7 +161,7 @@ public class DefaultVersionsHelperTest
 
     @Test
     public void testMVERSIONS159_ExcludedAndNotIncluded()
-        throws MojoExecutionException
+        throws Exception
     {
         VersionsHelper helper = createHelper();
         MavenProject project = null;
@@ -183,7 +175,7 @@ public class DefaultVersionsHelperTest
     }
 
     @Test
-    public void testIsClasspathUriDetectsClassPathProtocol() throws MojoExecutionException {
+    public void testIsClasspathUriDetectsClassPathProtocol() throws Exception {
         DefaultVersionsHelper helper = createHelper();
         String uri = "classpath:/p/a/c/k/a/g/e/resource.res";
 
@@ -191,7 +183,7 @@ public class DefaultVersionsHelperTest
     }
 
     @Test
-    public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws MojoExecutionException {
+    public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws Exception {
         DefaultVersionsHelper helper = createHelper();
         String uri = "http://10.10.10.10/p/a/c/k/a/g/e/resource.res";
 
@@ -200,12 +192,12 @@ public class DefaultVersionsHelperTest
 
 
     private DefaultVersionsHelper createHelper()
-        throws MojoExecutionException
+        throws Exception
     {
         return createHelper( new MavenMetadataSource() );
     }
     
-    private DefaultVersionsHelper createHelper( ArtifactMetadataSource metadataSource ) throws MojoExecutionException
+    private DefaultVersionsHelper createHelper( ArtifactMetadataSource metadataSource ) throws Exception
     {
         final String resourcePath = "/" + getClass().getPackage().getName().replace( '.', '/' ) + "/rules.xml";
         final String rulesUri = getClass().getResource( resourcePath ).toExternalForm();
@@ -214,16 +206,18 @@ public class DefaultVersionsHelperTest
     }
 
     private DefaultVersionsHelper createHelper( String rulesUri, ArtifactMetadataSource metadataSource )
-        throws MojoExecutionException
+        throws Exception
     {
-        final DefaultWagonManager wagonManager = new DefaultWagonManager()
-        {
-            public Wagon getWagon( Repository repository )
-                throws UnsupportedProtocolException, WagonConfigurationException
-            {
-                return new FileWagon();
-            }
-        };
+        WagonManager wagonManager = lookup(WagonManager.class);
+//        new DefaultWagonManager()
+//        {
+//            @Override
+//            public Wagon getWagon( String protocol )
+//                throws UnsupportedProtocolException
+//            {
+//                return new FileWagon();
+//            }
+//        };
 
         DefaultVersionsHelper helper =
             new DefaultVersionsHelper( new DefaultArtifactFactory(), new DefaultArtifactResolver(), metadataSource, new ArrayList(),

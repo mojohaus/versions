@@ -51,11 +51,11 @@ import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 public class MajorMinorIncrementalFilter
 {
 
-    private boolean allowMajorUpdates;
+    private final boolean allowMajorUpdates;
 
-    private boolean allowMinorUpdates;
+    private final boolean allowMinorUpdates;
 
-    private boolean allowIncrementalUpdates;
+    private final boolean allowIncrementalUpdates;
 
     public MajorMinorIncrementalFilter( boolean allowMajorUpdates, boolean allowMinorUpdates,
                                         boolean allowIncrementalUpdates )

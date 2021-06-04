@@ -505,11 +505,8 @@ public class PluginUpdatesRenderer
 
             sink.section3_();
 
-            for ( Object o : details.getDependencyVersions().entrySet() )
-            {
-                Map.Entry entry = (Map.Entry) o;
-                renderDependencyDetail( (Dependency) entry.getKey(), (ArtifactVersions) entry.getValue() );
-            }
+            details.getDependencyVersions().entrySet()
+                .forEach( entry -> renderDependencyDetail( entry.getKey(), entry.getValue() ) );
         }
         sink.section2_();
     }

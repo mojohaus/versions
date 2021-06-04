@@ -25,7 +25,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -216,12 +215,10 @@ class PropertyVersionsBuilder
 
     private VersionComparator[] lookupComparators()
     {
-        Set<VersionComparator> result = new HashSet<>();
-        for ( ArtifactAssociation association : associations )
-        {
-            result.add( helper.getVersionComparator( association.getArtifact() ) );
-        }
-        return result.toArray( new VersionComparator[0] );
+        return associations.stream().map(
+            association -> helper.getVersionComparator( association.getArtifact() ) )
+            .distinct()
+            .toArray( VersionComparator[]::new );
     }
 
     private final class PropertyVersionComparator

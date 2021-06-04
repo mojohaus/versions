@@ -25,17 +25,6 @@
     </license>
   </licenses>
 
-  <distributionManagement>
-    <repository>
-      <id>ossrh-staging</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-    </repository>
-    <snapshotRepository>
-      <id>ossrh-snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
-
   <developers>
     <developer>
       <name>Stephen Connolly</name>
@@ -110,7 +99,7 @@
     <mojo.java.target>1.8</mojo.java.target>
     <maven.compiler.source>${mojo.java.target}</maven.compiler.source>
 
-    <mavenVersion>2.2.1</mavenVersion>
+    <mavenVersion>3.0.5</mavenVersion>
     <wagonVersion>3.4.0</wagonVersion>
     <doxiaVersion>1.9.1</doxiaVersion>
     <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
@@ -134,12 +123,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact-manager</artifactId>
+      <artifactId>maven-core</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
+      <artifactId>maven-compat</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
     <dependency>
@@ -155,11 +144,6 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-settings</artifactId>
-      <version>${mavenVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-project</artifactId>
       <version>${mavenVersion}</version>
     </dependency>
     <dependency>

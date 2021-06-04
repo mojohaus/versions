@@ -22,7 +22,6 @@ package org.codehaus.mojo.versions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -207,9 +206,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return null;
         }
-        for ( Object dependencyArtifact : getProject().getDependencyArtifacts() )
+        for ( Artifact artifact : getProject().getDependencyArtifacts() )
         {
-            Artifact artifact = (Artifact) dependencyArtifact;
             if ( compare( artifact, dependency ) )
             {
                 return artifact;
