@@ -45,7 +45,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "dependency-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME )
+@Mojo( name = "dependency-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class DependencyUpdatesReport
     extends AbstractVersionsReport
 {

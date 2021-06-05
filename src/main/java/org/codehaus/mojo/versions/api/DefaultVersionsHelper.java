@@ -180,7 +180,7 @@ public class DefaultVersionsHelper
      * Constructs a new {@link DefaultVersionsHelper}.
      *
      * @param artifactFactory The artifact factory.
-     * @param artifactResolver
+     * @param artifactResolver Artifact resolver
      * @param artifactMetadataSource The artifact metadata source to use.
      * @param remoteArtifactRepositories The remote artifact repositories to consult.
      * @param remotePluginRepositories The remote plugin repositories to consult.
@@ -193,6 +193,7 @@ public class DefaultVersionsHelper
      * @param mavenSession The maven session information.
      * @param pathTranslator The path translator component. @throws org.apache.maven.plugin.MojoExecutionException If
      *            things go wrong.
+     * @throws MojoExecutionException if something goes wrong.
      * @since 1.0-alpha-3
      */
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,

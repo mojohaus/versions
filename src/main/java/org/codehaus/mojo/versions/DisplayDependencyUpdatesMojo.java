@@ -53,7 +53,7 @@ import javax.xml.stream.XMLStreamException;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false )
+@Mojo( name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false, threadSafe = true )
 public class DisplayDependencyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {

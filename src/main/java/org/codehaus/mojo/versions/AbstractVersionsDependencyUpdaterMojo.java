@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -141,7 +141,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the project/dependencies section of the pom be processed.
      *
-     * @return returns <code>true if the project/dependencies section of the pom should be processed.
+     * @return returns <code>true</code> if the project/dependencies section of the pom should be processed.
      * @since 1.0-alpha-3
      */
     public boolean isProcessingDependencies()
@@ -152,7 +152,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the project/dependencyManagement section of the pom be processed.
      *
-     * @return returns <code>true if the project/dependencyManagement section of the pom should be processed.
+     * @return returns <code>true</code> if the project/dependencyManagement section of the pom should be processed.
      * @since 1.0-alpha-3
      */
     public boolean isProcessingDependencyManagement()
@@ -163,7 +163,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the project/parent section of the pom be processed.
      *
-     * @return returns <code>true if the project/parent section of the pom should be processed.
+     * @return returns <code>true</code> if the project/parent section of the pom should be processed.
      * @since 2.3
      */
     public boolean isProcessingParent()
@@ -174,7 +174,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the artifacts produced in the current reactor be excluded from processing.
      *
-     * @return returns <code>true if the artifacts produced in the current reactor should be excluded from processing.
+     * @return returns <code>true</code> if the artifacts produced in the current reactor should be excluded from processing.
      * @since 1.0-alpha-3
      */
     public boolean isExcludeReactor()
@@ -183,10 +183,22 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     }
 
     /**
+     * Should the dependency be updated itself or is it handled by properties.
+     * 
+     * @param dependency Dependency
+     * @return true if the version starts with '${'
+     * @since 2.8
+     */
+    protected boolean isHandledByProperty(Dependency dependency) {
+		String version = dependency.getVersion();
+		return version.startsWith("${");
+	}
+
+    /**
      * Try to find the dependency artifact that matches the given dependency.
      *
-     * @param dependency
-     * @return
+     * @param dependency Dependency
+     * @return Artifact
      * @since 1.0-alpha-3
      */
     protected Artifact findArtifact( Dependency dependency )
@@ -210,8 +222,9 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Try to find the dependency artifact that matches the given dependency.
      *
-     * @param dependency
-     * @return
+     * @param dependency Dependency
+     * @throws MojoExecutionException Mojo execution exception
+     * @return Artifact
      * @since 1.0-alpha-3
      */
     protected Artifact toArtifact( Dependency dependency )
@@ -332,8 +345,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * Compare and artifact to a dependency. Returns true only if the groupId, artifactId, type, and classifier are all
      * equal.
      *
-     * @param artifact
-     * @param dep
+     * @param artifact Artifact
+     * @param dep Dependency
      * @return true if artifact and dep refer to the same artifact
      */
     private boolean compare( Artifact artifact, Dependency dep )

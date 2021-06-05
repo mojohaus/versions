@@ -42,7 +42,7 @@ import java.util.TreeSet;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "plugin-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME )
+@Mojo( name = "plugin-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true )
 public class PluginUpdatesReport
     extends AbstractVersionsReport
 {

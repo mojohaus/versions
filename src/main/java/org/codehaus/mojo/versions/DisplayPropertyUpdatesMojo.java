@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -180,7 +181,7 @@ public class DisplayPropertyUpdatesMojo
         if ( !current.isEmpty() )
         {
             logLine( false, "The following version properties are referencing the newest available version:" );
-            for ( String s : current )
+            for ( String s : new TreeSet<>(current) )
             {
                 logLine( false, "  " + s );
             }
@@ -197,7 +198,7 @@ public class DisplayPropertyUpdatesMojo
         if ( !updates.isEmpty() )
         {
             logLine( false, "The following version property updates are available:" );
-            for ( String update : updates )
+            for ( String update : new TreeSet<>(updates) )
             {
                 logLine( false, "  " + update );
             }

@@ -34,7 +34,7 @@ import java.io.StringReader;
 /**
  * Represents the modified pom file. Note: implementations of the StAX API (JSR-173) are not good round-trip rewriting
  * <b>while</b> keeping all unchanged bytes in the file as is. For example, the StAX API specifies that <code>CR</code>
- * characters will be stripped. Current implementations do not keep &quot; and &apos; characters consistent.
+ * characters will be stripped. Current implementations do not keep &quot; and ' characters consistent.
  *
  * @author Stephen Connolly
  */
@@ -119,6 +119,11 @@ public class ModifiedPomXMLEventReader
      */
     private XMLEventReader backing;
 
+    /**
+     * Field path
+     */
+    private final String path;
+
     // --------------------------- CONSTRUCTORS ---------------------------
 
     /**
@@ -126,13 +131,15 @@ public class ModifiedPomXMLEventReader
      *
      * @param pom of type StringBuilder
      * @param factory of type XMLInputFactory
+     * @param path Path pointing to source of XML
      * @throws XMLStreamException when
      */
-    public ModifiedPomXMLEventReader( StringBuilder pom, XMLInputFactory factory )
+    public ModifiedPomXMLEventReader( StringBuilder pom, XMLInputFactory factory, String path )
         throws XMLStreamException
     {
         this.pom = pom;
         this.factory = factory;
+        this.path = path;
         rewind();
     }
 
@@ -374,7 +381,7 @@ public class ModifiedPomXMLEventReader
         }
         catch ( XMLStreamException e )
         {
-            return false;
+            throw new RuntimeException("Error parsing " + path + ": " + e.getMessage(), e);
         }
     }
 
