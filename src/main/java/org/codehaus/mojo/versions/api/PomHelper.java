@@ -1244,7 +1244,7 @@ public class PomHelper
             }
             else
             {
-                modules.forEach( s -> logger.debug( "  " + s ));
+                modules.forEach( module -> logger.debug( "  " + module ));
             }
 
         }
