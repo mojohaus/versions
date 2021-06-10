@@ -107,7 +107,7 @@ public class PluginUpdatesXmlRenderer
     private static String getSummaryBlock( Map<Plugin, PluginUpdatesDetails> allUpdates )
     {
         Collection<ArtifactVersions> allVersions = allUpdates.values().stream()
-            .map( details -> details.getArtifactVersions() )
+            .map( PluginUpdatesDetails::getArtifactVersions )
             .collect( Collectors.toList() );
         return DependencyUpdatesXmlRenderer.getSummaryBlock( allVersions );
     }
