@@ -36,6 +36,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -480,13 +481,17 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * @param pom the pom to update.
+     * @param outFile The POM file to write
+     * @param input The modifications as a {@link StringBuilder}
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
      * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
      * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader, File, StringBuilder)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom )
+    protected void update(ModifiedPomXMLEventReader pom,
+                          final File outFile,
+                          final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         // do nothing

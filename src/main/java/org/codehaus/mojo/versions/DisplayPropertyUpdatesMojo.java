@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -206,7 +207,9 @@ public class DisplayPropertyUpdatesMojo
         logLine( false, "" );
     }
 
-    protected void update( ModifiedPomXMLEventReader pom )
+    protected void update(ModifiedPomXMLEventReader pom,
+                          final File outFile,
+                          final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
     }

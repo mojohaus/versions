@@ -1,5 +1,6 @@
 package org.codehaus.mojo.versions;
 
+import java.io.File;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
@@ -24,7 +25,9 @@ public class SeparatePatternsForIncludesAnExcludesTest
     {
         mojo = new AbstractVersionsDependencyUpdaterMojo()
         {
-            protected void update( ModifiedPomXMLEventReader pom )
+            protected void update(ModifiedPomXMLEventReader pom,
+                                  final File outFile,
+                                  final StringBuilder input)
                 throws MojoExecutionException, MojoFailureException, XMLStreamException
             {
             }

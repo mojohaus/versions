@@ -461,11 +461,15 @@ public class SetMojo
      * Updates the pom file.
      *
      * @param pom The pom file to update.
+     * @param outFile The POM file to write
+     * @param input The modifications as a {@link StringBuilder}
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
      * @throws org.apache.maven.plugin.MojoFailureException when things go wrong.
      * @throws javax.xml.stream.XMLStreamException when things go wrong.
      */
-    protected synchronized void update( ModifiedPomXMLEventReader pom )
+    protected synchronized void update(ModifiedPomXMLEventReader pom,
+                                       final File outFile,
+                                       final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         ContextualLog log = new DelegatingContextualLog( getLog() );

@@ -19,6 +19,16 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -45,17 +55,12 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.JGitHelper;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
+import org.eclipse.jgit.api.Git;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -68,6 +73,7 @@ public abstract class AbstractVersionsUpdaterMojo
 
     // ------------------------------ FIELDS ------------------------------
 
+    private final Lock lock = new ReentrantLock();
     /**
      * The Maven Project.
      *
@@ -312,7 +318,7 @@ public abstract class AbstractVersionsUpdaterMojo
             StringBuilder input = PomHelper.readXmlFile( outFile );
             ModifiedPomXMLEventReader newPom = newModifiedPomXER( input, outFile.getAbsolutePath() );
 
-            update( newPom );
+            update(newPom, outFile, input);
 
             if ( newPom.isModified() )
             {
@@ -333,7 +339,6 @@ public abstract class AbstractVersionsUpdaterMojo
                 {
                     getLog().debug( "Skipping generation of backup file" );
                 }
-                writeFile( outFile, input );
             }
         }
         catch ( IOException e )
@@ -381,9 +386,11 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param input The contents of the file.
      * @throws IOException when things go wrong.
      */
-    protected final void writeFile( File outFile, StringBuilder input )
+    protected final void writePomFile(File outFile, StringBuilder input )
         throws IOException
     {
+
+        getLog().info(" >>> Writing pom file : " + outFile.getPath());
         Writer writer = WriterFactory.newXmlWriter( outFile );
         try
         {
@@ -399,13 +406,17 @@ public abstract class AbstractVersionsUpdaterMojo
      * Updates the pom.
      *
      * @param pom The pom to update.
+     * @param outFile The POM file to write
+     * @param input The modifications as a {@link StringBuilder}
      * @throws MojoExecutionException If things go wrong.
      * @throws MojoFailureException If things go wrong.
      * @throws javax.xml.stream.XMLStreamException If things go wrong.
      * @throws ArtifactMetadataRetrievalException if something goes wrong.
      * @since 1.0-alpha-1
      */
-    protected abstract void update( ModifiedPomXMLEventReader pom )
+    protected abstract void update(ModifiedPomXMLEventReader pom,
+                                   final File outFile,
+                                   final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
 
     /**
@@ -488,29 +499,51 @@ public abstract class AbstractVersionsUpdaterMojo
         return segment;
     }
 
-    protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                  PropertyVersions version, String currentVersion )
+    protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom,
+                                                  Property property,
+                                                  PropertyVersions version,
+                                                  String currentVersion,
+                                                  File outFile,
+                                                  StringBuilder input )
         throws MojoExecutionException, XMLStreamException
     {
-        updatePropertyToNewestVersion( pom, property, version, currentVersion, false, -1 );
+        updatePropertyToNewestVersion( pom, property, version, currentVersion, false, -1, outFile, input );
     }
 
-    protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                  PropertyVersions version, String currentVersion,
-                                                  boolean allowDowngrade, int segment )
+    protected void updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom,
+                                                  Property property,
+                                                  PropertyVersions version,
+                                                  String currentVersion,
+                                                  boolean allowDowngrade,
+                                                  int segment,
+                                                  File outFile,
+                                                  StringBuilder input)
         throws MojoExecutionException, XMLStreamException
     {
+
         ArtifactVersion winner =
             version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
                                       this.getHelper(), allowDowngrade, segment );
-
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {
             getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
         }
-        else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
-        {
-            getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
+        else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) ) {
+            final String updateMessage = "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner;
+            lock.lock();
+            try {
+                // To have separated commits we need to write the pom each time a property is updated
+                writePomFile(outFile, input);
+                getLog().debug(">>>>"  + updateMessage);
+                final Git git = JGitHelper.git();
+                git.add().addFilepattern(".").call();
+                git.commit().setMessage(updateMessage).call();
+            } catch (final Exception exception) {
+                getLog().error(exception);
+            } finally {
+                lock.unlock();
+            }
+            getLog().info(updateMessage);
         }
     }
 }

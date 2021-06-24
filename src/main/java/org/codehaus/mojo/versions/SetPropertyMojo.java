@@ -28,6 +28,8 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
+
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -65,12 +67,16 @@ public class SetPropertyMojo
 
     /**
      * @param pom the pom to update.
+     * @param outFile The POM file to write
+     * @param input The modifications as a {@link StringBuilder}
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException when things go wrong in a very bad way
      * @throws XMLStreamException when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader, File, StringBuilder)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
+    protected void update(ModifiedPomXMLEventReader pom,
+                          final File outFile,
+                          final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         Property propertyConfig = new Property( property );
@@ -88,7 +94,6 @@ public class SetPropertyMojo
             {
                 continue;
             }
-
             PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), newVersion );
 
         }

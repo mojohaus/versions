@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -127,7 +129,9 @@ public class DisplayParentUpdatesMojo
     }
 
     @Override
-    protected void update( ModifiedPomXMLEventReader pom )
+    protected void update(ModifiedPomXMLEventReader pom,
+                          final File outFile,
+                          final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
     }

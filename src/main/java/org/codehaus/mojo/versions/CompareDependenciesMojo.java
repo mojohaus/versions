@@ -118,12 +118,14 @@ public class CompareDependenciesMojo
 
     /**
      * @param pom the pom to update.
+     * @param outFile The POM file to write
+     * @param input The modifications as a {@link StringBuilder}
      * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the plugin itself
      * @throws org.apache.maven.plugin.MojoFailureException The plugin detected an error in the build
      * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader, File, StringBuilder)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
+    protected void update(ModifiedPomXMLEventReader pom, final File outFile, final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         if ( this.ignoreRemoteDependencies && this.ignoreRemoteDependencyManagement )

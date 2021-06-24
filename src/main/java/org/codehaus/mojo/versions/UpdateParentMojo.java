@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -58,13 +60,17 @@ public class UpdateParentMojo
 
     /**
      * @param pom the pom to update.
+     * @param outFile The POM file to write
+     * @param input The modifications as a {@link StringBuilder}
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException when things go wrong in a very bad way
      * @throws XMLStreamException when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader, File, StringBuilder)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom )
+    protected void update(ModifiedPomXMLEventReader pom,
+                          final File outFile,
+                          final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         if ( getProject().getParent() == null )

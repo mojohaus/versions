@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -110,12 +111,16 @@ public class ResolveRangesMojo
 
     /**
      * @param pom the pom to update.
+     * @param outFile The POM file to write
+     * @param input The modifications as a {@link StringBuilder}
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException when things go wrong in a very bad way
      * @throws XMLStreamException when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader, File, StringBuilder)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
+    protected void update(ModifiedPomXMLEventReader pom,
+                          final File outFile,
+                          final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
         // Note we have to get the dependencies from the model because the dependencies in the
@@ -139,7 +144,7 @@ public class ResolveRangesMojo
         if ( processProperties )
         {
             getLog().debug( "processing properties of " + getProject().getId() );
-            resolvePropertyRanges( pom );
+            resolvePropertyRanges( pom, outFile, input );
         }
     }
 
@@ -271,7 +276,9 @@ public class ResolveRangesMojo
         }
     }
 
-    private void resolvePropertyRanges( ModifiedPomXMLEventReader pom )
+    private void resolvePropertyRanges(ModifiedPomXMLEventReader pom,
+                                       final File outFile,
+                                       final StringBuilder input)
         throws XMLStreamException, MojoExecutionException
     {
 
@@ -292,7 +299,7 @@ public class ResolveRangesMojo
 
             int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
             // TODO: Check if we could add allowDowngrade ? 
-            updatePropertyToNewestVersion( pom, property, version, currentVersion, false, segment );
+            updatePropertyToNewestVersion( pom, property, version, currentVersion, false, segment, outFile, input );
 
         }
     }

@@ -2,6 +2,7 @@ package org.codehaus.mojo.versions;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.xml.stream.XMLStreamException;
@@ -54,7 +55,9 @@ public class SetScmTagMojo
 	}
 
     @Override
-    protected void update(ModifiedPomXMLEventReader pom) throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
+    protected void update(ModifiedPomXMLEventReader pom,
+                          final File outFile,
+                          final StringBuilder input) throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
         try
         {

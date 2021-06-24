@@ -189,11 +189,15 @@ public class UpdateChildModulesMojo
      * Updates the pom file.
      *
      * @param pom The pom file to update.
+     * @param outFile The POM file to write
+     * @param input The modifications as a {@link StringBuilder}
      * @throws MojoExecutionException when things go wrong.
      * @throws MojoFailureException when things go wrong.
      * @throws XMLStreamException when things go wrong.
      */
-    protected synchronized void update( ModifiedPomXMLEventReader pom )
+    protected synchronized void update(ModifiedPomXMLEventReader pom,
+                                       final File outFile,
+                                       final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         getLog().debug( "Updating parent to " + sourceVersion );
