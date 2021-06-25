@@ -121,7 +121,7 @@ public class DisplayParentUpdatesMojo
             buf.append( ' ' );
             buf.append( currentVersion );
             buf.append( " -> " );
-            buf.append( artifactVersion.toString() );
+            buf.append( artifactVersion );
             logLine( false, buf.toString() );
         }
     }

@@ -157,7 +157,7 @@ public class UseLatestReleasesMojo
                 }
 
                 ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
-                getLog().debug( "Selected version:" + selectedVersion.toString() );
+                getLog().debug( "Selected version: " + selectedVersion );
 
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
@@ -172,9 +172,9 @@ public class UseLatestReleasesMojo
                     {
                         if ( artifact.getId().equals( getProject().getParentArtifact().getId() ) && isProcessingParent() )
                         {
-                            if ( PomHelper.setProjectParentVersion( pom, newVersion.toString() ) )
+                            if ( PomHelper.setProjectParentVersion( pom, newVersion ) )
                             {
-                                getLog().debug( "Made parent update from " + version + " to " + newVersion.toString() );
+                                getLog().debug( "Made parent update from " + version + " to " + newVersion );
                             }
                         }
                     }
