@@ -8,6 +8,9 @@ with a jGit hack to perform commit based on properties update (`mvn versions:upd
 
 Introduced JGIT in in order to be able to produce branch containing commits for each property updated.
 
+This to avoid dependabot and possible security breaches when using corporate network/credentials (even if it's safe for what I saw)
+but each company has different needs.
+
 - JGIT is created at start, reading the properties in `gitinfo.rpoperty`
 - Creates a branch (name comes from `gitinfo.properties`)
 - Push commit each time a file is updated
