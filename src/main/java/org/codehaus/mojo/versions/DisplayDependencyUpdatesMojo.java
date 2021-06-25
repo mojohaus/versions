@@ -421,7 +421,7 @@ public class DisplayDependencyUpdatesMojo
                     latest = null;
                 }
             }
-            String right = " " + ( latest == null ? current : current + " -> " + latest.toString() );
+            String right = " " + ( latest == null ? current : current + " -> " + latest );
             List<String> t = latest == null ? usingCurrent : withUpdates;
             if ( right.length() + left.length() + 3 > INFO_PAD_SIZE )
             {

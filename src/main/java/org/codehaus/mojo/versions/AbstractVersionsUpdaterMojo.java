@@ -434,18 +434,18 @@ public abstract class AbstractVersionsUpdaterMojo
         }
         catch ( ArtifactResolutionException e )
         {
-            getLog().warn( "Not updating version: could not resolve " + artifact.toString(), e );
+            getLog().warn( "Not updating version: could not resolve " + artifact, e );
             return false;
         }
         catch ( ArtifactNotFoundException e )
         {
-            getLog().warn( "Not updating version: could not find " + artifact.toString(), e );
+            getLog().warn( "Not updating version: could not find " + artifact, e );
             return false;
         }
 
         if ( currentVersion.equals( updateVersion.toString() ) )
         {
-            getLog().info( "Current version of " + artifact.toString() + " is the latest." );
+            getLog().info( "Current version of " + artifact + " is the latest." );
             return false;
         }
         return true;

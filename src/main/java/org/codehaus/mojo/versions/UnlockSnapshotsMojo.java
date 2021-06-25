@@ -141,7 +141,7 @@ public class UnlockSnapshotsMojo
             String unlockedParentVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
             if ( PomHelper.setProjectParentVersion( pom, unlockedParentVersion ) )
             {
-                getLog().info( "Unlocked parent " + parentArtifact.toString() + " to version "
+                getLog().info( "Unlocked parent " + parentArtifact + " to version "
                     + unlockedParentVersion );
             }
         }

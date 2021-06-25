@@ -184,7 +184,7 @@ public class UseLatestSnapshotsMojo
                         snapshotsOnly.add( newer[j] );
                     }
                 }
-                getLog().debug("Snapshot Only versions " + snapshotsOnly.toString());
+                getLog().debug( "Snapshot Only versions " + snapshotsOnly );
 
                 ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion,
                                                                                 (ArtifactVersion[]) snapshotsOnly.toArray(
@@ -199,9 +199,9 @@ public class UseLatestSnapshotsMojo
                     {
                         if ( artifact.getId().equals(getProject().getParentArtifact().getId()) && isProcessingParent() )
                         {
-                            if ( PomHelper.setProjectParentVersion( pom, latestVersion.toString() ) )
+                            if ( PomHelper.setProjectParentVersion( pom, latestVersion ) )
                             {
-                                getLog().debug( "Made parent update from " + version + " to " + latestVersion.toString() );
+                                getLog().debug( "Made parent update from " + version + " to " + latestVersion );
                             }
                         }
                     }
