@@ -1,4 +1,4 @@
-# MojoHaus Versions Maven Plugin
+# MojoHaus Versions Maven Plugin - JGit PoC
 
 This is an updated version of [versions-maven-plugin](http://www.mojohaus.org/versions-maven-plugin/)
 with a jGit hack to perform commit based on properties update (`mvn versions:update-properties`)
