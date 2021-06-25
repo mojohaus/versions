@@ -60,7 +60,7 @@ public class UpdateParentMojo
      * @since 2.8
      */
     @Parameter( property = "forceUpdate", defaultValue = "False" )
-    protected Boolean forceUpdate = null;
+    protected boolean forceUpdate = false;
 
     // -------------------------- OTHER METHODS --------------------------
 
