@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.change;
  * under the License.
  */
 
+import java.util.Objects;
+
 /**
  * Represents a change of an artifact's version.
  *
@@ -76,19 +78,19 @@ public final class VersionChange
 
         VersionChange versionChange = (VersionChange) o;
 
-        if ( artifactId != null ? !artifactId.equals( versionChange.artifactId ) : versionChange.artifactId != null )
+        if ( !Objects.equals( artifactId, versionChange.artifactId ) )
         {
             return false;
         }
-        if ( groupId != null ? !groupId.equals( versionChange.groupId ) : versionChange.groupId != null )
+        if ( !Objects.equals( groupId, versionChange.groupId ) )
         {
             return false;
         }
-        if ( newVersion != null ? !newVersion.equals( versionChange.newVersion ) : versionChange.newVersion != null )
+        if ( !Objects.equals( newVersion, versionChange.newVersion ) )
         {
             return false;
         }
-        if ( oldVersion != null ? !oldVersion.equals( versionChange.oldVersion ) : versionChange.oldVersion != null )
+        if ( !Objects.equals( oldVersion, versionChange.oldVersion ) )
         {
             return false;
         }

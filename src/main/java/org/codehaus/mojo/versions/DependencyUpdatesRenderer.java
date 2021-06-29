@@ -53,8 +53,7 @@ public class DependencyUpdatesRenderer
 
     protected void renderBody()
     {
-        Map<Dependency, ArtifactVersions> allUpdates =
-            new TreeMap<Dependency, ArtifactVersions>( new DependencyComparator() );
+        Map<Dependency, ArtifactVersions> allUpdates = new TreeMap<>( new DependencyComparator() );
         allUpdates.putAll( dependencyManagementUpdates );
         allUpdates.putAll( dependencyUpdates );
 

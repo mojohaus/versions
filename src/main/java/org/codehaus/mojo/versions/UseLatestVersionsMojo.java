@@ -115,11 +115,7 @@ public class UseLatestVersionsMojo
                 useLatestVersions( pom, list);
             }
         }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-        catch ( IOException e )
+        catch ( ArtifactMetadataRetrievalException | IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }

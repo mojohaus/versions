@@ -39,7 +39,6 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

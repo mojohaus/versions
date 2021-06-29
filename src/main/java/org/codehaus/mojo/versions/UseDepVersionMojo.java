@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.xml.stream.XMLStreamException;
 

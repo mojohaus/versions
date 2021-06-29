@@ -22,7 +22,6 @@ package org.codehaus.mojo.versions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -207,10 +206,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return null;
         }
-        Iterator<?> iter = getProject().getDependencyArtifacts().iterator();
-        while ( iter.hasNext() )
+        for ( Artifact artifact : getProject().getDependencyArtifacts() )
         {
-            Artifact artifact = (Artifact) iter.next();
             if ( compare( artifact, dependency ) )
             {
                 return artifact;
@@ -334,11 +331,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return false;
         }
-        if ( !StringUtils.equals( project.getArtifactId(), dep.getArtifactId() ) )
-        {
-            return false;
-        }
-        return true;
+        return project.getArtifactId().equals( dep.getArtifactId() );
     }
 
     /**
@@ -363,11 +356,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         {
             return false;
         }
-        if ( !StringUtils.equals( artifact.getClassifier(), dep.getClassifier() ) )
-        {
-            return false;
-        }
-        return true;
+        return StringUtils.equals( artifact.getClassifier(), dep.getClassifier() );
     }
 
     /**
@@ -495,9 +484,9 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         int nextRangeStartDelimiterIndex = -1;
 
         char[] delimiters = chars.toCharArray();
-        for ( int i = 0; i < delimiters.length; i++ )
+        for ( char delimiter : delimiters )
         {
-            int index = includeString.indexOf( delimiters[i] );
+            int index = includeString.indexOf( delimiter );
             if ( index >= 0 && nextRangeStartDelimiterIndex >= 0 )
             {
                 nextRangeStartDelimiterIndex = Math.min( index, nextRangeStartDelimiterIndex );

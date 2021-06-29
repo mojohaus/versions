@@ -36,7 +36,6 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -154,9 +153,9 @@ public class UseNextSnapshotsMojo
                 getLog().info( "Upper bound: " + (upperBound == null ? "none" : upperBound.toString() ) );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
                 getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
-                for ( int j = 0; j < newer.length; j++ )
+                for ( ArtifactVersion artifactVersion : newer )
                 {
-                    String newVersion = newer[j].toString();
+                    String newVersion = artifactVersion.toString();
                     if ( matchSnapshotRegex.matcher( newVersion ).matches() )
                     {
                         if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,

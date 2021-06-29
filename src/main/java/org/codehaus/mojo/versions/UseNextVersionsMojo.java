@@ -32,7 +32,6 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Replaces any version with the latest version.

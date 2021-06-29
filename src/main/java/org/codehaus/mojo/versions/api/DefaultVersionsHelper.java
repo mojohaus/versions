@@ -132,14 +132,14 @@ public class DefaultVersionsHelper
      *
      * @since 1.0-alpha-3
      */
-    private final List remoteArtifactRepositories;
+    private final List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * The remote plugin repositories to consult.
      *
      * @since 1.0-alpha-3
      */
-    private final List remotePluginRepositories;
+    private final List<ArtifactRepository> remotePluginRepositories;
 
     /**
      * The artifact factory.
@@ -197,8 +197,8 @@ public class DefaultVersionsHelper
      * @since 1.0-alpha-3
      */
     public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
-                                  ArtifactMetadataSource artifactMetadataSource, List remoteArtifactRepositories,
-                                  List remotePluginRepositories, ArtifactRepository localRepository,
+                                  ArtifactMetadataSource artifactMetadataSource, List<ArtifactRepository> remoteArtifactRepositories,
+                                  List<ArtifactRepository> remotePluginRepositories, ArtifactRepository localRepository,
                                   WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
                                   Log log, MavenSession mavenSession, PathTranslator pathTranslator )
         throws MojoExecutionException
@@ -223,21 +223,9 @@ public class DefaultVersionsHelper
         try
         {
             wagon.get( remoteURI, tempFile );
-            InputStream is = new FileInputStream(tempFile );
-            try
+            try(InputStream is = new FileInputStream(tempFile))
             {
                 return readRulesFromStream(is);
-            }
-            finally
-            {
-                try
-                {
-                    is.close();
-                }
-                catch ( IOException e )
-                {
-                    // ignore
-                }
             }
         }
         finally
@@ -253,28 +241,13 @@ public class DefaultVersionsHelper
     private static RuleSet readRulesFromStream(InputStream stream)
         throws IOException {
         RuleXpp3Reader reader = new RuleXpp3Reader();
-        BufferedInputStream bis = new BufferedInputStream( stream );
-
-        try
+        try (BufferedInputStream bis = new BufferedInputStream( stream ))
         {
             return reader.read( bis );
         }
         catch ( XmlPullParserException e )
         {
-            final IOException ioe = new IOException();
-            ioe.initCause( e );
-            throw ioe;
-        }
-        finally
-        {
-            try
-            {
-                bis.close();
-            }
-            catch ( IOException e )
-            {
-                // ignore
-            }
+            throw new IOException( e );
         }
     }
 
@@ -488,7 +461,7 @@ public class DefaultVersionsHelper
      */
     private List<IgnoreVersion> getIgnoredVersions( Artifact artifact )
     {
-        final List<IgnoreVersion> ret = new ArrayList<IgnoreVersion>();
+        final List<IgnoreVersion> ret = new ArrayList<>();
 
         for ( final IgnoreVersion ignoreVersion : ruleSet.getIgnoreVersions() )
         {
@@ -550,7 +523,7 @@ public class DefaultVersionsHelper
     public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactResolutionException, ArtifactNotFoundException
     {
-        List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
+        List<ArtifactRepository> remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
         artifactResolver.resolve( artifact, remoteRepositories, localRepository );
     }
 
@@ -678,7 +651,7 @@ public class DefaultVersionsHelper
      */
     public Set<Artifact> extractArtifacts( Collection<MavenProject> mavenProjects )
     {
-        Set<Artifact> result = new HashSet<Artifact>();
+        Set<Artifact> result = new HashSet<>();
         for ( MavenProject project : mavenProjects )
         {
             result.add( project.getArtifact() );
@@ -718,14 +691,13 @@ public class DefaultVersionsHelper
     {
         // Create the request for details collection for parallel lookup...
         final List<Callable<DependencyArtifactVersions>> requestsForDetails =
-            new ArrayList<Callable<DependencyArtifactVersions>>( dependencies.size() );
+            new ArrayList<>( dependencies.size() );
         for ( final Dependency dependency : dependencies )
         {
             requestsForDetails.add( new DependencyLookup( dependency, usePluginRepositories ) );
         }
 
-        final Map<Dependency, ArtifactVersions> dependencyUpdates =
-            new TreeMap<Dependency, ArtifactVersions>( new DependencyComparator() );
+        final Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>( new DependencyComparator() );
 
         // Lookup details in parallel...
         final ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
@@ -741,15 +713,10 @@ public class DefaultVersionsHelper
                 dependencyUpdates.put( dav.getDependency(), dav.getArtifactVersions() );
             }
         }
-        catch ( final ExecutionException ee )
+        catch ( ExecutionException | InterruptedException ie )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
-                + ": " + ee.getMessage(), ee );
-        }
-        catch ( final InterruptedException ie )
-        {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
-                + ": " + ie.getMessage(), ie );
+                + ": " + ie.getMessage(), ie, null );
         }
         finally
         {
@@ -782,18 +749,16 @@ public class DefaultVersionsHelper
         throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
     {
         // Create the request for details collection for parallel lookup...
-        final List<Callable<PluginPluginUpdatesDetails>> requestsForDetails =
-            new ArrayList<Callable<PluginPluginUpdatesDetails>>( plugins.size() );
+        List<Callable<PluginPluginUpdatesDetails>> requestsForDetails = new ArrayList<>( plugins.size() );
         for ( final Plugin plugin : plugins )
         {
             requestsForDetails.add( new PluginLookup( plugin, allowSnapshots ) );
         }
 
-        final Map<Plugin, PluginUpdatesDetails> pluginUpdates =
-            new TreeMap<Plugin, PluginUpdatesDetails>( new PluginComparator() );
+        Map<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>( new PluginComparator() );
 
         // Lookup details in parallel...
-        final ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
+        ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
         try
         {
             final List<Future<PluginPluginUpdatesDetails>> responseForDetails =
@@ -806,15 +771,10 @@ public class DefaultVersionsHelper
                 pluginUpdates.put( pud.getPlugin(), pud.getPluginUpdatesDetails() );
             }
         }
-        catch ( final ExecutionException ee )
+        catch ( ExecutionException | InterruptedException ie )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
-                + ee.getMessage(), ee );
-        }
-        catch ( final InterruptedException ie )
-        {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
-                + ie.getMessage(), ie );
+                + ie.getMessage(), ie, null );
         }
         finally
         {
@@ -836,13 +796,13 @@ public class DefaultVersionsHelper
 
         VersionRange versionRange = VersionRange.createFromVersion( version );
 
-        final boolean includeSnapshots = allowSnapshots;
+        boolean includeSnapshots = allowSnapshots;
 
         final ArtifactVersions pluginArtifactVersions =
             lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
                                     true );
 
-        Set<Dependency> pluginDependencies = new TreeSet<Dependency>( new DependencyComparator() );
+        Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
         if ( plugin.getDependencies() != null )
         {
             pluginDependencies.addAll( plugin.getDependencies() );
@@ -870,7 +830,7 @@ public class DefaultVersionsHelper
                                                                     boolean autoLinkItems )
         throws MojoExecutionException
     {
-        Map<String, Property> properties = new HashMap<String, Property>();
+        Map<String, Property> properties = new HashMap<>();
         if ( propertyDefinitions != null )
         {
             for ( Property propertyDefinition : propertyDefinitions )
@@ -878,7 +838,7 @@ public class DefaultVersionsHelper
                 properties.put( propertyDefinition.getName(), propertyDefinition );
             }
         }
-        Map<String, PropertyVersionsBuilder> builders = new HashMap<String, PropertyVersionsBuilder>();
+        Map<String, PropertyVersionsBuilder> builders = new HashMap<>();
         if ( autoLinkItems )
         {
             final PropertyVersionsBuilder[] propertyVersionsBuilders;
@@ -886,11 +846,7 @@ public class DefaultVersionsHelper
             {
                 propertyVersionsBuilders = PomHelper.getPropertyVersionsBuilders( this, project );
             }
-            catch ( ExpressionEvaluationException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
-            catch ( IOException e )
+            catch ( ExpressionEvaluationException | IOException e )
             {
                 throw new MojoExecutionException( e.getMessage(), e );
             }
@@ -933,8 +889,7 @@ public class DefaultVersionsHelper
             }
         }
         i = properties.values().iterator();
-        Map<Property, PropertyVersions> propertyVersions =
-            new LinkedHashMap<Property, PropertyVersions>( properties.size() );
+        Map<Property, PropertyVersions> propertyVersions = new LinkedHashMap<>( properties.size() );
         while ( i.hasNext() )
         {
             Property property = i.next();

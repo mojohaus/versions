@@ -34,11 +34,10 @@ import java.util.Stack;
  *
  * @author <a href="mailto:kenney@apache.org">Kenney Westerhof</a>
  * @author <a href="mailto:hboutemy@apache.org">Herve Boutemy</a>
- * @version $Id: ComparableVersion.java 720520 2008-11-25 16:07:14Z bentmann $
  * Note: The implementation of the maven core should be used.
  */
 public class ComparableVersion
-    implements Comparable
+    implements Comparable<ComparableVersion>
 {
     private String value;
 
@@ -130,7 +129,7 @@ public class ComparableVersion
     {
         private final static String[] QUALIFIERS = { "snapshot", "alpha", "beta", "milestone", "rc", "", "sp" };
 
-        private final static List QUALIFIERS_LIST = Arrays.asList( QUALIFIERS );
+        private final static List<String> QUALIFIERS_LIST = Arrays.asList( QUALIFIERS );
 
         private final static Properties ALIASES = new Properties();
 
@@ -145,9 +144,9 @@ public class ComparableVersion
          * A comparable for the empty-string qualifier. This one is used to determine if a given qualifier makes the
          * version older than one without a qualifier, or more recent.
          */
-        private static Comparable RELEASE_VERSION_INDEX = String.valueOf( QUALIFIERS_LIST.indexOf( "" ) );
+        private static final Comparable<String> RELEASE_VERSION_INDEX = String.valueOf( QUALIFIERS_LIST.indexOf( "" ) );
 
-        private String value;
+        private final String value;
 
         public StringItem( String value, boolean followedByDigit )
         {
@@ -234,7 +233,7 @@ public class ComparableVersion
      * with '-(number)' in the version specification).
      */
     private static class ListItem
-        extends ArrayList
+        extends ArrayList<Item>
         implements Item
     {
         public int getType()
@@ -249,9 +248,9 @@ public class ComparableVersion
 
         void normalize()
         {
-            for ( ListIterator iterator = listIterator( size() ); iterator.hasPrevious(); )
+            for ( ListIterator<Item> iterator = listIterator( size() ); iterator.hasPrevious(); )
             {
-                Item item = (Item) iterator.previous();
+                Item item = iterator.previous();
                 if ( item.isNull() )
                 {
                     iterator.remove(); // remove null trailing items: 0, "", empty list
@@ -271,7 +270,7 @@ public class ComparableVersion
                 {
                     return 0; // 1-0 = 1- (normalize) = 1
                 }
-                Item first = (Item) get( 0 );
+                Item first = get( 0 );
                 return first.compareTo( null );
             }
 
@@ -284,13 +283,13 @@ public class ComparableVersion
                     return 1; // 1-1 > 1-sp
 
                 case LIST_ITEM:
-                    Iterator left = iterator();
-                    Iterator right = ( (ListItem) item ).iterator();
+                    Iterator<Item> left = iterator();
+                    Iterator<Item> right = ( (ListItem) item ).iterator();
 
                     while ( left.hasNext() || right.hasNext() )
                     {
-                        Item l = left.hasNext() ? (Item) left.next() : null;
-                        Item r = right.hasNext() ? (Item) right.next() : null;
+                        Item l = left.hasNext() ? left.next() : null;
+                        Item r = right.hasNext() ? right.next() : null;
 
                         // if this is shorter, then invert the compare and mul with -1
                         int result = l == null ? -1 * r.compareTo( l ) : l.compareTo( r );
@@ -311,7 +310,7 @@ public class ComparableVersion
         public String toString()
         {
             StringBuilder buffer = new StringBuilder( "(" );
-            for ( Iterator iter = iterator(); iter.hasNext(); )
+            for ( Iterator<Item> iter = iterator(); iter.hasNext(); )
             {
                 buffer.append( iter.next() );
                 if ( iter.hasNext() )
@@ -339,7 +338,7 @@ public class ComparableVersion
 
         ListItem list = items;
 
-        Stack stack = new Stack();
+        Stack<ListItem> stack = new Stack<>();
         stack.push( list );
 
         boolean isDigit = false;
@@ -417,7 +416,7 @@ public class ComparableVersion
 
         while ( !stack.isEmpty() )
         {
-            list = (ListItem) stack.pop();
+            list = stack.pop();
             list.normalize();
         }
 
@@ -426,12 +425,12 @@ public class ComparableVersion
 
     private static Item parseItem( boolean isDigit, String buf )
     {
-        return isDigit ? (Item) new IntegerItem( buf ) : (Item) new StringItem( buf, false );
+        return isDigit ? new IntegerItem( buf ) : new StringItem( buf, false );
     }
 
-    public int compareTo( Object o )
+    public int compareTo( ComparableVersion o )
     {
-        return items.compareTo( ( (ComparableVersion) o ).items );
+        return items.compareTo( ( o ).items );
     }
 
     public String toString()
