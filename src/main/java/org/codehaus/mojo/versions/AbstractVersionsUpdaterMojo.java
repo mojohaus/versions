@@ -380,14 +380,9 @@ public abstract class AbstractVersionsUpdaterMojo
     protected final void writeFile( File outFile, StringBuilder input )
         throws IOException
     {
-        Writer writer = WriterFactory.newXmlWriter( outFile );
-        try
+        try (Writer writer = WriterFactory.newXmlWriter( outFile ) )
         {
             IOUtil.copy( input.toString(), writer );
-        }
-        finally
-        {
-            IOUtil.close( writer );
         }
     }
 
