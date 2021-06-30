@@ -409,6 +409,10 @@ public abstract class AbstractVersionsUpdaterMojo
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
 
     /**
+     * @deprecated
+     *  This method no longer supported.
+     *  use shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean forceUpdate )
+     *
      * Returns <code>true</code> if the update should be applied.
      *
      * @param artifact The artifact.
@@ -417,7 +421,52 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return <code>true</code> if the update should be applied.
      * @since 1.0-alpha-1
      */
-    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean forceUpdate )
+    @Deprecated
+    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
+    {
+        getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
+
+
+        if ( updateVersion == null )
+        {
+            getLog().warn( "Not updating version: could not resolve any versions" );
+            return false;
+        }
+
+        artifact.setVersion( updateVersion.toString() );
+        try
+        {
+            resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
+        }
+        catch ( ArtifactResolutionException e )
+        {
+            getLog().warn( "Not updating version: could not resolve " + artifact.toString(), e );
+            return false;
+        }
+        catch ( ArtifactNotFoundException e )
+        {
+            getLog().warn( "Not updating version: could not find " + artifact.toString(), e );
+            return false;
+        }
+
+        if ( currentVersion.equals( updateVersion.toString() ) )
+        {
+            getLog().info( "Current version of " + artifact.toString() + " is the latest." );
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns <code>true</code> if the update should be applied.
+     *
+     * @param artifact The artifact.
+     * @param currentVersion The current version of the artifact.
+     * @param updateVersion The proposed new version of the artifact.
+     * @return <code>true</code> if the update should be applied to the pom.
+     * @since 1.0-alpha-1
+     */
+    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, boolean forceUpdate )
     {
         getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
 

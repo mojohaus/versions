@@ -57,7 +57,7 @@ public class UpdateParentMojo
     /**
      * to update parent version by force when it is RELEASE or LATEST
      *
-     * @since 2.8
+     * @since 2.9
      */
     @Parameter( property = "forceUpdate", defaultValue = "false" )
     protected boolean forceUpdate = false;
