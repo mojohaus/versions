@@ -421,7 +421,7 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
 
-        if ( forceUpdate == Boolean.TRUE )
+        if ( forceUpdate )
         {
             getLog().info( "Force update enabled. LATEST or RELEASE versions will be overwritten with real version" );
             return true;
