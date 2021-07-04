@@ -120,7 +120,7 @@ public class UpdateParentMojo
 
         if ( PomHelper.setProjectParentVersion( pom, artifactVersion.toString() ) )
         {
-            getLog().debug( "Made an update from " + currentVersion + " to " + artifactVersion.toString() );
+            getLog().debug( "Made an update from " + currentVersion + " to " + artifactVersion );
         }
     }
 

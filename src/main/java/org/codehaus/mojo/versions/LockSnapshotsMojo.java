@@ -147,7 +147,7 @@ public class LockSnapshotsMojo
             {
                 if ( PomHelper.setProjectParentVersion( pom, lockedParentVersion ) )
                 {
-                    getLog().info( "Locked parent " + parentArtifact.toString() + " to version "
+                    getLog().info( "Locked parent " + parentArtifact + " to version "
                         + lockedParentVersion );
                 }
             }
