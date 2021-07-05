@@ -424,37 +424,7 @@ public abstract class AbstractVersionsUpdaterMojo
     @Deprecated
     protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
     {
-        getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
-
-
-        if ( updateVersion == null )
-        {
-            getLog().warn( "Not updating version: could not resolve any versions" );
-            return false;
-        }
-
-        artifact.setVersion( updateVersion.toString() );
-        try
-        {
-            resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
-        }
-        catch ( ArtifactResolutionException e )
-        {
-            getLog().warn( "Not updating version: could not resolve " + artifact.toString(), e );
-            return false;
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            getLog().warn( "Not updating version: could not find " + artifact.toString(), e );
-            return false;
-        }
-
-        if ( currentVersion.equals( updateVersion.toString() ) )
-        {
-            getLog().info( "Current version of " + artifact.toString() + " is the latest." );
-            return false;
-        }
-        return true;
+        return shouldApplyUpdate(artifact,currentVersion,updateVersion,false);
     }
 
     /**
