@@ -434,7 +434,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param currentVersion The current version of the artifact.
      * @param updateVersion The proposed new version of the artifact.
      * @return <code>true</code> if the update should be applied to the pom.
-     * @since 1.0-alpha-1
+     * @since 2.9
      */
     protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, boolean forceUpdate )
     {
