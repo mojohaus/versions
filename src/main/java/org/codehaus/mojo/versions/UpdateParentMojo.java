@@ -54,6 +54,14 @@ public class UpdateParentMojo
     @Parameter( property = "parentVersion", defaultValue = "null" )
     protected String parentVersion = null;
 
+    /**
+     * to update parent version by force when it is RELEASE or LATEST
+     *
+     * @since 2.9
+     */
+    @Parameter( property = "forceUpdate", defaultValue = "false" )
+    protected boolean forceUpdate = false;
+
     // -------------------------- OTHER METHODS --------------------------
 
     /**
@@ -111,7 +119,7 @@ public class UpdateParentMojo
             throw new MojoExecutionException( e.getMessage(), e );
         }
 
-        if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion ) )
+        if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion, forceUpdate ) )
         {
             return;
         }

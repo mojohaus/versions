@@ -400,6 +400,10 @@ public abstract class AbstractVersionsUpdaterMojo
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
 
     /**
+     * @deprecated
+     *  This method no longer supported.
+     *  use shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean forceUpdate )
+     *
      * Returns <code>true</code> if the update should be applied.
      *
      * @param artifact The artifact.
@@ -408,9 +412,30 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return <code>true</code> if the update should be applied.
      * @since 1.0-alpha-1
      */
+    @Deprecated
     protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
     {
+        return shouldApplyUpdate(artifact,currentVersion,updateVersion,false);
+    }
+
+    /**
+     * Returns <code>true</code> if the update should be applied.
+     *
+     * @param artifact The artifact.
+     * @param currentVersion The current version of the artifact.
+     * @param updateVersion The proposed new version of the artifact.
+     * @return <code>true</code> if the update should be applied to the pom.
+     * @since 2.9
+     */
+    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, boolean forceUpdate )
+    {
         getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
+
+        if ( forceUpdate )
+        {
+            getLog().info( "Force update enabled. LATEST or RELEASE versions will be overwritten with real version" );
+            return true;
+        }
 
         if ( updateVersion == null )
         {
