@@ -44,9 +44,6 @@ create/add/fix several issues in one, cause otherwise the history is hard to
 read and to understand and makes the maintenance of the issues and pull request
 hard or to be honest impossible.
 
-Furthermore it is necessary to create appropriate entries into the `ReleaseNotes.md`
-file as well.
-
 
 ## Releasing
 
