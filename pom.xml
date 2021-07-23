@@ -98,7 +98,7 @@
   <properties>
     <mojo.java.target>1.8</mojo.java.target>
     <maven.compiler.source>${mojo.java.target}</maven.compiler.source>
-
+    <junitBomVersion>5.7.2</junitBomVersion>
     <mavenVersion>3.0.5</mavenVersion>
     <wagonVersion>3.4.0</wagonVersion>
     <doxiaVersion>1.9.1</doxiaVersion>
@@ -107,6 +107,18 @@
     <sitePluginVersion>3.7</sitePluginVersion>
     <project.build.outputTimestamp>2020-08-07T21:31:00Z</project.build.outputTimestamp>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junitBomVersion}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -227,8 +239,13 @@
       <version>3.8.1</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
