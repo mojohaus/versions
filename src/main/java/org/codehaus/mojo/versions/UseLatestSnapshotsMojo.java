@@ -100,7 +100,11 @@ public class UseLatestSnapshotsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
+            	// handle normally declared dependencies
                 useLatestSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
+                
+                // handle import dependencies specially
+                useLatestSnapshots( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {

@@ -97,7 +97,11 @@ public class UseNextSnapshotsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
+            	// handle normally declared dependencies
                 useNextSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
+                
+                // handle import dependencies specially
+                useNextSnapshots( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {

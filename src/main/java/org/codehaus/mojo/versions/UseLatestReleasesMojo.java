@@ -101,7 +101,11 @@ public class UseLatestReleasesMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
+            	// handle normally declared dependencies
                 useLatestReleases( pom, getProject().getDependencyManagement().getDependencies() );
+                
+                // handle import dependencies specially
+                useLatestReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {

@@ -60,7 +60,11 @@ public class UseNextVersionsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
+            	// handle normally declared dependencies
                 useNextVersions( pom, getProject().getDependencyManagement().getDependencies() );
+                
+                // handle import dependencies specially
+                useNextVersions( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {

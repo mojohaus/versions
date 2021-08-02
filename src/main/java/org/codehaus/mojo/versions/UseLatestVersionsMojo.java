@@ -96,7 +96,11 @@ public class UseLatestVersionsMojo
                     PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
+                	// handle normally declared dependencies
                     useLatestVersions( pom, dependencyManagement.getDependencies() );
+                    
+                    // handle import dependencies specially
+                    useLatestVersions( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
                 }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
