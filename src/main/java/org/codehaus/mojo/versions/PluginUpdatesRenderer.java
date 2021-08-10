@@ -243,7 +243,7 @@ public class PluginUpdatesRenderer
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText("report.latestSubIncremental") );
+        sink.text( getText( "report.latestSubIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
         sink.text( getText( "report.latestIncremental" ) );
@@ -456,7 +456,7 @@ public class PluginUpdatesRenderer
                     else if ( equals( versions[i],
                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
-                        sink.text( getText("report.latestSubIncremental") );
+                        sink.text( getText( "report.latestSubIncremental" ) );
                     }
                     else if ( equals( versions[i],
                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) ) )

@@ -291,7 +291,7 @@ public abstract class AbstractVersionsReportRenderer
             sink.tableHeaderCell_();
         }
         sink.tableHeaderCell();
-        sink.text( getText("report.latestSubIncremental") );
+        sink.text( getText( "report.latestSubIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
         sink.text( getText( "report.latestIncremental" ) );
@@ -451,7 +451,7 @@ public abstract class AbstractVersionsReportRenderer
                     }
                     else if ( equals( versions[i], details.getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
-                        sink.text( getText("report.latestSubIncremental") );
+                        sink.text( getText( "report.latestSubIncremental" ) );
                     }
                     else if ( equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
                     {
@@ -733,7 +733,7 @@ public abstract class AbstractVersionsReportRenderer
                     }
                     else if ( equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
-                        sink.text( getText("report.latestSubIncremental") );
+                        sink.text( getText( "report.latestSubIncremental" ) );
                     }
                     else if ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
                     {
