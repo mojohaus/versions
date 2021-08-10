@@ -28,7 +28,7 @@ try
     }
     if ( result.indexOf( "# of properties where the next version available is smaller than an incremental version update 0" ) < 0 )
     {
-        System.out.println( "Did not generate with subincrermental totals correctly" );
+        System.out.println( "Did not generate with subincremental totals correctly" );
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
@@ -50,13 +50,13 @@ try
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
-    if ( result.indexOf( "${impl-version} 2.0 2.1" ) < 0 )
+    if ( result.indexOf( "${impl-version} 2.0 2.2" ) < 0 )
     {
         System.out.println( "Did not generate summary for ${impl-version} correctly" );
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
-    if ( result.indexOf( "${api-version} 1.0 1.0.1 1.1 2.0" ) < 0 )
+    if ( result.indexOf( "${api-version} 1.0 1.0.1 1.3 3.0" ) < 0 )
     {
         System.out.println( "Did not generate summary for ${api-version} correctly" );
         System.out.println( "Result = \"" + result +"\"" );
