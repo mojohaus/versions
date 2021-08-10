@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import java.text.MessageFormat;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -244,16 +243,16 @@ public class PluginUpdatesRenderer
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextVersion" ) );
+        sink.text( getText("report.latestSubIncremental") );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextIncremental" ) );
+        sink.text( getText( "report.latestIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextMinor" ) );
+        sink.text( getText( "report.latestMinor" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextMajor" ) );
+        sink.text( getText( "report.latestMajor" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
         sink.text( getText( "report.dependencyStatus" ) );
@@ -293,37 +292,37 @@ public class PluginUpdatesRenderer
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
+        if ( details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             safeBold();
-            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
+            sink.text( details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
+        if ( details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
             safeBold();
-            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
+            sink.text( details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) != null )
+        if ( details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) != null )
         {
             safeBold();
-            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ).toString() );
+            sink.text( details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) != null )
+        if ( details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) != null )
         {
             safeBold();
-            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ).toString() );
+            sink.text( details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ).toString() );
             safeBold_();
         }
         sink.tableCell_();
@@ -432,6 +431,7 @@ public class PluginUpdatesRenderer
                 }
                 boolean bold = equals( versions[i],
                                        details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) )
@@ -452,6 +452,11 @@ public class PluginUpdatesRenderer
                                  details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
+                    }
+                    else if ( equals( versions[i],
+                                      details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
+                    {
+                        sink.text( getText("report.latestSubIncremental") );
                     }
                     else if ( equals( versions[i],
                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
