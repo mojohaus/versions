@@ -335,7 +335,7 @@ public class PomHelper
      * @param pom The pom to modify.
      * @param value The new value of the property.
      * @return <code>true</code> if a replacement was made.
-     * @throws XMLStreamException if somethinh went wrong.
+     * @throws XMLStreamException if something went wrong.
      */
     public static boolean setProjectParentVersion( final ModifiedPomXMLEventReader pom, final String value )
         throws XMLStreamException

@@ -273,28 +273,37 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     protected String toString( Dependency d )
     {
+        return getString(d.getGroupId(), d.getArtifactId(), d.getType(), d.getClassifier(), d.getVersion());
+    }
+
+    protected String toString( Artifact a )
+    {
+        return getString(a.getGroupId(), a.getArtifactId(), a.getType(), a.getClassifier(), a.getVersion());
+    }
+
+    private String getString(String groupId, String artifactId, String type, String classifier, String version) {
         StringBuilder buf = new StringBuilder();
-        buf.append( d.getGroupId() );
+        buf.append(groupId);
         buf.append( ':' );
-        buf.append( d.getArtifactId() );
-        if ( d.getType() != null && d.getType().length() > 0 )
+        buf.append(artifactId);
+        if ( type != null && type.length() > 0 )
         {
             buf.append( ':' );
-            buf.append( d.getType() );
+            buf.append(type);
         }
         else
         {
             buf.append( ":jar" );
         }
-        if ( d.getClassifier() != null && d.getClassifier().length() > 0 )
+        if ( classifier != null && classifier.length() > 0 )
         {
             buf.append( ':' );
-            buf.append( d.getClassifier() );
+            buf.append(classifier);
         }
-        if ( d.getVersion() != null && d.getVersion().length() > 0 )
+        if ( version != null && version.length() > 0 )
         {
             buf.append( ":" );
-            buf.append( d.getVersion() );
+            buf.append(version);
         }
         return buf.toString();
     }

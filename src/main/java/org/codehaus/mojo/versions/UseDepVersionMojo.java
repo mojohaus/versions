@@ -83,6 +83,11 @@ public class UseDepVersionMojo
             {
                 useDepVersion( pom, getProject().getDependencies() );
             }
+
+            if(getProject().getParentArtifact() != null && isProcessingParent() )
+            {
+                useParentVersion( pom, getProject().getParentArtifact());
+            }
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
@@ -132,5 +137,29 @@ public class UseDepVersionMojo
                 }
             }
         }
+    }
+
+    private void useParentVersion( ModifiedPomXMLEventReader pom, Artifact artifact )
+            throws MojoExecutionException, XMLStreamException, ArtifactMetadataRetrievalException
+    {
+            if ( isIncluded( artifact ) )
+            {
+                if ( !forceVersion )
+                {
+                    ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+
+                    if ( !versions.containsVersion( depVersion ) )
+                    {
+                        throw new MojoExecutionException( String.format( "Version %s is not available for artifact %s:%s",
+                                depVersion, artifact.getGroupId(),
+                                artifact.getArtifactId() ) );
+                    }
+                }
+
+                if ( PomHelper.setProjectParentVersion(pom, depVersion) )
+                {
+                    getLog().info( "Updated " + toString( artifact ) + " to version " + depVersion );
+                }
+            }
     }
 }
