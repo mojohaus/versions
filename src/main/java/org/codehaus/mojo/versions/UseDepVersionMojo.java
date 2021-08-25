@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions;
 
 import java.util.Collection;
 
+import java.util.Objects;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.Artifact;
@@ -156,9 +157,19 @@ public class UseDepVersionMojo
                     }
                 }
 
-                if ( PomHelper.setProjectParentVersion(pom, depVersion) )
-                {
-                    getLog().info( "Updated " + toString( artifact ) + " to version " + depVersion );
+                Artifact projectParent = PomHelper.getProjectParent(pom, getHelper());
+                if(projectParent != null) {
+                    boolean updateParent = Objects.equals(projectParent.getGroupId(),
+                            artifact.getGroupId()) && Objects.equals(projectParent.getArtifactId(),
+                            artifact.getArtifactId()) && Objects.equals(projectParent.getClassifier(),
+                            artifact.getClassifier()) && Objects.equals(projectParent.getScope(), artifact.getScope());
+
+                    if (updateParent && PomHelper.setProjectParentVersion(pom, depVersion)) {
+                        getLog().info("Updated " + toString(artifact) + " to version " + depVersion);
+                    }
+                } else {
+                    getLog().info(String.format("No project parent available, skipping version update for %s:%s", artifact.getGroupId(),
+                            artifact.getArtifactId()));
                 }
             }
     }
