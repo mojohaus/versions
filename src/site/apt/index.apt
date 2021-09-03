@@ -38,6 +38,8 @@ Versions Maven Plugin
   * {{{./display-dependency-updates-mojo.html}versions:display-dependency-updates}} scans a project's dependencies and
   produces a report of those dependencies which have newer versions available.
 
+  * {{{./display-latest-version-mojo.html}versions:display-latest-version}} displays the latest version for an artefact.
+
   * {{{./display-plugin-updates-mojo.html}versions:display-plugin-updates}} scans a project's plugins and produces a
   report of those plugins which have newer versions available, taking care of Maven version prerequisites.
 
@@ -51,8 +53,8 @@ Versions Maven Plugin
   * {{{./update-properties-mojo.html}versions:update-properties}} updates properties defined in a project so that they
   correspond to the latest available version of specific dependencies.  This can be useful if a suite of dependencies
   must all be locked to one version.
-  
-  * {{{./update-property-mojo.html}versions:update-property}} Sets a property to the latest version in a given range of 
+
+  * {{{./update-property-mojo.html}versions:update-property}} Sets a property to the latest version in a given range of
   associated artifacts.
 
   * {{{./update-child-modules-mojo.html}versions:update-child-modules}} updates the parent section of the child modules
@@ -62,27 +64,27 @@ Versions Maven Plugin
   run this goal if your project is broken so badly that it cannot build because of the version mis-match).
 
   * {{{./lock-snapshots-mojo.html}versions:lock-snapshots}} searches the pom for all -SNAPSHOT versions and replaces them
-  with the current timestamp version of that -SNAPSHOT, e.g. -20090327.172306-4 
+  with the current timestamp version of that -SNAPSHOT, e.g. -20090327.172306-4
 
   * {{{./unlock-snapshots-mojo.html}versions:unlock-snapshots}} searches the pom for all timestamp locked snapshot versions
-  and replaces them with -SNAPSHOT. 
+  and replaces them with -SNAPSHOT.
 
   * {{{./resolve-ranges-mojo.html}versions:resolve-ranges}} finds dependencies using version ranges and resolves the range
-  to the specific version being used. 
+  to the specific version being used.
 
   * {{{./set-mojo.html}versions:set}} can be used to set the project version from the command line.
 
   * {{{./set-property-mojo.html}versions:set-property}} can be used to set one or multiple properties to a given version from the command line.
 
   * {{{./use-releases-mojo.html}versions:use-releases}} searches the pom for all -SNAPSHOT versions which have been
-  released and replaces them with the corresponding release version. 
-  
+  released and replaces them with the corresponding release version.
+
   * {{{./use-next-releases-mojo.html}versions:use-next-releases}} searches the pom for all non-SNAPSHOT versions which
   have been a newer release and replaces them with the next release version.
 
   * {{{./use-latest-releases-mojo.html}versions:use-latest-releases}} searches the pom for all non-SNAPSHOT versions which
-  have been a newer release and replaces them with the latest release version. 
-  
+  have been a newer release and replaces them with the latest release version.
+
   * {{{./use-next-snapshots-mojo.html}versions:use-next-snapshots}} searches the pom for all non-SNAPSHOT versions which
   have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
 
@@ -90,16 +92,16 @@ Versions Maven Plugin
   which have been a newer -SNAPSHOT version and replaces them with the latest -SNAPSHOT version.
 
   * {{{./use-next-versions-mojo.html}versions:use-next-versions}} searches the pom for all versions which
-  have been a newer version and replaces them with the next version. 
-  
+  have been a newer version and replaces them with the next version.
+
   * {{{./use-latest-versions-mojo.html}versions:use-latest-versions}} searches the pom for all versions which
-  have been a newer version and replaces them with the latest version. 
-  
+  have been a newer version and replaces them with the latest version.
+
   * {{{./commit-mojo.html}versions:commit}} removes the <<<pom.xml.versionsBackup>>> files. Forms one half of the
-  built-in "Poor Man's SCM". 
-  
+  built-in "Poor Man's SCM".
+
   * {{{./revert-mojo.html}versions:revert}} restores the <<<pom.xml>>> files from the <<<pom.xml.versionsBackup>>> files.
-  Forms one half of the built-in "Poor Man's SCM". 
+  Forms one half of the built-in "Poor Man's SCM".
 
 * Reporting goals overview
 

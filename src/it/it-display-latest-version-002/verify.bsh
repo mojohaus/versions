@@ -1,0 +1,25 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+import java.util.regex.*;
+
+try
+{
+    File file = new File( basedir, "build.log" );
+    String buf = FileUtils.fileRead( file );
+
+    Pattern p = Pattern.compile( "\\QArtifact localhost:notfound:jar not found\\E" );
+    Matcher m = p.matcher( buf.toString() );
+    if ( !m.find() )
+    {
+        System.out.println( "localhost:notfound:jar should not be found in the repository" );
+        return false;
+    }
+    System.out.println( m.group( 0 ) );
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;
