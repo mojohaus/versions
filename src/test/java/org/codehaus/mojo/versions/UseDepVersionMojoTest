@@ -1,0 +1,131 @@
+package org.codehaus.mojo.versions;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
+import javax.xml.stream.XMLInputFactory;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.stax2.XMLInputFactory2;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+@RunWith(MockitoJUnitRunner.class)
+public class UseDepVersionMojoTest {
+
+    @Mock
+    private ArtifactFactory artifactFactory;
+
+    private MavenProject mavenProject;
+
+    private ModifiedPomXMLEventReader pom;
+    
+    @Before
+    public void setup() throws Exception {
+        URL url = getClass().getResource("UseDepVersionMojoTest.pom.xml");
+
+        File file = new File(url.getPath());
+        StringBuilder input = PomHelper.readXmlFile(file);
+        Model rawModel = PomHelper.getRawModel(file);
+        mavenProject = new MavenProject(rawModel);
+
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
+
+        pom = new ModifiedPomXMLEventReader(input, inputFactory, file.getAbsolutePath());
+    }
+
+    @Test
+    public void testUpdateImportScopeDependency() throws Exception {
+        String groupId = "org.group1";
+        String artifactId = "artifact-pom";
+
+        UseDepVersionMojoUnderTest mojo = new UseDepVersionMojoUnderTest(artifactFactory, mavenProject, groupId, artifactId);
+        mojo.forceVersion = true;
+        mojo.depVersion = "2.0";
+
+        mojo.update(pom);
+
+        verifyResults(groupId, artifactId, "1.0-SNAPSHOT", "2.0");
+    }
+    
+    @Test
+    public void testUpdateNormalScopeDependency() throws Exception {
+        String groupId = "org.group1";
+        String artifactId = "artifact-jar";
+
+        UseDepVersionMojoUnderTest mojo = new UseDepVersionMojoUnderTest(artifactFactory, mavenProject, groupId, artifactId);
+        mojo.forceVersion = true;
+        mojo.depVersion = "2.0";
+
+        mojo.update(pom);
+
+        verifyResults(groupId, artifactId, "1.0-SNAPSHOT", "2.0");
+
+    }
+
+    private void verifyResults(String groupId, String artifactId, String oldVersion, String newVersion) throws IOException {
+        Model newModel = PomHelper.getRawModel(pom);
+        
+        List<Dependency> dependencies = newModel.getDependencyManagement().getDependencies();
+        assertNotNull(dependencies);
+        assertEquals(2, dependencies.size());
+
+        for(Dependency dependency: dependencies) {
+            if(dependency.getArtifactId().equals(artifactId)) {
+                assertEquals(newVersion, dependency.getVersion());
+            } else {
+                assertEquals(oldVersion, dependency.getVersion());
+            }
+        }
+    }
+
+    private static final class UseDepVersionMojoUnderTest extends UseDepVersionMojo {
+        private final String groupId;
+        private final String artifactId;
+    
+        private UseDepVersionMojoUnderTest(ArtifactFactory artifactFactory, MavenProject mavenProject, String groupId, String artifactId) {
+            this.groupId = groupId;
+            this.artifactId = artifactId;
+            super.project = mavenProject;
+            super.artifactFactory = artifactFactory;
+        }
+    
+        @Override
+        public boolean isProcessingDependencyManagement() {
+            return true;
+        }
+    
+        @Override
+        protected boolean isIncluded(Artifact artifact) {
+            return artifact.getGroupId().equals(groupId) && artifact.getArtifactId().equals(artifactId);
+        }
+    
+        @Override
+        protected Artifact toArtifact(Dependency dependency) throws MojoExecutionException {
+            DefaultArtifact artifact =
+                    new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(), VersionRange.createFromVersion( dependency.getVersion() ), dependency.getScope(),
+                                         dependency.getType(), dependency.getClassifier(), new DefaultArtifactHandler() );
+            return artifact;
+        }
+    }
+
+}
