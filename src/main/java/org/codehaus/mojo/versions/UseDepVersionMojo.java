@@ -76,11 +76,11 @@ public class UseDepVersionMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-            	// handle normally declared dependencies
+                // handle normally declared dependencies
                 useDepVersion( pom, getProject().getDependencyManagement().getDependencies() );
-                
+
                 // handle import dependencies specially
-                useDepVersion( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
+                useDepVersion( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
             }
 
             if ( getProject().getDependencies() != null && isProcessingDependencies() )

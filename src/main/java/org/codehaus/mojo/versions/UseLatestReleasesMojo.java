@@ -105,7 +105,7 @@ public class UseLatestReleasesMojo
                 useLatestReleases( pom, getProject().getDependencyManagement().getDependencies() );
                 
                 // handle import dependencies specially
-                useLatestReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection(pom) );
+                useLatestReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
