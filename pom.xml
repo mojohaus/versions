@@ -101,8 +101,8 @@
     <junitBomVersion>5.7.2</junitBomVersion>
     <mavenVersion>3.0.5</mavenVersion>
     <wagonVersion>3.4.0</wagonVersion>
-    <doxiaVersion>1.9.1</doxiaVersion>
-    <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
+    <doxiaVersion>1.10</doxiaVersion>
+    <doxia-sitetoolsVersion>1.10</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.7</sitePluginVersion>
     <project.build.outputTimestamp>2020-08-07T21:31:00Z</project.build.outputTimestamp>
@@ -380,7 +380,7 @@
             <mockRepo>
               <source>src/it-repo</source>
             </mockRepo>
-            <proxyRepo />
+            <proxyRepo/>
           </repositories>
         </configuration>
       </plugin>
