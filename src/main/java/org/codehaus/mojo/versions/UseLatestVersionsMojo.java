@@ -98,7 +98,6 @@ public class UseLatestVersionsMojo
                 {
                 	// handle normally declared dependencies
                     useLatestVersions( pom, dependencyManagement.getDependencies() );
-                    
                     // handle import dependencies specially
                     useLatestVersions( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
                 }

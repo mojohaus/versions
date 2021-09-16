@@ -69,7 +69,6 @@ public class UseNextReleasesMojo
         {
         	// handle normally declared dependencies
             useNextReleases( pom, getProject().getDependencyManagement().getDependencies() );
-            
             // handle import dependencies specially
             useNextReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
         }

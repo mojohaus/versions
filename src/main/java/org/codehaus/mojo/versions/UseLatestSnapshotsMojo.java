@@ -102,7 +102,6 @@ public class UseLatestSnapshotsMojo
             {
             	// handle normally declared dependencies
                 useLatestSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
-                
                 // handle import dependencies specially
                 useLatestSnapshots( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
             }

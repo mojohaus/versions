@@ -99,7 +99,6 @@ public class UseNextSnapshotsMojo
             {
             	// handle normally declared dependencies
                 useNextSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
-                
                 // handle import dependencies specially
                 useNextSnapshots( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
             }

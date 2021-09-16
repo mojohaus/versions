@@ -78,7 +78,6 @@ public class UseDepVersionMojo
             {
                 // handle normally declared dependencies
                 useDepVersion( pom, getProject().getDependencyManagement().getDependencies() );
-
                 // handle import dependencies specially
                 useDepVersion( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
             }
