@@ -18,9 +18,8 @@ public class JGitHelper {
     private Git git;
 
     private JGitHelper() throws IOException {
+        final Properties prop = new Properties();
         try (InputStream input = this.getClass().getClassLoader().getResourceAsStream("gitinfo.properties")) {
-
-            final Properties prop = new Properties();
             prop.load(input);
             git = Git.open(new File(prop.getProperty("git.local.folder")));
             git.checkout().setName(prop.getProperty("branch.name")).setCreateBranch(true).call();

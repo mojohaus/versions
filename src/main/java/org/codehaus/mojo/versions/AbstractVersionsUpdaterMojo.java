@@ -21,8 +21,10 @@ package org.codehaus.mojo.versions;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -529,14 +531,30 @@ public abstract class AbstractVersionsUpdaterMojo
             getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
         }
         else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) ) {
-            final String updateMessage = "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner;
+            String updateMessage = "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner;
             lock.lock();
             try {
                 // To have separated commits we need to write the pom each time a property is updated
                 writePomFile(outFile, input);
-                getLog().debug(">>>>"  + updateMessage);
+                getLog().debug(">>>>" + updateMessage);
+                final Properties prop = new Properties();
+                String releaseNoteUrl = getReleaseNotesUrl(prop, property, "releasenotes.properties");
                 final Git git = JGitHelper.git();
                 git.add().addFilepattern(".").call();
+                if (releaseNoteUrl != null) {
+                    releaseNoteUrl = new StringBuilder().append(releaseNoteUrl)
+                                                        .append(winner)
+                                                        .toString();
+                } else {
+                    // Try to find the changelog if any (does not require any version number)
+                    releaseNoteUrl = getReleaseNotesUrl(prop, property, "changelogs.properties");
+                }
+                if (releaseNoteUrl != null) {
+                    updateMessage = new StringBuilder(updateMessage).append("\n\r")
+                                                                    .append("Release notes: ")
+                                                                    .append(releaseNoteUrl)
+                                                                    .toString();
+                }
                 git.commit().setMessage(updateMessage).call();
             } catch (final Exception exception) {
                 getLog().error(exception);
@@ -545,5 +563,18 @@ public abstract class AbstractVersionsUpdaterMojo
             }
             getLog().info(updateMessage);
         }
+    }
+
+    private String getReleaseNotesUrl(final Properties properties,
+                                      final Property property,
+                                      final String propertyFileName) {
+        String url = null;
+        try (InputStream rn = this.getClass().getClassLoader().getResourceAsStream(propertyFileName)) {
+            properties.load(rn);
+            url = properties.getProperty(property.getName().replaceAll(".version", ""));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return url;
     }
 }
