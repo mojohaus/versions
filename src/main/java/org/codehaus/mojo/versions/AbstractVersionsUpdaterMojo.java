@@ -531,7 +531,7 @@ public abstract class AbstractVersionsUpdaterMojo
             getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
         }
         else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) ) {
-            String updateMessage = "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner;
+            String updateMessage = "Update ${" + property.getName() + "} from " + currentVersion + " to " + winner;
             lock.lock();
             try {
                 // To have separated commits we need to write the pom each time a property is updated
