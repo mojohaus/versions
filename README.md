@@ -13,7 +13,7 @@ but each company has different needs.
 
 - JGIT is created at start, reading the properties in `gitinfo.rpoperty`
 - Creates a branch (name comes from `gitinfo.properties`)
-- Push commit each time a file is updated
+- Push commit each time a file is updated and adds to the message the link of the release notes.
 - Leave your local repository safe: do not ask for email/user/authentication... everything is local.
 - Leave you the choice to rebase your commits and remove the unwanted.
 
