@@ -112,7 +112,7 @@
 
     <mavenVersion>2.2.1</mavenVersion>
     <wagonVersion>3.4.3</wagonVersion>
-    <doxiaVersion>1.9.1</doxiaVersion>
+    <doxiaVersion>1.10</doxiaVersion>
     <doxia-sitetoolsVersion>1.7</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.7</sitePluginVersion>
@@ -255,7 +255,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>2.28.2</version>
+      <version>3.11.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
