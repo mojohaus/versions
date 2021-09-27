@@ -550,9 +550,10 @@ public abstract class AbstractVersionsUpdaterMojo
                     releaseNoteUrl = getReleaseNotesUrl(prop, property, "changelogs.properties");
                 }
                 if (releaseNoteUrl != null) {
-                    updateMessage = new StringBuilder(updateMessage).append("\n\r")
+                    updateMessage = new StringBuilder(updateMessage).append("\n\n")
                                                                     .append("Release notes: ")
                                                                     .append(releaseNoteUrl)
+                                                                    .append("\n")
                                                                     .toString();
                 }
                 git.commit().setMessage(updateMessage).call();
