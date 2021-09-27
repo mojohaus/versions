@@ -2,10 +2,8 @@ package org.codehaus.mojo.versions.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.FileSystems;
-import java.util.Properties;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -20,9 +18,7 @@ public class JGitHelper {
     private Git git;
 
     private JGitHelper() throws IOException {
-        final Properties prop = new Properties();
-        try (InputStream input = this.getClass().getClassLoader().getResourceAsStream("gitinfo.properties")) {
-            prop.load(input);
+        try {
             final URI defaultLocalGitRepo = FileSystems.getDefault().getPath(".").toUri();
             git = Git.open(new File(defaultLocalGitRepo));
             git.checkout().setName("dependencies-updates").setCreateBranch(true).call();
