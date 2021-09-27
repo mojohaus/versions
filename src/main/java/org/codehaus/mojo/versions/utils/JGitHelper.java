@@ -3,6 +3,8 @@ package org.codehaus.mojo.versions.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.FileSystems;
 import java.util.Properties;
 
 import org.eclipse.jgit.api.Git;
@@ -21,9 +23,10 @@ public class JGitHelper {
         final Properties prop = new Properties();
         try (InputStream input = this.getClass().getClassLoader().getResourceAsStream("gitinfo.properties")) {
             prop.load(input);
-            git = Git.open(new File(prop.getProperty("git.local.folder")));
-            git.checkout().setName(prop.getProperty("branch.name")).setCreateBranch(true).call();
-        } catch (IOException | GitAPIException ex) {
+            final URI defaultLocalGitRepo = FileSystems.getDefault().getPath(".").toUri();
+            git = Git.open(new File(defaultLocalGitRepo));
+            git.checkout().setName("dependencies-updates").setCreateBranch(true).call();
+        } catch (IOException | GitAPIException | IllegalArgumentException ex) {
             ex.printStackTrace();
         }
     }
