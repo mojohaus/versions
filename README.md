@@ -20,13 +20,14 @@ but each company has different needs.
 #### Only a PoC for now
 
 This is only a poc, tested locally for now
-But the commits are created.
+But the commits are created with the release notes link. (The RN files need to be updated/completed)
 
 There is a few bugs to fix asap:
+- code is not pretty
 - commit only the pom file(s) (actually commit everything is not stashed)
 - if possible, get the link /release nots for each version update
 - fixup singleton
 - only tested with `mvn versions:update-properties -Dmaven.version.rules=<file_location> -DgenerateBackupPoms=false`
-- To test it, build it locally, then remove actual 2.8 version in your .m2 folder. Run the above command.
+- To test it, build it locally, then remove any 2.8.1 version in your .m2 folder. Then run the above command.
 
 VROM© 2021.
