@@ -187,6 +187,11 @@ public abstract class AbstractVersionsUpdaterMojo
     private VersionsHelper helper;
 
     /**
+     * Our versions helper.
+     */
+    final Properties properties = new Properties();
+
+    /**
      * The Maven Session.
      *
      * @since 1.0-alpha-1
@@ -537,26 +542,28 @@ public abstract class AbstractVersionsUpdaterMojo
                 // To have separated commits we need to write the pom each time a property is updated
                 writePomFile(outFile, input);
                 getLog().debug(">>>>" + updateMessage);
-                final Properties prop = new Properties();
-                String releaseNoteUrl = getReleaseNotesUrl(prop, property, "releasenotes.properties");
+
                 final Git git = JGitHelper.git();
                 git.add().addFilepattern(".").call();
+
+                final StringBuilder commitMessage = new StringBuilder(updateMessage).append("\n\n");
+                final String releaseNoteUrl = getUrlFromPropertiesFile(property, "releasenotes.properties");
                 if (releaseNoteUrl != null) {
-                    releaseNoteUrl = new StringBuilder().append(releaseNoteUrl)
-                                                        .append(winner)
-                                                        .toString();
-                } else {
-                    // Try to find the changelog if any (does not require any version number)
-                    releaseNoteUrl = getReleaseNotesUrl(prop, property, "changelogs.properties");
+                    commitMessage.append("Release notes: ")
+                                 .append(releaseNoteUrl)
+                                 .append(winner)
+                                 .append("\n")
+                                 .toString();
                 }
-                if (releaseNoteUrl != null) {
-                    updateMessage = new StringBuilder(updateMessage).append("\n\n")
-                                                                    .append("Release notes: ")
-                                                                    .append(releaseNoteUrl)
-                                                                    .append("\n")
-                                                                    .toString();
+                // Try to find the changelog if any (does not require any version number)
+                final String changeLogUrl = getUrlFromPropertiesFile(property, "changelogs.properties");
+                if (changeLogUrl != null) {
+                    commitMessage.append("Change logs: ")
+                                 .append(changeLogUrl)
+                                 .append("\n")
+                                 .toString();
                 }
-                git.commit().setMessage(updateMessage).call();
+                git.commit().setMessage(commitMessage.toString()).call();
             } catch (final Exception exception) {
                 getLog().error(exception);
             } finally {
@@ -566,9 +573,8 @@ public abstract class AbstractVersionsUpdaterMojo
         }
     }
 
-    private String getReleaseNotesUrl(final Properties properties,
-                                      final Property property,
-                                      final String propertyFileName) {
+    private String getUrlFromPropertiesFile(final Property property,
+                                            final String propertyFileName) {
         String url = null;
         try (InputStream rn = this.getClass().getClassLoader().getResourceAsStream(propertyFileName)) {
             properties.load(rn);
