@@ -187,11 +187,6 @@ public abstract class AbstractVersionsUpdaterMojo
     private VersionsHelper helper;
 
     /**
-     * Our versions helper.
-     */
-    final Properties properties = new Properties();
-
-    /**
      * The Maven Session.
      *
      * @since 1.0-alpha-1
@@ -576,6 +571,7 @@ public abstract class AbstractVersionsUpdaterMojo
     private String getUrlFromPropertiesFile(final Property property,
                                             final String propertyFileName) {
         String url = null;
+        final Properties properties = new Properties();
         try (InputStream rn = this.getClass().getClassLoader().getResourceAsStream(propertyFileName)) {
             properties.load(rn);
             url = properties.getProperty(property.getName().replaceAll(".version", ""));
