@@ -22,13 +22,16 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -62,6 +65,31 @@ public class UpdateParentMojo
     @Parameter( property = "forceUpdate", defaultValue = "false" )
     protected boolean forceUpdate = false;
 
+    /**
+     * Whether to allow the major version number to be changed.
+     *
+     * @since 2.9
+     */
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    private boolean allowMajorUpdates;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     *
+     * @since 2.9
+     */
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    private boolean allowMinorUpdates;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     *
+     * @since 2.9
+     */
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    private boolean allowIncrementalUpdates;
+
+    
     // -------------------------- OTHER METHODS --------------------------
 
     /**
@@ -72,7 +100,8 @@ public class UpdateParentMojo
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom )
+    @Override
+	protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         if ( getProject().getParent() == null )
@@ -90,7 +119,7 @@ public class UpdateParentMojo
         String currentVersion = getProject().getParent().getVersion();
         String version = currentVersion;
 
-        if ( parentVersion != null )
+        if ( parentVersion != null && !parentVersion.equals("null") )
         {
             version = parentVersion;
         }
@@ -109,10 +138,21 @@ public class UpdateParentMojo
                                                                       getProject().getParent().getArtifactId(),
                                                                       versionRange, "pom", null, null );
 
-        ArtifactVersion artifactVersion;
+        ArtifactVersion artifactVersion = new DefaultArtifactVersion( version );
         try
         {
-            artifactVersion = findLatestVersion( artifact, versionRange, null, false );
+            int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+            MajorMinorIncrementalFilter majorMinorIncfilter =
+                new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+
+            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+            ArtifactVersion[] newerVersions = versions.getNewerVersions( version, segment, allowSnapshots );
+
+            ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
+            ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
+            if (filteredVersions.length > 0) {
+            	artifactVersion = filteredVersions[filteredVersions.length - 1];
+            }
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
