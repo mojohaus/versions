@@ -539,7 +539,7 @@ public abstract class AbstractVersionsUpdaterMojo
             try {
                 // To have separated commits we need to write the pom each time a property is updated
                 writePomFile(outFile, input);
-                getLog().debug(">>>>" + updateMessage);
+                getLog().info(updateMessage);
 
                 final Git git = JGitHelper.git();
                 git.add().addFilepattern(".").call();
@@ -567,7 +567,6 @@ public abstract class AbstractVersionsUpdaterMojo
             } finally {
                 lock.unlock();
             }
-            getLog().info(updateMessage);
         }
     }
 
