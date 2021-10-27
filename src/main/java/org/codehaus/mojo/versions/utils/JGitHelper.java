@@ -6,7 +6,7 @@ import java.net.URI;
 import java.nio.file.FileSystems;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
 
 /**
  * This class is reponsible to initialise JGit with the given repo.
@@ -22,8 +22,10 @@ public class JGitHelper {
             final URI defaultLocalGitRepo = FileSystems.getDefault().getPath(".").toUri();
             git = Git.open(new File(defaultLocalGitRepo));
             git.checkout().setName("dependencies-updates").setCreateBranch(true).call();
-        } catch (IOException | GitAPIException | IllegalArgumentException ex) {
-            ex.printStackTrace();
+        } catch (Exception ex) {
+            if (!(ex instanceof RefAlreadyExistsException)) {
+                ex.printStackTrace();
+            }
         }
     }
 
