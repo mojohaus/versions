@@ -106,7 +106,7 @@ public class DependencyUpdatesXmlRenderer
         try
         {
             pw = new PrintWriter( outputFileName, "UTF8" );
-            pw.print( sb.toString() );
+            pw.print( sb );
             pw.close();
         }
         catch ( IOException e )

@@ -19,7 +19,7 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import org.apache.maven.artifact.manager.WagonConfigurationException;
+import org.apache.maven.repository.legacy.WagonConfigurationException;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.settings.Proxy;
@@ -79,7 +79,7 @@ public final class WagonUtils
      * @param logger The logger to use.
      * @return The wagon to connect to the url.
      * @throws org.apache.maven.wagon.UnsupportedProtocolException if the protocol is not supported.
-     * @throws org.apache.maven.artifact.manager.WagonConfigurationException if the wagon cannot be configured.
+     * @throws org.apache.maven.repository.legacy.WagonConfigurationException if the wagon cannot be configured.
      * @throws org.apache.maven.wagon.ConnectionException If the connection cannot be established.
      * @throws org.apache.maven.wagon.authentication.AuthenticationException If the connection cannot be authenticated.
      */

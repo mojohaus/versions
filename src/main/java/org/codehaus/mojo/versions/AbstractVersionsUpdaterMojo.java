@@ -121,13 +121,13 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-3
      */
     @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
-    protected List remoteArtifactRepositories;
+    protected List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * @since 1.0-alpha-3
      */
     @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
-    protected List remotePluginRepositories;
+    protected List<ArtifactRepository> remotePluginRepositories;
 
     /**
      * @since 1.0-alpha-1
@@ -344,11 +344,7 @@ public abstract class AbstractVersionsUpdaterMojo
                 }
             }
         }
-        catch ( IOException e )
-        {
-            getLog().error( e );
-        }
-        catch ( XMLStreamException e )
+        catch ( IOException | XMLStreamException e )
         {
             getLog().error( e );
         }
@@ -394,14 +390,9 @@ public abstract class AbstractVersionsUpdaterMojo
     {
 
         getLog().info(" >>> Writing pom file : " + outFile.getPath());
-        Writer writer = WriterFactory.newXmlWriter( outFile );
-        try
+        try (Writer writer = WriterFactory.newXmlWriter( outFile ) )
         {
             IOUtil.copy( input.toString(), writer );
-        }
-        finally
-        {
-            IOUtil.close( writer );
         }
     }
 
@@ -423,6 +414,10 @@ public abstract class AbstractVersionsUpdaterMojo
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
 
     /**
+     * @deprecated
+     *  This method no longer supported.
+     *  use shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean forceUpdate )
+     *
      * Returns <code>true</code> if the update should be applied.
      *
      * @param artifact The artifact.
@@ -431,9 +426,30 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return <code>true</code> if the update should be applied.
      * @since 1.0-alpha-1
      */
+    @Deprecated
     protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
     {
+        return shouldApplyUpdate(artifact,currentVersion,updateVersion,false);
+    }
+
+    /**
+     * Returns <code>true</code> if the update should be applied.
+     *
+     * @param artifact The artifact.
+     * @param currentVersion The current version of the artifact.
+     * @param updateVersion The proposed new version of the artifact.
+     * @return <code>true</code> if the update should be applied to the pom.
+     * @since 2.9
+     */
+    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, boolean forceUpdate )
+    {
         getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
+
+        if ( forceUpdate )
+        {
+            getLog().info( "Force update enabled. LATEST or RELEASE versions will be overwritten with real version" );
+            return true;
+        }
 
         if ( updateVersion == null )
         {
@@ -448,18 +464,18 @@ public abstract class AbstractVersionsUpdaterMojo
         }
         catch ( ArtifactResolutionException e )
         {
-            getLog().warn( "Not updating version: could not resolve " + artifact.toString(), e );
+            getLog().warn( "Not updating version: could not resolve " + artifact, e );
             return false;
         }
         catch ( ArtifactNotFoundException e )
         {
-            getLog().warn( "Not updating version: could not find " + artifact.toString(), e );
+            getLog().warn( "Not updating version: could not find " + artifact, e );
             return false;
         }
 
         if ( currentVersion.equals( updateVersion.toString() ) )
         {
-            getLog().info( "Current version of " + artifact.toString() + " is the latest." );
+            getLog().info( "Current version of " + artifact + " is the latest." );
             return false;
         }
         return true;

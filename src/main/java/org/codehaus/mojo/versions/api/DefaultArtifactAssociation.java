@@ -31,7 +31,7 @@ import java.util.Objects;
  * @since Aug 6, 2009 9:23:13 AM
  */
 final class DefaultArtifactAssociation
-    implements Comparable, ArtifactAssociation
+    implements ArtifactAssociation
 {
     private final Artifact artifact;
 
@@ -64,7 +64,7 @@ final class DefaultArtifactAssociation
         return usePluginRepositories;
     }
 
-    public int compareTo( Object o )
+    public int compareTo( ArtifactAssociation o )
     {
         if ( this == o )
         {
