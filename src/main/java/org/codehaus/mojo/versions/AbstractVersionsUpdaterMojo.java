@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.commons.text.CaseUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -531,7 +532,9 @@ public abstract class AbstractVersionsUpdaterMojo
             getLog().info( "Property " + property.getName() + ": Leaving unchanged as " + currentVersion );
         }
         else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) ) {
-            String updateMessage = "Update " + property.getName() + " from " + currentVersion + " to " + winner;
+            final String  protpertyName = CaseUtils.toCamelCase(property.getName().replaceAll(".version", "").toLowerCase(), true, null);
+            String updateMessage = "Update " + protpertyName + " from " + currentVersion + " to " + winner;
+
             lock.lock();
             try {
                 // To have separated commits we need to write the pom each time a property is updated
