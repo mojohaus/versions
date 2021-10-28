@@ -24,9 +24,7 @@ import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
@@ -38,7 +36,7 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
  * @since 1.0-beta-1
  */
 public abstract class UpdateScope
-    implements Comparable, Serializable
+    implements Comparable<UpdateScope>, Serializable
 {
 
     /**
@@ -373,9 +371,8 @@ public abstract class UpdateScope
      * by this method is the order in which the constants are declared.
      * </p>
      */
-    public final int compareTo( Object o )
+    public final int compareTo( UpdateScope other )
     {
-        UpdateScope other = (UpdateScope) o;
         UpdateScope self = this;
         if ( self.getClass() != other.getClass() )
         {
@@ -392,7 +389,7 @@ public abstract class UpdateScope
      *
      * @return the Class object corresponding to this enum constant's enum type
      */
-    public final Class getDeclaringClass()
+    public final Class<?> getDeclaringClass()
     {
         return getClass();
     }
@@ -409,7 +406,7 @@ public abstract class UpdateScope
      */
     public static UpdateScope valueOf( String name )
     {
-        UpdateScope result = (UpdateScope) levelConstants.get( name );
+        UpdateScope result = levelConstants.get( name );
         if ( result != null )
         {
             return result;
@@ -467,11 +464,11 @@ public abstract class UpdateScope
         }
     }
 
-    private static final Map levelConstants;
+    private static final Map<String, UpdateScope> levelConstants;
 
     static
     {
-        Map map = new HashMap( 5 );
+        Map<String, UpdateScope> map = new HashMap<>( 5 );
         map.put( SUBINCREMENTAL.name(), SUBINCREMENTAL );
         map.put( INCREMENTAL.name(), INCREMENTAL );
         map.put( MINOR.name(), MINOR );

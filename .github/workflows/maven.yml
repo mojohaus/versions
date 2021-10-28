@@ -26,29 +26,18 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
         java: [8, 11, 16]
-        jdk: ['adopt-openj9', zulu]
+        jdk: ['temurin']
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set up cache for ~./m2/repository
-        uses: actions/cache@v2.1.6
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ matrix.os }}-java${{ matrix.java }}-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-${{ matrix.os }}-java${{ matrix.java }}-
-            maven-${{ matrix.os }}-
-
-      - name: Set up JDK
-        uses: actions/setup-java@v2.3.1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
         with:
           distribution: ${{ matrix.jdk }}
           java-version: ${{ matrix.java }}
+          cache: 'maven'
 
       - name: Build with Maven
         run: mvn verify -e -B -V -P run-its javadoc:javadoc site site:stage

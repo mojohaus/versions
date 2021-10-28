@@ -25,7 +25,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -47,9 +46,9 @@ class PropertyVersionsBuilder
 
     private final VersionsHelper helper;
 
-    private final Map<String, Boolean> upperBounds = new LinkedHashMap<String, Boolean>();
+    private final Map<String, Boolean> upperBounds = new LinkedHashMap<>();
 
-    private final Map<String, Boolean> lowerBounds = new LinkedHashMap<String, Boolean>();
+    private final Map<String, Boolean> lowerBounds = new LinkedHashMap<>();
 
     /**
      * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.
@@ -62,7 +61,7 @@ class PropertyVersionsBuilder
     {
         this.profileId = profileId;
         this.name = name;
-        this.associations = new TreeSet<ArtifactAssociation>();
+        this.associations = new TreeSet<>();
         this.helper = helper;
     }
 
@@ -88,7 +87,7 @@ class PropertyVersionsBuilder
 
     public ArtifactAssociation[] getAssociations()
     {
-        return associations.toArray( new ArtifactAssociation[associations.size()] );
+        return associations.toArray( new ArtifactAssociation[0] );
     }
 
     public PropertyVersions newPropertyVersions()
@@ -216,12 +215,10 @@ class PropertyVersionsBuilder
 
     private VersionComparator[] lookupComparators()
     {
-        Set<VersionComparator> result = new HashSet<VersionComparator>();
-        for ( ArtifactAssociation association : associations )
-        {
-            result.add( helper.getVersionComparator( association.getArtifact() ) );
-        }
-        return result.toArray( new VersionComparator[result.size()] );
+        return associations.stream().map(
+            association -> helper.getVersionComparator( association.getArtifact() ) )
+            .distinct()
+            .toArray( VersionComparator[]::new );
     }
 
     private final class PropertyVersionComparator

@@ -64,7 +64,7 @@ public class VersionComparatorsTest
         int count = instance.getSegmentCount( v1 );
         for (int i = 0; i < count; i++) {
             ArtifactVersion v2 = instance.incrementSegment( v1, i );
-            assertTrue(v1.toString() + " < " + v2.toString(), instance.compare( v1, v2 ) < 0);
+            assertTrue(v1 + " < " + v2, instance.compare(v1, v2 ) < 0);
         }
     }
 }

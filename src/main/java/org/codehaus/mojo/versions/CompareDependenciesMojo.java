@@ -178,8 +178,8 @@ public class CompareDependenciesMojo
             mapDependencies( remoteDepsMap, remoteProjectDeps );
         }
 
-        List<String> totalDiffs = new ArrayList<String>();
-        List<String> propertyDiffs = new ArrayList<String>();
+        List<String> totalDiffs = new ArrayList<>();
+        List<String> propertyDiffs = new ArrayList<>();
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
             List<String> depManDiffs =

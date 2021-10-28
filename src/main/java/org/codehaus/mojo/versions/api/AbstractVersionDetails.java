@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -146,8 +145,8 @@ public abstract class AbstractVersionDetails
      * @param includeSnapshots Whether to include snapshot versions.
      * @return Returns the newer artifact versions.
      */
-    private final ArtifactVersion[] getNewerVersions( ArtifactVersion version, int upperBoundFixedSegment,
-                                                      boolean includeSnapshots )
+    private ArtifactVersion[] getNewerVersions( ArtifactVersion version, int upperBoundFixedSegment,
+                                                boolean includeSnapshots )
     {
         ArtifactVersion lowerBound = version;
         ArtifactVersion upperBound = null;
@@ -160,7 +159,7 @@ public abstract class AbstractVersionDetails
         return getVersions( version, upperBound, includeSnapshots, false, false );
     }
 
-    private final ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
+    private ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
     {
         return getVersions( version, null, includeSnapshots, false, true );
     }
@@ -322,7 +321,7 @@ public abstract class AbstractVersionDetails
     {
         final VersionComparator versionComparator = getVersionComparator();
         Set<ArtifactVersion> result = new TreeSet<>( versionComparator );
-        for ( ArtifactVersion candidate : Arrays.asList( getVersions( includeSnapshots ) ) )
+        for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
         {
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
@@ -344,7 +343,7 @@ public abstract class AbstractVersionDetails
             }
             result.add( candidate );
         }
-        return result.toArray( new ArtifactVersion[result.size()] );
+        return result.toArray( new ArtifactVersion[0] );
     }
 
     public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )

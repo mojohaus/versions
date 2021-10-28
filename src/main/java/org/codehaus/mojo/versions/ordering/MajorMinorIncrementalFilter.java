@@ -51,11 +51,11 @@ import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 public class MajorMinorIncrementalFilter
 {
 
-    private boolean allowMajorUpdates;
+    private final boolean allowMajorUpdates;
 
-    private boolean allowMinorUpdates;
+    private final boolean allowMinorUpdates;
 
-    private boolean allowIncrementalUpdates;
+    private final boolean allowIncrementalUpdates;
 
     public MajorMinorIncrementalFilter( boolean allowMajorUpdates, boolean allowMinorUpdates,
                                         boolean allowIncrementalUpdates )
@@ -73,7 +73,7 @@ public class MajorMinorIncrementalFilter
      */
     public ArtifactVersion[] filter( ArtifactVersion selectedVersion, ArtifactVersion[] newerVersions )
     {
-        List<ArtifactVersion> versionsToUse = new LinkedList<ArtifactVersion>();
+        List<ArtifactVersion> versionsToUse = new LinkedList<>();
         for ( ArtifactVersion artifactVersion : newerVersions )
         {
             if ( artifactVersion.getMajorVersion() != selectedVersion.getMajorVersion() )
@@ -114,7 +114,7 @@ public class MajorMinorIncrementalFilter
                 }
             }
         }
-        return versionsToUse.toArray( new ArtifactVersion[versionsToUse.size()] );
+        return versionsToUse.toArray( new ArtifactVersion[0] );
 
     }
 }

@@ -19,6 +19,13 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -26,11 +33,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-
-import java.io.File;
-import java.util.Map;
+import org.codehaus.mojo.versions.utils.PropertiesVersionsFileReader;
 
 /**
  * Set a property to a given version without any sanity checks. Please be careful this can lead to changes which might
@@ -66,6 +69,15 @@ public class SetPropertyMojo
     private boolean autoLinkItems;
 
     /**
+     * A property file name containing: property=value, to update several properties at the same time.
+     * If 'property' and 'newVersion' are also used, they will be ignored.
+     * @since 2.9
+     */
+
+    @Parameter( property = "propertiesVersionsFile" )
+    private String propertiesVersionsFile;
+
+    /**
      * @param pom the pom to update.
      * @param outFile The POM file to write
      * @param input The modifications as a {@link StringBuilder}
@@ -79,23 +91,57 @@ public class SetPropertyMojo
                           final StringBuilder input)
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        Property propertyConfig = new Property( property );
-        propertyConfig.setVersion( newVersion );
+        Property[] propertiesConfig = null;
+        String properties = "";
+        if (!StringUtils.isEmpty(propertiesVersionsFile) ) {
+            logWrongConfigWarning();
+            getLog().debug( "Reading properties and versions to update from file: " + propertiesVersionsFile );
+            PropertiesVersionsFileReader reader = new PropertiesVersionsFileReader(propertiesVersionsFile);
+            try {
+                reader.read();
+            } catch (IOException e) {
+                getLog().error("Unable to read property file  " + propertiesVersionsFile
+                        + ". re-run with -X option for more details.");
+                getLog().debug("Error while reading  property file " + propertiesVersionsFile, e);
+                throw new MojoFailureException("Unable to read property file " + propertiesVersionsFile);
+            }
+            propertiesConfig = reader.getPropertiesConfig();
+            properties = reader.getProperties();
+        } else {
+            getLog().debug( "Reading properties and versions to update from property and newVersion " );
+            Property propertyConfig = new Property(property);
+            propertyConfig.setVersion(newVersion);
+            propertiesConfig = new Property[] { propertyConfig };
+            properties = property;
+        }
+        update(pom, propertiesConfig, properties);
+    }
+
+    private void update(ModifiedPomXMLEventReader pom, Property[] propertiesConfig, String properties) throws MojoExecutionException, XMLStreamException {
         Map<Property, PropertyVersions> propertyVersions =
-            this.getHelper().getVersionPropertiesMap( getProject(), new Property[] { propertyConfig }, property, "",
+            this.getHelper().getVersionPropertiesMap( getProject(), propertiesConfig, properties, "",
                                                       autoLinkItems );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
-            Property property = entry.getKey();
+            Property currentProperty = entry.getKey();
             PropertyVersions version = entry.getValue();
+            String newVersionGiven = currentProperty.getVersion();
 
-            final String currentVersion = getProject().getProperties().getProperty( property.getName() );
+            final String currentVersion = getProject().getProperties().getProperty( currentProperty.getName() );
             if ( currentVersion == null )
             {
                 continue;
             }
-            PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), newVersion );
+            PomHelper.setPropertyVersion(pom, version.getProfileId(), currentProperty.getName(), newVersionGiven );
+        }
+    }
 
+    private void logWrongConfigWarning() {
+        if (!StringUtils.isEmpty(property)) {
+            getLog().warn("-Dproperty provided but will be ignored as -DpropertiesVersionsFile is used");
+        }
+        if (!StringUtils.isEmpty(property)) {
+            getLog().warn("-DnewVersion provided but will be ignored as -DpropertiesVersionsFile is used");
         }
     }
 

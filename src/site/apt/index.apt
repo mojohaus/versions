@@ -72,6 +72,8 @@ Versions Maven Plugin
 
   * {{{./set-mojo.html}versions:set}} can be used to set the project version from the command line.
 
+  * {{{./set-property-mojo.html}versions:set-property}} can be used to set one or multiple properties to a given version from the command line.
+
   * {{{./use-releases-mojo.html}versions:use-releases}} searches the pom for all -SNAPSHOT versions which have been
   released and replaces them with the corresponding release version. 
   
@@ -162,4 +164,3 @@ Versions Maven Plugin
   * {{{./examples/use-releases.html}Replacing -SNAPSHOT versions with their corresponding releases}}
 
   * {{{./examples/set.html}Changing the project version}}
-
