@@ -28,10 +28,9 @@ Once executed:
 #### Only a PoC
 
 This is only a poc, tested locally for now and working ok even if there is a few issues:
-- code is not pretty
+- code is not pretty - as it is only works with the update-properties, the project should be renamed and cleared.
 - commit only the pom file(s) (actually commit everything is not stashed!)
-- The RN files need to be updated/completed / manage uppercase/lower/name in a more flexible way.
-- fixup singleton
+- The release notes/changelogs files need to be updated/completed and the commit message should follow a pattern in a more flexible way instead of static code.
 - only tested with `mvn versions:update-properties -Dmaven.version.rules=<file_location> -DgenerateBackupPoms=false`
 See https://github.com/violette/utility-scripts/blob/master/update-mavendependencies.md
 
