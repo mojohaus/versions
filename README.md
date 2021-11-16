@@ -14,7 +14,7 @@ I'd choose JGIT to manage the local commits.
 #### How it works?
 
 - Compile the project and make sure there is no upper version of the Versions Maven Plugin in your .m2 folder
-- Run the command:
+- Run the command from your project - on master:
 `mvn versions:update-properties -Dmaven.version.rules=file:///path_to_rules_file -DgenerateBackupPoms=false`
 
 Once executed:
