@@ -35,7 +35,7 @@ This is only a poc, tested locally for now and working ok even if there is a few
 See https://github.com/violette/utility-scripts/blob/master/update-mavendependencies.md
 
 Tested with:
-- JDK openjdk version "11.0.11"
+- JDK version "11.0.11"
 - Apache Maven 3.6.3
 
 
