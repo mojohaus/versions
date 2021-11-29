@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>63</version>
+    <version>65</version>
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
@@ -237,7 +237,7 @@
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
-      <version>6.2.6</version>
+      <version>6.2.7</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -365,7 +365,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>mrm-maven-plugin</artifactId>
-        <version>1.2.0</version>
+        <version>1.3.0</version>
         <executions>
           <execution>
             <goals>
