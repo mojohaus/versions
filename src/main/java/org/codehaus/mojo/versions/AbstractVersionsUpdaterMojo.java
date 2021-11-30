@@ -561,17 +561,24 @@ public abstract class AbstractVersionsUpdaterMojo
                 git.add().addFilepattern(".").call();
 
                 final StringBuilder commitMessage = new StringBuilder(updateMessage).append("\n\n");
-                final String releaseNoteUrl = getUrlFromPropertiesFile(property, "releasenotes.properties");
+                String releaseNoteUrl = getUrlFromPropertiesFile(property, "releasenotes.properties");
                 if (releaseNoteUrl != null) {
+                    if (releaseNoteUrl.contains("<VERSION>")) {
+                        releaseNoteUrl = releaseNoteUrl.replace("<VERSION>", winner.toString());
+                    } else {
+                        releaseNoteUrl = releaseNoteUrl + winner.toString();
+                    }
                     commitMessage.append("Release notes: ")
                                  .append(releaseNoteUrl)
-                                 .append(winner)
                                  .append("\n")
                                  .toString();
                 }
                 // Try to find the changelog if any (does not require any version number)
-                final String changeLogUrl = getUrlFromPropertiesFile(property, "changelogs.properties");
+                String changeLogUrl = getUrlFromPropertiesFile(property, "changelogs.properties");
                 if (changeLogUrl != null) {
+                    if (changeLogUrl.contains("<VERSION>")) {
+                        changeLogUrl = changeLogUrl.replace("<VERSION>", winner.toString());
+                    }
                     commitMessage.append("Change logs: ")
                                  .append(changeLogUrl)
                                  .append("\n")
