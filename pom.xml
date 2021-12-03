@@ -101,7 +101,7 @@
     <junitBomVersion>5.8.2</junitBomVersion>
     <mavenVersion>3.0.5</mavenVersion>
     <wagonVersion>3.4.3</wagonVersion>
-    <doxiaVersion>1.10</doxiaVersion>
+    <doxiaVersion>1.11.1</doxiaVersion>
     <doxia-sitetoolsVersion>1.10</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.7</sitePluginVersion>
