@@ -3,7 +3,6 @@ package org.codehaus.mojo.versions.utils;
 import org.codehaus.mojo.versions.Property;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
