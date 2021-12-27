@@ -100,7 +100,7 @@
     <maven.compiler.source>${mojo.java.target}</maven.compiler.source>
     <junitBomVersion>5.8.2</junitBomVersion>
     <mavenVersion>3.0.5</mavenVersion>
-    <wagonVersion>3.4.3</wagonVersion>
+    <wagonVersion>3.5.1</wagonVersion>
     <doxiaVersion>1.11.1</doxiaVersion>
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
