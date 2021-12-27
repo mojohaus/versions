@@ -21,14 +21,18 @@ package org.codehaus.mojo.versions;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -485,6 +489,9 @@ public class SetMojo
             for ( VersionChange versionChange : sourceChanges )
             {
                 changer.apply( versionChange );
+
+                // also update project.build.outputTimestamp
+                updateBuildOutputTimestamp( pom, model );
             }
         }
         catch ( IOException e )
@@ -492,6 +499,38 @@ public class SetMojo
             throw new MojoExecutionException( e.getMessage(), e );
         }
         log.clearContext();
+    }
+
+    private void updateBuildOutputTimestamp( ModifiedPomXMLEventReader pom, Model model )
+        throws XMLStreamException
+    {
+        String buildOutputTimestamp = model.getProperties().getProperty( "project.build.outputTimestamp" );
+
+        if ( buildOutputTimestamp == null || StringUtils.isEmpty( buildOutputTimestamp ) )
+        {
+            // no Reproducible Builds output timestamp defined
+            return;
+        }
+
+        if ( StringUtils.isNumeric( buildOutputTimestamp ) )
+        {
+            // int representing seconds since the epoch, like SOURCE_DATE_EPOCH
+            buildOutputTimestamp = String.valueOf( System.currentTimeMillis() / 1000 );
+        }
+        else if ( buildOutputTimestamp.length() <= 1 )
+        {
+            // value length == 1 means disable Reproducible Builds
+            return;
+        }
+        else
+        {
+            // ISO-8601
+            DateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss'Z'" );
+            df.setTimeZone( TimeZone.getTimeZone( "UTC" ) );
+            buildOutputTimestamp = df.format( new Date() );
+        }
+
+        PomHelper.setPropertyVersion( pom, null, "project.build.outputTimestamp", buildOutputTimestamp );
     }
 
 }
