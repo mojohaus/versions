@@ -195,7 +195,7 @@ public class SetMojo
     /**
      * Whether to start processing at the local aggregation root (which might be a parent module
      * of that module where Maven is executed in, and the version change may affect parent and sibling modules).
-     * Setting to fale makes sure only the module (and it's submodule) where Maven is executed for is affected.
+     * Setting to false makes sure only the module (and it's submodules) where Maven is executed for is affected.
      *
      * @since 2.9
      */
