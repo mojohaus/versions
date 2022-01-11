@@ -1,108 +1,93 @@
 package org.codehaus.mojo.versions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
-import org.apache.maven.model.Prerequisites;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Finds the minimum Maven version required by a Maven project.
- * Checks for the existence of both the prerequisites.maven property and for maven-enforcer-plugin:enforce goal.
- * Returns null if no minimum version is found.
- * Checks project and it's parents recursively.
- *
- * Pros: works with Maven 3.5.0 which throws a warning if prerequisites.maven is set for a non Maven-Plugin project.
- * Cons: tightly coupled with the maven-enforcer-plugin and the Xpp3Dom configuration tag.
+ * Finds the minimal Maven version required to build a Maven project.
+ * Evaluates the {@code maven-enforcer-plugin:enforce} goal and 
+ * its {@code requireMavenVersion} rule.
+ * 
+ * @see <a href="https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html">Require Maven Version Rule</a>
  */
-class RequiredMavenVersionFinder {
+class MinimalMavenBuildVersionFinder {
 
-    private final MavenProject mavenProject;
-
-    RequiredMavenVersionFinder(MavenProject mavenProject) {
-        this.mavenProject = mavenProject;
+    private MinimalMavenBuildVersionFinder() {
+        // not supposed to be created, static methods only
     }
 
-    ArtifactVersion find() {
-        ArtifactVersion childMavenVersion = getHighestArtifactVersion(getPrerequisitesMavenVersion(), getEnforcerMavenVersion());
-
-        if (!mavenProject.hasParent()) {
-            return childMavenVersion;
+    static ArtifactVersion find(MavenProject mavenProject, String defaultVersion, Log log) {
+        ArtifactVersion version = getEnforcerMavenVersion(mavenProject, log);
+        if (version == null && defaultVersion != null) {
+            version = new DefaultArtifactVersion(defaultVersion);
         }
-
-        ArtifactVersion parentMavenVersion = new RequiredMavenVersionFinder(mavenProject.getParent()).find();
-
-        return getHighestArtifactVersion(childMavenVersion, parentMavenVersion);
+        return version;
     }
 
-    private ArtifactVersion getPrerequisitesMavenVersion() {
-        Prerequisites prerequisites = mavenProject.getPrerequisites();
-        if (null == prerequisites) {
-            return null;
-        }
-
-        String prerequisitesMavenValue = prerequisites.getMaven();
-        if (null == prerequisitesMavenValue) {
-            return null;
-        }
-
-        return new DefaultArtifactVersion(prerequisitesMavenValue);
-    }
-
-    private ArtifactVersion getEnforcerMavenVersion() {
+    private static ArtifactVersion getEnforcerMavenVersion(MavenProject mavenProject, Log log) {
         List<Plugin> buildPlugins = mavenProject.getBuildPlugins();
         if (null == buildPlugins) {
+            log.debug("MinimalMavenBuildVersionFinder: No build plugins found");
             return null;
         }
 
         Plugin mavenEnforcerPlugin = getMavenEnforcerPlugin(buildPlugins);
         if (null == mavenEnforcerPlugin) {
+            log.debug("MinimalMavenBuildVersionFinder: No maven-enforcer-plugin used");
             return null;
         }
 
         List<PluginExecution> pluginExecutions = mavenEnforcerPlugin.getExecutions();
         if (null == pluginExecutions) {
+            log.debug("MinimalMavenBuildVersionFinder: No executions of maven-enforcer-plugin found");
             return null;
         }
 
         List<PluginExecution> pluginExecutionsWithEnforceGoal = getPluginExecutionsWithEnforceGoal(pluginExecutions);
         if (pluginExecutionsWithEnforceGoal.isEmpty()) {
+            log.debug("MinimalMavenBuildVersionFinder: No 'enforce' execution of maven-enforcer-plugin found");
             return null;
         }
         
         Xpp3Dom requireMavenVersionTag = getRequireMavenVersionTag(pluginExecutionsWithEnforceGoal);
         if (null == requireMavenVersionTag) {
+            log.debug("MinimalMavenBuildVersionFinder: No 'requireMavenVersion' rule of maven-enforcer-plugin found");
             return null;
         }
 
         Xpp3Dom versionTag = requireMavenVersionTag.getChild("version");
         if (null == versionTag) {
+            log.debug("MinimalMavenBuildVersionFinder: No version specified in 'requireMavenVersion' rule of maven-enforcer-plugin");
             return null;
         }
 
         String versionTagValue = versionTag.getValue();
         if (null == versionTagValue || "".equals(versionTagValue)) {
+            log.debug("MinimalMavenBuildVersionFinder: Empty version specified in 'requireMavenVersion' rule of maven-enforcer-plugin");
             return null;
         }
 
         return processMavenVersionRange(versionTagValue);
     }
-
-    private Plugin getMavenEnforcerPlugin(List<Plugin> buildPlugins) {
+    
+    private static Plugin getMavenEnforcerPlugin(List<Plugin> buildPlugins) {
         for (Plugin plugin : buildPlugins) {
-            if ("maven-enforcer-plugin".equals(plugin.getArtifactId())) {
+            if ("maven-enforcer-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
                 return plugin;
             }
         }
         return null;
     }
 
-    private List<PluginExecution> getPluginExecutionsWithEnforceGoal(List<PluginExecution> executions) {
+    private static List<PluginExecution> getPluginExecutionsWithEnforceGoal(List<PluginExecution> executions) {
         List<PluginExecution> pluginExecutions = new ArrayList<>();
         for (PluginExecution pluginExecution : executions) {
             List<String> goals = pluginExecution.getGoals();
@@ -113,7 +98,7 @@ class RequiredMavenVersionFinder {
         return pluginExecutions;
     }
 
-    private Xpp3Dom getRequireMavenVersionTag(List<PluginExecution> executions) {
+    private static Xpp3Dom getRequireMavenVersionTag(List<PluginExecution> executions) {
         for (PluginExecution pluginExecution : executions) {
             Xpp3Dom configurationTag = (Xpp3Dom) pluginExecution.getConfiguration();
             if (null == configurationTag) {
@@ -135,30 +120,10 @@ class RequiredMavenVersionFinder {
         return null;
     }
 
-    private ArtifactVersion getHighestArtifactVersion(ArtifactVersion firstMavenVersion, ArtifactVersion secondMavenVersion) {
-        if (null == firstMavenVersion && null == secondMavenVersion) {
-            return null;
-        }
-
-        if (null == firstMavenVersion) {
-            return secondMavenVersion;
-        }
-
-        if (null == secondMavenVersion) {
-            return firstMavenVersion;
-        }
-
-        if (firstMavenVersion.compareTo(secondMavenVersion) < 0) {
-            return secondMavenVersion;
-        }
-
-        return firstMavenVersion;
-    }
-
     /**
      * The below method implements the specification found at https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html
      */
-    private ArtifactVersion processMavenVersionRange(String versionRange) {
+    private static ArtifactVersion processMavenVersionRange(String versionRange) {
 
         int openIndicesCount = 0;
         int closeIndicesCount = 0;
