@@ -74,8 +74,9 @@ class MinimalMavenBuildVersionFinder {
             log.debug("MinimalMavenBuildVersionFinder: Empty version specified in 'requireMavenVersion' rule of maven-enforcer-plugin");
             return null;
         }
-
-        return getMinimumVersionFromRange(versionTagValue);
+        ArtifactVersion minimumVersion = getMinimumVersionFromRange(versionTagValue);
+        log.debug("Calculated minimum version " + minimumVersion + " from version parameter value '" + versionTagValue + "'");
+        return minimumVersion;
     }
     
     private static Plugin getMavenEnforcerPlugin(List<Plugin> buildPlugins) {
