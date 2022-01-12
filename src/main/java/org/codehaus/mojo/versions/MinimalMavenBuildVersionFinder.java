@@ -75,7 +75,7 @@ class MinimalMavenBuildVersionFinder {
             return null;
         }
 
-        return processMavenVersionRange(versionTagValue);
+        return getMinimumVersionFromRange(versionTagValue);
     }
     
     private static Plugin getMavenEnforcerPlugin(List<Plugin> buildPlugins) {
@@ -123,7 +123,7 @@ class MinimalMavenBuildVersionFinder {
     /**
      * The below method implements the specification found at https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html
      */
-    private static ArtifactVersion processMavenVersionRange(String versionRange) {
+    static ArtifactVersion getMinimumVersionFromRange(String versionRange) {
 
         int openIndicesCount = 0;
         int closeIndicesCount = 0;
