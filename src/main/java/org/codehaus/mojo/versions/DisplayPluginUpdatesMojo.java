@@ -38,6 +38,7 @@ import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.mapping.LifecycleMapping;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Prerequisites;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
@@ -382,7 +383,7 @@ public class DisplayPluginUpdatesMojo
         List<String> pluginUpdates = new ArrayList<>();
         List<String> pluginLockdowns = new ArrayList<>();
         ArtifactVersion curMavenVersion = runtimeInformation.getApplicationVersion();
-        ArtifactVersion specMavenVersion = new DefaultArtifactVersion( getRequiredMavenVersion( getProject(), "2.0" ) );
+        ArtifactVersion specMavenVersion = MinimalMavenBuildVersionFinder.find( getProject(), "2.0", getLog() );
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
         // if Maven prerequisite upgraded to a version, Map<plugin compact key, latest compatible plugin vesion>
@@ -433,8 +434,7 @@ public class DisplayPluginUpdatesMojo
                         getHelper().resolveArtifact( probe, true );
                         MavenProject pluginMavenProject =
                             projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
-                        ArtifactVersion pluginRequires =
-                            new DefaultArtifactVersion( getRequiredMavenVersion( pluginMavenProject, "2.0" ) );
+                        ArtifactVersion pluginRequires = getPrerequisitesMavenVersion( pluginMavenProject );
                         if ( artifactVersion == null && compare( specMavenVersion, pluginRequires ) >= 0 )
                         {
                             // ok, newer version compatible with current specMavenVersion
@@ -492,8 +492,7 @@ public class DisplayPluginUpdatesMojo
                         getHelper().resolveArtifact( probe, true );
                         MavenProject mavenProject =
                             projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
-                        ArtifactVersion requires =
-                            new DefaultArtifactVersion( getRequiredMavenVersion( mavenProject, "2.0" ) );
+                        ArtifactVersion requires = getPrerequisitesMavenVersion( mavenProject );
                         if ( minMavenVersion == null || compare( minMavenVersion, requires ) < 0 )
                         {
                             minMavenVersion = requires;
@@ -595,30 +594,14 @@ public class DisplayPluginUpdatesMojo
         logLine( false, "" );
 
         // information on minimum Maven version
-        boolean noMavenMinVersion = getRequiredMavenVersion( getProject(), null ) == null;
-        boolean noExplicitMavenMinVersion =
-            getProject().getPrerequisites() == null || getProject().getPrerequisites().getMaven() == null;
+        boolean noMavenMinVersion = MinimalMavenBuildVersionFinder.find( getProject(), null, getLog() ) == null;
         if ( noMavenMinVersion )
         {
-            getLog().warn( "Project does not define minimum Maven version, default is: 2.0" );
-        }
-        else if ( noExplicitMavenMinVersion )
-        {
-            logLine( false, "Project inherits minimum Maven version as: " + specMavenVersion );
+            getLog().warn( "Project does not define minimum Maven version required for build, default is: 2.0" );
         }
         else
         {
-            ArtifactVersion explicitMavenVersion =
-                new DefaultArtifactVersion( getProject().getPrerequisites().getMaven() );
-            if ( compare( explicitMavenVersion, specMavenVersion ) < 0 )
-            {
-                logLine( true, "Project's effective minimum Maven (from parent) is: " + specMavenVersion );
-                logLine( true, "Project defines minimum Maven version as: " + explicitMavenVersion );
-            }
-            else
-            {
-                logLine( false, "Project defines minimum Maven version as: " + specMavenVersion );
-            }
+            logLine( false, "Project requires minimum Maven version for build of: " + specMavenVersion );
         }
         logLine( false, "Plugins require minimum Maven version of: " + minMavenVersion );
         if ( superPomDrivingMinVersion )
@@ -822,13 +805,6 @@ public class DisplayPluginUpdatesMojo
         return groupId + ":" + artifactId;
     }
 
-    private String getRequiredMavenVersion( MavenProject mavenProject, String defaultValue )
-    {
-        ArtifactVersion requiredMavenVersion = new RequiredMavenVersionFinder( mavenProject ).find();
-
-        return requiredMavenVersion == null ? defaultValue : requiredMavenVersion.toString();
-    }
-
     private static final class StackState
     {
         private final String path;
@@ -936,6 +912,26 @@ public class DisplayPluginUpdatesMojo
 
     // -------------------------- OTHER METHODS --------------------------
 
+    /**
+     * Get the minimum required Maven version of the given plugin
+     * Same logic as in https://github.com/apache/maven-plugin-tools/blob/c8ddcdcb10d342a5a5e2f38245bb569af5730c7c/maven-plugin-plugin/src/main/java/org/apache/maven/plugin/plugin/PluginReport.java#L711
+     * @param pluginProject the plugin for which to retrieve the minimum Maven version which is required
+     * @return The minimally required Maven version (never {@code null})
+     */
+    private ArtifactVersion getPrerequisitesMavenVersion( MavenProject pluginProject ) {
+        Prerequisites prerequisites = pluginProject.getPrerequisites();
+        if (null == prerequisites) {
+            return new DefaultArtifactVersion("2.0");
+        }
+
+        String prerequisitesMavenValue = prerequisites.getMaven();
+        if (null == prerequisitesMavenValue) {
+            return new DefaultArtifactVersion("2.0");
+        }
+
+        return new DefaultArtifactVersion(prerequisitesMavenValue);
+    }
+    
     /**
      * Gets the build plugins of a specific project.
      *
