@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -53,8 +53,8 @@
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment"> * @since 1.0-alpha-3</em>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  @Mojo( name = <span class="jxr_string">"lock-snapshots"</span>, requiresProject = <strong class="jxr_keyword">true</strong>, requiresDirectInvocation = <strong class="jxr_keyword">true</strong>, threadSafe = <strong class="jxr_keyword">true</strong> )
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/codehaus/mojo/versions/LockSnapshotsMojo.html">LockSnapshotsMojo</a>
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">extends</strong> <a href="../../../../org/codehaus/mojo/versions/AbstractVersionsDependencyUpdaterMojo.html">AbstractVersionsDependencyUpdaterMojo</a>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="LockSnapshotsMojo" href="../../../../org/codehaus/mojo/versions/LockSnapshotsMojo.html#LockSnapshotsMojo">LockSnapshotsMojo</a>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">extends</strong> <a name="AbstractVersionsDependencyUpdaterMojo" href="../../../../org/codehaus/mojo/versions/AbstractVersionsDependencyUpdaterMojo.html#AbstractVersionsDependencyUpdaterMojo">AbstractVersionsDependencyUpdaterMojo</a>
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  {
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>      <em class="jxr_comment">// ------------------------------ FIELDS ------------------------------</em>
@@ -73,7 +73,7 @@
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment">     * @throws XMLStreamException when things go wrong with XML streaming</em>
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment">     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)</em>
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> update( ModifiedPomXMLEventReader pom )
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> update( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom )
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>          <strong class="jxr_keyword">throws</strong> MojoExecutionException, MojoFailureException, XMLStreamException
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>      {
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>          <strong class="jxr_keyword">if</strong> ( getProject().getDependencyManagement() != <strong class="jxr_keyword">null</strong> &amp;&amp; isProcessingDependencyManagement() )
@@ -90,7 +90,7 @@
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>          }
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>      }
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> lockSnapshots( ModifiedPomXMLEventReader pom, Collection&lt;Dependency&gt; dependencies )
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> lockSnapshots( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom, Collection&lt;Dependency&gt; dependencies )
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>          <strong class="jxr_keyword">throws</strong> XMLStreamException, MojoExecutionException
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>      {
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>          <strong class="jxr_keyword">for</strong> ( Dependency dep : dependencies )
@@ -129,7 +129,7 @@
 <a class="jxr_linenumber" name="L121" href="#L121">121</a>         }
 <a class="jxr_linenumber" name="L122" href="#L122">122</a>     }
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 
-<a class="jxr_linenumber" name="L124" href="#L124">124</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> lockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent )
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> lockParentSnapshot( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom, MavenProject parent )
 <a class="jxr_linenumber" name="L125" href="#L125">125</a>         <strong class="jxr_keyword">throws</strong> XMLStreamException, MojoExecutionException
 <a class="jxr_linenumber" name="L126" href="#L126">126</a>     {
 <a class="jxr_linenumber" name="L127" href="#L127">127</a>         <strong class="jxr_keyword">if</strong> ( parent == <strong class="jxr_keyword">null</strong> )
@@ -155,7 +155,7 @@
 <a class="jxr_linenumber" name="L147" href="#L147">147</a>             {
 <a class="jxr_linenumber" name="L148" href="#L148">148</a>                 <strong class="jxr_keyword">if</strong> ( PomHelper.setProjectParentVersion( pom, lockedParentVersion ) )
 <a class="jxr_linenumber" name="L149" href="#L149">149</a>                 {
-<a class="jxr_linenumber" name="L150" href="#L150">150</a>                     getLog().info( <span class="jxr_string">"Locked parent "</span> + parentArtifact.toString() + <span class="jxr_string">" to version "</span>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>                     getLog().info( <span class="jxr_string">"Locked parent "</span> + parentArtifact + <span class="jxr_string">" to version "</span>
 <a class="jxr_linenumber" name="L151" href="#L151">151</a>                         + lockedParentVersion );
 <a class="jxr_linenumber" name="L152" href="#L152">152</a>                 }
 <a class="jxr_linenumber" name="L153" href="#L153">153</a>             }
@@ -219,6 +219,6 @@
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

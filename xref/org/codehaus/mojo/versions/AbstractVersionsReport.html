@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -62,7 +62,7 @@
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * @author Stephen Connolly</em>
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * @since 1.0-alpha-3</em>
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/codehaus/mojo/versions/AbstractVersionsReport.html">AbstractVersionsReport</a>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> <a name="AbstractVersionsReport" href="../../../../org/codehaus/mojo/versions/AbstractVersionsReport.html#AbstractVersionsReport">AbstractVersionsReport</a>
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>      <strong class="jxr_keyword">extends</strong> AbstractMavenReport
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  {
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  
@@ -133,13 +133,13 @@
 <a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-3</em>
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L127" href="#L127">127</a>     @Parameter( defaultValue = <span class="jxr_string">"${project.remoteArtifactRepositories}"</span>, readonly = <strong class="jxr_keyword">true</strong> )
-<a class="jxr_linenumber" name="L128" href="#L128">128</a>     <strong class="jxr_keyword">protected</strong> List remoteArtifactRepositories;
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>     <strong class="jxr_keyword">protected</strong> List&lt;ArtifactRepository&gt; remoteArtifactRepositories;
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 
 <a class="jxr_linenumber" name="L130" href="#L130">130</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-3</em>
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L133" href="#L133">133</a>     @Parameter( defaultValue = <span class="jxr_string">"${project.pluginArtifactRepositories}"</span>, readonly = <strong class="jxr_keyword">true</strong> )
-<a class="jxr_linenumber" name="L134" href="#L134">134</a>     <strong class="jxr_keyword">protected</strong> List remotePluginRepositories;
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     <strong class="jxr_keyword">protected</strong> List&lt;ArtifactRepository&gt; remotePluginRepositories;
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 
 <a class="jxr_linenumber" name="L136" href="#L136">136</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-1</em>
@@ -198,7 +198,7 @@
 <a class="jxr_linenumber" name="L190" href="#L190">190</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment">     * Our versions helper.</em>
 <a class="jxr_linenumber" name="L192" href="#L192">192</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L193" href="#L193">193</a>     <strong class="jxr_keyword">private</strong> <a href="../../../../org/codehaus/mojo/versions/api/VersionsHelper.html">VersionsHelper</a> helper;
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     <strong class="jxr_keyword">private</strong> <a name="VersionsHelper" href="../../../../org/codehaus/mojo/versions/api/VersionsHelper.html#VersionsHelper">VersionsHelper</a> helper;
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> 
 <a class="jxr_linenumber" name="L195" href="#L195">195</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">     * The Maven Session.</em>
@@ -216,14 +216,14 @@
 <a class="jxr_linenumber" name="L208" href="#L208">208</a> 
 <a class="jxr_linenumber" name="L209" href="#L209">209</a>     <em class="jxr_comment">// --------------------- GETTER / SETTER METHODS ---------------------</em>
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 
-<a class="jxr_linenumber" name="L211" href="#L211">211</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../org/codehaus/mojo/versions/api/VersionsHelper.html">VersionsHelper</a> getHelper()
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>     <strong class="jxr_keyword">public</strong> <a name="VersionsHelper" href="../../../../org/codehaus/mojo/versions/api/VersionsHelper.html#VersionsHelper">VersionsHelper</a> getHelper()
 <a class="jxr_linenumber" name="L212" href="#L212">212</a>         <strong class="jxr_keyword">throws</strong> MavenReportException
 <a class="jxr_linenumber" name="L213" href="#L213">213</a>     {
 <a class="jxr_linenumber" name="L214" href="#L214">214</a>         <strong class="jxr_keyword">if</strong> ( helper == <strong class="jxr_keyword">null</strong> )
 <a class="jxr_linenumber" name="L215" href="#L215">215</a>         {
 <a class="jxr_linenumber" name="L216" href="#L216">216</a>             <strong class="jxr_keyword">try</strong>
 <a class="jxr_linenumber" name="L217" href="#L217">217</a>             {
-<a class="jxr_linenumber" name="L218" href="#L218">218</a>                 helper = <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/api/DefaultVersionsHelper.html">DefaultVersionsHelper</a>( artifactFactory, artifactResolver, artifactMetadataSource,
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>                 helper = <strong class="jxr_keyword">new</strong> <a name="DefaultVersionsHelper" href="../../../../org/codehaus/mojo/versions/api/DefaultVersionsHelper.html#DefaultVersionsHelper">DefaultVersionsHelper</a>( artifactFactory, artifactResolver, artifactMetadataSource,
 <a class="jxr_linenumber" name="L219" href="#L219">219</a>                                                     remoteArtifactRepositories, remotePluginRepositories,
 <a class="jxr_linenumber" name="L220" href="#L220">220</a>                                                     localRepository, wagonManager, settings, serverId, rulesUri,
 <a class="jxr_linenumber" name="L221" href="#L221">221</a>                                                     getLog(), session, pathTranslator );
@@ -293,7 +293,7 @@
 <a class="jxr_linenumber" name="L285" href="#L285">285</a>         }
 <a class="jxr_linenumber" name="L286" href="#L286">286</a>         <strong class="jxr_keyword">try</strong>
 <a class="jxr_linenumber" name="L287" href="#L287">287</a>         {
-<a class="jxr_linenumber" name="L288" href="#L288">288</a>             <strong class="jxr_keyword">final</strong> <a href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html">ArtifactVersions</a> artifactVersions =
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>             <strong class="jxr_keyword">final</strong> <a name="ArtifactVersions" href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html#ArtifactVersions">ArtifactVersions</a> artifactVersions =
 <a class="jxr_linenumber" name="L289" href="#L289">289</a>                 getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
 <a class="jxr_linenumber" name="L290" href="#L290">290</a>             <strong class="jxr_keyword">return</strong> artifactVersions.getNewestVersion( versionRange, includeSnapshots );
 <a class="jxr_linenumber" name="L291" href="#L291">291</a>         }
@@ -383,6 +383,6 @@
 <a class="jxr_linenumber" name="L375" href="#L375">375</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

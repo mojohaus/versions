@@ -36,7 +36,7 @@
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment"> * @version $Revision$ $Date$</em>
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  @SuppressWarnings( <span class="jxr_string">"all"</span> )
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html">RuleXpp3Reader</a>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="RuleXpp3Reader" href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html#RuleXpp3Reader">RuleXpp3Reader</a>
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  {
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>        <em class="jxr_comment">//--------------------------/</em>
@@ -48,9 +48,9 @@
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">     * from the XHTML specification.</em>
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment">     * The entities used:</em>
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment">     * &lt;ul&gt;</em>
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment">     * &lt;li&gt;<a href="http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent&lt;/li&gt" target="alexandria_uri">http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent&lt;/li&gt</a>;</em>
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment">     * &lt;li&gt;<a href="http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent&lt;/li&gt" target="alexandria_uri">http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent&lt;/li&gt</a>;</em>
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">     * &lt;li&gt;<a href="http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent&lt;/li&gt" target="alexandria_uri">http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent&lt;/li&gt</a>;</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment">     * &lt;li&gt;<a href="http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent&lt;/li&gt;" target="alexandria_uri">http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent&lt;/li&gt;</a></em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment">     * &lt;li&gt;<a href="http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent&lt;/li&gt;" target="alexandria_uri">http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent&lt;/li&gt;</a></em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">     * &lt;li&gt;<a href="http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent&lt;/li&gt;" target="alexandria_uri">http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent&lt;/li&gt;</a></em>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">     * &lt;/ul&gt;</em>
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> addDefaultEntities = <strong class="jxr_keyword">true</strong>;
@@ -58,14 +58,14 @@
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment">     * Field contentTransformer.</em>
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html">ContentTransformer</a> contentTransformer;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> ContentTransformer contentTransformer;
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>        <em class="jxr_comment">//----------------/</em>
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>       <em class="jxr_comment">//- Constructors -/</em>
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>      <em class="jxr_comment">//----------------/</em>
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>      <strong class="jxr_keyword">public</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html">RuleXpp3Reader</a>()
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>      <strong class="jxr_keyword">public</strong> <a name="RuleXpp3Reader" href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html#RuleXpp3Reader">RuleXpp3Reader</a>()
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>      {
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>          <strong class="jxr_keyword">this</strong>( <strong class="jxr_keyword">new</strong> ContentTransformer()
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>          {
@@ -76,7 +76,7 @@
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>          } );
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>      } <em class="jxr_comment">//-- org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader()</em>
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>      <strong class="jxr_keyword">public</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html">RuleXpp3Reader</a>(<a href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html">ContentTransformer</a> contentTransformer)
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      <strong class="jxr_keyword">public</strong> <a name="RuleXpp3Reader" href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html#RuleXpp3Reader">RuleXpp3Reader</a>(ContentTransformer contentTransformer)
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>      {
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>          <strong class="jxr_keyword">this</strong>.contentTransformer = contentTransformer;
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>      } <em class="jxr_comment">//-- org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader(ContentTransformer)</em>
@@ -552,7 +552,7 @@
 <a class="jxr_linenumber" name="L544" href="#L544">544</a> <em class="jxr_javadoccomment">     * @throws XmlPullParserException</em>
 <a class="jxr_linenumber" name="L545" href="#L545">545</a> <em class="jxr_javadoccomment">     * @return RuleSet</em>
 <a class="jxr_linenumber" name="L546" href="#L546">546</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L547" href="#L547">547</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a> read( Reader reader, <strong class="jxr_keyword">boolean</strong> strict )
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>     <strong class="jxr_keyword">public</strong> <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> read( Reader reader, <strong class="jxr_keyword">boolean</strong> strict )
 <a class="jxr_linenumber" name="L548" href="#L548">548</a>         <strong class="jxr_keyword">throws</strong> IOException, XmlPullParserException
 <a class="jxr_linenumber" name="L549" href="#L549">549</a>     {
 <a class="jxr_linenumber" name="L550" href="#L550">550</a>         XmlPullParser parser = addDefaultEntities ? <strong class="jxr_keyword">new</strong> MXParser(EntityReplacementMap.defaultEntityReplacementMap) : <strong class="jxr_keyword">new</strong> MXParser( );
@@ -571,7 +571,7 @@
 <a class="jxr_linenumber" name="L563" href="#L563">563</a> <em class="jxr_javadoccomment">     * @throws XmlPullParserException</em>
 <a class="jxr_linenumber" name="L564" href="#L564">564</a> <em class="jxr_javadoccomment">     * @return RuleSet</em>
 <a class="jxr_linenumber" name="L565" href="#L565">565</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L566" href="#L566">566</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a> read( Reader reader )
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>     <strong class="jxr_keyword">public</strong> <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> read( Reader reader )
 <a class="jxr_linenumber" name="L567" href="#L567">567</a>         <strong class="jxr_keyword">throws</strong> IOException, XmlPullParserException
 <a class="jxr_linenumber" name="L568" href="#L568">568</a>     {
 <a class="jxr_linenumber" name="L569" href="#L569">569</a>         <strong class="jxr_keyword">return</strong> read( reader, <strong class="jxr_keyword">true</strong> );
@@ -586,7 +586,7 @@
 <a class="jxr_linenumber" name="L578" href="#L578">578</a> <em class="jxr_javadoccomment">     * @throws XmlPullParserException</em>
 <a class="jxr_linenumber" name="L579" href="#L579">579</a> <em class="jxr_javadoccomment">     * @return RuleSet</em>
 <a class="jxr_linenumber" name="L580" href="#L580">580</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L581" href="#L581">581</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a> read( InputStream in, <strong class="jxr_keyword">boolean</strong> strict )
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>     <strong class="jxr_keyword">public</strong> <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> read( InputStream in, <strong class="jxr_keyword">boolean</strong> strict )
 <a class="jxr_linenumber" name="L582" href="#L582">582</a>         <strong class="jxr_keyword">throws</strong> IOException, XmlPullParserException
 <a class="jxr_linenumber" name="L583" href="#L583">583</a>     {
 <a class="jxr_linenumber" name="L584" href="#L584">584</a>         <strong class="jxr_keyword">return</strong> read( ReaderFactory.newXmlReader( in ), strict );
@@ -600,7 +600,7 @@
 <a class="jxr_linenumber" name="L592" href="#L592">592</a> <em class="jxr_javadoccomment">     * @throws XmlPullParserException</em>
 <a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">     * @return RuleSet</em>
 <a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L595" href="#L595">595</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a> read( InputStream in )
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>     <strong class="jxr_keyword">public</strong> <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> read( InputStream in )
 <a class="jxr_linenumber" name="L596" href="#L596">596</a>         <strong class="jxr_keyword">throws</strong> IOException, XmlPullParserException
 <a class="jxr_linenumber" name="L597" href="#L597">597</a>     {
 <a class="jxr_linenumber" name="L598" href="#L598">598</a>         <strong class="jxr_keyword">return</strong> read( ReaderFactory.newXmlReader( in ) );
@@ -615,11 +615,11 @@
 <a class="jxr_linenumber" name="L607" href="#L607">607</a> <em class="jxr_javadoccomment">     * @throws XmlPullParserException</em>
 <a class="jxr_linenumber" name="L608" href="#L608">608</a> <em class="jxr_javadoccomment">     * @return IgnoreVersion</em>
 <a class="jxr_linenumber" name="L609" href="#L609">609</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L610" href="#L610">610</a>     <strong class="jxr_keyword">private</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html">IgnoreVersion</a> parseIgnoreVersion( XmlPullParser parser, <strong class="jxr_keyword">boolean</strong> strict )
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>     <strong class="jxr_keyword">private</strong> <a name="IgnoreVersion" href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html#IgnoreVersion">IgnoreVersion</a> parseIgnoreVersion( XmlPullParser parser, <strong class="jxr_keyword">boolean</strong> strict )
 <a class="jxr_linenumber" name="L611" href="#L611">611</a>         <strong class="jxr_keyword">throws</strong> IOException, XmlPullParserException
 <a class="jxr_linenumber" name="L612" href="#L612">612</a>     {
 <a class="jxr_linenumber" name="L613" href="#L613">613</a>         String tagName = parser.getName();
-<a class="jxr_linenumber" name="L614" href="#L614">614</a>         <a href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html">IgnoreVersion</a> ignoreVersion = <strong class="jxr_keyword">new</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html">IgnoreVersion</a>();
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>         <a name="IgnoreVersion" href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html#IgnoreVersion">IgnoreVersion</a> ignoreVersion = <strong class="jxr_keyword">new</strong> <a name="IgnoreVersion" href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html#IgnoreVersion">IgnoreVersion</a>();
 <a class="jxr_linenumber" name="L615" href="#L615">615</a>         <strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = parser.getAttributeCount() - 1; i &gt;= 0; i-- )
 <a class="jxr_linenumber" name="L616" href="#L616">616</a>         {
 <a class="jxr_linenumber" name="L617" href="#L617">617</a>             String name = parser.getAttributeName( i );
@@ -651,11 +651,11 @@
 <a class="jxr_linenumber" name="L643" href="#L643">643</a> <em class="jxr_javadoccomment">     * @throws XmlPullParserException</em>
 <a class="jxr_linenumber" name="L644" href="#L644">644</a> <em class="jxr_javadoccomment">     * @return Rule</em>
 <a class="jxr_linenumber" name="L645" href="#L645">645</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L646" href="#L646">646</a>     <strong class="jxr_keyword">private</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html">Rule</a> parseRule( XmlPullParser parser, <strong class="jxr_keyword">boolean</strong> strict )
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>     <strong class="jxr_keyword">private</strong> <a name="Rule" href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html#Rule">Rule</a> parseRule( XmlPullParser parser, <strong class="jxr_keyword">boolean</strong> strict )
 <a class="jxr_linenumber" name="L647" href="#L647">647</a>         <strong class="jxr_keyword">throws</strong> IOException, XmlPullParserException
 <a class="jxr_linenumber" name="L648" href="#L648">648</a>     {
 <a class="jxr_linenumber" name="L649" href="#L649">649</a>         String tagName = parser.getName();
-<a class="jxr_linenumber" name="L650" href="#L650">650</a>         <a href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html">Rule</a> rule = <strong class="jxr_keyword">new</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html">Rule</a>();
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>         <a name="Rule" href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html#Rule">Rule</a> rule = <strong class="jxr_keyword">new</strong> <a name="Rule" href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html#Rule">Rule</a>();
 <a class="jxr_linenumber" name="L651" href="#L651">651</a>         <strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = parser.getAttributeCount() - 1; i &gt;= 0; i-- )
 <a class="jxr_linenumber" name="L652" href="#L652">652</a>         {
 <a class="jxr_linenumber" name="L653" href="#L653">653</a>             String name = parser.getAttributeName( i );
@@ -718,11 +718,11 @@
 <a class="jxr_linenumber" name="L710" href="#L710">710</a> <em class="jxr_javadoccomment">     * @throws XmlPullParserException</em>
 <a class="jxr_linenumber" name="L711" href="#L711">711</a> <em class="jxr_javadoccomment">     * @return RuleSet</em>
 <a class="jxr_linenumber" name="L712" href="#L712">712</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L713" href="#L713">713</a>     <strong class="jxr_keyword">private</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a> parseRuleSet( XmlPullParser parser, <strong class="jxr_keyword">boolean</strong> strict )
+<a class="jxr_linenumber" name="L713" href="#L713">713</a>     <strong class="jxr_keyword">private</strong> <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> parseRuleSet( XmlPullParser parser, <strong class="jxr_keyword">boolean</strong> strict )
 <a class="jxr_linenumber" name="L714" href="#L714">714</a>         <strong class="jxr_keyword">throws</strong> IOException, XmlPullParserException
 <a class="jxr_linenumber" name="L715" href="#L715">715</a>     {
 <a class="jxr_linenumber" name="L716" href="#L716">716</a>         String tagName = parser.getName();
-<a class="jxr_linenumber" name="L717" href="#L717">717</a>         <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a> ruleSet = <strong class="jxr_keyword">new</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a>();
+<a class="jxr_linenumber" name="L717" href="#L717">717</a>         <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> ruleSet = <strong class="jxr_keyword">new</strong> <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a>();
 <a class="jxr_linenumber" name="L718" href="#L718">718</a>         <strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = parser.getAttributeCount() - 1; i &gt;= 0; i-- )
 <a class="jxr_linenumber" name="L719" href="#L719">719</a>         {
 <a class="jxr_linenumber" name="L720" href="#L720">720</a>             String name = parser.getAttributeName( i );
@@ -797,10 +797,10 @@
 <a class="jxr_linenumber" name="L789" href="#L789">789</a> <em class="jxr_javadoccomment">     * @throws XmlPullParserException</em>
 <a class="jxr_linenumber" name="L790" href="#L790">790</a> <em class="jxr_javadoccomment">     * @return RuleSet</em>
 <a class="jxr_linenumber" name="L791" href="#L791">791</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L792" href="#L792">792</a>     <strong class="jxr_keyword">private</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a> read( XmlPullParser parser, <strong class="jxr_keyword">boolean</strong> strict )
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>     <strong class="jxr_keyword">private</strong> <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> read( XmlPullParser parser, <strong class="jxr_keyword">boolean</strong> strict )
 <a class="jxr_linenumber" name="L793" href="#L793">793</a>         <strong class="jxr_keyword">throws</strong> IOException, XmlPullParserException
 <a class="jxr_linenumber" name="L794" href="#L794">794</a>     {
-<a class="jxr_linenumber" name="L795" href="#L795">795</a>         <a href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html">RuleSet</a> ruleSet = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>         <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> ruleSet = <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L796" href="#L796">796</a>         <strong class="jxr_keyword">int</strong> eventType = parser.getEventType();
 <a class="jxr_linenumber" name="L797" href="#L797">797</a>         <strong class="jxr_keyword">boolean</strong> parsed = false;
 <a class="jxr_linenumber" name="L798" href="#L798">798</a>         <strong class="jxr_keyword">while</strong> ( eventType != XmlPullParser.END_DOCUMENT )
@@ -839,7 +839,7 @@
 <a class="jxr_linenumber" name="L831" href="#L831">831</a>         <strong class="jxr_keyword">this</strong>.addDefaultEntities = addDefaultEntities;
 <a class="jxr_linenumber" name="L832" href="#L832">832</a>     } <em class="jxr_comment">//-- void setAddDefaultEntities( boolean )</em>
 <a class="jxr_linenumber" name="L833" href="#L833">833</a> 
-<a class="jxr_linenumber" name="L834" href="#L834">834</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Reader.html">ContentTransformer</a>
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">interface</strong> ContentTransformer
 <a class="jxr_linenumber" name="L835" href="#L835">835</a> {
 <a class="jxr_linenumber" name="L836" href="#L836">836</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L837" href="#L837">837</a> <em class="jxr_javadoccomment">     * Interpolate the value read from the xpp3 document</em>
@@ -854,6 +854,6 @@
 <a class="jxr_linenumber" name="L846" href="#L846">846</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -40,13 +40,13 @@
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment"> * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/codehaus/mojo/versions/PropertyUpdatesRenderer.html">PropertyUpdatesRenderer</a>
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>      <strong class="jxr_keyword">extends</strong> <a href="../../../../org/codehaus/mojo/versions/AbstractVersionsReportRenderer.html">AbstractVersionsReportRenderer</a>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="PropertyUpdatesRenderer" href="../../../../org/codehaus/mojo/versions/PropertyUpdatesRenderer.html#PropertyUpdatesRenderer">PropertyUpdatesRenderer</a>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>      <strong class="jxr_keyword">extends</strong> <a name="AbstractVersionsReportRenderer" href="../../../../org/codehaus/mojo/versions/AbstractVersionsReportRenderer.html#AbstractVersionsReportRenderer">AbstractVersionsReportRenderer</a>
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  {
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Map&lt;Property, PropertyVersions&gt; propertyUpdates;
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>      <strong class="jxr_keyword">public</strong> <a href="../../../../org/codehaus/mojo/versions/PropertyUpdatesRenderer.html">PropertyUpdatesRenderer</a>( Sink sink, I18N i18n, String bundleName, Locale locale,
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>      <strong class="jxr_keyword">public</strong> <a name="PropertyUpdatesRenderer" href="../../../../org/codehaus/mojo/versions/PropertyUpdatesRenderer.html#PropertyUpdatesRenderer">PropertyUpdatesRenderer</a>( Sink sink, I18N i18n, String bundleName, Locale locale,
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>                                      Map&lt;Property, PropertyVersions&gt; propertyUpdates )
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>      {
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>          <strong class="jxr_keyword">super</strong>( sink, bundleName, i18n, locale );
@@ -55,7 +55,7 @@
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> renderBody()
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>      {
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>          Map&lt;Property, PropertyVersions&gt; allUpdates = <strong class="jxr_keyword">new</strong> TreeMap&lt;&gt;( <strong class="jxr_keyword">new</strong> PropertyComparator() );
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>          Map&lt;Property, PropertyVersions&gt; allUpdates = <strong class="jxr_keyword">new</strong> TreeMap&lt;&gt;( <strong class="jxr_keyword">new</strong> <a name="PropertyComparator" href="../../../../org/codehaus/mojo/versions/utils/PropertyComparator.html#PropertyComparator">PropertyComparator</a>() );
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>          allUpdates.putAll( propertyUpdates );
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>          sink.section1();
@@ -114,7 +114,7 @@
 <a class="jxr_linenumber" name="L106" href="#L106">106</a>         <strong class="jxr_keyword">int</strong> numMaj = 0;
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>         <strong class="jxr_keyword">int</strong> numAny = 0;
 <a class="jxr_linenumber" name="L108" href="#L108">108</a>         <strong class="jxr_keyword">int</strong> numCur = 0;
-<a class="jxr_linenumber" name="L109" href="#L109">109</a>         <strong class="jxr_keyword">for</strong> ( PropertyVersions details : allUpdates.values() )
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>         <strong class="jxr_keyword">for</strong> ( <a name="PropertyVersions" href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html#PropertyVersions">PropertyVersions</a> details : allUpdates.values() )
 <a class="jxr_linenumber" name="L110" href="#L110">110</a>         {
 <a class="jxr_linenumber" name="L111" href="#L111">111</a>             <strong class="jxr_keyword">if</strong> ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != <strong class="jxr_keyword">null</strong> )
 <a class="jxr_linenumber" name="L112" href="#L112">112</a>             {
@@ -196,7 +196,7 @@
 <a class="jxr_linenumber" name="L188" href="#L188">188</a>         sink.table_();
 <a class="jxr_linenumber" name="L189" href="#L189">189</a>     }
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> 
-<a class="jxr_linenumber" name="L191" href="#L191">191</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> renderPropertyDetail( Property property, PropertyVersions versions )
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> renderPropertyDetail( <a name="Property" href="../../../../org/codehaus/mojo/versions/Property.html#Property">Property</a> property, <a name="PropertyVersions" href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html#PropertyVersions">PropertyVersions</a> versions )
 <a class="jxr_linenumber" name="L192" href="#L192">192</a>     {
 <a class="jxr_linenumber" name="L193" href="#L193">193</a>         sink.section2();
 <a class="jxr_linenumber" name="L194" href="#L194">194</a>         sink.sectionTitle2();
@@ -209,6 +209,6 @@
 <a class="jxr_linenumber" name="L201" href="#L201">201</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

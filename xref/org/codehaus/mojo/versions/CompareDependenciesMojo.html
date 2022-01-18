@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -61,8 +61,8 @@
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * @since 1.3</em>
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  @Mojo( name = <span class="jxr_string">"compare-dependencies"</span>, requiresProject = <strong class="jxr_keyword">true</strong>, requiresDirectInvocation = <strong class="jxr_keyword">true</strong>, threadSafe = <strong class="jxr_keyword">true</strong> )
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/codehaus/mojo/versions/CompareDependenciesMojo.html">CompareDependenciesMojo</a>
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>      <strong class="jxr_keyword">extends</strong> <a href="../../../../org/codehaus/mojo/versions/AbstractVersionsDependencyUpdaterMojo.html">AbstractVersionsDependencyUpdaterMojo</a>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="CompareDependenciesMojo" href="../../../../org/codehaus/mojo/versions/CompareDependenciesMojo.html#CompareDependenciesMojo">CompareDependenciesMojo</a>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>      <strong class="jxr_keyword">extends</strong> <a name="AbstractVersionsDependencyUpdaterMojo" href="../../../../org/codehaus/mojo/versions/AbstractVersionsDependencyUpdaterMojo.html#AbstractVersionsDependencyUpdaterMojo">AbstractVersionsDependencyUpdaterMojo</a>
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  {
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>      <em class="jxr_javadoccomment">/**</em>
@@ -131,7 +131,7 @@
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming</em>
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)</em>
 <a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> update( ModifiedPomXMLEventReader pom )
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> update( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom )
 <a class="jxr_linenumber" name="L127" href="#L127">127</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException, MojoFailureException, XMLStreamException
 <a class="jxr_linenumber" name="L128" href="#L128">128</a>     {
 <a class="jxr_linenumber" name="L129" href="#L129">129</a>         <strong class="jxr_keyword">if</strong> ( <strong class="jxr_keyword">this</strong>.ignoreRemoteDependencies &amp;&amp; <strong class="jxr_keyword">this</strong>.ignoreRemoteDependencyManagement )
@@ -184,8 +184,8 @@
 <a class="jxr_linenumber" name="L176" href="#L176">176</a>             mapDependencies( remoteDepsMap, remoteProjectDeps );
 <a class="jxr_linenumber" name="L177" href="#L177">177</a>         }
 <a class="jxr_linenumber" name="L178" href="#L178">178</a> 
-<a class="jxr_linenumber" name="L179" href="#L179">179</a>         List&lt;String&gt; totalDiffs = <strong class="jxr_keyword">new</strong> ArrayList&lt;String&gt;();
-<a class="jxr_linenumber" name="L180" href="#L180">180</a>         List&lt;String&gt; propertyDiffs = <strong class="jxr_keyword">new</strong> ArrayList&lt;String&gt;();
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>         List&lt;String&gt; totalDiffs = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>         List&lt;String&gt; propertyDiffs = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
 <a class="jxr_linenumber" name="L181" href="#L181">181</a>         <strong class="jxr_keyword">if</strong> ( getProject().getDependencyManagement() != <strong class="jxr_keyword">null</strong> &amp;&amp; isProcessingDependencyManagement() )
 <a class="jxr_linenumber" name="L182" href="#L182">182</a>         {
 <a class="jxr_linenumber" name="L183" href="#L183">183</a>             List&lt;String&gt; depManDiffs =
@@ -245,7 +245,7 @@
 <a class="jxr_linenumber" name="L237" href="#L237">237</a> <em class="jxr_javadoccomment">     *</em>
 <a class="jxr_linenumber" name="L238" href="#L238">238</a> <em class="jxr_javadoccomment">     * @throws XMLStreamException</em>
 <a class="jxr_linenumber" name="L239" href="#L239">239</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L240" href="#L240">240</a>     <strong class="jxr_keyword">private</strong> List&lt;String&gt; compareVersions( ModifiedPomXMLEventReader pom, List&lt;Dependency&gt; dependencies,
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>     <strong class="jxr_keyword">private</strong> List&lt;String&gt; compareVersions( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom, List&lt;Dependency&gt; dependencies,
 <a class="jxr_linenumber" name="L241" href="#L241">241</a>                                           Map&lt;String, Dependency&gt; remoteDependencies )
 <a class="jxr_linenumber" name="L242" href="#L242">242</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException, XMLStreamException
 <a class="jxr_linenumber" name="L243" href="#L243">243</a>     {
@@ -289,7 +289,7 @@
 <a class="jxr_linenumber" name="L281" href="#L281">281</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment">     * Updates the properties holding a version if necessary.</em>
 <a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L284" href="#L284">284</a>     <strong class="jxr_keyword">private</strong> List&lt;String&gt; updatePropertyVersions( ModifiedPomXMLEventReader pom,
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>     <strong class="jxr_keyword">private</strong> List&lt;String&gt; updatePropertyVersions( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom,
 <a class="jxr_linenumber" name="L285" href="#L285">285</a>                                                  Map&lt;Property, PropertyVersions&gt; versionProperties,
 <a class="jxr_linenumber" name="L286" href="#L286">286</a>                                                  Map&lt;String, Dependency&gt; remoteDependencies )
 <a class="jxr_linenumber" name="L287" href="#L287">287</a>         <strong class="jxr_keyword">throws</strong> XMLStreamException
@@ -297,8 +297,8 @@
 <a class="jxr_linenumber" name="L289" href="#L289">289</a>         List&lt;String&gt; result = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
 <a class="jxr_linenumber" name="L290" href="#L290">290</a>         <strong class="jxr_keyword">for</strong> ( Map.Entry&lt;Property, PropertyVersions&gt; entry : versionProperties.entrySet() )
 <a class="jxr_linenumber" name="L291" href="#L291">291</a>         {
-<a class="jxr_linenumber" name="L292" href="#L292">292</a>             <a href="../../../../org/codehaus/mojo/versions/Property.html">Property</a> property = entry.getKey();
-<a class="jxr_linenumber" name="L293" href="#L293">293</a>             <a href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html">PropertyVersions</a> version = entry.getValue();
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>             <a name="Property" href="../../../../org/codehaus/mojo/versions/Property.html#Property">Property</a> property = entry.getKey();
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>             <a name="PropertyVersions" href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html#PropertyVersions">PropertyVersions</a> version = entry.getValue();
 <a class="jxr_linenumber" name="L294" href="#L294">294</a> 
 <a class="jxr_linenumber" name="L295" href="#L295">295</a>             String candidateVersion = computeCandidateVersion( remoteDependencies, property, version );
 <a class="jxr_linenumber" name="L296" href="#L296">296</a>             <strong class="jxr_keyword">if</strong> ( candidateVersion != <strong class="jxr_keyword">null</strong> )
@@ -331,11 +331,11 @@
 <a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment">     * @param propertyVersions the association</em>
 <a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment">     * @return the candidate version or &lt;tt&gt;null&lt;/tt&gt; if there isn't any</em>
 <a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L326" href="#L326">326</a>     <strong class="jxr_keyword">private</strong> String computeCandidateVersion( Map&lt;String, Dependency&gt; remoteDependencies, Property property,
-<a class="jxr_linenumber" name="L327" href="#L327">327</a>                                             <a href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html">PropertyVersions</a> propertyVersions )
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>     <strong class="jxr_keyword">private</strong> String computeCandidateVersion( Map&lt;String, Dependency&gt; remoteDependencies, <a name="Property" href="../../../../org/codehaus/mojo/versions/Property.html#Property">Property</a> property,
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>                                             <a name="PropertyVersions" href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html#PropertyVersions">PropertyVersions</a> propertyVersions )
 <a class="jxr_linenumber" name="L328" href="#L328">328</a>     {
 <a class="jxr_linenumber" name="L329" href="#L329">329</a>         String candidateVersion = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L330" href="#L330">330</a>         <strong class="jxr_keyword">for</strong> ( ArtifactAssociation artifactAssociation : propertyVersions.getAssociations() )
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>         <strong class="jxr_keyword">for</strong> ( <a name="ArtifactAssociation" href="../../../../org/codehaus/mojo/versions/api/ArtifactAssociation.html#ArtifactAssociation">ArtifactAssociation</a> artifactAssociation : propertyVersions.getAssociations() )
 <a class="jxr_linenumber" name="L331" href="#L331">331</a>         {
 <a class="jxr_linenumber" name="L332" href="#L332">332</a>             String id = generateId( artifactAssociation.getArtifact() );
 <a class="jxr_linenumber" name="L333" href="#L333">333</a>             Dependency dependency = remoteDependencies.get( id );
@@ -469,6 +469,6 @@
 <a class="jxr_linenumber" name="L461" href="#L461">461</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

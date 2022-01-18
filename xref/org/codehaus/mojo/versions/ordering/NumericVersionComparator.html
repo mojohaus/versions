@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -41,8 +41,8 @@
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment"> * @since 1.0-alpha-3</em>
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> * @deprecated</em>
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../org/codehaus/mojo/versions/ordering/NumericVersionComparator.html">NumericVersionComparator</a>
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>      <strong class="jxr_keyword">extends</strong> <a href="../../../../../org/codehaus/mojo/versions/ordering/AbstractVersionComparator.html">AbstractVersionComparator</a>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="NumericVersionComparator" href="../../../../../org/codehaus/mojo/versions/ordering/NumericVersionComparator.html#NumericVersionComparator">NumericVersionComparator</a>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>      <strong class="jxr_keyword">extends</strong> <a name="AbstractVersionComparator" href="../../../../../org/codehaus/mojo/versions/ordering/AbstractVersionComparator.html#AbstractVersionComparator">AbstractVersionComparator</a>
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  {
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> BigInteger BIG_INTEGER_ZERO = <strong class="jxr_keyword">new</strong> BigInteger( <span class="jxr_string">"0"</span> );
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  
@@ -175,7 +175,7 @@
 <a class="jxr_linenumber" name="L167" href="#L167">167</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> segmentCount = innerGetSegmentCount( v );
 <a class="jxr_linenumber" name="L168" href="#L168">168</a>         <strong class="jxr_keyword">if</strong> ( segment &lt; 0 || segment &gt; segmentCount )
 <a class="jxr_linenumber" name="L169" href="#L169">169</a>         {
-<a class="jxr_linenumber" name="L170" href="#L170">170</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../org/codehaus/mojo/versions/ordering/InvalidSegmentException.html">InvalidSegmentException</a>( segment, segmentCount, v.toString() );
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidSegmentException" href="../../../../../org/codehaus/mojo/versions/ordering/InvalidSegmentException.html#InvalidSegmentException">InvalidSegmentException</a>( segment, segmentCount, v.toString() );
 <a class="jxr_linenumber" name="L171" href="#L171">171</a>         }
 <a class="jxr_linenumber" name="L172" href="#L172">172</a>         <strong class="jxr_keyword">final</strong> String version = v.toString();
 <a class="jxr_linenumber" name="L173" href="#L173">173</a>         StringBuilder buf = <strong class="jxr_keyword">new</strong> StringBuilder();
@@ -344,6 +344,6 @@
 <a class="jxr_linenumber" name="L336" href="#L336">336</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -48,7 +48,7 @@
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> * @author Illia Dubinin</em>
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * @since 2.4</em>
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesXmlRenderer.html">DependencyUpdatesXmlRenderer</a>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="DependencyUpdatesXmlRenderer" href="../../../../org/codehaus/mojo/versions/DependencyUpdatesXmlRenderer.html#DependencyUpdatesXmlRenderer">DependencyUpdatesXmlRenderer</a>
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  {
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String GROUP_ID = <span class="jxr_string">"groupId"</span>;
@@ -83,7 +83,7 @@
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>      <strong class="jxr_keyword">private</strong> String outputFileName;
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <strong class="jxr_keyword">public</strong> <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesXmlRenderer.html">DependencyUpdatesXmlRenderer</a>( Map&lt;Dependency, ArtifactVersions&gt; dependencyUpdates,
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <strong class="jxr_keyword">public</strong> <a name="DependencyUpdatesXmlRenderer" href="../../../../org/codehaus/mojo/versions/DependencyUpdatesXmlRenderer.html#DependencyUpdatesXmlRenderer">DependencyUpdatesXmlRenderer</a>( Map&lt;Dependency, ArtifactVersions&gt; dependencyUpdates,
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>                                           Map&lt;Dependency, ArtifactVersions&gt; dependencyManagementUpdates,
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>                                           String outputFileName )
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>      {
@@ -102,7 +102,7 @@
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>      {
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>          StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>          sb.append( <span class="jxr_string">"&lt;DependencyUpdatesReport&gt;"</span> ).append( NL );
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>          Map&lt;Dependency, ArtifactVersions&gt; allUpdates = <strong class="jxr_keyword">new</strong> TreeMap&lt;&gt;( <strong class="jxr_keyword">new</strong> DependencyComparator() );
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          Map&lt;Dependency, ArtifactVersions&gt; allUpdates = <strong class="jxr_keyword">new</strong> TreeMap&lt;&gt;( <strong class="jxr_keyword">new</strong> <a name="DependencyComparator" href="../../../../org/codehaus/mojo/versions/utils/DependencyComparator.html#DependencyComparator">DependencyComparator</a>() );
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>          allUpdates.putAll( dependencyManagementUpdates );
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>          allUpdates.putAll( dependencyUpdates );
 <a class="jxr_linenumber" name="L100" href="#L100">100</a>         sb.append( getSummaryBlock( allUpdates.values() ) );
@@ -114,7 +114,7 @@
 <a class="jxr_linenumber" name="L106" href="#L106">106</a>         <strong class="jxr_keyword">try</strong>
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>         {
 <a class="jxr_linenumber" name="L108" href="#L108">108</a>             pw = <strong class="jxr_keyword">new</strong> PrintWriter( outputFileName, <span class="jxr_string">"UTF8"</span> );
-<a class="jxr_linenumber" name="L109" href="#L109">109</a>             pw.print( sb.toString() );
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>             pw.print( sb );
 <a class="jxr_linenumber" name="L110" href="#L110">110</a>             pw.close();
 <a class="jxr_linenumber" name="L111" href="#L111">111</a>         }
 <a class="jxr_linenumber" name="L112" href="#L112">112</a>         <strong class="jxr_keyword">catch</strong> ( IOException e )
@@ -151,7 +151,7 @@
 <a class="jxr_linenumber" name="L143" href="#L143">143</a>         <strong class="jxr_keyword">int</strong> numMaj = 0;
 <a class="jxr_linenumber" name="L144" href="#L144">144</a>         <strong class="jxr_keyword">int</strong> numAny = 0;
 <a class="jxr_linenumber" name="L145" href="#L145">145</a>         <strong class="jxr_keyword">int</strong> numCur = 0;
-<a class="jxr_linenumber" name="L146" href="#L146">146</a>         <strong class="jxr_keyword">for</strong> ( ArtifactVersions details : allUpdates )
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>         <strong class="jxr_keyword">for</strong> ( <a name="ArtifactVersions" href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html#ArtifactVersions">ArtifactVersions</a> details : allUpdates )
 <a class="jxr_linenumber" name="L147" href="#L147">147</a>         {
 <a class="jxr_linenumber" name="L148" href="#L148">148</a>             <strong class="jxr_keyword">if</strong> ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != <strong class="jxr_keyword">null</strong> )
 <a class="jxr_linenumber" name="L149" href="#L149">149</a>             {
@@ -192,7 +192,7 @@
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">     * @param versions version info for dependency</em>
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">     * @return xml reports about current possible updates.</em>
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L187" href="#L187">187</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String getVersionsBlocks( ArtifactVersions versions )
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String getVersionsBlocks( <a name="ArtifactVersions" href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html#ArtifactVersions">ArtifactVersions</a> versions )
 <a class="jxr_linenumber" name="L188" href="#L188">188</a>     {
 <a class="jxr_linenumber" name="L189" href="#L189">189</a>         StringBuilder sBuilder = <strong class="jxr_keyword">new</strong> StringBuilder();
 <a class="jxr_linenumber" name="L190" href="#L190">190</a>         sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( versions.getCurrentVersion().toString(),
@@ -264,7 +264,7 @@
 <a class="jxr_linenumber" name="L256" href="#L256">256</a>         <strong class="jxr_keyword">return</strong> sBuilder.toString();
 <a class="jxr_linenumber" name="L257" href="#L257">257</a>     }
 <a class="jxr_linenumber" name="L258" href="#L258">258</a> 
-<a class="jxr_linenumber" name="L259" href="#L259">259</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String getVersionsInScopeBlock( ArtifactVersions av, UpdateScope scope )
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String getVersionsInScopeBlock( <a name="ArtifactVersions" href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html#ArtifactVersions">ArtifactVersions</a> av, <a name="UpdateScope" href="../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> scope )
 <a class="jxr_linenumber" name="L260" href="#L260">260</a>     {
 <a class="jxr_linenumber" name="L261" href="#L261">261</a>         String versionsTag = scope.toString().toLowerCase() + <span class="jxr_string">"s"</span>;
 <a class="jxr_linenumber" name="L262" href="#L262">262</a>         StringBuilder sBuilder = <strong class="jxr_keyword">new</strong> StringBuilder();
@@ -288,6 +288,6 @@
 <a class="jxr_linenumber" name="L280" href="#L280">280</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

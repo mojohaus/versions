@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -54,8 +54,8 @@
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  @Mojo( name = <span class="jxr_string">"dependency-updates-report"</span>, requiresProject = <strong class="jxr_keyword">true</strong>, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = <strong class="jxr_keyword">true</strong>)
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesReport.html">DependencyUpdatesReport</a>
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>      <strong class="jxr_keyword">extends</strong> <a href="../../../../org/codehaus/mojo/versions/AbstractVersionsReport.html">AbstractVersionsReport</a>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="DependencyUpdatesReport" href="../../../../org/codehaus/mojo/versions/DependencyUpdatesReport.html#DependencyUpdatesReport">DependencyUpdatesReport</a>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      <strong class="jxr_keyword">extends</strong> <a name="AbstractVersionsReport" href="../../../../org/codehaus/mojo/versions/AbstractVersionsReport.html#AbstractVersionsReport">AbstractVersionsReport</a>
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  {
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>      <em class="jxr_javadoccomment">/**</em>
@@ -111,10 +111,10 @@
 <a class="jxr_linenumber" name="L103" href="#L103">103</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doGenerateReport( Locale locale, Sink sink )
 <a class="jxr_linenumber" name="L104" href="#L104">104</a>         <strong class="jxr_keyword">throws</strong> MavenReportException
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>     {
-<a class="jxr_linenumber" name="L106" href="#L106">106</a>         Set&lt;Dependency&gt; dependencies = <strong class="jxr_keyword">new</strong> TreeSet&lt;&gt;( <strong class="jxr_keyword">new</strong> DependencyComparator() );
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>         Set&lt;Dependency&gt; dependencies = <strong class="jxr_keyword">new</strong> TreeSet&lt;&gt;( <strong class="jxr_keyword">new</strong> <a name="DependencyComparator" href="../../../../org/codehaus/mojo/versions/utils/DependencyComparator.html#DependencyComparator">DependencyComparator</a>() );
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>         dependencies.addAll( getProject().getDependencies() );
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 
-<a class="jxr_linenumber" name="L109" href="#L109">109</a>         Set&lt;Dependency&gt; dependencyManagement = <strong class="jxr_keyword">new</strong> TreeSet&lt;&gt;( <strong class="jxr_keyword">new</strong> DependencyComparator() );
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>         Set&lt;Dependency&gt; dependencyManagement = <strong class="jxr_keyword">new</strong> TreeSet&lt;&gt;( <strong class="jxr_keyword">new</strong> <a name="DependencyComparator" href="../../../../org/codehaus/mojo/versions/utils/DependencyComparator.html#DependencyComparator">DependencyComparator</a>() );
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 
 <a class="jxr_linenumber" name="L111" href="#L111">111</a>         <strong class="jxr_keyword">if</strong> ( processDependencyManagementTransitive )
 <a class="jxr_linenumber" name="L112" href="#L112">112</a>         {
@@ -165,8 +165,8 @@
 <a class="jxr_linenumber" name="L157" href="#L157">157</a>             {
 <a class="jxr_linenumber" name="L158" href="#L158">158</a>                 <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"html"</span>.equals( format ) )
 <a class="jxr_linenumber" name="L159" href="#L159">159</a>                 {
-<a class="jxr_linenumber" name="L160" href="#L160">160</a>                     <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesRenderer.html">DependencyUpdatesRenderer</a> renderer =
-<a class="jxr_linenumber" name="L161" href="#L161">161</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesRenderer.html">DependencyUpdatesRenderer</a>( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>                     <a name="DependencyUpdatesRenderer" href="../../../../org/codehaus/mojo/versions/DependencyUpdatesRenderer.html#DependencyUpdatesRenderer">DependencyUpdatesRenderer</a> renderer =
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>                         <strong class="jxr_keyword">new</strong> <a name="DependencyUpdatesRenderer" href="../../../../org/codehaus/mojo/versions/DependencyUpdatesRenderer.html#DependencyUpdatesRenderer">DependencyUpdatesRenderer</a>( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
 <a class="jxr_linenumber" name="L162" href="#L162">162</a>                                                        dependencyManagementUpdates );
 <a class="jxr_linenumber" name="L163" href="#L163">163</a>                     renderer.render();
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 
@@ -180,8 +180,8 @@
 <a class="jxr_linenumber" name="L172" href="#L172">172</a>                     }
 <a class="jxr_linenumber" name="L173" href="#L173">173</a>                     String outputFile =
 <a class="jxr_linenumber" name="L174" href="#L174">174</a>                         outputDir.getAbsolutePath() + File.separator + getOutputName() + <span class="jxr_string">".xml"</span>;
-<a class="jxr_linenumber" name="L175" href="#L175">175</a>                     <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesXmlRenderer.html">DependencyUpdatesXmlRenderer</a> xmlGenerator =
-<a class="jxr_linenumber" name="L176" href="#L176">176</a>                         <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/DependencyUpdatesXmlRenderer.html">DependencyUpdatesXmlRenderer</a>( dependencyUpdates, dependencyManagementUpdates, outputFile );
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>                     <a name="DependencyUpdatesXmlRenderer" href="../../../../org/codehaus/mojo/versions/DependencyUpdatesXmlRenderer.html#DependencyUpdatesXmlRenderer">DependencyUpdatesXmlRenderer</a> xmlGenerator =
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>                         <strong class="jxr_keyword">new</strong> <a name="DependencyUpdatesXmlRenderer" href="../../../../org/codehaus/mojo/versions/DependencyUpdatesXmlRenderer.html#DependencyUpdatesXmlRenderer">DependencyUpdatesXmlRenderer</a>( dependencyUpdates, dependencyManagementUpdates, outputFile );
 <a class="jxr_linenumber" name="L177" href="#L177">177</a>                     xmlGenerator.render();
 <a class="jxr_linenumber" name="L178" href="#L178">178</a>                 }
 <a class="jxr_linenumber" name="L179" href="#L179">179</a>             }
@@ -204,7 +204,7 @@
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L197" href="#L197">197</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Set&lt;Dependency&gt; removeDependencyManagment( Set&lt;Dependency&gt; dependencies, Set&lt;Dependency&gt; dependencyManagement )
 <a class="jxr_linenumber" name="L198" href="#L198">198</a>     {
-<a class="jxr_linenumber" name="L199" href="#L199">199</a>         Set&lt;Dependency&gt; result = <strong class="jxr_keyword">new</strong> TreeSet&lt;&gt;( <strong class="jxr_keyword">new</strong> DependencyComparator() );
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>         Set&lt;Dependency&gt; result = <strong class="jxr_keyword">new</strong> TreeSet&lt;&gt;( <strong class="jxr_keyword">new</strong> <a name="DependencyComparator" href="../../../../org/codehaus/mojo/versions/utils/DependencyComparator.html#DependencyComparator">DependencyComparator</a>() );
 <a class="jxr_linenumber" name="L200" href="#L200">200</a>         <strong class="jxr_keyword">for</strong> ( Dependency c : dependencies )
 <a class="jxr_linenumber" name="L201" href="#L201">201</a>         {
 <a class="jxr_linenumber" name="L202" href="#L202">202</a>             <strong class="jxr_keyword">boolean</strong> matched = false;
@@ -242,6 +242,6 @@
 <a class="jxr_linenumber" name="L234" href="#L234">234</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

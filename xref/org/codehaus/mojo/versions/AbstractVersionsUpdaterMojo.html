@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -70,7 +70,7 @@
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> *</em>
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * @author Stephen Connolly</em>
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/codehaus/mojo/versions/AbstractVersionsUpdaterMojo.html">AbstractVersionsUpdaterMojo</a>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> <a name="AbstractVersionsUpdaterMojo" href="../../../../org/codehaus/mojo/versions/AbstractVersionsUpdaterMojo.html#AbstractVersionsUpdaterMojo">AbstractVersionsUpdaterMojo</a>
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>      <strong class="jxr_keyword">extends</strong> AbstractMojo
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  {
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  
@@ -120,13 +120,13 @@
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-3</em>
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L114" href="#L114">114</a>     @Parameter( defaultValue = <span class="jxr_string">"${project.remoteArtifactRepositories}"</span>, readonly = <strong class="jxr_keyword">true</strong> )
-<a class="jxr_linenumber" name="L115" href="#L115">115</a>     <strong class="jxr_keyword">protected</strong> List remoteArtifactRepositories;
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>     <strong class="jxr_keyword">protected</strong> List&lt;ArtifactRepository&gt; remoteArtifactRepositories;
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-3</em>
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L120" href="#L120">120</a>     @Parameter( defaultValue = <span class="jxr_string">"${project.pluginArtifactRepositories}"</span>, readonly = <strong class="jxr_keyword">true</strong> )
-<a class="jxr_linenumber" name="L121" href="#L121">121</a>     <strong class="jxr_keyword">protected</strong> List remotePluginRepositories;
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>     <strong class="jxr_keyword">protected</strong> List&lt;ArtifactRepository&gt; remotePluginRepositories;
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 
 <a class="jxr_linenumber" name="L123" href="#L123">123</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-1</em>
@@ -184,7 +184,7 @@
 <a class="jxr_linenumber" name="L176" href="#L176">176</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">     * Our versions helper.</em>
 <a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L179" href="#L179">179</a>     <strong class="jxr_keyword">private</strong> <a href="../../../../org/codehaus/mojo/versions/api/VersionsHelper.html">VersionsHelper</a> helper;
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>     <strong class="jxr_keyword">private</strong> <a name="VersionsHelper" href="../../../../org/codehaus/mojo/versions/api/VersionsHelper.html#VersionsHelper">VersionsHelper</a> helper;
 <a class="jxr_linenumber" name="L180" href="#L180">180</a> 
 <a class="jxr_linenumber" name="L181" href="#L181">181</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">     * The Maven Session.</em>
@@ -202,12 +202,12 @@
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> 
 <a class="jxr_linenumber" name="L195" href="#L195">195</a>     <em class="jxr_comment">// --------------------- GETTER / SETTER METHODS ---------------------</em>
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> 
-<a class="jxr_linenumber" name="L197" href="#L197">197</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../org/codehaus/mojo/versions/api/VersionsHelper.html">VersionsHelper</a> getHelper()
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     <strong class="jxr_keyword">public</strong> <a name="VersionsHelper" href="../../../../org/codehaus/mojo/versions/api/VersionsHelper.html#VersionsHelper">VersionsHelper</a> getHelper()
 <a class="jxr_linenumber" name="L198" href="#L198">198</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException
 <a class="jxr_linenumber" name="L199" href="#L199">199</a>     {
 <a class="jxr_linenumber" name="L200" href="#L200">200</a>         <strong class="jxr_keyword">if</strong> ( helper == <strong class="jxr_keyword">null</strong> )
 <a class="jxr_linenumber" name="L201" href="#L201">201</a>         {
-<a class="jxr_linenumber" name="L202" href="#L202">202</a>             helper = <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/api/DefaultVersionsHelper.html">DefaultVersionsHelper</a>( artifactFactory, artifactResolver, artifactMetadataSource,
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>             helper = <strong class="jxr_keyword">new</strong> <a name="DefaultVersionsHelper" href="../../../../org/codehaus/mojo/versions/api/DefaultVersionsHelper.html#DefaultVersionsHelper">DefaultVersionsHelper</a>( artifactFactory, artifactResolver, artifactMetadataSource,
 <a class="jxr_linenumber" name="L203" href="#L203">203</a>                                                 remoteArtifactRepositories, remotePluginRepositories, localRepository,
 <a class="jxr_linenumber" name="L204" href="#L204">204</a>                                                 wagonManager, settings, serverId, rulesUri, getLog(), session,
 <a class="jxr_linenumber" name="L205" href="#L205">205</a>                                                 pathTranslator );
@@ -286,7 +286,7 @@
 <a class="jxr_linenumber" name="L278" href="#L278">278</a>         {
 <a class="jxr_linenumber" name="L279" href="#L279">279</a>             includeSnapshots = false;
 <a class="jxr_linenumber" name="L280" href="#L280">280</a>         }
-<a class="jxr_linenumber" name="L281" href="#L281">281</a>         <strong class="jxr_keyword">final</strong> <a href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html">ArtifactVersions</a> artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>         <strong class="jxr_keyword">final</strong> <a name="ArtifactVersions" href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html#ArtifactVersions">ArtifactVersions</a> artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
 <a class="jxr_linenumber" name="L282" href="#L282">282</a>         <strong class="jxr_keyword">return</strong> artifactVersions.getNewestVersion( versionRange, includeSnapshots );
 <a class="jxr_linenumber" name="L283" href="#L283">283</a>     }
 <a class="jxr_linenumber" name="L284" href="#L284">284</a> 
@@ -318,7 +318,7 @@
 <a class="jxr_linenumber" name="L310" href="#L310">310</a>         <strong class="jxr_keyword">try</strong>
 <a class="jxr_linenumber" name="L311" href="#L311">311</a>         {
 <a class="jxr_linenumber" name="L312" href="#L312">312</a>             StringBuilder input = PomHelper.readXmlFile( outFile );
-<a class="jxr_linenumber" name="L313" href="#L313">313</a>             <a href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html">ModifiedPomXMLEventReader</a> newPom = newModifiedPomXER( input, outFile.getAbsolutePath() );
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>             <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> newPom = newModifiedPomXER( input, outFile.getAbsolutePath() );
 <a class="jxr_linenumber" name="L314" href="#L314">314</a> 
 <a class="jxr_linenumber" name="L315" href="#L315">315</a>             update( newPom );
 <a class="jxr_linenumber" name="L316" href="#L316">316</a> 
@@ -344,186 +344,202 @@
 <a class="jxr_linenumber" name="L336" href="#L336">336</a>                 writeFile( outFile, input );
 <a class="jxr_linenumber" name="L337" href="#L337">337</a>             }
 <a class="jxr_linenumber" name="L338" href="#L338">338</a>         }
-<a class="jxr_linenumber" name="L339" href="#L339">339</a>         <strong class="jxr_keyword">catch</strong> ( IOException e )
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>         <strong class="jxr_keyword">catch</strong> ( IOException | XMLStreamException e )
 <a class="jxr_linenumber" name="L340" href="#L340">340</a>         {
 <a class="jxr_linenumber" name="L341" href="#L341">341</a>             getLog().error( e );
 <a class="jxr_linenumber" name="L342" href="#L342">342</a>         }
-<a class="jxr_linenumber" name="L343" href="#L343">343</a>         <strong class="jxr_keyword">catch</strong> ( XMLStreamException e )
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>         <strong class="jxr_keyword">catch</strong> ( ArtifactMetadataRetrievalException e )
 <a class="jxr_linenumber" name="L344" href="#L344">344</a>         {
-<a class="jxr_linenumber" name="L345" href="#L345">345</a>             getLog().error( e );
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MojoExecutionException( e.getMessage(), e );
 <a class="jxr_linenumber" name="L346" href="#L346">346</a>         }
-<a class="jxr_linenumber" name="L347" href="#L347">347</a>         <strong class="jxr_keyword">catch</strong> ( ArtifactMetadataRetrievalException e )
-<a class="jxr_linenumber" name="L348" href="#L348">348</a>         {
-<a class="jxr_linenumber" name="L349" href="#L349">349</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> MojoExecutionException( e.getMessage(), e );
-<a class="jxr_linenumber" name="L350" href="#L350">350</a>         }
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 
-<a class="jxr_linenumber" name="L352" href="#L352">352</a>     }
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
-<a class="jxr_linenumber" name="L354" href="#L354">354</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment">     * Creates a {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader} from a StringBuilder.</em>
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_javadoccomment">     * @param input The XML to read and modify.</em>
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> <em class="jxr_javadoccomment">     * @param path Path pointing to the source of the XML</em>
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_javadoccomment">     * @return The {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader}.</em>
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L361" href="#L361">361</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html">ModifiedPomXMLEventReader</a> newModifiedPomXER( StringBuilder input, String path )
-<a class="jxr_linenumber" name="L362" href="#L362">362</a>     {
-<a class="jxr_linenumber" name="L363" href="#L363">363</a>         <a href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html">ModifiedPomXMLEventReader</a> newPom = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L364" href="#L364">364</a>         <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L365" href="#L365">365</a>         {
-<a class="jxr_linenumber" name="L366" href="#L366">366</a>             XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-<a class="jxr_linenumber" name="L367" href="#L367">367</a>             inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
-<a class="jxr_linenumber" name="L368" href="#L368">368</a>             newPom = <strong class="jxr_keyword">new</strong> <a href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html">ModifiedPomXMLEventReader</a>( input, inputFactory, path );
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>     }
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_javadoccomment">     * Creates a {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader} from a StringBuilder.</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">     * @param input The XML to read and modify.</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_javadoccomment">     * @param path Path pointing to the source of the XML</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment">     * @return The {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader}.</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> newModifiedPomXER( StringBuilder input, String path )
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>         <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> newPom = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>         <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>         {
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>             XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>             inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>             newPom = <strong class="jxr_keyword">new</strong> <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a>( input, inputFactory, path );
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>         }
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>         <strong class="jxr_keyword">catch</strong> ( XMLStreamException e )
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>         {
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>             getLog().error( e );
 <a class="jxr_linenumber" name="L369" href="#L369">369</a>         }
-<a class="jxr_linenumber" name="L370" href="#L370">370</a>         <strong class="jxr_keyword">catch</strong> ( XMLStreamException e )
-<a class="jxr_linenumber" name="L371" href="#L371">371</a>         {
-<a class="jxr_linenumber" name="L372" href="#L372">372</a>             getLog().error( e );
-<a class="jxr_linenumber" name="L373" href="#L373">373</a>         }
-<a class="jxr_linenumber" name="L374" href="#L374">374</a>         <strong class="jxr_keyword">return</strong> newPom;
-<a class="jxr_linenumber" name="L375" href="#L375">375</a>     }
-<a class="jxr_linenumber" name="L376" href="#L376">376</a> 
-<a class="jxr_linenumber" name="L377" href="#L377">377</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">     * Writes a StringBuilder into a file.</em>
-<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> <em class="jxr_javadoccomment">     * @param outFile The file to read.</em>
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_javadoccomment">     * @param input The contents of the file.</em>
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> <em class="jxr_javadoccomment">     * @throws IOException when things go wrong.</em>
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L384" href="#L384">384</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> writeFile( File outFile, StringBuilder input )
-<a class="jxr_linenumber" name="L385" href="#L385">385</a>         <strong class="jxr_keyword">throws</strong> IOException
-<a class="jxr_linenumber" name="L386" href="#L386">386</a>     {
-<a class="jxr_linenumber" name="L387" href="#L387">387</a>         Writer writer = WriterFactory.newXmlWriter( outFile );
-<a class="jxr_linenumber" name="L388" href="#L388">388</a>         <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L389" href="#L389">389</a>         {
-<a class="jxr_linenumber" name="L390" href="#L390">390</a>             IOUtil.copy( input.toString(), writer );
-<a class="jxr_linenumber" name="L391" href="#L391">391</a>         }
-<a class="jxr_linenumber" name="L392" href="#L392">392</a>         <strong class="jxr_keyword">finally</strong>
-<a class="jxr_linenumber" name="L393" href="#L393">393</a>         {
-<a class="jxr_linenumber" name="L394" href="#L394">394</a>             IOUtil.close( writer );
-<a class="jxr_linenumber" name="L395" href="#L395">395</a>         }
-<a class="jxr_linenumber" name="L396" href="#L396">396</a>     }
-<a class="jxr_linenumber" name="L397" href="#L397">397</a> 
-<a class="jxr_linenumber" name="L398" href="#L398">398</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L399" href="#L399">399</a> <em class="jxr_javadoccomment">     * Updates the pom.</em>
-<a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> <em class="jxr_javadoccomment">     * @param pom The pom to update.</em>
-<a class="jxr_linenumber" name="L402" href="#L402">402</a> <em class="jxr_javadoccomment">     * @throws MojoExecutionException If things go wrong.</em>
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">     * @throws MojoFailureException If things go wrong.</em>
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">     * @throws javax.xml.stream.XMLStreamException If things go wrong.</em>
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">     * @throws ArtifactMetadataRetrievalException if something goes wrong.</em>
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-1</em>
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L408" href="#L408">408</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> update( ModifiedPomXMLEventReader pom )
-<a class="jxr_linenumber" name="L409" href="#L409">409</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> 
-<a class="jxr_linenumber" name="L411" href="#L411">411</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> <em class="jxr_javadoccomment">     * Returns &lt;code&gt;true&lt;/code&gt; if the update should be applied.</em>
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">     * @param artifact The artifact.</em>
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_javadoccomment">     * @param currentVersion The current version of the artifact.</em>
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">     * @param updateVersion The proposed new version of the artifact.</em>
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">     * @return &lt;code&gt;true&lt;/code&gt; if the update should be applied.</em>
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-1</em>
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L420" href="#L420">420</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
-<a class="jxr_linenumber" name="L421" href="#L421">421</a>     {
-<a class="jxr_linenumber" name="L422" href="#L422">422</a>         getLog().debug( <span class="jxr_string">"Proposal is to update from "</span> + currentVersion + <span class="jxr_string">" to "</span> + updateVersion );
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 
-<a class="jxr_linenumber" name="L424" href="#L424">424</a>         <strong class="jxr_keyword">if</strong> ( updateVersion == <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L425" href="#L425">425</a>         {
-<a class="jxr_linenumber" name="L426" href="#L426">426</a>             getLog().warn( <span class="jxr_string">"Not updating version: could not resolve any versions"</span> );
-<a class="jxr_linenumber" name="L427" href="#L427">427</a>             <strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L428" href="#L428">428</a>         }
-<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
-<a class="jxr_linenumber" name="L430" href="#L430">430</a>         artifact.setVersion( updateVersion.toString() );
-<a class="jxr_linenumber" name="L431" href="#L431">431</a>         <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L432" href="#L432">432</a>         {
-<a class="jxr_linenumber" name="L433" href="#L433">433</a>             resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
-<a class="jxr_linenumber" name="L434" href="#L434">434</a>         }
-<a class="jxr_linenumber" name="L435" href="#L435">435</a>         <strong class="jxr_keyword">catch</strong> ( ArtifactResolutionException e )
-<a class="jxr_linenumber" name="L436" href="#L436">436</a>         {
-<a class="jxr_linenumber" name="L437" href="#L437">437</a>             getLog().warn( <span class="jxr_string">"Not updating version: could not resolve "</span> + artifact.toString(), e );
-<a class="jxr_linenumber" name="L438" href="#L438">438</a>             <strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L439" href="#L439">439</a>         }
-<a class="jxr_linenumber" name="L440" href="#L440">440</a>         <strong class="jxr_keyword">catch</strong> ( ArtifactNotFoundException e )
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>         <strong class="jxr_keyword">return</strong> newPom;
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>     }
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_javadoccomment">     * Writes a StringBuilder into a file.</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment">     * @param outFile The file to read.</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">     * @param input The contents of the file.</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">     * @throws IOException when things go wrong.</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> writeFile( File outFile, StringBuilder input )
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>         <strong class="jxr_keyword">throws</strong> IOException
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>     {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>         <strong class="jxr_keyword">try</strong> (Writer writer = WriterFactory.newXmlWriter( outFile ) )
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>         {
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>             IOUtil.copy( input.toString(), writer );
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>         }
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>     }
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> <em class="jxr_javadoccomment">     * Updates the pom.</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> <em class="jxr_javadoccomment">     * @param pom The pom to update.</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> <em class="jxr_javadoccomment">     * @throws MojoExecutionException If things go wrong.</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">     * @throws MojoFailureException If things go wrong.</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> <em class="jxr_javadoccomment">     * @throws javax.xml.stream.XMLStreamException If things go wrong.</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> <em class="jxr_javadoccomment">     * @throws ArtifactMetadataRetrievalException if something goes wrong.</em>
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-1</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> update( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom )
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">     * @deprecated</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">     *  This method no longer supported.</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">     *  use shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean forceUpdate )</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_javadoccomment">     * Returns &lt;code&gt;true&lt;/code&gt; if the update should be applied.</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> <em class="jxr_javadoccomment">     * @param artifact The artifact.</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_javadoccomment">     * @param currentVersion The current version of the artifact.</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> <em class="jxr_javadoccomment">     * @param updateVersion The proposed new version of the artifact.</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> <em class="jxr_javadoccomment">     * @return &lt;code&gt;true&lt;/code&gt; if the update should be applied.</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> <em class="jxr_javadoccomment">     * @since 1.0-alpha-1</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>     @Deprecated
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>     {
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>         <strong class="jxr_keyword">return</strong> shouldApplyUpdate(artifact,currentVersion,updateVersion,false);
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>     }
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> <em class="jxr_javadoccomment">     * Returns &lt;code&gt;true&lt;/code&gt; if the update should be applied.</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> <em class="jxr_javadoccomment">     * @param artifact The artifact.</em>
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> <em class="jxr_javadoccomment">     * @param currentVersion The current version of the artifact.</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> <em class="jxr_javadoccomment">     * @param updateVersion The proposed new version of the artifact.</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">     * @return &lt;code&gt;true&lt;/code&gt; if the update should be applied to the pom.</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">     * @since 2.9</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, <strong class="jxr_keyword">boolean</strong> forceUpdate )
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>     {
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>         getLog().debug( <span class="jxr_string">"Proposal is to update from "</span> + currentVersion + <span class="jxr_string">" to "</span> + updateVersion );
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>         <strong class="jxr_keyword">if</strong> ( forceUpdate )
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>         {
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>             getLog().info( <span class="jxr_string">"Force update enabled. LATEST or RELEASE versions will be overwritten with real version"</span> );
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>         }
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>         <strong class="jxr_keyword">if</strong> ( updateVersion == <strong class="jxr_keyword">null</strong> )
 <a class="jxr_linenumber" name="L441" href="#L441">441</a>         {
-<a class="jxr_linenumber" name="L442" href="#L442">442</a>             getLog().warn( <span class="jxr_string">"Not updating version: could not find "</span> + artifact.toString(), e );
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>             getLog().warn( <span class="jxr_string">"Not updating version: could not resolve any versions"</span> );
 <a class="jxr_linenumber" name="L443" href="#L443">443</a>             <strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L444" href="#L444">444</a>         }
 <a class="jxr_linenumber" name="L445" href="#L445">445</a> 
-<a class="jxr_linenumber" name="L446" href="#L446">446</a>         <strong class="jxr_keyword">if</strong> ( currentVersion.equals( updateVersion.toString() ) )
-<a class="jxr_linenumber" name="L447" href="#L447">447</a>         {
-<a class="jxr_linenumber" name="L448" href="#L448">448</a>             getLog().info( <span class="jxr_string">"Current version of "</span> + artifact.toString() + <span class="jxr_string">" is the latest."</span> );
-<a class="jxr_linenumber" name="L449" href="#L449">449</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>         artifact.setVersion( updateVersion.toString() );
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>         <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>         {
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>             resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
 <a class="jxr_linenumber" name="L450" href="#L450">450</a>         }
-<a class="jxr_linenumber" name="L451" href="#L451">451</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L452" href="#L452">452</a>     }
-<a class="jxr_linenumber" name="L453" href="#L453">453</a> 
-<a class="jxr_linenumber" name="L454" href="#L454">454</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L455" href="#L455">455</a> <em class="jxr_javadoccomment">     * Based on the passed flags, determines which segment is unchangable. This can be used when determining an upper</em>
-<a class="jxr_linenumber" name="L456" href="#L456">456</a> <em class="jxr_javadoccomment">     * bound for the "latest" version.</em>
-<a class="jxr_linenumber" name="L457" href="#L457">457</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L458" href="#L458">458</a> <em class="jxr_javadoccomment">     * @param allowMajorUpdates Allow major updates</em>
-<a class="jxr_linenumber" name="L459" href="#L459">459</a> <em class="jxr_javadoccomment">     * @param allowMinorUpdates Allow minor updates</em>
-<a class="jxr_linenumber" name="L460" href="#L460">460</a> <em class="jxr_javadoccomment">     * @param allowIncrementalUpdates Allow incremental updates</em>
-<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">     * @return Returns the segment that is unchangable. If any segment can change, returns -1.</em>
-<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L463" href="#L463">463</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">int</strong> determineUnchangedSegment( <strong class="jxr_keyword">boolean</strong> allowMajorUpdates, <strong class="jxr_keyword">boolean</strong> allowMinorUpdates,
-<a class="jxr_linenumber" name="L464" href="#L464">464</a>                                              <strong class="jxr_keyword">boolean</strong> allowIncrementalUpdates )
-<a class="jxr_linenumber" name="L465" href="#L465">465</a>     {
-<a class="jxr_linenumber" name="L466" href="#L466">466</a>         <strong class="jxr_keyword">int</strong> segment;
-<a class="jxr_linenumber" name="L467" href="#L467">467</a>         <strong class="jxr_keyword">if</strong> ( allowMajorUpdates )
-<a class="jxr_linenumber" name="L468" href="#L468">468</a>         {
-<a class="jxr_linenumber" name="L469" href="#L469">469</a>             segment = -1;
-<a class="jxr_linenumber" name="L470" href="#L470">470</a>             getLog().info( <span class="jxr_string">"Major version changes allowed"</span> );
-<a class="jxr_linenumber" name="L471" href="#L471">471</a>         }
-<a class="jxr_linenumber" name="L472" href="#L472">472</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( allowMinorUpdates )
-<a class="jxr_linenumber" name="L473" href="#L473">473</a>         {
-<a class="jxr_linenumber" name="L474" href="#L474">474</a>             segment = 0;
-<a class="jxr_linenumber" name="L475" href="#L475">475</a>             getLog().info( <span class="jxr_string">"Minor version changes allowed"</span> );
-<a class="jxr_linenumber" name="L476" href="#L476">476</a>         }
-<a class="jxr_linenumber" name="L477" href="#L477">477</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( allowIncrementalUpdates )
-<a class="jxr_linenumber" name="L478" href="#L478">478</a>         {
-<a class="jxr_linenumber" name="L479" href="#L479">479</a>             segment = 1;
-<a class="jxr_linenumber" name="L480" href="#L480">480</a>             getLog().info( <span class="jxr_string">"Incremental version changes allowed"</span> );
-<a class="jxr_linenumber" name="L481" href="#L481">481</a>         }
-<a class="jxr_linenumber" name="L482" href="#L482">482</a>         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L483" href="#L483">483</a>         {
-<a class="jxr_linenumber" name="L484" href="#L484">484</a>             segment = 2;
-<a class="jxr_linenumber" name="L485" href="#L485">485</a>             getLog().info( <span class="jxr_string">"Subincremental version changes allowed"</span> );
-<a class="jxr_linenumber" name="L486" href="#L486">486</a>         }
-<a class="jxr_linenumber" name="L487" href="#L487">487</a> 
-<a class="jxr_linenumber" name="L488" href="#L488">488</a>         <strong class="jxr_keyword">return</strong> segment;
-<a class="jxr_linenumber" name="L489" href="#L489">489</a>     }
-<a class="jxr_linenumber" name="L490" href="#L490">490</a> 
-<a class="jxr_linenumber" name="L491" href="#L491">491</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-<a class="jxr_linenumber" name="L492" href="#L492">492</a>                                                   <a href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html">PropertyVersions</a> version, String currentVersion )
-<a class="jxr_linenumber" name="L493" href="#L493">493</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException, XMLStreamException
-<a class="jxr_linenumber" name="L494" href="#L494">494</a>     {
-<a class="jxr_linenumber" name="L495" href="#L495">495</a>         updatePropertyToNewestVersion( pom, property, version, currentVersion, false, -1 );
-<a class="jxr_linenumber" name="L496" href="#L496">496</a>     }
-<a class="jxr_linenumber" name="L497" href="#L497">497</a> 
-<a class="jxr_linenumber" name="L498" href="#L498">498</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-<a class="jxr_linenumber" name="L499" href="#L499">499</a>                                                   <a href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html">PropertyVersions</a> version, String currentVersion,
-<a class="jxr_linenumber" name="L500" href="#L500">500</a>                                                   <strong class="jxr_keyword">boolean</strong> allowDowngrade, <strong class="jxr_keyword">int</strong> segment )
-<a class="jxr_linenumber" name="L501" href="#L501">501</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException, XMLStreamException
-<a class="jxr_linenumber" name="L502" href="#L502">502</a>     {
-<a class="jxr_linenumber" name="L503" href="#L503">503</a>         ArtifactVersion winner =
-<a class="jxr_linenumber" name="L504" href="#L504">504</a>             version.getNewestVersion( currentVersion, property, <strong class="jxr_keyword">this</strong>.allowSnapshots, <strong class="jxr_keyword">this</strong>.reactorProjects,
-<a class="jxr_linenumber" name="L505" href="#L505">505</a>                                       <strong class="jxr_keyword">this</strong>.getHelper(), allowDowngrade, segment );
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>         <strong class="jxr_keyword">catch</strong> ( ArtifactResolutionException e )
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>         {
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>             getLog().warn( <span class="jxr_string">"Not updating version: could not resolve "</span> + artifact, e );
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>         }
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>         <strong class="jxr_keyword">catch</strong> ( ArtifactNotFoundException e )
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>         {
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>             getLog().warn( <span class="jxr_string">"Not updating version: could not find "</span> + artifact, e );
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>         }
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>         <strong class="jxr_keyword">if</strong> ( currentVersion.equals( updateVersion.toString() ) )
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>         {
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>             getLog().info( <span class="jxr_string">"Current version of "</span> + artifact + <span class="jxr_string">" is the latest."</span> );
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>         }
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>     }
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> <em class="jxr_javadoccomment">     * Based on the passed flags, determines which segment is unchangable. This can be used when determining an upper</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> <em class="jxr_javadoccomment">     * bound for the "latest" version.</em>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">     * @param allowMajorUpdates Allow major updates</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">     * @param allowMinorUpdates Allow minor updates</em>
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> <em class="jxr_javadoccomment">     * @param allowIncrementalUpdates Allow incremental updates</em>
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> <em class="jxr_javadoccomment">     * @return Returns the segment that is unchangable. If any segment can change, returns -1.</em>
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">int</strong> determineUnchangedSegment( <strong class="jxr_keyword">boolean</strong> allowMajorUpdates, <strong class="jxr_keyword">boolean</strong> allowMinorUpdates,
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>                                              <strong class="jxr_keyword">boolean</strong> allowIncrementalUpdates )
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>     {
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>         <strong class="jxr_keyword">int</strong> segment;
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>         <strong class="jxr_keyword">if</strong> ( allowMajorUpdates )
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>         {
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>             segment = -1;
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>             getLog().info( <span class="jxr_string">"Major version changes allowed"</span> );
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>         }
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( allowMinorUpdates )
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>         {
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>             segment = 0;
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>             getLog().info( <span class="jxr_string">"Minor version changes allowed"</span> );
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>         }
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( allowIncrementalUpdates )
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>         {
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>             segment = 1;
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>             getLog().info( <span class="jxr_string">"Incremental version changes allowed"</span> );
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>         }
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>         {
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>             segment = 2;
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>             getLog().info( <span class="jxr_string">"Subincremental version changes allowed"</span> );
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>         }
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>         <strong class="jxr_keyword">return</strong> segment;
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>     }
 <a class="jxr_linenumber" name="L506" href="#L506">506</a> 
-<a class="jxr_linenumber" name="L507" href="#L507">507</a>         <strong class="jxr_keyword">if</strong> ( winner == <strong class="jxr_keyword">null</strong> || currentVersion.equals( winner.toString() ) )
-<a class="jxr_linenumber" name="L508" href="#L508">508</a>         {
-<a class="jxr_linenumber" name="L509" href="#L509">509</a>             getLog().info( <span class="jxr_string">"Property ${"</span> + property.getName() + <span class="jxr_string">"}: Leaving unchanged as "</span> + currentVersion );
-<a class="jxr_linenumber" name="L510" href="#L510">510</a>         }
-<a class="jxr_linenumber" name="L511" href="#L511">511</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
-<a class="jxr_linenumber" name="L512" href="#L512">512</a>         {
-<a class="jxr_linenumber" name="L513" href="#L513">513</a>             getLog().info( <span class="jxr_string">"Updated ${"</span> + property.getName() + <span class="jxr_string">"} from "</span> + currentVersion + <span class="jxr_string">" to "</span> + winner );
-<a class="jxr_linenumber" name="L514" href="#L514">514</a>         }
-<a class="jxr_linenumber" name="L515" href="#L515">515</a>     }
-<a class="jxr_linenumber" name="L516" href="#L516">516</a> }
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> updatePropertyToNewestVersion( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom, <a name="Property" href="../../../../org/codehaus/mojo/versions/Property.html#Property">Property</a> property,
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>                                                   <a name="PropertyVersions" href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html#PropertyVersions">PropertyVersions</a> version, String currentVersion )
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException, XMLStreamException
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>     {
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>         updatePropertyToNewestVersion( pom, property, version, currentVersion, false, -1 );
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>     }
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> 
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> updatePropertyToNewestVersion( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom, <a name="Property" href="../../../../org/codehaus/mojo/versions/Property.html#Property">Property</a> property,
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>                                                   <a name="PropertyVersions" href="../../../../org/codehaus/mojo/versions/api/PropertyVersions.html#PropertyVersions">PropertyVersions</a> version, String currentVersion,
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>                                                   <strong class="jxr_keyword">boolean</strong> allowDowngrade, <strong class="jxr_keyword">int</strong> segment )
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>         <strong class="jxr_keyword">throws</strong> MojoExecutionException, XMLStreamException
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>     {
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>         ArtifactVersion winner =
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>             version.getNewestVersion( currentVersion, property, <strong class="jxr_keyword">this</strong>.allowSnapshots, <strong class="jxr_keyword">this</strong>.reactorProjects,
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>                                       <strong class="jxr_keyword">this</strong>.getHelper(), allowDowngrade, segment );
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> 
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>         <strong class="jxr_keyword">if</strong> ( winner == <strong class="jxr_keyword">null</strong> || currentVersion.equals( winner.toString() ) )
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>         {
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>             getLog().info( <span class="jxr_string">"Property ${"</span> + property.getName() + <span class="jxr_string">"}: Leaving unchanged as "</span> + currentVersion );
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>         }
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>         {
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>             getLog().info( <span class="jxr_string">"Updated ${"</span> + property.getName() + <span class="jxr_string">"} from "</span> + currentVersion + <span class="jxr_string">" to "</span> + winner );
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>         }
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>     }
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

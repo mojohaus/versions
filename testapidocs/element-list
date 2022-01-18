@@ -1,0 +1,4 @@
+org.codehaus.mojo.versions
+org.codehaus.mojo.versions.api
+org.codehaus.mojo.versions.ordering
+org.codehaus.mojo.versions.utils

@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -37,7 +37,7 @@
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment"> * @author connollys</em>
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment"> * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../org/codehaus/mojo/versions/api/VersionDetails.html">VersionDetails</a>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="VersionDetails" href="../../../../../org/codehaus/mojo/versions/api/VersionDetails.html#VersionDetails">VersionDetails</a>
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  {
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment">     * Returns &lt;code&gt;true&lt;/code&gt; if the specific version is in the list of versions.</em>
@@ -54,7 +54,7 @@
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">     * @return the rule for version comparison of this artifact.</em>
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <a href="../../../../../org/codehaus/mojo/versions/ordering/VersionComparator.html">VersionComparator</a> getVersionComparator();
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <a name="VersionComparator" href="../../../../../org/codehaus/mojo/versions/ordering/VersionComparator.html#VersionComparator">VersionComparator</a> getVersionComparator();
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">     * Returns all the available versions in increasing order.</em>
@@ -274,7 +274,7 @@
 <a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">     *         version is available.</em>
 <a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L269" href="#L269">269</a>     ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope );
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>     ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope );
 <a class="jxr_linenumber" name="L270" href="#L270">270</a> 
 <a class="jxr_linenumber" name="L271" href="#L271">271</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">     * Returns the newest version newer than the specified current version, but within the the specified update scope or</em>
@@ -286,7 +286,7 @@
 <a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment">     *         version is available.</em>
 <a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L281" href="#L281">281</a>     ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope );
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>     ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope );
 <a class="jxr_linenumber" name="L282" href="#L282">282</a> 
 <a class="jxr_linenumber" name="L283" href="#L283">283</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment">     * Returns the all versions newer than the specified current version, but within the the specified update scope.</em>
@@ -296,7 +296,7 @@
 <a class="jxr_linenumber" name="L288" href="#L288">288</a> <em class="jxr_javadoccomment">     * @return the all versions after currentVersion within the specified update scope.</em>
 <a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L291" href="#L291">291</a>     ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope );
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>     ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope );
 <a class="jxr_linenumber" name="L292" href="#L292">292</a> 
 <a class="jxr_linenumber" name="L293" href="#L293">293</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L294" href="#L294">294</a> <em class="jxr_javadoccomment">     * Returns the oldest version newer than the specified current version, but within the the specified update scope or</em>
@@ -309,7 +309,7 @@
 <a class="jxr_linenumber" name="L301" href="#L301">301</a> <em class="jxr_javadoccomment">     *         version is available.</em>
 <a class="jxr_linenumber" name="L302" href="#L302">302</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L304" href="#L304">304</a>     ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>     ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope,
 <a class="jxr_linenumber" name="L305" href="#L305">305</a>                                      <strong class="jxr_keyword">boolean</strong> includeSnapshots );
 <a class="jxr_linenumber" name="L306" href="#L306">306</a> 
 <a class="jxr_linenumber" name="L307" href="#L307">307</a>     <em class="jxr_javadoccomment">/**</em>
@@ -323,7 +323,7 @@
 <a class="jxr_linenumber" name="L315" href="#L315">315</a> <em class="jxr_javadoccomment">     *         version is available.</em>
 <a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L318" href="#L318">318</a>     ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>     ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope,
 <a class="jxr_linenumber" name="L319" href="#L319">319</a>                                      <strong class="jxr_keyword">boolean</strong> includeSnapshots );
 <a class="jxr_linenumber" name="L320" href="#L320">320</a> 
 <a class="jxr_linenumber" name="L321" href="#L321">321</a>     <em class="jxr_javadoccomment">/**</em>
@@ -335,7 +335,7 @@
 <a class="jxr_linenumber" name="L327" href="#L327">327</a> <em class="jxr_javadoccomment">     * @return the all versions after currentVersion within the specified update scope.</em>
 <a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L330" href="#L330">330</a>     ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope,
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>     ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope,
 <a class="jxr_linenumber" name="L331" href="#L331">331</a>                                      <strong class="jxr_keyword">boolean</strong> includeSnapshots );
 <a class="jxr_linenumber" name="L332" href="#L332">332</a> 
 <a class="jxr_linenumber" name="L333" href="#L333">333</a>     <em class="jxr_javadoccomment">/**</em>
@@ -457,7 +457,7 @@
 <a class="jxr_linenumber" name="L449" href="#L449">449</a> <em class="jxr_javadoccomment">     *         version is available.</em>
 <a class="jxr_linenumber" name="L450" href="#L450">450</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L451" href="#L451">451</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L452" href="#L452">452</a>     ArtifactVersion getOldestUpdate( UpdateScope updateScope );
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>     ArtifactVersion getOldestUpdate( <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope );
 <a class="jxr_linenumber" name="L453" href="#L453">453</a> 
 <a class="jxr_linenumber" name="L454" href="#L454">454</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L455" href="#L455">455</a> <em class="jxr_javadoccomment">     * Returns the newest version newer than the specified current version, but within the the specified update scope or</em>
@@ -468,7 +468,7 @@
 <a class="jxr_linenumber" name="L460" href="#L460">460</a> <em class="jxr_javadoccomment">     *         version is available.</em>
 <a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L463" href="#L463">463</a>     ArtifactVersion getNewestUpdate( UpdateScope updateScope );
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>     ArtifactVersion getNewestUpdate( <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope );
 <a class="jxr_linenumber" name="L464" href="#L464">464</a> 
 <a class="jxr_linenumber" name="L465" href="#L465">465</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L466" href="#L466">466</a> <em class="jxr_javadoccomment">     * Returns the all versions newer than the specified current version, but within the the specified update scope.</em>
@@ -477,7 +477,7 @@
 <a class="jxr_linenumber" name="L469" href="#L469">469</a> <em class="jxr_javadoccomment">     * @return the all versions after currentVersion within the specified update scope.</em>
 <a class="jxr_linenumber" name="L470" href="#L470">470</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L471" href="#L471">471</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L472" href="#L472">472</a>     ArtifactVersion[] getAllUpdates( UpdateScope updateScope );
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>     ArtifactVersion[] getAllUpdates( <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope );
 <a class="jxr_linenumber" name="L473" href="#L473">473</a> 
 <a class="jxr_linenumber" name="L474" href="#L474">474</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">     * Returns the oldest version newer than the specified current version, but within the the specified update scope or</em>
@@ -489,7 +489,7 @@
 <a class="jxr_linenumber" name="L481" href="#L481">481</a> <em class="jxr_javadoccomment">     *         version is available.</em>
 <a class="jxr_linenumber" name="L482" href="#L482">482</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L483" href="#L483">483</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L484" href="#L484">484</a>     ArtifactVersion getOldestUpdate( UpdateScope updateScope, <strong class="jxr_keyword">boolean</strong> includeSnapshots );
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>     ArtifactVersion getOldestUpdate( <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope, <strong class="jxr_keyword">boolean</strong> includeSnapshots );
 <a class="jxr_linenumber" name="L485" href="#L485">485</a> 
 <a class="jxr_linenumber" name="L486" href="#L486">486</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L487" href="#L487">487</a> <em class="jxr_javadoccomment">     * Returns the newest version newer than the specified current version, but within the the specified update scope or</em>
@@ -501,7 +501,7 @@
 <a class="jxr_linenumber" name="L493" href="#L493">493</a> <em class="jxr_javadoccomment">     *         version is available.</em>
 <a class="jxr_linenumber" name="L494" href="#L494">494</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L495" href="#L495">495</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L496" href="#L496">496</a>     ArtifactVersion getNewestUpdate( UpdateScope updateScope, <strong class="jxr_keyword">boolean</strong> includeSnapshots );
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>     ArtifactVersion getNewestUpdate( <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope, <strong class="jxr_keyword">boolean</strong> includeSnapshots );
 <a class="jxr_linenumber" name="L497" href="#L497">497</a> 
 <a class="jxr_linenumber" name="L498" href="#L498">498</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L499" href="#L499">499</a> <em class="jxr_javadoccomment">     * Returns the all versions newer than the specified current version, but within the the specified update scope.</em>
@@ -511,7 +511,7 @@
 <a class="jxr_linenumber" name="L503" href="#L503">503</a> <em class="jxr_javadoccomment">     * @return the all versions after currentVersion within the specified update scope.</em>
 <a class="jxr_linenumber" name="L504" href="#L504">504</a> <em class="jxr_javadoccomment">     * @since 1.0-beta-1</em>
 <a class="jxr_linenumber" name="L505" href="#L505">505</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L506" href="#L506">506</a>     ArtifactVersion[] getAllUpdates( UpdateScope updateScope, <strong class="jxr_keyword">boolean</strong> includeSnapshots );
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>     ArtifactVersion[] getAllUpdates( <a name="UpdateScope" href="../../../../../org/codehaus/mojo/versions/api/UpdateScope.html#UpdateScope">UpdateScope</a> updateScope, <strong class="jxr_keyword">boolean</strong> includeSnapshots );
 <a class="jxr_linenumber" name="L507" href="#L507">507</a> 
 <a class="jxr_linenumber" name="L508" href="#L508">508</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L509" href="#L509">509</a> <em class="jxr_javadoccomment">     * Returns the oldest version newer than the current version, but within the the specified update scope or</em>
@@ -581,6 +581,6 @@
 <a class="jxr_linenumber" name="L573" href="#L573">573</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

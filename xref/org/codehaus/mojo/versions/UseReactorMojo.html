@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -49,8 +49,8 @@
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * @since 2.2</em>
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  @Mojo( name = <span class="jxr_string">"use-reactor"</span>, requiresProject = <strong class="jxr_keyword">true</strong>, requiresDirectInvocation = <strong class="jxr_keyword">true</strong>, threadSafe = <strong class="jxr_keyword">true</strong> )
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../org/codehaus/mojo/versions/UseReactorMojo.html">UseReactorMojo</a>
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>      <strong class="jxr_keyword">extends</strong> <a href="../../../../org/codehaus/mojo/versions/AbstractVersionsDependencyUpdaterMojo.html">AbstractVersionsDependencyUpdaterMojo</a>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="UseReactorMojo" href="../../../../org/codehaus/mojo/versions/UseReactorMojo.html#UseReactorMojo">UseReactorMojo</a>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      <strong class="jxr_keyword">extends</strong> <a name="AbstractVersionsDependencyUpdaterMojo" href="../../../../org/codehaus/mojo/versions/AbstractVersionsDependencyUpdaterMojo.html#AbstractVersionsDependencyUpdaterMojo">AbstractVersionsDependencyUpdaterMojo</a>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  {
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>      <em class="jxr_comment">// ------------------------------ METHODS --------------------------</em>
@@ -62,7 +62,7 @@
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment">     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming</em>
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment">     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)</em>
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> update( ModifiedPomXMLEventReader pom )
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> update( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom )
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>          <strong class="jxr_keyword">throws</strong> MojoExecutionException, MojoFailureException, XMLStreamException
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>      {
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>          <strong class="jxr_keyword">try</strong>
@@ -85,7 +85,7 @@
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>          }
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>      }
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> useReactor( ModifiedPomXMLEventReader pom, Collection&lt;Dependency&gt; dependencies )
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> useReactor( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom, Collection&lt;Dependency&gt; dependencies )
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>          <strong class="jxr_keyword">throws</strong> XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>      {
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  
@@ -115,7 +115,7 @@
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>         }
 <a class="jxr_linenumber" name="L108" href="#L108">108</a>     }
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 
-<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> useReactor( ModifiedPomXMLEventReader pom, MavenProject parent )
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> useReactor( <a name="ModifiedPomXMLEventReader" href="../../../../org/codehaus/mojo/versions/rewriting/ModifiedPomXMLEventReader.html#ModifiedPomXMLEventReader">ModifiedPomXMLEventReader</a> pom, MavenProject parent )
 <a class="jxr_linenumber" name="L111" href="#L111">111</a>             <strong class="jxr_keyword">throws</strong> XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
 <a class="jxr_linenumber" name="L112" href="#L112">112</a>     {
 <a class="jxr_linenumber" name="L113" href="#L113">113</a>         <strong class="jxr_keyword">for</strong> ( Object reactorProject : reactorProjects )
@@ -137,6 +137,6 @@
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

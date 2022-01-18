@@ -32,7 +32,7 @@
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment"> * @version $Revision$ $Date$</em>
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  @SuppressWarnings( <span class="jxr_string">"all"</span> )
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Writer.html">RuleXpp3Writer</a>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="RuleXpp3Writer" href="../../../../../../../org/codehaus/mojo/versions/model/io/xpp3/RuleXpp3Writer.html#RuleXpp3Writer">RuleXpp3Writer</a>
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  {
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>        <em class="jxr_comment">//--------------------------/</em>
@@ -71,7 +71,7 @@
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment">     * @param ruleSet</em>
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment">     * @throws java.io.IOException</em>
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> write( Writer writer, RuleSet ruleSet )
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> write( Writer writer, <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> ruleSet )
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>          <strong class="jxr_keyword">throws</strong> java.io.IOException
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>      {
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>          XmlSerializer serializer = <strong class="jxr_keyword">new</strong> MXSerializer();
@@ -90,7 +90,7 @@
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment">     * @param ruleSet</em>
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment">     * @throws java.io.IOException</em>
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> write( OutputStream stream, RuleSet ruleSet )
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> write( OutputStream stream, <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> ruleSet )
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>          <strong class="jxr_keyword">throws</strong> java.io.IOException
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>      {
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>          XmlSerializer serializer = <strong class="jxr_keyword">new</strong> MXSerializer();
@@ -110,7 +110,7 @@
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">     * @param tagName</em>
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">     * @throws java.io.IOException</em>
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L105" href="#L105">105</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeIgnoreVersion( IgnoreVersion ignoreVersion, String tagName, XmlSerializer serializer )
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeIgnoreVersion( <a name="IgnoreVersion" href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html#IgnoreVersion">IgnoreVersion</a> ignoreVersion, String tagName, XmlSerializer serializer )
 <a class="jxr_linenumber" name="L106" href="#L106">106</a>         <strong class="jxr_keyword">throws</strong> java.io.IOException
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>     {
 <a class="jxr_linenumber" name="L108" href="#L108">108</a>         serializer.startTag( NAMESPACE, tagName );
@@ -130,7 +130,7 @@
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">     * @param tagName</em>
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     * @throws java.io.IOException</em>
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L125" href="#L125">125</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeRule( Rule rule, String tagName, XmlSerializer serializer )
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeRule( <a name="Rule" href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html#Rule">Rule</a> rule, String tagName, XmlSerializer serializer )
 <a class="jxr_linenumber" name="L126" href="#L126">126</a>         <strong class="jxr_keyword">throws</strong> java.io.IOException
 <a class="jxr_linenumber" name="L127" href="#L127">127</a>     {
 <a class="jxr_linenumber" name="L128" href="#L128">128</a>         serializer.startTag( NAMESPACE, tagName );
@@ -151,7 +151,7 @@
 <a class="jxr_linenumber" name="L143" href="#L143">143</a>             serializer.startTag( NAMESPACE, <span class="jxr_string">"ignoreVersions"</span> );
 <a class="jxr_linenumber" name="L144" href="#L144">144</a>             <strong class="jxr_keyword">for</strong> ( Iterator iter = rule.getIgnoreVersions().iterator(); iter.hasNext(); )
 <a class="jxr_linenumber" name="L145" href="#L145">145</a>             {
-<a class="jxr_linenumber" name="L146" href="#L146">146</a>                 <a href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html">IgnoreVersion</a> o = (IgnoreVersion) iter.next();
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>                 <a name="IgnoreVersion" href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html#IgnoreVersion">IgnoreVersion</a> o = (<a name="IgnoreVersion" href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html#IgnoreVersion">IgnoreVersion</a>) iter.next();
 <a class="jxr_linenumber" name="L147" href="#L147">147</a>                 writeIgnoreVersion( o, <span class="jxr_string">"ignoreVersion"</span>, serializer );
 <a class="jxr_linenumber" name="L148" href="#L148">148</a>             }
 <a class="jxr_linenumber" name="L149" href="#L149">149</a>             serializer.endTag( NAMESPACE, <span class="jxr_string">"ignoreVersions"</span> );
@@ -167,7 +167,7 @@
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">     * @param tagName</em>
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">     * @throws java.io.IOException</em>
 <a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L162" href="#L162">162</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeRuleSet( RuleSet ruleSet, String tagName, XmlSerializer serializer )
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeRuleSet( <a name="RuleSet" href="../../../../../../../org/codehaus/mojo/versions/model/RuleSet.html#RuleSet">RuleSet</a> ruleSet, String tagName, XmlSerializer serializer )
 <a class="jxr_linenumber" name="L163" href="#L163">163</a>         <strong class="jxr_keyword">throws</strong> java.io.IOException
 <a class="jxr_linenumber" name="L164" href="#L164">164</a>     {
 <a class="jxr_linenumber" name="L165" href="#L165">165</a>         serializer.startTag( NAMESPACE, tagName );
@@ -180,7 +180,7 @@
 <a class="jxr_linenumber" name="L172" href="#L172">172</a>             serializer.startTag( NAMESPACE, <span class="jxr_string">"ignoreVersions"</span> );
 <a class="jxr_linenumber" name="L173" href="#L173">173</a>             <strong class="jxr_keyword">for</strong> ( Iterator iter = ruleSet.getIgnoreVersions().iterator(); iter.hasNext(); )
 <a class="jxr_linenumber" name="L174" href="#L174">174</a>             {
-<a class="jxr_linenumber" name="L175" href="#L175">175</a>                 <a href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html">IgnoreVersion</a> o = (IgnoreVersion) iter.next();
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>                 <a name="IgnoreVersion" href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html#IgnoreVersion">IgnoreVersion</a> o = (<a name="IgnoreVersion" href="../../../../../../../org/codehaus/mojo/versions/model/IgnoreVersion.html#IgnoreVersion">IgnoreVersion</a>) iter.next();
 <a class="jxr_linenumber" name="L176" href="#L176">176</a>                 writeIgnoreVersion( o, <span class="jxr_string">"ignoreVersion"</span>, serializer );
 <a class="jxr_linenumber" name="L177" href="#L177">177</a>             }
 <a class="jxr_linenumber" name="L178" href="#L178">178</a>             serializer.endTag( NAMESPACE, <span class="jxr_string">"ignoreVersions"</span> );
@@ -190,7 +190,7 @@
 <a class="jxr_linenumber" name="L182" href="#L182">182</a>             serializer.startTag( NAMESPACE, <span class="jxr_string">"rules"</span> );
 <a class="jxr_linenumber" name="L183" href="#L183">183</a>             <strong class="jxr_keyword">for</strong> ( Iterator iter = ruleSet.getRules().iterator(); iter.hasNext(); )
 <a class="jxr_linenumber" name="L184" href="#L184">184</a>             {
-<a class="jxr_linenumber" name="L185" href="#L185">185</a>                 <a href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html">Rule</a> o = (Rule) iter.next();
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>                 <a name="Rule" href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html#Rule">Rule</a> o = (<a name="Rule" href="../../../../../../../org/codehaus/mojo/versions/model/Rule.html#Rule">Rule</a>) iter.next();
 <a class="jxr_linenumber" name="L186" href="#L186">186</a>                 writeRule( o, <span class="jxr_string">"rule"</span>, serializer );
 <a class="jxr_linenumber" name="L187" href="#L187">187</a>             }
 <a class="jxr_linenumber" name="L188" href="#L188">188</a>             serializer.endTag( NAMESPACE, <span class="jxr_string">"rules"</span> );
@@ -201,6 +201,6 @@
 <a class="jxr_linenumber" name="L193" href="#L193">193</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

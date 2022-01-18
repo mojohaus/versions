@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -38,14 +38,14 @@
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment"> * @author connollys</em>
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment"> * @since Aug 6, 2009 9:23:13 AM</em>
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html">DefaultArtifactAssociation</a>
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>      <strong class="jxr_keyword">implements</strong> Comparable, <a href="../../../../../org/codehaus/mojo/versions/api/ArtifactAssociation.html">ArtifactAssociation</a>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a name="DefaultArtifactAssociation" href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html#DefaultArtifactAssociation">DefaultArtifactAssociation</a>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>      <strong class="jxr_keyword">implements</strong> <a name="ArtifactAssociation" href="../../../../../org/codehaus/mojo/versions/api/ArtifactAssociation.html#ArtifactAssociation">ArtifactAssociation</a>
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  {
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Artifact artifact;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> usePluginRepositories;
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>      <a href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html">DefaultArtifactAssociation</a>( Artifact artifact, <strong class="jxr_keyword">boolean</strong> usePluginRepositories )
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>      <a name="DefaultArtifactAssociation" href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html#DefaultArtifactAssociation">DefaultArtifactAssociation</a>( Artifact artifact, <strong class="jxr_keyword">boolean</strong> usePluginRepositories )
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>      {
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>          Objects.requireNonNull( artifact );
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>          <strong class="jxr_keyword">this</strong>.artifact = artifact;
@@ -72,7 +72,7 @@
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>          <strong class="jxr_keyword">return</strong> usePluginRepositories;
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>      }
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> compareTo( Object o )
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> compareTo( <a name="ArtifactAssociation" href="../../../../../org/codehaus/mojo/versions/api/ArtifactAssociation.html#ArtifactAssociation">ArtifactAssociation</a> o )
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>      {
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>          <strong class="jxr_keyword">if</strong> ( <strong class="jxr_keyword">this</strong> == o )
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>          {
@@ -82,7 +82,7 @@
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>          {
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>              <strong class="jxr_keyword">return</strong> 1;
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>          }
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>          <a href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html">DefaultArtifactAssociation</a> that = (DefaultArtifactAssociation) o;
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          <a name="DefaultArtifactAssociation" href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html#DefaultArtifactAssociation">DefaultArtifactAssociation</a> that = (<a name="DefaultArtifactAssociation" href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html#DefaultArtifactAssociation">DefaultArtifactAssociation</a>) o;
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>          <strong class="jxr_keyword">int</strong> rv = getGroupId().compareTo( that.getGroupId() );
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>          <strong class="jxr_keyword">if</strong> ( rv != 0 )
@@ -112,7 +112,7 @@
 <a class="jxr_linenumber" name="L104" href="#L104">104</a>             <strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>         }
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 
-<a class="jxr_linenumber" name="L107" href="#L107">107</a>         <a href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html">DefaultArtifactAssociation</a> that = (DefaultArtifactAssociation) o;
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         <a name="DefaultArtifactAssociation" href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html#DefaultArtifactAssociation">DefaultArtifactAssociation</a> that = (<a name="DefaultArtifactAssociation" href="../../../../../org/codehaus/mojo/versions/api/DefaultArtifactAssociation.html#DefaultArtifactAssociation">DefaultArtifactAssociation</a>) o;
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 
 <a class="jxr_linenumber" name="L109" href="#L109">109</a>         <strong class="jxr_keyword">if</strong> ( usePluginRepositories != that.usePluginRepositories )
 <a class="jxr_linenumber" name="L110" href="#L110">110</a>         {
@@ -145,6 +145,6 @@
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

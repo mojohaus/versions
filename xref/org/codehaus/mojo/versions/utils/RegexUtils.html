@@ -17,7 +17,7 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * "License"); you may not use this file except in compliance</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * with the License.  You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing,</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * software distributed under the License is distributed on an</em>
@@ -33,7 +33,7 @@
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment"> * @author Stephen Connolly</em>
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment"> * @since 1.0-alpha-3</em>
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../org/codehaus/mojo/versions/utils/RegexUtils.html">RegexUtils</a>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a name="RegexUtils" href="../../../../../org/codehaus/mojo/versions/utils/RegexUtils.html#RegexUtils">RegexUtils</a>
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  {
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment">     * The end of a regex literal sequence.</em>
@@ -56,7 +56,7 @@
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String REGEX_QUOTE_END_ESCAPED = REGEX_QUOTE_END + '&#92;&#92;' + REGEX_QUOTE_END + REGEX_QUOTE_START;
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>      <strong class="jxr_keyword">private</strong> <a href="../../../../../org/codehaus/mojo/versions/utils/RegexUtils.html">RegexUtils</a>()
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>      <strong class="jxr_keyword">private</strong> <a name="RegexUtils" href="../../../../../org/codehaus/mojo/versions/utils/RegexUtils.html#RegexUtils">RegexUtils</a>()
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>      {
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>          <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalAccessError( <span class="jxr_string">"Utility classes should never be instantiated"</span> );
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>      }
@@ -87,7 +87,7 @@
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>          <strong class="jxr_keyword">do</strong>
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>          {
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>              <em class="jxr_comment">// we are safe from pos to i</em>
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>              sb.append( s.substring( pos, i ) );
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>              sb.append( s, pos, i );
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>              <em class="jxr_comment">// now escape-escape</em>
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>              sb.append( REGEX_QUOTE_END_ESCAPED );
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>              <em class="jxr_comment">// move the working start</em>
@@ -96,7 +96,7 @@
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>          }
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>          <strong class="jxr_keyword">while</strong> ( i != -1 );
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>          sb.append( s.substring( pos, s.length() ) );
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>          sb.append( s.substring( pos ) );
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>          sb.append( REGEX_QUOTE_END );
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>  
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>          <strong class="jxr_keyword">return</strong> sb.toString();
@@ -180,6 +180,6 @@
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2008&#x2013;2020 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>
