@@ -97,16 +97,18 @@ public abstract class AbstractVersionsReportRenderer
 
     protected void renderWarningIcon()
     {
-        sink.figure();
+        // a rendering regression was fixed here,
+        // putting figure back will reintroduce the regression.
+        // https://github.com/mojohaus/versions-maven-plugin/issues/536
         sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
     }
 
     protected void renderSuccessIcon()
     {
-        sink.figure();
+        // a rendering regression was fixed here,
+        // putting figure back will reintroduce the regression.
+        // https://github.com/mojohaus/versions-maven-plugin/issues/536
         sink.figureGraphics( "images/icon_success_sml.gif" );
-        sink.figure_();
     }
 
     protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
