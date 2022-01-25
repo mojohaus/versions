@@ -31,6 +31,7 @@ import org.codehaus.mojo.versions.utils.PropertiesVersionsFileReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -50,6 +51,7 @@ public class SetPropertyMojo
 
     /**
      * A property to update.
+     * You can also specify multiple property names separated by "," which are all set to the same new version.
      */
     @Parameter( property = "property" )
     private String property = null;
@@ -103,9 +105,13 @@ public class SetPropertyMojo
             properties = reader.getProperties();
         } else {
             getLog().debug( "Reading properties and versions to update from property and newVersion " );
-            Property propertyConfig = new Property(property);
-            propertyConfig.setVersion(newVersion);
-            propertiesConfig = new Property[] { propertyConfig };
+            propertiesConfig = Arrays.stream(StringUtils.split(property, ","))
+                    .map(prp -> {
+                        Property propertyConfig = new Property(prp);
+                        propertyConfig.setVersion(newVersion);
+                        return propertyConfig;
+                    })
+                    .toArray(size -> new Property[size]);
             properties = property;
         }
         update(pom, propertiesConfig, properties);
