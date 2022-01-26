@@ -36,11 +36,17 @@ import org.apache.maven.lifecycle.Lifecycle;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.mapping.LifecycleMapping;
+import org.apache.maven.model.InputLocation;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Prerequisites;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.building.DefaultModelBuildingRequest;
+import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.model.building.ModelProblem.Severity;
+import org.apache.maven.model.building.ModelProblemCollector;
+import org.apache.maven.model.interpolation.ModelInterpolator;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.plugin.InvalidPluginException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -56,8 +62,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.DefaultProjectBuilderConfiguration;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.project.interpolation.ModelInterpolationException;
-import org.apache.maven.project.interpolation.ModelInterpolator;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -716,35 +720,29 @@ public class DisplayPluginUpdatesMojo
             StringWriter writer = new StringWriter();
             boolean havePom = false;
             Model interpolatedModel;
+
+            Model originalModel = parentProject.getOriginalModel();
+            if ( originalModel == null )
+            {
+                getLog().warn( "project.getOriginalModel()==null for  " + parentProject.getGroupId() + ":"
+                    + parentProject.getArtifactId() + ":" + parentProject.getVersion()
+                    + " is null, substituting project.getModel()" );
+                originalModel = parentProject.getModel();
+            }
             try
             {
-                Model originalModel = parentProject.getOriginalModel();
-                if ( originalModel == null )
-                {
-                    getLog().warn( "project.getOriginalModel()==null for  " + parentProject.getGroupId() + ":"
-                        + parentProject.getArtifactId() + ":" + parentProject.getVersion()
-                        + " is null, substituting project.getModel()" );
-                    originalModel = parentProject.getModel();
-                }
-                try
-                {
-                    new MavenXpp3Writer().write( writer, originalModel );
-                    writer.close();
-                    havePom = true;
-                }
-                catch ( IOException e )
-                {
-                    // ignore
-                }
-                interpolatedModel =
-                    modelInterpolator.interpolate( originalModel, null,
-                                                   new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
-                                                   false );
+                new MavenXpp3Writer().write( writer, originalModel );
+                writer.close();
+                havePom = true;
             }
-            catch ( ModelInterpolationException e )
+            catch ( IOException e )
             {
-                throw new MojoExecutionException( e.getMessage(), e );
+                // ignore
             }
+            ModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest();
+            modelBuildingRequest.setUserProperties(getProject().getProperties());
+            interpolatedModel = modelInterpolator.interpolateModel( originalModel, null,
+                    modelBuildingRequest, new IgnoringModelProblemCollector() );
             if ( havePom )
             {
                 try
@@ -1477,18 +1475,11 @@ public class DisplayPluginUpdatesMojo
 
         debugVersionMap( "final aggregate version map", excludePluginManagement );
 
-        Model originalModel;
-        try
-        {
-            originalModel =
-                modelInterpolator.interpolate( getProject().getOriginalModel(), getProject().getBasedir(),
-                                               new DefaultProjectBuilderConfiguration().setExecutionProperties( getProject().getProperties() ),
-                                               true );
-        }
-        catch ( ModelInterpolationException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+        ModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest();
+        modelBuildingRequest.setUserProperties(getProject().getProperties());
+        Model originalModel = modelInterpolator.interpolateModel( getProject().getOriginalModel(), getProject().getBasedir(),
+                modelBuildingRequest, new IgnoringModelProblemCollector() );
+
         try
         {
             addProjectPlugins( plugins, originalModel.getBuild().getPluginManagement().getPlugins(),
@@ -1800,4 +1791,12 @@ public class DisplayPluginUpdatesMojo
     {
         return a.compareTo( b );
     }
+
+    private static class IgnoringModelProblemCollector implements ModelProblemCollector {
+        @Override
+        public void add(Severity severity, String message, InputLocation location, Exception cause) {
+            // ignore
+        }
+    }
+
 }
