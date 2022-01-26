@@ -103,7 +103,7 @@ public class SetPropertyMojo
             }
             propertiesConfig = reader.getPropertiesConfig();
             properties = reader.getProperties();
-        } else {
+        } else if (!StringUtils.isEmpty(property)) {
             getLog().debug( "Reading properties and versions to update from property and newVersion " );
             propertiesConfig = Arrays.stream(StringUtils.split(property, ","))
                     .map(prp -> {
@@ -113,6 +113,8 @@ public class SetPropertyMojo
                     })
                     .toArray(size -> new Property[size]);
             properties = property;
+        } else {
+            throw new MojoExecutionException("Please provide either 'property' or 'propertiesVersionsFile' parameter.");
         }
         update(pom, propertiesConfig, properties);
     }
@@ -140,7 +142,7 @@ public class SetPropertyMojo
         if (!StringUtils.isEmpty(property)) {
             getLog().warn("-Dproperty provided but will be ignored as -DpropertiesVersionsFile is used");
         }
-        if (!StringUtils.isEmpty(property)) {
+        if (!StringUtils.isEmpty(newVersion)) {
             getLog().warn("-DnewVersion provided but will be ignored as -DpropertiesVersionsFile is used");
         }
     }
