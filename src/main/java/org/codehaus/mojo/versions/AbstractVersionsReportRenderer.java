@@ -97,16 +97,12 @@ public abstract class AbstractVersionsReportRenderer
 
     protected void renderWarningIcon()
     {
-        sink.figure();
         sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
     }
 
     protected void renderSuccessIcon()
     {
-        sink.figure();
         sink.figureGraphics( "images/icon_success_sml.gif" );
-        sink.figure_();
     }
 
     protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
