@@ -122,6 +122,16 @@ public class ArtifactVersions
         return true;
     }
 
+    public static boolean isVersionInRange( ArtifactVersion[] versions, VersionRange range )
+    {
+        boolean inRange = false;
+        for (int i =0; i <versions.length; i++)
+        {
+            inRange |= ArtifactVersions.isVersionInRange(versions[i],range);
+        }
+        return inRange;
+    }
+
     /**
      * Returns the artifact who's version information we are holding.
      *

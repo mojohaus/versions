@@ -278,7 +278,7 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope );
+    ArtifactVersion[] getNewestUpdate( ArtifactVersion currentVersion, UpdateScope[] updateScope );
 
     /**
      * Returns the all versions newer than the specified current version, but within the the specified update scope.
@@ -315,7 +315,7 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
+    ArtifactVersion[] getNewestUpdate( ArtifactVersion currentVersion, UpdateScope[] updateScope,
                                      boolean includeSnapshots );
 
     /**
@@ -460,7 +460,7 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( UpdateScope updateScope );
+    ArtifactVersion[] getNewestUpdate( UpdateScope[] updateScope );
 
     /**
      * Returns the all versions newer than the specified current version, but within the the specified update scope.
@@ -493,7 +493,7 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( UpdateScope updateScope, boolean includeSnapshots );
+    ArtifactVersion[] getNewestUpdate( UpdateScope[] updateScope, boolean includeSnapshots );
 
     /**
      * Returns the all versions newer than the specified current version, but within the the specified update scope.

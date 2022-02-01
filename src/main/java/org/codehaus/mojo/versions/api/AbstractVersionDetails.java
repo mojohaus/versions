@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -351,7 +353,7 @@ public abstract class AbstractVersionDetails
         return getOldestUpdate( currentVersion, updateScope, isIncludeSnapshots() );
     }
 
-    public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
+    public final ArtifactVersion[] getNewestUpdate( ArtifactVersion currentVersion, UpdateScope[] updateScope )
     {
         return getNewestUpdate( currentVersion, updateScope, isIncludeSnapshots() );
     }
@@ -382,10 +384,18 @@ public abstract class AbstractVersionDetails
         return updateScope.getOldestUpdate( this, currentVersion, includeSnapshots );
     }
 
-    public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
+    public final ArtifactVersion[] getNewestUpdate( ArtifactVersion currentVersion, UpdateScope[] updateScopes,
                                                   boolean includeSnapshots )
     {
-        return updateScope.getNewestUpdate( this, currentVersion, includeSnapshots );
+        List<ArtifactVersion> artifactVersions = new ArrayList<>();
+        for (UpdateScope updateScope: updateScopes)
+        {
+            ArtifactVersion newestUpdate = updateScope.getNewestUpdate(this, currentVersion, includeSnapshots);
+            if (newestUpdate != null) {
+                artifactVersions.add(newestUpdate);
+            }
+        }
+        return artifactVersions.isEmpty() ? null : artifactVersions.toArray(new ArtifactVersion[0]);
     }
 
     public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope,
@@ -417,7 +427,7 @@ public abstract class AbstractVersionDetails
         return getOldestUpdate( updateScope, isIncludeSnapshots() );
     }
 
-    public final ArtifactVersion getNewestUpdate( UpdateScope updateScope )
+    public final ArtifactVersion[] getNewestUpdate( UpdateScope[] updateScope )
     {
         return getNewestUpdate( updateScope, isIncludeSnapshots() );
     }
@@ -436,7 +446,7 @@ public abstract class AbstractVersionDetails
         return null;
     }
 
-    public final ArtifactVersion getNewestUpdate( UpdateScope updateScope, boolean includeSnapshots )
+    public final ArtifactVersion[] getNewestUpdate( UpdateScope[] updateScope, boolean includeSnapshots )
     {
         if ( isCurrentVersionDefined() )
         {

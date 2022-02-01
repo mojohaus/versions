@@ -378,31 +378,27 @@ public class DisplayDependencyUpdatesMojo
         }
     }
 
-    private UpdateScope calculateUpdateScope()
+    private UpdateScope[] calculateUpdateScope()
     {
-        UpdateScope result = UpdateScope.ANY;
+        List<UpdateScope> scopes = new ArrayList<>();
         if ( !allowAnyUpdates )
         {
             if ( allowMajorUpdates )
             {
-                result = UpdateScope.MAJOR;
+                scopes.add(UpdateScope.MAJOR);
             }
-            else
+            if ( allowMinorUpdates )
             {
-                if ( allowMinorUpdates )
-                {
-                    result = UpdateScope.MINOR;
-                }
-                else
-                {
-                    if ( allowIncrementalUpdates )
-                    {
-                        result = UpdateScope.INCREMENTAL;
-                    }
-                }
+                scopes.add(UpdateScope.MINOR);
             }
+            if ( allowIncrementalUpdates )
+            {
+                scopes.add(UpdateScope.INCREMENTAL);
+            }
+        } else {
+            scopes.add(UpdateScope.ANY);
         }
-        return result;
+        return scopes.toArray(new UpdateScope[0]);
     }
 
     private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
@@ -413,9 +409,8 @@ public class DisplayDependencyUpdatesMojo
         while ( i.hasNext() )
         {
             ArtifactVersions versions = (ArtifactVersions) i.next();
-            String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
             final String current;
-            ArtifactVersion latest;
+            ArtifactVersion[] latest;
             if ( versions.isCurrentVersionDefined() )
             {
                 current = versions.getCurrentVersion().toString();
@@ -434,7 +429,8 @@ public class DisplayDependencyUpdatesMojo
                     latest = null;
                 }
             }
-            String right = " " + ( latest == null ? current : current + " -> " + latest );
+            String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
+            String right = " " + ( latest == null ? current : current + " -> " + (latest.length > 0?printLatest(latest):latest[0]) );
             List<String> t = latest == null ? usingCurrent : withUpdates;
             if ( right.length() + left.length() + 3 > INFO_PAD_SIZE )
             {
@@ -489,6 +485,21 @@ public class DisplayDependencyUpdatesMojo
             }
             logLine( false, "" );
         }
+    }
+
+    /**
+     * This array can have 1 to 3 elements in that order: MAJOR(allowMajorUpdates==true), MINOR(allowMinorUpdates==true), INCREMENT(allowIncrementalUpdates==true) (@see calculateUpdateScope()).
+     * the index = 0 have the preference
+     * @param latest
+     * @return
+     */
+    private String printLatest(ArtifactVersion[] latest) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < latest.length; i++) {
+            stringBuilder.append(latest[i]).append("|");
+        }
+
+        return stringBuilder.deleteCharAt(stringBuilder.lastIndexOf("|")).toString();
     }
 
     /**
