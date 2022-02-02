@@ -435,14 +435,22 @@ public abstract class AbstractVersionsReportRenderer
                 {
                     sink.lineBreak();
                 }
+                ArtifactVersion[] newestUpdateSubIncremental = details.getNewestUpdate(new UpdateScope[] { UpdateScope.SUBINCREMENTAL });
+
+                ArtifactVersion[] newestUpdateIncremental = details.getNewestUpdate(new UpdateScope[] { UpdateScope.INCREMENTAL });
+
+                ArtifactVersion[] newestUpdateMinor = details.getNewestUpdate(new UpdateScope[] { UpdateScope.MINOR });
+
+                ArtifactVersion[] newestUpdateMajor = details.getNewestUpdate(new UpdateScope[] { UpdateScope.MAJOR });
+
                 boolean bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
-                    || equals( versions[i], details.getNewestUpdate( new UpdateScope[] {UpdateScope.SUBINCREMENTAL })[0] )
+                    || equals( versions[i], newestUpdateSubIncremental!= null? newestUpdateSubIncremental[0]: null )
                     || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )
-                    || equals( versions[i], details.getNewestUpdate( new UpdateScope[] {UpdateScope.INCREMENTAL })[0] )
+                    || equals( versions[i], newestUpdateIncremental != null? newestUpdateIncremental[0]: null )
                     || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )
-                    || equals( versions[i], details.getNewestUpdate( new UpdateScope[] {UpdateScope.MINOR })[0] )
+                    || equals( versions[i], newestUpdateMinor != null? newestUpdateMinor[0]: null )
                     || equals( versions[i], details.getOldestUpdate( UpdateScope.MAJOR ) )
-                    || equals( versions[i], details.getNewestUpdate( new UpdateScope[] {UpdateScope.MAJOR })[0] );
+                    || equals( versions[i], newestUpdateMajor != null? newestUpdateMajor[0]: null );
                 if ( bold )
                 {
                     safeBold();
@@ -457,7 +465,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.nextVersion" ) );
                     }
-                    else if ( equals( versions[i], details.getNewestUpdate( new UpdateScope[] {UpdateScope.SUBINCREMENTAL} )[0] ) )
+                    else if ( equals( versions[i], newestUpdateSubIncremental!= null? newestUpdateSubIncremental[0]: null ) )
                     {
                         sink.text( getText( "report.latestSubIncremental" ) );
                     }
@@ -465,7 +473,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.nextIncremental" ) );
                     }
-                    else if ( equals( versions[i], details.getNewestUpdate( new UpdateScope[] {UpdateScope.INCREMENTAL} )[0] ) )
+                    else if ( equals( versions[i], newestUpdateIncremental != null? newestUpdateIncremental[0]: null ) )
                     {
                         sink.text( getText( "report.latestIncremental" ) );
                     }
@@ -473,7 +481,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.nextMinor" ) );
                     }
-                    else if ( equals( versions[i], details.getNewestUpdate( new UpdateScope[] {UpdateScope.MINOR} )[0] ) )
+                    else if ( equals( versions[i],newestUpdateMinor != null? newestUpdateMinor[0]: null ) )
                     {
                         sink.text( getText( "report.latestMinor" ) );
                     }
@@ -481,7 +489,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.nextMajor" ) );
                     }
-                    else if ( equals( versions[i], details.getNewestUpdate( new UpdateScope[] {UpdateScope.MAJOR} )[0] ) )
+                    else if ( equals( versions[i], newestUpdateMajor != null? newestUpdateMajor[0]: null ) )
                     {
                         sink.text( getText( "report.latestMajor" ) );
                     }
@@ -721,14 +729,23 @@ public abstract class AbstractVersionsReportRenderer
                     sink.lineBreak();
                 }
                 boolean allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );
+
+                ArtifactVersion[] newestUpdateSubIncremental = versions.getNewestUpdate(new UpdateScope[] { UpdateScope.SUBINCREMENTAL });
+
+                ArtifactVersion[] newestUpdateIncremental = versions.getNewestUpdate(new UpdateScope[] { UpdateScope.INCREMENTAL });
+
+                ArtifactVersion[] newestUpdateMinor = versions.getNewestUpdate(new UpdateScope[] { UpdateScope.MINOR });
+
+                ArtifactVersion[] newestUpdateMajor = versions.getNewestUpdate(new UpdateScope[] { UpdateScope.MAJOR });
+
                 boolean bold = equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( new UpdateScope[] {UpdateScope.SUBINCREMENTAL })[0] )
+                    || equals( artifactVersions[i], newestUpdateSubIncremental!= null?newestUpdateSubIncremental[0]:null )
                     || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( new UpdateScope[] {UpdateScope.INCREMENTAL} )[0] )
+                    || equals( artifactVersions[i], newestUpdateIncremental!=null?newestUpdateIncremental[0]:null )
                     || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( new UpdateScope[] {UpdateScope.MINOR })[0] )
+                    || equals( artifactVersions[i], newestUpdateMinor!= null? newestUpdateMinor[0]: null )
                     || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MAJOR ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( new UpdateScope[] {UpdateScope.MAJOR })[0] );
+                    || equals( artifactVersions[i], newestUpdateMajor!= null ? newestUpdateMajor[0]: null );
                 if ( !allowed )
                 {
                     sink.text( "* " );
@@ -751,7 +768,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.nextVersion" ) );
                     }
-                    else if ( equals( artifactVersions[i], versions.getNewestUpdate( new UpdateScope[] {UpdateScope.SUBINCREMENTAL} )[0] ) )
+                    else if ( equals( artifactVersions[i], newestUpdateSubIncremental!= null? newestUpdateSubIncremental[0]:null ) )
                     {
                         sink.text( getText( "report.latestSubIncremental" ) );
                     }
@@ -759,7 +776,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.nextIncremental" ) );
                     }
-                    else if ( equals( artifactVersions[i], versions.getNewestUpdate( new UpdateScope[] {UpdateScope.INCREMENTAL} )[0] ) )
+                    else if ( equals( artifactVersions[i], newestUpdateIncremental!= null? newestUpdateIncremental[0]:null ) )
                     {
                         sink.text( getText( "report.latestIncremental" ) );
                     }
@@ -767,7 +784,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.nextMinor" ) );
                     }
-                    else if ( equals( artifactVersions[i], versions.getNewestUpdate(new UpdateScope[] { UpdateScope.MINOR} )[0] ) )
+                    else if ( equals( artifactVersions[i],newestUpdateMinor!= null? newestUpdateMinor[0]: null ) )
                     {
                         sink.text( getText( "report.latestMinor" ) );
                     }
@@ -775,7 +792,7 @@ public abstract class AbstractVersionsReportRenderer
                     {
                         sink.text( getText( "report.nextMajor" ) );
                     }
-                    else if ( equals( artifactVersions[i], versions.getNewestUpdate( new UpdateScope[] {UpdateScope.MAJOR} )[0] ) )
+                    else if ( equals( artifactVersions[i], newestUpdateMajor!= null ? newestUpdateMajor[0]: null ) )
                     {
                         sink.text( getText( "report.latestMajor" ) );
                     }

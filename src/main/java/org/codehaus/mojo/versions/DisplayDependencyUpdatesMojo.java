@@ -430,7 +430,12 @@ public class DisplayDependencyUpdatesMojo
                 }
             }
             String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
-            String right = " " + ( latest == null ? current : current + " -> " + (latest.length > 0?printLatest(latest):latest[0]) );
+            /*
+             * `latest` can have 1 to 3 elements in that order: MAJOR(if allowMajorUpdates==true),
+             * MINOR(if allowMinorUpdates==true) and INCREMENT(if allowIncrementalUpdates==true) (@see calculateUpdateScope()).
+             * the index = 0 have the preference
+             */
+            String right = " " + ( latest == null ? current : current + " -> " + latest[0] );
             List<String> t = latest == null ? usingCurrent : withUpdates;
             if ( right.length() + left.length() + 3 > INFO_PAD_SIZE )
             {
@@ -485,21 +490,6 @@ public class DisplayDependencyUpdatesMojo
             }
             logLine( false, "" );
         }
-    }
-
-    /**
-     * This array can have 1 to 3 elements in that order: MAJOR(allowMajorUpdates==true), MINOR(allowMinorUpdates==true), INCREMENT(allowIncrementalUpdates==true) (@see calculateUpdateScope()).
-     * the index = 0 have the preference
-     * @param latest
-     * @return
-     */
-    private String printLatest(ArtifactVersion[] latest) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < latest.length; i++) {
-            stringBuilder.append(latest[i]).append("|");
-        }
-
-        return stringBuilder.deleteCharAt(stringBuilder.lastIndexOf("|")).toString();
     }
 
     /**

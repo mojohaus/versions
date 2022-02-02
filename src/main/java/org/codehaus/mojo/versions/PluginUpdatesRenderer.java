@@ -297,8 +297,8 @@ public class PluginUpdatesRenderer
             safeBold();
             ArtifactVersion[] newestUpdate = details.getArtifactVersions()
                     .getNewestUpdate(new UpdateScope[] { UpdateScope.SUBINCREMENTAL });
-            for (int i = 0; i < newestUpdate.length; i++) {
-                sink.text( newestUpdate[i].toString() );
+            for (ArtifactVersion artifactVersion : newestUpdate) {
+                sink.text(artifactVersion.toString());
             }
             safeBold_();
         }
@@ -310,8 +310,8 @@ public class PluginUpdatesRenderer
             safeBold();
             ArtifactVersion[] newestUpdate = details.getArtifactVersions()
                     .getNewestUpdate(new UpdateScope[] { UpdateScope.INCREMENTAL });
-            for (int i = 0; i < newestUpdate.length; i++) {
-                sink.text( newestUpdate[i].toString() );
+            for (ArtifactVersion artifactVersion : newestUpdate) {
+                sink.text(artifactVersion.toString());
             }
             safeBold_();
         }
@@ -323,8 +323,8 @@ public class PluginUpdatesRenderer
             safeBold();
             ArtifactVersion[] newestUpdate = details.getArtifactVersions()
                     .getNewestUpdate(new UpdateScope[] { UpdateScope.MINOR });
-            for (int i = 0; i < newestUpdate.length; i++) {
-                sink.text( newestUpdate[i].toString() );
+            for (ArtifactVersion artifactVersion : newestUpdate) {
+                sink.text(artifactVersion.toString());
             }
             safeBold_();
         }
@@ -336,8 +336,8 @@ public class PluginUpdatesRenderer
             safeBold();
             ArtifactVersion[] newestUpdate = details.getArtifactVersions()
                     .getNewestUpdate(new UpdateScope[] { UpdateScope.MAJOR });
-            for (int i = 0; i < newestUpdate.length; i++) {
-                sink.text( newestUpdate[i].toString() );
+            for (ArtifactVersion artifactVersion : newestUpdate) {
+                sink.text(artifactVersion.toString());
             }
             safeBold_();
         }
@@ -445,15 +445,28 @@ public class PluginUpdatesRenderer
                 {
                     sink.lineBreak();
                 }
+
+                ArtifactVersion[] newestUpdateSubIncremental = details.getArtifactVersions()
+                        .getNewestUpdate(new UpdateScope[] { UpdateScope.SUBINCREMENTAL });
+
+                ArtifactVersion[] newestUpdateIncremental = details.getArtifactVersions()
+                        .getNewestUpdate(new UpdateScope[] { UpdateScope.INCREMENTAL });
+
+                ArtifactVersion[] newestUpdateMinor = details.getArtifactVersions()
+                        .getNewestUpdate(new UpdateScope[] { UpdateScope.MINOR });
+
+                ArtifactVersion[] newestUpdateMajor = details.getArtifactVersions()
+                        .getNewestUpdate(new UpdateScope[] { UpdateScope.MAJOR });
+
                 boolean bold = equals( versions[i],
                                        details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
-                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate(new UpdateScope[] { UpdateScope.SUBINCREMENTAL })[0] )
+                    || equals( versions[i], newestUpdateSubIncremental != null ? newestUpdateSubIncremental[0]: null )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate(UpdateScope.INCREMENTAL ) )
-                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate(new UpdateScope[] { UpdateScope.INCREMENTAL })[0] )
+                    || equals( versions[i], newestUpdateIncremental != null ? newestUpdateIncremental[0]: null )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate(UpdateScope.MINOR ) )
-                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate(new UpdateScope[] { UpdateScope.MINOR} )[0] )
+                    || equals( versions[i], newestUpdateMinor != null ? newestUpdateMinor[0]: null )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate(UpdateScope.MAJOR ) )
-                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate(new UpdateScope[] { UpdateScope.MAJOR })[0] );
+                    || equals( versions[i], newestUpdateMajor != null ? newestUpdateMajor[0]: null );
                 if ( bold )
                 {
                     safeBold();
@@ -470,7 +483,7 @@ public class PluginUpdatesRenderer
                         sink.text( getText( "report.nextVersion" ) );
                     }
                     else if ( equals( versions[i],
-                                      details.getArtifactVersions().getNewestUpdate( new UpdateScope[] { UpdateScope.SUBINCREMENTAL} )[0] ) )
+                                      newestUpdateSubIncremental != null? newestUpdateSubIncremental[0]:null ) )
                     {
                         sink.text( getText( "report.latestSubIncremental" ) );
                     }
@@ -480,7 +493,7 @@ public class PluginUpdatesRenderer
                         sink.text( getText( "report.nextIncremental" ) );
                     }
                     else if ( equals( versions[i],
-                                      details.getArtifactVersions().getNewestUpdate(new UpdateScope[] {  UpdateScope.INCREMENTAL })[0] ) )
+                                      newestUpdateIncremental != null ? newestUpdateIncremental[0]: null ) )
                     {
                         sink.text( getText( "report.latestIncremental" ) );
                     }
@@ -490,7 +503,7 @@ public class PluginUpdatesRenderer
                         sink.text( getText( "report.nextMinor" ) );
                     }
                     else if ( equals( versions[i],
-                                      details.getArtifactVersions().getNewestUpdate( new UpdateScope[] { UpdateScope.MINOR} )[0] ) )
+                                      newestUpdateMinor != null? newestUpdateMinor[0]: null ) )
                     {
                         sink.text( getText( "report.latestMinor" ) );
                     }
@@ -500,7 +513,7 @@ public class PluginUpdatesRenderer
                         sink.text( getText( "report.nextMajor" ) );
                     }
                     else if ( equals( versions[i],
-                                      details.getArtifactVersions().getNewestUpdate( new UpdateScope[] { UpdateScope.MAJOR })[0] ) )
+                                      newestUpdateMajor != null ? newestUpdateMajor[0]: null ) )
                     {
                         sink.text( getText( "report.latestMajor" ) );
                     }
