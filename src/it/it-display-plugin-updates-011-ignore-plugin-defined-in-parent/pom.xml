@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>localhost</groupId>
+    <artifactId>it-101-parent</artifactId>
+    <version>1.0</version>
+    <relativePath>parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-101</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <name>display-plugin-updates</name>
+
+  <description>Ignore plugin used in this POM without version, which has a version defined in a parent POM.</description>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>localhost</groupId>
+          <artifactId>dummy-maven-plugin</artifactId>
+        </plugin>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
