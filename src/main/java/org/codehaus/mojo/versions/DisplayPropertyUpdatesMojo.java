@@ -148,7 +148,7 @@ public class DisplayPropertyUpdatesMojo
                 buf.append( property.getName() );
                 buf.append( "} " );
                 final String newVersion = winner.toString();
-                int padding = INFO_PAD_SIZE - currentVersion.length() - newVersion.length() - 4;
+                int padding = INFO_PAD_SIZE - currentVersion.length() - newVersion.length() - 4 + getDisplayTerminalWidthOffset();
                 while ( buf.length() < padding )
                 {
                     buf.append( '.' );
@@ -165,7 +165,7 @@ public class DisplayPropertyUpdatesMojo
                 buf.append( "${" );
                 buf.append( property.getName() );
                 buf.append( "} " );
-                int padding = INFO_PAD_SIZE - currentVersion.length();
+                int padding = INFO_PAD_SIZE - currentVersion.length() + getDisplayTerminalWidthOffset();
                 while ( buf.length() < padding )
                 {
                     buf.append( '.' );
