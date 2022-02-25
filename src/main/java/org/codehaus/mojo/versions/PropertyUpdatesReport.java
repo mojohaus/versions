@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -43,6 +44,14 @@ import org.codehaus.mojo.versions.utils.PropertyComparator;
 public class PropertyUpdatesReport
     extends AbstractVersionsReport
 {
+
+    /**
+     * Report formats (html and/or xml). HTML by default.
+     *
+     * @since 2.9.1
+     */
+    @Parameter( property = "propertyUpdatesReportFormats", defaultValue = "html" )
+    private String[] formats;
 
     /**
      * Any restrictions that apply to specific properties.
@@ -110,9 +119,31 @@ public class PropertyUpdatesReport
         {
             throw new MavenReportException( e.getMessage(), e );
         }
-        PropertyUpdatesRenderer renderer =
-            new PropertyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, updateSet );
-        renderer.render();
+
+        for ( String format : formats )
+        {
+            if ( "html".equals( format ) )
+            {
+                PropertyUpdatesRenderer renderer =
+                    new PropertyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, updateSet );
+                renderer.render();
+            }
+            else if ( "xml".equals( format ) )
+            {
+                File outputDir = new File(getProject().getBuild().getDirectory());
+                if (!outputDir.exists())
+                {
+                    outputDir.mkdirs();
+                }
+                String outputFile = outputDir.getAbsolutePath() + File.separator + getOutputName() + ".xml";
+                PropertyUpdatesXmlRenderer renderer = new PropertyUpdatesXmlRenderer(updateSet, outputFile);
+                renderer.render();
+            }
+            else
+            {
+                throw new MavenReportException("Unsupported report format: " + format);
+            }
+        }
     }
 
     /**
