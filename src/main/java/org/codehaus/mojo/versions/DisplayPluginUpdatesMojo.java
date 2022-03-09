@@ -404,6 +404,13 @@ public class DisplayPluginUpdatesMojo
             {
                 version = parentPlugins.get( coords );
             }
+
+            boolean versionSpecifiedInCurrentPom = pluginsWithVersionsSpecified.contains( coords );
+            if ( !versionSpecifiedInCurrentPom && parentPlugins.containsKey( coords ) ) {
+                getLog().debug( "Skip " + coords + ", version " + version + " is defined in parent POM." );
+                continue;
+            }
+
             getLog().debug( "Checking " + coords + " for updates newer than " + version );
             String effectiveVersion = version;
 
@@ -515,7 +522,7 @@ public class DisplayPluginUpdatesMojo
 
             String newVersion;
 
-            if ( version == null && pluginsWithVersionsSpecified.contains( coords ) )
+            if ( version == null && versionSpecifiedInCurrentPom )
             {
                 // Hack ALERT!
                 //
@@ -530,8 +537,8 @@ public class DisplayPluginUpdatesMojo
             getLog().debug( "[" + coords + "].version=" + version );
             getLog().debug( "[" + coords + "].artifactVersion=" + artifactVersion );
             getLog().debug( "[" + coords + "].effectiveVersion=" + effectiveVersion );
-            getLog().debug( "[" + coords + "].specified=" + pluginsWithVersionsSpecified.contains( coords ) );
-            if ( version == null || !pluginsWithVersionsSpecified.contains( coords ) )
+            getLog().debug( "[" + coords + "].specified=" + versionSpecifiedInCurrentPom );
+            if ( version == null || !versionSpecifiedInCurrentPom )
             {
                 version = superPomPluginManagement.get( coords );
                 getLog().debug( "[" + coords + "].superPom.version=" + version );
