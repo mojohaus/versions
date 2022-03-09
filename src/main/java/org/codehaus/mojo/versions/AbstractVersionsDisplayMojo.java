@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.codehaus.plexus.util.FileUtils;
 
 /**
@@ -65,6 +66,7 @@ public abstract class AbstractVersionsDisplayMojo
 
     /**
      * Terminal width which should be used to format the padding of the version info list output.
+     * If set to -1 the terminal width is detected automatically (may not be supported with all terminals).
      *
      * @since 2.10.0
      */
@@ -165,6 +167,13 @@ public abstract class AbstractVersionsDisplayMojo
      * @return Offset of the configured display terminal width compared to the default with of 80.
      */
     protected int getDisplayTerminalWidthOffset() {
+        if (this.displayTerminalWidth == -1) {
+            this.displayTerminalWidth = MessageUtils.getTerminalWidth();
+            // getTerminalWidth may return -1 if JANSI is not available
+            if (this.displayTerminalWidth == -1) {
+                this.displayTerminalWidth = DEFAULT_DISPLAY_TERMINAL_WIDTH;
+            }
+        }
         return this.displayTerminalWidth - DEFAULT_DISPLAY_TERMINAL_WIDTH;
     }
 
