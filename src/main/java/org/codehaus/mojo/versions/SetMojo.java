@@ -203,6 +203,14 @@ public class SetMojo
     private boolean processFromLocalAggregationRoot;
 
     /**
+     * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
+     *
+     * @since 2.10
+     */
+    @Parameter( property = "updateBuildOutputTimestamp", defaultValue = "true" )
+    private boolean updateBuildOutputTimestamp;
+
+    /**
      * The changes to module coordinates. Guarded by this.
      */
     private final transient List<VersionChange> sourceChanges = new ArrayList<>();
@@ -506,8 +514,10 @@ public class SetMojo
             {
                 changer.apply( versionChange );
 
-                // also update project.build.outputTimestamp
-                updateBuildOutputTimestamp( pom, model );
+                if (updateBuildOutputTimestamp) {
+                    // also update project.build.outputTimestamp
+                    updateBuildOutputTimestamp( pom, model );
+                }
             }
         }
         catch ( IOException e )
