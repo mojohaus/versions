@@ -476,12 +476,12 @@ public class DisplayPluginUpdatesMojo
                                 {
                                     // plugin version configured that require a Maven version higher than spec
                                     upgradePlugins.put( upgradePluginKey,
-                                                        pad( upgradePluginKey, INFO_PAD_SIZE, newer ) );
+                                                        pad( upgradePluginKey, INFO_PAD_SIZE + getDisplayTerminalWidthOffset(), newer ) );
                                 }
                                 else
                                 {
                                     // plugin that can be upgraded
-                                    upgradePlugins.put( upgradePluginKey, pad( upgradePluginKey, INFO_PAD_SIZE,
+                                    upgradePlugins.put( upgradePluginKey, pad( upgradePluginKey, INFO_PAD_SIZE + getDisplayTerminalWidthOffset(),
                                                                                effectiveVersion, " -> ", newer ) );
                                 }
                             }
@@ -551,7 +551,7 @@ public class DisplayPluginUpdatesMojo
                     superPomDrivingMinVersion = true;
                 }
 
-                pluginLockdowns.add( pad( compactKey( groupId, artifactId ), WARN_PAD_SIZE,
+                pluginLockdowns.add( pad( compactKey( groupId, artifactId ), WARN_PAD_SIZE + getDisplayTerminalWidthOffset(),
                                     superPomDrivingMinVersion ? FROM_SUPER_POM : "", newVersion ) );
             }
             else if ( artifactVersion != null )
@@ -565,7 +565,7 @@ public class DisplayPluginUpdatesMojo
             if ( version != null && artifactVersion != null && newVersion != null && effectiveVersion != null
                 && new DefaultArtifactVersion( effectiveVersion ).compareTo( new DefaultArtifactVersion( newVersion ) ) < 0 )
             {
-                pluginUpdates.add( pad( compactKey( groupId, artifactId ), INFO_PAD_SIZE,
+                pluginUpdates.add( pad( compactKey( groupId, artifactId ), INFO_PAD_SIZE + getDisplayTerminalWidthOffset(),
                                   effectiveVersion, " -> ", newVersion ) );
             }
         }

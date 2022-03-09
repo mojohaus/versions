@@ -36,6 +36,9 @@ import org.codehaus.plexus.util.FileUtils;
 public abstract class AbstractVersionsDisplayMojo
     extends AbstractVersionsUpdaterMojo
 {
+
+    private static final int DEFAULT_DISPLAY_TERMINAL_WIDTH = 80;
+
     /**
      * If specified then the display output will be sent to the specified file.
      *
@@ -59,6 +62,14 @@ public abstract class AbstractVersionsDisplayMojo
      */
     @Parameter( property = "outputEncoding", defaultValue = "${project.reporting.outputEncoding}" )
     private String outputEncoding;
+
+    /**
+     * Terminal width which should be used to format the padding of the version info list output.
+     *
+     * @since 2.10.0
+     */
+    @Parameter( property = "versions.displayTerminalWidth", defaultValue = AbstractVersionsDisplayMojo.DEFAULT_DISPLAY_TERMINAL_WIDTH + "" )
+    private int displayTerminalWidth;
 
     private boolean outputFileError = false;
 
@@ -148,6 +159,13 @@ public abstract class AbstractVersionsDisplayMojo
                 outputFileError = true;
             }
         }
+    }
+
+    /**
+     * @return Offset of the configured display terminal width compared to the default with of 80.
+     */
+    protected int getDisplayTerminalWidthOffset() {
+        return this.displayTerminalWidth - DEFAULT_DISPLAY_TERMINAL_WIDTH;
     }
 
 }
