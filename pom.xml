@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
-  <version>2.9.1-SNAPSHOT</version>
+  <version>2.10.0</version>
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
@@ -88,7 +88,7 @@
     <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
     <url>https://github.com/mojohaus/versions-maven-plugin/tree/${project.scm.tag}</url>
-    <tag>versions-maven-plugin-2.9.0</tag>
+    <tag>versions-maven-plugin-2.10.0</tag>
   </scm>
   <issueManagement>
     <system>github</system>
@@ -105,7 +105,7 @@
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.7</sitePluginVersion>
-    <project.build.outputTimestamp>2022-01-18T09:14:02Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2022-03-11T21:39:08Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
