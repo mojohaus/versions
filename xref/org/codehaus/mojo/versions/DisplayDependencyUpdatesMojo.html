@@ -444,15 +444,15 @@
 <a class="jxr_linenumber" name="L436" href="#L436">436</a>             }
 <a class="jxr_linenumber" name="L437" href="#L437">437</a>             String right = <span class="jxr_string">" "</span> + ( latest == <strong class="jxr_keyword">null</strong> ? current : current + <span class="jxr_string">" -&gt; "</span> + latest );
 <a class="jxr_linenumber" name="L438" href="#L438">438</a>             List&lt;String&gt; t = latest == <strong class="jxr_keyword">null</strong> ? usingCurrent : withUpdates;
-<a class="jxr_linenumber" name="L439" href="#L439">439</a>             <strong class="jxr_keyword">if</strong> ( right.length() + left.length() + 3 &gt; INFO_PAD_SIZE )
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>             <strong class="jxr_keyword">if</strong> ( right.length() + left.length() + 3 &gt; INFO_PAD_SIZE + getOutputLineWidthOffset() )
 <a class="jxr_linenumber" name="L440" href="#L440">440</a>             {
 <a class="jxr_linenumber" name="L441" href="#L441">441</a>                 t.add( left + <span class="jxr_string">"..."</span> );
-<a class="jxr_linenumber" name="L442" href="#L442">442</a>                 t.add( StringUtils.leftPad( right, INFO_PAD_SIZE ) );
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>                 t.add( StringUtils.leftPad( right, INFO_PAD_SIZE + getOutputLineWidthOffset() ) );
 <a class="jxr_linenumber" name="L443" href="#L443">443</a> 
 <a class="jxr_linenumber" name="L444" href="#L444">444</a>             }
 <a class="jxr_linenumber" name="L445" href="#L445">445</a>             <strong class="jxr_keyword">else</strong>
 <a class="jxr_linenumber" name="L446" href="#L446">446</a>             {
-<a class="jxr_linenumber" name="L447" href="#L447">447</a>                 t.add( StringUtils.rightPad( left, INFO_PAD_SIZE - right.length(), <span class="jxr_string">"."</span> ) + right );
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>                 t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), <span class="jxr_string">"."</span> ) + right );
 <a class="jxr_linenumber" name="L448" href="#L448">448</a>             }
 <a class="jxr_linenumber" name="L449" href="#L449">449</a>         }
 <a class="jxr_linenumber" name="L450" href="#L450">450</a> 
