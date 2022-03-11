@@ -436,15 +436,15 @@ public class DisplayDependencyUpdatesMojo
             }
             String right = " " + ( latest == null ? current : current + " -> " + latest );
             List<String> t = latest == null ? usingCurrent : withUpdates;
-            if ( right.length() + left.length() + 3 > INFO_PAD_SIZE + getDisplayTerminalWidthOffset() )
+            if ( right.length() + left.length() + 3 > INFO_PAD_SIZE + getOutputLineWidthOffset() )
             {
                 t.add( left + "..." );
-                t.add( StringUtils.leftPad( right, INFO_PAD_SIZE + getDisplayTerminalWidthOffset() ) );
+                t.add( StringUtils.leftPad( right, INFO_PAD_SIZE + getOutputLineWidthOffset() ) );
 
             }
             else
             {
-                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getDisplayTerminalWidthOffset() - right.length(), "." ) + right );
+                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), "." ) + right );
             }
         }
 
