@@ -99,7 +99,7 @@
     <mojo.java.target>1.8</mojo.java.target>
     <maven.compiler.source>${mojo.java.target}</maven.compiler.source>
     <junitBomVersion>5.8.2</junitBomVersion>
-    <mavenVersion>3.0.5</mavenVersion>
+    <mavenVersion>3.8.5</mavenVersion>
     <wagonVersion>3.4.3</wagonVersion>
     <doxiaVersion>1.11.1</doxiaVersion>
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
