@@ -188,10 +188,11 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @return true if the version starts with '${'
      * @since 2.8
      */
-    protected boolean isHandledByProperty(Dependency dependency) {
-		String version = dependency.getVersion();
-		return version.startsWith("${");
-	}
+    protected boolean isHandledByProperty( Dependency dependency )
+    {
+        String version = dependency.getVersion();
+        return version != null && version.startsWith( "${" );
+    }
 
     /**
      * Try to find the dependency artifact that matches the given dependency.
