@@ -190,7 +190,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     protected boolean isHandledByProperty(Dependency dependency) {
 		String version = dependency.getVersion();
-		return version.startsWith("${");
+		return version != null && version.startsWith("${");
 	}
 
     /**

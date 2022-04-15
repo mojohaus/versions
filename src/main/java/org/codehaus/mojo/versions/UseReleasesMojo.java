@@ -209,6 +209,11 @@ public class UseReleasesMojo
             }
 
             String version = dep.getVersion();
+            if ( version == null )
+            {
+                getLog().info( "Ignoring dependency with no version: " + toString( dep ) );
+                continue;
+            }
             Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( versionMatcher.matches() )
             {
