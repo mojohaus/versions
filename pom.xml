@@ -213,8 +213,7 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
-      <!-- Stick with version 3.3.1 because later versions break writing of output files, see https://github.com/mojohaus/versions-maven-plugin/issues/542 -->
-      <version>3.3.1</version>
+      <version>3.4.1</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>

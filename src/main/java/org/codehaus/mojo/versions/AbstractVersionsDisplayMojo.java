@@ -21,12 +21,13 @@ package org.codehaus.mojo.versions;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Abstract base class for the Display___ mojos.
@@ -36,6 +37,7 @@ import org.codehaus.plexus.util.FileUtils;
 public abstract class AbstractVersionsDisplayMojo
     extends AbstractVersionsUpdaterMojo
 {
+    String NL = System.getProperty( "line.separator" );
 
     private static final int DEFAULT_OUTPUT_LINE_WIDTH = 80;
 
@@ -149,9 +151,9 @@ public abstract class AbstractVersionsDisplayMojo
         {
             try
             {
-                FileUtils.fileAppend( outputFile.getAbsolutePath(), outputEncoding,
-                                      error ? "> " + line + System.getProperty( "line.separator" )
-                                                      : line + System.getProperty( "line.separator" ) );
+                Files.write( outputFile.toPath(),
+                        ( error ? "> " + line + NL : line + NL ).getBytes( outputEncoding ),
+                        StandardOpenOption.APPEND, StandardOpenOption.CREATE );
             }
             catch ( IOException e )
             {
