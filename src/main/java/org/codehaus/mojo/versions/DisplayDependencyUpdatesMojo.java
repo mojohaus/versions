@@ -25,11 +25,13 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -148,6 +150,19 @@ public class DisplayDependencyUpdatesMojo
      */
     @Parameter( property = "verbose", defaultValue = "false" )
     private boolean verbose;
+
+    /**
+     * Whether to process the depdendencyManagement part transitive or not.
+     * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
+     * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
+     * by default to report also the imported dependencies.
+     * If processTransitive is set to <code>false</code> the report will only show
+     * updates of the imported pom it self.
+     *
+     * @since 2.5 Note: Currently in experimental state.
+     */
+    @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
+    private boolean processDependencyManagementTransitive;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -283,10 +298,11 @@ public class DisplayDependencyUpdatesMojo
         logInit();
 
         Set<Dependency> dependencyManagement = new TreeSet<>( new DependencyComparator() );
-        if ( getProject().getDependencyManagement() != null )
+        DependencyManagement projectDependencyManagement = getProjectDependencyManagement(getProject());
+        if ( projectDependencyManagement != null )
         {
 
-            List<Dependency> dependenciesFromPom = getProject().getDependencyManagement().getDependencies();
+            List<Dependency> dependenciesFromPom = projectDependencyManagement.getDependencies();
             for ( Dependency dependency : dependenciesFromPom )
             {
                 getLog().debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
@@ -297,10 +313,10 @@ public class DisplayDependencyUpdatesMojo
                     if ( getProject().hasParent() )
                     {
                         getLog().debug( "Reading parent dependencyManagement information" );
-                        if ( getProject().getParent().getDependencyManagement() != null )
+                        DependencyManagement parentProjectDependencyManagement = getProjectDependencyManagement(getProject().getParent());
+                        if ( parentProjectDependencyManagement != null )
                         {
-                            List<Dependency> parentDeps =
-                                getProject().getParent().getDependencyManagement().getDependencies();
+                            List<Dependency> parentDeps = parentProjectDependencyManagement.getDependencies();
                             for ( Dependency parentDep : parentDeps )
                             {
                                 // only groupId && artifactId needed cause version is null
@@ -375,6 +391,15 @@ public class DisplayDependencyUpdatesMojo
         catch ( InvalidVersionSpecificationException | ArtifactMetadataRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
+        }
+    }
+
+    private DependencyManagement getProjectDependencyManagement(MavenProject project) {
+        if (processDependencyManagementTransitive) {
+            return project.getDependencyManagement();
+        }
+        else {
+            return project.getOriginalModel().getDependencyManagement();
         }
     }
 
