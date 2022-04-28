@@ -79,6 +79,19 @@ public class DisplayDependencyUpdatesMojo
     private boolean processDependencyManagement;
 
     /**
+     * Whether to process the depdendencyManagement part transitive or not.
+     * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
+     * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
+     * by default to report also the imported dependencies.
+     * If processTransitive is set to <code>false</code> the report will only show
+     * updates of the imported pom it self.
+     *
+     * @since 2.5 Note: Currently in experimental state.
+     */
+    @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
+    private boolean processDependencyManagementTransitive;
+
+    /**
      * Whether to process the dependencies section of the project.
      *
      * @since 1.2
@@ -150,19 +163,6 @@ public class DisplayDependencyUpdatesMojo
      */
     @Parameter( property = "verbose", defaultValue = "false" )
     private boolean verbose;
-
-    /**
-     * Whether to process the depdendencyManagement part transitive or not.
-     * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
-     * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
-     * by default to report also the imported dependencies.
-     * If processTransitive is set to <code>false</code> the report will only show
-     * updates of the imported pom it self.
-     *
-     * @since 2.5 Note: Currently in experimental state.
-     */
-    @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
-    private boolean processDependencyManagementTransitive;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
