@@ -86,7 +86,7 @@ public class DisplayDependencyUpdatesMojo
      * If processTransitive is set to <code>false</code> the report will only show
      * updates of the imported pom it self.
      *
-     * @since 2.5 Note: Currently in experimental state.
+     * @since 2.11
      */
     @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
     private boolean processDependencyManagementTransitive;
