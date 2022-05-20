@@ -34,16 +34,14 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import javax.xml.stream.XMLStreamException;
-import java.util.Collection;
-
 /**
+ * Updates a dependency to a specific version.
+ * This can be useful if you have to manage versions for a very large (100+ module) projects where you can’t always use the most up-to-date version of a particular third party component.
  * @author Dan Arcari
  * @since 2.3
  */
 @Mojo( name = "use-dep-version",
        requiresProject = true,
-       requiresDirectInvocation = true,
        threadSafe = true )
 public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
 {
@@ -63,7 +61,6 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
                 defaultValue = "false" )
     protected boolean forceVersion;
 
-    @SuppressWarnings( "unchecked" )
     @Override
     protected void update( ModifiedPomXMLEventReader pom ) throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
