@@ -114,12 +114,15 @@
 <a class="jxr_linenumber" name="L106" href="#L106">106</a>                                                      getProject().getModel() ) )
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>                 {
 <a class="jxr_linenumber" name="L108" href="#L108">108</a>                     getLog().info( <span class="jxr_string">"Updated "</span> + toString( dep ) + <span class="jxr_string">" to version "</span> + newVersion );
-<a class="jxr_linenumber" name="L109" href="#L109">109</a>                 }
-<a class="jxr_linenumber" name="L110" href="#L110">110</a>             }
-<a class="jxr_linenumber" name="L111" href="#L111">111</a>         }
-<a class="jxr_linenumber" name="L112" href="#L112">112</a>     }
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> }
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>                     <strong class="jxr_keyword">this</strong>.getChangeRecorder().recordUpdate( <span class="jxr_string">"useNextVersions"</span>, dep.getGroupId(),
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>                             dep.getArtifactId(), version, newVersion );
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>                 }
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>             }
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>         }
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>     }
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
