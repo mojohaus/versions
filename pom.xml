@@ -78,6 +78,9 @@
       <email>antoon.johansson@gmail.com</email>
       <timezone>+1</timezone>
     </contributor>
+    <contributor>
+      <name>Violette</name>
+    </contributor>
   </contributors>
 
   <prerequisites>
@@ -106,6 +109,23 @@
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.7</sitePluginVersion>
     <project.build.outputTimestamp>2020-08-07T21:31:00Z</project.build.outputTimestamp>
+
+    <commons-lang3.version>3.12.0</commons-lang3.version>
+    <eclipse.jgit.version>5.13.0.202109080827-r</eclipse.jgit.version>
+    <hamcrest.version>2.2</hamcrest.version>
+    <maven.common.artifact.filters.version>3.2.0</maven.common.artifact.filters.version>
+    <maven.plugin.annotations.version>3.6.1</maven.plugin.annotations.version>
+    <maven.reporting.api.version>3.0</maven.reporting.api.version>
+    <maven.reporting.impl.version>3.0.0</maven.reporting.impl.version>
+    <mockito.version>4.5.1</mockito.version>
+    <plexus.container.default.version>2.1.0</plexus.container.default.version>
+    <plexus.interactivity.api.version>1.1</plexus.interactivity.api.version>
+    <plexus.utils.version>3.4.1</plexus.utils.version>
+    <woodstox.core.version>6.2.6</woodstox.core.version>
+
+    <modello.maven.plugin.version>1.11</modello.maven.plugin.version>
+    <mrm.maven.plugin.version>1.2.0</mrm.maven.plugin.version>
+    <versions.maven.plugin.version>2.11.0</versions.maven.plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -124,14 +144,14 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.6.1</version>
+      <version>${maven.plugin.annotations.version}</version>
       <scope>provided</scope>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>5.13.0.202109080827-r</version>
+      <version>${eclipse.jgit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -166,17 +186,17 @@
     <dependency>
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-api</artifactId>
-      <version>3.0</version>
+      <version>${maven.reporting.api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-impl</artifactId>
-      <version>3.0.0</version>
+      <version>${maven.reporting.impl.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-common-artifact-filters</artifactId>
-      <version>3.2.0</version>
+      <version>${maven.common.artifact.filters.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
@@ -221,17 +241,17 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
-      <version>3.4.1</version>
+      <version>${plexus.utils.version}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-container-default</artifactId>
-      <version>2.1.0</version>
+      <version>${plexus.container.default.version}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-interactivity-api</artifactId>
-      <version>1.1</version>
+      <version>${plexus.interactivity.api.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>plexus-container-default</artifactId>
@@ -242,12 +262,12 @@
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
-      <version>6.2.6</version>
+      <version>${woodstox.core.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.12.0</version>
+      <version>${commons-lang3.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -268,13 +288,13 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>4.0.0</version>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
-      <version>2.2</version>
+      <version>${hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -285,7 +305,7 @@
         <plugin>
           <groupId>org.codehaus.modello</groupId>
           <artifactId>modello-maven-plugin</artifactId>
-          <version>1.11</version>
+          <version>${modello.maven.plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -370,7 +390,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>mrm-maven-plugin</artifactId>
-        <version>1.2.0</version>
+        <version>${mrm.maven.plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -449,7 +469,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.7</version>
+        <version>${versions.maven.plugin.version}</version>
         <reportSets>
           <reportSet>
             <reports>
