@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>63</version>
+    <version>67</version>
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
@@ -121,7 +121,7 @@
     <plexus.container.default.version>2.1.0</plexus.container.default.version>
     <plexus.interactivity.api.version>1.1</plexus.interactivity.api.version>
     <plexus.utils.version>3.4.1</plexus.utils.version>
-    <woodstox.core.version>6.2.6</woodstox.core.version>
+    <woodstox.core.version>6.2.8</woodstox.core.version>
 
     <modello.maven.plugin.version>1.11</modello.maven.plugin.version>
     <mrm.maven.plugin.version>1.2.0</mrm.maven.plugin.version>
