@@ -19,6 +19,18 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -29,31 +41,16 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.project.path.DefaultPathTranslator;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.plexus.PlexusTestCase;
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsIterableContaining.hasItems;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.same;
-
 /**
  * Test {@link DefaultVersionsHelper}
  */
@@ -88,8 +85,7 @@ public class DefaultVersionsHelperTest extends PlexusTestCase
         
         final List<ArtifactVersion> actual = asList( versions.getVersions( true ) );
         
-        assertEquals( 3, actual.size() );
-        assertThat( actual, hasItems( three, oneTwoHundred, illegal ) );
+        assertThat(actual).containsExactly(illegal, three, oneTwoHundred);
     }
 
     @Test
@@ -122,8 +118,7 @@ public class DefaultVersionsHelperTest extends PlexusTestCase
         
         final List<ArtifactVersion> actual = asList( versions.getVersions( true ) );
         
-        assertEquals( 4, actual.size() );
-        assertThat( actual, hasItems( one, two, three, illegal ) );
+        assertThat(actual).containsExactly(illegal, one, three, two);
     }
 
     @Test
@@ -179,7 +174,7 @@ public class DefaultVersionsHelperTest extends PlexusTestCase
         DefaultVersionsHelper helper = createHelper();
         String uri = "classpath:/p/a/c/k/a/g/e/resource.res";
 
-        assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(true));
+        assertThat(DefaultVersionsHelper.isClasspathUri(uri)).isTrue();
     }
 
     @Test
@@ -187,7 +182,7 @@ public class DefaultVersionsHelperTest extends PlexusTestCase
         DefaultVersionsHelper helper = createHelper();
         String uri = "http://10.10.10.10/p/a/c/k/a/g/e/resource.res";
 
-        assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(false));
+        assertThat(DefaultVersionsHelper.isClasspathUri(uri)).isFalse();
     }
 
 

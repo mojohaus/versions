@@ -1,11 +1,10 @@
 package org.codehaus.mojo.versions.ordering;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.junit.Test;
-
-import static org.hamcrest.Matchers.arrayContaining;
-import static org.junit.Assert.assertThat;
 
 public class MajorMinorIncrementalFilterTest {
 
@@ -21,10 +20,12 @@ public class MajorMinorIncrementalFilterTest {
         ArtifactVersion selectedVersion = version("1.1.1");
         MajorMinorIncrementalFilter filter = new MajorMinorIncrementalFilter(true, true, true);
         ArtifactVersion[] filteredVersions = filter.filter(selectedVersion, newerVersions);
-        assertThat(filteredVersions, arrayContaining(
-            version("1.1.1-sp1"), version("1.1.1-1"),
-            version("1.1.2"), version("1.1.3"),
-            version("1.2.0"), version("2.0.0-SNAPSHOT")));
+        assertThat(filteredVersions).containsExactly(version("1.1.1-sp1"),
+                                                     version("1.1.1-1"),
+                                                     version("1.1.2"),
+                                                     version("1.1.3"),
+                                                     version("1.2.0"),
+                                                     version("2.0.0-SNAPSHOT"));
     }
 
     @Test
@@ -32,8 +33,11 @@ public class MajorMinorIncrementalFilterTest {
         ArtifactVersion selectedVersion = version("1.1.1");
         MajorMinorIncrementalFilter filter = new MajorMinorIncrementalFilter(false, true, true);
         ArtifactVersion[] filteredVersions = filter.filter(selectedVersion, newerVersions);
-        assertThat(filteredVersions, arrayContaining(version("1.1.1-sp1"), version("1.1.1-1"),
-                                                     version("1.1.2"), version("1.1.3"), version("1.2.0")));
+        assertThat(filteredVersions).containsExactly(version("1.1.1-sp1"),
+                                                     version("1.1.1-1"),
+                                                     version("1.1.2"),
+                                                     version("1.1.3"),
+                                                     version("1.2.0"));
     }
 
     @Test
@@ -41,8 +45,10 @@ public class MajorMinorIncrementalFilterTest {
         ArtifactVersion selectedVersion = version("1.1.1");
         MajorMinorIncrementalFilter filter = new MajorMinorIncrementalFilter(false, false, true);
         ArtifactVersion[] filteredVersions = filter.filter(selectedVersion, newerVersions);
-        assertThat(filteredVersions, arrayContaining(version("1.1.1-sp1"), version("1.1.1-1"),
-                                                     version("1.1.2"), version("1.1.3")));
+        assertThat(filteredVersions).containsExactly(version("1.1.1-sp1"),
+                                                     version("1.1.1-1"),
+                                                     version("1.1.2"),
+                                                     version("1.1.3"));
     }
 
     @Test
@@ -50,7 +56,7 @@ public class MajorMinorIncrementalFilterTest {
         ArtifactVersion selectedVersion = version("1.1.1");
         MajorMinorIncrementalFilter filter = new MajorMinorIncrementalFilter(false, false, false);
         ArtifactVersion[] filteredVersions = filter.filter(selectedVersion, newerVersions);
-        assertThat(filteredVersions, arrayContaining(version("1.1.1-sp1"), version("1.1.1-1")));
+        assertThat(filteredVersions).containsExactly(version("1.1.1-sp1"), version("1.1.1-1"));
     }
 
     @Test
@@ -59,7 +65,7 @@ public class MajorMinorIncrementalFilterTest {
         MajorMinorIncrementalFilter filter = new MajorMinorIncrementalFilter(false, false, false);
         ArtifactVersion[] filteredVersions = filter.filter(selectedVersion,
                                                            new ArtifactVersion[] {version("1.1.1")});
-        assertThat(filteredVersions, arrayContaining(version("1.1.1")));
+        assertThat(filteredVersions).containsExactly(version("1.1.1"));
     }
 
 
@@ -78,14 +84,13 @@ public class MajorMinorIncrementalFilterTest {
 
 
         ArtifactVersion[] filteredVersions = filter.filter(selectedVersion, newerVersions);
-        assertThat(filteredVersions,
-                   arrayContaining(version("1.1.1.1-sp1"),
-                                   version("1.1.1.2"),
-                                   version("1.1.2.21"),
-                                   version("1.1.3.0"),
-                                   version("1.2.0"),
-                                   version("1.2.0.1"),
-                                   version("2.0.0-SNAPSHOT")));
+        assertThat(filteredVersions).containsExactly(version("1.1.1.1-sp1"),
+                                                     version("1.1.1.2"),
+                                                     version("1.1.2.21"),
+                                                     version("1.1.3.0"),
+                                                     version("1.2.0"),
+                                                     version("1.2.0.1"),
+                                                     version("2.0.0-SNAPSHOT"));
     }
 
     private ArtifactVersion version(String versionString) {
