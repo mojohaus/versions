@@ -19,6 +19,16 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -34,19 +44,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
+import org.codehaus.mojo.versions.filtering.DependencyFilter;
+import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Displays all dependencies that have newer versions available.
@@ -92,12 +94,100 @@ public class DisplayDependencyUpdatesMojo
     private boolean processDependencyManagementTransitive;
 
     /**
+     * Only take these artifacts into consideration.
+     * <p>
+     * Comma-separated list of extended GAV patterns.
+     *
+     * <p>
+     * Extended GAV: groupId:artifactId:version:type:classifier:scope
+     * </p>
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: "mygroup:artifact:*,*:*:*:*:*:compile"
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "dependencyManagementIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    private List<String> dependencyManagementIncludes;
+
+    /**
+     * Exclude these artifacts from consideration.
+     * <p>
+     * Comma-separated list of extended GAV patterns.
+     *
+     * <p>
+     * Extended GAV: groupId:artifactId:version:type:classifier:scope
+     * </p>
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: "mygroup:artifact:*,*:*:*:*:*:provided,*:*:*:*:*:system"
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "dependencyManagementExcludes" )
+    private List<String> dependencyManagementExcludes;
+
+    /**
      * Whether to process the dependencies section of the project.
      *
      * @since 1.2
      */
     @Parameter( property = "processDependencies", defaultValue = "true" )
     private boolean processDependencies;
+
+    /**
+     * Only take these artifacts into consideration.
+     * <p>
+     * Comma-separated list of extended GAV patterns.
+     *
+     * <p>
+     * Extended GAV: groupId:artifactId:version:type:classifier:scope
+     * </p>
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: "mygroup:artifact:*,*:*:*:*:*:compile"
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "dependencyIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    private List<String> dependencyIncludes;
+
+    /**
+     * Exclude these artifacts from consideration.
+     * <p>
+     * Comma-separated list of extended GAV patterns.
+     *
+     * <p>
+     * Extended GAV: groupId:artifactId:version:type:classifier:scope
+     * </p>
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: "mygroup:artifact:*,*:*:*:*:*:provided,*:*:*:*:*:system"
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "dependencyExcludes" )
+    private List<String> dependencyExcludes;
 
     /**
      * Whether to process the dependencies sections of plugins.
@@ -118,7 +208,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the major version number to be changed.
      * You need to set {@link #allowAnyUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      * @since 2.5
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
@@ -127,7 +217,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the minor version number to be changed.
      * You need to set {@link #allowMajorUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -137,7 +227,7 @@ public class DisplayDependencyUpdatesMojo
     /**
      * Whether to allow the incremental version number to be changed.
      * You need to set {@link #allowMinorUpdates} to <code>false</code> to
-     * get this configuration gets control. 
+     * get this configuration gets control.
      *
      * @since 2.5
      */
@@ -292,6 +382,7 @@ public class DisplayDependencyUpdatesMojo
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()
      * @since 1.0-alpha-1
      */
+    @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -306,7 +397,7 @@ public class DisplayDependencyUpdatesMojo
             for ( Dependency dependency : dependenciesFromPom )
             {
                 getLog().debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
-                    + ":" + dependency.getVersion() );
+                    + ":" + dependency.getVersion() + ":" + dependency.getScope() );
                 if ( dependency.getVersion() == null )
                 {
                     // get parent and get the information from there.
@@ -371,11 +462,15 @@ public class DisplayDependencyUpdatesMojo
         {
             if ( isProcessingDependencyManagement() )
             {
+                dependencyManagement = filterDependencyManagementIncludes( dependencyManagement );
+
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
                             "Dependency Management" );
             }
             if ( isProcessingDependencies() )
             {
+                dependencies = filterDependencyIncludes( dependencies );
+
                 logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
             }
             if ( isProcessPluginDependenciesInDependencyManagement() )
@@ -392,6 +487,33 @@ public class DisplayDependencyUpdatesMojo
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
+    }
+
+    private Set<Dependency> filterDependencyIncludes(Set<Dependency> dependencies) {
+        return filterDependencies(dependencies, dependencyIncludes, dependencyExcludes, "dependencies");
+    }
+
+    private Set<Dependency> filterDependencyManagementIncludes(Set<Dependency> dependencyManagement) {
+        return filterDependencies(dependencyManagement,
+                                  dependencyManagementIncludes, dependencyManagementExcludes, "dependecyManagement");
+    }
+
+    private Set<Dependency> filterDependencies(
+            Set<Dependency> dependencies,
+            List<String> includes,
+            List<String> excludes,
+            String section
+    ) {
+        DependencyFilter includeDeps = DependencyFilter.parseFrom(includes);
+        DependencyFilter excludeDeps = DependencyFilter.parseFrom(excludes);
+
+        getLog().debug(String.format("parsed includes in %s: %s -> %s",  section, includes, includeDeps ));
+        getLog().debug(String.format("parsed excludes in %s: %s -> %s",  section, excludes, excludeDeps ));
+
+        Set<Dependency> onlyIncludes = includeDeps.retainingIn(dependencies);
+        Set<Dependency> filtered = excludeDeps.removingFrom(onlyIncludes);
+
+        return filtered;
     }
 
     private DependencyManagement getProjectDependencyManagement(MavenProject project) {
@@ -493,9 +615,9 @@ public class DisplayDependencyUpdatesMojo
                 }
                 logLine( false, "" );
             }
-        }        
-        
-        
+        }
+
+
         if ( withUpdates.isEmpty() )
         {
             if ( !usingCurrent.isEmpty() )
@@ -524,6 +646,7 @@ public class DisplayDependencyUpdatesMojo
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
+    @Override
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
