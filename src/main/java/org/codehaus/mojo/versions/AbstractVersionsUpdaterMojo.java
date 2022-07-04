@@ -44,6 +44,7 @@ import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.api.VersionsHelperFactory;
 import org.codehaus.mojo.versions.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.recording.ChangeRecorderNull;
 import org.codehaus.mojo.versions.recording.ChangeRecorderXML;
@@ -60,6 +61,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -223,12 +225,53 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         if ( helper == null )
         {
-            helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource,
-                                                remoteArtifactRepositories, remotePluginRepositories, localRepository,
-                                                wagonManager, settings, serverId, rulesUri, getLog(), session,
-                                                pathTranslator );
+            helper = fetchVersionHelper();
         }
         return helper;
+    }
+
+    public VersionsHelper fetchVersionHelper()
+        throws MojoExecutionException
+    {
+        ServiceLoader<VersionsHelperFactory> versionsHelperFactoryServiceLoader = ServiceLoader.load(VersionsHelperFactory.class);
+
+        for (VersionsHelperFactory versionsHelperFactory : versionsHelperFactoryServiceLoader)
+        {
+            if (versionsHelperFactory != null)
+            {
+                return versionsHelperFactory.buildVersionsHelper(
+                        artifactFactory,
+                        artifactResolver,
+                        artifactMetadataSource,
+                        remoteArtifactRepositories,
+                        remotePluginRepositories,
+                        localRepository,
+                        wagonManager,
+                        settings,
+                        serverId,
+                        rulesUri,
+                        getLog(),
+                        session,
+                        pathTranslator
+                );
+            }
+        }
+        return new DefaultVersionsHelper(
+                artifactFactory,
+                artifactResolver,
+                artifactMetadataSource,
+                remoteArtifactRepositories,
+                remotePluginRepositories,
+                localRepository,
+                wagonManager,
+                settings,
+                serverId,
+                rulesUri,
+                getLog(),
+                session,
+                pathTranslator
+        );
+
     }
 
     /**
