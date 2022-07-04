@@ -1,0 +1,188 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>versions-maven-plugin-parent</artifactId>
+    <version>2.11.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>versions-maven-plugin-api</artifactId>
+
+  <name>Versions Maven Plugin Api</name>
+  <url>http://www.mojohaus.org/versions-maven-plugin/</url>
+  <description>
+    Versions Plugin for Maven. The Versions Plugin updates the versions of components in the POM.
+  </description>
+  <inceptionYear>2008</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Stephen Connolly</name>
+      <email>stephenconnolly at codehaus</email>
+      <roles>
+        <role>Lead Developer</role>
+      </roles>
+      <timezone>0</timezone>
+    </developer>
+    <developer>
+      <name>Paul Gier</name>
+      <email>pgier at redhat</email>
+      <roles>
+        <role>Developer</role>
+      </roles>
+    </developer>
+    <developer>
+      <name>Arnaud Heritier</name>
+      <email>aheritier at apache</email>
+      <roles>
+        <role>Developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
+  <contributors>
+    <contributor>
+      <name>Benoit Lafontaine</name>
+      <timezone>+1</timezone>
+    </contributor>
+    <contributor>
+      <name>Martin Franklin</name>
+    </contributor>
+    <contributor>
+      <name>Tom Folga</name>
+    </contributor>
+    <contributor>
+      <name>Eric Pabst</name>
+    </contributor>
+    <contributor>
+      <name>Stefan Seelmann</name>
+    </contributor>
+    <contributor>
+      <name>Clement Denis</name>
+    </contributor>
+    <contributor>
+      <name>Erik Schepers</name>
+    </contributor>
+    <contributor>
+      <name>Anton Johansson</name>
+      <email>antoon.johansson@gmail.com</email>
+      <timezone>+1</timezone>
+    </contributor>
+  </contributors>
+
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+
+  <scm>
+    <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
+    <url>https://github.com/mojohaus/versions-maven-plugin/tree/${project.scm.tag}</url>
+    <tag>versions-maven-plugin-2.11.0</tag>
+  </scm>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/mojohaus/versions-maven-plugin/issues/</url>
+  </issueManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${mavenVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <version>${mavenVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-compat</artifactId>
+      <version>${mavenVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>3.4.2</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.modello</groupId>
+          <artifactId>modello-maven-plugin</artifactId>
+          <version>2.0.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.modello</groupId>
+        <artifactId>modello-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <!-- Generate the xpp3 reader code -->
+              <goal>xpp3-reader</goal>
+              <!-- Generate the xpp3 writer code -->
+              <goal>xpp3-writer</goal>
+              <!-- Generate the Java sources for the model itself -->
+              <goal>java</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>site-doc</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>xdoc</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>site-xsd</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>xsd</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/generated-site/resources/xsd</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <models>
+            <model>src/main/mdo/rule.mdo</model>
+          </models>
+          <version>2.0.0</version>
+          <useJava5>true</useJava5>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <!-- Exclude packages generated by Modello in JavaDocs -->
+          <excludePackageNames>
+            org.codehaus.mojo.versions.model,
+            org.codehaus.mojo.versions.model.io.xpp3
+          </excludePackageNames>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
