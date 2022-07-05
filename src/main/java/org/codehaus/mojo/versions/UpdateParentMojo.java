@@ -53,8 +53,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "parentVersion",
-                defaultValue = "null" )
+    @Parameter( property = "parentVersion" )
     protected String parentVersion = null;
 
     /**
