@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>68</version>
+    <version>69</version>
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
