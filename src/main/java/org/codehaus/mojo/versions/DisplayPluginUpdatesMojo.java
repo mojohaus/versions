@@ -431,7 +431,7 @@ public class DisplayPluginUpdatesMojo
             try
             {
                 // now we want to find the newest versions and check their Maven version prerequisite
-                ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifactRange, true );
+                ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifactRange, true, version );
                 ArtifactVersion[] newerVersions = artifactVersions.getVersions( this.allowSnapshots );
                 ArtifactVersion minRequires = null;
                 for ( int j = newerVersions.length - 1; j >= 0; j-- )

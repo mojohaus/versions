@@ -175,7 +175,7 @@ public class ResolveRangesMojo
                 if ( artifactVersion == null )
                 {
                     ArtifactVersion latestVersion =
-                        findLatestVersion( artifact, artifact.getVersionRange(), allowSnapshots, false );
+                        findLatestVersion( artifact, artifact.getVersionRange(), getProject().getModel().getParent().getVersion(), allowSnapshots, false );
 
                     if ( latestVersion != null )
                     {
@@ -240,7 +240,7 @@ public class ResolveRangesMojo
                     if ( artifactVersion == null )
                     {
                         ArtifactVersion latestVersion =
-                            findLatestVersion( artifact, artifact.getVersionRange(), allowSnapshots, false );
+                            findLatestVersion( artifact, artifact.getVersionRange(), dep.getVersion(), allowSnapshots, false );
 
                         if ( latestVersion != null )
                         {

@@ -112,7 +112,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         ArtifactVersion artifactVersion;
         try
         {
-            artifactVersion = findLatestVersion( artifact, versionRange, null, false );
+            artifactVersion = findLatestVersion( artifact, versionRange, version, null, false );
         }
         catch ( ArtifactMetadataRetrievalException e )
         {

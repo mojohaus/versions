@@ -142,7 +142,7 @@ public class UseReleasesMojo
             // Force releaseVersion version because org.apache.maven.artifact.metadata.MavenMetadataSource does not
             // retrieve release version if provided snapshot version.
             artifact.setVersion( releaseVersion );
-            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, version );
             if ( !allowRangeMatching ) // standard behaviour
             {
                 if ( versions.containsVersion( releaseVersion ) )
@@ -232,7 +232,7 @@ public class UseReleasesMojo
                 // Force releaseVersion version because org.apache.maven.artifact.metadata.MavenMetadataSource does not
                 // retrieve release version if provided snapshot version.
                 artifact.setVersion( releaseVersion );
-                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, version );
                 if ( !allowRangeMatching ) // standard behaviour
                 {
                     noRangeMatching( pom, dep, version, releaseVersion, versions );

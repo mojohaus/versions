@@ -89,7 +89,7 @@ public class PropertyVersions
         for ( ArtifactAssociation association : associations )
         {
             final ArtifactVersions associatedVersions =
-                helper.lookupArtifactVersions( association.getArtifact(), association.isUsePluginRepositories() );
+                helper.lookupArtifactVersions( association.getArtifact(), association.isUsePluginRepositories(), association.getArtifact().getVersion() );
             if ( versions != null )
             {
                 final ArtifactVersion[] artifactVersions = associatedVersions.getVersions( true );

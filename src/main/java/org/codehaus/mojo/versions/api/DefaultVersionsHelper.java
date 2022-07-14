@@ -97,13 +97,13 @@ import java.util.regex.Pattern;
 public class DefaultVersionsHelper
     implements VersionsHelper
 {
-    private static final String CLASSPATH_PROTOCOL = "classpath";
+    protected static final String CLASSPATH_PROTOCOL = "classpath";
 
-    private static final String TYPE_EXACT = "exact";
+    protected static final String TYPE_EXACT = "exact";
 
-    private static final String TYPE_REGEX = "regex";
+    protected static final String TYPE_REGEX = "regex";
 
-    private static final int LOOKUP_PARALLEL_THREADS = 5;
+    protected static final int LOOKUP_PARALLEL_THREADS = 5;
 
     /**
      * The artifact comparison rules to use.
@@ -111,70 +111,70 @@ public class DefaultVersionsHelper
      * @deprecated
      * @since 1.0-alpha-3
      */
-    private final RuleSet ruleSet;
+    protected final RuleSet ruleSet;
 
     /**
      * The artifact metadata source to use.
      *
      * @since 1.0-alpha-3
      */
-    private final ArtifactMetadataSource artifactMetadataSource;
+    protected final ArtifactMetadataSource artifactMetadataSource;
 
     /**
      * The local repository to consult.
      *
      * @since 1.0-alpha-3
      */
-    private final ArtifactRepository localRepository;
+    protected final ArtifactRepository localRepository;
 
     /**
      * The remote artifact repositories to consult.
      *
      * @since 1.0-alpha-3
      */
-    private final List<ArtifactRepository> remoteArtifactRepositories;
+    protected final List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * The remote plugin repositories to consult.
      *
      * @since 1.0-alpha-3
      */
-    private final List<ArtifactRepository> remotePluginRepositories;
+    protected final List<ArtifactRepository> remotePluginRepositories;
 
     /**
      * The artifact factory.
      *
      * @since 1.0-alpha-3
      */
-    private final ArtifactFactory artifactFactory;
+    protected final ArtifactFactory artifactFactory;
 
     /**
      * The {@link Log} to send log messages to.
      *
      * @since 1.0-alpha-3
      */
-    private final Log log;
+    protected final Log log;
 
     /**
      * The path translator.
      *
      * @since 1.0-beta-1
      */
-    private final PathTranslator pathTranslator;
+    protected final PathTranslator pathTranslator;
 
     /**
      * The maven session.
      *
      * @since 1.0-beta-1
      */
-    private final MavenSession mavenSession;
+    protected final MavenSession mavenSession;
 
     /**
      * The artifact resolver.
      *
      * @since 1.3
      */
-    private final ArtifactResolver artifactResolver;
+    protected final ArtifactResolver artifactResolver;
 
     /**
      * Constructs a new {@link DefaultVersionsHelper}.
@@ -216,7 +216,7 @@ public class DefaultVersionsHelper
     }
 
     @Deprecated
-    private static RuleSet getRuleSet( Wagon wagon, String remoteURI )
+    protected static RuleSet getRuleSet( Wagon wagon, String remoteURI )
         throws IOException, AuthorizationException, TransferFailedException, ResourceDoesNotExistException
     {
         File tempFile = File.createTempFile( "ruleset", ".xml" );
@@ -238,7 +238,7 @@ public class DefaultVersionsHelper
         }
     }
 
-    private static RuleSet readRulesFromStream(InputStream stream)
+    protected static RuleSet readRulesFromStream(InputStream stream)
         throws IOException {
         RuleXpp3Reader reader = new RuleXpp3Reader();
         try (BufferedInputStream bis = new BufferedInputStream( stream ))
@@ -263,7 +263,7 @@ public class DefaultVersionsHelper
         return p.matcher( value ).matches();
     }
 
-    private static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
+    protected static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
                                         Log logger )
         throws MojoExecutionException {
         RuleSet ruleSet = new RuleSet();
@@ -286,7 +286,7 @@ public class DefaultVersionsHelper
         return ruleSet;
     }
 
-    private static RuleSet getRulesFromClasspath(String uri, Log logger)
+    protected static RuleSet getRulesFromClasspath(String uri, Log logger)
         throws MojoExecutionException {
         logger.debug("Going to load rules from \"" + uri + "\"");
 
@@ -310,11 +310,11 @@ public class DefaultVersionsHelper
         }
     }
 
-    private static boolean isRulesUriNotBlank(String rulesUri) {
+    protected static boolean isRulesUriNotBlank(String rulesUri) {
         return rulesUri != null && rulesUri.trim().length() != 0;
     }
 
-    private static RuleSet getRulesViaWagon(String rulesUri, Log logger, String serverId, String id,
+    protected static RuleSet getRulesViaWagon(String rulesUri, Log logger, String serverId, String id,
                                             WagonManager wagonManager, Settings settings)
         throws MojoExecutionException {
         RuleSet loadedRules = new RuleSet();
@@ -456,7 +456,7 @@ public class DefaultVersionsHelper
      * @param artifact The artifact
      * @return List of ignored version
      */
-    private List<IgnoreVersion> getIgnoredVersions( Artifact artifact )
+    protected List<IgnoreVersion> getIgnoredVersions( Artifact artifact )
     {
         final List<IgnoreVersion> ret = new ArrayList<>();
 
@@ -501,7 +501,7 @@ public class DefaultVersionsHelper
      * @param ignoredVersions A list of ignored versions
      * @return A String representation of the list
      */
-    private String showIgnoredVersions( List<IgnoreVersion> ignoredVersions )
+    protected String showIgnoredVersions( List<IgnoreVersion> ignoredVersions )
     {
         StringBuilder buf = new StringBuilder();
         Iterator<IgnoreVersion> iterator = ignoredVersions.iterator();
@@ -736,7 +736,9 @@ public class DefaultVersionsHelper
         return lookupArtifactVersions( createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(),
                                                                  versionRange, dependency.getType(),
                                                                  dependency.getClassifier(), dependency.getScope() ),
-                                       usePluginRepositories );
+                                       usePluginRepositories,
+                                       dependency.getVersion()
+        );
     }
 
     /**
@@ -796,8 +798,11 @@ public class DefaultVersionsHelper
         boolean includeSnapshots = allowSnapshots;
 
         final ArtifactVersions pluginArtifactVersions =
-            lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
-                                    true );
+            lookupArtifactVersions(
+                    createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
+                    true,
+                    version
+            );
 
         Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
         if ( plugin.getDependencies() != null )
@@ -940,7 +945,7 @@ public class DefaultVersionsHelper
         return propertyVersions;
     }
 
-    private List<String> getSplittedProperties( String commaSeparatedProperties )
+    protected List<String> getSplittedProperties( String commaSeparatedProperties )
     {
         List<String> propertiesList = Collections.emptyList();
         if ( StringUtils.isNotEmpty( commaSeparatedProperties ) )
@@ -952,11 +957,11 @@ public class DefaultVersionsHelper
     }
 
     // This is a data container to hold the result of a Dependency lookup to its ArtifactVersions.
-    private static class DependencyArtifactVersions
+    protected static class DependencyArtifactVersions
     {
-        private final Dependency dependency;
+        protected final Dependency dependency;
 
-        private final ArtifactVersions artifactVersions;
+        protected final ArtifactVersions artifactVersions;
 
         public DependencyArtifactVersions( final Dependency dependency, final ArtifactVersions artifactVersions )
         {
@@ -976,11 +981,11 @@ public class DefaultVersionsHelper
     }
 
     // This is a data container to hold the result of a Dependency lookup to its ArtifactVersions.
-    private static class PluginPluginUpdatesDetails
+    protected static class PluginPluginUpdatesDetails
     {
-        private final Plugin plugin;
+        protected final Plugin plugin;
 
-        private final PluginUpdatesDetails pluginUpdatesDetails;
+        protected final PluginUpdatesDetails pluginUpdatesDetails;
 
         public PluginPluginUpdatesDetails( final Plugin plugin, final PluginUpdatesDetails pluginUpdatesDetails )
         {
@@ -1000,12 +1005,12 @@ public class DefaultVersionsHelper
     }
 
     // This Callable wraps lookupDependencyUpdates so that it can be run in parallel.
-    private class DependencyLookup
+    protected class DependencyLookup
         implements Callable<DependencyArtifactVersions>
     {
-        private final Dependency dependency;
+        protected final Dependency dependency;
 
-        private final boolean usePluginRepositories;
+        protected final boolean usePluginRepositories;
 
         public DependencyLookup( final Dependency dependency, final boolean usePluginRepositories )
         {
@@ -1022,12 +1027,12 @@ public class DefaultVersionsHelper
     }
 
     // This Callable wraps lookupPluginUpdates so that it can be run in parallel.
-    private class PluginLookup
+    protected class PluginLookup
         implements Callable<PluginPluginUpdatesDetails>
     {
-        private final Plugin plugin;
+        protected final Plugin plugin;
 
-        private final boolean allowSnapshots;
+        protected final boolean allowSnapshots;
 
         public PluginLookup( final Plugin plugin, final Boolean allowSnapshots )
         {

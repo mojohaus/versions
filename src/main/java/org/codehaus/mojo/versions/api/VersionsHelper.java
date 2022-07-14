@@ -164,12 +164,47 @@ public interface VersionsHelper
      * @param artifact The artifact to look for versions of.
      * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
      *            consult the repositories for normal dependencies.
+     * @param currentVersion currentVersion
      * @return The details of the available artifact versions.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      * @since 1.0-alpha-3
      */
-    ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException;
+    default ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories, String currentVersion )
+            throws ArtifactMetadataRetrievalException {
+        return lookupArtifactVersions( artifact, usePluginRepositories );
+    }
+
+    /**
+     * Looks up the versions of the specified artifact that are available in either the local repository, or the
+     * appropriate remote repositories.
+     *
+     * @param artifact The artifact to look for versions of.
+     * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
+     *            consult the repositories for normal dependencies.
+     * @return The details of the available artifact versions.
+     * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @since 1.0-alpha-3
+     */
+    @Deprecated
+    default ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
+            throws ArtifactMetadataRetrievalException {
+        return lookupArtifactVersions( artifact, usePluginRepositories, artifact.getVersion());
+    }
+
+    /**
+     * Looks up the updates of an artifact.
+     *
+     * @param artifact The artifact to look up
+     * @param allowSnapshots Include snapshots in the list of updates.
+     * @param usePluginRepositories Search the plugin repositories.
+     * @param currentVersion currentVersion
+     * @return The artifact update details.
+     * @throws ArtifactMetadataRetrievalException When things go wrong.
+     */
+    default ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots, boolean usePluginRepositories, String currentVersion )
+        throws ArtifactMetadataRetrievalException {
+        return lookupArtifactUpdates( artifact, allowSnapshots, usePluginRepositories);
+    }
 
     /**
      * Looks up the updates of an artifact.
@@ -180,8 +215,11 @@ public interface VersionsHelper
      * @return The artifact update details.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      */
-    ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException;
+    @Deprecated
+    default ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots, boolean usePluginRepositories )
+            throws ArtifactMetadataRetrievalException {
+        return lookupArtifactUpdates( artifact, allowSnapshots, usePluginRepositories, artifact.getVersion());
+    }
 
     /**
      * Looks up the updates for a set of dependencies.

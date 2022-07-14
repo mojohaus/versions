@@ -152,7 +152,7 @@ public class UseLatestVersionsMojo
             getLog().debug( "Selected version:" + selectedVersion );
 
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
-            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, version );
 
             ArtifactVersion[] newerVersions = versions.getNewerVersions( version, segment, allowSnapshots );
 

@@ -111,7 +111,7 @@ public class ForceReleasesMojo
                 }
 
                 getLog().debug( "Looking for a release of " + toString( dep ) );
-                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, version );
                 if ( versions.containsVersion( releaseVersion ) )
                 {
                     if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,

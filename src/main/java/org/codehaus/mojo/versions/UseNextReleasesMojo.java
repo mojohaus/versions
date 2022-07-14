@@ -103,7 +103,7 @@ public class UseNextReleasesMojo
                     continue;
                 }
 
-                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, version );
                 ArtifactVersion[] newer = versions.getNewerVersions( version, false );
                 if ( newer.length > 0 )
                 {

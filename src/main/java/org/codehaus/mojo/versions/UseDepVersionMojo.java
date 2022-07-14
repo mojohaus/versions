@@ -117,7 +117,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
             {
                 if ( !forceVersion )
                 {
-                    ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+                    ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, dep.getVersion() );
 
                     if ( !versions.containsVersion( depVersion ) )
                     {

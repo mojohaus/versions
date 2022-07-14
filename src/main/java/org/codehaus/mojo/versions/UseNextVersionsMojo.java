@@ -97,7 +97,7 @@ public class UseNextVersionsMojo
             }
 
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
-            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, version );
             ArtifactVersion[] newer = versions.getNewerVersions( version, Boolean.TRUE.equals( allowSnapshots ) );
             if ( newer.length > 0 )
             {

@@ -158,7 +158,7 @@ public class UseLatestSnapshotsMojo
 
                 ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
 
-                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, version );
                 final VersionComparator versionComparator = versions.getVersionComparator();
                 final DefaultArtifactVersion lowerBound = new DefaultArtifactVersion( version );
                 if ( segment + 1 > versionComparator.getSegmentCount( lowerBound ) )
