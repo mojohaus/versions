@@ -12,11 +12,13 @@
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
-  <url>http://www.mojohaus.org/versions-maven-plugin/</url>
+  <url>https://www.mojohaus.org/versions-maven-plugin/</url>
+
   <description>
     Versions Plugin for Maven. The Versions Plugin updates the versions of components in the POM.
   </description>
   <inceptionYear>2008</inceptionYear>
+
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -50,6 +52,7 @@
       <timezone>+1</timezone>
     </developer>
   </developers>
+
   <contributors>
     <contributor>
       <name>Benoit Lafontaine</name>
@@ -87,13 +90,9 @@
   <scm>
     <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
-    <url>https://github.com/mojohaus/versions-maven-plugin/tree/${project.scm.tag}</url>
-    <tag>versions-maven-plugin-2.11.0</tag>
+    <url>https://github.com/mojohaus/versions-maven-plugin/tree/master</url>
+    <tag>HEAD</tag>
   </scm>
-  <issueManagement>
-    <system>github</system>
-    <url>https://github.com/mojohaus/versions-maven-plugin/issues/</url>
-  </issueManagement>
 
   <properties>
     <mojo.java.target>1.8</mojo.java.target>
@@ -124,7 +123,6 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.6.4</version>
       <scope>provided</scope>
     </dependency>
   
@@ -217,12 +215,6 @@
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-container-default</artifactId>
-      <version>2.1.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-interactivity-api</artifactId>
       <version>1.1</version>
     </dependency>
@@ -276,23 +268,8 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.6.4</version>
-        <configuration>
-          <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>helpmojo</goal>
-              <goal>descriptor</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -352,29 +329,6 @@
             <model>src/main/mdo/rule.mdo</model>
           </models>
           <version>2.0.0</version>
-          <useJava5>true</useJava5>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>mrm-maven-plugin</artifactId>
-        <version>1.4.1</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>start</goal>
-              <goal>stop</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <propertyName>repository.proxy.url</propertyName>
-          <repositories>
-            <mockRepo>
-              <source>src/it-repo</source>
-            </mockRepo>
-            <proxyRepo />
-          </repositories>
         </configuration>
       </plugin>
       <plugin>
@@ -437,7 +391,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.7</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -460,7 +413,32 @@
       <id>run-its</id>
       <build>
         <defaultGoal>verify</defaultGoal>
+
         <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>mrm-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>start</goal>
+                  <goal>stop</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <propertyName>repository.proxy.url</propertyName>
+              <repositories>
+                <mockRepo>
+                  <source>src/it-repo</source>
+                </mockRepo>
+                <localRepo>
+                  <source>${project.build.directory}/local-repo</source>
+                </localRepo>
+                <proxyRepo />
+              </repositories>
+            </configuration>
+          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
@@ -469,7 +447,8 @@
                 <id>integration-test</id>
                 <goals>
                   <goal>install</goal>
-                  <goal>run</goal>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
                 </goals>
                 <configuration>
                   <streamLogs>false</streamLogs>
@@ -480,21 +459,6 @@
           </plugin>
         </plugins>
       </build>
-      <reporting>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-invoker-plugin</artifactId>
-            <reportSets>
-              <reportSet>
-                <reports>
-                  <report>report</report>
-                </reports>
-              </reportSet>
-            </reportSets>
-          </plugin>
-        </plugins>
-      </reporting>
     </profile>
   </profiles>
 </project>
