@@ -11,7 +11,7 @@
   <version>2.11.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Versions Maven Plugin Parent</name>
+  <name>Versions Maven Plugin</name>
   <url>http://www.mojohaus.org/versions-maven-plugin/</url>
   <description>
     Versions Plugin for Maven. The Versions Plugin updates the versions of components in the POM.

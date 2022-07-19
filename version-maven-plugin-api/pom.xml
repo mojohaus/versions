@@ -10,89 +10,9 @@
 
   <artifactId>versions-maven-plugin-api</artifactId>
 
-  <name>Versions Maven Plugin Api</name>
-  <url>http://www.mojohaus.org/versions-maven-plugin/</url>
-  <description>
-    Versions Plugin for Maven. The Versions Plugin updates the versions of components in the POM.
-  </description>
-  <inceptionYear>2008</inceptionYear>
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
-  <developers>
-    <developer>
-      <name>Stephen Connolly</name>
-      <email>stephenconnolly at codehaus</email>
-      <roles>
-        <role>Lead Developer</role>
-      </roles>
-      <timezone>0</timezone>
-    </developer>
-    <developer>
-      <name>Paul Gier</name>
-      <email>pgier at redhat</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-    <developer>
-      <name>Arnaud Heritier</name>
-      <email>aheritier at apache</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </developer>
-  </developers>
-  <contributors>
-    <contributor>
-      <name>Benoit Lafontaine</name>
-      <timezone>+1</timezone>
-    </contributor>
-    <contributor>
-      <name>Martin Franklin</name>
-    </contributor>
-    <contributor>
-      <name>Tom Folga</name>
-    </contributor>
-    <contributor>
-      <name>Eric Pabst</name>
-    </contributor>
-    <contributor>
-      <name>Stefan Seelmann</name>
-    </contributor>
-    <contributor>
-      <name>Clement Denis</name>
-    </contributor>
-    <contributor>
-      <name>Erik Schepers</name>
-    </contributor>
-    <contributor>
-      <name>Anton Johansson</name>
-      <email>antoon.johansson@gmail.com</email>
-      <timezone>+1</timezone>
-    </contributor>
-  </contributors>
-
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
-
-  <scm>
-    <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
-    <url>https://github.com/mojohaus/versions-maven-plugin/tree/${project.scm.tag}</url>
-    <tag>versions-maven-plugin-2.11.0</tag>
-  </scm>
-  <issueManagement>
-    <system>github</system>
-    <url>https://github.com/mojohaus/versions-maven-plugin/issues/</url>
-  </issueManagement>
 
   <dependencies>
     <dependency>
