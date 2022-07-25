@@ -875,7 +875,7 @@ public class PomHelper
         throws ExpressionEvaluationException, IOException
     {
         ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator( project );
-        Model model = getRawModel( project );
+        Model projectModel = getRawModel( project );
         Map<String, PropertyVersionsBuilder> result = new TreeMap<>();
 
         Set<String> activeProfiles = new TreeSet<>();
@@ -885,7 +885,7 @@ public class PomHelper
         }
 
         // add any properties from profiles first (as they override properties from the project
-        for ( Profile profile : model.getProfiles() )
+        for ( Profile profile : projectModel.getProfiles() )
         {
             if ( !activeProfiles.contains( profile.getId() ) )
             {
@@ -914,52 +914,62 @@ public class PomHelper
         }
 
         // second, we add all the properties in the pom
-        addProperties( helper, result, null, model.getProperties() );
-        if ( model.getDependencyManagement() != null )
+        addProperties( helper, result, null, projectModel.getProperties() );
+        Model model = projectModel;
+        MavenProject currentPrj = project;
+        while ( currentPrj != null )
         {
-            addDependencyAssocations( helper, expressionEvaluator, result,
-                                      model.getDependencyManagement().getDependencies(), false );
-        }
-        addDependencyAssocations( helper, expressionEvaluator, result, model.getDependencies(), false );
-        if ( model.getBuild() != null )
-        {
-            if ( model.getBuild().getPluginManagement() != null )
-            {
-                addPluginAssociations( helper, expressionEvaluator, result,
-                                       model.getBuild().getPluginManagement().getPlugins() );
-            }
-            addPluginAssociations( helper, expressionEvaluator, result, model.getBuild().getPlugins() );
-        }
-        if ( model.getReporting() != null )
-        {
-            addReportPluginAssociations( helper, expressionEvaluator, result, model.getReporting().getPlugins() );
-        }
-
-        // third, we add any associations from the active profiles
-        for ( Profile profile : model.getProfiles() )
-        {
-            if ( !activeProfiles.contains( profile.getId() ) )
-            {
-                continue;
-            }
-            if ( profile.getDependencyManagement() != null )
+            if ( model.getDependencyManagement() != null )
             {
                 addDependencyAssocations( helper, expressionEvaluator, result,
-                                          profile.getDependencyManagement().getDependencies(), false );
+                                          model.getDependencyManagement().getDependencies(), false );
             }
-            addDependencyAssocations( helper, expressionEvaluator, result, profile.getDependencies(), false );
-            if ( profile.getBuild() != null )
+            addDependencyAssocations( helper, expressionEvaluator, result, model.getDependencies(), false );
+            if ( model.getBuild() != null )
             {
-                if ( profile.getBuild().getPluginManagement() != null )
+                if ( model.getBuild().getPluginManagement() != null )
                 {
                     addPluginAssociations( helper, expressionEvaluator, result,
-                                           profile.getBuild().getPluginManagement().getPlugins() );
+                                           model.getBuild().getPluginManagement().getPlugins() );
                 }
-                addPluginAssociations( helper, expressionEvaluator, result, profile.getBuild().getPlugins() );
+                addPluginAssociations( helper, expressionEvaluator, result, model.getBuild().getPlugins() );
             }
-            if ( profile.getReporting() != null )
+            if ( model.getReporting() != null )
             {
-                addReportPluginAssociations( helper, expressionEvaluator, result, profile.getReporting().getPlugins() );
+                addReportPluginAssociations( helper, expressionEvaluator, result, model.getReporting().getPlugins() );
+            }
+
+            // third, we add any associations from the active profiles
+            for ( Profile profile : model.getProfiles() )
+            {
+                if ( !activeProfiles.contains( profile.getId() ) )
+                {
+                    continue;
+                }
+                if ( profile.getDependencyManagement() != null )
+                {
+                    addDependencyAssocations( helper, expressionEvaluator, result,
+                                              profile.getDependencyManagement().getDependencies(), false );
+                }
+                addDependencyAssocations( helper, expressionEvaluator, result, profile.getDependencies(), false );
+                if ( profile.getBuild() != null )
+                {
+                    if ( profile.getBuild().getPluginManagement() != null )
+                    {
+                        addPluginAssociations( helper, expressionEvaluator, result,
+                                               profile.getBuild().getPluginManagement().getPlugins() );
+                    }
+                    addPluginAssociations( helper, expressionEvaluator, result, profile.getBuild().getPlugins() );
+                }
+                if ( profile.getReporting() != null )
+                {
+                    addReportPluginAssociations( helper, expressionEvaluator, result, profile.getReporting().getPlugins() );
+                }
+            }
+            currentPrj = currentPrj.getParent();
+            if ( currentPrj != null )
+            {
+                model = currentPrj.getOriginalModel();
             }
         }
 
