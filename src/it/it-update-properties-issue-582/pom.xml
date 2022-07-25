@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-parent-issue-582</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <groupId>localhost</groupId>
+    <artifactId>it-update-properties-issue-582</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+    <name>update-properties with one property, with dependency in parent</name>
+
+    <properties>
+        <api>1.0</api>
+    </properties>
+
+</project>
