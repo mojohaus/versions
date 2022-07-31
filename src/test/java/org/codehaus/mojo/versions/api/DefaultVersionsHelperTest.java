@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions.api;
  */
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -33,6 +32,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.project.path.DefaultPathTranslator;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.Property;
@@ -220,7 +220,7 @@ public class DefaultVersionsHelperTest extends PlexusTestCase
 //        };
 
         DefaultVersionsHelper helper =
-            new DefaultVersionsHelper( new DefaultArtifactFactory(), new DefaultArtifactResolver(), metadataSource, new ArrayList(),
+            new DefaultVersionsHelper( lookup( RepositorySystem.class ), new DefaultArtifactResolver(), metadataSource, new ArrayList(),
                                        new ArrayList(),
                                        new DefaultArtifactRepository( "", "", new DefaultRepositoryLayout() ),
                                        wagonManager, new Settings(), "", rulesUri, mock( Log.class ), mock( MavenSession.class ),

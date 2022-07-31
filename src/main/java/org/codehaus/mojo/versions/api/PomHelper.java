@@ -441,8 +441,8 @@ public class PomHelper
         {
             return null;
         }
-        return helper.createDependencyArtifact( groupId, artifactId, VersionRange.createFromVersion( version ), "pom",
-                                                null, null, false );
+        return helper.createDependencyArtifact( groupId, artifactId, version , "pom",
+                                                null, null );
     }
 
     /**
@@ -1030,13 +1030,12 @@ public class PomHelper
                             artifactId = (String) expressionEvaluator.evaluate( artifactId );
                         }
                         // might as well capture the current value
-                        VersionRange versionRange =
-                            VersionRange.createFromVersion( (String) expressionEvaluator.evaluate( plugin.getVersion() ) );
-                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionRange ),
+                        String evaluatedVersion = (String) expressionEvaluator.evaluate( plugin.getVersion() );
+                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, evaluatedVersion ),
                                                  true );
                         if ( !propertyRef.equals( version ) )
                         {
-                            addBounds( property, version, propertyRef, versionRange.toString() );
+                            addBounds( property, version, propertyRef );
                         }
                     }
                 }
@@ -1087,13 +1086,12 @@ public class PomHelper
                             artifactId = (String) expressionEvaluator.evaluate( artifactId );
                         }
                         // might as well capture the current value
-                        VersionRange versionRange =
-                            VersionRange.createFromVersion( (String) expressionEvaluator.evaluate( plugin.getVersion() ) );
-                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionRange ),
+                        String versionEvaluated = (String) expressionEvaluator.evaluate( plugin.getVersion() );
+                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionEvaluated ),
                                                  true );
                         if ( !propertyRef.equals( version ) )
                         {
-                            addBounds( property, version, propertyRef, versionRange.toString() );
+                            addBounds( property, version, propertyRef );
                         }
                     }
                 }
@@ -1143,9 +1141,8 @@ public class PomHelper
                             artifactId = (String) expressionEvaluator.evaluate( artifactId );
                         }
                         // might as well capture the current value
-                        VersionRange versionRange =
-                            VersionRange.createFromVersion( (String) expressionEvaluator.evaluate( dependency.getVersion() ) );
-                        property.addAssociation( helper.createDependencyArtifact( groupId, artifactId, versionRange,
+                        String versionEvaluated = (String) expressionEvaluator.evaluate( dependency.getVersion() );
+                        property.addAssociation( helper.createDependencyArtifact( groupId, artifactId, versionEvaluated,
                                                                                   dependency.getType(),
                                                                                   dependency.getClassifier(),
                                                                                   dependency.getScope(),
@@ -1153,7 +1150,7 @@ public class PomHelper
                                                  usePluginRepositories );
                         if ( !propertyRef.equals( version ) )
                         {
-                            addBounds( property, version, propertyRef, versionRange.toString() );
+                            addBounds( property, version, propertyRef );
                         }
                     }
                 }
@@ -1161,8 +1158,7 @@ public class PomHelper
         }
     }
 
-    private static void addBounds( PropertyVersionsBuilder builder, String rawVersionRange, String propertyRef,
-                                   String evaluatedVersionRange )
+    private static void addBounds( PropertyVersionsBuilder builder, String rawVersionRange, String propertyRef )
     {
         Pattern lowerBound = Pattern.compile( "([(\\[])([^,]*)," + RegexUtils.quote( propertyRef ) + "([)\\]])" );
         Pattern upperBound = Pattern.compile( "([(\\[])" + RegexUtils.quote( propertyRef ) + ",([^,]*)([)\\]])" );
