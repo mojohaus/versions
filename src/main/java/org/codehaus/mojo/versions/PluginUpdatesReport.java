@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -136,7 +135,7 @@ public class PluginUpdatesReport
                 }
             }
         }
-        catch ( InvalidVersionSpecificationException | ArtifactMetadataRetrievalException e )
+        catch ( ArtifactMetadataRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }

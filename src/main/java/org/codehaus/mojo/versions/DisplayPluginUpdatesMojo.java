@@ -29,13 +29,13 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.RuntimeInformation;
 import org.apache.maven.lifecycle.Lifecycle;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.mapping.LifecycleMapping;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.InputLocation;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
@@ -148,7 +148,6 @@ public class DisplayPluginUpdatesMojo
     /**
      * The plugin manager.
      *
-     * @component
      * @since 1.0-alpha-1
      */
     @Component
@@ -414,18 +413,8 @@ public class DisplayPluginUpdatesMojo
             getLog().debug( "Checking " + coords + " for updates newer than " + version );
             String effectiveVersion = version;
 
-            Artifact artifactRange;
-            try
-            {
-                boolean unspecified = ( version == null );
-                VersionRange versionRange = unspecified ? VersionRange.createFromVersionSpec( "[0,)" )
-                                : VersionRange.createFromVersionSpec( version );
-                artifactRange = artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
-            }
-            catch ( InvalidVersionSpecificationException e )
-            {
-                throw new MojoExecutionException( "Invalid version range specification: " + version, e );
-            }
+            Artifact artifactRange = getHelper().createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(),
+                                                                       version );
 
             ArtifactVersion artifactVersion = null;
             try
@@ -436,10 +425,15 @@ public class DisplayPluginUpdatesMojo
                 ArtifactVersion minRequires = null;
                 for ( int j = newerVersions.length - 1; j >= 0; j-- )
                 {
-                    Artifact probe =
-                        artifactFactory.createDependencyArtifact( groupId, artifactId,
-                                                                  VersionRange.createFromVersion( newerVersions[j].toString() ),
-                                                                  "pom", null, "runtime" );
+
+                    Dependency dependency = new Dependency();
+                    dependency.setGroupId( groupId );
+                    dependency.setArtifactId( artifactId );
+                    dependency.setVersion( newerVersions[j].toString() );
+                    dependency.setType( "pom" );
+                    dependency.setScope( "runtime" );
+
+                    Artifact probe = getHelper().createDependencyArtifact( dependency );
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
@@ -495,9 +489,14 @@ public class DisplayPluginUpdatesMojo
                 }
                 if ( effectiveVersion != null )
                 {
-                    VersionRange currentVersionRange = VersionRange.createFromVersion( effectiveVersion );
-                    Artifact probe = artifactFactory.createDependencyArtifact( groupId, artifactId, currentVersionRange,
-                                                                               "pom", null, "runtime" );
+                    Dependency dependency = new Dependency();
+                    dependency.setGroupId( groupId );
+                    dependency.setArtifactId( artifactId );
+                    dependency.setVersion( effectiveVersion );
+                    dependency.setType( "pom" );
+                    dependency.setScope( "runtime" );
+
+                    Artifact probe = getHelper().createDependencyArtifact( dependency );
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
@@ -769,7 +768,7 @@ public class DisplayPluginUpdatesMojo
                     map.keySet().retainAll( withVersionSpecified );
                     parentPlugins.putAll( map );
                 }
-                catch ( IOException | XMLStreamException e )
+                catch ( XMLStreamException e )
                 {
                     throw new MojoExecutionException( e.getMessage(), e );
                 }
@@ -851,7 +850,7 @@ public class DisplayPluginUpdatesMojo
      * @return a set of Strings which correspond to the plugin coordinates where there is a version specified.
      */
     private Set<String> findPluginsWithVersionsSpecified( StringBuilder pomContents, String path )
-        throws IOException, XMLStreamException
+        throws XMLStreamException
     {
         Set<String> result = new HashSet<>();
         ModifiedPomXMLEventReader pom = newModifiedPomXER( pomContents, path );

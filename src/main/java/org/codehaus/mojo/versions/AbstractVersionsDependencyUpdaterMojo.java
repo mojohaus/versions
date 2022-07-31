@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -231,14 +230,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         Artifact artifact = findArtifact( dependency );
         if ( artifact == null )
         {
-            try
-            {
-                return getHelper().createDependencyArtifact( dependency );
-            }
-            catch ( InvalidVersionSpecificationException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
+            return getHelper().createDependencyArtifact( dependency );
         }
         return artifact;
     }

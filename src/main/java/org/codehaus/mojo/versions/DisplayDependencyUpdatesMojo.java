@@ -22,7 +22,6 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -153,6 +152,7 @@ public class DisplayDependencyUpdatesMojo
      * @deprecated This will be removed with version 3.0.0
      * @since 2.5
      */
+    @Deprecated
     @Parameter(property = "allowAnyUpdates", defaultValue = "true")
     private boolean allowAnyUpdates;
 
@@ -388,7 +388,7 @@ public class DisplayDependencyUpdatesMojo
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
             }
         }
-        catch ( InvalidVersionSpecificationException | ArtifactMetadataRetrievalException e )
+        catch ( ArtifactMetadataRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }

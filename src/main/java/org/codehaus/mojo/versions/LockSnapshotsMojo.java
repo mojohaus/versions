@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -193,10 +192,7 @@ public class LockSnapshotsMojo
 
         try
         {
-            Artifact depArtifact =
-                artifactFactory.createDependencyArtifact( dep.getGroupId(), dep.getArtifactId(),
-                                                          VersionRange.createFromVersionSpec( dep.getVersion() ),
-                                                          dep.getType(), dep.getClassifier(), dep.getScope() );
+            Artifact depArtifact = getHelper().createDependencyArtifact( dep );
             resolver.resolve( depArtifact, getProject().getRemoteArtifactRepositories(), localRepository );
 
             lockedVersion = depArtifact.getVersion();

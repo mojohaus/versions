@@ -38,6 +38,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.path.PathTranslator;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
@@ -80,11 +81,8 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( defaultValue = "${project}", required = true, readonly = true )
     protected MavenProject project;
 
-    /**
-     * @since 1.0-alpha-1
-     */
     @Component
-    protected org.apache.maven.artifact.factory.ArtifactFactory artifactFactory;
+    protected RepositorySystem repositorySystem;
 
     /**
      * @since 1.0-alpha-1
@@ -131,7 +129,6 @@ public abstract class AbstractVersionsUpdaterMojo
     protected ArtifactRepository localRepository;
 
     /**
-     * @component
      * @since 1.0-alpha-3
      */
     @Component
@@ -223,7 +220,7 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         if ( helper == null )
         {
-            helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource,
+            helper = new DefaultVersionsHelper( repositorySystem, artifactResolver, artifactMetadataSource,
                                                 remoteArtifactRepositories, remotePluginRepositories, localRepository,
                                                 wagonManager, settings, serverId, rulesUri, getLog(), session,
                                                 pathTranslator );
