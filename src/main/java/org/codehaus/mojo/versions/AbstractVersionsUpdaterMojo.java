@@ -457,16 +457,16 @@ public abstract class AbstractVersionsUpdaterMojo
     {
         getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
 
-        if ( forceUpdate )
-        {
-            getLog().info( "Force update enabled. LATEST or RELEASE versions will be overwritten with real version" );
-            return true;
-        }
-
         if ( updateVersion == null )
         {
             getLog().warn( "Not updating version: could not resolve any versions" );
             return false;
+        }
+
+        if ( forceUpdate )
+        {
+            getLog().info( "Force update enabled. LATEST or RELEASE versions will be overwritten with real version" );
+            return true;
         }
 
         artifact.setVersion( updateVersion.toString() );
