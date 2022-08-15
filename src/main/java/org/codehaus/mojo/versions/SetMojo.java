@@ -84,7 +84,7 @@ public class SetMojo
 
     /**
      * The groupId of the dependency/module to update.
-     * If you like to update modules of a aggregator you 
+     * If you like to update modules of a aggregator you
      * should set <code>-DgroupId='*'</code> to ignore the
      * group of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
@@ -97,7 +97,7 @@ public class SetMojo
 
     /**
      * The artifactId of the dependency/module to update.
-     * If you like to update modules of a aggregator you 
+     * If you like to update modules of a aggregator you
      * should set <code>-DartifactId='*'</code> to ignore the
      * artifactId of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
@@ -205,10 +205,21 @@ public class SetMojo
     /**
      * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
      *
+     * @deprecated please use {@link #updateBuildOutputTimestampPolicy} instead
      * @since 2.10
      */
     @Parameter( property = "updateBuildOutputTimestamp", defaultValue = "true" )
     private boolean updateBuildOutputTimestamp;
+
+    /**
+     * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
+     * Valid values are: <code>onchange</code>, which will only change <code>outputTimestamp</code> for changed POMs,
+     * <code>always</code>, <code>never</code>.
+     *
+     * @since 2.12
+     */
+    @Parameter( property = "updateBuildOutputTimestampPolicy", defaultValue = "onchange" )
+    private String updateBuildOutputTimestampPolicy;
 
     /**
      * The changes to module coordinates. Guarded by this.
@@ -299,6 +310,14 @@ public class SetMojo
         {
             throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
                 + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+        }
+
+        if ( !"onchange".equals( updateBuildOutputTimestampPolicy )
+                && !"always".equals( updateBuildOutputTimestampPolicy )
+                && !"never".equals( updateBuildOutputTimestampPolicy ) )
+        {
+            throw new MojoExecutionException( "updateBuildOutputTimestampPolicy should be one of: "
+                    + "\"onchange\", \"always\", \"never\"." );
         }
 
         try
@@ -513,10 +532,12 @@ public class SetMojo
             for ( VersionChange versionChange : sourceChanges )
             {
                 changer.apply( versionChange );
+            }
 
-                if (updateBuildOutputTimestamp) {
+            if ( updateBuildOutputTimestamp && !"never".equals( updateBuildOutputTimestampPolicy ) ) {
+                if ( "always".equals( updateBuildOutputTimestampPolicy) || !sourceChanges.isEmpty() ) {
                     // also update project.build.outputTimestamp
-                    updateBuildOutputTimestamp( pom, model );
+                    updateBuildOutputTimestamp(pom, model);
                 }
             }
         }
