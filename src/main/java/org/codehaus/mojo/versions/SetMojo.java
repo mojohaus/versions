@@ -204,8 +204,8 @@ public class SetMojo
 
     /**
      * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
-     * Deprecated; please use <code>updateBuildOutputTimestampPolicy</code> instead.
      *
+     * @deprecated please use {@link #updateBuildOutputTimestampPolicy} instead
      * @since 2.10
      */
     @Parameter( property = "updateBuildOutputTimestamp", defaultValue = "true" )
@@ -213,6 +213,8 @@ public class SetMojo
 
     /**
      * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
+     * Valid values are: <code>onchange</code>, which will only change <code>outputTimestamp</code> for changed POMs,
+     * <code>always</code>, <code>never</code>.
      *
      * @since 2.12
      */
