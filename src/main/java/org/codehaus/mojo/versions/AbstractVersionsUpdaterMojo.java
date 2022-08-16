@@ -44,6 +44,7 @@ import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.api.VersionHistoryHelper;
 import org.codehaus.mojo.versions.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.recording.ChangeRecorderNull;
 import org.codehaus.mojo.versions.recording.ChangeRecorderXML;
@@ -59,6 +60,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -182,6 +184,8 @@ public abstract class AbstractVersionsUpdaterMojo
      */
     private VersionsHelper helper;
 
+    private VersionHistoryHelper versionHistoryHelper;
+
     /**
      * The Maven Session.
      *
@@ -229,6 +233,16 @@ public abstract class AbstractVersionsUpdaterMojo
                                                 pathTranslator );
         }
         return helper;
+    }
+
+    public VersionHistoryHelper getVersionHistoryHelper()
+    {
+        if ( versionHistoryHelper == null )
+        {
+            versionHistoryHelper = new VersionHistoryHelper( remoteArtifactRepositories, remotePluginRepositories, getLog() );
+        }
+
+        return versionHistoryHelper;
     }
 
     /**
@@ -303,6 +317,40 @@ public abstract class AbstractVersionsUpdaterMojo
             includeSnapshots = false;
         }
         final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
+        return artifactVersions.getNewestVersion( versionRange, includeSnapshots );
+    }
+
+    /**
+     * Finds the latest version of the specified artifact that matches the version range.
+     *
+     * @param artifact The artifact.
+     * @param versionRange The version range.
+     * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
+     * @param usePluginRepositories Use plugin repositories
+     * @return The latest version of the specified artifact that matches the specified version range or
+     *         <code>null</code> if no matching version could be found.
+     * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
+     * @throws MojoExecutionException if something goes wrong.
+     * @since 1.0-alpha-1
+     */
+    protected ArtifactVersion findLatestVersionHistorical( Artifact artifact, VersionRange versionRange,
+                                                 Boolean allowingSnapshots, boolean usePluginRepositories,
+                                                           ZonedDateTime versionsAsOf )
+            throws ArtifactMetadataRetrievalException, MojoExecutionException
+    {
+        boolean includeSnapshots = this.allowSnapshots;
+        if ( Boolean.TRUE.equals( allowingSnapshots ) )
+        {
+            includeSnapshots = true;
+        }
+        if ( Boolean.FALSE.equals( allowingSnapshots ) )
+        {
+            includeSnapshots = false;
+        }
+        ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
+
+        artifactVersions = getVersionHistoryHelper().filterVersions(artifactVersions, versionsAsOf, includeSnapshots);
+
         return artifactVersions.getNewestVersion( versionRange, includeSnapshots );
     }
 
