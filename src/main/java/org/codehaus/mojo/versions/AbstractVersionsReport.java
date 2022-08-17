@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -38,6 +37,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
@@ -82,14 +82,10 @@ public abstract class AbstractVersionsReport
     @Parameter( defaultValue = "${project}", required = true, readonly = true )
     private MavenProject project;
 
-    /**
-     * @since 1.0-alpha-3
-     */
     @Component
-    protected ArtifactFactory artifactFactory;
+    protected RepositorySystem repositorySystem;
 
     /**
-     * @component
      * @since 1.0-alpha-3
      */
     @Component
@@ -215,7 +211,7 @@ public abstract class AbstractVersionsReport
         {
             try
             {
-                helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource,
+                helper = new DefaultVersionsHelper( repositorySystem, artifactResolver, artifactMetadataSource,
                                                     remoteArtifactRepositories, remotePluginRepositories,
                                                     localRepository, wagonManager, settings, serverId, rulesUri,
                                                     getLog(), session, pathTranslator );

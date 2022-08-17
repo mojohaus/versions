@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -31,8 +30,6 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
@@ -40,6 +37,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.path.PathTranslator;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -141,12 +139,7 @@ public class DefaultVersionsHelper
      */
     private final List<ArtifactRepository> remotePluginRepositories;
 
-    /**
-     * The artifact factory.
-     *
-     * @since 1.0-alpha-3
-     */
-    private final ArtifactFactory artifactFactory;
+    private final RepositorySystem repositorySystem;
 
     /**
      * The {@link Log} to send log messages to.
@@ -179,7 +172,7 @@ public class DefaultVersionsHelper
     /**
      * Constructs a new {@link DefaultVersionsHelper}.
      *
-     * @param artifactFactory The artifact factory.
+     * @param repositorySystem The repositorySystem.
      * @param artifactResolver Artifact resolver
      * @param artifactMetadataSource The artifact metadata source to use.
      * @param remoteArtifactRepositories The remote artifact repositories to consult.
@@ -196,14 +189,14 @@ public class DefaultVersionsHelper
      * @throws MojoExecutionException if something goes wrong.
      * @since 1.0-alpha-3
      */
-    public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
+    public DefaultVersionsHelper( RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
                                   ArtifactMetadataSource artifactMetadataSource, List<ArtifactRepository> remoteArtifactRepositories,
                                   List<ArtifactRepository> remotePluginRepositories, ArtifactRepository localRepository,
                                   WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
                                   Log log, MavenSession mavenSession, PathTranslator pathTranslator )
         throws MojoExecutionException
     {
-        this.artifactFactory = artifactFactory;
+        this.repositorySystem = repositorySystem;
         this.artifactResolver = artifactResolver;
         this.mavenSession = mavenSession;
         this.pathTranslator = pathTranslator;
@@ -376,25 +369,13 @@ public class DefaultVersionsHelper
         return (uri != null && uri.startsWith(CLASSPATH_PROTOCOL + ":"));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public ArtifactFactory getArtifactFactory()
-    {
-        return artifactFactory;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Log getLog()
     {
         return log;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
@@ -517,6 +498,7 @@ public class DefaultVersionsHelper
         return buf.toString();
     }
 
+    @Override
     public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactResolutionException, ArtifactNotFoundException
     {
@@ -524,17 +506,13 @@ public class DefaultVersionsHelper
         artifactResolver.resolve( artifact, remoteRepositories, localRepository );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public VersionComparator getVersionComparator( Artifact artifact )
     {
         return getVersionComparator( artifact.getGroupId(), artifact.getArtifactId() );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public VersionComparator getVersionComparator( String groupId, String artifactId )
     {
         Rule rule = getBestFitRule( groupId, artifactId );
@@ -603,49 +581,51 @@ public class DefaultVersionsHelper
         return bestFit;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Artifact createPluginArtifact( String groupId, String artifactId, VersionRange versionRange )
+    @Override
+    public Artifact createPluginArtifact( String groupId, String artifactId, String version )
     {
-        return artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
+        Plugin plugin = new Plugin();
+        plugin.setGroupId( groupId );
+        plugin.setArtifactId( artifactId );
+        plugin.setVersion( StringUtils.isNotBlank( version) ? version : "[0,]" );
+        return repositorySystem.createPluginArtifact( plugin );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
+    @Override
+    public Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
                                               String classifier, String scope, boolean optional )
     {
-        return artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, type, classifier, scope,
-                                                         optional );
+        Dependency dependency = new Dependency();
+        dependency.setGroupId( groupId );
+        dependency.setArtifactId( artifactId );
+        dependency.setType( type );
+        dependency.setClassifier( classifier );
+        dependency.setScope( scope );
+        dependency.setOptional( optional );
+        dependency.setVersion( StringUtils.isNotBlank( version) ? version : "[0,]" );
+        return repositorySystem.createDependencyArtifact( dependency );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
+    @Override
+    public Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
                                               String classifier, String scope )
     {
-        return artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, type, classifier, scope );
+        return createDependencyArtifact( groupId, artifactId, version, type, classifier, scope, false );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Artifact createDependencyArtifact( Dependency dependency )
-        throws InvalidVersionSpecificationException
     {
-        return createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                         dependency.getVersion() == null ? VersionRange.createFromVersionSpec( "[0,]" )
-                                                         : VersionRange.createFromVersionSpec( dependency.getVersion() ),
-                                         dependency.getType(), dependency.getClassifier(), dependency.getScope(),
-                                         dependency.isOptional() );
+        if ( StringUtils.isBlank( dependency.getVersion() ) )
+        {
+            dependency = dependency.clone();
+            dependency.setVersion( "[,0]" );
+        }
+
+        return repositorySystem.createDependencyArtifact( dependency );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Set<Artifact> extractArtifacts( Collection<MavenProject> mavenProjects )
     {
         Set<Artifact> result = new HashSet<>();
@@ -657,17 +637,13 @@ public class DefaultVersionsHelper
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ArtifactVersion createArtifactVersion( String version )
     {
         return new DefaultArtifactVersion( version );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots,
                                                    boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
@@ -679,12 +655,10 @@ public class DefaultVersionsHelper
         return artifactVersions;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                         boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException
     {
         // Create the request for details collection for parallel lookup...
         final List<Callable<DependencyArtifactVersions>> requestsForDetails =
@@ -722,28 +696,20 @@ public class DefaultVersionsHelper
         return dependencyUpdates;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException
     {
         getLog().debug( "Checking "
             + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )
             + " for updates newer than " + dependency.getVersion() );
-        VersionRange versionRange = VersionRange.createFromVersionSpec( dependency.getVersion() );
 
-        return lookupArtifactVersions( createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                                                 versionRange, dependency.getType(),
-                                                                 dependency.getClassifier(), dependency.getScope() ),
-                                       usePluginRepositories );
+        return lookupArtifactVersions( createDependencyArtifact( dependency ), usePluginRepositories );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException
     {
         // Create the request for details collection for parallel lookup...
         List<Callable<PluginPluginUpdatesDetails>> requestsForDetails = new ArrayList<>( plugins.size() );
@@ -780,23 +746,19 @@ public class DefaultVersionsHelper
         return pluginUpdates;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException
     {
         String version = plugin.getVersion();
         version = version == null ? "LATEST" : version;
         getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
             + " for updates newer than " + version );
 
-        VersionRange versionRange = VersionRange.createFromVersion( version );
-
         boolean includeSnapshots = allowSnapshots;
 
         final ArtifactVersions pluginArtifactVersions =
-            lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
+            lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), version ),
                                     true );
 
         Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
@@ -810,17 +772,13 @@ public class DefaultVersionsHelper
         return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, includeSnapshots );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ExpressionEvaluator getExpressionEvaluator( MavenProject project )
     {
         return new VersionsExpressionEvaluator( mavenSession, pathTranslator, project );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Map<Property, PropertyVersions> getVersionPropertiesMap( MavenProject project,
                                                                     Property[] propertyDefinitions,
                                                                     String includeProperties, String excludeProperties,
@@ -908,15 +866,8 @@ public class DefaultVersionsHelper
             {
                 for ( Dependency dependency : dependencies )
                 {
-                    try
-                    {
-                        getLog().debug( "Property ${" + property.getName() + "}: Adding association to " + dependency );
-                        builder.addAssociation( this.createDependencyArtifact( dependency ), false );
-                    }
-                    catch ( InvalidVersionSpecificationException e )
-                    {
-                        throw new MojoExecutionException( e.getMessage(), e );
-                    }
+                    getLog().debug( "Property ${" + property.getName() + "}: Adding association to " + dependency );
+                    builder.addAssociation( this.createDependencyArtifact( dependency ), false );
                 }
             }
             try

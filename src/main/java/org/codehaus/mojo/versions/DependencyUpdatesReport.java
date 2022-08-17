@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -178,7 +177,7 @@ public class DependencyUpdatesReport
                 }
             }
         }
-        catch ( InvalidVersionSpecificationException| ArtifactMetadataRetrievalException e )
+        catch ( ArtifactMetadataRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }

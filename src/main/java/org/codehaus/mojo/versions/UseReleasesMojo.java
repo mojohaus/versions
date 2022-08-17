@@ -22,8 +22,6 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -119,20 +117,15 @@ public class UseReleasesMojo
         {
             String releaseVersion = versionMatcher.group( 1 );
 
-            VersionRange versionRange;
-            try
-            {
-                versionRange = VersionRange.createFromVersionSpec( releaseVersion );
-            }
-            catch ( InvalidVersionSpecificationException e )
-            {
-                throw new MojoExecutionException( "Invalid version range specification: " + version, e );
-            }
-
             final MavenProject parent = getProject().getParent();
-            Artifact artifact = artifactFactory.createDependencyArtifact( parent.getGroupId(),
-                                                                          parent.getArtifactId(),
-                                                                          versionRange, "pom", null, null );
+
+            Dependency dependency = new Dependency();
+            dependency.setGroupId( parent.getGroupId() );
+            dependency.setArtifactId( parent.getArtifactId() );
+            dependency.setVersion( releaseVersion );
+            dependency.setType( "pom" );
+
+            Artifact artifact = getHelper().createDependencyArtifact( dependency );
             if ( !isIncluded( artifact ) )
             {
                 return;

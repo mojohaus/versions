@@ -441,8 +441,8 @@ public class PomHelper
         {
             return null;
         }
-        return helper.createDependencyArtifact( groupId, artifactId, VersionRange.createFromVersion( version ), "pom",
-                                                null, null, false );
+        return helper.createDependencyArtifact( groupId, artifactId, version , "pom",
+                                                null, null );
     }
 
     /**
@@ -875,7 +875,7 @@ public class PomHelper
         throws ExpressionEvaluationException, IOException
     {
         ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator( project );
-        Model model = getRawModel( project );
+        Model projectModel = getRawModel( project );
         Map<String, PropertyVersionsBuilder> result = new TreeMap<>();
 
         Set<String> activeProfiles = new TreeSet<>();
@@ -885,7 +885,7 @@ public class PomHelper
         }
 
         // add any properties from profiles first (as they override properties from the project
-        for ( Profile profile : model.getProfiles() )
+        for ( Profile profile : projectModel.getProfiles() )
         {
             if ( !activeProfiles.contains( profile.getId() ) )
             {
@@ -914,52 +914,62 @@ public class PomHelper
         }
 
         // second, we add all the properties in the pom
-        addProperties( helper, result, null, model.getProperties() );
-        if ( model.getDependencyManagement() != null )
+        addProperties( helper, result, null, projectModel.getProperties() );
+        Model model = projectModel;
+        MavenProject currentPrj = project;
+        while ( currentPrj != null )
         {
-            addDependencyAssocations( helper, expressionEvaluator, result,
-                                      model.getDependencyManagement().getDependencies(), false );
-        }
-        addDependencyAssocations( helper, expressionEvaluator, result, model.getDependencies(), false );
-        if ( model.getBuild() != null )
-        {
-            if ( model.getBuild().getPluginManagement() != null )
-            {
-                addPluginAssociations( helper, expressionEvaluator, result,
-                                       model.getBuild().getPluginManagement().getPlugins() );
-            }
-            addPluginAssociations( helper, expressionEvaluator, result, model.getBuild().getPlugins() );
-        }
-        if ( model.getReporting() != null )
-        {
-            addReportPluginAssociations( helper, expressionEvaluator, result, model.getReporting().getPlugins() );
-        }
-
-        // third, we add any associations from the active profiles
-        for ( Profile profile : model.getProfiles() )
-        {
-            if ( !activeProfiles.contains( profile.getId() ) )
-            {
-                continue;
-            }
-            if ( profile.getDependencyManagement() != null )
+            if ( model.getDependencyManagement() != null )
             {
                 addDependencyAssocations( helper, expressionEvaluator, result,
-                                          profile.getDependencyManagement().getDependencies(), false );
+                                          model.getDependencyManagement().getDependencies(), false );
             }
-            addDependencyAssocations( helper, expressionEvaluator, result, profile.getDependencies(), false );
-            if ( profile.getBuild() != null )
+            addDependencyAssocations( helper, expressionEvaluator, result, model.getDependencies(), false );
+            if ( model.getBuild() != null )
             {
-                if ( profile.getBuild().getPluginManagement() != null )
+                if ( model.getBuild().getPluginManagement() != null )
                 {
                     addPluginAssociations( helper, expressionEvaluator, result,
-                                           profile.getBuild().getPluginManagement().getPlugins() );
+                                           model.getBuild().getPluginManagement().getPlugins() );
                 }
-                addPluginAssociations( helper, expressionEvaluator, result, profile.getBuild().getPlugins() );
+                addPluginAssociations( helper, expressionEvaluator, result, model.getBuild().getPlugins() );
             }
-            if ( profile.getReporting() != null )
+            if ( model.getReporting() != null )
             {
-                addReportPluginAssociations( helper, expressionEvaluator, result, profile.getReporting().getPlugins() );
+                addReportPluginAssociations( helper, expressionEvaluator, result, model.getReporting().getPlugins() );
+            }
+
+            // third, we add any associations from the active profiles
+            for ( Profile profile : model.getProfiles() )
+            {
+                if ( !activeProfiles.contains( profile.getId() ) )
+                {
+                    continue;
+                }
+                if ( profile.getDependencyManagement() != null )
+                {
+                    addDependencyAssocations( helper, expressionEvaluator, result,
+                                              profile.getDependencyManagement().getDependencies(), false );
+                }
+                addDependencyAssocations( helper, expressionEvaluator, result, profile.getDependencies(), false );
+                if ( profile.getBuild() != null )
+                {
+                    if ( profile.getBuild().getPluginManagement() != null )
+                    {
+                        addPluginAssociations( helper, expressionEvaluator, result,
+                                               profile.getBuild().getPluginManagement().getPlugins() );
+                    }
+                    addPluginAssociations( helper, expressionEvaluator, result, profile.getBuild().getPlugins() );
+                }
+                if ( profile.getReporting() != null )
+                {
+                    addReportPluginAssociations( helper, expressionEvaluator, result, profile.getReporting().getPlugins() );
+                }
+            }
+            currentPrj = currentPrj.getParent();
+            if ( currentPrj != null )
+            {
+                model = currentPrj.getOriginalModel();
             }
         }
 
@@ -1020,13 +1030,12 @@ public class PomHelper
                             artifactId = (String) expressionEvaluator.evaluate( artifactId );
                         }
                         // might as well capture the current value
-                        VersionRange versionRange =
-                            VersionRange.createFromVersion( (String) expressionEvaluator.evaluate( plugin.getVersion() ) );
-                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionRange ),
+                        String evaluatedVersion = (String) expressionEvaluator.evaluate( plugin.getVersion() );
+                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, evaluatedVersion ),
                                                  true );
                         if ( !propertyRef.equals( version ) )
                         {
-                            addBounds( property, version, propertyRef, versionRange.toString() );
+                            addBounds( property, version, propertyRef );
                         }
                     }
                 }
@@ -1077,13 +1086,12 @@ public class PomHelper
                             artifactId = (String) expressionEvaluator.evaluate( artifactId );
                         }
                         // might as well capture the current value
-                        VersionRange versionRange =
-                            VersionRange.createFromVersion( (String) expressionEvaluator.evaluate( plugin.getVersion() ) );
-                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionRange ),
+                        String versionEvaluated = (String) expressionEvaluator.evaluate( plugin.getVersion() );
+                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionEvaluated ),
                                                  true );
                         if ( !propertyRef.equals( version ) )
                         {
-                            addBounds( property, version, propertyRef, versionRange.toString() );
+                            addBounds( property, version, propertyRef );
                         }
                     }
                 }
@@ -1133,9 +1141,8 @@ public class PomHelper
                             artifactId = (String) expressionEvaluator.evaluate( artifactId );
                         }
                         // might as well capture the current value
-                        VersionRange versionRange =
-                            VersionRange.createFromVersion( (String) expressionEvaluator.evaluate( dependency.getVersion() ) );
-                        property.addAssociation( helper.createDependencyArtifact( groupId, artifactId, versionRange,
+                        String versionEvaluated = (String) expressionEvaluator.evaluate( dependency.getVersion() );
+                        property.addAssociation( helper.createDependencyArtifact( groupId, artifactId, versionEvaluated,
                                                                                   dependency.getType(),
                                                                                   dependency.getClassifier(),
                                                                                   dependency.getScope(),
@@ -1143,7 +1150,7 @@ public class PomHelper
                                                  usePluginRepositories );
                         if ( !propertyRef.equals( version ) )
                         {
-                            addBounds( property, version, propertyRef, versionRange.toString() );
+                            addBounds( property, version, propertyRef );
                         }
                     }
                 }
@@ -1151,8 +1158,7 @@ public class PomHelper
         }
     }
 
-    private static void addBounds( PropertyVersionsBuilder builder, String rawVersionRange, String propertyRef,
-                                   String evaluatedVersionRange )
+    private static void addBounds( PropertyVersionsBuilder builder, String rawVersionRange, String propertyRef )
     {
         Pattern lowerBound = Pattern.compile( "([(\\[])([^,]*)," + RegexUtils.quote( propertyRef ) + "([)\\]])" );
         Pattern upperBound = Pattern.compile( "([(\\[])" + RegexUtils.quote( propertyRef ) + ",([^,]*)([)\\]])" );

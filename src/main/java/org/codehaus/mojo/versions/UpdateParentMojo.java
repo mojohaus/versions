@@ -24,6 +24,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -53,8 +54,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "parentVersion",
-                defaultValue = "null" )
+    @Parameter( property = "parentVersion" )
     protected String parentVersion = null;
 
     /**
@@ -107,8 +107,12 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
             throw new MojoExecutionException( "Invalid version range specification: " + version, e );
         }
 
-        Artifact artifact = artifactFactory.createDependencyArtifact( getProject().getParent().getGroupId(),
-                getProject().getParent().getArtifactId(), versionRange, "pom", null, null );
+        Dependency dependency = new Dependency();
+        dependency.setGroupId( getProject().getParent().getGroupId() );
+        dependency.setArtifactId( getProject().getParent().getArtifactId() );
+        dependency.setVersion( version );
+        dependency.setType( "pom" );
+        Artifact artifact = getHelper().createDependencyArtifact( dependency );
 
         ArtifactVersion artifactVersion;
         try
