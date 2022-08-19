@@ -30,11 +30,11 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
@@ -196,8 +196,8 @@ public abstract class AbstractVersionsReport
     @Parameter( defaultValue = "${session}", required = true, readonly = true )
     protected MavenSession session;
 
-    @Component
-    protected PathTranslator pathTranslator;
+    @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
+    private MojoExecution mojoExecution;
 
     @Component
     protected ArtifactResolver artifactResolver;
@@ -214,7 +214,7 @@ public abstract class AbstractVersionsReport
                 helper = new DefaultVersionsHelper( repositorySystem, artifactResolver, artifactMetadataSource,
                                                     remoteArtifactRepositories, remotePluginRepositories,
                                                     localRepository, wagonManager, settings, serverId, rulesUri,
-                                                    getLog(), session, pathTranslator );
+                                                    getLog(), session, mojoExecution );
             }
             catch ( MojoExecutionException e )
             {

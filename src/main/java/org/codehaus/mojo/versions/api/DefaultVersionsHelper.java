@@ -33,10 +33,10 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.ConnectionException;
@@ -149,13 +149,6 @@ public class DefaultVersionsHelper
     private final Log log;
 
     /**
-     * The path translator.
-     *
-     * @since 1.0-beta-1
-     */
-    private final PathTranslator pathTranslator;
-
-    /**
      * The maven session.
      *
      * @since 1.0-beta-1
@@ -168,6 +161,8 @@ public class DefaultVersionsHelper
      * @since 1.3
      */
     private final ArtifactResolver artifactResolver;
+
+    private final MojoExecution mojoExecution;
 
     /**
      * Constructs a new {@link DefaultVersionsHelper}.
@@ -184,8 +179,6 @@ public class DefaultVersionsHelper
      * @param rulesUri The URL to retrieve the versioning rules from.
      * @param log The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
      * @param mavenSession The maven session information.
-     * @param pathTranslator The path translator component. @throws org.apache.maven.plugin.MojoExecutionException If
-     *            things go wrong.
      * @throws MojoExecutionException if something goes wrong.
      * @since 1.0-alpha-3
      */
@@ -193,13 +186,13 @@ public class DefaultVersionsHelper
                                   ArtifactMetadataSource artifactMetadataSource, List<ArtifactRepository> remoteArtifactRepositories,
                                   List<ArtifactRepository> remotePluginRepositories, ArtifactRepository localRepository,
                                   WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
-                                  Log log, MavenSession mavenSession, PathTranslator pathTranslator )
+                                  Log log, MavenSession mavenSession, MojoExecution mojoExecution )
         throws MojoExecutionException
     {
         this.repositorySystem = repositorySystem;
         this.artifactResolver = artifactResolver;
         this.mavenSession = mavenSession;
-        this.pathTranslator = pathTranslator;
+        this.mojoExecution = mojoExecution;
         this.ruleSet = loadRuleSet( serverId, settings, wagonManager, rulesUri, log );
         this.artifactMetadataSource = artifactMetadataSource;
         this.localRepository = localRepository;
@@ -775,7 +768,7 @@ public class DefaultVersionsHelper
     @Override
     public ExpressionEvaluator getExpressionEvaluator( MavenProject project )
     {
-        return new VersionsExpressionEvaluator( mavenSession, pathTranslator, project );
+        return new VersionsExpressionEvaluator( mavenSession, mojoExecution );
     }
 
     @Override

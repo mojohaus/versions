@@ -31,6 +31,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
@@ -187,8 +188,8 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( defaultValue = "${session}", required = true, readonly = true )
     protected MavenSession session;
 
-    @Component
-    protected PathTranslator pathTranslator;
+    @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
+    private MojoExecution mojoExecution;
 
     @Component
     protected ArtifactResolver artifactResolver;
@@ -222,8 +223,8 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             helper = new DefaultVersionsHelper( repositorySystem, artifactResolver, artifactMetadataSource,
                                                 remoteArtifactRepositories, remotePluginRepositories, localRepository,
-                                                wagonManager, settings, serverId, rulesUri, getLog(), session,
-                                                pathTranslator );
+                                                wagonManager, settings, serverId, rulesUri, getLog(),
+                                                session, mojoExecution );
         }
         return helper;
     }
