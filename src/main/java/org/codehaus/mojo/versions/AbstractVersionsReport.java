@@ -57,30 +57,13 @@ import java.util.Locale;
 public abstract class AbstractVersionsReport
     extends AbstractMavenReport
 {
-
-    /**
-     * Doxia Site Renderer component.
-     *
-     * @since 1.0-alpha-3
-     */
-    @Component
-    private Renderer siteRenderer;
-
     /**
      * Internationalization component.
      *
      * @since 1.0-alpha-3
      */
     @Component
-    private I18N i18n;
-
-    /**
-     * The Maven Project.
-     *
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${project}", required = true, readonly = true )
-    private MavenProject project;
+    protected I18N i18n;
 
     @Component
     protected RepositorySystem repositorySystem;
@@ -90,16 +73,6 @@ public abstract class AbstractVersionsReport
      */
     @Component
     private ArtifactResolver resolver;
-
-    /**
-     * The output directory for the report. Note that this parameter is only evaluated if the goal is run directly from
-     * the command line. If the goal is run indirectly as part of a site generation, the output directory configured in
-     * the Maven Site Plugin is used instead.
-     *
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${project.reporting.outputDirectory}", required = true )
-    private File outputDirectory;
 
     /**
      * Skip entire check.
