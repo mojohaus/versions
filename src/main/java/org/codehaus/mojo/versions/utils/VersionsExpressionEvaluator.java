@@ -22,9 +22,6 @@ package org.codehaus.mojo.versions.utils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
-import org.apache.maven.plugin.descriptor.MojoDescriptor;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.path.PathTranslator;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 
 /**
@@ -37,10 +34,8 @@ public class VersionsExpressionEvaluator
     extends PluginParameterExpressionEvaluator
     implements ExpressionEvaluator
 {
-    public VersionsExpressionEvaluator( MavenSession mavenSession, PathTranslator pathTranslator,
-                                        MavenProject mavenProject )
+    public VersionsExpressionEvaluator( MavenSession mavenSession, MojoExecution mojoExecution )
     {
-        super( mavenSession, new MojoExecution( new MojoDescriptor() ), pathTranslator, null, mavenProject,
-               mavenSession.getExecutionProperties() );
+        super( mavenSession, mojoExecution );
     }
 }

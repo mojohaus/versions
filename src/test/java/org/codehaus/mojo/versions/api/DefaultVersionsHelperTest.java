@@ -28,6 +28,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.MavenMetadataSource;
@@ -223,8 +224,8 @@ public class DefaultVersionsHelperTest extends PlexusTestCase
             new DefaultVersionsHelper( lookup( RepositorySystem.class ), new DefaultArtifactResolver(), metadataSource, new ArrayList(),
                                        new ArrayList(),
                                        new DefaultArtifactRepository( "", "", new DefaultRepositoryLayout() ),
-                                       wagonManager, new Settings(), "", rulesUri, mock( Log.class ), mock( MavenSession.class ),
-                                       new DefaultPathTranslator());
+                                       wagonManager, new Settings(), "", rulesUri, mock( Log.class ),
+                                       mock( MavenSession.class ), mock( MojoExecution.class ) );
         return helper;
     }
 
