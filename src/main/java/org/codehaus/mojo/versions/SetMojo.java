@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -386,30 +386,16 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
      * Returns the incremented version, with the nextSnapshotIndexToIncrement indicating the 1-based index,
      * conunting from the left, or the most major version component, of the version string.
      *
-     *
-     *
      * @param version input version
      * @return version with the incremented index specified by nextSnapshotIndexToIncrement or last index
      * @throws MojoExecutionException thrown if the input parameters are invalid
      */
-    protected String getIncrementedVersion( String version, Integer nextSnapshotIndexToIncrement ) throws MojoExecutionException
+    protected String getIncrementedVersion( String version, Integer nextSnapshotIndexToIncrement )
+            throws MojoExecutionException
     {
-        String versionWithoutSnapshot = version;
-        if ( version.endsWith( SNAPSHOT ) )
-        {
-            versionWithoutSnapshot = version.substring( 0, version.indexOf( SNAPSHOT ) );
-        }
-        LinkedList<String> numbers = new LinkedList<>();
-        if ( versionWithoutSnapshot.contains( "." ) )
-        {
-            // Chop the version into numbers by splitting on the dot (.)
-            Collections.addAll( numbers, versionWithoutSnapshot.split( "\\." ) );
-        }
-        else
-        {
-            // The version contains no dots, assume that it is only 1 number
-            numbers.add( versionWithoutSnapshot );
-        }
+        String versionWithoutSnapshot =
+                version.endsWith( SNAPSHOT ) ? version.substring( 0, version.indexOf( SNAPSHOT ) ) : version;
+        List<String> numbers = new LinkedList<>( Arrays.asList( versionWithoutSnapshot.split( "\\." ) ) );
 
         if ( nextSnapshotIndexToIncrement == null )
         {

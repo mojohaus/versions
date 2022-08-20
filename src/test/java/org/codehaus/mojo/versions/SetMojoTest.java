@@ -24,7 +24,16 @@ public class SetMojoTest
                 assertThat( getIncrementedVersion( "1.0.0-SNAPSHOT", 1 ), is( "2.0.0-SNAPSHOT" ) );
                 assertThat( getIncrementedVersion( "1.0.0-SNAPSHOT", 2 ), is( "1.1.0-SNAPSHOT" ) );
                 assertThat( getIncrementedVersion( "1.0.0-SNAPSHOT", 3 ), is( "1.0.1-SNAPSHOT" ) );
+            }
+        };
+    }
 
+    @Test
+    public void testNextSnapshotIndexLowerBound()
+    {
+        new SetMojo()
+        {
+            {
                 try
                 {
                     getIncrementedVersion( "1.0.0", 0 );
@@ -35,6 +44,16 @@ public class SetMojoTest
                     assertThat( e.getMessage(),
                             containsString( "nextSnapshotIndexToIncrement cannot be less than 1" ) );
                 }
+            }
+        };
+    }
+
+    @Test
+    public void testNextSnapshotIndexUpperBound()
+    {
+        new SetMojo()
+        {
+            {
                 try
                 {
                     getIncrementedVersion( "1.0.0", 4 );
