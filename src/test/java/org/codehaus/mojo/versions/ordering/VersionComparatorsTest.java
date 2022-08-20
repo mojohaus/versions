@@ -32,7 +32,7 @@ public class VersionComparatorsTest
         "1.0",
         "1.0.0",
         "1.0.0-1",
-        "1.0.0.sp1",
+        "1.0.0-sp1",
         "foobar",
         "1-alpha-1",
     };

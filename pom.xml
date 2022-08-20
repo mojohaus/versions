@@ -84,7 +84,7 @@
   </contributors>
 
   <prerequisites>
-    <maven>3.0</maven>
+    <maven>${mavenVersion}</maven>
   </prerequisites>
 
   <scm>
@@ -98,7 +98,7 @@
     <mojo.java.target>1.8</mojo.java.target>
     <maven.compiler.source>${mojo.java.target}</maven.compiler.source>
     <junitBomVersion>5.9.0</junitBomVersion>
-    <mavenVersion>3.0.5</mavenVersion>
+    <mavenVersion>3.2.5</mavenVersion>
     <wagonVersion>3.5.2</wagonVersion>
     <doxiaVersion>1.11.1</doxiaVersion>
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
@@ -227,6 +227,13 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>3.12.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven.plugin-testing</groupId>
+      <artifactId>maven-plugin-testing-harness</artifactId>
+      <version>3.3.0</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

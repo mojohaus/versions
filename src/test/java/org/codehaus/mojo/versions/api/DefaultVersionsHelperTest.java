@@ -30,15 +30,14 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.MavenMetadataSource;
-import org.apache.maven.project.path.DefaultPathTranslator;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
-import org.codehaus.plexus.PlexusTestCase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -58,7 +57,7 @@ import static org.mockito.Mockito.same;
 /**
  * Test {@link DefaultVersionsHelper}
  */
-public class DefaultVersionsHelperTest extends PlexusTestCase
+public class DefaultVersionsHelperTest extends AbstractMojoTestCase
 {
 
     @Test
