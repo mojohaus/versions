@@ -178,11 +178,24 @@ public class SetMojo
 
     /**
      * Whether to add next version number and <code>-SNAPSHOT</code> to the existing version.
+     * Unless specified by <code>nextSnapshotIndexToIncrement</code>, will increment
+     * the last minor index of the snapshot version, e.g. the <code>z</code> in <code>x.y.z-SNAPSHOT</code>
      *
      * @since 2.10
      */
     @Parameter( property = "nextSnapshot", defaultValue = "false" )
-    private boolean nextSnapshot;
+    protected boolean nextSnapshot;
+
+    /**
+     * <p>Specifies the version index to increment when using <code>nextSnapshot</code>.
+     * Will increment the (1-based) index of the snapshot version, e.g. for <code>-DnextSnapshotIndexToIncrement=1</code>
+     * and the version being <code>1.2.3-SNAPSHOT</code>, the new version will become <code>2.2.3-SNAPSHOT.</code></p>
+     * <p>Only valid with <code>nextSnapshot</code>.</p>
+     *
+     * @since 2.12
+     */
+    @Parameter( property = "nextSnapshotIndexToIncrement" )
+    protected Integer nextSnapshotIndexToIncrement;
 
     /**
      * Whether to process all modules whereas they have parent/child or not.
@@ -259,6 +272,11 @@ public class SetMojo
             }
         }
 
+        if ( !nextSnapshot && nextSnapshotIndexToIncrement != null )
+        {
+            throw new MojoExecutionException( "nextSnapshotIndexToIncrement is not valid when nextSnapshot is false" );
+        }
+
         if ( !removeSnapshot && nextSnapshot )
         {
             String version = getVersion();
@@ -267,7 +285,7 @@ public class SetMojo
             {
                 versionWithoutSnapshot = version.substring( 0, version.indexOf( SNAPSHOT ) );
             }
-            LinkedList<String> numbers = new LinkedList<String>();
+            LinkedList<String> numbers = new LinkedList<>();
             if ( versionWithoutSnapshot.contains( "." ) )
             {
                 // Chop the version into numbers by splitting on the dot (.)
@@ -279,8 +297,21 @@ public class SetMojo
                 numbers.add( versionWithoutSnapshot );
             }
 
-            int lastNumber = Integer.parseInt( numbers.removeLast() );
-            numbers.addLast( String.valueOf( lastNumber + 1 ) );
+            if ( nextSnapshotIndexToIncrement == null )
+            {
+                nextSnapshotIndexToIncrement = numbers.size();
+            }
+            else if ( nextSnapshotIndexToIncrement < 1 )
+            {
+                throw new MojoExecutionException( "nextSnapshotIndexToIncrement cannot be less than 1" );
+            }
+            else if ( nextSnapshotIndexToIncrement > numbers.size() )
+            {
+                throw new MojoExecutionException( "nextSnapshotIndexToIncrement cannot be greater than the last version index" );
+            }
+            int snapshotVersionToIncrement = Integer.parseInt( numbers.remove( nextSnapshotIndexToIncrement - 1 ) );
+            numbers.add( nextSnapshotIndexToIncrement - 1, String.valueOf( snapshotVersionToIncrement + 1 ) );
+
             String nextVersion = StringUtils.join( numbers.toArray( new String[0] ), "." );
             newVersion = nextVersion + "-SNAPSHOT";
             getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );

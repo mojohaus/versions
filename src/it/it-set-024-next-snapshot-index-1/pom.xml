@@ -3,8 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>localhost</groupId>
-  <artifactId>it-set-scm-tag-002</artifactId>
-  <version>1.0</version>
+  <artifactId>it-set-024-next-snapshot-index-1</artifactId>
+  <version>1.2.3-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>set-scm-tag</name>
+  <name>set</name>
+
 </project>
