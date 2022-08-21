@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.change;
  */
 
 import javax.xml.stream.XMLStreamException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

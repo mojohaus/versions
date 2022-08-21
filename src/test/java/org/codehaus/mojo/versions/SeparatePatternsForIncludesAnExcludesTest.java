@@ -1,13 +1,12 @@
 package org.codehaus.mojo.versions;
 
-import java.util.List;
-
 import javax.xml.stream.XMLStreamException;
+
+import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -79,8 +78,8 @@ public class SeparatePatternsForIncludesAnExcludesTest
     @Test
     public void testSeparatePatternsWithSeveralCommaSeparatedPatterns()
     {
-        List patterns =
-            mojo.separatePatterns( "group:artifact:type:version,group:artifact:type:version2,group:artifact:type:version3,group:artifact:type:version4" );
+        List patterns = mojo.separatePatterns( "group:artifact:type:version,group:artifact:type:version2,"
+                                                   + "group:artifact:type:version3,group:artifact:type:version4" );
         assertEquals( 4, patterns.size() );
         assertEquals( "group:artifact:type:version", patterns.get( 0 ) );
         assertEquals( "group:artifact:type:version2", patterns.get( 1 ) );

@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import org.apache.maven.repository.legacy.WagonConfigurationException;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.repository.legacy.WagonConfigurationException;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.ConnectionException;

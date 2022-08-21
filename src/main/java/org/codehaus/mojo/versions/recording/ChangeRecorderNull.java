@@ -46,7 +46,8 @@ public class ChangeRecorderNull implements ChangeRecorder
     }
 
     @Override
-    public final void recordUpdate( final String kind, final String groupId, final String artifactId, final String oldVersion, final String newVersion )
+    public final void recordUpdate( final String kind, final String groupId, final String artifactId,
+                                    final String oldVersion, final String newVersion )
     {
         Objects.requireNonNull( kind, "kind" );
         Objects.requireNonNull( groupId, "groupId" );

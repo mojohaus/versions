@@ -29,7 +29,8 @@ public class NumericVersionComparatorTest
 {
     private NumericVersionComparator instance = new NumericVersionComparator();
 
-    private int instanceCompare(String v1, String v2) {
+    private int instanceCompare( String v1, String v2 )
+    {
         return instance.compare( new DefaultArtifactVersion( v1 ), new DefaultArtifactVersion( v2 ) );
     }
 

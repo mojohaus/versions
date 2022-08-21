@@ -19,10 +19,10 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
+import java.util.Comparator;
+
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.ReportPlugin;
-
-import java.util.Comparator;
 
 /**
  * A comparator used to sort plugins and report plugins by group id, artifact id and finally version.
@@ -46,11 +46,13 @@ public class PluginComparator
     {
         if ( !( o1 instanceof Plugin || o1 instanceof ReportPlugin ) )
         {
-            throw new IllegalArgumentException( "This comparator can only be used to compare Plugin and ReportPlugin instances" );
+            throw new IllegalArgumentException(
+                "This comparator can only be used to compare Plugin and ReportPlugin instances" );
         }
         if ( !( o2 instanceof Plugin || o2 instanceof ReportPlugin ) )
         {
-            throw new IllegalArgumentException( "This comparator can only be used to compare Plugin and ReportPlugin instances" );
+            throw new IllegalArgumentException(
+                "This comparator can only be used to compare Plugin and ReportPlugin instances" );
         }
         String g1 = o1 instanceof Plugin ? ( (Plugin) o1 ).getGroupId() : ( (ReportPlugin) o1 ).getGroupId();
         String g2 = o2 instanceof Plugin ? ( (Plugin) o2 ).getGroupId() : ( (ReportPlugin) o2 ).getGroupId();

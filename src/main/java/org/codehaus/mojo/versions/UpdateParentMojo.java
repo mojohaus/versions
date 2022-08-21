@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -31,8 +33,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Sets the parent version to the latest parent version.
@@ -75,7 +75,8 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom ) throws MojoExecutionException, MojoFailureException, XMLStreamException
+    protected void update( ModifiedPomXMLEventReader pom )
+        throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         if ( getProject().getParent() == null )
         {
@@ -136,7 +137,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
             getLog().debug( "Made an update from " + currentVersion + " to " + artifactVersion );
 
             this.getChangeRecorder().recordUpdate( "updateParent", artifact.getGroupId(), artifact.getArtifactId(),
-                    currentVersion, artifactVersion.toString() );
+                                                   currentVersion, artifactVersion.toString() );
         }
     }
 

@@ -19,6 +19,15 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -38,7 +47,6 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
-import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
@@ -54,14 +62,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -277,14 +277,14 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * Finds the latest version of the specified artifact that matches the version range.
      *
-     * @param artifact The artifact.
-     * @param versionRange The version range.
-     * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
+     * @param artifact              The artifact.
+     * @param versionRange          The version range.
+     * @param allowingSnapshots     <code>null</code> for no override, otherwise the local override to apply.
      * @param usePluginRepositories Use plugin repositories
      * @return The latest version of the specified artifact that matches the specified version range or
-     *         <code>null</code> if no matching version could be found.
+     * <code>null</code> if no matching version could be found.
      * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
-     * @throws MojoExecutionException if something goes wrong.
+     * @throws MojoExecutionException             if something goes wrong.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
@@ -308,7 +308,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Gets the property value that is defined in the pom. This is an extension point to allow updating a file external
      * to the reactor.
      *
-     * @param pom The pom.
+     * @param pom      The pom.
      * @param property The property.
      * @return The value as defined in the pom or <code>null</code> if not defined.
      * @since 1.0-alpha-1
@@ -323,7 +323,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @param outFile The file to process.
      * @throws MojoExecutionException If things go wrong.
-     * @throws MojoFailureException If things go wrong.
+     * @throws MojoFailureException   If things go wrong.
      * @since 1.0-alpha-1
      */
     protected void process( File outFile )
@@ -375,7 +375,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Creates a {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader} from a StringBuilder.
      *
      * @param input The XML to read and modify.
-     * @param path Path pointing to the source of the XML
+     * @param path  Path pointing to the source of the XML
      * @return The {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader}.
      */
     protected final ModifiedPomXMLEventReader newModifiedPomXER( StringBuilder input, String path )
@@ -398,13 +398,13 @@ public abstract class AbstractVersionsUpdaterMojo
      * Writes a StringBuilder into a file.
      *
      * @param outFile The file to read.
-     * @param input The contents of the file.
+     * @param input   The contents of the file.
      * @throws IOException when things go wrong.
      */
     protected final void writeFile( File outFile, StringBuilder input )
         throws IOException
     {
-        try (Writer writer = WriterFactory.newXmlWriter( outFile ) )
+        try ( Writer writer = WriterFactory.newXmlWriter( outFile ) )
         {
             IOUtil.copy( input.toString(), writer );
         }
@@ -414,44 +414,44 @@ public abstract class AbstractVersionsUpdaterMojo
      * Updates the pom.
      *
      * @param pom The pom to update.
-     * @throws MojoExecutionException If things go wrong.
-     * @throws MojoFailureException If things go wrong.
+     * @throws MojoExecutionException              If things go wrong.
+     * @throws MojoFailureException                If things go wrong.
      * @throws javax.xml.stream.XMLStreamException If things go wrong.
-     * @throws ArtifactMetadataRetrievalException if something goes wrong.
+     * @throws ArtifactMetadataRetrievalException  if something goes wrong.
      * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
 
     /**
-     * @deprecated
-     *  This method no longer supported.
-     *  use shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean forceUpdate )
-     *
-     * Returns <code>true</code> if the update should be applied.
-     *
-     * @param artifact The artifact.
+     * @param artifact       The artifact.
      * @param currentVersion The current version of the artifact.
-     * @param updateVersion The proposed new version of the artifact.
+     * @param updateVersion  The proposed new version of the artifact.
      * @return <code>true</code> if the update should be applied.
      * @since 1.0-alpha-1
+     * @deprecated This method no longer supported.
+     * use shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean
+     * forceUpdate )
+     * <p>
+     * Returns <code>true</code> if the update should be applied.
      */
     @Deprecated
     protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
     {
-        return shouldApplyUpdate(artifact,currentVersion,updateVersion,false);
+        return shouldApplyUpdate( artifact, currentVersion, updateVersion, false );
     }
 
     /**
      * Returns <code>true</code> if the update should be applied.
      *
-     * @param artifact The artifact.
+     * @param artifact       The artifact.
      * @param currentVersion The current version of the artifact.
-     * @param updateVersion The proposed new version of the artifact.
+     * @param updateVersion  The proposed new version of the artifact.
      * @return <code>true</code> if the update should be applied to the pom.
      * @since 2.9
      */
-    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, boolean forceUpdate )
+    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion,
+                                         boolean forceUpdate )
     {
         getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
 
@@ -495,8 +495,8 @@ public abstract class AbstractVersionsUpdaterMojo
      * Based on the passed flags, determines which segment is unchangable. This can be used when determining an upper
      * bound for the "latest" version.
      *
-     * @param allowMajorUpdates Allow major updates
-     * @param allowMinorUpdates Allow minor updates
+     * @param allowMajorUpdates       Allow major updates
+     * @param allowMinorUpdates       Allow minor updates
      * @param allowIncrementalUpdates Allow incremental updates
      * @return Returns the segment that is unchangable. If any segment can change, returns -1.
      */

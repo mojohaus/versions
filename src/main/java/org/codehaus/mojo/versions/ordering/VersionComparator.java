@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-
 import java.util.Comparator;
+
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 /**
  * A rule for comparing and manipulating versions.

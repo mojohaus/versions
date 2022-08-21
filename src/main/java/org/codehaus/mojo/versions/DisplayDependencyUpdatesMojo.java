@@ -57,7 +57,8 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false, threadSafe = true )
+@Mojo( name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false,
+       threadSafe = true )
 public class DisplayDependencyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
@@ -208,9 +209,10 @@ public class DisplayDependencyUpdatesMojo
      * Whether to allow the major version number to be changed.
      * You need to set {@link #allowAnyUpdates} to <code>false</code> to
      * get this configuration gets control.
+     *
      * @since 2.5
      */
-    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
     private boolean allowMajorUpdates;
 
     /**
@@ -220,7 +222,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
     private boolean allowMinorUpdates;
 
     /**
@@ -230,7 +232,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     private boolean allowIncrementalUpdates;
 
     /**
@@ -239,11 +241,12 @@ public class DisplayDependencyUpdatesMojo
      * If you set this to false you can control changes in version
      * number by {@link #allowMajorUpdates}, {@link #allowMinorUpdates} or
      * {@link #allowIncrementalUpdates}.
-     * @deprecated This will be removed with version 3.0.0
+     *
      * @since 2.5
+     * @deprecated This will be removed with version 3.0.0
      */
     @Deprecated
-    @Parameter(property = "allowAnyUpdates", defaultValue = "true")
+    @Parameter( property = "allowAnyUpdates", defaultValue = "true" )
     private boolean allowAnyUpdates;
 
     /**
@@ -289,13 +292,14 @@ public class DisplayDependencyUpdatesMojo
      * Returns a set of dependencies where the dependencies which are defined in the dependency management section have
      * been filtered out.
      *
-     * @param dependencies The set of dependencies.
+     * @param dependencies         The set of dependencies.
      * @param dependencyManagement The set of dependencies from the dependency management section.
      * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency
-     *         management dependencies.
+     * management dependencies.
      * @since 1.0-beta-1
      */
-    private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies, Set<Dependency> dependencyManagement )
+    private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies,
+                                                              Set<Dependency> dependencyManagement )
     {
         Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
         for ( Dependency dependency : dependencies )
@@ -320,31 +324,31 @@ public class DisplayDependencyUpdatesMojo
     // open for tests
     protected static boolean dependenciesMatch( Dependency dependency, Dependency managedDependency )
     {
-        if ( ! managedDependency.getGroupId().equals( dependency.getGroupId() ) )
+        if ( !managedDependency.getGroupId().equals( dependency.getGroupId() ) )
         {
             return false;
         }
 
-        if ( ! managedDependency.getArtifactId().equals( dependency.getArtifactId() ) )
+        if ( !managedDependency.getArtifactId().equals( dependency.getArtifactId() ) )
         {
             return false;
         }
 
         if ( managedDependency.getScope() == null
-                || Objects.equals( managedDependency.getScope(), dependency.getScope() ) )
+            || Objects.equals( managedDependency.getScope(), dependency.getScope() ) )
         {
             return false;
         }
 
         if ( managedDependency.getClassifier() == null
-                || Objects.equals( managedDependency.getClassifier(), dependency.getClassifier() ) )
+            || Objects.equals( managedDependency.getClassifier(), dependency.getClassifier() ) )
         {
             return false;
         }
 
         return dependency.getVersion() == null
-                || managedDependency.getVersion() == null
-                || Objects.equals( managedDependency.getVersion(), dependency.getVersion() );
+            || managedDependency.getVersion() == null
+            || Objects.equals( managedDependency.getVersion(), dependency.getVersion() );
     }
 
     public boolean isProcessingDependencyManagement()
@@ -378,7 +382,7 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()
      * @since 1.0-alpha-1
      */
@@ -389,7 +393,7 @@ public class DisplayDependencyUpdatesMojo
         logInit();
 
         Set<Dependency> dependencyManagement = new TreeSet<>( new DependencyComparator() );
-        DependencyManagement projectDependencyManagement = getProjectDependencyManagement(getProject());
+        DependencyManagement projectDependencyManagement = getProjectDependencyManagement( getProject() );
         if ( projectDependencyManagement != null )
         {
 
@@ -397,14 +401,15 @@ public class DisplayDependencyUpdatesMojo
             for ( Dependency dependency : dependenciesFromPom )
             {
                 getLog().debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
-                    + ":" + dependency.getVersion() + ":" + dependency.getScope() );
+                                    + ":" + dependency.getVersion() + ":" + dependency.getScope() );
                 if ( dependency.getVersion() == null )
                 {
                     // get parent and get the information from there.
                     if ( getProject().hasParent() )
                     {
                         getLog().debug( "Reading parent dependencyManagement information" );
-                        DependencyManagement parentProjectDependencyManagement = getProjectDependencyManagement(getProject().getParent());
+                        DependencyManagement parentProjectDependencyManagement =
+                            getProjectDependencyManagement( getProject().getParent() );
                         if ( parentProjectDependencyManagement != null )
                         {
                             List<Dependency> parentDeps = parentProjectDependencyManagement.getDependencies();
@@ -489,38 +494,44 @@ public class DisplayDependencyUpdatesMojo
         }
     }
 
-    private Set<Dependency> filterDependencyIncludes(Set<Dependency> dependencies) {
-        return filterDependencies(dependencies, dependencyIncludes, dependencyExcludes, "dependencies");
+    private Set<Dependency> filterDependencyIncludes( Set<Dependency> dependencies )
+    {
+        return filterDependencies( dependencies, dependencyIncludes, dependencyExcludes, "dependencies" );
     }
 
-    private Set<Dependency> filterDependencyManagementIncludes(Set<Dependency> dependencyManagement) {
-        return filterDependencies(dependencyManagement,
-                                  dependencyManagementIncludes, dependencyManagementExcludes, "dependecyManagement");
+    private Set<Dependency> filterDependencyManagementIncludes( Set<Dependency> dependencyManagement )
+    {
+        return filterDependencies( dependencyManagement,
+                                   dependencyManagementIncludes, dependencyManagementExcludes, "dependecyManagement" );
     }
 
     private Set<Dependency> filterDependencies(
-            Set<Dependency> dependencies,
-            List<String> includes,
-            List<String> excludes,
-            String section
-    ) {
-        DependencyFilter includeDeps = DependencyFilter.parseFrom(includes);
-        DependencyFilter excludeDeps = DependencyFilter.parseFrom(excludes);
+        Set<Dependency> dependencies,
+        List<String> includes,
+        List<String> excludes,
+        String section
+    )
+    {
+        DependencyFilter includeDeps = DependencyFilter.parseFrom( includes );
+        DependencyFilter excludeDeps = DependencyFilter.parseFrom( excludes );
 
-        getLog().debug(String.format("parsed includes in %s: %s -> %s",  section, includes, includeDeps ));
-        getLog().debug(String.format("parsed excludes in %s: %s -> %s",  section, excludes, excludeDeps ));
+        getLog().debug( String.format( "parsed includes in %s: %s -> %s", section, includes, includeDeps ) );
+        getLog().debug( String.format( "parsed excludes in %s: %s -> %s", section, excludes, excludeDeps ) );
 
-        Set<Dependency> onlyIncludes = includeDeps.retainingIn(dependencies);
-        Set<Dependency> filtered = excludeDeps.removingFrom(onlyIncludes);
+        Set<Dependency> onlyIncludes = includeDeps.retainingIn( dependencies );
+        Set<Dependency> filtered = excludeDeps.removingFrom( onlyIncludes );
 
         return filtered;
     }
 
-    private DependencyManagement getProjectDependencyManagement(MavenProject project) {
-        if (processDependencyManagementTransitive) {
+    private DependencyManagement getProjectDependencyManagement( MavenProject project )
+    {
+        if ( processDependencyManagementTransitive )
+        {
             return project.getDependencyManagement();
         }
-        else {
+        else
+        {
             return project.getOriginalModel().getDependencyManagement();
         }
     }
@@ -574,7 +585,7 @@ public class DisplayDependencyUpdatesMojo
                     versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null ? null
-                                : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
+                    : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
                 if ( latest != null
                     && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
                 {
@@ -591,7 +602,8 @@ public class DisplayDependencyUpdatesMojo
             }
             else
             {
-                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), "." ) + right );
+                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), "." )
+                           + right );
             }
         }
 
@@ -641,8 +653,8 @@ public class DisplayDependencyUpdatesMojo
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */

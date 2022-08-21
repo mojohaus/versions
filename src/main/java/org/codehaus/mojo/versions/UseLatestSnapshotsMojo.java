@@ -19,6 +19,15 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -33,14 +42,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Replaces any release versions with the latest snapshot version (if it has been deployed).
@@ -82,15 +83,15 @@ public class UseLatestSnapshotsMojo
     /**
      * Pattern to match a snapshot version.
      */
-    public final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
+    private final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
 
     // ------------------------------ METHODS --------------------------
 
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -112,9 +113,9 @@ public class UseLatestSnapshotsMojo
                 dependency.setArtifactId( getProject().getParent().getArtifactId() );
                 dependency.setGroupId( getProject().getParent().getGroupId() );
                 dependency.setVersion( getProject().getParent().getVersion() );
-                dependency.setType("pom");
+                dependency.setType( "pom" );
                 List list = new ArrayList();
-                list.add(dependency);
+                list.add( dependency );
                 useLatestSnapshots( pom, list );
             }
         }
@@ -129,7 +130,7 @@ public class UseLatestSnapshotsMojo
     {
         int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
         MajorMinorIncrementalFilter majorMinorIncfilter =
-                new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+            new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         for ( Dependency dep : dependencies )
         {
@@ -146,7 +147,7 @@ public class UseLatestSnapshotsMojo
             }
 
             String version = dep.getVersion();
-            Matcher versionMatcher = matchSnapshotRegex.matcher(version);
+            Matcher versionMatcher = matchSnapshotRegex.matcher( version );
             if ( !versionMatcher.matches() )
             {
                 getLog().debug( "Looking for latest snapshot of " + toString( dep ) );
@@ -168,12 +169,12 @@ public class UseLatestSnapshotsMojo
                 }
                 ArtifactVersion upperBound =
                     segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
-                getLog().info( "Upper bound: " + (upperBound == null ? "none" : upperBound.toString() ) );
+                getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
                 ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
                 getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
 
                 String latestVersion;
-                ArrayList snapshotsOnly = new ArrayList();
+                ArrayList<ArtifactVersion> snapshotsOnly = new ArrayList<>();
 
                 for ( ArtifactVersion artifactVersion : newer )
                 {
@@ -185,9 +186,8 @@ public class UseLatestSnapshotsMojo
                 }
                 getLog().debug( "Snapshot Only versions " + snapshotsOnly );
 
-                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion,
-                                                                                (ArtifactVersion[]) snapshotsOnly.toArray(
-                                                                                    new ArtifactVersion[0] ) );
+                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter(
+                    selectedVersion, snapshotsOnly.toArray( new ArtifactVersion[0] ) );
                 getLog().debug( "Filtered versions " + Arrays.asList( filteredVersions ) );
 
 
@@ -197,14 +197,15 @@ public class UseLatestSnapshotsMojo
                     if ( getProject().getParent() != null )
                     {
                         final Artifact parentArtifact = getProject().getParentArtifact();
-                        if ( artifact.getId().equals( parentArtifact.getId()) && isProcessingParent() )
+                        if ( artifact.getId().equals( parentArtifact.getId() ) && isProcessingParent() )
                         {
                             if ( PomHelper.setProjectParentVersion( pom, latestVersion ) )
                             {
                                 getLog().debug( "Made parent update from " + version + " to " + latestVersion );
 
-                                this.getChangeRecorder().recordUpdate( "useLatestSnapshots", parentArtifact.getGroupId(),
-                                        parentArtifact.getArtifactId(), version, latestVersion );
+                                this.getChangeRecorder()
+                                    .recordUpdate( "useLatestSnapshots", parentArtifact.getGroupId(),
+                                                   parentArtifact.getArtifactId(), version, latestVersion );
                             }
                         }
                     }
@@ -215,7 +216,7 @@ public class UseLatestSnapshotsMojo
                         getLog().info( "Updated " + toString( dep ) + " to version " + latestVersion );
 
                         this.getChangeRecorder().recordUpdate( "useLatestSnapshots", dep.getGroupId(),
-                                dep.getArtifactId(), version, latestVersion );
+                                                               dep.getArtifactId(), version, latestVersion );
                     }
                 }
             }

@@ -65,7 +65,7 @@ public class PluginUpdatesReportTest
     private static class TestPluginUpdatesReport extends PluginUpdatesReport
     {
         @SuppressWarnings( "deprecation" )
-        public TestPluginUpdatesReport()
+        TestPluginUpdatesReport()
         {
             mockPlexusComponents();
 
@@ -77,22 +77,23 @@ public class PluginUpdatesReportTest
             try
             {
                 when( artifactMetadataSource.retrieveAvailableVersions( any( Artifact.class ), any(), any() ) ).then(
-                        invocation -> {
-                            Artifact artifact = invocation.getArgument( 0 );
-                            if ( "artifactA".equals( artifact.getArtifactId() ) && "1.0.0".equals(
-                                    artifact.getVersion() ) )
-                            {
-                                return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
-                                        new DefaultArtifactVersion( "2.0.0" ) );
-                            }
-                            if ( "artifactB".equals( artifact.getArtifactId() ) && "1.0.0".equals(
-                                    artifact.getVersion() ) )
-                            {
-                                return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
-                                        new DefaultArtifactVersion( "1.1.0" ) );
-                            }
-                            return Collections.singletonList( new DefaultArtifactVersion( artifact.getVersion() ) );
-                        } );
+                    invocation ->
+                    {
+                        Artifact artifact = invocation.getArgument( 0 );
+                        if ( "artifactA".equals( artifact.getArtifactId() ) && "1.0.0".equals(
+                            artifact.getVersion() ) )
+                        {
+                            return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
+                                                  new DefaultArtifactVersion( "2.0.0" ) );
+                        }
+                        if ( "artifactB".equals( artifact.getArtifactId() ) && "1.0.0".equals(
+                            artifact.getVersion() ) )
+                        {
+                            return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
+                                                  new DefaultArtifactVersion( "1.1.0" ) );
+                        }
+                        return Collections.singletonList( new DefaultArtifactVersion( artifact.getVersion() ) );
+                    } );
             }
             catch ( ArtifactMetadataRetrievalException e )
             {
@@ -130,22 +131,23 @@ public class PluginUpdatesReportTest
          * <code>org.codehaus.plexus.PlexusTestCase.lookup</code>,
          * but that method greatly slows down test execution.</p>
          *
-         * @see <a
-         * href="https://codehaus-plexus.github.io/guides/developer-guide/building-components/component-testing.html">Testing
-         * Plexus Components</a>
+         * @see <a href="https://codehaus-plexus.github.io/guides/developer-guide/building-components/component-testing.html">
+         * Testing Plexus Components</a>
          */
         private void mockPlexusComponents()
         {
             i18n = mock( I18N.class );
             when( i18n.getString( anyString(), any(), anyString() ) ).thenAnswer(
-                    invocation -> invocation.getArgument( 2 ) );
+                invocation -> invocation.getArgument( 2 ) );
 
             repositorySystem = mock( RepositorySystem.class );
-            when( repositorySystem.createPluginArtifact( any( Plugin.class ) ) ).thenAnswer( invocation -> {
-                Plugin plugin = invocation.getArgument( 0 );
-                return new DefaultArtifact( plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(),
-                        SCOPE_RUNTIME, "maven-plugin", "jar", null );
-            } );
+            when( repositorySystem.createPluginArtifact( any( Plugin.class ) ) ).thenAnswer(
+                invocation ->
+                {
+                    Plugin plugin = invocation.getArgument( 0 );
+                    return new DefaultArtifact( plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(),
+                                                SCOPE_RUNTIME, "maven-plugin", "jar", null );
+                } );
 
             Artifact skinArtifact = mock( Artifact.class );
             when( skinArtifact.getId() ).thenReturn( "" );
@@ -179,10 +181,10 @@ public class PluginUpdatesReportTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReport()
-                .withPlugins( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
-                        pluginOf( "artifactC" ) )
-                .withOnlyUpgradable( true )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+            .withPlugins( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
+                          pluginOf( "artifactC" ) )
+            .withOnlyUpgradable( true )
+            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
         assertThat( output, allOf( containsString( "artifactA" ), containsString( "artifactB" ) ) );
@@ -195,10 +197,10 @@ public class PluginUpdatesReportTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReport()
-                .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
-                        pluginOf( "artifactC" ) )
-                .withOnlyUpgradable( true )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+            .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
+                                   pluginOf( "artifactC" ) )
+            .withOnlyUpgradable( true )
+            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
         assertThat( output, allOf( containsString( "artifactA" ), containsString( "artifactB" ) ) );
@@ -211,12 +213,12 @@ public class PluginUpdatesReportTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReport()
-                .withPlugins( pluginOf( "artifactA" ) )
-                .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
-                        pluginOf( "artifactC" ) )
-                .withOnlyUpgradable( true )
-                .withOnlyProjectPlugins( true )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+            .withPlugins( pluginOf( "artifactA" ) )
+            .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
+                                   pluginOf( "artifactC" ) )
+            .withOnlyUpgradable( true )
+            .withOnlyProjectPlugins( true )
+            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
         assertThat( output, containsString( "artifactA" ) );

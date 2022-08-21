@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,8 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
@@ -119,8 +119,8 @@ public class CompareDependenciesMojo
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the plugin itself
-     * @throws org.apache.maven.plugin.MojoFailureException The plugin detected an error in the build
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoFailureException   The plugin detected an error in the build
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -129,7 +129,7 @@ public class CompareDependenciesMojo
         if ( this.ignoreRemoteDependencies && this.ignoreRemoteDependencyManagement )
         {
             throw new MojoFailureException( " ignoreRemoteDependencies and ignoreRemoteDependencyManagement"
-                + "are both set to true.  At least one of these needs to be false " );
+                                                + "are both set to true.  At least one of these needs to be false " );
         }
 
         if ( updateDependencies )
@@ -167,7 +167,7 @@ public class CompareDependenciesMojo
         if ( !ignoreRemoteDependencyManagement )
         {
             List<Dependency> remoteProjectDepMgmtDeps = ( remoteMavenProject.getDependencyManagement() == null ) ? null
-                            : remoteMavenProject.getDependencyManagement().getDependencies();
+                : remoteMavenProject.getDependencyManagement().getDependencies();
             mapDependencies( remoteDepsMap, remoteProjectDepMgmtDeps );
         }
         if ( !ignoreRemoteDependencies )
@@ -303,7 +303,7 @@ public class CompareDependenciesMojo
                         && PomHelper.setPropertyVersion( pom, null, property.getName(), candidateVersion ) )
                     {
                         getLog().info( "Updated ${" + property.getName() + "} from " + originalVersion + " to "
-                            + candidateVersion );
+                                           + candidateVersion );
                     }
                 }
             }
@@ -319,8 +319,8 @@ public class CompareDependenciesMojo
      * indicating that there is no candidate.
      *
      * @param remoteDependencies the remote dependencies
-     * @param property the property to update
-     * @param propertyVersions the association
+     * @param property           the property to update
+     * @param propertyVersions   the association
      * @return the candidate version or <tt>null</tt> if there isn't any
      */
     private String computeCandidateVersion( Map<String, Dependency> remoteDependencies, Property property,
@@ -360,8 +360,8 @@ public class CompareDependenciesMojo
             reportOutputFile.getParentFile().mkdirs();
         }
 
-        try( FileWriter fw = new FileWriter( reportOutputFile ); //
-            PrintWriter pw = new PrintWriter( fw ) )
+        try ( FileWriter fw = new FileWriter( reportOutputFile ); //
+              PrintWriter pw = new PrintWriter( fw ) )
         {
             pw.println( "The following differences were found:" );
             pw.println();
@@ -450,7 +450,8 @@ public class CompareDependenciesMojo
     private static String generateId( Artifact artifact )
     {
         StringBuilder sb = new StringBuilder();
-        sb.append( artifact.getGroupId() ).append( ":" ).append( artifact.getArtifactId() ).append( ":" ).append( artifact.getType() );
+        sb.append( artifact.getGroupId() ).append( ":" ).append( artifact.getArtifactId() ).append( ":" )
+            .append( artifact.getType() );
         if ( artifact.getClassifier() != null )
         {
             sb.append( ":" ).append( artifact.getClassifier() );

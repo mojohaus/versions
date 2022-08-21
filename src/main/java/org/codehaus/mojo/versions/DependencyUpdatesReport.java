@@ -128,13 +128,13 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
             if ( processDependencyManagementTransitive )
             {
                 if ( getProject().getDependencyManagement() != null
-                        && getProject().getDependencyManagement().getDependencies() != null )
+                    && getProject().getDependencyManagement().getDependencies() != null )
                 {
                     for ( Dependency dep : getProject().getDependencyManagement().getDependencies() )
                     {
                         getLog().debug(
-                                "Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion() + ":"
-                                        + dep.getType() + ":" + dep.getScope() );
+                            "Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion() + ":"
+                                + dep.getType() + ":" + dep.getScope() );
                     }
                     dependencyManagement.addAll( getProject().getDependencyManagement().getDependencies() );
                 }
@@ -142,7 +142,7 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
             else
             {
                 if ( getProject().getOriginalModel().getDependencyManagement() != null
-                        && getProject().getOriginalModel().getDependencyManagement().getDependencies() != null )
+                    && getProject().getOriginalModel().getDependencyManagement().getDependencies() != null )
                 {
                     // Using the original model to get the original dependencyManagement entries and
                     // not the interpolated model.
@@ -150,10 +150,10 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
                     for ( Dependency dep : getProject().getOriginalModel().getDependencyManagement().getDependencies() )
                     {
                         getLog().debug( "Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
-                                + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );
+                                            + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );
                     }
                     dependencyManagement.addAll(
-                            getProject().getOriginalModel().getDependencyManagement().getDependencies() );
+                        getProject().getOriginalModel().getDependencyManagement().getDependencies() );
                 }
             }
 
@@ -172,11 +172,11 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
         try
         {
             Map<Dependency, ArtifactVersions> dependencyUpdates =
-                    getHelper().lookupDependenciesUpdates( dependencies, false );
+                getHelper().lookupDependenciesUpdates( dependencies, false );
 
             Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
-                    processDependencyManagement ? getHelper().lookupDependenciesUpdates( dependencyManagement, false ) :
-                            EMPTY_MAP;
+                processDependencyManagement ? getHelper().lookupDependenciesUpdates( dependencyManagement, false )
+                    : EMPTY_MAP;
 
             if ( onlyUpgradable )
             {
@@ -189,8 +189,8 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
                 if ( "html".equals( format ) )
                 {
                     DependencyUpdatesRenderer renderer =
-                            new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
-                                    dependencyManagementUpdates );
+                        new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
+                                                       dependencyManagementUpdates );
                     renderer.render();
 
                 }
@@ -206,8 +206,8 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
                     }
                     String outputFile = outputDir.getAbsolutePath() + File.separator + getOutputName() + ".xml";
                     DependencyUpdatesXmlRenderer xmlGenerator =
-                            new DependencyUpdatesXmlRenderer( dependencyUpdates, dependencyManagementUpdates,
-                                    outputFile );
+                        new DependencyUpdatesXmlRenderer( dependencyUpdates, dependencyManagementUpdates,
+                                                          outputFile );
                     xmlGenerator.render();
                 }
             }
@@ -226,11 +226,11 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
     private boolean match( Dependency dep, Dependency dmDep )
     {
         return dmDep.getGroupId().equals( dep.getGroupId() )
-                && dmDep.getArtifactId().equals( dep.getArtifactId() )
-                && ( dmDep.getScope() == null || dmDep.getScope().equals( dep.getScope() ) )
-                && ( dmDep.getClassifier() == null || dmDep.getClassifier().equals( dep.getClassifier() ) )
-                && ( dep.getVersion() == null || dmDep.getVersion() == null || dmDep.getVersion()
-                .equals( dep.getVersion() ) );
+            && dmDep.getArtifactId().equals( dep.getArtifactId() )
+            && ( dmDep.getScope() == null || dmDep.getScope().equals( dep.getScope() ) )
+            && ( dmDep.getClassifier() == null || dmDep.getClassifier().equals( dep.getClassifier() ) )
+            && ( dep.getVersion() == null || dmDep.getVersion() == null || dmDep.getVersion()
+            .equals( dep.getVersion() ) );
     }
 
     /**

@@ -45,7 +45,7 @@ import org.codehaus.mojo.versions.api.AbstractVersionDetails;
  * versions which will defined <code>2.1.0-M1</code> as less than <code>2.1.0</code>. The method
  * {@link #filter(ArtifactVersion, ArtifactVersion[])} will filter out those versions which violate the configuration
  * {@link #allowMajorUpdates}, {@link #allowMinorUpdates} {@link #allowIncrementalUpdates}.
- * 
+ *
  * @author Karl Heinz Marbaise
  */
 public class MajorMinorIncrementalFilter
@@ -67,9 +67,9 @@ public class MajorMinorIncrementalFilter
 
     /**
      * @param selectedVersion The version which will be checked.
-     * @param newerVersions The list of identified versions which are greater or equal than the selectedVersion.
+     * @param newerVersions   The list of identified versions which are greater or equal than the selectedVersion.
      * @return The cleaned up list which obeys usage of {@link #allowMajorUpdates}, {@link #allowMinorUpdates},
-     *         {@link #allowIncrementalUpdates}.
+     * {@link #allowIncrementalUpdates}.
      */
     public ArtifactVersion[] filter( ArtifactVersion selectedVersion, ArtifactVersion[] newerVersions )
     {
@@ -106,11 +106,12 @@ public class MajorMinorIncrementalFilter
                     }
                 }
             }
-            else {
+            else
+            {
                 // build number or qualifier.  Will already be sorted and higher
                 if ( !versionsToUse.contains( artifactVersion ) )
                 {
-                        versionsToUse.add( artifactVersion );
+                    versionsToUse.add( artifactVersion );
                 }
             }
         }

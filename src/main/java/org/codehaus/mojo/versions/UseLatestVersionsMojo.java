@@ -19,12 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -80,8 +80,8 @@ public class UseLatestVersionsMojo
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -105,13 +105,13 @@ public class UseLatestVersionsMojo
             if ( getProject().getParent() != null && isProcessingParent() )
             {
                 Dependency dependency = new Dependency();
-                dependency.setArtifactId(getProject().getParent().getArtifactId());
-                dependency.setGroupId(getProject().getParent().getGroupId());
-                dependency.setVersion(getProject().getParent().getVersion());
-                dependency.setType("pom");
+                dependency.setArtifactId( getProject().getParent().getArtifactId() );
+                dependency.setGroupId( getProject().getParent().getGroupId() );
+                dependency.setVersion( getProject().getParent().getVersion() );
+                dependency.setType( "pom" );
                 List list = new ArrayList();
-                list.add(dependency);
-                useLatestVersions( pom, list);
+                list.add( dependency );
+                useLatestVersions( pom, list );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -165,20 +165,23 @@ public class UseLatestVersionsMojo
                     final Artifact parentArtifact = getProject().getParentArtifact();
                     if ( artifact.getId().equals( parentArtifact.getId() ) && isProcessingParent() )
                     {
-                        if ( PomHelper.setProjectParentVersion( pom, newVersion ) ) {
-                            getLog().debug("Made parent update from " + version + " to " + newVersion);
+                        if ( PomHelper.setProjectParentVersion( pom, newVersion ) )
+                        {
+                            getLog().debug( "Made parent update from " + version + " to " + newVersion );
 
                             this.getChangeRecorder().recordUpdate( "useLatestVersions", parentArtifact.getGroupId(),
-                                    parentArtifact.getArtifactId(), version, newVersion );
+                                                                   parentArtifact.getArtifactId(), version,
+                                                                   newVersion );
                         }
                     }
                 }
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion,
-                                                     getProject().getModel() ) ) {
+                                                     getProject().getModel() ) )
+                {
                     getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
 
                     this.getChangeRecorder().recordUpdate( "useLatestVersions", dep.getGroupId(),
-                            dep.getArtifactId(), version, newVersion );
+                                                           dep.getArtifactId(), version, newVersion );
                 }
             }
 

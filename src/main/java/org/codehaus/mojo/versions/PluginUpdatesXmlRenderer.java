@@ -19,9 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import static org.codehaus.mojo.versions.DependencyUpdatesXmlRenderer.getVersionsBlocks;
-import static org.codehaus.mojo.versions.DependencyUpdatesXmlRenderer.wrapElement;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -35,10 +32,13 @@ import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 
+import static org.codehaus.mojo.versions.DependencyUpdatesXmlRenderer.getVersionsBlocks;
+import static org.codehaus.mojo.versions.DependencyUpdatesXmlRenderer.wrapElement;
+
 /**
  * XML renderer for PluginUpdatesReport creates an xml file in target directory and writes report about available
  * plugin/plugin management updates.
- * 
+ *
  * @author Illia Dubinin
  * @since 2.4
  */
@@ -75,7 +75,7 @@ public class PluginUpdatesXmlRenderer
 
     /**
      * Makes report file with given name in target directory.
-     * 
+     *
      * @throws MavenReportException if something went wrong
      */
     public void render()
@@ -118,7 +118,8 @@ public class PluginUpdatesXmlRenderer
         sBuilder.append( TAB ).append( OPEN_TAG ).append( blockName ).append( CLOSE_TAG ).append( NL );
         for ( Entry<Plugin, PluginUpdatesDetails> entry : pluginUpdates.entrySet() )
         {
-            sBuilder.append( TAB ).append( TAB ).append( OPEN_TAG ).append( subblockName ).append( CLOSE_TAG ).append( NL );
+            sBuilder.append( TAB ).append( TAB ).append( OPEN_TAG ).append( subblockName ).append( CLOSE_TAG )
+                .append( NL );
 
             Plugin plugin = entry.getKey();
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( plugin.getGroupId(),
@@ -128,7 +129,8 @@ public class PluginUpdatesXmlRenderer
 
             sBuilder.append( getVersionsBlocks( entry.getValue().getArtifactVersions() ) );
 
-            sBuilder.append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( subblockName ).append( CLOSE_TAG ).append( NL );
+            sBuilder.append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( subblockName ).append( CLOSE_TAG )
+                .append( NL );
         }
         sBuilder.append( TAB ).append( OPEN_CLOSING_TAG ).append( blockName ).append( CLOSE_TAG ).append( NL );
         return sBuilder.toString();

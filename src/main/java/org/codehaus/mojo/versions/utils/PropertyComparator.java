@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import org.codehaus.mojo.versions.Property;
-
 import java.util.Comparator;
+
+import org.codehaus.mojo.versions.Property;
 
 /**
  * A comparator used to sort {@link Property} instances.

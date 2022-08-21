@@ -406,7 +406,7 @@ public abstract class UpdateScope
      */
     public static UpdateScope valueOf( String name )
     {
-        UpdateScope result = levelConstants.get( name );
+        UpdateScope result = LEVEL_CONSTANTS.get( name );
         if ( result != null )
         {
             return result;
@@ -464,7 +464,7 @@ public abstract class UpdateScope
         }
     }
 
-    private static final Map<String, UpdateScope> levelConstants;
+    private static final Map<String, UpdateScope> LEVEL_CONSTANTS;
 
     static
     {
@@ -474,7 +474,7 @@ public abstract class UpdateScope
         map.put( MINOR.name(), MINOR );
         map.put( MAJOR.name(), MAJOR );
         map.put( ANY.name(), ANY );
-        levelConstants = map;
+        LEVEL_CONSTANTS = map;
     }
 
     /**

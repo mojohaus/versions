@@ -19,6 +19,17 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -30,17 +41,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Manages a property that is associated with one or more artifacts.
@@ -158,8 +158,8 @@ public class PropertyVersions
      *
      * @param artifacts The {@link Collection} of {@link Artifact} instances .
      * @return The versions that can be resolved from the supplied Artifact instances or an empty array if no version
-     *         can be resolved (i.e. the property is not associated with any of the supplied artifacts or the property
-     *         is also associated to an artifact that has not been provided).
+     * can be resolved (i.e. the property is not associated with any of the supplied artifacts or the property
+     * is also associated to an artifact that has not been provided).
      * @throws org.apache.maven.plugin.MojoExecutionException When things go wrong.
      * @since 1.0-alpha-3
      */
@@ -192,10 +192,12 @@ public class PropertyVersions
         }
         // we now have a list of all the versions that partially satisfy the association requirements
         Iterator<ArtifactVersion> k = result.iterator();
-        versions: while ( k.hasNext() )
+        versions:
+        while ( k.hasNext() )
         {
             ArtifactVersion candidate = k.next();
-            associations: for ( ArtifactAssociation association : associations )
+            associations:
+            for ( ArtifactAssociation association : associations )
             {
                 for ( Artifact artifact : artifacts )
                 {
@@ -276,10 +278,12 @@ public class PropertyVersions
                 Arrays.sort( alt, rules[j] );
                 if ( !Arrays.equals( alt, answer ) )
                 {
-                    throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts"
-                        + " and these artifacts use different version sorting rules and these rules are effectively"
-                        + " incompatible for the set of versions available to this property.\nFirst rule says: "
-                        + Arrays.asList( answer ) + "\nSecond rule says: " + Arrays.asList( alt ) );
+                    throw new IllegalStateException(
+                        "Property " + name + " is associated with multiple artifacts"
+                            + " and these artifacts use different version sorting rules and these rules are effectively"
+                            + " incompatible for the set of versions available to this property.\nFirst rule says: "
+                            + Arrays.asList( answer ) + "\nSecond rule says: "
+                            + Arrays.asList( alt ) );
                 }
             }
             return answer;
@@ -322,7 +326,7 @@ public class PropertyVersions
         final boolean includeSnapshots = !property.isBanSnapshots() && allowSnapshots;
         helper.getLog().debug( "getNewestVersion(): includeSnapshots='" + includeSnapshots + "'" );
         helper.getLog().debug( "Property ${" + property.getName() + "}: Set of valid available versions is "
-            + Arrays.asList( getVersions( includeSnapshots ) ) );
+                                   + Arrays.asList( getVersions( includeSnapshots ) ) );
         VersionRange range;
         try
         {
@@ -347,7 +351,7 @@ public class PropertyVersions
         {
             if ( segment != -1 )
             {
-                lowerBoundArtifactVersion = getLowerBound(helper, currentVersion, segment);
+                lowerBoundArtifactVersion = getLowerBound( helper, currentVersion, segment );
             }
             helper.getLog().debug( "lowerBoundArtifactVersion is null based on allowDowngrade:" + allowDowngrade );
         }
@@ -374,7 +378,8 @@ public class PropertyVersions
             Collection reactorArtifacts = helper.extractArtifacts( reactorProjects );
             ArtifactVersion[] reactorVersions = getVersions( reactorArtifacts );
             helper.getLog().debug( "Property ${" + property.getName()
-                + "}: Set of valid available versions from the reactor is " + Arrays.asList( reactorVersions ) );
+                                       + "}: Set of valid available versions from the reactor is " + Arrays.asList(
+                reactorVersions ) );
             ArtifactVersion fromReactor = null;
             if ( reactorVersions.length > 0 )
             {
@@ -384,7 +389,7 @@ public class PropertyVersions
                     {
                         fromReactor = reactorVersions[j];
                         helper.getLog().debug( "Property ${" + property.getName() + "}: Reactor has version "
-                            + fromReactor );
+                                                   + fromReactor );
                         break;
                     }
                 }
@@ -394,7 +399,7 @@ public class PropertyVersions
                 if ( property.isPreferReactor() )
                 {
                     helper.getLog().debug( "Property ${" + property.getName()
-                        + "}: Reactor has a version and we prefer the reactor" );
+                                               + "}: Reactor has a version and we prefer the reactor" );
                     result = fromReactor;
                 }
                 else
@@ -412,7 +417,7 @@ public class PropertyVersions
                     else
                     {
                         helper.getLog().debug( "Property ${" + property.getName()
-                            + "}: Reactor has the same or older version" );
+                                                   + "}: Reactor has the same or older version" );
                     }
                 }
             }
@@ -454,11 +459,14 @@ public class PropertyVersions
                 int alt = comparators[i].compare( v1, v2 );
                 if ( result != alt && ( result >= 0 && alt < 0 ) || ( result <= 0 && alt > 0 ) )
                 {
-                    throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts"
-                        + " and these artifacts use different version sorting rules and these rules are effectively"
-                        + " incompatible for the two of versions being compared.\nFirst rule says compare(\"" + v1
-                        + "\", \"" + v2 + "\") = " + result + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2
-                        + "\") = " + alt );
+                    throw new IllegalStateException(
+                        "Property " + name + " is associated with multiple artifacts"
+                            + " and these artifacts use different version sorting rules and these rules are effectively"
+                            + " incompatible for the two of versions being compared.\nFirst rule says compare(\""
+                            + v1
+                            + "\", \"" + v2 + "\") = " + result
+                            + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2
+                            + "\") = " + alt );
                 }
             }
             return result;
@@ -478,10 +486,14 @@ public class PropertyVersions
                 int alt = comparators[i].getSegmentCount( v );
                 if ( result != alt )
                 {
-                    throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts"
-                        + " and these artifacts use different version sorting rules and these rules are effectively"
-                        + " incompatible for the two of versions being compared.\nFirst rule says getSegmentCount(\""
-                        + v + "\") = " + result + "\nSecond rule says getSegmentCount(\"" + v + "\") = " + alt );
+                    throw new IllegalStateException(
+                        "Property " + name + " is associated with multiple artifacts"
+                            + " and these artifacts use different version sorting rules and these rules are effectively"
+                            + " incompatible for the two of versions being compared.\n"
+                            + "First rule says getSegmentCount(\""
+                            + v + "\") = " + result
+                            + "\nSecond rule says getSegmentCount(\"" + v + "\") = "
+                            + alt );
                 }
             }
             return result;
@@ -501,11 +513,14 @@ public class PropertyVersions
                 ArtifactVersion alt = comparators[i].incrementSegment( v, segment );
                 if ( !result.toString().equals( alt.toString() ) )
                 {
-                    throw new IllegalStateException( "Property " + name + " is associated with multiple artifacts"
-                        + " and these artifacts use different version sorting rules and these rules are effectively"
-                        + " incompatible for the two of versions being compared.\nFirst rule says incrementSegment(\""
-                        + v + "\", " + segment + ") = " + result + "\nSecond rule says incrementSegment(\"" + v + "\", "
-                        + segment + ") = " + alt );
+                    throw new IllegalStateException(
+                        "Property " + name + " is associated with multiple artifacts"
+                            + " and these artifacts use different version sorting rules and these rules are effectively"
+                            + " incompatible for the two of versions being compared.\n"
+                            + "First rule says incrementSegment(\""
+                            + v + "\", " + segment + ") = " + result
+                            + "\nSecond rule says incrementSegment(\"" + v + "\", "
+                            + segment + ") = " + alt );
                 }
             }
             return result;
@@ -514,42 +529,43 @@ public class PropertyVersions
     }
 
 
-    private ArtifactVersion getLowerBound(VersionsHelper helper,
-            String currentVersion, int segment)
+    private ArtifactVersion getLowerBound( VersionsHelper helper,
+                                           String currentVersion, int segment )
     {
-        ArtifactVersion version = helper.createArtifactVersion(currentVersion);
-        int segmentCount = getVersionComparator().getSegmentCount(version);
-        if (segment < 0 || segment > segmentCount)
+        ArtifactVersion version = helper.createArtifactVersion( currentVersion );
+        int segmentCount = getVersionComparator().getSegmentCount( version );
+        if ( segment < 0 || segment > segmentCount )
         {
-            throw new InvalidSegmentException(segment, segmentCount,
-                    currentVersion);
+            throw new InvalidSegmentException( segment, segmentCount,
+                                               currentVersion );
         }
 
         StringBuilder newVersion = new StringBuilder();
-        newVersion.append(segment >= 0 ? version.getMajorVersion() : 0);
-        if (segmentCount > 0)
+        newVersion.append( segment >= 0 ? version.getMajorVersion() : 0 );
+        if ( segmentCount > 0 )
         {
-            newVersion.append(".")
-                    .append(segment >= 1 ? version.getMinorVersion() : 0);
+            newVersion.append( "." )
+                .append( segment >= 1 ? version.getMinorVersion() : 0 );
         }
-        if (segmentCount > 1)
+        if ( segmentCount > 1 )
         {
-            newVersion.append(".")
-                    .append(segment >= 2 ? version.getIncrementalVersion() : 0);
+            newVersion.append( "." )
+                .append( segment >= 2 ? version.getIncrementalVersion() : 0 );
         }
-        if (segmentCount > 2)
+        if ( segmentCount > 2 )
         {
-            if (version.getQualifier() != null)
+            if ( version.getQualifier() != null )
             {
-                newVersion.append("-")
-                        .append(segment >= 3 ? version.getQualifier() : "0");
-            } else
+                newVersion.append( "-" )
+                    .append( segment >= 3 ? version.getQualifier() : "0" );
+            }
+            else
             {
-                newVersion.append("-")
-                        .append(segment >= 3 ? version.getBuildNumber() : "0");
+                newVersion.append( "-" )
+                    .append( segment >= 3 ? version.getBuildNumber() : "0" );
             }
         }
-        return helper.createArtifactVersion(newVersion.toString());
+        return helper.createArtifactVersion( newVersion.toString() );
     }
 
 }

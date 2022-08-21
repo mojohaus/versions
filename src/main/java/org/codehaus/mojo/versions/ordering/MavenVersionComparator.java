@@ -155,6 +155,9 @@ public class MavenVersionComparator
                         build++;
                     }
                     break;
+                default:
+                    // no action
+                    break;
             }
             StringBuilder result = new StringBuilder();
             result.append( major );

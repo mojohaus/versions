@@ -19,11 +19,11 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
@@ -53,7 +53,7 @@ public class LockSnapshotsMojo
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
      */
-    public final Pattern matchSnapshotRegex = Pattern.compile( "-" + Artifact.SNAPSHOT_VERSION );
+    private final Pattern matchSnapshotRegex = Pattern.compile( "-" + Artifact.SNAPSHOT_VERSION );
 
     // ------------------------------ METHODS --------------------------
 

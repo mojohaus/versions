@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.util.Collection;
-
 import javax.xml.stream.XMLStreamException;
+
+import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
@@ -50,8 +50,8 @@ public class UseReactorMojo
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -59,7 +59,8 @@ public class UseReactorMojo
     {
         try
         {
-            if ( isProcessingParent() && getProject().hasParent() ) {
+            if ( isProcessingParent() && getProject().hasParent() )
+            {
                 useReactor( pom, getProject().getParent() );
             }
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
@@ -108,14 +109,14 @@ public class UseReactorMojo
     }
 
     private void useReactor( ModifiedPomXMLEventReader pom, MavenProject parent )
-            throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+        throws XMLStreamException, ArtifactMetadataRetrievalException
     {
         for ( Object reactorProject : reactorProjects )
         {
             MavenProject project = (MavenProject) reactorProject;
             if ( StringUtils.equals( project.getGroupId(), parent.getGroupId() )
-                    && StringUtils.equals( project.getArtifactId(), parent.getArtifactId() )
-                    && !StringUtils.equals( project.getVersion(), parent.getVersion() ) )
+                && StringUtils.equals( project.getArtifactId(), parent.getArtifactId() )
+                && !StringUtils.equals( project.getVersion(), parent.getVersion() ) )
             {
                 if ( PomHelper.setProjectParentVersion( pom, project.getVersion() ) )
                 {

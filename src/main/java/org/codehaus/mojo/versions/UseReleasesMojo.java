@@ -19,6 +19,13 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -31,13 +38,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import java.util.Collection;
-import java.util.NoSuchElementException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Replaces any -SNAPSHOT versions with the corresponding release version (if it has been released).
@@ -71,15 +71,15 @@ public class UseReleasesMojo
     /**
      * Pattern to match a snapshot version.
      */
-    public final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
+    private final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
 
     // ------------------------------ METHODS --------------------------
 
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -148,7 +148,7 @@ public class UseReleasesMojo
                 else if ( failIfNotReplaced )
                 {
                     throw new NoSuchElementException( "No matching release of " + toString( project )
-                        + " found for update." );
+                                                          + " found for update." );
                 }
             }
             else
@@ -159,7 +159,7 @@ public class UseReleasesMojo
                     if ( proposedVersion.toString().startsWith( releaseVersion ) )
                     {
                         getLog().debug( "Found matching version for " + toString( project ) + " to version "
-                            + releaseVersion );
+                                            + releaseVersion );
                         finalVersion = proposedVersion;
                     }
                 }
@@ -171,7 +171,8 @@ public class UseReleasesMojo
                         getLog().info( "Updated " + toString( project ) + " to version " + finalVersion );
 
                         this.getChangeRecorder().recordUpdate( "useReleases", parent.getGroupId(),
-                                parent.getArtifactId(), version, finalVersion.toString() );
+                                                               parent.getArtifactId(), version,
+                                                               finalVersion.toString() );
                     }
                 }
                 else
@@ -180,7 +181,7 @@ public class UseReleasesMojo
                     if ( failIfNotReplaced )
                     {
                         throw new NoSuchElementException( "No matching release of " + toString( project )
-                            + " found for update via rangeMatching." );
+                                                              + " found for update via rangeMatching." );
                     }
                 }
 
@@ -259,7 +260,7 @@ public class UseReleasesMojo
                 getLog().info( "Updated " + toString( dep ) + " to version " + finalVersion );
 
                 this.getChangeRecorder().recordUpdate( "useReleases", dep.getGroupId(),
-                        dep.getArtifactId(), version, finalVersion.toString() );
+                                                       dep.getArtifactId(), version, finalVersion.toString() );
             }
         }
         else
@@ -268,7 +269,7 @@ public class UseReleasesMojo
             if ( failIfNotReplaced )
             {
                 throw new NoSuchElementException( "No matching release of " + toString( dep )
-                    + " found for update via rangeMatching." );
+                                                      + " found for update via rangeMatching." );
             }
         }
     }
@@ -284,7 +285,7 @@ public class UseReleasesMojo
                 getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
 
                 this.getChangeRecorder().recordUpdate( "useReleases", dep.getGroupId(),
-                        dep.getArtifactId(), version, releaseVersion );
+                                                       dep.getArtifactId(), version, releaseVersion );
             }
         }
         else if ( failIfNotReplaced )
