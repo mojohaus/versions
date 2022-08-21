@@ -341,6 +341,7 @@ public class PluginUpdatesRenderer
         sink.tableRow_();
     }
 
+    @SuppressWarnings( "checkstyle:MethodLength" )
     private void renderPluginDetail( Plugin plugin, PluginUpdatesDetails details )
     {
         final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
@@ -350,10 +351,10 @@ public class PluginUpdatesRenderer
         sink.section2();
         sink.sectionTitle2();
         sink.text( MessageFormat.format( getText( "report.plugin" ), new Object[] {
-            ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) } ) );
+            ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
         sink.sectionTitle2_();
         sink.table();
-        sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
+        sink.tableRows( new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false );
         sink.tableRow();
         sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.status" ) );
@@ -429,9 +430,10 @@ public class PluginUpdatesRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals( versions[i],
-                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
-                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                boolean bold = equals(
+                    versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( versions[i],
+                               details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) )
@@ -503,7 +505,7 @@ public class PluginUpdatesRenderer
             sink.section3();
             sink.sectionTitle3();
             sink.text( MessageFormat.format( getText( "report.pluginDependencies" ), new Object[] {
-                ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) } ) );
+                ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
             sink.sectionTitle3_();
 
             renderDependencySummaryTable( details.getDependencyVersions(), false, true, true );
@@ -521,7 +523,7 @@ public class PluginUpdatesRenderer
         sink.section3();
         sink.sectionTitle3();
         sink.text( MessageFormat.format( getText( "report.pluginDependency" ), new Object[] {
-            ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() ) } ) );
+            ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )} ) );
         sink.sectionTitle3_();
         renderDependencyDetailTable( dependency, details, false, true, true );
         sink.section3_();

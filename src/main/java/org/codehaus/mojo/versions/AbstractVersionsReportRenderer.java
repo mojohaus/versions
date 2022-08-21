@@ -211,6 +211,7 @@ public abstract class AbstractVersionsReportRenderer
         }
     }
 
+    @SuppressWarnings( "checkstyle:MethodName" )
     protected void safeBold_()
     {
         try
@@ -235,6 +236,7 @@ public abstract class AbstractVersionsReportRenderer
         }
     }
 
+    @SuppressWarnings( "checkstyle:MethodName" )
     protected void safeItalic_()
     {
         try
@@ -306,6 +308,7 @@ public abstract class AbstractVersionsReportRenderer
         renderDependencyDetailTable( dependency, details, true, true, true );
     }
 
+    @SuppressWarnings( "checkstyle:MethodLength" )
     protected void renderDependencyDetailTable( Dependency dependency, ArtifactVersions details, boolean includeScope,
                                                 boolean includeClassifier, boolean includeType )
     {
@@ -601,6 +604,7 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableRow_();
     }
 
+    @SuppressWarnings( "checkstyle:MethodLength" )
     protected void renderPropertyDetailTable( Property property, PropertyVersions versions )
     {
         final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();

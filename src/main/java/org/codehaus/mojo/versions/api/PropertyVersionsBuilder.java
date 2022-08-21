@@ -19,16 +19,16 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
-
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
  * Builds {@link org.codehaus.mojo.versions.api.PropertyVersions} instances.
@@ -57,7 +57,7 @@ class PropertyVersionsBuilder
      * @param name The property name.
      * @param helper The {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper}.
      */
-    public PropertyVersionsBuilder( String profileId, String name, VersionsHelper helper )
+    PropertyVersionsBuilder( String profileId, String name, VersionsHelper helper )
     {
         this.profileId = profileId;
         this.name = name;

@@ -19,10 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.stax2.XMLInputFactory2;
-import org.junit.Test;
-
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
@@ -30,9 +26,14 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Stack;
+
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.stax2.XMLInputFactory2;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -109,6 +110,7 @@ public class RewriteWithStAXTest
         assertEquals( expected, output.toString() );
     }
 
+    @SuppressWarnings( {"checkstyle:MethodLength", "checkstyle:LineLength"} )
     @Test
     public void testReplaceFancy()
         throws Exception

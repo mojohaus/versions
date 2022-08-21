@@ -19,6 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.util.Map;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -27,9 +31,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.Map;
 
 /**
  * Sets properties to the latest versions of specific artifacts.
@@ -128,10 +129,14 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom ) throws MojoExecutionException, MojoFailureException, XMLStreamException
+    protected void update( ModifiedPomXMLEventReader pom )
+        throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         Map<Property, PropertyVersions> propertyVersions = this.getHelper().getVersionPropertiesMap( getProject(),
-                properties, includeProperties, excludeProperties, autoLinkItems );
+                                                                                                     properties,
+                                                                                                     includeProperties,
+                                                                                                     excludeProperties,
+                                                                                                     autoLinkItems );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property property = entry.getKey();
@@ -148,7 +153,10 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
                 if ( !( isIncluded( association.getArtifact() ) ) )
                 {
                     getLog().info(
-                            "Not updating the property ${" + property.getName() + "} because it is used by artifact " + association.getArtifact().toString() + " and that artifact is not included in the list of " + " allowed artifacts to be updated." );
+                        "Not updating the property ${" + property.getName() + "} because it is used by artifact "
+                            + association.getArtifact().toString()
+                            + " and that artifact is not included in the list of "
+                            + " allowed artifacts to be updated." );
                     canUpdateProperty = false;
                     break;
                 }
@@ -157,18 +165,19 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
             if ( canUpdateProperty )
             {
                 int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                        allowIncrementalUpdates );
+                                                         allowIncrementalUpdates );
                 ArtifactVersion targetVersion = updatePropertyToNewestVersion( pom, property, version, currentVersion,
-                        allowDowngrade, segment );
+                                                                               allowDowngrade, segment );
 
-                if (targetVersion != null)
+                if ( targetVersion != null )
                 {
                     for ( final ArtifactAssociation association : version.getAssociations() )
                     {
                         if ( ( isIncluded( association.getArtifact() ) ) )
                         {
                             this.getChangeRecorder().recordUpdate( "updateProperty", association.getGroupId(),
-                                    association.getArtifactId(), currentVersion, targetVersion.toString() );
+                                                                   association.getArtifactId(), currentVersion,
+                                                                   targetVersion.toString() );
                         }
                     }
                 }

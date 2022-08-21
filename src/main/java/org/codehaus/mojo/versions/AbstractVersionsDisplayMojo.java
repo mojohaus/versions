@@ -37,7 +37,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 public abstract class AbstractVersionsDisplayMojo
     extends AbstractVersionsUpdaterMojo
 {
-    String NL = System.getProperty( "line.separator" );
+    static final String NL = System.getProperty( "line.separator" );
 
     private static final int DEFAULT_OUTPUT_LINE_WIDTH = 80;
 
@@ -70,7 +70,8 @@ public abstract class AbstractVersionsDisplayMojo
      *
      * @since 2.10.0
      */
-    @Parameter( property = "versions.outputLineWidth", defaultValue = AbstractVersionsDisplayMojo.DEFAULT_OUTPUT_LINE_WIDTH + "" )
+    @Parameter( property = "versions.outputLineWidth",
+                defaultValue = AbstractVersionsDisplayMojo.DEFAULT_OUTPUT_LINE_WIDTH + "" )
     private int outputLineWidth;
 
     private boolean outputFileError = false;
@@ -129,7 +130,7 @@ public abstract class AbstractVersionsDisplayMojo
             {
                 outputEncoding = System.getProperty( "file.encoding" );
                 getLog().warn( "File encoding has not been set, using platform encoding " + outputEncoding
-                    + ", i.e. build is platform dependent!" );
+                                   + ", i.e. build is platform dependent!" );
             }
         }
     }
@@ -152,8 +153,8 @@ public abstract class AbstractVersionsDisplayMojo
             try
             {
                 Files.write( outputFile.toPath(),
-                        ( error ? "> " + line + NL : line + NL ).getBytes( outputEncoding ),
-                        StandardOpenOption.APPEND, StandardOpenOption.CREATE );
+                             ( error ? "> " + line + NL : line + NL ).getBytes( outputEncoding ),
+                             StandardOpenOption.APPEND, StandardOpenOption.CREATE );
             }
             catch ( IOException e )
             {
@@ -166,7 +167,8 @@ public abstract class AbstractVersionsDisplayMojo
     /**
      * @return Offset of the configured output line width compared to the default with of 80.
      */
-    protected int getOutputLineWidthOffset() {
+    protected int getOutputLineWidthOffset()
+    {
         return this.outputLineWidth - DEFAULT_OUTPUT_LINE_WIDTH;
     }
 

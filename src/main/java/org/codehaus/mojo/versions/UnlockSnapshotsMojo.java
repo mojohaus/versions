@@ -19,6 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -27,11 +33,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Attempts to resolve unlocked snapshot dependency versions to the locked timestamp versions used in the build. For
@@ -54,7 +55,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
      */
-    public final Pattern matchSnapshotRegex = Pattern.compile( "-(\\d{8}\\.\\d{6})-(\\d+)$" );
+    private final Pattern matchSnapshotRegex = Pattern.compile( "-(\\d{8}\\.\\d{6})-(\\d+)$" );
 
     // ------------------------------ METHODS --------------------------
 
@@ -65,7 +66,8 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
      * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom ) throws MojoExecutionException, MojoFailureException, XMLStreamException
+    protected void update( ModifiedPomXMLEventReader pom )
+        throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
 
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
@@ -82,7 +84,8 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
         }
     }
 
-    private void unlockSnapshots( ModifiedPomXMLEventReader pom, List<Dependency> dependencies ) throws XMLStreamException, MojoExecutionException
+    private void unlockSnapshots( ModifiedPomXMLEventReader pom, List<Dependency> dependencies )
+        throws XMLStreamException, MojoExecutionException
     {
         for ( Dependency dep : dependencies )
         {
@@ -109,17 +112,18 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
             {
                 String unlockedVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                        unlockedVersion, getProject().getModel() ) )
+                                                     unlockedVersion, getProject().getModel() ) )
                 {
                     getChangeRecorder().recordUpdate( "unlockSnapshot", dep.getGroupId(), dep.getArtifactId(),
-                            dep.getVersion(), unlockedVersion );
+                                                      dep.getVersion(), unlockedVersion );
                     getLog().info( "Unlocked " + toString( dep ) + " to version " + unlockedVersion );
                 }
             }
         }
     }
 
-    private void unlockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent ) throws XMLStreamException, MojoExecutionException
+    private void unlockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent )
+        throws XMLStreamException, MojoExecutionException
     {
         if ( parent == null )
         {
@@ -143,9 +147,10 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
             if ( PomHelper.setProjectParentVersion( pom, unlockedParentVersion ) )
             {
                 getLog().info( "Unlocked parent " + parentArtifact + " to version "
-                    + unlockedParentVersion );
+                                   + unlockedParentVersion );
                 getChangeRecorder().recordUpdate( "unlockParentVersion", parentArtifact.getGroupId(),
-                        parentArtifact.getArtifactId(), parentArtifact.getVersion(), unlockedParentVersion );
+                                                  parentArtifact.getArtifactId(), parentArtifact.getVersion(),
+                                                  unlockedParentVersion );
             }
         }
     }

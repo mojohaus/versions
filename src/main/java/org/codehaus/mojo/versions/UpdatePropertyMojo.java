@@ -19,6 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.util.Map;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -27,9 +31,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.Map;
 
 /**
  * Sets a property to the latest version in a given range of associated artifacts.
@@ -46,7 +47,7 @@ public class UpdatePropertyMojo
 
     /**
      * A property to update.
-     * 
+     *
      * @since 1.3
      */
     @Parameter( property = "property" )
@@ -65,7 +66,7 @@ public class UpdatePropertyMojo
      * <code>-DnewVersion=[19.0]</code> otherwise a newer existing version will be used. If you need to downgrade a
      * version you have to define <code>-DallowDowngrade=true</code> as well otherwise
      * the version will be kept.
-     * 
+     *
      * @since 1.3
      */
     @Parameter( property = "newVersion" )
@@ -83,7 +84,7 @@ public class UpdatePropertyMojo
      * If a property points to a version like <code>1.2.3</code> and your repository contains versions like
      * <code>1.2.3</code> and <code>1.1.0</code> without settings this to <code>true</code> the property will never
      * being changed back to <code>1.1.0</code> by using <code>-DnewVersion=[1.1.0]</code>.
-     * 
+     *
      * @since 3.0.0
      */
     @Parameter( property = "allowDowngrade", defaultValue = "false" )
@@ -120,8 +121,8 @@ public class UpdatePropertyMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException when things go wrong in a very bad way
-     * @throws XMLStreamException when things go wrong with XML streaming
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
@@ -131,7 +132,7 @@ public class UpdatePropertyMojo
         Property propertyConfig = new Property( property );
         propertyConfig.setVersion( newVersion );
         Map<Property, PropertyVersions> propertyVersions =
-            this.getHelper().getVersionPropertiesMap( getProject(), new Property[] { propertyConfig }, property, "",
+            this.getHelper().getVersionPropertiesMap( getProject(), new Property[] {propertyConfig}, property, "",
                                                       autoLinkItems );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
@@ -146,14 +147,15 @@ public class UpdatePropertyMojo
 
             int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
             ArtifactVersion targetVersion = updatePropertyToNewestVersion( pom, property, version, currentVersion,
-                    allowDowngrade, segment );
+                                                                           allowDowngrade, segment );
 
-            if (targetVersion != null)
+            if ( targetVersion != null )
             {
                 for ( final ArtifactAssociation association : version.getAssociations() )
                 {
                     this.getChangeRecorder().recordUpdate( "updateProperty", association.getGroupId(),
-                            association.getArtifactId(), currentVersion, targetVersion.toString() );
+                                                           association.getArtifactId(), currentVersion,
+                                                           targetVersion.toString() );
                 }
             }
         }

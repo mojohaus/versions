@@ -1,15 +1,13 @@
 package org.codehaus.mojo.versions.filtering;
 
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayNameGeneration( DisplayNameGenerator.ReplaceUnderscores.class )
 class WildcardMatcherTest
 {
     @Nested
@@ -18,7 +16,7 @@ class WildcardMatcherTest
         private final WildcardMatcher matcher = WildcardMatcher.parse( "asdf" );
 
         @Test
-        void matches_the_exact_input()
+        void matchesTheExactInput()
         {
             boolean actual = matcher.test( "asdf" );
 
@@ -26,7 +24,7 @@ class WildcardMatcherTest
         }
 
         @Test
-        void rejects_null()
+        void rejectsNull()
         {
             boolean actual = matcher.test( null );
 
@@ -35,15 +33,15 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "",
-                "    ",
-                "a",
-                "as",
-                "asf",
-                "asXf",
-                "asdfx",
+            "",
+            "    ",
+            "a",
+            "as",
+            "asf",
+            "asXf",
+            "asdfx",
         } )
-        void rejects_different_input( String input )
+        void rejectsDifferentInput( String input )
         {
             boolean actual = matcher.test( input );
 
@@ -57,7 +55,7 @@ class WildcardMatcherTest
         private final WildcardMatcher matcher = WildcardMatcher.parse( "*" );
 
         @Test
-        void accepts_null()
+        void acceptsNull()
         {
             boolean actual = matcher.test( null );
 
@@ -67,10 +65,10 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "",
-                "    ",
-                "a",
-                "asdfx",
+            "",
+            "    ",
+            "a",
+            "asdfx",
         } )
         void accepts( String input )
         {
@@ -88,7 +86,7 @@ class WildcardMatcherTest
         private final WildcardMatcher matcher = WildcardMatcher.parse( "*asdf*" );
 
         @Test
-        void rejects_null()
+        void rejectsNull()
         {
             boolean actual = matcher.test( null );
 
@@ -98,13 +96,13 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "asdf",
-                "fooasdf",
-                "asdfbar",
-                "fooasdfbar",
-                " asdf",
-                "asdf ",
-                " asdf ",
+            "asdf",
+            "fooasdf",
+            "asdfbar",
+            "fooasdfbar",
+            " asdf",
+            "asdf ",
+            " asdf ",
         } )
         void accepts( String input )
         {
@@ -115,9 +113,9 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "",
-                "    ",
-                "foo",
+            "",
+            "    ",
+            "foo",
         } )
         void rejects( String input )
         {
@@ -134,7 +132,7 @@ class WildcardMatcherTest
         private final WildcardMatcher matcher = WildcardMatcher.parse( "*asdf" );
 
         @Test
-        void rejects_null()
+        void rejectsNull()
         {
             boolean actual = matcher.test( null );
 
@@ -144,11 +142,11 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "asdf",
-                "asdfasdf",
-                "    asdf",
-                "Xasdf",
-                "99999999asdf",
+            "asdf",
+            "asdfasdf",
+            "    asdf",
+            "Xasdf",
+            "99999999asdf",
         } )
         void accepts( String input )
         {
@@ -159,11 +157,11 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "",
-                "    ",
-                "asdf ",
-                "asdfx",
-                "asdfbanana",
+            "",
+            "    ",
+            "asdf ",
+            "asdfx",
+            "asdfbanana",
         } )
         void rejects( String input )
         {
@@ -180,7 +178,7 @@ class WildcardMatcherTest
         private final WildcardMatcher matcher = WildcardMatcher.parse( "asdf*" );
 
         @Test
-        void rejects_null()
+        void rejectsNull()
         {
             boolean actual = matcher.test( null );
 
@@ -190,11 +188,11 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "asdf",
-                "asdfasdf",
-                "asdf ",
-                "asdfx",
-                "asdfbanana",
+            "asdf",
+            "asdfasdf",
+            "asdf ",
+            "asdfx",
+            "asdfbanana",
         } )
         void accepts( String input )
         {
@@ -205,11 +203,11 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "",
-                "    ",
-                "    asdf",
-                "Xasdf",
-                "99999999asdf",
+            "",
+            "    ",
+            "    asdf",
+            "Xasdf",
+            "99999999asdf",
         } )
         void rejects( String input )
         {
@@ -226,7 +224,7 @@ class WildcardMatcherTest
         private final WildcardMatcher matcher = WildcardMatcher.parse( "[2.0,3.0]" );
 
         @Test
-        void rejects_null()
+        void rejectsNull()
         {
             boolean actual = matcher.test( null );
 
@@ -236,9 +234,9 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "2.0",
-                "2.1",
-                "3.0",
+            "2.0",
+            "2.1",
+            "3.0",
         } )
         void accepts( String input )
         {
@@ -249,11 +247,11 @@ class WildcardMatcherTest
 
         @ParameterizedTest
         @ValueSource( strings = {
-                "",
-                "    ",
-                "1.0",
-                "2.0-SNAPSHOT",
-                "4.0",
+            "",
+            "    ",
+            "1.0",
+            "2.0-SNAPSHOT",
+            "4.0",
         } )
         void rejects( String input )
         {

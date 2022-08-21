@@ -19,10 +19,6 @@ package org.codehaus.mojo.versions.recording;
  * under the License.
  */
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,9 +28,14 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * A recorder of version updates.
@@ -81,7 +82,8 @@ public class ChangeRecorderXML implements ChangeRecorder
     }
 
     @Override
-    public final void recordUpdate( final String kind, final String groupId, final String artifactId, final String oldVersion, final String newVersion )
+    public final void recordUpdate( final String kind, final String groupId, final String artifactId,
+                                    final String oldVersion, final String newVersion )
     {
         Objects.requireNonNull( kind, "kind" );
         Objects.requireNonNull( groupId, "groupId" );

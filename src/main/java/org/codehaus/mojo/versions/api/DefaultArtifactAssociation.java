@@ -19,10 +19,10 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Objects;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
-
-import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.

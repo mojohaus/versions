@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.util.Collection;
-
 import javax.xml.stream.XMLStreamException;
+
+import java.util.Collection;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -36,7 +36,9 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
  * Updates a dependency to a specific version.
- * This can be useful if you have to manage versions for a very large (100+ module) projects where you can’t always use the most up-to-date version of a particular third party component.
+ * This can be useful if you have to manage versions for a very large (100+ module) projects where you can’t always use
+ * the most up-to-date version of a particular third party component.
+ *
  * @author Dan Arcari
  * @since 2.3
  */
@@ -62,19 +64,22 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
     protected boolean forceVersion;
 
     @Override
-    protected void update( ModifiedPomXMLEventReader pom ) throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
+    protected void update( ModifiedPomXMLEventReader pom )
+        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
 
         if ( depVersion == null || depVersion.equals( "" ) )
         {
             throw new IllegalArgumentException(
-                    "depVersion must be supplied with use-specific-version, and cannot be blank." );
+                "depVersion must be supplied with use-specific-version, and cannot be blank." );
         }
 
         if ( !forceVersion && !hasIncludes() )
         {
             throw new IllegalArgumentException(
-                    "The use-specific-version goal is intended to be used with a single artifact. Please specify a value for the 'includes' parameter, or use -DforceVersion=true to override this check." );
+                "The use-specific-version goal is intended to be used with a single artifact. "
+                    + "Please specify a value for the 'includes' parameter, "
+                    + "or use -DforceVersion=true to override this check." );
         }
 
         try
@@ -95,7 +100,8 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
         }
     }
 
-    private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies ) throws MojoExecutionException, XMLStreamException, ArtifactMetadataRetrievalException
+    private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
+        throws MojoExecutionException, XMLStreamException, ArtifactMetadataRetrievalException
     {
         for ( Dependency dep : dependencies )
         {
@@ -122,20 +128,20 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
                     if ( !versions.containsVersion( depVersion ) )
                     {
                         throw new MojoExecutionException(
-                                String.format( "Version %s is not available for artifact %s:%s", depVersion,
-                                        artifact.getGroupId(), artifact.getArtifactId() ) );
+                            String.format( "Version %s is not available for artifact %s:%s",
+                                           depVersion, artifact.getGroupId(), artifact.getArtifactId() ) );
                     }
                 }
 
                 String version = dep.getVersion();
 
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, depVersion,
-                        getProject().getModel() ) )
+                                                     getProject().getModel() ) )
                 {
                     getLog().info( "Updated " + toString( dep ) + " to version " + depVersion );
 
                     this.getChangeRecorder().recordUpdate( "useDependencyVersion", dep.getGroupId(),
-                            dep.getArtifactId(), version, depVersion );
+                                                           dep.getArtifactId(), version, depVersion );
                 }
             }
         }

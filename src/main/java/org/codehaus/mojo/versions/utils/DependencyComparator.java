@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import org.apache.maven.model.Dependency;
-
 import java.util.Comparator;
+
+import org.apache.maven.model.Dependency;
 
 /**
  * A comparator used to sort dependencies by group id, artifact id and finally version.

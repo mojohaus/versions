@@ -19,6 +19,32 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -43,31 +69,6 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Helper class for modifying pom files.
@@ -102,7 +103,7 @@ public class PomHelper
     public static Model getRawModel( File moduleProjectFile )
         throws IOException
     {
-        try (FileInputStream input = new FileInputStream( moduleProjectFile ))
+        try ( FileInputStream input = new FileInputStream( moduleProjectFile ) )
         {
             return new MavenXpp3Reader().read( input );
         }
@@ -122,7 +123,7 @@ public class PomHelper
     public static Model getRawModel( ModifiedPomXMLEventReader modifiedPomXMLEventReader )
         throws IOException
     {
-        try (StringReader stringReader = new StringReader( modifiedPomXMLEventReader.asStringBuilder().toString() ))
+        try ( StringReader stringReader = new StringReader( modifiedPomXMLEventReader.asStringBuilder().toString() ) )
         {
             return new MavenXpp3Reader().read( stringReader );
         }
@@ -135,10 +136,10 @@ public class PomHelper
     /**
      * Searches the pom re-defining the specified property to the specified version.
      *
-     * @param pom The pom to modify.
+     * @param pom       The pom to modify.
      * @param profileId The profile in which to modify the property.
-     * @param property The property to modify.
-     * @param value The new value of the property.
+     * @param property  The property to modify.
+     * @param value     The new value of the property.
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
@@ -222,7 +223,7 @@ public class PomHelper
     /**
      * Searches the pom re-defining the project version to the specified version.
      *
-     * @param pom The pom to modify.
+     * @param pom   The pom to modify.
      * @param value The new value of the property.
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
@@ -236,9 +237,9 @@ public class PomHelper
     /**
      * Searches the pom re-defining a project value using the given pattern.
      *
-     * @param pom The pom to modify.
+     * @param pom     The pom to modify.
      * @param pattern The pattern to look for.
-     * @param value The new value of the property.
+     * @param value   The new value of the property.
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if something went wrong.
      */
@@ -290,7 +291,7 @@ public class PomHelper
      *
      * @param pom The pom.
      * @return the project version or <code>null</code> if the project version is not defined (i.e. inherited from
-     *         parent version).
+     * parent version).
      * @throws XMLStreamException if something went wrong.
      */
     public static String getProjectVersion( final ModifiedPomXMLEventReader pom )
@@ -336,7 +337,7 @@ public class PomHelper
     /**
      * Searches the pom re-defining the project version to the specified version.
      *
-     * @param pom The pom to modify.
+     * @param pom   The pom to modify.
      * @param value The new value of the property.
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
@@ -387,7 +388,7 @@ public class PomHelper
     /**
      * Gets the parent artifact from the pom.
      *
-     * @param pom The pom.
+     * @param pom    The pom.
      * @param helper The helper (used to create the artifact).
      * @return The parent artifact or <code>null</code> if no parent is specified.
      * @throws XMLStreamException if something went wrong.
@@ -441,22 +442,23 @@ public class PomHelper
         {
             return null;
         }
-        return helper.createDependencyArtifact( groupId, artifactId, version , "pom",
+        return helper.createDependencyArtifact( groupId, artifactId, version, "pom",
                                                 null, null );
     }
 
     /**
      * Searches the pom re-defining the specified dependency to the specified version.
      *
-     * @param pom The pom to modify.
-     * @param groupId The groupId of the dependency.
+     * @param pom        The pom to modify.
+     * @param groupId    The groupId of the dependency.
      * @param artifactId The artifactId of the dependency.
      * @param oldVersion The old version of the dependency.
      * @param newVersion The new version of the dependency.
-     * @param model The model to get the project properties from.
+     * @param model      The model to get the project properties from.
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if something went wrong.
      */
+    @SuppressWarnings( "checkstyle:MethodLength" )
     public static boolean setDependencyVersion( final ModifiedPomXMLEventReader pom, final String groupId,
                                                 final String artifactId, final String oldVersion,
                                                 final String newVersion, final Model model )
@@ -467,8 +469,8 @@ public class PomHelper
 
         Set<String> implicitPaths =
             new HashSet<>( Arrays.asList( "/project/parent/groupId", "/project/parent/artifactId",
-                                                        "/project/parent/version", "/project/groupId",
-                                                        "/project/artifactId", "/project/version" ) );
+                                          "/project/parent/version", "/project/groupId",
+                                          "/project/artifactId", "/project/version" ) );
         Map<String, String> implicitProperties = new HashMap<>();
 
         for ( Map.Entry<Object, Object> entry : model.getProperties().entrySet() )
@@ -530,12 +532,16 @@ public class PomHelper
         boolean haveArtifactId = false;
         boolean haveOldVersion = false;
 
-        final Pattern matchScopeRegex = Pattern.compile( "/project" + "(/profiles/profile)?"
-            + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?" + "/dependencies/dependency" );
+        final Pattern matchScopeRegex = Pattern.compile(
+            "/project" + "(/profiles/profile)?"
+                + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
+                + "/dependencies/dependency" );
 
-        final Pattern matchTargetRegex = Pattern.compile( "/project" + "(/profiles/profile)?"
-            + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?" + "/dependencies/dependency"
-            + "((/groupId)|(/artifactId)|(/version))" );
+        final Pattern matchTargetRegex = Pattern.compile(
+            "/project" + "(/profiles/profile)?"
+                + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
+                + "/dependencies/dependency"
+                + "((/groupId)|(/artifactId)|(/version))" );
 
         pom.rewind();
 
@@ -622,7 +628,7 @@ public class PomHelper
     /**
      * A lightweight expression evaluation function.
      *
-     * @param expr The expression to evaluate.
+     * @param expr       The expression to evaluate.
      * @param properties The properties to substitute.
      * @return The evaluated expression.
      */
@@ -715,7 +721,7 @@ public class PomHelper
     /**
      * Checks if two versions or ranges have an overlap.
      *
-     * @param leftVersionOrRange the 1st version number or range to test
+     * @param leftVersionOrRange  the 1st version number or range to test
      * @param rightVersionOrRange the 2nd version number or range to test
      * @return true if both versions have an overlap
      * @throws InvalidVersionSpecificationException if the versions can't be parsed to a range
@@ -753,8 +759,8 @@ public class PomHelper
     /**
      * Searches the pom re-defining the specified plugin to the specified version.
      *
-     * @param pom The pom to modify.
-     * @param groupId The groupId of the dependency.
+     * @param pom        The pom to modify.
+     * @param groupId    The groupId of the dependency.
      * @param artifactId The artifactId of the dependency.
      * @param oldVersion The old version of the dependency.
      * @param newVersion The new version of the dependency.
@@ -777,10 +783,11 @@ public class PomHelper
         boolean haveOldVersion = false;
 
         matchScopeRegex = Pattern.compile( "/project" + "(/profiles/profile)?"
-            + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin" );
+                                               + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin" );
 
         matchTargetRegex = Pattern.compile( "/project" + "(/profiles/profile)?"
-            + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin" + "((/groupId)|(/artifactId)|(/version))" );
+                                                + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin"
+                                                + "((/groupId)|(/artifactId)|(/version))" );
 
         pom.rewind();
 
@@ -864,11 +871,11 @@ public class PomHelper
     /**
      * Examines the project to find any properties which are associated with versions of artifacts in the project.
      *
-     * @param helper Our versions helper.
+     * @param helper  Our versions helper.
      * @param project The project to examine.
      * @return An array of properties that are associated within the project.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
-     * @throws IOException if the project's pom file cannot be parsed.
+     * @throws IOException                   if the project's pom file cannot be parsed.
      * @since 1.0-alpha-3
      */
     public static PropertyVersionsBuilder[] getPropertyVersionsBuilders( VersionsHelper helper, MavenProject project )
@@ -963,7 +970,8 @@ public class PomHelper
                 }
                 if ( profile.getReporting() != null )
                 {
-                    addReportPluginAssociations( helper, expressionEvaluator, result, profile.getReporting().getPlugins() );
+                    addReportPluginAssociations( helper, expressionEvaluator, result,
+                                                 profile.getReporting().getPlugins() );
                 }
             }
             currentPrj = currentPrj.getParent();
@@ -983,10 +991,11 @@ public class PomHelper
      * Takes a list of {@link org.apache.maven.model.Plugin} instances and adds associations to properties used to
      * define versions of the plugin artifact or any of the plugin dependencies specified in the pom.
      *
-     * @param helper Our helper.
+     * @param helper              Our helper.
      * @param expressionEvaluator Our expression evaluator.
-     * @param result The map of {@link org.codehaus.mojo.versions.api.PropertyVersionsBuilder} keyed by property name.
-     * @param plugins The list of {@link org.apache.maven.model.Plugin}.
+     * @param result              The map of {@link org.codehaus.mojo.versions.api.PropertyVersionsBuilder} keyed by
+     *                            property name.
+     * @param plugins             The list of {@link org.apache.maven.model.Plugin}.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      */
     private static void addPluginAssociations( VersionsHelper helper, ExpressionEvaluator expressionEvaluator,
@@ -1211,7 +1220,7 @@ public class PomHelper
      * activation).
      *
      * @param project The project.
-     * @param logger The logger to use.
+     * @param logger  The logger to use.
      * @return the set of all child modules of the project.
      */
     public static Set<String> getAllChildModules( MavenProject project, Log logger )
@@ -1223,7 +1232,7 @@ public class PomHelper
      * Returns a set of all child modules for a project, including any defined in profiles (ignoring profile
      * activation).
      *
-     * @param model The project model.
+     * @param model  The project model.
      * @param logger The logger to use.
      * @return the set of all child modules of the project.
      */
@@ -1239,7 +1248,7 @@ public class PomHelper
     /**
      * Outputs a debug message with a list of modules.
      *
-     * @param logger The logger to log to.
+     * @param logger  The logger to log to.
      * @param message The message to display.
      * @param modules The modules to append to the message.
      */
@@ -1254,7 +1263,7 @@ public class PomHelper
             }
             else
             {
-                modules.forEach( module -> logger.debug( "  " + module ));
+                modules.forEach( module -> logger.debug( "  " + module ) );
             }
 
         }
@@ -1263,8 +1272,8 @@ public class PomHelper
     /**
      * Modifies the collection of child modules removing those which cannot be found relative to the parent.
      *
-     * @param logger The logger to log to.
-     * @param project the project.
+     * @param logger       The logger to log to.
+     * @param project      the project.
      * @param childModules the child modules.
      */
     public static void removeMissingChildModules( Log logger, MavenProject project, Collection<String> childModules )
@@ -1275,8 +1284,8 @@ public class PomHelper
     /**
      * Modifies the collection of child modules removing those which cannot be found relative to the parent.
      *
-     * @param logger The logger to log to.
-     * @param basedir the project basedir.
+     * @param logger       The logger to log to.
+     * @param basedir      the project basedir.
      * @param childModules the child modules.
      */
     public static void removeMissingChildModules( Log logger, File basedir, Collection<String> childModules )
@@ -1368,10 +1377,10 @@ public class PomHelper
     /**
      * Finds the local root of the specified project.
      *
-     * @param project The project to find the local root for.
-     * @param localRepository the local repo.
+     * @param project              The project to find the local root for.
+     * @param localRepository      the local repo.
      * @param globalProfileManager the global profile manager.
-     * @param logger The logger to log to.
+     * @param logger               The logger to log to.
      * @return The local root (note this may be the project passed as an argument).
      */
     public static MavenProject getLocalRoot( MavenProjectBuilder builder, MavenProject project,
@@ -1418,7 +1427,7 @@ public class PomHelper
      * Builds a map of raw models keyed by module path.
      *
      * @param project The project to build from.
-     * @param logger The logger for logging.
+     * @param logger  The logger for logging.
      * @return A map of raw models keyed by path relative to the project's basedir.
      * @throws IOException if things go wrong.
      */
@@ -1436,10 +1445,10 @@ public class PomHelper
     /**
      * Builds a sub-map of raw models keyed by module path.
      *
-     * @param path The relative path to base the sub-map on.
-     * @param model The model at the relative path.
+     * @param path    The relative path to base the sub-map on.
+     * @param model   The model at the relative path.
      * @param project The project to build from.
-     * @param logger The logger for logging.
+     * @param logger  The logger for logging.
      * @return A map of raw models keyed by path relative to the project's basedir.
      * @throws IOException if things go wrong.
      */
@@ -1498,8 +1507,8 @@ public class PomHelper
     /**
      * Returns all the models that have a specified groupId and artifactId as parent.
      *
-     * @param reactor The map of models keyed by path.
-     * @param groupId The groupId of the parent.
+     * @param reactor    The map of models keyed by path.
+     * @param groupId    The groupId of the parent.
      * @param artifactId The artifactId of the parent.
      * @return a map of models that have a specified groupId and artifactId as parent keyed by path.
      */
@@ -1523,8 +1532,8 @@ public class PomHelper
     /**
      * Returns the model that has the specified groupId and artifactId or <code>null</code> if no such model exists.
      *
-     * @param reactor The map of models keyed by path.
-     * @param groupId The groupId to match.
+     * @param reactor    The map of models keyed by path.
+     * @param groupId    The groupId to match.
      * @param artifactId The artifactId to match.
      * @return The model or <code>null</code> if the model was not in the reactor.
      */
@@ -1537,8 +1546,8 @@ public class PomHelper
     /**
      * Returns the model that has the specified groupId and artifactId or <code>null</code> if no such model exists.
      *
-     * @param reactor The map of models keyed by path.
-     * @param groupId The groupId to match.
+     * @param reactor    The map of models keyed by path.
+     * @param groupId    The groupId to match.
      * @param artifactId The artifactId to match.
      * @return The model entry or <code>null</code> if the model was not in the reactor.
      */
@@ -1560,7 +1569,7 @@ public class PomHelper
      * Returns a count of how many parents a model has in the reactor.
      *
      * @param reactor The map of models keyed by path.
-     * @param model The model.
+     * @param model   The model.
      * @return The number of parents of this model in the reactor.
      */
     public static int getReactorParentCount( Map<String, Model> reactor, Model model )
@@ -1590,7 +1599,7 @@ public class PomHelper
     public static StringBuilder readXmlFile( File outFile )
         throws IOException
     {
-        try( Reader reader = ReaderFactory.newXmlReader( outFile ) )
+        try ( Reader reader = ReaderFactory.newXmlReader( outFile ) )
         {
             return new StringBuilder( IOUtil.toString( reader ) );
         }
@@ -1629,7 +1638,7 @@ public class PomHelper
         String scopeElement = "scope";
         Set<String> recognizedElements =
             new HashSet<>( Arrays.asList( groupIdElement, artifactIdElement, versionElement, typeElement,
-                                                scopeElement ) );
+                                          scopeElement ) );
         Map<String, String> depData = new HashMap<>();
 
         pom.rewind();

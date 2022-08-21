@@ -19,11 +19,11 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-
 import java.math.BigInteger;
 import java.util.StringTokenizer;
+
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 /**
  * A comparator which uses Mercury's version rules.

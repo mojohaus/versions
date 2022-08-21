@@ -19,15 +19,15 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.maven.doxia.sink.Sink;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
 import org.codehaus.plexus.i18n.I18N;
-
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @since 1.0-beta-1

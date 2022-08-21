@@ -65,7 +65,7 @@ public class DependencyUpdatesReportTest
     private static class TestDependencyUpdatesReport extends DependencyUpdatesReport
     {
         @SuppressWarnings( "deprecation" )
-        public TestDependencyUpdatesReport()
+        TestDependencyUpdatesReport()
         {
             mockPlexusComponents();
 
@@ -78,22 +78,23 @@ public class DependencyUpdatesReportTest
             try
             {
                 when( artifactMetadataSource.retrieveAvailableVersions( any( Artifact.class ), any(), any() ) ).then(
-                        invocation -> {
-                            Artifact artifact = invocation.getArgument( 0 );
-                            if ( "artifactA".equals( artifact.getArtifactId() ) && "1.0.0".equals(
-                                    artifact.getVersion() ) )
-                            {
-                                return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
-                                        new DefaultArtifactVersion( "2.0.0" ) );
-                            }
-                            if ( "artifactB".equals( artifact.getArtifactId() ) && "1.0.0".equals(
-                                    artifact.getVersion() ) )
-                            {
-                                return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
-                                        new DefaultArtifactVersion( "1.1.0" ) );
-                            }
-                            return Collections.singletonList( new DefaultArtifactVersion( artifact.getVersion() ) );
-                        } );
+                    invocation ->
+                    {
+                        Artifact artifact = invocation.getArgument( 0 );
+                        if ( "artifactA".equals( artifact.getArtifactId() ) && "1.0.0".equals(
+                            artifact.getVersion() ) )
+                        {
+                            return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
+                                                  new DefaultArtifactVersion( "2.0.0" ) );
+                        }
+                        if ( "artifactB".equals( artifact.getArtifactId() ) && "1.0.0".equals(
+                            artifact.getVersion() ) )
+                        {
+                            return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
+                                                  new DefaultArtifactVersion( "1.1.0" ) );
+                        }
+                        return Collections.singletonList( new DefaultArtifactVersion( artifact.getVersion() ) );
+                    } );
             }
             catch ( ArtifactMetadataRetrievalException e )
             {
@@ -108,10 +109,10 @@ public class DependencyUpdatesReportTest
         }
 
         public TestDependencyUpdatesReport withOriginalDependencyManagement(
-                Dependency... originalDependencyManagement )
+            Dependency... originalDependencyManagement )
         {
             project.getOriginalModel().getDependencyManagement()
-                    .setDependencies( Arrays.asList( originalDependencyManagement ) );
+                .setDependencies( Arrays.asList( originalDependencyManagement ) );
             return this;
         }
 
@@ -134,14 +135,14 @@ public class DependencyUpdatesReportTest
         }
 
         public TestDependencyUpdatesReport withProcessDependencyManagementTransitive(
-                boolean processDependencyManagementTransitive )
+            boolean processDependencyManagementTransitive )
         {
             this.processDependencyManagementTransitive = processDependencyManagementTransitive;
             return this;
         }
 
         public TestDependencyUpdatesReport withOnlyProjectDependencies(
-                boolean onlyProjectDependencies )
+            boolean onlyProjectDependencies )
         {
             this.onlyProjectDependencies = onlyProjectDependencies;
             return this;
@@ -153,23 +154,24 @@ public class DependencyUpdatesReportTest
          * <code>org.codehaus.plexus.PlexusTestCase.lookup</code>,
          * but that method greatly slows down test execution.</p>
          *
-         * @see <a
-         * href="https://codehaus-plexus.github.io/guides/developer-guide/building-components/component-testing.html">Testing
-         * Plexus Components</a>
+         * @see <a href="https://codehaus-plexus.github.io/guides/developer-guide/building-components/component-testing.html">
+         * Testing Plexus Components</a>
          */
         private void mockPlexusComponents()
         {
             i18n = mock( I18N.class );
             when( i18n.getString( anyString(), any(), anyString() ) ).thenAnswer(
-                    invocation -> invocation.getArgument( 2 ) );
+                invocation -> invocation.getArgument( 2 ) );
 
             repositorySystem = mock( RepositorySystem.class );
-            when( repositorySystem.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer( invocation -> {
-                Dependency dependency = invocation.getArgument( 0 );
-                return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                        dependency.getVersion(), dependency.getScope(), dependency.getType(),
-                        dependency.getClassifier(), null );
-            } );
+            when( repositorySystem.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer(
+                invocation ->
+                {
+                    Dependency dependency = invocation.getArgument( 0 );
+                    return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
+                                                dependency.getVersion(), dependency.getScope(), dependency.getType(),
+                                                dependency.getClassifier(), null );
+                } );
 
             Artifact skinArtifact = mock( Artifact.class );
             when( skinArtifact.getId() ).thenReturn( "" );
@@ -196,11 +198,11 @@ public class DependencyUpdatesReportTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestDependencyUpdatesReport()
-                .withOnlyUpgradable( true )
-                .withDependencies(
-                        dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
-                        dependencyOf( "artifactC" ) )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+            .withOnlyUpgradable( true )
+            .withDependencies(
+                dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
+                dependencyOf( "artifactC" ) )
+            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
         assertThat( output, allOf( containsString( "artifactA" ), containsString( "artifactB" ) ) );
@@ -213,11 +215,11 @@ public class DependencyUpdatesReportTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestDependencyUpdatesReport()
-                .withOriginalDependencyManagement( dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
-                        dependencyOf( "artifactC" ) )
-                .withProcessDependencyManagement( true )
-                .withOnlyUpgradable( true )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+            .withOriginalDependencyManagement( dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
+                                               dependencyOf( "artifactC" ) )
+            .withProcessDependencyManagement( true )
+            .withOnlyUpgradable( true )
+            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
         assertThat( output, allOf( containsString( "artifactA" ), containsString( "artifactB" ) ) );
@@ -230,13 +232,13 @@ public class DependencyUpdatesReportTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestDependencyUpdatesReport()
-                .withDependencyManagement(
-                        dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
-                        dependencyOf( "artifactC" ) )
-                .withProcessDependencyManagement( true )
-                .withProcessDependencyManagementTransitive( true )
-                .withOnlyUpgradable( true )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+            .withDependencyManagement(
+                dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
+                dependencyOf( "artifactC" ) )
+            .withProcessDependencyManagement( true )
+            .withProcessDependencyManagementTransitive( true )
+            .withOnlyUpgradable( true )
+            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
         assertThat( output, allOf( containsString( "artifactA" ), containsString( "artifactB" ) ) );
@@ -249,12 +251,12 @@ public class DependencyUpdatesReportTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestDependencyUpdatesReport()
-                .withDependencies( dependencyOf( "artifactA" ) )
-                .withDependencyManagement( dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
-                        dependencyOf( "artifactC" ) )
-                .withProcessDependencyManagement( true )
-                .withOnlyProjectDependencies( true )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+            .withDependencies( dependencyOf( "artifactA" ) )
+            .withDependencyManagement( dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
+                                       dependencyOf( "artifactC" ) )
+            .withProcessDependencyManagement( true )
+            .withOnlyProjectDependencies( true )
+            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
         assertThat( output, containsString( "artifactA" ) );

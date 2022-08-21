@@ -19,6 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -29,11 +35,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Replaces any release versions with the next release version (if it has been released).
@@ -51,7 +52,7 @@ public class UseNextReleasesMojo
     /**
      * Pattern to match a snapshot version.
      */
-    public final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
+    private static final Pattern MATCH_SNAPSHOT_REGEX = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
 
     // ------------------------------ METHODS --------------------------
 
@@ -93,7 +94,7 @@ public class UseNextReleasesMojo
             }
 
             String version = dep.getVersion();
-            Matcher versionMatcher = matchSnapshotRegex.matcher( version );
+            Matcher versionMatcher = MATCH_SNAPSHOT_REGEX.matcher( version );
             if ( !versionMatcher.matches() )
             {
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );

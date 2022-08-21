@@ -19,17 +19,18 @@ package org.codehaus.mojo.versions.rewriting;
  * under the License.
  */
 
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
+
 import java.io.IOException;
 import java.io.StringReader;
+
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
  * Represents the modified pom file. Note: implementations of the StAX API (JSR-173) are not good round-trip rewriting
@@ -129,9 +130,9 @@ public class ModifiedPomXMLEventReader
     /**
      * Constructor ModifiedPomXMLEventReader creates a new ModifiedPomXMLEventReader instance.
      *
-     * @param pom of type StringBuilder
+     * @param pom     of type StringBuilder
      * @param factory of type XMLInputFactory
-     * @param path Path pointing to source of XML
+     * @param path    Path pointing to source of XML
      * @throws XMLStreamException when
      */
     public ModifiedPomXMLEventReader( StringBuilder pom, XMLInputFactory factory, String path )
@@ -381,7 +382,7 @@ public class ModifiedPomXMLEventReader
         }
         catch ( XMLStreamException e )
         {
-            throw new RuntimeException("Error parsing " + path + ": " + e.getMessage(), e);
+            throw new RuntimeException( "Error parsing " + path + ": " + e.getMessage(), e );
         }
     }
 
@@ -500,8 +501,8 @@ public class ModifiedPomXMLEventReader
     /**
      * Replaces all content between marks index1 and index2 with the replacement text.
      *
-     * @param index1 The event mark to replace after.
-     * @param index2 The event mark to replace before.
+     * @param index1      The event mark to replace after.
+     * @param index2      The event mark to replace before.
      * @param replacement The replacement.
      */
     public void replaceBetween( int index1, int index2, String replacement )
@@ -546,7 +547,7 @@ public class ModifiedPomXMLEventReader
     /**
      * Replaces the specified marked element with the replacement text.
      *
-     * @param index The mark.
+     * @param index       The mark.
      * @param replacement The replacement.
      */
     public void replaceMark( int index, String replacement )
