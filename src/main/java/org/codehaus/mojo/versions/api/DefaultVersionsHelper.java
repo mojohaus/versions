@@ -165,6 +165,14 @@ public class DefaultVersionsHelper
     private final MojoExecution mojoExecution;
 
     /**
+     * A cache mapping artifacts to their best fitting rule, since looking up
+     * this information can be quite costly.
+     * 
+     * @since 2.12
+     */
+    private final Map<String, Rule> artifactBestFitRule = new HashMap<>();
+    
+    /**
      * Constructs a new {@link DefaultVersionsHelper}.
      *
      * @param repositorySystem The repositorySystem.
@@ -522,6 +530,11 @@ public class DefaultVersionsHelper
      */
     protected Rule getBestFitRule( String groupId, String artifactId )
     {
+        String groupArtifactId = groupId + ':' + artifactId;
+        if (artifactBestFitRule.containsKey( groupArtifactId )) {
+            return artifactBestFitRule.get( groupArtifactId );
+        }
+
         Rule bestFit = null;
         final List<Rule> rules = ruleSet.getRules();
         int bestGroupIdScore = Integer.MAX_VALUE;
@@ -571,6 +584,8 @@ public class DefaultVersionsHelper
             }
             bestFit = rule;
         }
+
+        artifactBestFitRule.put( groupArtifactId, bestFit );
         return bestFit;
     }
 
