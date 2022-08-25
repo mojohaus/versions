@@ -33,8 +33,6 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
-import org.apache.maven.doxia.tools.SiteTool;
-import org.apache.maven.doxia.tools.SiteToolException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -173,15 +171,6 @@ public class DependencyUpdatesReportTest
 
             Artifact skinArtifact = mock( Artifact.class );
             when( skinArtifact.getId() ).thenReturn( "" );
-            siteTool = mock( SiteTool.class );
-            try
-            {
-                when( siteTool.getSkinArtifactFromRepository( any(), any(), any() ) ).thenReturn( skinArtifact );
-            }
-            catch ( SiteToolException e )
-            {
-                throw new RuntimeException( e );
-            }
         }
     }
 
