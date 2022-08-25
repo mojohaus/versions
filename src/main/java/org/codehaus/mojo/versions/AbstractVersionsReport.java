@@ -19,6 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -43,10 +47,6 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.plexus.i18n.I18N;
-
-import java.io.File;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Base class for all versions reports.
@@ -101,12 +101,6 @@ public abstract class AbstractVersionsReport
      */
     @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
     protected List<ArtifactRepository> remotePluginRepositories;
-
-    /**
-     * @since 1.0-alpha-1
-     */
-    @Parameter( defaultValue = "${localRepository}", readonly = true )
-    protected ArtifactRepository localRepository;
 
     /**
      * @since 1.0-alpha-3
