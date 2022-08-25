@@ -171,11 +171,11 @@ public class DefaultVersionsHelper
     /**
      * A cache mapping artifacts to their best fitting rule, since looking up
      * this information can be quite costly.
-     * 
+     *
      * @since 2.12
      */
     private final Map<String, Rule> artifactBestFitRule = new HashMap<>();
-    
+
     /**
      * Constructs a new {@link DefaultVersionsHelper}.
      *
@@ -568,7 +568,8 @@ public class DefaultVersionsHelper
     protected Rule getBestFitRule( String groupId, String artifactId )
     {
         String groupArtifactId = groupId + ':' + artifactId;
-        if (artifactBestFitRule.containsKey( groupArtifactId )) {
+        if ( artifactBestFitRule.containsKey( groupArtifactId ) )
+        {
             return artifactBestFitRule.get( groupArtifactId );
         }
 
