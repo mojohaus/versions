@@ -15,7 +15,7 @@
     <jaxb.version>2.2.11</jaxb.version>
     <jaxb2-basics.version>0.11.1</jaxb2-basics.version>
     <poi.version>3.17</poi.version>
-    <httpclient.version>4.5.2</httpclient.version>
+    <httpclient.version>4.5.13</httpclient.version>
     <jackson.version>2.6.7.3</jackson.version>
     <mariadb-client.version>2.4.3</mariadb-client.version>
     <postgresql-client.version>42.2.6</postgresql-client.version>
