@@ -103,12 +103,6 @@ public abstract class AbstractVersionsReport
     protected List<ArtifactRepository> remotePluginRepositories;
 
     /**
-     * @since 1.0-alpha-1
-     */
-    @Parameter( defaultValue = "${localRepository}", readonly = true )
-    protected ArtifactRepository localRepository;
-
-    /**
      * @since 1.0-alpha-3
      */
     @Component
