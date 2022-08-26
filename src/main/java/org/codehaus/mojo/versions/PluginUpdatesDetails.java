@@ -19,13 +19,13 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.Map;
+import java.util.Objects;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
-
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Details of a plugin's updates.
@@ -38,7 +38,8 @@ public class PluginUpdatesDetails
 
     private final boolean includeSnapshots;
 
-    public PluginUpdatesDetails( ArtifactVersions artifactVersions, Map<Dependency, ArtifactVersions> dependencyVersions, boolean includeSnapshots )
+    public PluginUpdatesDetails( ArtifactVersions artifactVersions,
+                                 Map<Dependency, ArtifactVersions> dependencyVersions, boolean includeSnapshots )
     {
         Objects.requireNonNull( artifactVersions );
         Objects.requireNonNull( dependencyVersions );

@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -173,7 +172,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     /**
      * Should the artifacts produced in the current reactor be excluded from processing.
      *
-     * @return returns <code>true</code> if the artifacts produced in the current reactor should be excluded from processing.
+     * @return returns <code>true</code> if the artifacts produced in the current reactor
+     * should be excluded from processing.
      * @since 1.0-alpha-3
      */
     public boolean isExcludeReactor()
@@ -183,15 +183,16 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     /**
      * Should the dependency be updated itself or is it handled by properties.
-     * 
+     *
      * @param dependency Dependency
      * @return true if the version starts with '${'
      * @since 2.8
      */
-    protected boolean isHandledByProperty(Dependency dependency) {
-		String version = dependency.getVersion();
-		return version.startsWith("${");
-	}
+    protected boolean isHandledByProperty( Dependency dependency )
+    {
+        String version = dependency.getVersion();
+        return version != null && version.startsWith( "${" );
+    }
 
     /**
      * Try to find the dependency artifact that matches the given dependency.
@@ -220,8 +221,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * Try to find the dependency artifact that matches the given dependency.
      *
      * @param dependency Dependency
-     * @throws MojoExecutionException Mojo execution exception
      * @return Artifact
+     * @throws MojoExecutionException Mojo execution exception
      * @since 1.0-alpha-3
      */
     protected Artifact toArtifact( Dependency dependency )
@@ -230,14 +231,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         Artifact artifact = findArtifact( dependency );
         if ( artifact == null )
         {
-            try
-            {
-                return getHelper().createDependencyArtifact( dependency );
-            }
-            catch ( InvalidVersionSpecificationException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
+            return getHelper().createDependencyArtifact( dependency );
         }
         return artifact;
     }
@@ -308,9 +302,11 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     protected boolean isProducedByReactor( Dependency dependency )
     {
-        for ( Object reactorProject : reactorProjects ) {
+        for ( Object reactorProject : reactorProjects )
+        {
             MavenProject project = (MavenProject) reactorProject;
-            if ( compare(project, dependency) ) {
+            if ( compare( project, dependency ) )
+            {
                 return true;
             }
         }
@@ -322,7 +318,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * Compare a project to a dependency. Returns true only if the groupId and artifactId are all equal.
      *
      * @param project the project
-     * @param dep the dependency
+     * @param dep     the dependency
      * @return true if project and dep refer to the same artifact
      */
     private boolean compare( MavenProject project, Dependency dep )
@@ -339,7 +335,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * equal.
      *
      * @param artifact Artifact
-     * @param dep Dependency
+     * @param dep      Dependency
      * @return true if artifact and dep refer to the same artifact
      */
     private boolean compare( Artifact artifact, Dependency dep )
@@ -388,7 +384,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     /**
      * Indicates whether any includes were specified via the 'includes' or 'includesList' options.
-     * 
+     *
      * @return true if includes were specified, false otherwise.
      */
     protected boolean hasIncludes()

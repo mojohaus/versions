@@ -77,7 +77,7 @@ public class ComparableVersion
             this.value = BIG_INTEGEGER_ZERO;
         }
 
-        public IntegerItem( String str )
+        IntegerItem( String str )
         {
             this.value = new BigInteger( str );
         }
@@ -127,11 +127,11 @@ public class ComparableVersion
     private static class StringItem
         implements Item
     {
-        private final static String[] QUALIFIERS = { "snapshot", "alpha", "beta", "milestone", "rc", "", "sp" };
+        private static final String[] QUALIFIERS = {"snapshot", "alpha", "beta", "milestone", "rc", "", "sp"};
 
-        private final static List<String> QUALIFIERS_LIST = Arrays.asList( QUALIFIERS );
+        private static final List<String> QUALIFIERS_LIST = Arrays.asList( QUALIFIERS );
 
-        private final static Properties ALIASES = new Properties();
+        private static final Properties ALIASES = new Properties();
 
         static
         {
@@ -148,7 +148,7 @@ public class ComparableVersion
 
         private final String value;
 
-        public StringItem( String value, boolean followedByDigit )
+        StringItem( String value, boolean followedByDigit )
         {
             if ( followedByDigit && value.length() == 1 )
             {
@@ -163,6 +163,9 @@ public class ComparableVersion
                         break;
                     case 'm':
                         value = "milestone";
+                        break;
+                    default:
+                        // no action
                         break;
                 }
             }
@@ -381,7 +384,9 @@ public class ComparableVersion
                     {
                         // new ListItem only if previous were digits and new char is a digit,
                         // ie need to differentiate only 1.1 from 1-1
+                        // CHECKSTYLE_OFF: InnerAssignment
                         list.add( list = new ListItem() );
+                        // CHECKSTYLE_ON: InnerAssignment
 
                         stack.push( list );
                     }

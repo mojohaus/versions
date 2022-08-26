@@ -39,7 +39,8 @@ import org.codehaus.mojo.versions.utils.PropertyComparator;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "property-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true )
+@Mojo( name = "property-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME,
+       threadSafe = true )
 public class PropertyUpdatesReport
     extends AbstractVersionsReport
 {
@@ -104,7 +105,7 @@ public class PropertyUpdatesReport
         try
         {
             updateSet.putAll( getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties,
-                                                             excludeProperties, autoLinkItems ));
+                                                                   excludeProperties, autoLinkItems ) );
         }
         catch ( MojoExecutionException e )
         {

@@ -19,8 +19,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<model xmlns="http://modello.codehaus.org/MODELLO/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://modello.codehaus.org/MODELLO/1.1.0 http://modello.codehaus.org/xsd/modello-1.1.0.xsd"
+<model xmlns="http://codehaus-plexus.github.io/MODELLO/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://codehaus-plexus.github.io/MODELLO/2.0.0 https://codehaus-plexus.github.io/modello/xsd/modello-2.0.0.xsd"
        xsd.namespace="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0"
        xsd.targetNamespace="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0">
   <id>rule</id>
@@ -45,7 +45,7 @@ under the License.
       </description>
       <version>1.0+</version>
       <fields>
-        <field xml.attributes="false">
+        <field>
           <name>ignoreVersions</name>
           <version>2.0+</version>
           <required>false</required>
@@ -131,7 +131,7 @@ under the License.
       </description>
       <version>1.0+</version>
       <fields>
-        <field xml.attributes="false">
+        <field>
           <name>ignoreVersions</name>
           <version>2.0+</version>
           <required>false</required>
@@ -146,7 +146,7 @@ under the License.
           <name>rules</name>
           <required>true</required>
           <version>1.0+</version>
-          <association xml.itemStyle="flat">
+          <association>
             <type>Rule</type>
             <multiplicity>*</multiplicity>
           </association>
@@ -200,7 +200,8 @@ under the License.
           <name>version</name>
           <version>2.0+</version>
           <type>String</type>
-          <description>A version number or a regular expression for version numbers that should be ignored.</description>
+          <description>A version number or a regular expression for version numbers that should be ignored.
+          </description>
         </field>
         <field xml.attribute="true">
           <name>type</name>

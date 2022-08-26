@@ -19,6 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
@@ -26,10 +30,6 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.i18n.I18N;
-
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @since 1.0-beta-1

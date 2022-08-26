@@ -19,12 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -148,7 +148,8 @@ public class DisplayPropertyUpdatesMojo
                 buf.append( property.getName() );
                 buf.append( "} " );
                 final String newVersion = winner.toString();
-                int padding = INFO_PAD_SIZE - currentVersion.length() - newVersion.length() - 4;
+                int padding =
+                    INFO_PAD_SIZE - currentVersion.length() - newVersion.length() - 4 + getOutputLineWidthOffset();
                 while ( buf.length() < padding )
                 {
                     buf.append( '.' );
@@ -165,7 +166,7 @@ public class DisplayPropertyUpdatesMojo
                 buf.append( "${" );
                 buf.append( property.getName() );
                 buf.append( "} " );
-                int padding = INFO_PAD_SIZE - currentVersion.length();
+                int padding = INFO_PAD_SIZE - currentVersion.length() + getOutputLineWidthOffset();
                 while ( buf.length() < padding )
                 {
                     buf.append( '.' );
@@ -181,7 +182,7 @@ public class DisplayPropertyUpdatesMojo
         if ( !current.isEmpty() )
         {
             logLine( false, "The following version properties are referencing the newest available version:" );
-            for ( String s : new TreeSet<>(current) )
+            for ( String s : new TreeSet<>( current ) )
             {
                 logLine( false, "  " + s );
             }
@@ -198,7 +199,7 @@ public class DisplayPropertyUpdatesMojo
         if ( !updates.isEmpty() )
         {
             logLine( false, "The following version property updates are available:" );
-            for ( String update : new TreeSet<>(updates) )
+            for ( String update : new TreeSet<>( updates ) )
             {
                 logLine( false, "  " + update );
             }

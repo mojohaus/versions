@@ -19,17 +19,18 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Displays any updates of the project's parent project
@@ -41,6 +42,8 @@ import javax.xml.stream.XMLStreamException;
 public class DisplayParentUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {
+
+    public static final int MESSAGE_LENGTH = 68;
 
     @Override
     public void execute()
@@ -72,9 +75,13 @@ public class DisplayParentUpdatesMojo
             throw new MojoExecutionException( "Invalid version range specification: " + version, e );
         }
 
-        Artifact artifact = artifactFactory.createDependencyArtifact( getProject().getParent().getGroupId(),
-                                                                      getProject().getParent().getArtifactId(),
-                                                                      versionRange, "pom", null, null );
+        Dependency dependency = new Dependency();
+        dependency.setGroupId( getProject().getParent().getGroupId() );
+        dependency.setArtifactId( getProject().getParent().getArtifactId() );
+        dependency.setVersion( version );
+        dependency.setType( "pom" );
+
+        Artifact artifact = getHelper().createDependencyArtifact( dependency );
 
         ArtifactVersion artifactVersion;
         try
@@ -89,13 +96,13 @@ public class DisplayParentUpdatesMojo
         if ( artifactVersion == null || currentVersion.equals( artifactVersion.toString() ) )
         {
             logLine( false, "The parent project is the latest version:" );
-            StringBuilder buf = new StringBuilder( 68 );
+            StringBuilder buf = new StringBuilder( MESSAGE_LENGTH );
             buf.append( "  " );
             buf.append( getProject().getParent().getGroupId() );
             buf.append( ':' );
             buf.append( getProject().getParent().getArtifactId() );
             buf.append( ' ' );
-            int padding = 68 - currentVersion.length();
+            int padding = MESSAGE_LENGTH - currentVersion.length();
             while ( buf.length() < padding )
             {
                 buf.append( '.' );
@@ -107,13 +114,14 @@ public class DisplayParentUpdatesMojo
         else
         {
             logLine( false, "The parent project has a newer version:" );
-            StringBuilder buf = new StringBuilder( 68 );
+            StringBuilder buf = new StringBuilder( MESSAGE_LENGTH );
             buf.append( "  " );
             buf.append( getProject().getParent().getGroupId() );
             buf.append( ':' );
             buf.append( getProject().getParent().getArtifactId() );
             buf.append( ' ' );
-            int padding = 68 - currentVersion.length() - artifactVersion.toString().length() - " -> ".length();
+            int padding = MESSAGE_LENGTH - currentVersion.length()
+                - artifactVersion.toString().length() - " -> ".length();
             while ( buf.length() < padding )
             {
                 buf.append( '.' );

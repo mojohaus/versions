@@ -19,9 +19,34 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -31,15 +56,14 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.path.PathTranslator;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -66,28 +90,6 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.regex.Pattern;
-
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
  *
@@ -108,8 +110,8 @@ public class DefaultVersionsHelper
     /**
      * The artifact comparison rules to use.
      *
-     * @deprecated
      * @since 1.0-alpha-3
+     * @deprecated
      */
     private final RuleSet ruleSet;
 
@@ -141,12 +143,7 @@ public class DefaultVersionsHelper
      */
     private final List<ArtifactRepository> remotePluginRepositories;
 
-    /**
-     * The artifact factory.
-     *
-     * @since 1.0-alpha-3
-     */
-    private final ArtifactFactory artifactFactory;
+    private final RepositorySystem repositorySystem;
 
     /**
      * The {@link Log} to send log messages to.
@@ -154,13 +151,6 @@ public class DefaultVersionsHelper
      * @since 1.0-alpha-3
      */
     private final Log log;
-
-    /**
-     * The path translator.
-     *
-     * @since 1.0-beta-1
-     */
-    private final PathTranslator pathTranslator;
 
     /**
      * The maven session.
@@ -176,37 +166,47 @@ public class DefaultVersionsHelper
      */
     private final ArtifactResolver artifactResolver;
 
+    private final MojoExecution mojoExecution;
+
+    /**
+     * A cache mapping artifacts to their best fitting rule, since looking up
+     * this information can be quite costly.
+     *
+     * @since 2.12
+     */
+    private final Map<String, Rule> artifactBestFitRule = new HashMap<>();
+
     /**
      * Constructs a new {@link DefaultVersionsHelper}.
      *
-     * @param artifactFactory The artifact factory.
-     * @param artifactResolver Artifact resolver
-     * @param artifactMetadataSource The artifact metadata source to use.
+     * @param repositorySystem           The repositorySystem.
+     * @param artifactResolver           Artifact resolver
+     * @param artifactMetadataSource     The artifact metadata source to use.
      * @param remoteArtifactRepositories The remote artifact repositories to consult.
-     * @param remotePluginRepositories The remote plugin repositories to consult.
-     * @param localRepository The local repository to consult.
-     * @param wagonManager The wagon manager (used if rules need to be retrieved).
-     * @param settings The settings (used to provide proxy information to the wagon manager).
-     * @param serverId The serverId hint for the wagon manager.
-     * @param rulesUri The URL to retrieve the versioning rules from.
-     * @param log The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
-     * @param mavenSession The maven session information.
-     * @param pathTranslator The path translator component. @throws org.apache.maven.plugin.MojoExecutionException If
-     *            things go wrong.
+     * @param remotePluginRepositories   The remote plugin repositories to consult.
+     * @param localRepository            The local repository to consult.
+     * @param wagonManager               The wagon manager (used if rules need to be retrieved).
+     * @param settings                   The settings (used to provide proxy information to the wagon manager).
+     * @param serverId                   The serverId hint for the wagon manager.
+     * @param rulesUri                   The URL to retrieve the versioning rules from.
+     * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
+     * @param mavenSession               The maven session information.
      * @throws MojoExecutionException if something goes wrong.
      * @since 1.0-alpha-3
      */
-    public DefaultVersionsHelper( ArtifactFactory artifactFactory, ArtifactResolver artifactResolver,
-                                  ArtifactMetadataSource artifactMetadataSource, List<ArtifactRepository> remoteArtifactRepositories,
+    @SuppressWarnings( "checkstyle:ParameterNumber" )
+    public DefaultVersionsHelper( RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
+                                  ArtifactMetadataSource artifactMetadataSource,
+                                  List<ArtifactRepository> remoteArtifactRepositories,
                                   List<ArtifactRepository> remotePluginRepositories, ArtifactRepository localRepository,
                                   WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
-                                  Log log, MavenSession mavenSession, PathTranslator pathTranslator )
+                                  Log log, MavenSession mavenSession, MojoExecution mojoExecution )
         throws MojoExecutionException
     {
-        this.artifactFactory = artifactFactory;
+        this.repositorySystem = repositorySystem;
         this.artifactResolver = artifactResolver;
         this.mavenSession = mavenSession;
-        this.pathTranslator = pathTranslator;
+        this.mojoExecution = mojoExecution;
         this.ruleSet = loadRuleSet( serverId, settings, wagonManager, rulesUri, log );
         this.artifactMetadataSource = artifactMetadataSource;
         this.localRepository = localRepository;
@@ -223,9 +223,9 @@ public class DefaultVersionsHelper
         try
         {
             wagon.get( remoteURI, tempFile );
-            try(InputStream is = new FileInputStream(tempFile))
+            try ( InputStream is = new FileInputStream( tempFile ) )
             {
-                return readRulesFromStream(is);
+                return readRulesFromStream( is );
             }
         }
         finally
@@ -238,10 +238,11 @@ public class DefaultVersionsHelper
         }
     }
 
-    private static RuleSet readRulesFromStream(InputStream stream)
-        throws IOException {
+    private static RuleSet readRulesFromStream( InputStream stream )
+        throws IOException
+    {
         RuleXpp3Reader reader = new RuleXpp3Reader();
-        try (BufferedInputStream bis = new BufferedInputStream( stream ))
+        try ( BufferedInputStream bis = new BufferedInputStream( stream ) )
         {
             return reader.read( bis );
         }
@@ -265,136 +266,150 @@ public class DefaultVersionsHelper
 
     private static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
                                         Log logger )
-        throws MojoExecutionException {
+        throws MojoExecutionException
+    {
         RuleSet ruleSet = new RuleSet();
-        boolean rulesUriGiven = isRulesUriNotBlank(rulesUri);
+        boolean rulesUriGiven = isRulesUriNotBlank( rulesUri );
 
-        if (rulesUriGiven) {
+        if ( rulesUriGiven )
+        {
             RuleSet loadedRules;
 
-            if (isClasspathUri(rulesUri)) {
-                loadedRules = getRulesFromClasspath(rulesUri, logger);
-            } else {
-                loadedRules = getRulesViaWagon(rulesUri, logger, serverId, serverId, wagonManager,
-                                                       settings);
+            if ( isClasspathUri( rulesUri ) )
+            {
+                loadedRules = getRulesFromClasspath( rulesUri, logger );
+            }
+            else
+            {
+                loadedRules = getRulesViaWagon( rulesUri, logger, serverId, serverId, wagonManager,
+                                                settings );
             }
 
-            ruleSet.setIgnoreVersions(loadedRules.getIgnoreVersions());
-            ruleSet.setRules(loadedRules.getRules());
+            ruleSet.setIgnoreVersions( loadedRules.getIgnoreVersions() );
+            ruleSet.setRules( loadedRules.getRules() );
         }
 
         return ruleSet;
     }
 
-    private static RuleSet getRulesFromClasspath(String uri, Log logger)
-        throws MojoExecutionException {
-        logger.debug("Going to load rules from \"" + uri + "\"");
+    private static RuleSet getRulesFromClasspath( String uri, Log logger )
+        throws MojoExecutionException
+    {
+        logger.debug( "Going to load rules from \"" + uri + "\"" );
 
-        String choppedUrl = uri.substring(CLASSPATH_PROTOCOL.length() + 3);
+        String choppedUrl = uri.substring( CLASSPATH_PROTOCOL.length() + 3 );
 
-        URL url = DefaultVersionsHelper.class.getResource(choppedUrl);
+        URL url = DefaultVersionsHelper.class.getResource( choppedUrl );
 
-        if (null == url) {
+        if ( null == url )
+        {
             String message = "Resource \"" + uri + "\" not found in classpath.";
 
-            throw new MojoExecutionException(message);
+            throw new MojoExecutionException( message );
         }
 
-        try {
-            RuleSet rules = readRulesFromStream(url.openStream());
-            logger.debug("Loaded rules from \"" + uri + "\" successfully");
+        try
+        {
+            RuleSet rules = readRulesFromStream( url.openStream() );
+            logger.debug( "Loaded rules from \"" + uri + "\" successfully" );
             return rules;
         }
-        catch (IOException e) {
-            throw new MojoExecutionException("Could not load specified rules from " + uri, e);
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( "Could not load specified rules from " + uri, e );
         }
     }
 
-    private static boolean isRulesUriNotBlank(String rulesUri) {
+    private static boolean isRulesUriNotBlank( String rulesUri )
+    {
         return rulesUri != null && rulesUri.trim().length() != 0;
     }
 
-    private static RuleSet getRulesViaWagon(String rulesUri, Log logger, String serverId, String id,
-                                            WagonManager wagonManager, Settings settings)
-        throws MojoExecutionException {
+    private static RuleSet getRulesViaWagon( String rulesUri, Log logger, String serverId, String id,
+                                             WagonManager wagonManager, Settings settings )
+        throws MojoExecutionException
+    {
         RuleSet loadedRules = new RuleSet();
 
-        int split = rulesUri.lastIndexOf('/');
+        int split = rulesUri.lastIndexOf( '/' );
         String baseUri = rulesUri;
         String fileUri = "";
 
-        if (split != -1) {
-            baseUri = rulesUri.substring(0, split) + '/';
-            fileUri = split + 1 < rulesUri.length() ? rulesUri.substring(split + 1) : "";
+        if ( split != -1 )
+        {
+            baseUri = rulesUri.substring( 0, split ) + '/';
+            fileUri = split + 1 < rulesUri.length() ? rulesUri.substring( split + 1 ) : "";
         }
 
-        try {
-            Wagon wagon = WagonUtils.createWagon(serverId, baseUri, wagonManager, settings, logger);
-            try {
-                logger.debug("Trying to load ruleset from file \"" + fileUri + "\" in " + baseUri);
-                loadedRules = getRuleSet(wagon, fileUri);
+        try
+        {
+            Wagon wagon = WagonUtils.createWagon( serverId, baseUri, wagonManager, settings, logger );
+            try
+            {
+                logger.debug( "Trying to load ruleset from file \"" + fileUri + "\" in " + baseUri );
+                loadedRules = getRuleSet( wagon, fileUri );
             }
-            finally {
-                logger.debug("Rule set loaded");
+            finally
+            {
+                logger.debug( "Rule set loaded" );
 
-                if (wagon != null) {
-                    try {
+                if ( wagon != null )
+                {
+                    try
+                    {
                         wagon.disconnect();
                     }
-                    catch (ConnectionException e) {
-                        logger.warn("Could not disconnect wagon!", e);
+                    catch ( ConnectionException e )
+                    {
+                        logger.warn( "Could not disconnect wagon!", e );
                     }
                 }
             }
         }
-        catch (TransferFailedException e) {
-            throw new MojoExecutionException("Could not transfer rules from " + rulesUri, e);
+        catch ( TransferFailedException e )
+        {
+            throw new MojoExecutionException( "Could not transfer rules from " + rulesUri, e );
         }
-        catch (AuthorizationException e) {
-            throw new MojoExecutionException("Authorization failure trying to load rules from " + rulesUri, e);
+        catch ( AuthorizationException e )
+        {
+            throw new MojoExecutionException( "Authorization failure trying to load rules from " + rulesUri, e );
         }
-        catch (ResourceDoesNotExistException e) {
-            throw new MojoExecutionException("Could not load specified rules from " + rulesUri, e);
+        catch ( ResourceDoesNotExistException e )
+        {
+            throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
         }
-        catch (AuthenticationException e) {
-            throw new MojoExecutionException("Authentication failure trying to load rules from " + rulesUri, e);
+        catch ( AuthenticationException e )
+        {
+            throw new MojoExecutionException( "Authentication failure trying to load rules from " + rulesUri, e );
         }
-        catch (UnsupportedProtocolException e) {
-            throw new MojoExecutionException("Unsupported protocol for " + rulesUri, e);
+        catch ( UnsupportedProtocolException e )
+        {
+            throw new MojoExecutionException( "Unsupported protocol for " + rulesUri, e );
         }
-        catch (ConnectionException e) {
-            throw new MojoExecutionException("Could not establish connection to " + rulesUri, e);
+        catch ( ConnectionException e )
+        {
+            throw new MojoExecutionException( "Could not establish connection to " + rulesUri, e );
         }
-        catch (IOException e) {
-            throw new MojoExecutionException("Could not load specified rules from " + rulesUri, e);
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
         }
 
         return loadedRules;
     }
 
-    static boolean isClasspathUri(String uri) {
-        return (uri != null && uri.startsWith(CLASSPATH_PROTOCOL + ":"));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public ArtifactFactory getArtifactFactory()
+    static boolean isClasspathUri( String uri )
     {
-        return artifactFactory;
+        return ( uri != null && uri.startsWith( CLASSPATH_PROTOCOL + ":" ) );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Log getLog()
     {
         return log;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
@@ -423,8 +438,9 @@ public class DefaultVersionsHelper
                             if ( getLog().isDebugEnabled() )
                             {
                                 getLog().debug( "Version " + version + " for artifact "
-                                    + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list: "
-                                    + ignoreVersion );
+                                                    + ArtifactUtils.versionlessKey( artifact )
+                                                    + " found on ignore list: "
+                                                    + ignoreVersion );
                             }
                             i.remove();
                             break;
@@ -437,8 +453,9 @@ public class DefaultVersionsHelper
                             if ( getLog().isDebugEnabled() )
                             {
                                 getLog().debug( "Version " + version + " for artifact "
-                                    + ArtifactUtils.versionlessKey( artifact ) + " found on ignore list: "
-                                    + ignoreVersion );
+                                                    + ArtifactUtils.versionlessKey( artifact )
+                                                    + " found on ignore list: "
+                                                    + ignoreVersion );
                             }
                             i.remove();
                             break;
@@ -465,8 +482,9 @@ public class DefaultVersionsHelper
             if ( !TYPE_EXACT.equals( ignoreVersion.getType() ) && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
             {
                 getLog().warn( "The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion["
-                    + ignoreVersion + "] is not valid." + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX
-                    + "'." );
+                                   + ignoreVersion + "] is not valid." + " Please use either '" + TYPE_EXACT + "' or '"
+                                   + TYPE_REGEX
+                                   + "'." );
             }
             else
             {
@@ -483,7 +501,7 @@ public class DefaultVersionsHelper
                 if ( !TYPE_EXACT.equals( ignoreVersion.getType() ) && !TYPE_REGEX.equals( ignoreVersion.getType() ) )
                 {
                     getLog().warn( "The type attribute '" + ignoreVersion.getType() + "' for " + rule + " is not valid."
-                        + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
+                                       + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'." );
                 }
                 else
                 {
@@ -517,24 +535,22 @@ public class DefaultVersionsHelper
         return buf.toString();
     }
 
+    @Override
     public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactResolutionException, ArtifactNotFoundException
     {
-        List<ArtifactRepository> remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
+        List<ArtifactRepository> remoteRepositories =
+            usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
         artifactResolver.resolve( artifact, remoteRepositories, localRepository );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public VersionComparator getVersionComparator( Artifact artifact )
     {
         return getVersionComparator( artifact.getGroupId(), artifact.getArtifactId() );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public VersionComparator getVersionComparator( String groupId, String artifactId )
     {
         Rule rule = getBestFitRule( groupId, artifactId );
@@ -545,12 +561,18 @@ public class DefaultVersionsHelper
     /**
      * Find the rule, if any, which best fits the artifact details given.
      *
-     * @param groupId Group id of the artifact
+     * @param groupId    Group id of the artifact
      * @param artifactId Artifact id of the artifact
      * @return Rule which best describes the given artifact
      */
     protected Rule getBestFitRule( String groupId, String artifactId )
     {
+        String groupArtifactId = groupId + ':' + artifactId;
+        if ( artifactBestFitRule.containsKey( groupArtifactId ) )
+        {
+            return artifactBestFitRule.get( groupArtifactId );
+        }
+
         Rule bestFit = null;
         final List<Rule> rules = ruleSet.getRules();
         int bestGroupIdScore = Integer.MAX_VALUE;
@@ -600,52 +622,56 @@ public class DefaultVersionsHelper
             }
             bestFit = rule;
         }
+
+        artifactBestFitRule.put( groupArtifactId, bestFit );
         return bestFit;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Artifact createPluginArtifact( String groupId, String artifactId, VersionRange versionRange )
+    @Override
+    public Artifact createPluginArtifact( String groupId, String artifactId, String version )
     {
-        return artifactFactory.createPluginArtifact( groupId, artifactId, versionRange );
+        Plugin plugin = new Plugin();
+        plugin.setGroupId( groupId );
+        plugin.setArtifactId( artifactId );
+        plugin.setVersion( StringUtils.isNotBlank( version ) ? version : "[0,]" );
+        return repositorySystem.createPluginArtifact( plugin );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
+    @Override
+    public Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
                                               String classifier, String scope, boolean optional )
     {
-        return artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, type, classifier, scope,
-                                                         optional );
+        Dependency dependency = new Dependency();
+        dependency.setGroupId( groupId );
+        dependency.setArtifactId( artifactId );
+        dependency.setType( type );
+        dependency.setClassifier( classifier );
+        dependency.setScope( scope );
+        dependency.setOptional( optional );
+        dependency.setVersion( StringUtils.isNotBlank( version ) ? version : "[0,]" );
+        return repositorySystem.createDependencyArtifact( dependency );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
+    @Override
+    public Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
                                               String classifier, String scope )
     {
-        return artifactFactory.createDependencyArtifact( groupId, artifactId, versionRange, type, classifier, scope );
+        return createDependencyArtifact( groupId, artifactId, version, type, classifier, scope, false );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Artifact createDependencyArtifact( Dependency dependency )
-        throws InvalidVersionSpecificationException
     {
-        return createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                         dependency.getVersion() == null ? VersionRange.createFromVersionSpec( "[0,]" )
-                                                         : VersionRange.createFromVersionSpec( dependency.getVersion() ),
-                                         dependency.getType(), dependency.getClassifier(), dependency.getScope(),
-                                         dependency.isOptional() );
+        if ( StringUtils.isBlank( dependency.getVersion() ) )
+        {
+            dependency = dependency.clone();
+            dependency.setVersion( "[,0]" );
+        }
+
+        return repositorySystem.createDependencyArtifact( dependency );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Set<Artifact> extractArtifacts( Collection<MavenProject> mavenProjects )
     {
         Set<Artifact> result = new HashSet<>();
@@ -657,17 +683,13 @@ public class DefaultVersionsHelper
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ArtifactVersion createArtifactVersion( String version )
     {
         return new DefaultArtifactVersion( version );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots,
                                                    boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
@@ -679,12 +701,10 @@ public class DefaultVersionsHelper
         return artifactVersions;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                         boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException
     {
         // Create the request for details collection for parallel lookup...
         final List<Callable<DependencyArtifactVersions>> requestsForDetails =
@@ -713,7 +733,7 @@ public class DefaultVersionsHelper
         catch ( ExecutionException | InterruptedException ie )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
-                + ": " + ie.getMessage(), ie, null );
+                                                              + ": " + ie.getMessage(), ie, null );
         }
         finally
         {
@@ -722,28 +742,20 @@ public class DefaultVersionsHelper
         return dependencyUpdates;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException
     {
         getLog().debug( "Checking "
-            + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )
-            + " for updates newer than " + dependency.getVersion() );
-        VersionRange versionRange = VersionRange.createFromVersionSpec( dependency.getVersion() );
+                            + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )
+                            + " for updates newer than " + dependency.getVersion() );
 
-        return lookupArtifactVersions( createDependencyArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                                                 versionRange, dependency.getType(),
-                                                                 dependency.getClassifier(), dependency.getScope() ),
-                                       usePluginRepositories );
+        return lookupArtifactVersions( createDependencyArtifact( dependency ), usePluginRepositories );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException
     {
         // Create the request for details collection for parallel lookup...
         List<Callable<PluginPluginUpdatesDetails>> requestsForDetails = new ArrayList<>( plugins.size() );
@@ -771,7 +783,7 @@ public class DefaultVersionsHelper
         catch ( ExecutionException | InterruptedException ie )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
-                + ie.getMessage(), ie, null );
+                                                              + ie.getMessage(), ie, null );
         }
         finally
         {
@@ -780,23 +792,19 @@ public class DefaultVersionsHelper
         return pluginUpdates;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+        throws ArtifactMetadataRetrievalException
     {
         String version = plugin.getVersion();
         version = version == null ? "LATEST" : version;
         getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
-            + " for updates newer than " + version );
-
-        VersionRange versionRange = VersionRange.createFromVersion( version );
+                            + " for updates newer than " + version );
 
         boolean includeSnapshots = allowSnapshots;
 
         final ArtifactVersions pluginArtifactVersions =
-            lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), versionRange ),
+            lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), version ),
                                     true );
 
         Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
@@ -810,17 +818,13 @@ public class DefaultVersionsHelper
         return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, includeSnapshots );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ExpressionEvaluator getExpressionEvaluator( MavenProject project )
     {
-        return new VersionsExpressionEvaluator( mavenSession, pathTranslator, project );
+        return new VersionsExpressionEvaluator( mavenSession, mojoExecution );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Map<Property, PropertyVersions> getVersionPropertiesMap( MavenProject project,
                                                                     Property[] propertyDefinitions,
                                                                     String includeProperties, String excludeProperties,
@@ -856,7 +860,7 @@ public class DefaultVersionsHelper
                 {
                     final Property value = new Property( name );
                     getLog().debug( "Property ${" + name + "}: Adding inferred version range of "
-                        + propertyVersionsBuilder.getVersionRange() );
+                                        + propertyVersionsBuilder.getVersionRange() );
                     value.setVersion( propertyVersionsBuilder.getVersionRange() );
                     properties.put( name, value );
                 }
@@ -895,7 +899,7 @@ public class DefaultVersionsHelper
             if ( builder == null || !builder.isAssociated() )
             {
                 getLog().debug( "Property ${" + property.getName() + "}: Looks like this property is not "
-                    + "associated with any dependency..." );
+                                    + "associated with any dependency..." );
                 builder = new PropertyVersionsBuilder( null, property.getName(), this );
             }
             if ( !property.isAutoLinkDependencies() )
@@ -908,15 +912,8 @@ public class DefaultVersionsHelper
             {
                 for ( Dependency dependency : dependencies )
                 {
-                    try
-                    {
-                        getLog().debug( "Property ${" + property.getName() + "}: Adding association to " + dependency );
-                        builder.addAssociation( this.createDependencyArtifact( dependency ), false );
-                    }
-                    catch ( InvalidVersionSpecificationException e )
-                    {
-                        throw new MojoExecutionException( e.getMessage(), e );
-                    }
+                    getLog().debug( "Property ${" + property.getName() + "}: Adding association to " + dependency );
+                    builder.addAssociation( this.createDependencyArtifact( dependency ), false );
                 }
             }
             try
@@ -926,7 +923,7 @@ public class DefaultVersionsHelper
                     && !StringUtils.isEmpty( builder.getVersionRange() ) )
                 {
                     getLog().debug( "Property ${" + property.getName() + "}: Adding inferred version range of "
-                        + builder.getVersionRange() );
+                                        + builder.getVersionRange() );
                     property.setVersion( builder.getVersionRange() );
                 }
                 versions.setCurrentVersion( project.getProperties().getProperty( property.getName() ) );
@@ -958,7 +955,7 @@ public class DefaultVersionsHelper
 
         private final ArtifactVersions artifactVersions;
 
-        public DependencyArtifactVersions( final Dependency dependency, final ArtifactVersions artifactVersions )
+        DependencyArtifactVersions( final Dependency dependency, final ArtifactVersions artifactVersions )
         {
             this.dependency = dependency;
             this.artifactVersions = artifactVersions;
@@ -982,7 +979,7 @@ public class DefaultVersionsHelper
 
         private final PluginUpdatesDetails pluginUpdatesDetails;
 
-        public PluginPluginUpdatesDetails( final Plugin plugin, final PluginUpdatesDetails pluginUpdatesDetails )
+        PluginPluginUpdatesDetails( final Plugin plugin, final PluginUpdatesDetails pluginUpdatesDetails )
         {
             this.plugin = plugin;
             this.pluginUpdatesDetails = pluginUpdatesDetails;
@@ -1007,7 +1004,7 @@ public class DefaultVersionsHelper
 
         private final boolean usePluginRepositories;
 
-        public DependencyLookup( final Dependency dependency, final boolean usePluginRepositories )
+        DependencyLookup( final Dependency dependency, final boolean usePluginRepositories )
         {
             this.dependency = dependency;
             this.usePluginRepositories = usePluginRepositories;
@@ -1029,7 +1026,7 @@ public class DefaultVersionsHelper
 
         private final boolean allowSnapshots;
 
-        public PluginLookup( final Plugin plugin, final Boolean allowSnapshots )
+        PluginLookup( final Plugin plugin, final Boolean allowSnapshots )
         {
             this.plugin = plugin;
             this.allowSnapshots = allowSnapshots;

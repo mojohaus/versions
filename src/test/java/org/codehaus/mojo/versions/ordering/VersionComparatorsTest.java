@@ -19,8 +19,8 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -32,39 +32,46 @@ public class VersionComparatorsTest
         "1.0",
         "1.0.0",
         "1.0.0-1",
-        "1.0.0.sp1",
+        "1.0.0-sp1",
         "foobar",
         "1-alpha-1",
     };
 
     @Test
-    public void testMavenVersionComparator() {
+    public void testMavenVersionComparator()
+    {
         assertVersions( new MavenVersionComparator() );
     }
 
     @Test
-    public void testMercuryVersionComparator() {
-        assertVersions( new MercuryVersionComparator());
+    public void testMercuryVersionComparator()
+    {
+        assertVersions( new MercuryVersionComparator() );
     }
 
     @Test
-    public void testNumericVersionComparator() {
+    public void testNumericVersionComparator()
+    {
         assertVersions( new NumericVersionComparator() );
     }
 
-    public void assertVersions(VersionComparator instance) {
-        for (int i = 0; i < versionDataset.length; i++) {
+    public void assertVersions( VersionComparator instance )
+    {
+        for ( int i = 0; i < versionDataset.length; i++ )
+        {
             assertLater( versionDataset[i], instance );
-            assertLater( versionDataset[i]+"-SNAPSHOT", instance );
+            assertLater( versionDataset[i] + "-SNAPSHOT", instance );
         }
     }
 
-    public void assertLater(String version, VersionComparator instance) {
+    public void assertLater( String version, VersionComparator instance )
+    {
         ArtifactVersion v1 = new DefaultArtifactVersion( version );
         int count = instance.getSegmentCount( v1 );
-        for (int i = 0; i < count; i++) {
+        for ( int i = 0; i < count; i++ )
+        {
             ArtifactVersion v2 = instance.incrementSegment( v1, i );
-            assertTrue(v1 + " < " + v2, instance.compare(v1, v2 ) < 0);
+            assertTrue( v1 + " < " + v2, instance.compare( v1, v2 ) < 0 );
         }
     }
 }

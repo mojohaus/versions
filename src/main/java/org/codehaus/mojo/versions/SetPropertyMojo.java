@@ -19,6 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -29,17 +35,12 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.PropertiesVersionsFileReader;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Map;
-
 /**
  * Set a property to a given version without any sanity checks. Please be careful this can lead to changes which might
  * not build anymore. The sanity checks are done by other goals like <code>update-properties</code> or
  * <code>update-property</code> etc. they are not done here. So use this goal with care.
  *
- * @author Karl Heinz Marbaise          
+ * @author Karl Heinz Marbaise
  * @since 2.5
  */
 @Mojo( name = "set-property", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
@@ -51,6 +52,7 @@ public class SetPropertyMojo
 
     /**
      * A property to update.
+     * You can also specify multiple property names separated by "," which are all set to the same new version.
      */
     @Parameter( property = "property" )
     private String property = null;
@@ -70,6 +72,7 @@ public class SetPropertyMojo
     /**
      * A property file name containing: property=value, to update several properties at the same time.
      * If 'property' and 'newVersion' are also used, they will be ignored.
+     *
      * @since 2.9
      */
 
@@ -79,8 +82,8 @@ public class SetPropertyMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException when things go wrong in a very bad way
-     * @throws XMLStreamException when things go wrong with XML streaming
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -88,31 +91,49 @@ public class SetPropertyMojo
     {
         Property[] propertiesConfig = null;
         String properties = "";
-        if (!StringUtils.isEmpty(propertiesVersionsFile) ) {
+        if ( !StringUtils.isEmpty( propertiesVersionsFile ) )
+        {
             logWrongConfigWarning();
             getLog().debug( "Reading properties and versions to update from file: " + propertiesVersionsFile );
-            PropertiesVersionsFileReader reader = new PropertiesVersionsFileReader(propertiesVersionsFile);
-            try {
+            PropertiesVersionsFileReader reader = new PropertiesVersionsFileReader( propertiesVersionsFile );
+            try
+            {
                 reader.read();
-            } catch (IOException e) {
-                getLog().error("Unable to read property file  " + propertiesVersionsFile
-                        + ". re-run with -X option for more details.");
-                getLog().debug("Error while reading  property file " + propertiesVersionsFile, e);
-                throw new MojoFailureException("Unable to read property file " + propertiesVersionsFile);
+            }
+            catch ( IOException e )
+            {
+                getLog().error( "Unable to read property file  " + propertiesVersionsFile
+                                    + ". re-run with -X option for more details." );
+                getLog().debug( "Error while reading  property file " + propertiesVersionsFile, e );
+                throw new MojoFailureException( "Unable to read property file " + propertiesVersionsFile );
             }
             propertiesConfig = reader.getPropertiesConfig();
             properties = reader.getProperties();
-        } else {
+        }
+        else if ( !StringUtils.isEmpty( property ) )
+        {
             getLog().debug( "Reading properties and versions to update from property and newVersion " );
-            Property propertyConfig = new Property(property);
-            propertyConfig.setVersion(newVersion);
-            propertiesConfig = new Property[] { propertyConfig };
+            propertiesConfig = Arrays.stream( StringUtils.split( property, "," ) ).map(
+                    prp ->
+                    {
+                        Property propertyConfig = new Property( prp );
+                        propertyConfig.setVersion( newVersion );
+                        return propertyConfig;
+                    } )
+                .toArray( size -> new Property[size] );
             properties = property;
         }
-        update(pom, propertiesConfig, properties);
+        else
+        {
+            throw new MojoExecutionException(
+                "Please provide either 'property' or 'propertiesVersionsFile' parameter." );
+        }
+        update( pom, propertiesConfig, properties );
     }
 
-    private void update(ModifiedPomXMLEventReader pom, Property[] propertiesConfig, String properties) throws MojoExecutionException, XMLStreamException {
+    private void update( ModifiedPomXMLEventReader pom, Property[] propertiesConfig, String properties )
+        throws MojoExecutionException, XMLStreamException
+    {
         Map<Property, PropertyVersions> propertyVersions =
             this.getHelper().getVersionPropertiesMap( getProject(), propertiesConfig, properties, "",
                                                       autoLinkItems );
@@ -127,16 +148,19 @@ public class SetPropertyMojo
             {
                 continue;
             }
-            PomHelper.setPropertyVersion(pom, version.getProfileId(), currentProperty.getName(), newVersionGiven );
+            PomHelper.setPropertyVersion( pom, version.getProfileId(), currentProperty.getName(), newVersionGiven );
         }
     }
 
-    private void logWrongConfigWarning() {
-        if (!StringUtils.isEmpty(property)) {
-            getLog().warn("-Dproperty provided but will be ignored as -DpropertiesVersionsFile is used");
+    private void logWrongConfigWarning()
+    {
+        if ( !StringUtils.isEmpty( property ) )
+        {
+            getLog().warn( "-Dproperty provided but will be ignored as -DpropertiesVersionsFile is used" );
         }
-        if (!StringUtils.isEmpty(property)) {
-            getLog().warn("-DnewVersion provided but will be ignored as -DpropertiesVersionsFile is used");
+        if ( !StringUtils.isEmpty( newVersion ) )
+        {
+            getLog().warn( "-DnewVersion provided but will be ignored as -DpropertiesVersionsFile is used" );
         }
     }
 

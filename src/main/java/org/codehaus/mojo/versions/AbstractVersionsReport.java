@@ -19,8 +19,11 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -31,22 +34,19 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.path.PathTranslator;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.plexus.i18n.I18N;
-
-import java.io.File;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Base class for all versions reports.
@@ -57,53 +57,22 @@ import java.util.Locale;
 public abstract class AbstractVersionsReport
     extends AbstractMavenReport
 {
-
-    /**
-     * Doxia Site Renderer component.
-     *
-     * @since 1.0-alpha-3
-     */
-    @Component
-    private Renderer siteRenderer;
-
     /**
      * Internationalization component.
      *
      * @since 1.0-alpha-3
      */
     @Component
-    private I18N i18n;
+    protected I18N i18n;
 
-    /**
-     * The Maven Project.
-     *
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${project}", required = true, readonly = true )
-    private MavenProject project;
-
-    /**
-     * @since 1.0-alpha-3
-     */
     @Component
-    protected ArtifactFactory artifactFactory;
+    protected RepositorySystem repositorySystem;
 
     /**
-     * @component
      * @since 1.0-alpha-3
      */
     @Component
     private ArtifactResolver resolver;
-
-    /**
-     * The output directory for the report. Note that this parameter is only evaluated if the goal is run directly from
-     * the command line. If the goal is run indirectly as part of a site generation, the output directory configured in
-     * the Maven Site Plugin is used instead.
-     *
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${project.reporting.outputDirectory}", required = true )
-    private File outputDirectory;
 
     /**
      * Skip entire check.
@@ -132,12 +101,6 @@ public abstract class AbstractVersionsReport
      */
     @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
     protected List<ArtifactRepository> remotePluginRepositories;
-
-    /**
-     * @since 1.0-alpha-1
-     */
-    @Parameter( defaultValue = "${localRepository}", readonly = true )
-    protected ArtifactRepository localRepository;
 
     /**
      * @since 1.0-alpha-3
@@ -200,8 +163,8 @@ public abstract class AbstractVersionsReport
     @Parameter( defaultValue = "${session}", required = true, readonly = true )
     protected MavenSession session;
 
-    @Component
-    protected PathTranslator pathTranslator;
+    @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
+    private MojoExecution mojoExecution;
 
     @Component
     protected ArtifactResolver artifactResolver;
@@ -215,10 +178,10 @@ public abstract class AbstractVersionsReport
         {
             try
             {
-                helper = new DefaultVersionsHelper( artifactFactory, artifactResolver, artifactMetadataSource,
+                helper = new DefaultVersionsHelper( repositorySystem, artifactResolver, artifactMetadataSource,
                                                     remoteArtifactRepositories, remotePluginRepositories,
                                                     localRepository, wagonManager, settings, serverId, rulesUri,
-                                                    getLog(), session, pathTranslator );
+                                                    getLog(), session, mojoExecution );
             }
             catch ( MojoExecutionException e )
             {

@@ -21,12 +21,13 @@ package org.codehaus.mojo.versions;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Abstract base class for the Display___ mojos.
@@ -36,6 +37,10 @@ import org.codehaus.plexus.util.FileUtils;
 public abstract class AbstractVersionsDisplayMojo
     extends AbstractVersionsUpdaterMojo
 {
+    static final String NL = System.getProperty( "line.separator" );
+
+    private static final int DEFAULT_OUTPUT_LINE_WIDTH = 80;
+
     /**
      * If specified then the display output will be sent to the specified file.
      *
@@ -59,6 +64,15 @@ public abstract class AbstractVersionsDisplayMojo
      */
     @Parameter( property = "outputEncoding", defaultValue = "${project.reporting.outputEncoding}" )
     private String outputEncoding;
+
+    /**
+     * Line width which should be used to format the padding of the version info list output.
+     *
+     * @since 2.10.0
+     */
+    @Parameter( property = "versions.outputLineWidth",
+                defaultValue = AbstractVersionsDisplayMojo.DEFAULT_OUTPUT_LINE_WIDTH + "" )
+    private int outputLineWidth;
 
     private boolean outputFileError = false;
 
@@ -116,7 +130,7 @@ public abstract class AbstractVersionsDisplayMojo
             {
                 outputEncoding = System.getProperty( "file.encoding" );
                 getLog().warn( "File encoding has not been set, using platform encoding " + outputEncoding
-                    + ", i.e. build is platform dependent!" );
+                                   + ", i.e. build is platform dependent!" );
             }
         }
     }
@@ -138,9 +152,9 @@ public abstract class AbstractVersionsDisplayMojo
         {
             try
             {
-                FileUtils.fileAppend( outputFile.getAbsolutePath(), outputEncoding,
-                                      error ? "> " + line + System.getProperty( "line.separator" )
-                                                      : line + System.getProperty( "line.separator" ) );
+                Files.write( outputFile.toPath(),
+                             ( error ? "> " + line + NL : line + NL ).getBytes( outputEncoding ),
+                             StandardOpenOption.APPEND, StandardOpenOption.CREATE );
             }
             catch ( IOException e )
             {
@@ -148,6 +162,14 @@ public abstract class AbstractVersionsDisplayMojo
                 outputFileError = true;
             }
         }
+    }
+
+    /**
+     * @return Offset of the configured output line width compared to the default with of 80.
+     */
+    protected int getOutputLineWidthOffset()
+    {
+        return this.outputLineWidth - DEFAULT_OUTPUT_LINE_WIDTH;
     }
 
 }

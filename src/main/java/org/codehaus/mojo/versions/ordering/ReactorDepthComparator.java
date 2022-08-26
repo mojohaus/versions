@@ -19,11 +19,11 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
-import org.apache.maven.model.Model;
-import org.codehaus.mojo.versions.api.PomHelper;
-
 import java.util.Comparator;
 import java.util.Map;
+
+import org.apache.maven.model.Model;
+import org.codehaus.mojo.versions.api.PomHelper;
 
 /**
  * Compares project paths relative to the base directory based on their depth in a reactor

@@ -8,7 +8,7 @@ try
 
     if ( buf.indexOf( "<versionModule>9.5.0-20170604.123456-2</versionModule>" ) < 0 )
     {
-        System.err.println( "versionModule has not been changed which should not happened." );
+        System.err.println( "versionModule has not been changed which should not happen." );
         return false;
     }
     if ( buf.indexOf( "<versionModuleTest>1.2.3-SNAPSHOT</versionModuleTest>" ) < 0 )

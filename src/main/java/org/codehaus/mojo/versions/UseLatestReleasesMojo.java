@@ -19,6 +19,14 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
@@ -36,13 +44,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import javax.xml.stream.XMLStreamException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * Replaces any release versions with the latest release version.
  *
@@ -59,7 +60,7 @@ public class UseLatestReleasesMojo
     /**
      * Pattern to match a snapshot version.
      */
-    public final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
+    private final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
 
     /**
      * Whether to allow the major version number to be changed.
@@ -90,8 +91,8 @@ public class UseLatestReleasesMojo
     /**
      * @param pom the pom to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException when things go wrong with XML streaming
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -110,13 +111,13 @@ public class UseLatestReleasesMojo
             if ( getProject().getParent() != null && isProcessingParent() )
             {
                 Dependency dependency = new Dependency();
-                dependency.setArtifactId(getProject().getParent().getArtifactId());
-                dependency.setGroupId(getProject().getParent().getGroupId());
-                dependency.setVersion(getProject().getParent().getVersion());
-                dependency.setType("pom");
+                dependency.setArtifactId( getProject().getParent().getArtifactId() );
+                dependency.setGroupId( getProject().getParent().getGroupId() );
+                dependency.setVersion( getProject().getParent().getVersion() );
+                dependency.setType( "pom" );
                 List list = new ArrayList();
-                list.add(dependency);
-                useLatestReleases( pom, list);
+                list.add( dependency );
+                useLatestReleases( pom, list );
             }
         }
         catch ( ArtifactMetadataRetrievalException e )
@@ -170,7 +171,8 @@ public class UseLatestReleasesMojo
                     String newVersion = filteredVersions[filteredVersions.length - 1].toString();
                     if ( getProject().getParent() != null )
                     {
-                        if ( artifact.getId().equals( getProject().getParentArtifact().getId() ) && isProcessingParent() )
+                        if ( artifact.getId().equals( getProject().getParentArtifact().getId() )
+                            && isProcessingParent() )
                         {
                             if ( PomHelper.setProjectParentVersion( pom, newVersion ) )
                             {
@@ -182,6 +184,9 @@ public class UseLatestReleasesMojo
                                                          newVersion, getProject().getModel() ) )
                     {
                         getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+
+                        this.getChangeRecorder().recordUpdate( "useLatestReleases", dep.getGroupId(),
+                                                               dep.getArtifactId(), version, newVersion );
                     }
                 }
             }

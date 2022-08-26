@@ -19,20 +19,24 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
@@ -64,8 +68,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @since 1.0-beta-1
  */
 @Mojo( name = "set", requiresProject = true, requiresDirectInvocation = true, aggregator = true, threadSafe = true )
-public class SetMojo
-    extends AbstractVersionsUpdaterMojo
+public class SetMojo extends AbstractVersionsUpdaterMojo
 {
 
     private static final String SNAPSHOT = "-SNAPSHOT";
@@ -80,7 +83,7 @@ public class SetMojo
 
     /**
      * The groupId of the dependency/module to update.
-     * If you like to update modules of a aggregator you 
+     * If you like to update modules of a aggregator you
      * should set <code>-DgroupId='*'</code> to ignore the
      * group of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
@@ -93,7 +96,7 @@ public class SetMojo
 
     /**
      * The artifactId of the dependency/module to update.
-     * If you like to update modules of a aggregator you 
+     * If you like to update modules of a aggregator you
      * should set <code>-DartifactId='*'</code> to ignore the
      * artifactId of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
@@ -111,6 +114,7 @@ public class SetMojo
      * version of the current project. On Windows you can omit
      * the single quotes on Linux they are necessary to prevent
      * expansion through the shell.
+     *
      * @since 1.2
      */
     @Parameter( property = "oldVersion", defaultValue = "${project.version}" )
@@ -174,11 +178,25 @@ public class SetMojo
 
     /**
      * Whether to add next version number and <code>-SNAPSHOT</code> to the existing version.
+     * Unless specified by <code>nextSnapshotIndexToIncrement</code>, will increment
+     * the last minor index of the snapshot version, e.g. the <code>z</code> in <code>x.y.z-SNAPSHOT</code>
      *
      * @since 2.10
      */
     @Parameter( property = "nextSnapshot", defaultValue = "false" )
-    private boolean nextSnapshot;
+    protected boolean nextSnapshot;
+
+    /**
+     * <p>Specifies the version index to increment when using <code>nextSnapshot</code>.
+     * Will increment the (1-based, counting from the left, or the most major component) index
+     * of the snapshot version, e.g. for <code>-DnextSnapshotIndexToIncrement=1</code>
+     * and the version being <code>1.2.3-SNAPSHOT</code>, the new version will become <code>2.2.3-SNAPSHOT.</code></p>
+     * <p>Only valid with <code>nextSnapshot</code>.</p>
+     *
+     * @since 2.12
+     */
+    @Parameter( property = "nextSnapshotIndexToIncrement" )
+    protected Integer nextSnapshotIndexToIncrement;
 
     /**
      * Whether to process all modules whereas they have parent/child or not.
@@ -187,6 +205,35 @@ public class SetMojo
      */
     @Parameter( property = "processAllModules", defaultValue = "false" )
     private boolean processAllModules;
+
+    /**
+     * Whether to start processing at the local aggregation root (which might be a parent module
+     * of that module where Maven is executed in, and the version change may affect parent and sibling modules).
+     * Setting to false makes sure only the module (and it's submodules) where Maven is executed for is affected.
+     *
+     * @since 2.9
+     */
+    @Parameter( property = "processFromLocalAggregationRoot", defaultValue = "true" )
+    private boolean processFromLocalAggregationRoot;
+
+    /**
+     * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
+     *
+     * @since 2.10
+     * @deprecated please use {@link #updateBuildOutputTimestampPolicy} instead
+     */
+    @Parameter( property = "updateBuildOutputTimestamp", defaultValue = "true" )
+    private boolean updateBuildOutputTimestamp;
+
+    /**
+     * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
+     * Valid values are: <code>onchange</code>, which will only change <code>outputTimestamp</code> for changed POMs,
+     * <code>always</code>, <code>never</code>.
+     *
+     * @since 2.12
+     */
+    @Parameter( property = "updateBuildOutputTimestampPolicy", defaultValue = "onchange" )
+    private String updateBuildOutputTimestampPolicy;
 
     /**
      * The changes to module coordinates. Guarded by this.
@@ -205,10 +252,9 @@ public class SetMojo
      * Called when this mojo is executed.
      *
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong.
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong.
      */
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
+    public void execute() throws MojoExecutionException, MojoFailureException
     {
         if ( getProject().getOriginalModel().getVersion() == null )
         {
@@ -226,30 +272,15 @@ public class SetMojo
             }
         }
 
+        if ( !nextSnapshot && nextSnapshotIndexToIncrement != null )
+        {
+            throw new MojoExecutionException( "nextSnapshotIndexToIncrement is not valid when nextSnapshot is false" );
+        }
+
         if ( !removeSnapshot && nextSnapshot )
         {
             String version = getVersion();
-            String versionWithoutSnapshot = version;
-            if ( version.endsWith( SNAPSHOT ) )
-            {
-                versionWithoutSnapshot = version.substring( 0, version.indexOf( SNAPSHOT ) );
-            }
-            LinkedList<String> numbers = new LinkedList<String>();
-            if ( versionWithoutSnapshot.contains( "." ) )
-            {
-                // Chop the version into numbers by splitting on the dot (.)
-                Collections.addAll( numbers, versionWithoutSnapshot.split( "\\." ) );
-            }
-            else
-            {
-                // The version contains no dots, assume that it is only 1 number
-                numbers.add( versionWithoutSnapshot );
-            }
-
-            int lastNumber = Integer.parseInt( numbers.removeLast() );
-            numbers.addLast( String.valueOf( lastNumber + 1 ) );
-            String nextVersion = StringUtils.join( numbers.toArray( new String[0] ), "." );
-            newVersion = nextVersion + "-SNAPSHOT";
+            newVersion = getIncrementedVersion( version, nextSnapshotIndexToIncrement );
             getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );
         }
 
@@ -259,8 +290,8 @@ public class SetMojo
             {
                 try
                 {
-                    newVersion =
-                        prompter.prompt( "Enter the new version to set", getProject().getOriginalModel().getVersion() );
+                    newVersion = prompter.prompt( "Enter the new version to set",
+                                                  getProject().getOriginalModel().getVersion() );
                 }
                 catch ( PrompterException e )
                 {
@@ -270,18 +301,35 @@ public class SetMojo
             else
             {
                 throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
-                    + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+                                                      + "property (that is -DnewVersion=... on the command line) "
+                                                      + "or run in interactive mode" );
             }
         }
         if ( StringUtils.isEmpty( newVersion ) )
         {
             throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
-                + "property (that is -DnewVersion=... on the command line) or run in interactive mode" );
+                                                  + "property (that is -DnewVersion=... on the command line) "
+                                                  + "or run in interactive mode" );
+        }
+
+        if ( !"onchange".equals( updateBuildOutputTimestampPolicy ) && !"always".equals(
+            updateBuildOutputTimestampPolicy ) && !"never".equals( updateBuildOutputTimestampPolicy ) )
+        {
+            throw new MojoExecutionException(
+                "updateBuildOutputTimestampPolicy should be one of: " + "\"onchange\", \"always\", \"never\"." );
         }
 
         try
         {
-            final MavenProject project = getProject();
+            final MavenProject project;
+            if ( processFromLocalAggregationRoot )
+            {
+                project = PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() );
+            }
+            else
+            {
+                project = getProject();
+            }
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
@@ -292,8 +340,8 @@ public class SetMojo
             // set of files to update
             final Set<File> files = new LinkedHashSet<File>();
 
-            getLog().info( "Processing change of " + groupId + ":" + artifactId + ":" + oldVersion + " -> "
-                + newVersion );
+            getLog().info(
+                "Processing change of " + groupId + ":" + artifactId + ":" + oldVersion + " -> " + newVersion );
             Pattern groupIdRegex =
                 Pattern.compile( RegexUtils.convertWildcardsToRegex( fixNullOrEmpty( groupId, "*" ), true ) );
             Pattern artifactIdRegex =
@@ -306,8 +354,9 @@ public class SetMojo
                 final String mGroupId = PomHelper.getGroupId( m );
                 final String mArtifactId = PomHelper.getArtifactId( m );
                 final String mVersion = PomHelper.getVersion( m );
-                if ((  ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId ).matches() ) //
-                       || (processAllModules) ) //
+                if ( ( ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId )
+                    .matches() ) //
+                    || ( processAllModules ) ) //
                     && oldVersionIdRegex.matcher( mVersion ).matches() && !newVersion.equals( mVersion ) )
                 {
                     found = true;
@@ -335,6 +384,40 @@ public class SetMojo
         }
     }
 
+    /**
+     * Returns the incremented version, with the nextSnapshotIndexToIncrement indicating the 1-based index,
+     * conunting from the left, or the most major version component, of the version string.
+     *
+     * @param version input version
+     * @return version with the incremented index specified by nextSnapshotIndexToIncrement or last index
+     * @throws MojoExecutionException thrown if the input parameters are invalid
+     */
+    protected String getIncrementedVersion( String version, Integer nextSnapshotIndexToIncrement )
+        throws MojoExecutionException
+    {
+        String versionWithoutSnapshot =
+            version.endsWith( SNAPSHOT ) ? version.substring( 0, version.indexOf( SNAPSHOT ) ) : version;
+        List<String> numbers = new LinkedList<>( Arrays.asList( versionWithoutSnapshot.split( "\\." ) ) );
+
+        if ( nextSnapshotIndexToIncrement == null )
+        {
+            nextSnapshotIndexToIncrement = numbers.size();
+        }
+        else if ( nextSnapshotIndexToIncrement < 1 )
+        {
+            throw new MojoExecutionException( "nextSnapshotIndexToIncrement cannot be less than 1" );
+        }
+        else if ( nextSnapshotIndexToIncrement > numbers.size() )
+        {
+            throw new MojoExecutionException(
+                "nextSnapshotIndexToIncrement cannot be greater than the last version index" );
+        }
+        int snapshotVersionToIncrement = Integer.parseInt( numbers.remove( nextSnapshotIndexToIncrement - 1 ) );
+        numbers.add( nextSnapshotIndexToIncrement - 1, String.valueOf( snapshotVersionToIncrement + 1 ) );
+
+        return StringUtils.join( numbers.toArray( new String[0] ), "." ) + "-SNAPSHOT";
+    }
+
     private static String fixNullOrEmpty( String value, String defaultValue )
     {
         return StringUtils.isBlank( value ) ? defaultValue : value;
@@ -360,7 +443,7 @@ public class SetMojo
             final Model sourceModel = sourceEntry.getValue();
 
             getLog().debug( sourcePath.length() == 0 ? "Processing root module as parent"
-                            : "Processing " + sourcePath + " as a parent." );
+                                : "Processing " + sourcePath + " as a parent." );
 
             final String sourceGroupId = PomHelper.getGroupId( sourceModel );
             if ( sourceGroupId == null )
@@ -383,50 +466,56 @@ public class SetMojo
 
             addFile( files, project, sourcePath );
 
-            getLog().debug( "Looking for modules which use "
-                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent" );
+            getLog().debug(
+                "Looking for modules which use " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
+                    + " as their parent" );
 
-            for ( Map.Entry<String, Model> stringModelEntry : processAllModules ? reactor.entrySet() : //
-                                                                    PomHelper.getChildModels( reactor, sourceGroupId,
-                                                                                        sourceArtifactId ).entrySet() )
+            for ( Map.Entry<String, Model> stringModelEntry : processAllModules ? reactor.entrySet()
+                : PomHelper.getChildModels( reactor, sourceGroupId, sourceArtifactId ).entrySet() )
             {
                 final Model targetModel = stringModelEntry.getValue();
                 final Parent parent = targetModel.getParent();
                 getLog().debug( "Module: " + stringModelEntry.getKey() );
                 if ( parent != null && sourceVersion.equals( parent.getVersion() ) )
                 {
-                    getLog().debug( "    parent already is "
-                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + sourceVersion );
+                    getLog().debug(
+                        "    parent already is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
+                            + ":" + sourceVersion );
                 }
                 else
                 {
-                    getLog().debug( "    parent is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                        + ":" + ( parent == null ? "" : parent.getVersion() ));
-                    getLog().debug( "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                        + ":" + sourceVersion );
+                    getLog().debug(
+                        "    parent is " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":" + (
+                            parent == null ? "" : parent.getVersion() ) );
+                    getLog().debug(
+                        "    will become " + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                            + sourceVersion );
                 }
                 final boolean targetExplicit = PomHelper.isExplicitVersion( targetModel );
                 if ( ( updateMatchingVersions || !targetExplicit ) //
-                    && ( parent != null && StringUtils.equals( parent.getVersion(), PomHelper.getVersion( targetModel ) ) ) )
+                    && ( parent != null && StringUtils.equals( parent.getVersion(),
+                                                               PomHelper.getVersion( targetModel ) ) ) )
                 {
-                    getLog().debug( "    module is "
-                        + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                        PomHelper.getArtifactId( targetModel ) )
-                        + ":" + PomHelper.getVersion( targetModel ) );
-                    getLog().debug( "    will become "
-                        + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                        PomHelper.getArtifactId( targetModel ) )
-                        + ":" + sourceVersion );
+                    getLog().debug(
+                        "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                         PomHelper.getArtifactId( targetModel ) ) + ":"
+                            + PomHelper.getVersion(
+                            targetModel ) );
+                    getLog().debug(
+                        "    will become " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                           PomHelper.getArtifactId( targetModel ) )
+                            + ":" + sourceVersion );
                     addChange( PomHelper.getGroupId( targetModel ), PomHelper.getArtifactId( targetModel ),
                                PomHelper.getVersion( targetModel ), sourceVersion );
                     targetModel.setVersion( sourceVersion );
                 }
                 else
                 {
-                    getLog().debug( "    module is "
-                        + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
-                                                        PomHelper.getArtifactId( targetModel ) )
-                        + ":" + PomHelper.getVersion( targetModel ) );
+                    getLog().debug(
+                        "    module is " + ArtifactUtils.versionlessKey( PomHelper.getGroupId( targetModel ),
+                                                                         PomHelper.getArtifactId( targetModel ) ) + ":"
+                            + PomHelper.getVersion(
+                            targetModel ) );
                 }
             }
         }
@@ -462,8 +551,8 @@ public class SetMojo
      *
      * @param pom The pom file to update.
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
-     * @throws org.apache.maven.plugin.MojoFailureException when things go wrong.
-     * @throws javax.xml.stream.XMLStreamException when things go wrong.
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong.
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong.
      */
     protected synchronized void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
@@ -479,12 +568,22 @@ public class SetMojo
             versionChangerFactory.setLog( log );
             versionChangerFactory.setModel( model );
 
-            VersionChanger changer = versionChangerFactory.newVersionChanger( processParent, processProject,
-                                                                              processDependencies, processPlugins );
+            VersionChanger changer =
+                versionChangerFactory.newVersionChanger( processParent, processProject, processDependencies,
+                                                         processPlugins );
 
             for ( VersionChange versionChange : sourceChanges )
             {
                 changer.apply( versionChange );
+            }
+
+            if ( updateBuildOutputTimestamp && !"never".equals( updateBuildOutputTimestampPolicy ) )
+            {
+                if ( "always".equals( updateBuildOutputTimestampPolicy ) || !sourceChanges.isEmpty() )
+                {
+                    // also update project.build.outputTimestamp
+                    updateBuildOutputTimestamp( pom, model );
+                }
             }
         }
         catch ( IOException e )
@@ -492,6 +591,37 @@ public class SetMojo
             throw new MojoExecutionException( e.getMessage(), e );
         }
         log.clearContext();
+    }
+
+    private void updateBuildOutputTimestamp( ModifiedPomXMLEventReader pom, Model model ) throws XMLStreamException
+    {
+        String buildOutputTimestamp = model.getProperties().getProperty( "project.build.outputTimestamp" );
+
+        if ( buildOutputTimestamp == null || StringUtils.isEmpty( buildOutputTimestamp ) )
+        {
+            // no Reproducible Builds output timestamp defined
+            return;
+        }
+
+        if ( StringUtils.isNumeric( buildOutputTimestamp ) )
+        {
+            // int representing seconds since the epoch, like SOURCE_DATE_EPOCH
+            buildOutputTimestamp = String.valueOf( System.currentTimeMillis() / 1000 );
+        }
+        else if ( buildOutputTimestamp.length() <= 1 )
+        {
+            // value length == 1 means disable Reproducible Builds
+            return;
+        }
+        else
+        {
+            // ISO-8601
+            DateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss'Z'" );
+            df.setTimeZone( TimeZone.getTimeZone( "UTC" ) );
+            buildOutputTimestamp = df.format( new Date() );
+        }
+
+        PomHelper.setPropertyVersion( pom, null, "project.build.outputTimestamp", buildOutputTimestamp );
     }
 
 }

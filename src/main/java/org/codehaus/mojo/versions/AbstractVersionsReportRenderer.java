@@ -97,16 +97,12 @@ public abstract class AbstractVersionsReportRenderer
 
     protected void renderWarningIcon()
     {
-        sink.figure();
         sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
     }
 
     protected void renderSuccessIcon()
     {
-        sink.figure();
         sink.figureGraphics( "images/icon_success_sml.gif" );
-        sink.figure_();
     }
 
     protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
@@ -165,37 +161,37 @@ public abstract class AbstractVersionsReportRenderer
         }
 
         sink.tableCell();
-        if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
+        if ( details.getNewestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             safeBold();
-            sink.text( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
+            sink.text( details.getNewestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
+        if ( details.getNewestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
             safeBold();
-            sink.text( details.getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
+            sink.text( details.getNewestUpdate( UpdateScope.INCREMENTAL ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getOldestUpdate( UpdateScope.MINOR ) != null )
+        if ( details.getNewestUpdate( UpdateScope.MINOR ) != null )
         {
             safeBold();
-            sink.text( details.getOldestUpdate( UpdateScope.MINOR ).toString() );
+            sink.text( details.getNewestUpdate( UpdateScope.MINOR ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getOldestUpdate( UpdateScope.MAJOR ) != null )
+        if ( details.getNewestUpdate( UpdateScope.MAJOR ) != null )
         {
             safeBold();
-            sink.text( details.getOldestUpdate( UpdateScope.MAJOR ).toString() );
+            sink.text( details.getNewestUpdate( UpdateScope.MAJOR ).toString() );
             safeBold_();
         }
         sink.tableCell_();
@@ -215,6 +211,7 @@ public abstract class AbstractVersionsReportRenderer
         }
     }
 
+    @SuppressWarnings( "checkstyle:MethodName" )
     protected void safeBold_()
     {
         try
@@ -239,6 +236,7 @@ public abstract class AbstractVersionsReportRenderer
         }
     }
 
+    @SuppressWarnings( "checkstyle:MethodName" )
     protected void safeItalic_()
     {
         try
@@ -291,16 +289,16 @@ public abstract class AbstractVersionsReportRenderer
             sink.tableHeaderCell_();
         }
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextVersion" ) );
+        sink.text( getText( "report.latestSubIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextIncremental" ) );
+        sink.text( getText( "report.latestIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextMinor" ) );
+        sink.text( getText( "report.latestMinor" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextMajor" ) );
+        sink.text( getText( "report.latestMajor" ) );
         sink.tableHeaderCell_();
         sink.tableRow_();
     }
@@ -310,6 +308,7 @@ public abstract class AbstractVersionsReportRenderer
         renderDependencyDetailTable( dependency, details, true, true, true );
     }
 
+    @SuppressWarnings( "checkstyle:MethodLength" )
     protected void renderDependencyDetailTable( Dependency dependency, ArtifactVersions details, boolean includeScope,
                                                 boolean includeClassifier, boolean includeType )
     {
@@ -428,6 +427,7 @@ public abstract class AbstractVersionsReportRenderer
                     sink.lineBreak();
                 }
                 boolean bold = equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( versions[i], details.getNewestUpdate( UpdateScope.SUBINCREMENTAL ) )
                     || equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getNewestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getOldestUpdate( UpdateScope.MINOR ) )
@@ -447,6 +447,10 @@ public abstract class AbstractVersionsReportRenderer
                     if ( equals( versions[i], details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
+                    }
+                    else if ( equals( versions[i], details.getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
+                    {
+                        sink.text( getText( "report.latestSubIncremental" ) );
                     }
                     else if ( equals( versions[i], details.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
                     {
@@ -535,37 +539,37 @@ public abstract class AbstractVersionsReportRenderer
         sink.tableCell_();
 
         sink.tableCell();
-        if ( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
+        if ( versions.getNewestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             safeBold();
-            sink.text( versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
+            sink.text( versions.getNewestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( versions.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
+        if ( versions.getNewestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
             safeBold();
-            sink.text( versions.getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
+            sink.text( versions.getNewestUpdate( UpdateScope.INCREMENTAL ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( versions.getOldestUpdate( UpdateScope.MINOR ) != null )
+        if ( versions.getNewestUpdate( UpdateScope.MINOR ) != null )
         {
             safeBold();
-            sink.text( versions.getOldestUpdate( UpdateScope.MINOR ).toString() );
+            sink.text( versions.getNewestUpdate( UpdateScope.MINOR ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( versions.getOldestUpdate( UpdateScope.MAJOR ) != null )
+        if ( versions.getNewestUpdate( UpdateScope.MAJOR ) != null )
         {
             safeBold();
-            sink.text( versions.getOldestUpdate( UpdateScope.MAJOR ).toString() );
+            sink.text( versions.getNewestUpdate( UpdateScope.MAJOR ).toString() );
             safeBold_();
         }
         sink.tableCell_();
@@ -586,20 +590,21 @@ public abstract class AbstractVersionsReportRenderer
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextVersion" ) );
+        sink.text( getText( "report.latestSubIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextIncremental" ) );
+        sink.text( getText( "report.latestIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextMinor" ) );
+        sink.text( getText( "report.latestMinor" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextMajor" ) );
+        sink.text( getText( "report.latestMajor" ) );
         sink.tableHeaderCell_();
         sink.tableRow_();
     }
 
+    @SuppressWarnings( "checkstyle:MethodLength" )
     protected void renderPropertyDetailTable( Property property, PropertyVersions versions )
     {
         final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
@@ -697,6 +702,7 @@ public abstract class AbstractVersionsReportRenderer
                 }
                 boolean allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );
                 boolean bold = equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.SUBINCREMENTAL ) )
                     || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.MINOR ) )
@@ -724,6 +730,10 @@ public abstract class AbstractVersionsReportRenderer
                     if ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
+                    }
+                    else if ( equals( artifactVersions[i], versions.getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
+                    {
+                        sink.text( getText( "report.latestSubIncremental" ) );
                     }
                     else if ( equals( artifactVersions[i], versions.getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
                     {

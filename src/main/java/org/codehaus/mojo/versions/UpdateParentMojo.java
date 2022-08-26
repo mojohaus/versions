@@ -19,12 +19,15 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -34,17 +37,17 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import javax.xml.stream.XMLStreamException;
-
 /**
  * Sets the parent version to the latest parent version.
  *
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "update-parent", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
-public class UpdateParentMojo
-    extends AbstractVersionsUpdaterMojo
+@Mojo( name = "update-parent",
+       requiresProject = true,
+       requiresDirectInvocation = true,
+       threadSafe = true )
+public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -54,7 +57,7 @@ public class UpdateParentMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "parentVersion", defaultValue = "null" )
+    @Parameter( property = "parentVersion" )
     protected String parentVersion = null;
 
     /**
@@ -95,8 +98,8 @@ public class UpdateParentMojo
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException when things go wrong in a very bad way
-     * @throws XMLStreamException when things go wrong with XML streaming
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
@@ -134,9 +137,12 @@ public class UpdateParentMojo
             throw new MojoExecutionException( "Invalid version range specification: " + version, e );
         }
 
-        Artifact artifact = artifactFactory.createDependencyArtifact( getProject().getParent().getGroupId(),
-                                                                      getProject().getParent().getArtifactId(),
-                                                                      versionRange, "pom", null, null );
+        Dependency dependency = new Dependency();
+        dependency.setGroupId( getProject().getParent().getGroupId() );
+        dependency.setArtifactId( getProject().getParent().getArtifactId() );
+        dependency.setVersion( version );
+        dependency.setType( "pom" );
+        Artifact artifact = getHelper().createDependencyArtifact( dependency );
 
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( version );
         try
@@ -169,6 +175,9 @@ public class UpdateParentMojo
         if ( PomHelper.setProjectParentVersion( pom, artifactVersion.toString() ) )
         {
             getLog().debug( "Made an update from " + currentVersion + " to " + artifactVersion );
+
+            this.getChangeRecorder().recordUpdate( "updateParent", artifact.getGroupId(), artifact.getArtifactId(),
+                                                   currentVersion, artifactVersion.toString() );
         }
     }
 

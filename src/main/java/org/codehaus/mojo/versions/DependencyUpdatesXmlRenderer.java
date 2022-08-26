@@ -36,7 +36,7 @@ import org.codehaus.mojo.versions.utils.DependencyComparator;
 /**
  * XML renderer for DependencyUpdatesReport creates an xml file in target directory and writes report about available
  * dependency/dependency management updates.
- * 
+ *
  * @author Illia Dubinin
  * @since 2.4
  */
@@ -86,7 +86,7 @@ public class DependencyUpdatesXmlRenderer
 
     /**
      * Makes report file with given name in target directory.
-     * 
+     *
      * @throws MavenReportException if something went wrong
      */
     public void render()
@@ -118,9 +118,9 @@ public class DependencyUpdatesXmlRenderer
     /**
      * Method wraps value in xml tag. In ex: to wrap foo in tag bar you have to pass foo as value and bar as tag. As a
      * result you will get: &lt;bar&gt;foo&lt;/bar&gt;
-     * 
+     *
      * @param value - string to wrap
-     * @param tag - name of tag
+     * @param tag   - name of tag
      * @return value wrapped in xml tag
      */
 
@@ -132,7 +132,7 @@ public class DependencyUpdatesXmlRenderer
     /**
      * Returns summary of dependency analysis result in xml format: current version, next available, next incremental,
      * next minor and next major versions.
-     * 
+     *
      * @param allUpdates all dependencies versions
      * @return summary in xml format
      */
@@ -180,15 +180,16 @@ public class DependencyUpdatesXmlRenderer
      * Returns xml report for current dependency state with following info: current version, next available version,
      * next incremental/minor/major if available and status ('incremental available', 'minor available', 'major
      * available' or 'no new available')
-     * 
+     *
      * @param versions version info for dependency
      * @return xml reports about current possible updates.
      */
     public static String getVersionsBlocks( ArtifactVersions versions )
     {
         StringBuilder sBuilder = new StringBuilder();
-        sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( versions.getCurrentVersion().toString(),
-                                                                                CURRENT_VERSION ) ).append( NL );
+        sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( versions.isCurrentVersionDefined()
+                        ? versions.getCurrentVersion().toString() : versions.getArtifact().getVersionRange().toString(),
+                CURRENT_VERSION ) ).append( NL );
         ArtifactVersion nextVersion = versions.getOldestUpdate( UpdateScope.ANY );
         if ( nextVersion != null )
         {
@@ -234,7 +235,8 @@ public class DependencyUpdatesXmlRenderer
         sBuilder.append( TAB ).append( OPEN_TAG ).append( blockName ).append( CLOSE_TAG ).append( NL );
         for ( Entry<Dependency, ArtifactVersions> entry : dependencyUpdates.entrySet() )
         {
-            sBuilder.append( TAB ).append( TAB ).append( OPEN_TAG ).append( subblockName ).append( CLOSE_TAG ).append( NL );
+            sBuilder.append( TAB ).append( TAB ).append( OPEN_TAG ).append( subblockName ).append( CLOSE_TAG )
+                .append( NL );
 
             Dependency dep = entry.getKey();
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( dep.getGroupId(),
@@ -250,7 +252,8 @@ public class DependencyUpdatesXmlRenderer
 
             sBuilder.append( getVersionsBlocks( entry.getValue() ) );
 
-            sBuilder.append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( subblockName ).append( CLOSE_TAG ).append( NL );
+            sBuilder.append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( subblockName ).append( CLOSE_TAG )
+                .append( NL );
         }
         sBuilder.append( TAB ).append( OPEN_CLOSING_TAG ).append( blockName ).append( CLOSE_TAG ).append( NL );
         return sBuilder.toString();
@@ -264,14 +267,17 @@ public class DependencyUpdatesXmlRenderer
         ArtifactVersion nextVersion = av.getOldestUpdate( scope );
         if ( nextVersion != null )
         {
-            sBuilder.append( TAB ).append( TAB ).append( TAB ).append( OPEN_TAG ).append( versionsTag ).append( CLOSE_TAG ).append( NL );
+            sBuilder.append( TAB ).append( TAB ).append( TAB ).append( OPEN_TAG ).append( versionsTag )
+                .append( CLOSE_TAG ).append( NL );
             ArtifactVersion[] versions = av.getAllUpdates( scope );
             for ( ArtifactVersion version : versions )
             {
-                sBuilder.append( TAB ).append( TAB ).append( TAB ).append( TAB ).append( wrapElement( version.toString(),
-                                                                                                      scope.toString().toLowerCase() ) ).append( NL );
+                sBuilder.append( TAB ).append( TAB ).append( TAB ).append( TAB )
+                    .append( wrapElement( version.toString(),
+                                          scope.toString().toLowerCase() ) ).append( NL );
             }
-            sBuilder.append( TAB ).append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( versionsTag ).append( CLOSE_TAG ).append( NL );
+            sBuilder.append( TAB ).append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( versionsTag )
+                .append( CLOSE_TAG ).append( NL );
         }
 
         return sBuilder.toString();

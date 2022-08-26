@@ -19,6 +19,14 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
@@ -28,14 +36,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Scans the current projects child modules, updating the versions of any which use the current project to the version
  * of the current project.
@@ -43,7 +43,8 @@ import java.util.Map;
  * @author Stephen Connolly
  * @since 1.0-alpha-2
  */
-@Mojo( name = "update-child-modules", requiresProject = true, requiresDirectInvocation = true, aggregator = true, threadSafe = true )
+@Mojo( name = "update-child-modules", requiresProject = true, requiresDirectInvocation = true, aggregator = true,
+       threadSafe = true )
 public class UpdateChildModulesMojo
     extends AbstractVersionsUpdaterMojo
 {
@@ -66,7 +67,7 @@ public class UpdateChildModulesMojo
      * Called when this mojo is executed.
      *
      * @throws MojoExecutionException when things go wrong.
-     * @throws MojoFailureException when things go wrong.
+     * @throws MojoFailureException   when things go wrong.
      */
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -78,28 +79,30 @@ public class UpdateChildModulesMojo
         {
             final Map<String, Model> reactor = PomHelper.getReactorModels( getProject(), getLog() );
             List<String> order = new ArrayList<>( reactor.keySet() );
-            order.sort( ( o1, o2 ) -> {
-                Model m1 = reactor.get( o1 );
-                Model m2 = reactor.get( o2 );
-                int d1 = PomHelper.getReactorParentCount( reactor, m1 );
-                int d2 = PomHelper.getReactorParentCount( reactor, m2 );
-                if ( d1 < d2 )
+            order.sort(
+                ( o1, o2 ) ->
                 {
-                    return -1;
-                }
-                else if ( d1 > d2 )
-                {
-                    return 1;
-                }
-                return 0;
-            } );
+                    Model m1 = reactor.get( o1 );
+                    Model m2 = reactor.get( o2 );
+                    int d1 = PomHelper.getReactorParentCount( reactor, m1 );
+                    int d2 = PomHelper.getReactorParentCount( reactor, m2 );
+                    if ( d1 < d2 )
+                    {
+                        return -1;
+                    }
+                    else if ( d1 > d2 )
+                    {
+                        return 1;
+                    }
+                    return 0;
+                } );
 
             for ( String sourcePath : order )
             {
                 Model sourceModel = reactor.get( sourcePath );
 
                 getLog().debug( sourcePath.length() == 0 ? "Processing root module as parent"
-                                : "Processing " + sourcePath + " as a parent." );
+                                    : "Processing " + sourcePath + " as a parent." );
 
                 synchronized ( this )
                 {
@@ -123,7 +126,8 @@ public class UpdateChildModulesMojo
                     }
 
                     getLog().debug( "Looking for modules which use "
-                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + " as their parent to update it to " + sourceVersion );
+                                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
+                                        + " as their parent to update it to " + sourceVersion );
 
                     for ( Map.Entry<String, Model> target : PomHelper.getChildModels( reactor, sourceGroupId,
                                                                                       sourceArtifactId ).entrySet() )
@@ -150,18 +154,18 @@ public class UpdateChildModulesMojo
                         if ( sourceVersion.equals( parent.getVersion() ) )
                         {
                             getLog().debug( "Module: " + targetPath + " parent is "
-                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                + sourceVersion );
+                                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                                                + sourceVersion );
                         }
                         else
                         {
                             getLog().info( "Module: " + targetPath );
                             getLog().info( "    parent was "
-                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                + parent.getVersion() );
+                                               + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                                               + parent.getVersion() );
                             getLog().info( "    updated to "
-                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                + sourceVersion );
+                                               + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
+                                               + sourceVersion );
                             process( moduleProjectFile );
                             didSomething = true;
                         }
@@ -185,8 +189,8 @@ public class UpdateChildModulesMojo
      *
      * @param pom The pom file to update.
      * @throws MojoExecutionException when things go wrong.
-     * @throws MojoFailureException when things go wrong.
-     * @throws XMLStreamException when things go wrong.
+     * @throws MojoFailureException   when things go wrong.
+     * @throws XMLStreamException     when things go wrong.
      */
     protected synchronized void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException

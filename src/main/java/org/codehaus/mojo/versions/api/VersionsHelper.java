@@ -25,13 +25,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -77,15 +74,7 @@ public interface VersionsHelper
     VersionComparator getVersionComparator( String groupId, String artifactId );
 
     /**
-     * Returns the artifact factory to use.
-     *
-     * @return the artifact factory to use.
-     * @since 1.0-alpha-3
-     */
-    ArtifactFactory getArtifactFactory();
-
-    /**
-     * Shorthand method for <code>getArtifactFactory().createPluginArtifact(...)</code>.
+     * Shorthand method for <code>repositorySystem.createPluginArtifact(...)</code>.
      *
      * @param groupId The group Id.
      * @param artifactId The artifact Id.
@@ -93,10 +82,10 @@ public interface VersionsHelper
      * @return the corresponding plugin artifact.
      * @since 1.0-alpha-3
      */
-    Artifact createPluginArtifact( String groupId, String artifactId, VersionRange version );
+    Artifact createPluginArtifact( String groupId, String artifactId, String version );
 
     /**
-     * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code>.
+     * Shorthand method for <code>repositorySystem.createDependencyArtifact(...)</code>.
      *
      * @param groupId The group id.
      * @param artifactId The artifact id.
@@ -108,7 +97,7 @@ public interface VersionsHelper
      * @return The corresponding dependency artifact.
      * @since 1.0-alpha-3
      */
-    Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange version, String type,
+    Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
                                        String classifier, String scope, boolean optional );
 
     /**
@@ -116,27 +105,25 @@ public interface VersionsHelper
      *
      * @param groupId The group id.
      * @param artifactId The artifact id.
-     * @param versionRange The version range.
+     * @param version The version.
      * @param type The type.
      * @param classifier The classifier.
      * @param scope The scope.
      * @return The corresponding dependency artifact.
      * @since 1.0-beta-1
      */
-    Artifact createDependencyArtifact( String groupId, String artifactId, VersionRange versionRange, String type,
+    Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
                                        String classifier, String scope );
 
     /**
-     * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code> which extracts the
+     * Shorthand method for <code>repositorySystem.createDependencyArtifact(...)</code> which extracts the
      * parameters from the Dependency instance.
      *
      * @param dependency The dependency to create the artifact for.
      * @return The corresponding dependency artifact.
-     * @throws InvalidVersionSpecificationException if the version specified in the dependency is invalid.
      * @since 1.0-alpha-3
      */
-    Artifact createDependencyArtifact( Dependency dependency )
-        throws InvalidVersionSpecificationException;
+    Artifact createDependencyArtifact( Dependency dependency );
 
     /**
      * Takes a {@link List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a
@@ -190,12 +177,11 @@ public interface VersionsHelper
      * @param usePluginRepositories Search the plugin repositories.
      * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.api.ArtifactVersions}.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
-     * @throws InvalidVersionSpecificationException if something goes wrong.
      * @since 1.0-beta-1
      */
     Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                  boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
+        throws ArtifactMetadataRetrievalException;
 
     /**
      * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency.
@@ -204,11 +190,10 @@ public interface VersionsHelper
      * @param usePluginRepositories Search the plugin repositories.
      * @return The details of updates to the dependency.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
-     * @throws InvalidVersionSpecificationException if something goes wrong.
      * @since 1.0-beta-1
      */
     ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
+        throws ArtifactMetadataRetrievalException;
 
     /**
      * Looks up the updates for a set of plugins.
@@ -217,11 +202,10 @@ public interface VersionsHelper
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.PluginUpdatesDetails}.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
-     * @throws InvalidVersionSpecificationException if something goes wrong.
      * @since 1.0-beta-1
      */
     Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
+        throws ArtifactMetadataRetrievalException;
 
     /**
      * Looks up the updates for a plugin.
@@ -230,11 +214,10 @@ public interface VersionsHelper
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return The plugin update details.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
-     * @throws InvalidVersionSpecificationException if a version is invalid.
      * @since 1.0-beta-1
      */
     PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException, InvalidVersionSpecificationException;
+        throws ArtifactMetadataRetrievalException;
 
     /**
      * Returns an {@link ExpressionEvaluator} for the specified project.

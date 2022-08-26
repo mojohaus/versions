@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import java.text.MessageFormat;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -244,16 +243,16 @@ public class PluginUpdatesRenderer
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextVersion" ) );
+        sink.text( getText( "report.latestSubIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextIncremental" ) );
+        sink.text( getText( "report.latestIncremental" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextMinor" ) );
+        sink.text( getText( "report.latestMinor" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
-        sink.text( getText( "report.nextMajor" ) );
+        sink.text( getText( "report.latestMajor" ) );
         sink.tableHeaderCell_();
         sink.tableHeaderCell();
         sink.text( getText( "report.dependencyStatus" ) );
@@ -293,37 +292,37 @@ public class PluginUpdatesRenderer
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
+        if ( details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
         {
             safeBold();
-            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
+            sink.text( details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
+        if ( details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) != null )
         {
             safeBold();
-            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ).toString() );
+            sink.text( details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) != null )
+        if ( details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) != null )
         {
             safeBold();
-            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ).toString() );
+            sink.text( details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) != null )
+        if ( details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) != null )
         {
             safeBold();
-            sink.text( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ).toString() );
+            sink.text( details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ).toString() );
             safeBold_();
         }
         sink.tableCell_();
@@ -342,6 +341,7 @@ public class PluginUpdatesRenderer
         sink.tableRow_();
     }
 
+    @SuppressWarnings( "checkstyle:MethodLength" )
     private void renderPluginDetail( Plugin plugin, PluginUpdatesDetails details )
     {
         final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
@@ -351,10 +351,10 @@ public class PluginUpdatesRenderer
         sink.section2();
         sink.sectionTitle2();
         sink.text( MessageFormat.format( getText( "report.plugin" ), new Object[] {
-            ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) } ) );
+            ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
         sink.sectionTitle2_();
         sink.table();
-        sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
+        sink.tableRows( new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false );
         sink.tableRow();
         sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.status" ) );
@@ -430,8 +430,10 @@ public class PluginUpdatesRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals( versions[i],
-                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                boolean bold = equals(
+                    versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+                    || equals( versions[i],
+                               details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) )
                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) )
@@ -452,6 +454,11 @@ public class PluginUpdatesRenderer
                                  details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
                     {
                         sink.text( getText( "report.nextVersion" ) );
+                    }
+                    else if ( equals( versions[i],
+                                      details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
+                    {
+                        sink.text( getText( "report.latestSubIncremental" ) );
                     }
                     else if ( equals( versions[i],
                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
@@ -498,7 +505,7 @@ public class PluginUpdatesRenderer
             sink.section3();
             sink.sectionTitle3();
             sink.text( MessageFormat.format( getText( "report.pluginDependencies" ), new Object[] {
-                ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) } ) );
+                ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
             sink.sectionTitle3_();
 
             renderDependencySummaryTable( details.getDependencyVersions(), false, true, true );
@@ -516,7 +523,7 @@ public class PluginUpdatesRenderer
         sink.section3();
         sink.sectionTitle3();
         sink.text( MessageFormat.format( getText( "report.pluginDependency" ), new Object[] {
-            ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() ) } ) );
+            ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )} ) );
         sink.sectionTitle3_();
         renderDependencyDetailTable( dependency, details, false, true, true );
         sink.section3_();

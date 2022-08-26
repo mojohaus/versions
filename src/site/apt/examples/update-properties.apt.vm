@@ -380,7 +380,7 @@ Update Properties
   To update the property for only the "com.foo.bar" dependencies, you can run:
 
 +---+
-mvn versions:use-releases -Dincludes=com.foo.bar:*
+mvn versions:update-properties -Dincludes=com.foo.bar:*
 +---+
 
   Would result in the property for the manchu.version being updated, but not the blarg.version property.
@@ -388,7 +388,7 @@ mvn versions:use-releases -Dincludes=com.foo.bar:*
   In the above example, you could achieve the same result using:
 
 +---+
-mvn versions:use-releases -Dexcludes=org.blarg:*
+mvn versions:update-properties -Dexcludes=org.blarg:*
 +---+
 
   If a property is used by artifacts that are not allowed by the set of specified <<includes>> and <<excludes>> then the property

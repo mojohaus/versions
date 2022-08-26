@@ -19,12 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
@@ -104,15 +104,15 @@ public class ResolveRangesMojo
     /**
      * Pattern to match a version range. For example 1.0-20090128.202731-1
      */
-    public final Pattern matchRangeRegex = Pattern.compile( "," );
+    private final Pattern matchRangeRegex = Pattern.compile( "," );
 
     // ------------------------------ METHODS --------------------------
 
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException when things go wrong in a very bad way
-     * @throws XMLStreamException when things go wrong with XML streaming
+     * @throws MojoFailureException   when things go wrong in a very bad way
+     * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
@@ -196,7 +196,7 @@ public class ResolveRangesMojo
                     else
                     {
                         getLog().warn( "Could not find the version tag for parent " + artifact + " in project "
-                            + getProject().getId() + " so unable to set version to " + artifactVersion );
+                                           + getProject().getId() + " so unable to set version to " + artifactVersion );
                     }
                 }
             }
@@ -217,7 +217,8 @@ public class ResolveRangesMojo
 
             if ( StringUtils.isBlank( dep.getVersion() ) )
             {
-                throw new MojoExecutionException( "Found invalid managed dependency " + toString( dep ) + " without a version");
+                throw new MojoExecutionException(
+                    "Found invalid managed dependency " + toString( dep ) + " without a version" );
             }
 
             if ( isHandledByProperty( dep ) )
@@ -263,7 +264,8 @@ public class ResolveRangesMojo
                         else
                         {
                             getLog().debug( "Could not find the version tag for dependency " + artifact + " in project "
-                                + getProject().getId() + " so unable to set version to " + artifactVersion );
+                                                + getProject().getId() + " so unable to set version to "
+                                                + artifactVersion );
                         }
                     }
                 }
