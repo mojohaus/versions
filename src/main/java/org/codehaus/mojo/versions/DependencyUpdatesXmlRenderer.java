@@ -187,8 +187,9 @@ public class DependencyUpdatesXmlRenderer
     public static String getVersionsBlocks( ArtifactVersions versions )
     {
         StringBuilder sBuilder = new StringBuilder();
-        sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( versions.getCurrentVersion().toString(),
-                                                                                CURRENT_VERSION ) ).append( NL );
+        sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( versions.isCurrentVersionDefined()
+                        ? versions.getCurrentVersion().toString() : versions.getArtifact().getVersionRange().toString(),
+                CURRENT_VERSION ) ).append( NL );
         ArtifactVersion nextVersion = versions.getOldestUpdate( UpdateScope.ANY );
         if ( nextVersion != null )
         {
