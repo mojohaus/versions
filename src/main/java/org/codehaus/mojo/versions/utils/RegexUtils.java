@@ -97,16 +97,18 @@ public final class RegexUtils
     public static int getWildcardScore( String wildcardRule )
     {
         int score = 0;
-        for ( int i = 0; i < wildcardRule.length(); i++ )
+        if ( wildcardRule != null )
         {
-            char c = wildcardRule.charAt( i );
-            if ( c == '?' )
+            for ( char c : wildcardRule.toCharArray() )
             {
-                score++;
-            }
-            else if ( c == '*' )
-            {
-                score += 1000;
+                if ( c == '?' )
+                {
+                    score++;
+                }
+                else if ( c == '*' )
+                {
+                    score += 1000;
+                }
             }
         }
         return score;

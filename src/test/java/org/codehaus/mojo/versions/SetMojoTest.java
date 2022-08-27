@@ -4,14 +4,14 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.utils.BaseMojoTestCase;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
 
-public class SetMojoTest
+public class SetMojoTest extends BaseMojoTestCase
 {
     @Test
     public void testGetIncrementedVersion() throws MojoExecutionException
@@ -92,4 +92,10 @@ public class SetMojoTest
         }
     }
 
+    @Test
+    public void testVersionlessDependency() throws Exception
+    {
+        SetMojo myMojo = createMojo( "set", "src/test/resources/org/codehaus/mojo/set/versionless-01/pom.xml" );
+        myMojo.execute();
+    }
 }
