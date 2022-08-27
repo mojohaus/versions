@@ -816,7 +816,7 @@ public class PomHelper
                 {
                     if ( "groupId".equals( elementName ) )
                     {
-                        haveGroupId = groupId.equals( pom.getElementText().trim() );
+                        haveGroupId =  pom.getElementText().trim().equals( groupId );
                         path = stack.pop();
                     }
                     else if ( "artifactId".equals( elementName ) )
@@ -1539,12 +1539,14 @@ public class PomHelper
      */
     public static Model getModel( Map<String, Model> reactor, String groupId, String artifactId )
     {
-        Map.Entry<String, Model> entry = getModelEntry( reactor, groupId, artifactId );
-        return entry == null ? null : entry.getValue();
+        return reactor.values().stream().filter(
+                model -> ( groupId == null || groupId.equals( getGroupId( model ) ) ) && artifactId.equals(
+                        getArtifactId( model ) ) ).findAny().orElse( null );
     }
 
     /**
-     * Returns the model that has the specified groupId and artifactId or <code>null</code> if no such model exists.
+     * Returns the model that has the specified groupId (if specified)
+     * and artifactId or <code>null</code> if no such model exists.
      *
      * @param reactor    The map of models keyed by path.
      * @param groupId    The groupId to match.
@@ -1554,15 +1556,9 @@ public class PomHelper
     public static Map.Entry<String, Model> getModelEntry( Map<String, Model> reactor, String groupId,
                                                           String artifactId )
     {
-        for ( Map.Entry<String, Model> entry : reactor.entrySet() )
-        {
-            Model model = entry.getValue();
-            if ( groupId.equals( getGroupId( model ) ) && artifactId.equals( getArtifactId( model ) ) )
-            {
-                return entry;
-            }
-        }
-        return null;
+        return reactor.entrySet().stream().filter(
+                e -> ( groupId == null || groupId.equals( PomHelper.getGroupId( e.getValue() ) ) ) && artifactId.equals(
+                        PomHelper.getArtifactId( e.getValue() ) ) ).findAny().orElse( null );
     }
 
     /**
@@ -1578,15 +1574,12 @@ public class PomHelper
         {
             return 0;
         }
-        else
+        Model parentModel = getModel( reactor, model.getParent().getGroupId(), model.getParent().getArtifactId() );
+        if ( parentModel == null )
         {
-            Model parentModel = getModel( reactor, model.getParent().getGroupId(), model.getParent().getArtifactId() );
-            if ( parentModel != null )
-            {
-                return getReactorParentCount( reactor, parentModel ) + 1;
-            }
             return 0;
         }
+        return getReactorParentCount( reactor, parentModel ) + 1;
     }
 
     /**

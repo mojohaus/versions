@@ -433,10 +433,12 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
         addChange( groupId, artifactId, oldVersion, newVersion );
         // now fake out the triggering change
 
-        final Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
-        current.getValue().setVersion( newVersion );
-
-        addFile( files, project, current.getKey() );
+        Map.Entry<String, Model> current = PomHelper.getModelEntry( reactor, groupId, artifactId );
+        if ( current != null )
+        {
+            current.getValue().setVersion( newVersion );
+            addFile( files, project, current.getKey() );
+        }
 
         for ( Map.Entry<String, Model> sourceEntry : reactor.entrySet() )
         {
