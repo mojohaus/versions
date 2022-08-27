@@ -354,15 +354,16 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
                 final String mGroupId = PomHelper.getGroupId( m );
                 final String mArtifactId = PomHelper.getArtifactId( m );
                 final String mVersion = PomHelper.getVersion( m );
-                if ( ( ( groupIdRegex.matcher( mGroupId ).matches() && artifactIdRegex.matcher( mArtifactId )
-                    .matches() ) //
-                    || ( processAllModules ) ) //
-                    && oldVersionIdRegex.matcher( mVersion ).matches() && !newVersion.equals( mVersion ) )
+                if ( ( processAllModules
+                        || groupIdRegex.matcher( mGroupId ).matches()
+                        && artifactIdRegex.matcher( mArtifactId ).matches() )
+                        && oldVersionIdRegex.matcher( mVersion ).matches()
+                        && !newVersion.equals( mVersion ) )
                 {
                     found = true;
                     // if the change is not one we have swept up already
                     applyChange( project, reactor, files, mGroupId, m.getArtifactId(),
-                                 StringUtils.isBlank( oldVersion ) || "*".equals( oldVersion ) ? "" : m.getVersion() );
+                            StringUtils.isBlank( oldVersion ) || "*".equals( oldVersion ) ? "" : mVersion );
                 }
             }
             if ( !found && RegexUtils.getWildcardScore( groupId ) == 0 && RegexUtils.getWildcardScore( artifactId ) == 0
