@@ -26,6 +26,7 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
@@ -135,30 +136,6 @@ public abstract class AbstractVersionDetails
         return getVersions( currentVersion, upperBound, includeSnapshots, false, false );
     }
 
-    /**
-     * Gets newer versions of the specified artifact version.
-     *
-     * @param version The current version of the artifact.
-     * @param upperBoundFixedSegment Indicates the segment in the version number that cannot be changed. For example, a
-     *            value of 0 indicates that the major version number cannot be changed. A value of -1 indicates any
-     *            segment value can be changed.
-     * @param includeSnapshots Whether to include snapshot versions.
-     * @return Returns the newer artifact versions.
-     */
-    private ArtifactVersion[] getNewerVersions( ArtifactVersion version, int upperBoundFixedSegment,
-                                                boolean includeSnapshots )
-    {
-        ArtifactVersion lowerBound = version;
-        ArtifactVersion upperBound = null;
-
-        if ( upperBoundFixedSegment != -1 )
-        {
-            upperBound = getVersionComparator().incrementSegment( lowerBound, upperBoundFixedSegment );
-        }
-
-        return getVersions( version, upperBound, includeSnapshots, false, false );
-    }
-
     private ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
     {
         return getVersions( version, null, includeSnapshots, false, true );
@@ -243,9 +220,43 @@ public abstract class AbstractVersionDetails
         return getNewerVersions( new DefaultArtifactVersion( version ), includeSnapshots );
     }
 
+    /**
+     * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
+     * should be included.
+     *
+     * @param version current version
+     * @param upperBoundSegment the upper bound segment
+     * @param includeSnapshots whether snapshot versions should be included
+     * @deprecated please use {@link AbstractVersionDetails#getNewerVersions(String, int, boolean, boolean)} instead
+     * @return array of newer versions fulfilling the criteria
+     */
+    @Deprecated
     public final ArtifactVersion[] getNewerVersions( String version, int upperBoundSegment, boolean includeSnapshots )
     {
-        return getNewerVersions( new DefaultArtifactVersion( version ), upperBoundSegment, includeSnapshots );
+        return getNewerVersions( version, upperBoundSegment, includeSnapshots, false );
+    }
+
+    /**
+     * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
+     * should be included.
+     *
+     * @param versionString current version
+     * @param upperBoundSegment the upper bound segment
+     * @param includeSnapshots whether snapshot versions should be included
+     * @param allowDowngrade whether to allow downgrading if the current version is a snapshots and snapshots
+     *                       are disallowed
+     * @return array of newer versions fulfilling the criteria
+     */
+    public final ArtifactVersion[] getNewerVersions( String versionString, int upperBoundSegment,
+                                                     boolean includeSnapshots, boolean allowDowngrade )
+    {
+        ArtifactVersion currentVersion = new DefaultArtifactVersion( versionString );
+        ArtifactVersion lowerBound =
+                allowDowngrade ? getLowerBoundArtifactVersion( currentVersion, upperBoundSegment ) : currentVersion;
+        ArtifactVersion upperBound = upperBoundSegment == -1 ? null
+                : getVersionComparator().incrementSegment( lowerBound, upperBoundSegment );
+
+        return getVersions( lowerBound, upperBound, includeSnapshots, allowDowngrade, allowDowngrade );
     }
 
     public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
@@ -482,5 +493,53 @@ public abstract class AbstractVersionDetails
     public ArtifactVersion[] getAllUpdates( VersionRange versionRange, boolean includeSnapshots )
     {
         return getVersions( versionRange, getCurrentVersion(), null, includeSnapshots, false, true );
+    }
+
+    protected ArtifactVersion getLowerBoundArtifactVersion( ArtifactVersion version, int segment )
+    {
+        String lowerBound = getLowerBound( version, segment );
+        return lowerBound != null ? new DefaultArtifactVersion( lowerBound ) : null;
+    }
+
+    protected String getLowerBound( ArtifactVersion version, int segment )
+    {
+        if ( segment < 0 )
+        {
+            return null;
+        }
+
+        int segmentCount = getVersionComparator().getSegmentCount( version );
+        if ( segment > segmentCount )
+        {
+            throw new InvalidSegmentException( segment, segmentCount,
+                    version.toString() );
+        }
+
+        StringBuilder newVersion = new StringBuilder();
+        newVersion.append( version.getMajorVersion() );
+        if ( segmentCount > 0 )
+        {
+            newVersion.append( "." )
+                    .append( segment >= 1 ? version.getMinorVersion() : 0 );
+        }
+        if ( segmentCount > 1 )
+        {
+            newVersion.append( "." )
+                    .append( segment >= 2 ? version.getIncrementalVersion() : 0 );
+        }
+        if ( segmentCount > 2 )
+        {
+            if ( version.getQualifier() != null )
+            {
+                newVersion.append( "-" )
+                        .append( segment >= 3 ? version.getQualifier() : "0" );
+            }
+            else
+            {
+                newVersion.append( "-" )
+                        .append( segment >= 3 ? version.getBuildNumber() : "0" );
+            }
+        }
+        return newVersion.toString();
     }
 }
