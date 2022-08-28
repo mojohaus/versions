@@ -7,9 +7,9 @@ import java.util.Collections;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
-import org.codehaus.mojo.versions.SetMojo;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
@@ -58,11 +58,11 @@ public abstract class BaseMojoTestCase extends AbstractMojoTestCase
      * @return a Mojo instance
      * @throws Exception thrown if mojo lookup fails
      */
-    protected SetMojo createMojo( String goal, String pomFilePath ) throws Exception
+    protected <T extends Mojo> T createMojo( String goal, String pomFilePath ) throws Exception
     {
         File pomFile = new File( pomFilePath );
-        SetMojo mojo = (SetMojo) lookupMojo( goal, pomFile );
-        mojo.setProject( new TestProjectStub( pomFile ) );
+        T mojo = (T) lookupMojo( goal, pomFile );
+        setVariableValueToObject( mojo, "project", new TestProjectStub( pomFile ) );
         return mojo;
     }
 
