@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +38,6 @@ import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.mojo.versions.Property;
-import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
@@ -145,12 +143,8 @@ public class PropertyVersions
 
     private VersionComparator[] lookupComparators()
     {
-        Set<VersionComparator> result = new HashSet();
-        for ( ArtifactAssociation association : associations )
-        {
-            result.add( helper.getVersionComparator( association.getArtifact() ) );
-        }
-        return result.toArray( new VersionComparator[0] );
+        return associations.stream().map( association -> helper.getVersionComparator( association.getArtifact() ) )
+                .distinct().toArray( VersionComparator[]::new );
     }
 
     /**
@@ -346,19 +340,15 @@ public class PropertyVersions
             throw new MojoExecutionException( e.getMessage(), e );
         }
 
-        ArtifactVersion lowerBoundArtifactVersion = null;
+        ArtifactVersion lowerBoundArtifactVersion = helper.createArtifactVersion( currentVersion );
         if ( allowDowngrade )
         {
-            if ( segment != -1 )
-            {
-                lowerBoundArtifactVersion = getLowerBound( helper, currentVersion, segment );
-            }
-            helper.getLog().debug( "lowerBoundArtifactVersion is null based on allowDowngrade:" + allowDowngrade );
+            String updatedVersion = getLowerBound( lowerBoundArtifactVersion, segment );
+            lowerBoundArtifactVersion = updatedVersion != null ? helper.createArtifactVersion( updatedVersion ) : null;
         }
-        else
+        if ( helper.getLog().isDebugEnabled() )
         {
-            lowerBoundArtifactVersion = helper.createArtifactVersion( currentVersion );
-            helper.getLog().debug( "lowerBoundArtifactVersion: " + lowerBoundArtifactVersion.toString() );
+            helper.getLog().debug( "lowerBoundArtifactVersion: " + lowerBoundArtifactVersion );
         }
 
         ArtifactVersion upperBound = null;
@@ -375,7 +365,7 @@ public class PropertyVersions
         if ( property.isSearchReactor() )
         {
             helper.getLog().debug( "Property ${" + property.getName() + "}: Searching reactor for a valid version..." );
-            Collection reactorArtifacts = helper.extractArtifacts( reactorProjects );
+            Set<Artifact> reactorArtifacts = helper.extractArtifacts( reactorProjects );
             ArtifactVersion[] reactorVersions = getVersions( reactorArtifacts );
             helper.getLog().debug( "Property ${" + property.getName()
                                        + "}: Set of valid available versions from the reactor is " + Arrays.asList(
@@ -527,45 +517,4 @@ public class PropertyVersions
         }
 
     }
-
-
-    private ArtifactVersion getLowerBound( VersionsHelper helper,
-                                           String currentVersion, int segment )
-    {
-        ArtifactVersion version = helper.createArtifactVersion( currentVersion );
-        int segmentCount = getVersionComparator().getSegmentCount( version );
-        if ( segment < 0 || segment > segmentCount )
-        {
-            throw new InvalidSegmentException( segment, segmentCount,
-                                               currentVersion );
-        }
-
-        StringBuilder newVersion = new StringBuilder();
-        newVersion.append( segment >= 0 ? version.getMajorVersion() : 0 );
-        if ( segmentCount > 0 )
-        {
-            newVersion.append( "." )
-                .append( segment >= 1 ? version.getMinorVersion() : 0 );
-        }
-        if ( segmentCount > 1 )
-        {
-            newVersion.append( "." )
-                .append( segment >= 2 ? version.getIncrementalVersion() : 0 );
-        }
-        if ( segmentCount > 2 )
-        {
-            if ( version.getQualifier() != null )
-            {
-                newVersion.append( "-" )
-                    .append( segment >= 3 ? version.getQualifier() : "0" );
-            }
-            else
-            {
-                newVersion.append( "-" )
-                    .append( segment >= 3 ? version.getBuildNumber() : "0" );
-            }
-        }
-        return helper.createArtifactVersion( newVersion.toString() );
-    }
-
 }

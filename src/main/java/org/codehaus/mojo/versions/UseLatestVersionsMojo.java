@@ -22,9 +22,8 @@ package org.codehaus.mojo.versions;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -75,7 +74,32 @@ public class UseLatestVersionsMojo
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     private boolean allowIncrementalUpdates;
 
+    /**
+     * <p>Whether to downgrade a snapshot dependency if <code>allowSnapshots</code> is <code>false</code>
+     * and there exists a non-snapshot version within the range fulfilling the criteria.</p>
+     * <p>Only valid if <code>allowSnapshots</code> is <code>false</code>.</p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "allowDowngrade",
+                defaultValue = "false" )
+    private boolean allowDowngrade;
+
     // ------------------------------ METHODS --------------------------
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException
+    {
+        if ( allowDowngrade && allowSnapshots )
+        {
+            throw new MojoExecutionException( "allowDowngrade is only valid with allowSnapshots equal to false" );
+        }
+        super.execute();
+    }
 
     /**
      * @param pom the pom to update.
@@ -109,9 +133,7 @@ public class UseLatestVersionsMojo
                 dependency.setGroupId( getProject().getParent().getGroupId() );
                 dependency.setVersion( getProject().getParent().getVersion() );
                 dependency.setType( "pom" );
-                List list = new ArrayList();
-                list.add( dependency );
-                useLatestVersions( pom, list );
+                useLatestVersions( pom, Collections.singletonList( dependency ) );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -154,7 +176,8 @@ public class UseLatestVersionsMojo
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
 
-            ArtifactVersion[] newerVersions = versions.getNewerVersions( version, segment, allowSnapshots );
+            ArtifactVersion[] newerVersions = versions.getNewerVersions( version, segment, allowSnapshots,
+                    allowDowngrade );
 
             ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
             if ( filteredVersions.length > 0 )
