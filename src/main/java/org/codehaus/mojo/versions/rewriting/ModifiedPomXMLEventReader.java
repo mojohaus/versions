@@ -462,7 +462,7 @@ public class ModifiedPomXMLEventReader
             return;
         }
         pom.replace( start, end, replacement );
-        int delta = replacement.length() - lastEnd - lastStart;
+        int delta = replacement.length() - ( lastEnd - lastStart );
         nextDelta += delta;
         for ( int i = 0; i < MAX_MARKS; i++ )
         {
@@ -563,7 +563,7 @@ public class ModifiedPomXMLEventReader
             return;
         }
         pom.replace( start, end, replacement );
-        int delta = replacement.length() - markEnd[index] - markStart[index];
+        int delta = replacement.length() - ( markEnd[index] - markStart[index] );
         nextDelta += delta;
         if ( lastStart == markStart[index] && lastEnd == markEnd[index] )
         {
