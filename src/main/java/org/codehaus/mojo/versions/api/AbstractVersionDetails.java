@@ -19,8 +19,11 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -156,11 +159,26 @@ public abstract class AbstractVersionDetails
                                                    ArtifactVersion upperBound, boolean includeSnapshots,
                                                    boolean includeLower, boolean includeUpper )
     {
-        ArtifactVersion latest = null;
+        return getNewestVersion( versionRange, lowerBound, upperBound, includeSnapshots, includeLower,
+                includeUpper, false );
+    }
+
+    private static <T> Iterable<T> reverse( T[] array )
+    {
+        return Arrays.stream( array ).sorted( Collections.reverseOrder() ).collect( Collectors.toList() );
+    }
+
+    public final ArtifactVersion getNewestVersion( VersionRange versionRange, ArtifactVersion lowerBound,
+                                                   ArtifactVersion upperBound, boolean includeSnapshots,
+                                                   boolean includeLower, boolean includeUpper, boolean allowDowngrade )
+    {
         final VersionComparator versionComparator = getVersionComparator();
-        for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
+        // reverse( getVersions( ... ) ) will contain versions sorted from latest to oldest,
+        // so we only need to find the first candidate fulfilling the criteria
+        for ( ArtifactVersion candidate : reverse( getVersions( includeSnapshots ) ) )
         {
-            if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
+            if ( !allowDowngrade && versionRange != null
+                    && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
                 continue;
             }
@@ -178,17 +196,9 @@ public abstract class AbstractVersionDetails
             {
                 continue;
             }
-            if ( latest == null )
-            {
-                latest = candidate;
-            }
-            else if ( versionComparator.compare( latest, candidate ) < 0 )
-            {
-                latest = candidate;
-            }
-
+            return candidate;
         }
-        return latest;
+        return null;
     }
 
     public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,

@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -96,7 +95,8 @@ public class ArtifactVersions
         {
             return false;
         }
-        for ( Restriction r : ( (List<Restriction>) range.getRestrictions() ) )
+
+        for ( Restriction r : range.getRestrictions() )
         {
             if ( r.containsVersion( version ) )
             {
@@ -157,24 +157,10 @@ public class ArtifactVersions
 
     public ArtifactVersion[] getVersions( boolean includeSnapshots )
     {
-        Set<ArtifactVersion> result;
-        if ( includeSnapshots )
-        {
-            result = versions;
-        }
-        else
-        {
-            result = new TreeSet<>( versionComparator );
-            for ( ArtifactVersion candidate : versions )
-            {
-                if ( ArtifactUtils.isSnapshot( candidate.toString() ) )
-                {
-                    continue;
-                }
-                result.add( candidate );
-            }
-        }
-        return result.toArray( new ArtifactVersion[0] );
+        return includeSnapshots
+                ? versions.toArray( new ArtifactVersion[0] )
+                : versions.stream().filter( v -> !ArtifactUtils.isSnapshot( v.toString() ) )
+                .toArray( ArtifactVersion[]::new );
     }
 
     public VersionComparator getVersionComparator()
