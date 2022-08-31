@@ -9,5 +9,8 @@
   <name>set-scm-tag</name>
   <scm>
     <tag>HEAD</tag>
+    <connection>dummy</connection>
+    <developerConnection>dummy</developerConnection>
+    <url>dummy</url>
   </scm>
 </project>
