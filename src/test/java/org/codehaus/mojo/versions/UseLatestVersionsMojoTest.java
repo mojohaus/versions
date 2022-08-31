@@ -2,11 +2,8 @@ package org.codehaus.mojo.versions;
 
 import javax.xml.stream.XMLStreamException;
 
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -22,7 +19,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.change.VersionChange;
-import org.codehaus.mojo.versions.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
@@ -70,8 +67,6 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
                     return null;
                 } );
 
-        changeRecorder = new TestChangeRecorder();
-
         mojo = new UseLatestVersionsMojo()
         {{
             MavenProject project = new MavenProject()
@@ -95,29 +90,10 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
             setProject( project );
             repositorySystem = repositorySystemMock;
             artifactMetadataSource = artifactMetadataSourceMock;
+
+            changeRecorder = new TestChangeRecorder();
             setVariableValueToObject( this, "changeRecorder", changeRecorder );
         }};
-    }
-
-    private static class TestChangeRecorder implements ChangeRecorder
-    {
-        private final List<VersionChange> changes = new LinkedList<>();
-
-        @Override
-        public void recordUpdate( String kind, String groupId, String artifactId, String oldVersion, String newVersion )
-        {
-            changes.add( new VersionChange( groupId, artifactId, oldVersion, newVersion ) );
-        }
-
-        @Override
-        public void serialize( OutputStream outputStream )
-        {
-        }
-
-        public List<VersionChange> getChanges()
-        {
-            return changes;
-        }
     }
 
     @Test

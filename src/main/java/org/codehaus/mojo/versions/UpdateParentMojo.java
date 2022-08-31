@@ -65,6 +65,17 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
     @Parameter( property = "forceUpdate", defaultValue = "false" )
     protected boolean forceUpdate = false;
 
+    /**
+     * <p>Whether to downgrade a snapshot dependency if <code>allowSnapshots</code> is <code>false</code>
+     * and there exists a version within the range fulfilling the criteria.</p>
+     * <p>Default <code>false</code></p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "allowDowngrade",
+                defaultValue = "false" )
+    protected boolean allowDowngrade;
+
     // -------------------------- OTHER METHODS --------------------------
 
     /**
@@ -98,16 +109,6 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
             version = parentVersion;
         }
 
-        VersionRange versionRange;
-        try
-        {
-            versionRange = VersionRange.createFromVersionSpec( version );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( "Invalid version range specification: " + version, e );
-        }
-
         Dependency dependency = new Dependency();
         dependency.setGroupId( getProject().getParent().getGroupId() );
         dependency.setArtifactId( getProject().getParent().getArtifactId() );
@@ -115,15 +116,32 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         dependency.setType( "pom" );
         Artifact artifact = getHelper().createDependencyArtifact( dependency );
 
+        VersionRange versionRange;
+        try
+        {
+            versionRange = VersionRange.createFromVersionSpec( version );
+            if ( versionRange.getRecommendedVersion() != null )
+            {
+                versionRange = versionRange.restrict(
+                        VersionRange.createFromVersionSpec( "[" + versionRange.getRecommendedVersion() + ",)" ) );
+            }
+        }
+        catch ( InvalidVersionSpecificationException e )
+        {
+            throw new MojoExecutionException( "Invalid version range specification: " + version, e );
+        }
+
         ArtifactVersion artifactVersion;
         try
         {
-            artifactVersion = findLatestVersion( artifact, versionRange, null, false );
+            artifactVersion = findLatestVersion( artifact, versionRange, false, true,
+                    allowDowngrade );
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
+
 
         if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion, forceUpdate ) )
         {
