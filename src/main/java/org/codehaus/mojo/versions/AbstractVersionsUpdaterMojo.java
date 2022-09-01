@@ -37,6 +37,7 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -54,6 +55,7 @@ import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.recording.ChangeRecorderNull;
 import org.codehaus.mojo.versions.recording.ChangeRecorderXML;
@@ -101,7 +103,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-1
      */
     @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
-    protected List reactorProjects;
+    protected List<MavenProject> reactorProjects;
 
     /**
      * The artifact metadata source to use.
@@ -216,8 +218,7 @@ public abstract class AbstractVersionsUpdaterMojo
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
-    public VersionsHelper getHelper()
-        throws MojoExecutionException
+    public VersionsHelper getHelper() throws MojoExecutionException
     {
         if ( helper == null )
         {
@@ -514,13 +515,22 @@ public abstract class AbstractVersionsUpdaterMojo
     }
 
     /**
-     * Based on the passed flags, determines which segment is unchangable. This can be used when determining an upper
+     * <p>Based on the passed flags, determines which segment (0-based), which is not to be changed.</p>
+     * <p>The method will return, depending on the first parameter on the list to be true:
+     * <ul>
+     * <li>{@code allowMajorUpdates}: -1</li>
+     * <li>{@code allowMinorUpdates}: 0</li>
+     * <li>{@code allowIncrementalUpdates}: 1</li>
+     * <li>(none): 2</li>
+     * </ul>
+     *
+     * This can be used when determining an upper
      * bound for the "latest" version.
      *
      * @param allowMajorUpdates       Allow major updates
      * @param allowMinorUpdates       Allow minor updates
      * @param allowIncrementalUpdates Allow incremental updates
-     * @return Returns the segment that is unchangable. If any segment can change, returns -1.
+     * @return Returns the segment (0-based) that is unchangable. If any segment can change, returns -1.
      */
     protected int determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,
                                              boolean allowIncrementalUpdates )
@@ -553,7 +563,8 @@ public abstract class AbstractVersionsUpdaterMojo
     protected ArtifactVersion updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
                                                              PropertyVersions version, String currentVersion,
                                                              boolean allowDowngrade, int segment )
-        throws MojoExecutionException, XMLStreamException
+            throws XMLStreamException, InvalidVersionSpecificationException,
+            InvalidSegmentException, MojoExecutionException
     {
         ArtifactVersion winner =
             version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,

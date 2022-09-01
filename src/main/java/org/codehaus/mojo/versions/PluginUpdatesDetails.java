@@ -58,11 +58,21 @@ public class PluginUpdatesDetails
         return dependencyVersions;
     }
 
+    /**
+     * Returns true if a new version of the artifact fulfilling the criteria (whether to include snapshots) can be found
+     *
+     * @return true if a new version can be found
+     */
     public boolean isArtifactUpdateAvailable()
     {
         return artifactVersions.getAllUpdates( UpdateScope.ANY, includeSnapshots ).length > 0;
     }
 
+    /**
+     * Returns true if a new version of the dependency can be found
+     *
+     * @return true if a new version can be found
+     */
     public boolean isDependencyUpdateAvailable()
     {
         for ( ArtifactVersions versions : dependencyVersions.values() )
@@ -76,6 +86,11 @@ public class PluginUpdatesDetails
         return false;
     }
 
+    /**
+     * Returns true if a new version of the dependency can be found
+     *
+     * @return true if a new version can be found
+     */
     public boolean isUpdateAvailable()
     {
         return isArtifactUpdateAvailable() || isDependencyUpdateAvailable();

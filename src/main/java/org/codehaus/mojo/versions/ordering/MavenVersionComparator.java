@@ -92,12 +92,12 @@ public class MavenVersionComparator
     /**
      * {@inheritDoc}
      */
-    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
+    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment ) throws InvalidSegmentException
     {
         int segmentCount = innerGetSegmentCount( v );
         if ( segment < 0 || segment >= segmentCount )
         {
-            throw new InvalidSegmentException( segment, segmentCount, v.toString() );
+            throw new InvalidSegmentException( segment, segmentCount, v );
         }
         String version = v.toString();
         if ( segmentCount == 1 )

@@ -41,6 +41,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -162,32 +163,40 @@ public class UseLatestReleasesMojo
 
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                ArtifactVersion[] newer = versions.getNewerVersions( version, segment, false );
-                newer = filterVersionsWithIncludes( newer, artifact );
-
-                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newer );
-                if ( filteredVersions.length > 0 )
+                try
                 {
-                    String newVersion = filteredVersions[filteredVersions.length - 1].toString();
-                    if ( getProject().getParent() != null )
+                    ArtifactVersion[] newer = versions.getNewerVersions( version, segment, false );
+                    newer = filterVersionsWithIncludes( newer, artifact );
+
+                    ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newer );
+                    if ( filteredVersions.length > 0 )
                     {
-                        if ( artifact.getId().equals( getProject().getParentArtifact().getId() )
-                            && isProcessingParent() )
+                        String newVersion = filteredVersions[filteredVersions.length - 1].toString();
+                        if ( getProject().getParent() != null )
                         {
-                            if ( PomHelper.setProjectParentVersion( pom, newVersion ) )
+                            if ( artifact.getId().equals( getProject().getParentArtifact().getId() )
+                                    && isProcessingParent() )
                             {
-                                getLog().debug( "Made parent update from " + version + " to " + newVersion );
+                                if ( PomHelper.setProjectParentVersion( pom, newVersion ) )
+                                {
+                                    getLog().debug( "Made parent update from " + version + " to " + newVersion );
+                                }
                             }
                         }
-                    }
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         newVersion, getProject().getModel() ) )
-                    {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                newVersion, getProject().getModel() ) )
+                        {
+                            getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
 
-                        this.getChangeRecorder().recordUpdate( "useLatestReleases", dep.getGroupId(),
-                                                               dep.getArtifactId(), version, newVersion );
+                            this.getChangeRecorder().recordUpdate( "useLatestReleases", dep.getGroupId(),
+                                    dep.getArtifactId(), version, newVersion );
+                        }
                     }
+                }
+                catch ( InvalidSegmentException e )
+                {
+                    getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s", dep.getGroupId(),
+                            dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
                 }
             }
         }

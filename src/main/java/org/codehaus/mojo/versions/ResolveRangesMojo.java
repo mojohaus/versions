@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -37,6 +38,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -294,8 +296,15 @@ public class ResolveRangesMojo
 
             int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
             // TODO: Check if we could add allowDowngrade ? 
-            updatePropertyToNewestVersion( pom, property, version, currentVersion, false, segment );
-
+            try
+            {
+                updatePropertyToNewestVersion( pom, property, version, currentVersion, false, segment );
+            }
+            catch ( InvalidSegmentException | InvalidVersionSpecificationException e )
+            {
+                getLog().warn( String.format( "Skipping the processing of %s:%s due to: %s", property.getName(),
+                        property.getVersion(), e.getMessage() ) );
+            }
         }
     }
 

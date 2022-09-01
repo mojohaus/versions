@@ -24,12 +24,14 @@ import javax.xml.stream.XMLStreamException;
 import java.util.Map;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -146,17 +148,25 @@ public class UpdatePropertyMojo
             }
 
             int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
-            ArtifactVersion targetVersion = updatePropertyToNewestVersion( pom, property, version, currentVersion,
-                                                                           allowDowngrade, segment );
-
-            if ( targetVersion != null )
+            try
             {
-                for ( final ArtifactAssociation association : version.getAssociations() )
+                ArtifactVersion targetVersion = updatePropertyToNewestVersion( pom, property, version, currentVersion,
+                        allowDowngrade, segment );
+
+                if ( targetVersion != null )
                 {
-                    this.getChangeRecorder().recordUpdate( "updateProperty", association.getGroupId(),
-                                                           association.getArtifactId(), currentVersion,
-                                                           targetVersion.toString() );
+                    for ( final ArtifactAssociation association : version.getAssociations() )
+                    {
+                        this.getChangeRecorder().recordUpdate( "updateProperty", association.getGroupId(),
+                                association.getArtifactId(), currentVersion,
+                                targetVersion.toString() );
+                    }
                 }
+            }
+            catch ( InvalidSegmentException | InvalidVersionSpecificationException e )
+            {
+                getLog().warn( String.format( "Skipping the processing of %s:%s due to: %s", property.getName(),
+                        property.getVersion(), e.getMessage() ) );
             }
         }
     }
