@@ -37,6 +37,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -149,26 +150,34 @@ public class UseNextSnapshotsMojo
                     getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
                     continue;
                 }
-                ArtifactVersion upperBound =
-                    segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
-                getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
-                ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
-                getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
-                for ( ArtifactVersion artifactVersion : newer )
+                try
                 {
-                    String newVersion = artifactVersion.toString();
-                    if ( matchSnapshotRegex.matcher( newVersion ).matches() )
+                    ArtifactVersion upperBound =
+                            segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
+                    getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
+                    ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
+                    getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
+                    for ( ArtifactVersion artifactVersion : newer )
                     {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                             newVersion, getProject().getModel() ) )
+                        String newVersion = artifactVersion.toString();
+                        if ( matchSnapshotRegex.matcher( newVersion ).matches() )
                         {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+                            if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                    newVersion, getProject().getModel() ) )
+                            {
+                                getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
 
-                            this.getChangeRecorder().recordUpdate( "useNextSnapshots", dep.getGroupId(),
-                                                                   dep.getArtifactId(), version, newVersion );
+                                this.getChangeRecorder().recordUpdate( "useNextSnapshots", dep.getGroupId(),
+                                        dep.getArtifactId(), version, newVersion );
+                            }
+                            break;
                         }
-                        break;
                     }
+                }
+                catch ( InvalidSegmentException e )
+                {
+                    getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s", dep.getGroupId(),
+                            dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
                 }
             }
         }

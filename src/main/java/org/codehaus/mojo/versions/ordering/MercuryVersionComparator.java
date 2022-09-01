@@ -52,12 +52,12 @@ public class MercuryVersionComparator
         return tok.countTokens();
     }
 
-    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment )
+    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment ) throws InvalidSegmentException
     {
         final int segmentCount = getSegmentCount( v );
         if ( segment < 0 || segment > segmentCount )
         {
-            throw new InvalidSegmentException( segment, segmentCount, v.toString() );
+            throw new InvalidSegmentException( segment, segmentCount, v );
         }
         final String version = v.toString();
         StringBuilder result = new StringBuilder( version.length() + 10 );

@@ -42,7 +42,7 @@ public class MavenVersionComparatorTest
 
     @Test
     public void testSegmentIncrementing()
-        throws Exception
+        throws InvalidSegmentException
     {
         assertIncrement( "6", "5", 0 );
         assertIncrement( "6.0", "5.0", 0 );
@@ -58,7 +58,7 @@ public class MavenVersionComparatorTest
         assertIncrement( "1.0-z90-SNAPSHOT", "1.0-z9-SNAPSHOT", 3 );
     }
 
-    private void assertIncrement( String expected, String initial, int segment )
+    private void assertIncrement( String expected, String initial, int segment ) throws InvalidSegmentException
     {
         assertEquals( expected,
                       instance.incrementSegment( new DefaultArtifactVersion( initial ), segment ).toString() );

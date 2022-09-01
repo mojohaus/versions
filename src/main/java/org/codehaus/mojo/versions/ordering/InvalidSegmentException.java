@@ -19,22 +19,56 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+
 /**
  * Represents an invalid segment being identified within a version.
  */
-public class InvalidSegmentException
-    extends RuntimeException
+public class InvalidSegmentException extends Exception
 {
+    private final int segment;
+
+    private final int segmentCount;
+
+    private final ArtifactVersion version;
+
     /**
-     * Constructs a new exception.
+     * Constructs the exception object
      *
      * @param segment the invalid segment index.
      * @param segmentCount the number of segments.
-     * @param version the version string.
+     * @param version the version object.
      */
-    public InvalidSegmentException( int segment, int segmentCount, String version )
+    public InvalidSegmentException( int segment, int segmentCount, ArtifactVersion version )
     {
         super( String.format( "Invalid segment, %d, for the %d segment version: '%s'", segment, segmentCount,
-                              version ) );
+                version.toString() ) );
+        this.segment = segment;
+        this.segmentCount = segmentCount;
+        this.version = version;
+    }
+
+    /**
+     * @return segment
+     */
+    public int getSegment()
+    {
+        return segment;
+    }
+
+    /**
+     * @return segment count
+     */
+    public int getSegmentCount()
+    {
+        return segmentCount;
+    }
+
+    /**
+     * @return version object
+     */
+    public ArtifactVersion getVersion()
+    {
+        return version;
     }
 }

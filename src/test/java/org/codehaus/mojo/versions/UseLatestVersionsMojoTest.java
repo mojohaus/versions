@@ -47,8 +47,8 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
         {
             Dependency dependency = invocation.getArgument( 0 );
             return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(),
-                    dependency.getScope(), dependency.getType(), dependency.getClassifier() != null
-                    ? dependency.getClassifier() : "default", null );
+                    dependency.getScope(), dependency.getType(),
+                    dependency.getClassifier() != null ? dependency.getClassifier() : "default", null );
         } );
 
         ArtifactMetadataSource artifactMetadataSourceMock = mock( ArtifactMetadataSource.class );
@@ -62,6 +62,15 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
                                 new DefaultArtifactVersion( "1.1.0" ), new DefaultArtifactVersion( "1.1.0-SNAPSHOT" ),
                                 new DefaultArtifactVersion( "1.0.0" ), new DefaultArtifactVersion( "1.0.0-SNAPSHOT" ),
                                 new DefaultArtifactVersion( "0.9.0" ) );
+                    }
+                    else if ( "poison-artifact".equals( artifact.getArtifactId() ) )
+                    {
+                        return Arrays.asList( new DefaultArtifactVersion( "1.1.1.1-SNAPSHOT" ),
+                                new DefaultArtifactVersion( "1.1.1.0" ),
+                                new DefaultArtifactVersion( "1.1.1.0-SNAPSHOT" ),
+                                new DefaultArtifactVersion( "1.0.0.0" ),
+                                new DefaultArtifactVersion( "1.0.0.0-SNAPSHOT" ),
+                                new DefaultArtifactVersion( "0.9.0.0" ) );
                     }
                     fail();
                     return null;
@@ -114,8 +123,7 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                        "1.1.0" ) ) );
+                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0" ) ) );
     }
 
     @Test
@@ -136,8 +144,7 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                        "1.0.0" ) ) );
+                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.0.0" ) ) );
     }
 
     @Test
@@ -158,8 +165,7 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                        "0.9.0" ) ) );
+                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "0.9.0" ) ) );
     }
 
     @Test
@@ -182,8 +188,7 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                        "1.1.0" ) ) );
+                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0" ) ) );
     }
 
     @Test
@@ -197,8 +202,9 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
         setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
         setVariableValueToObject( mojo, "allowDowngrade", true );
 
-        mojo.getProject().setParentArtifact( new DefaultArtifact( "default-group", "dependency-artifact",
-                "1.1.1-SNAPSHOT", "compile", "pom", "default", null ) );
+        mojo.getProject().setParentArtifact(
+                new DefaultArtifact( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "compile", "pom",
+                        "default", null ) );
         mojo.getProject().setParent( new MavenProject()
         {{
             setGroupId( mojo.getProject().getParentArtifact().getGroupId() );
@@ -214,7 +220,38 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                        "1.1.0" ) ) );
+                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0" ) ) );
     }
+
+    @Test
+    public void testPoisonDependencyVersion()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+    {
+        mojo.getProject().getModel().setDependencies( Arrays.asList(
+                DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
+                        "default", "pom", SCOPE_COMPILE ),
+                DependencyBuilder.dependencyWith( "default-group", "poison-artifact", "1.1.1.1-SNAPSHOT",
+                        "default", "pom", SCOPE_COMPILE )
+                ) );
+
+        setVariableValueToObject( mojo, "processDependencies", true );
+        setVariableValueToObject( mojo, "allowSnapshots", false );
+        setVariableValueToObject( mojo, "allowMajorUpdates", false );
+        setVariableValueToObject( mojo, "allowMinorUpdates", true );
+        setVariableValueToObject( mojo, "allowIncrementalUpdates", false );
+        setVariableValueToObject( mojo, "allowDowngrade", true );
+
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
+                    .thenReturn( true );
+            mojo.update( null );
+        }
+        // So, the regular update should take place despite an irregular, or — if I may — "poison", dependency
+        // being present in the dependency list
+        assertThat( changeRecorder.getChanges(),
+                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
+                        "1.0.0" ) ) );
+    }
+
 }

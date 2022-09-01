@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
@@ -266,7 +267,8 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope );
+    ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
+            throws InvalidSegmentException;
 
     /**
      * Returns the newest version newer than the specified current version, but within the the specified update scope or
@@ -278,7 +280,8 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope );
+    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
+            throws InvalidSegmentException;
 
     /**
      * Returns the all versions newer than the specified current version, but within the the specified update scope.
@@ -288,7 +291,8 @@ public interface VersionDetails
      * @return the all versions after currentVersion within the specified update scope.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope );
+    ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope )
+            throws InvalidSegmentException;
 
     /**
      * Returns the oldest version newer than the specified current version, but within the the specified update scope or
@@ -302,7 +306,7 @@ public interface VersionDetails
      * @since 1.0-beta-1
      */
     ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
-                                     boolean includeSnapshots );
+                                     boolean includeSnapshots ) throws InvalidSegmentException;
 
     /**
      * Returns the newest version newer than the specified current version, but within the the specified update scope or
@@ -316,7 +320,7 @@ public interface VersionDetails
      * @since 1.0-beta-1
      */
     ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
-                                     boolean includeSnapshots );
+                                     boolean includeSnapshots ) throws InvalidSegmentException;
 
     /**
      * Returns the all versions newer than the specified current version, but within the the specified update scope.
@@ -328,7 +332,7 @@ public interface VersionDetails
      * @since 1.0-beta-1
      */
     ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope,
-                                     boolean includeSnapshots );
+                                     boolean includeSnapshots ) throws InvalidSegmentException;
 
     /**
      * Returns the oldest version newer than the specified current version, but within the the specified update scope or
@@ -449,7 +453,7 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getOldestUpdate( UpdateScope updateScope );
+    ArtifactVersion getOldestUpdate( UpdateScope updateScope ) throws InvalidSegmentException;
 
     /**
      * Returns the newest version newer than the specified current version, but within the the specified update scope or
@@ -460,7 +464,7 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( UpdateScope updateScope );
+    ArtifactVersion getNewestUpdate( UpdateScope updateScope ) throws InvalidSegmentException;
 
     /**
      * Returns the all versions newer than the specified current version, but within the the specified update scope.
@@ -469,7 +473,7 @@ public interface VersionDetails
      * @return the all versions after currentVersion within the specified update scope.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getAllUpdates( UpdateScope updateScope );
+    ArtifactVersion[] getAllUpdates( UpdateScope updateScope ) throws InvalidSegmentException;
 
     /**
      * Returns the oldest version newer than the specified current version, but within the the specified update scope or
@@ -481,7 +485,7 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getOldestUpdate( UpdateScope updateScope, boolean includeSnapshots );
+    ArtifactVersion getOldestUpdate( UpdateScope updateScope, boolean includeSnapshots ) throws InvalidSegmentException;
 
     /**
      * Returns the newest version newer than the specified current version, but within the the specified update scope or
@@ -493,7 +497,7 @@ public interface VersionDetails
      *         version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( UpdateScope updateScope, boolean includeSnapshots );
+    ArtifactVersion getNewestUpdate( UpdateScope updateScope, boolean includeSnapshots ) throws InvalidSegmentException;
 
     /**
      * Returns the all versions newer than the specified current version, but within the the specified update scope.
@@ -503,7 +507,7 @@ public interface VersionDetails
      * @return the all versions after currentVersion within the specified update scope.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getAllUpdates( UpdateScope updateScope, boolean includeSnapshots );
+    ArtifactVersion[] getAllUpdates( UpdateScope updateScope, boolean includeSnapshots ) throws InvalidSegmentException;
 
     /**
      * Returns the oldest version newer than the current version, but within the the specified update scope or

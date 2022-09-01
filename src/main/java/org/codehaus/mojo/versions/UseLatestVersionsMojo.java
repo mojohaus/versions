@@ -37,6 +37,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -145,7 +146,8 @@ public class UseLatestVersionsMojo
     private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+        int unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                allowIncrementalUpdates );
         MajorMinorIncrementalFilter majorMinorIncfilter =
             new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
@@ -176,38 +178,46 @@ public class UseLatestVersionsMojo
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
 
-            ArtifactVersion[] newerVersions = versions.getNewerVersions( version, segment, allowSnapshots,
-                    allowDowngrade );
-
-            ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
-            if ( filteredVersions.length > 0 )
+            try
             {
-                String newVersion = filteredVersions[filteredVersions.length - 1].toString();
-                if ( getProject().getParent() != null )
-                {
-                    final Artifact parentArtifact = getProject().getParentArtifact();
-                    if ( artifact.getId().equals( parentArtifact.getId() ) && isProcessingParent() )
-                    {
-                        if ( PomHelper.setProjectParentVersion( pom, newVersion ) )
-                        {
-                            getLog().debug( "Made parent update from " + version + " to " + newVersion );
+                ArtifactVersion[] newerVersions = versions.getNewerVersions( version, unchangedSegment, allowSnapshots,
+                        allowDowngrade );
 
-                            this.getChangeRecorder().recordUpdate( "useLatestVersions", parentArtifact.getGroupId(),
-                                                                   parentArtifact.getArtifactId(), version,
-                                                                   newVersion );
+                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
+                if ( filteredVersions.length > 0 )
+                {
+                    String newVersion = filteredVersions[filteredVersions.length - 1].toString();
+                    if ( getProject().getParent() != null )
+                    {
+                        final Artifact parentArtifact = getProject().getParentArtifact();
+                        if ( artifact.getId().equals( parentArtifact.getId() ) && isProcessingParent() )
+                        {
+                            if ( PomHelper.setProjectParentVersion( pom, newVersion ) )
+                            {
+                                getLog().debug( "Made parent update from " + version + " to " + newVersion );
+
+                                this.getChangeRecorder().recordUpdate( "useLatestVersions", parentArtifact.getGroupId(),
+                                        parentArtifact.getArtifactId(), version,
+                                        newVersion );
+                            }
                         }
                     }
-                }
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion,
-                                                     getProject().getModel() ) )
-                {
-                    getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                            newVersion,
+                            getProject().getModel() ) )
+                    {
+                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
 
-                    this.getChangeRecorder().recordUpdate( "useLatestVersions", dep.getGroupId(),
-                                                           dep.getArtifactId(), version, newVersion );
+                        this.getChangeRecorder().recordUpdate( "useLatestVersions", dep.getGroupId(),
+                                dep.getArtifactId(), version, newVersion );
+                    }
                 }
             }
-
+            catch ( InvalidSegmentException e )
+            {
+                getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s", dep.getGroupId(),
+                        dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
+            }
         }
     }
 

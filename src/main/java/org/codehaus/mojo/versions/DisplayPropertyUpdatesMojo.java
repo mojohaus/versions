@@ -28,11 +28,13 @@ import java.util.TreeSet;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -138,44 +140,51 @@ public class DisplayPropertyUpdatesMojo
             }
 
             int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
-            ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                                                               this.reactorProjects, this.getHelper(), false, segment );
-
-            if ( winner != null && !currentVersion.equals( winner.toString() ) )
+            try
             {
-                StringBuilder buf = new StringBuilder();
-                buf.append( "${" );
-                buf.append( property.getName() );
-                buf.append( "} " );
-                final String newVersion = winner.toString();
-                int padding =
-                    INFO_PAD_SIZE - currentVersion.length() - newVersion.length() - 4 + getOutputLineWidthOffset();
-                while ( buf.length() < padding )
+                ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
+                        this.reactorProjects, this.getHelper(), false, segment );
+                if ( winner != null && !currentVersion.equals( winner.toString() ) )
                 {
-                    buf.append( '.' );
+                    StringBuilder buf = new StringBuilder();
+                    buf.append( "${" );
+                    buf.append( property.getName() );
+                    buf.append( "} " );
+                    final String newVersion = winner.toString();
+                    int padding =
+                            INFO_PAD_SIZE - currentVersion.length() - newVersion.length() - 4
+                                    + getOutputLineWidthOffset();
+                    while ( buf.length() < padding )
+                    {
+                        buf.append( '.' );
+                    }
+                    buf.append( ' ' );
+                    buf.append( currentVersion );
+                    buf.append( " -> " );
+                    buf.append( newVersion );
+                    updates.add( buf.toString() );
                 }
-                buf.append( ' ' );
-                buf.append( currentVersion );
-                buf.append( " -> " );
-                buf.append( newVersion );
-                updates.add( buf.toString() );
+                else
+                {
+                    StringBuilder buf = new StringBuilder();
+                    buf.append( "${" );
+                    buf.append( property.getName() );
+                    buf.append( "} " );
+                    int padding = INFO_PAD_SIZE - currentVersion.length() + getOutputLineWidthOffset();
+                    while ( buf.length() < padding )
+                    {
+                        buf.append( '.' );
+                    }
+                    buf.append( ' ' );
+                    buf.append( currentVersion );
+                    current.add( buf.toString() );
+                }
             }
-            else
+            catch ( InvalidSegmentException | InvalidVersionSpecificationException e )
             {
-                StringBuilder buf = new StringBuilder();
-                buf.append( "${" );
-                buf.append( property.getName() );
-                buf.append( "} " );
-                int padding = INFO_PAD_SIZE - currentVersion.length() + getOutputLineWidthOffset();
-                while ( buf.length() < padding )
-                {
-                    buf.append( '.' );
-                }
-                buf.append( ' ' );
-                buf.append( currentVersion );
-                current.add( buf.toString() );
+                getLog().warn( String.format( "Skipping the processing of %s:%s due to: %s", property.getName(),
+                        property.getVersion(), e.getMessage() ) );
             }
-
         }
 
         logLine( false, "" );

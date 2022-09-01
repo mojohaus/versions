@@ -38,24 +38,24 @@ public class VersionComparatorsTest
     };
 
     @Test
-    public void testMavenVersionComparator()
+    public void testMavenVersionComparator() throws InvalidSegmentException
     {
         assertVersions( new MavenVersionComparator() );
     }
 
     @Test
-    public void testMercuryVersionComparator()
+    public void testMercuryVersionComparator() throws InvalidSegmentException
     {
         assertVersions( new MercuryVersionComparator() );
     }
 
     @Test
-    public void testNumericVersionComparator()
+    public void testNumericVersionComparator() throws InvalidSegmentException
     {
         assertVersions( new NumericVersionComparator() );
     }
 
-    public void assertVersions( VersionComparator instance )
+    public void assertVersions( VersionComparator instance ) throws InvalidSegmentException
     {
         for ( int i = 0; i < versionDataset.length; i++ )
         {
@@ -64,7 +64,7 @@ public class VersionComparatorsTest
         }
     }
 
-    public void assertLater( String version, VersionComparator instance )
+    public void assertLater( String version, VersionComparator instance ) throws InvalidSegmentException
     {
         ArtifactVersion v1 = new DefaultArtifactVersion( version );
         int count = instance.getSegmentCount( v1 );

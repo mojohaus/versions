@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -36,8 +37,9 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
@@ -154,11 +156,9 @@ public class PropertyVersions
      * @return The versions that can be resolved from the supplied Artifact instances or an empty array if no version
      * can be resolved (i.e. the property is not associated with any of the supplied artifacts or the property
      * is also associated to an artifact that has not been provided).
-     * @throws org.apache.maven.plugin.MojoExecutionException When things go wrong.
      * @since 1.0-alpha-3
      */
     public ArtifactVersion[] getVersions( Collection<Artifact> artifacts )
-        throws MojoExecutionException
     {
         List<ArtifactVersion> result = new ArrayList<>();
         // go through all the associations
@@ -307,44 +307,46 @@ public class PropertyVersions
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
                                              List reactorProjects, VersionsHelper helper )
-        throws MojoExecutionException
+            throws InvalidVersionSpecificationException, InvalidSegmentException
     {
         return getNewestVersion( currentVersion, property, allowSnapshots, reactorProjects, helper, false, -1 );
     }
 
+    /**
+     * Retrieves the newest artifact version for the given property-denoted artifact or {@code null} if no newer
+     * version could be found.
+     *
+     * @param currentVersion current version of the artifact
+     * @param property property name indicating the artifact
+     * @param allowSnapshots whether snapshots should be considered
+     * @param reactorProjects collection of reactor projects
+     * @param helper VersionHelper object
+     * @param allowDowngrade whether downgrades should be allowed
+     * @param unchangedSegment indicates the (0-based) most major segment which needs to stay unchanged;
+     *                         -1 means that the whole version can be changed
+     * @return newest artifact version fulfilling the criteria or null if no newer version could be found
+     * @throws InvalidSegmentException thrown if the {@code unchangedSegment} is not valid (e.g. greater than the number
+     * of segments in the version string)
+     * @throws InvalidVersionSpecificationException thrown if the version string in the property is not valid
+     */
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper, boolean allowDowngrade,
-                                             int segment )
-        throws MojoExecutionException
+                                             Collection<MavenProject> reactorProjects, VersionsHelper helper,
+                                             boolean allowDowngrade, int unchangedSegment )
+            throws InvalidSegmentException, InvalidVersionSpecificationException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && allowSnapshots;
         helper.getLog().debug( "getNewestVersion(): includeSnapshots='" + includeSnapshots + "'" );
         helper.getLog().debug( "Property ${" + property.getName() + "}: Set of valid available versions is "
                                    + Arrays.asList( getVersions( includeSnapshots ) ) );
-        VersionRange range;
-        try
-        {
-            if ( property.getVersion() != null )
-            {
-                range = VersionRange.createFromVersionSpec( property.getVersion() );
-                helper.getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
-            }
-            else
-            {
-                range = null;
-                helper.getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
-            }
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
+        VersionRange range = property.getVersion() != null
+                ? VersionRange.createFromVersionSpec( property.getVersion() ) : null;
+        helper.getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
 
         ArtifactVersion lowerBoundArtifactVersion = helper.createArtifactVersion( currentVersion );
         if ( allowDowngrade )
         {
-            String updatedVersion = getLowerBound( lowerBoundArtifactVersion, segment );
-            lowerBoundArtifactVersion = updatedVersion != null ? helper.createArtifactVersion( updatedVersion ) : null;
+            Optional<String> updatedVersion = getLowerBound( lowerBoundArtifactVersion, unchangedSegment );
+            lowerBoundArtifactVersion = updatedVersion.map( helper::createArtifactVersion ).orElse( null );
         }
         if ( helper.getLog().isDebugEnabled() )
         {
@@ -352,9 +354,9 @@ public class PropertyVersions
         }
 
         ArtifactVersion upperBound = null;
-        if ( segment != -1 )
+        if ( unchangedSegment != -1 )
         {
-            upperBound = getVersionComparator().incrementSegment( lowerBoundArtifactVersion, segment );
+            upperBound = getVersionComparator().incrementSegment( lowerBoundArtifactVersion, unchangedSegment );
             helper.getLog().debug( "Property ${" + property.getName() + "}: upperBound is: " + upperBound );
         }
         ArtifactVersion result =
@@ -417,6 +419,7 @@ public class PropertyVersions
 
     private ArtifactVersion getNewestVersion( String currentVersion, VersionsHelper helper, int segment,
                                               boolean includeSnapshots, VersionRange range )
+            throws InvalidSegmentException
     {
         ArtifactVersion lowerBound = helper.createArtifactVersion( currentVersion );
         ArtifactVersion upperBound = null;
@@ -489,7 +492,7 @@ public class PropertyVersions
             return result;
         }
 
-        public ArtifactVersion incrementSegment( ArtifactVersion v, int segment )
+        public ArtifactVersion incrementSegment( ArtifactVersion v, int segment ) throws InvalidSegmentException
         {
             if ( !isAssociated() )
             {

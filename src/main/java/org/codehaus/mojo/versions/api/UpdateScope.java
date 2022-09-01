@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
@@ -51,10 +52,18 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                            : versionDetails.getOldestVersion( currentVersion,
-                                                               versionComparator.incrementSegment( currentVersion, 2 ),
-                                                               includeSnapshots, false, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 3
+                        ? null
+                        : versionDetails.getOldestVersion( currentVersion,
+                        versionComparator.incrementSegment( currentVersion, 2 ),
+                        includeSnapshots, false, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         /** {@inheritDoc} */
@@ -62,10 +71,18 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                            : versionDetails.getNewestVersion( currentVersion,
-                                                               versionComparator.incrementSegment( currentVersion, 2 ),
-                                                               includeSnapshots, false, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 3
+                        ? null
+                        : versionDetails.getNewestVersion( currentVersion,
+                        versionComparator.incrementSegment( currentVersion, 2 ),
+                        includeSnapshots, false, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         /** {@inheritDoc} */
@@ -73,10 +90,17 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                            : versionDetails.getVersions( currentVersion,
-                                                          versionComparator.incrementSegment( currentVersion, 2 ),
-                                                          includeSnapshots, false, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
+                                : versionDetails.getVersions( currentVersion,
+                                                              versionComparator.incrementSegment( currentVersion, 2 ),
+                                                              includeSnapshots, false, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
     };
@@ -94,10 +118,17 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                            : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
-                                                               versionComparator.incrementSegment( currentVersion, 1 ),
-                                                               includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
+                        : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
+                        versionComparator.incrementSegment( currentVersion, 1 ),
+                        includeSnapshots, true, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         /** {@inheritDoc} */
@@ -105,10 +136,17 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                            : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
-                                                               versionComparator.incrementSegment( currentVersion, 1 ),
-                                                               includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
+                        : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
+                        versionComparator.incrementSegment( currentVersion, 1 ),
+                        includeSnapshots, true, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         /** {@inheritDoc} */
@@ -116,10 +154,17 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                            : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 2 ),
-                                                          versionComparator.incrementSegment( currentVersion, 1 ),
-                                                          includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
+                        : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 2 ),
+                                versionComparator.incrementSegment( currentVersion, 1 ), includeSnapshots, true,
+                                false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
     };
@@ -137,10 +182,17 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
-                            : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
-                                                               versionComparator.incrementSegment( currentVersion, 0 ),
-                                                               includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
+                        : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
+                        versionComparator.incrementSegment( currentVersion, 0 ),
+                        includeSnapshots, true, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         /** {@inheritDoc} */
@@ -148,10 +200,17 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
-                            : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
-                                                               versionComparator.incrementSegment( currentVersion, 0 ),
-                                                               includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
+                        : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
+                                versionComparator.incrementSegment( currentVersion, 0 ), includeSnapshots, true,
+                                false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         /** {@inheritDoc} */
@@ -159,10 +218,17 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
-                            : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 1 ),
-                                                          versionComparator.incrementSegment( currentVersion, 0 ),
-                                                          includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
+                        : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 1 ),
+                        versionComparator.incrementSegment( currentVersion, 0 ),
+                        includeSnapshots, true, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
     };
@@ -180,9 +246,16 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 1 ? null
-                            : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 0 ),
-                                                               null, includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 1 ? null
+                        : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 0 ),
+                                                                   null, includeSnapshots, true, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         /** {@inheritDoc} */
@@ -190,9 +263,16 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 1 ? null
-                            : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 0 ),
-                                                               null, includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 1 ? null
+                        : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 0 ),
+                                                                   null, includeSnapshots, true, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         /** {@inheritDoc} */
@@ -200,9 +280,17 @@ public abstract class UpdateScope
                                                 boolean includeSnapshots )
         {
             VersionComparator versionComparator = versionDetails.getVersionComparator();
-            return versionComparator.getSegmentCount( currentVersion ) < 1 ? null
-                            : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 0 ), null,
-                                                          includeSnapshots, true, false );
+            try
+            {
+                return versionComparator.getSegmentCount( currentVersion ) < 1
+                        ? null
+                        : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 0 ),
+                        null, includeSnapshots, true, false );
+            }
+            catch ( InvalidSegmentException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
     };
@@ -432,6 +520,7 @@ public abstract class UpdateScope
      * @return The update classification.
      */
     public static UpdateScope classifyUpdate( VersionComparator comparator, ArtifactVersion from, ArtifactVersion to )
+            throws InvalidSegmentException
     {
         if ( comparator.compare( from, to ) >= 0 )
         {
