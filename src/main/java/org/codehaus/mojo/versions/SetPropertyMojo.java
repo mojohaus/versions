@@ -22,7 +22,9 @@ package org.codehaus.mojo.versions;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +36,8 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.PropertiesVersionsFileReader;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Set a property to a given version without any sanity checks. Please be careful this can lead to changes which might
@@ -80,6 +84,31 @@ public class SetPropertyMojo
     private String propertiesVersionsFile;
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException
+    {
+        List<String> problems = new ArrayList<>();
+        if ( isBlank( propertiesVersionsFile ) )
+        {
+            if ( isBlank( newVersion ) )
+            {
+                problems.add( "newVersion must not be empty" );
+            }
+            if ( isBlank( property ) )
+            {
+                problems.add( "property must not be empty" );
+            }
+        }
+        if ( !problems.isEmpty() )
+        {
+            throw new MojoExecutionException( "Invalid execution arguments: " + String.join( ", ", problems ) );
+        }
+        super.execute();
+    }
+
+    /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException   when things go wrong in a very bad way
@@ -120,7 +149,7 @@ public class SetPropertyMojo
                         propertyConfig.setVersion( newVersion );
                         return propertyConfig;
                     } )
-                .toArray( size -> new Property[size] );
+                .toArray( Property[]::new );
             properties = property;
         }
         else

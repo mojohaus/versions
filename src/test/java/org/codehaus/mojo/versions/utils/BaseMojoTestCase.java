@@ -3,6 +3,7 @@ package org.codehaus.mojo.versions.utils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Properties;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
@@ -58,6 +59,7 @@ public abstract class BaseMojoTestCase extends AbstractMojoTestCase
      * @return a Mojo instance
      * @throws Exception thrown if mojo lookup fails
      */
+    @SuppressWarnings( "unchecked" )
     protected <T extends Mojo> T createMojo( String goal, String pomFilePath ) throws Exception
     {
         File pomFile = new File( pomFilePath );
@@ -108,6 +110,12 @@ public abstract class BaseMojoTestCase extends AbstractMojoTestCase
         public File getBasedir()
         {
             return pomFile.getParentFile();
+        }
+
+        @Override
+        public Properties getProperties()
+        {
+            return getModel().getProperties();
         }
     }
 }
