@@ -5,7 +5,6 @@ assert buildLog.text.contains("""
 [INFO]   localhost:dummy-api ....................................... 1.0 -> 3.0
 [INFO]   localhost:dummy-impl ...................................... 1.0 -> 2.2
 [INFO] 
-[INFO] ------------------------------------------------------------------------
 """.replaceAll( "\n", System.lineSeparator() ) )
 
 return true
