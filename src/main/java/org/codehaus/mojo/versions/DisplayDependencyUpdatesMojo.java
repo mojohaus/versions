@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -257,6 +258,94 @@ public class DisplayDependencyUpdatesMojo
     @Parameter( property = "verbose", defaultValue = "false" )
     private boolean verbose;
 
+    /**
+     * Only take these artifacts into consideration.
+     * <p>
+     * Comma-separated list of extended GAV patterns.
+     *
+     * <p>
+     * Extended GAV: groupId:artifactId:version:type:classifier:scope
+     * </p>
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: "mygroup:artifact:*,*:*:*:*:*:compile"
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "pluginDependencyIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    private List<String> pluginDependencyIncludes;
+
+    /**
+     * Only take these artifacts into consideration.
+     * <p>
+     * Comma-separated list of extended GAV patterns.
+     *
+     * <p>
+     * Extended GAV: groupId:artifactId:version:type:classifier:scope
+     * </p>
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: "mygroup:artifact:*,*:*:*:*:*:compile"
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "pluginDependencyExcludes" )
+    private List<String> pluginDependencyExcludes;
+
+    /**
+     * Only take these artifacts into consideration.
+     * <p>
+     * Comma-separated list of extended GAV patterns.
+     *
+     * <p>
+     * Extended GAV: groupId:artifactId:version:type:classifier:scope
+     * </p>
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: "mygroup:artifact:*,*:*:*:*:*:compile"
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "pluginManagementDependencyIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    private List<String> pluginManagementDependencyIncludes;
+
+    /**
+     * Only take these artifacts into consideration.
+     * <p>
+     * Comma-separated list of extended GAV patterns.
+     *
+     * <p>
+     * Extended GAV: groupId:artifactId:version:type:classifier:scope
+     * </p>
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: "mygroup:artifact:*,*:*:*:*:*:compile"
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "pluginManagementDependencyExcludes" )
+    private List<String> pluginManagementDependencyExcludes;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )
@@ -480,11 +569,16 @@ public class DisplayDependencyUpdatesMojo
             }
             if ( isProcessPluginDependenciesInDependencyManagement() )
             {
+                pluginDependenciesInPluginManagement =
+                        filterPluginManagementIncludes( pluginDependenciesInPluginManagement );
+
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependenciesInPluginManagement, false ),
                             "pluginManagement of plugins" );
             }
             if ( isProcessingPluginDependencies() )
             {
+                pluginDependencies = filterPluginDependencyIncludes( pluginDependencies );
+
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
             }
         }
@@ -496,13 +590,26 @@ public class DisplayDependencyUpdatesMojo
 
     private Set<Dependency> filterDependencyIncludes( Set<Dependency> dependencies )
     {
-        return filterDependencies( dependencies, dependencyIncludes, dependencyExcludes, "dependencies" );
+        return filterDependencies( dependencies, dependencyIncludes, dependencyExcludes, "Dependencies" );
     }
 
     private Set<Dependency> filterDependencyManagementIncludes( Set<Dependency> dependencyManagement )
     {
         return filterDependencies( dependencyManagement,
-                                   dependencyManagementIncludes, dependencyManagementExcludes, "dependecyManagement" );
+                                   dependencyManagementIncludes, dependencyManagementExcludes, "Dependecy Management" );
+    }
+
+    private Set<Dependency> filterPluginDependencyIncludes( Set<Dependency> dependencies )
+    {
+        return filterDependencies( dependencies, pluginDependencyIncludes, pluginDependencyExcludes,
+                "Plugin Dependencies" );
+    }
+
+    private Set<Dependency> filterPluginManagementIncludes( Set<Dependency> dependencyManagement )
+    {
+        return filterDependencies( dependencyManagement,
+                pluginManagementDependencyIncludes, pluginManagementDependencyExcludes,
+                "Plugin Management Dependencies" );
     }
 
     private Set<Dependency> filterDependencies(
@@ -515,15 +622,26 @@ public class DisplayDependencyUpdatesMojo
         DependencyFilter includeDeps = DependencyFilter.parseFrom( includes );
         DependencyFilter excludeDeps = DependencyFilter.parseFrom( excludes );
 
-        getLog().debug( String.format( "parsed includes in %s: %s -> %s", section, includes, includeDeps ) );
-        getLog().debug( String.format( "parsed excludes in %s: %s -> %s", section, excludes, excludeDeps ) );
+        Set<Dependency> filtered = includeDeps.retainingIn( dependencies );
+        filtered = excludeDeps.removingFrom( filtered );
 
-        Set<Dependency> onlyIncludes = includeDeps.retainingIn( dependencies );
-        Set<Dependency> filtered = excludeDeps.removingFrom( onlyIncludes );
+        if ( getLog().isDebugEnabled() )
+        {
+            getLog().debug( String.format( "parsed includes in %s: %s -> %s", section, includes, includeDeps ) );
+            getLog().debug( String.format( "parsed excludes in %s: %s -> %s", section, excludes, excludeDeps ) );
+            getLog().debug( String.format( "Unfiltered %s: ", section ) + output( dependencies ) );
+            getLog().debug( String.format( "Filtered %s: ", section ) + output( filtered ) );
+        }
 
         return filtered;
     }
 
+    private String output( Set<Dependency> dependencies )
+    {
+        return dependencies.stream()
+                .map( d -> String.format( "%s:%s:%s", d.getGroupId(), d.getArtifactId(), d.getVersion() ) )
+                .collect( Collectors.joining( ", " ) );
+    }
     private DependencyManagement getProjectDependencyManagement( MavenProject project )
     {
         if ( processDependencyManagementTransitive )
@@ -563,7 +681,7 @@ public class DisplayDependencyUpdatesMojo
         return result;
     }
 
-    protected void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
+    private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
     {
         List<String> withUpdates = new ArrayList<>();
         List<String> usingCurrent = new ArrayList<>();
@@ -594,15 +712,15 @@ public class DisplayDependencyUpdatesMojo
             }
             String right = " " + ( latest == null ? current : current + " -> " + latest );
             List<String> t = latest == null ? usingCurrent : withUpdates;
-            if ( right.length() + left.length() + 3 > outputLineWidth )
+            if ( right.length() + left.length() + 3 > INFO_PAD_SIZE + getOutputLineWidthOffset() )
             {
                 t.add( left + "..." );
-                t.add( StringUtils.leftPad( right, outputLineWidth ) );
+                t.add( StringUtils.leftPad( right, INFO_PAD_SIZE + getOutputLineWidthOffset() ) );
 
             }
             else
             {
-                t.add( StringUtils.rightPad( left, outputLineWidth - right.length(), "." )
+                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), "." )
                            + right );
             }
         }
