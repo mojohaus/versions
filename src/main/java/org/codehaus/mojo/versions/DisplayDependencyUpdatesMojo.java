@@ -563,7 +563,7 @@ public class DisplayDependencyUpdatesMojo
         return result;
     }
 
-    private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
+    protected void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
     {
         List<String> withUpdates = new ArrayList<>();
         List<String> usingCurrent = new ArrayList<>();
@@ -594,15 +594,15 @@ public class DisplayDependencyUpdatesMojo
             }
             String right = " " + ( latest == null ? current : current + " -> " + latest );
             List<String> t = latest == null ? usingCurrent : withUpdates;
-            if ( right.length() + left.length() + 3 > INFO_PAD_SIZE + getOutputLineWidthOffset() )
+            if ( right.length() + left.length() + 3 > outputLineWidth )
             {
                 t.add( left + "..." );
-                t.add( StringUtils.leftPad( right, INFO_PAD_SIZE + getOutputLineWidthOffset() ) );
+                t.add( StringUtils.leftPad( right, outputLineWidth ) );
 
             }
             else
             {
-                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), "." )
+                t.add( StringUtils.rightPad( left, outputLineWidth - right.length(), "." )
                            + right );
             }
         }
