@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -48,6 +49,8 @@ import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
+
+import static org.apache.commons.lang3.StringUtils.countMatches;
 
 /**
  * Displays all dependencies that have newer versions available.
@@ -107,7 +110,7 @@ public class DisplayDependencyUpdatesMojo
      * </p>
      *
      * <p>
-     * Example: "mygroup:artifact:*,*:*:*:*:*:compile"
+     * Example: {@code "mygroup:artifact:*,*:*:*:*:*:compile"}
      * </p>
      *
      * @since 2.12.0
@@ -129,7 +132,7 @@ public class DisplayDependencyUpdatesMojo
      * </p>
      *
      * <p>
-     * Example: "mygroup:artifact:*,*:*:*:*:*:provided,*:*:*:*:*:system"
+     * Example: {@code "mygroup:artifact:*,*:*:*:*:*:provided,*:*:*:*:*:system"}
      * </p>
      *
      * @since 2.12.0
@@ -159,7 +162,7 @@ public class DisplayDependencyUpdatesMojo
      * </p>
      *
      * <p>
-     * Example: "mygroup:artifact:*,*:*:*:*:*:compile"
+     * Example: {@code "mygroup:artifact:*,*:*:*:*:*:compile"}
      * </p>
      *
      * @since 2.12.0
@@ -181,7 +184,7 @@ public class DisplayDependencyUpdatesMojo
      * </p>
      *
      * <p>
-     * Example: "mygroup:artifact:*,*:*:*:*:*:provided,*:*:*:*:*:system"
+     * Example: {@code "mygroup:artifact:*,*:*:*:*:*:provided,*:*:*:*:*:system"}
      * </p>
      *
      * @since 2.12.0
@@ -256,6 +259,77 @@ public class DisplayDependencyUpdatesMojo
      */
     @Parameter( property = "verbose", defaultValue = "false" )
     private boolean verbose;
+
+    /**
+     * <p>Only take these artifacts into consideration:<br/>
+     * Comma-separated list of {@code groupId:[artifactId[:version]]} patterns</p>
+     *
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: {@code "mygroup:artifact:*,othergroup:*,anothergroup"}
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "pluginDependencyIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    private List<String> pluginDependencyIncludes;
+
+    /**
+     * <p>Exclude these artifacts into consideration:<br/>
+     * Comma-separated list of {@code groupId:[artifactId[:version]]} patterns</p>
+     *
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: {@code "mygroup:artifact:*,othergroup:*,anothergroup"}
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "pluginDependencyExcludes" )
+    private List<String> pluginDependencyExcludes;
+
+    /**
+     * <p>Only take these artifacts into consideration:<br/>
+     * Comma-separated list of {@code groupId:[artifactId[:version]]} patterns</p>
+
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: {@code "mygroup:artifact:*,othergroup:*,anothergroup"}
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "pluginManagementDependencyIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    private List<String> pluginManagementDependencyIncludes;
+
+    /**
+     * <p>Exclude these artifacts into consideration:<br/>
+     * Comma-separated list of {@code groupId:[artifactId[:version]]} patterns</p>
+     *
+     * <p>
+     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The version token does support version ranges.
+     * </p>
+     *
+     * <p>
+     * Example: {@code "mygroup:artifact:*,othergroup:*,anothergroup"}
+     * </p>
+     *
+     * @since 2.12.0
+     */
+    @Parameter( property = "pluginManagementDependencyExcludes" )
+    private List<String> pluginManagementDependencyExcludes;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -392,6 +466,8 @@ public class DisplayDependencyUpdatesMojo
     {
         logInit();
 
+        validateInput();
+
         Set<Dependency> dependencyManagement = new TreeSet<>( new DependencyComparator() );
         DependencyManagement projectDependencyManagement = getProjectDependencyManagement( getProject() );
         if ( projectDependencyManagement != null )
@@ -480,11 +556,16 @@ public class DisplayDependencyUpdatesMojo
             }
             if ( isProcessPluginDependenciesInDependencyManagement() )
             {
+                pluginDependenciesInPluginManagement =
+                        filterPluginManagementIncludes( pluginDependenciesInPluginManagement );
+
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependenciesInPluginManagement, false ),
                             "pluginManagement of plugins" );
             }
             if ( isProcessingPluginDependencies() )
             {
+                pluginDependencies = filterPluginDependencyIncludes( pluginDependencies );
+
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
             }
         }
@@ -494,15 +575,56 @@ public class DisplayDependencyUpdatesMojo
         }
     }
 
+    private void validateInput() throws MojoExecutionException
+    {
+        validateGAVList( dependencyIncludes, 6, "dependencyIncludes" );
+        validateGAVList( dependencyExcludes, 6, "dependencyExcludes" );
+        validateGAVList( dependencyManagementIncludes, 6, "dependencyManagementIncludes" );
+        validateGAVList( dependencyManagementIncludes, 6, "dependencyManagementExcludes" );
+        validateGAVList( pluginDependencyIncludes, 3, "pluginDependencyIncludes" );
+        validateGAVList( pluginDependencyExcludes, 3, "pluginDependencyExcludes" );
+        validateGAVList( pluginManagementDependencyIncludes, 3, "pluginManagementDependencyIncludes" );
+        validateGAVList( pluginManagementDependencyExcludes, 3, "pluginManagementDependencyExcludes" );
+    }
+
+    /**
+     * Validates a list of GAV strings
+     * @param gavList list of the input GAV strings
+     * @param numSections number of sections in the GAV to verify against
+     * @param argumentName argument name to indicate in the exception
+     * @throws MojoExecutionException if the argument is invalid
+     */
+    static void validateGAVList( List<String> gavList, int numSections, String argumentName )
+            throws MojoExecutionException
+    {
+        if ( gavList != null && gavList.stream().anyMatch( gav -> countMatches( gav, ":" ) >= numSections ) )
+        {
+            throw new MojoExecutionException( argumentName + " should not contain more than 6 segments" );
+        }
+    }
+
     private Set<Dependency> filterDependencyIncludes( Set<Dependency> dependencies )
     {
-        return filterDependencies( dependencies, dependencyIncludes, dependencyExcludes, "dependencies" );
+        return filterDependencies( dependencies, dependencyIncludes, dependencyExcludes, "Dependencies" );
     }
 
     private Set<Dependency> filterDependencyManagementIncludes( Set<Dependency> dependencyManagement )
     {
         return filterDependencies( dependencyManagement,
-                                   dependencyManagementIncludes, dependencyManagementExcludes, "dependecyManagement" );
+                                   dependencyManagementIncludes, dependencyManagementExcludes, "Dependecy Management" );
+    }
+
+    private Set<Dependency> filterPluginDependencyIncludes( Set<Dependency> dependencies )
+    {
+        return filterDependencies( dependencies, pluginDependencyIncludes, pluginDependencyExcludes,
+                "Plugin Dependencies" );
+    }
+
+    private Set<Dependency> filterPluginManagementIncludes( Set<Dependency> dependencyManagement )
+    {
+        return filterDependencies( dependencyManagement,
+                pluginManagementDependencyIncludes, pluginManagementDependencyExcludes,
+                "Plugin Management Dependencies" );
     }
 
     private Set<Dependency> filterDependencies(
@@ -515,15 +637,26 @@ public class DisplayDependencyUpdatesMojo
         DependencyFilter includeDeps = DependencyFilter.parseFrom( includes );
         DependencyFilter excludeDeps = DependencyFilter.parseFrom( excludes );
 
-        getLog().debug( String.format( "parsed includes in %s: %s -> %s", section, includes, includeDeps ) );
-        getLog().debug( String.format( "parsed excludes in %s: %s -> %s", section, excludes, excludeDeps ) );
+        Set<Dependency> filtered = includeDeps.retainingIn( dependencies );
+        filtered = excludeDeps.removingFrom( filtered );
 
-        Set<Dependency> onlyIncludes = includeDeps.retainingIn( dependencies );
-        Set<Dependency> filtered = excludeDeps.removingFrom( onlyIncludes );
+        if ( getLog().isDebugEnabled() )
+        {
+            getLog().debug( String.format( "parsed includes in %s: %s -> %s", section, includes, includeDeps ) );
+            getLog().debug( String.format( "parsed excludes in %s: %s -> %s", section, excludes, excludeDeps ) );
+            getLog().debug( String.format( "Unfiltered %s: ", section ) + output( dependencies ) );
+            getLog().debug( String.format( "Filtered %s: ", section ) + output( filtered ) );
+        }
 
         return filtered;
     }
 
+    private String output( Set<Dependency> dependencies )
+    {
+        return dependencies.stream()
+                .map( d -> String.format( "%s:%s:%s", d.getGroupId(), d.getArtifactId(), d.getVersion() ) )
+                .collect( Collectors.joining( ", " ) );
+    }
     private DependencyManagement getProjectDependencyManagement( MavenProject project )
     {
         if ( processDependencyManagementTransitive )
