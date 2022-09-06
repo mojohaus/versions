@@ -349,193 +349,195 @@
 <a class="jxr_linenumber" name="L341" href="#L341">341</a>         sink.tableRow_();
 <a class="jxr_linenumber" name="L342" href="#L342">342</a>     }
 <a class="jxr_linenumber" name="L343" href="#L343">343</a> 
-<a class="jxr_linenumber" name="L344" href="#L344">344</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> renderPluginDetail( Plugin plugin, <a name="PluginUpdatesDetails" href="../../../../org/codehaus/mojo/versions/PluginUpdatesDetails.html#PluginUpdatesDetails">PluginUpdatesDetails</a> details )
-<a class="jxr_linenumber" name="L345" href="#L345">345</a>     {
-<a class="jxr_linenumber" name="L346" href="#L346">346</a>         <strong class="jxr_keyword">final</strong> SinkEventAttributes headerAttributes = <strong class="jxr_keyword">new</strong> SinkEventAttributeSet();
-<a class="jxr_linenumber" name="L347" href="#L347">347</a>         headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="jxr_string">"20%"</span> );
-<a class="jxr_linenumber" name="L348" href="#L348">348</a>         <strong class="jxr_keyword">final</strong> SinkEventAttributes cellAttributes = <strong class="jxr_keyword">new</strong> SinkEventAttributeSet();
-<a class="jxr_linenumber" name="L349" href="#L349">349</a>         headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="jxr_string">"80%"</span> );
-<a class="jxr_linenumber" name="L350" href="#L350">350</a>         sink.section2();
-<a class="jxr_linenumber" name="L351" href="#L351">351</a>         sink.sectionTitle2();
-<a class="jxr_linenumber" name="L352" href="#L352">352</a>         sink.text( MessageFormat.format( getText( <span class="jxr_string">"report.plugin"</span> ), <strong class="jxr_keyword">new</strong> Object[] {
-<a class="jxr_linenumber" name="L353" href="#L353">353</a>             ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) } ) );
-<a class="jxr_linenumber" name="L354" href="#L354">354</a>         sink.sectionTitle2_();
-<a class="jxr_linenumber" name="L355" href="#L355">355</a>         sink.table();
-<a class="jxr_linenumber" name="L356" href="#L356">356</a>         sink.tableRows( <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
-<a class="jxr_linenumber" name="L357" href="#L357">357</a>         sink.tableRow();
-<a class="jxr_linenumber" name="L358" href="#L358">358</a>         sink.tableHeaderCell( headerAttributes );
-<a class="jxr_linenumber" name="L359" href="#L359">359</a>         sink.text( getText( <span class="jxr_string">"report.status"</span> ) );
-<a class="jxr_linenumber" name="L360" href="#L360">360</a>         sink.tableHeaderCell_();
-<a class="jxr_linenumber" name="L361" href="#L361">361</a>         sink.tableCell( cellAttributes );
-<a class="jxr_linenumber" name="L362" href="#L362">362</a>         ArtifactVersion[] versions = details.getArtifactVersions().getAllUpdates( UpdateScope.ANY );
-<a class="jxr_linenumber" name="L363" href="#L363">363</a>         <strong class="jxr_keyword">if</strong> ( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L364" href="#L364">364</a>         {
-<a class="jxr_linenumber" name="L365" href="#L365">365</a>             renderWarningIcon();
-<a class="jxr_linenumber" name="L366" href="#L366">366</a>             sink.nonBreakingSpace();
-<a class="jxr_linenumber" name="L367" href="#L367">367</a>             sink.text( getText( <span class="jxr_string">"report.otherUpdatesAvailable"</span> ) );
-<a class="jxr_linenumber" name="L368" href="#L368">368</a>         }
-<a class="jxr_linenumber" name="L369" href="#L369">369</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) != <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L370" href="#L370">370</a>         {
-<a class="jxr_linenumber" name="L371" href="#L371">371</a>             renderWarningIcon();
-<a class="jxr_linenumber" name="L372" href="#L372">372</a>             sink.nonBreakingSpace();
-<a class="jxr_linenumber" name="L373" href="#L373">373</a>             sink.text( getText( <span class="jxr_string">"report.incrementalUpdatesAvailable"</span> ) );
-<a class="jxr_linenumber" name="L374" href="#L374">374</a>         }
-<a class="jxr_linenumber" name="L375" href="#L375">375</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) != <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L376" href="#L376">376</a>         {
-<a class="jxr_linenumber" name="L377" href="#L377">377</a>             renderWarningIcon();
-<a class="jxr_linenumber" name="L378" href="#L378">378</a>             sink.nonBreakingSpace();
-<a class="jxr_linenumber" name="L379" href="#L379">379</a>             sink.text( getText( <span class="jxr_string">"report.minorUpdatesAvailable"</span> ) );
-<a class="jxr_linenumber" name="L380" href="#L380">380</a>         }
-<a class="jxr_linenumber" name="L381" href="#L381">381</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) != <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L382" href="#L382">382</a>         {
-<a class="jxr_linenumber" name="L383" href="#L383">383</a>             renderWarningIcon();
-<a class="jxr_linenumber" name="L384" href="#L384">384</a>             sink.nonBreakingSpace();
-<a class="jxr_linenumber" name="L385" href="#L385">385</a>             sink.text( getText( <span class="jxr_string">"report.majorUpdatesAvailable"</span> ) );
-<a class="jxr_linenumber" name="L386" href="#L386">386</a>         }
-<a class="jxr_linenumber" name="L387" href="#L387">387</a>         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L388" href="#L388">388</a>         {
-<a class="jxr_linenumber" name="L389" href="#L389">389</a>             renderSuccessIcon();
-<a class="jxr_linenumber" name="L390" href="#L390">390</a>             sink.nonBreakingSpace();
-<a class="jxr_linenumber" name="L391" href="#L391">391</a>             sink.text( getText( <span class="jxr_string">"report.noUpdatesAvailable"</span> ) );
-<a class="jxr_linenumber" name="L392" href="#L392">392</a>         }
-<a class="jxr_linenumber" name="L393" href="#L393">393</a>         sink.tableCell_();
-<a class="jxr_linenumber" name="L394" href="#L394">394</a>         sink.tableRow_();
-<a class="jxr_linenumber" name="L395" href="#L395">395</a>         sink.tableRow();
-<a class="jxr_linenumber" name="L396" href="#L396">396</a>         sink.tableHeaderCell( headerAttributes );
-<a class="jxr_linenumber" name="L397" href="#L397">397</a>         sink.text( getText( <span class="jxr_string">"report.groupId"</span> ) );
-<a class="jxr_linenumber" name="L398" href="#L398">398</a>         sink.tableHeaderCell_();
-<a class="jxr_linenumber" name="L399" href="#L399">399</a>         sink.tableCell( cellAttributes );
-<a class="jxr_linenumber" name="L400" href="#L400">400</a>         sink.text( plugin.getGroupId() );
-<a class="jxr_linenumber" name="L401" href="#L401">401</a>         sink.tableCell_();
-<a class="jxr_linenumber" name="L402" href="#L402">402</a>         sink.tableRow_();
-<a class="jxr_linenumber" name="L403" href="#L403">403</a>         sink.tableRow();
-<a class="jxr_linenumber" name="L404" href="#L404">404</a>         sink.tableHeaderCell( headerAttributes );
-<a class="jxr_linenumber" name="L405" href="#L405">405</a>         sink.text( getText( <span class="jxr_string">"report.artifactId"</span> ) );
-<a class="jxr_linenumber" name="L406" href="#L406">406</a>         sink.tableHeaderCell_();
-<a class="jxr_linenumber" name="L407" href="#L407">407</a>         sink.tableCell( cellAttributes );
-<a class="jxr_linenumber" name="L408" href="#L408">408</a>         sink.text( plugin.getArtifactId() );
-<a class="jxr_linenumber" name="L409" href="#L409">409</a>         sink.tableCell_();
-<a class="jxr_linenumber" name="L410" href="#L410">410</a>         sink.tableRow_();
-<a class="jxr_linenumber" name="L411" href="#L411">411</a>         sink.tableRow();
-<a class="jxr_linenumber" name="L412" href="#L412">412</a>         sink.tableHeaderCell( headerAttributes );
-<a class="jxr_linenumber" name="L413" href="#L413">413</a>         sink.text( getText( <span class="jxr_string">"report.currentVersion"</span> ) );
-<a class="jxr_linenumber" name="L414" href="#L414">414</a>         sink.tableHeaderCell_();
-<a class="jxr_linenumber" name="L415" href="#L415">415</a>         sink.tableCell( cellAttributes );
-<a class="jxr_linenumber" name="L416" href="#L416">416</a>         sink.text( plugin.getVersion() );
-<a class="jxr_linenumber" name="L417" href="#L417">417</a>         sink.tableCell_();
-<a class="jxr_linenumber" name="L418" href="#L418">418</a>         sink.tableRow_();
-<a class="jxr_linenumber" name="L419" href="#L419">419</a>         <strong class="jxr_keyword">if</strong> ( versions.length &gt; 0 )
-<a class="jxr_linenumber" name="L420" href="#L420">420</a>         {
-<a class="jxr_linenumber" name="L421" href="#L421">421</a>             sink.tableRow();
-<a class="jxr_linenumber" name="L422" href="#L422">422</a>             sink.tableHeaderCell( headerAttributes );
-<a class="jxr_linenumber" name="L423" href="#L423">423</a>             sink.text( getText( <span class="jxr_string">"report.updateVersions"</span> ) );
-<a class="jxr_linenumber" name="L424" href="#L424">424</a>             sink.tableHeaderCell_();
-<a class="jxr_linenumber" name="L425" href="#L425">425</a>             sink.tableCell( cellAttributes );
-<a class="jxr_linenumber" name="L426" href="#L426">426</a>             <strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = 0; i &lt; versions.length; i++ )
-<a class="jxr_linenumber" name="L427" href="#L427">427</a>             {
-<a class="jxr_linenumber" name="L428" href="#L428">428</a>                 <strong class="jxr_keyword">if</strong> ( i &gt; 0 )
-<a class="jxr_linenumber" name="L429" href="#L429">429</a>                 {
-<a class="jxr_linenumber" name="L430" href="#L430">430</a>                     sink.lineBreak();
-<a class="jxr_linenumber" name="L431" href="#L431">431</a>                 }
-<a class="jxr_linenumber" name="L432" href="#L432">432</a>                 <strong class="jxr_keyword">boolean</strong> bold = equals( versions[i],
-<a class="jxr_linenumber" name="L433" href="#L433">433</a>                                        details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
-<a class="jxr_linenumber" name="L434" href="#L434">434</a>                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) )
-<a class="jxr_linenumber" name="L435" href="#L435">435</a>                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) )
-<a class="jxr_linenumber" name="L436" href="#L436">436</a>                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) )
-<a class="jxr_linenumber" name="L437" href="#L437">437</a>                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) )
-<a class="jxr_linenumber" name="L438" href="#L438">438</a>                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) )
-<a class="jxr_linenumber" name="L439" href="#L439">439</a>                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) )
-<a class="jxr_linenumber" name="L440" href="#L440">440</a>                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) );
-<a class="jxr_linenumber" name="L441" href="#L441">441</a>                 <strong class="jxr_keyword">if</strong> ( bold )
-<a class="jxr_linenumber" name="L442" href="#L442">442</a>                 {
-<a class="jxr_linenumber" name="L443" href="#L443">443</a>                     safeBold();
-<a class="jxr_linenumber" name="L444" href="#L444">444</a>                 }
-<a class="jxr_linenumber" name="L445" href="#L445">445</a>                 sink.text( versions[i].toString() );
-<a class="jxr_linenumber" name="L446" href="#L446">446</a>                 <strong class="jxr_keyword">if</strong> ( bold )
-<a class="jxr_linenumber" name="L447" href="#L447">447</a>                 {
-<a class="jxr_linenumber" name="L448" href="#L448">448</a>                     safeBold_();
-<a class="jxr_linenumber" name="L449" href="#L449">449</a>                     sink.nonBreakingSpace();
-<a class="jxr_linenumber" name="L450" href="#L450">450</a>                     safeItalic();
-<a class="jxr_linenumber" name="L451" href="#L451">451</a>                     <strong class="jxr_keyword">if</strong> ( equals( versions[i],
-<a class="jxr_linenumber" name="L452" href="#L452">452</a>                                  details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
-<a class="jxr_linenumber" name="L453" href="#L453">453</a>                     {
-<a class="jxr_linenumber" name="L454" href="#L454">454</a>                         sink.text( getText( <span class="jxr_string">"report.nextVersion"</span> ) );
-<a class="jxr_linenumber" name="L455" href="#L455">455</a>                     }
-<a class="jxr_linenumber" name="L456" href="#L456">456</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
-<a class="jxr_linenumber" name="L457" href="#L457">457</a>                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
-<a class="jxr_linenumber" name="L458" href="#L458">458</a>                     {
-<a class="jxr_linenumber" name="L459" href="#L459">459</a>                         sink.text( getText( <span class="jxr_string">"report.latestSubIncremental"</span> ) );
-<a class="jxr_linenumber" name="L460" href="#L460">460</a>                     }
-<a class="jxr_linenumber" name="L461" href="#L461">461</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
-<a class="jxr_linenumber" name="L462" href="#L462">462</a>                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
-<a class="jxr_linenumber" name="L463" href="#L463">463</a>                     {
-<a class="jxr_linenumber" name="L464" href="#L464">464</a>                         sink.text( getText( <span class="jxr_string">"report.nextIncremental"</span> ) );
-<a class="jxr_linenumber" name="L465" href="#L465">465</a>                     }
-<a class="jxr_linenumber" name="L466" href="#L466">466</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
-<a class="jxr_linenumber" name="L467" href="#L467">467</a>                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) ) )
-<a class="jxr_linenumber" name="L468" href="#L468">468</a>                     {
-<a class="jxr_linenumber" name="L469" href="#L469">469</a>                         sink.text( getText( <span class="jxr_string">"report.latestIncremental"</span> ) );
-<a class="jxr_linenumber" name="L470" href="#L470">470</a>                     }
-<a class="jxr_linenumber" name="L471" href="#L471">471</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
-<a class="jxr_linenumber" name="L472" href="#L472">472</a>                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) ) )
-<a class="jxr_linenumber" name="L473" href="#L473">473</a>                     {
-<a class="jxr_linenumber" name="L474" href="#L474">474</a>                         sink.text( getText( <span class="jxr_string">"report.nextMinor"</span> ) );
-<a class="jxr_linenumber" name="L475" href="#L475">475</a>                     }
-<a class="jxr_linenumber" name="L476" href="#L476">476</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
-<a class="jxr_linenumber" name="L477" href="#L477">477</a>                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) ) )
-<a class="jxr_linenumber" name="L478" href="#L478">478</a>                     {
-<a class="jxr_linenumber" name="L479" href="#L479">479</a>                         sink.text( getText( <span class="jxr_string">"report.latestMinor"</span> ) );
-<a class="jxr_linenumber" name="L480" href="#L480">480</a>                     }
-<a class="jxr_linenumber" name="L481" href="#L481">481</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
-<a class="jxr_linenumber" name="L482" href="#L482">482</a>                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) ) )
-<a class="jxr_linenumber" name="L483" href="#L483">483</a>                     {
-<a class="jxr_linenumber" name="L484" href="#L484">484</a>                         sink.text( getText( <span class="jxr_string">"report.nextMajor"</span> ) );
-<a class="jxr_linenumber" name="L485" href="#L485">485</a>                     }
-<a class="jxr_linenumber" name="L486" href="#L486">486</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
-<a class="jxr_linenumber" name="L487" href="#L487">487</a>                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) ) )
-<a class="jxr_linenumber" name="L488" href="#L488">488</a>                     {
-<a class="jxr_linenumber" name="L489" href="#L489">489</a>                         sink.text( getText( <span class="jxr_string">"report.latestMajor"</span> ) );
-<a class="jxr_linenumber" name="L490" href="#L490">490</a>                     }
-<a class="jxr_linenumber" name="L491" href="#L491">491</a> 
-<a class="jxr_linenumber" name="L492" href="#L492">492</a>                     safeItalic_();
-<a class="jxr_linenumber" name="L493" href="#L493">493</a>                 }
-<a class="jxr_linenumber" name="L494" href="#L494">494</a>             }
-<a class="jxr_linenumber" name="L495" href="#L495">495</a>             sink.tableCell_();
-<a class="jxr_linenumber" name="L496" href="#L496">496</a>             sink.tableRow_();
-<a class="jxr_linenumber" name="L497" href="#L497">497</a>         }
-<a class="jxr_linenumber" name="L498" href="#L498">498</a>         sink.tableRows_();
-<a class="jxr_linenumber" name="L499" href="#L499">499</a>         sink.table_();
-<a class="jxr_linenumber" name="L500" href="#L500">500</a> 
-<a class="jxr_linenumber" name="L501" href="#L501">501</a>         <strong class="jxr_keyword">if</strong> ( !details.getDependencyVersions().isEmpty() )
-<a class="jxr_linenumber" name="L502" href="#L502">502</a>         {
-<a class="jxr_linenumber" name="L503" href="#L503">503</a>             sink.section3();
-<a class="jxr_linenumber" name="L504" href="#L504">504</a>             sink.sectionTitle3();
-<a class="jxr_linenumber" name="L505" href="#L505">505</a>             sink.text( MessageFormat.format( getText( <span class="jxr_string">"report.pluginDependencies"</span> ), <strong class="jxr_keyword">new</strong> Object[] {
-<a class="jxr_linenumber" name="L506" href="#L506">506</a>                 ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) } ) );
-<a class="jxr_linenumber" name="L507" href="#L507">507</a>             sink.sectionTitle3_();
-<a class="jxr_linenumber" name="L508" href="#L508">508</a> 
-<a class="jxr_linenumber" name="L509" href="#L509">509</a>             renderDependencySummaryTable( details.getDependencyVersions(), false, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>     @SuppressWarnings( <span class="jxr_string">"checkstyle:MethodLength"</span> )
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> renderPluginDetail( Plugin plugin, <a name="PluginUpdatesDetails" href="../../../../org/codehaus/mojo/versions/PluginUpdatesDetails.html#PluginUpdatesDetails">PluginUpdatesDetails</a> details )
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>     {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>         <strong class="jxr_keyword">final</strong> SinkEventAttributes headerAttributes = <strong class="jxr_keyword">new</strong> SinkEventAttributeSet();
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>         headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="jxr_string">"20%"</span> );
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>         <strong class="jxr_keyword">final</strong> SinkEventAttributes cellAttributes = <strong class="jxr_keyword">new</strong> SinkEventAttributeSet();
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>         headerAttributes.addAttribute( SinkEventAttributes.WIDTH, <span class="jxr_string">"80%"</span> );
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>         sink.section2();
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>         sink.sectionTitle2();
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>         sink.text( MessageFormat.format( getText( <span class="jxr_string">"report.plugin"</span> ), <strong class="jxr_keyword">new</strong> Object[] {
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>             ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>         sink.sectionTitle2_();
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>         sink.table();
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>         sink.tableRows( <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false );
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>         sink.tableRow();
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>         sink.tableHeaderCell( headerAttributes );
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>         sink.text( getText( <span class="jxr_string">"report.status"</span> ) );
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>         sink.tableHeaderCell_();
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>         sink.tableCell( cellAttributes );
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>         ArtifactVersion[] versions = details.getArtifactVersions().getAllUpdates( UpdateScope.ANY );
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>         <strong class="jxr_keyword">if</strong> ( details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>         {
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>             renderWarningIcon();
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>             sink.nonBreakingSpace();
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>             sink.text( getText( <span class="jxr_string">"report.otherUpdatesAvailable"</span> ) );
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>         }
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) != <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>         {
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>             renderWarningIcon();
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>             sink.nonBreakingSpace();
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>             sink.text( getText( <span class="jxr_string">"report.incrementalUpdatesAvailable"</span> ) );
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>         }
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) != <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>         {
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>             renderWarningIcon();
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>             sink.nonBreakingSpace();
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>             sink.text( getText( <span class="jxr_string">"report.minorUpdatesAvailable"</span> ) );
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>         }
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) != <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>         {
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>             renderWarningIcon();
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>             sink.nonBreakingSpace();
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>             sink.text( getText( <span class="jxr_string">"report.majorUpdatesAvailable"</span> ) );
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>         }
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>         {
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>             renderSuccessIcon();
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>             sink.nonBreakingSpace();
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>             sink.text( getText( <span class="jxr_string">"report.noUpdatesAvailable"</span> ) );
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>         }
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>         sink.tableCell_();
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>         sink.tableRow_();
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>         sink.tableRow();
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>         sink.tableHeaderCell( headerAttributes );
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>         sink.text( getText( <span class="jxr_string">"report.groupId"</span> ) );
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>         sink.tableHeaderCell_();
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>         sink.tableCell( cellAttributes );
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>         sink.text( plugin.getGroupId() );
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>         sink.tableCell_();
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>         sink.tableRow_();
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>         sink.tableRow();
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>         sink.tableHeaderCell( headerAttributes );
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>         sink.text( getText( <span class="jxr_string">"report.artifactId"</span> ) );
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>         sink.tableHeaderCell_();
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>         sink.tableCell( cellAttributes );
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>         sink.text( plugin.getArtifactId() );
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>         sink.tableCell_();
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>         sink.tableRow_();
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>         sink.tableRow();
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>         sink.tableHeaderCell( headerAttributes );
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>         sink.text( getText( <span class="jxr_string">"report.currentVersion"</span> ) );
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>         sink.tableHeaderCell_();
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>         sink.tableCell( cellAttributes );
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>         sink.text( plugin.getVersion() );
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>         sink.tableCell_();
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>         sink.tableRow_();
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>         <strong class="jxr_keyword">if</strong> ( versions.length &gt; 0 )
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>         {
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>             sink.tableRow();
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>             sink.tableHeaderCell( headerAttributes );
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>             sink.text( getText( <span class="jxr_string">"report.updateVersions"</span> ) );
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>             sink.tableHeaderCell_();
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>             sink.tableCell( cellAttributes );
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>             <strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = 0; i &lt; versions.length; i++ )
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>             {
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>                 <strong class="jxr_keyword">if</strong> ( i &gt; 0 )
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>                 {
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>                     sink.lineBreak();
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>                 }
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>                 <strong class="jxr_keyword">boolean</strong> bold = equals(
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>                     versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) )
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>                     || equals( versions[i],
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>                                details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) )
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) )
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) )
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) )
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) )
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>                     || equals( versions[i], details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) )
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>                     || equals( versions[i], details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) );
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>                 <strong class="jxr_keyword">if</strong> ( bold )
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>                 {
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>                     safeBold();
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>                 }
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>                 sink.text( versions[i].toString() );
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>                 <strong class="jxr_keyword">if</strong> ( bold )
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>                 {
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>                     safeBold_();
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>                     sink.nonBreakingSpace();
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>                     safeItalic();
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>                     <strong class="jxr_keyword">if</strong> ( equals( versions[i],
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>                                  details.getArtifactVersions().getOldestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>                     {
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>                         sink.text( getText( <span class="jxr_string">"report.nextVersion"</span> ) );
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>                     }
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.SUBINCREMENTAL ) ) )
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>                     {
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>                         sink.text( getText( <span class="jxr_string">"report.latestSubIncremental"</span> ) );
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>                     }
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.INCREMENTAL ) ) )
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>                     {
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>                         sink.text( getText( <span class="jxr_string">"report.nextIncremental"</span> ) );
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>                     }
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.INCREMENTAL ) ) )
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>                     {
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>                         sink.text( getText( <span class="jxr_string">"report.latestIncremental"</span> ) );
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>                     }
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.MINOR ) ) )
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>                     {
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>                         sink.text( getText( <span class="jxr_string">"report.nextMinor"</span> ) );
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>                     }
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.MINOR ) ) )
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>                     {
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>                         sink.text( getText( <span class="jxr_string">"report.latestMinor"</span> ) );
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>                     }
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>                                       details.getArtifactVersions().getOldestUpdate( UpdateScope.MAJOR ) ) )
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>                     {
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>                         sink.text( getText( <span class="jxr_string">"report.nextMajor"</span> ) );
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>                     }
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( equals( versions[i],
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>                                       details.getArtifactVersions().getNewestUpdate( UpdateScope.MAJOR ) ) )
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>                     {
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>                         sink.text( getText( <span class="jxr_string">"report.latestMajor"</span> ) );
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>                     }
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> 
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>                     safeItalic_();
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>                 }
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>             }
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>             sink.tableCell_();
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>             sink.tableRow_();
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>         }
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>         sink.tableRows_();
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>         sink.table_();
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>         <strong class="jxr_keyword">if</strong> ( !details.getDependencyVersions().isEmpty() )
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>         {
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>             sink.section3();
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>             sink.sectionTitle3();
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>             sink.text( MessageFormat.format( getText( <span class="jxr_string">"report.pluginDependencies"</span> ), <strong class="jxr_keyword">new</strong> Object[] {
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>                 ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>             sink.sectionTitle3_();
 <a class="jxr_linenumber" name="L510" href="#L510">510</a> 
-<a class="jxr_linenumber" name="L511" href="#L511">511</a>             sink.section3_();
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>             renderDependencySummaryTable( details.getDependencyVersions(), false, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">true</strong> );
 <a class="jxr_linenumber" name="L512" href="#L512">512</a> 
-<a class="jxr_linenumber" name="L513" href="#L513">513</a>             details.getDependencyVersions().entrySet()
-<a class="jxr_linenumber" name="L514" href="#L514">514</a>                 .forEach( entry -&gt; renderDependencyDetail( entry.getKey(), entry.getValue() ) );
-<a class="jxr_linenumber" name="L515" href="#L515">515</a>         }
-<a class="jxr_linenumber" name="L516" href="#L516">516</a>         sink.section2_();
-<a class="jxr_linenumber" name="L517" href="#L517">517</a>     }
-<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
-<a class="jxr_linenumber" name="L519" href="#L519">519</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> renderDependencyDetail( Dependency dependency, <a name="ArtifactVersions" href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html#ArtifactVersions">ArtifactVersions</a> details )
-<a class="jxr_linenumber" name="L520" href="#L520">520</a>     {
-<a class="jxr_linenumber" name="L521" href="#L521">521</a>         sink.section3();
-<a class="jxr_linenumber" name="L522" href="#L522">522</a>         sink.sectionTitle3();
-<a class="jxr_linenumber" name="L523" href="#L523">523</a>         sink.text( MessageFormat.format( getText( <span class="jxr_string">"report.pluginDependency"</span> ), <strong class="jxr_keyword">new</strong> Object[] {
-<a class="jxr_linenumber" name="L524" href="#L524">524</a>             ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() ) } ) );
-<a class="jxr_linenumber" name="L525" href="#L525">525</a>         sink.sectionTitle3_();
-<a class="jxr_linenumber" name="L526" href="#L526">526</a>         renderDependencyDetailTable( dependency, details, false, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">true</strong> );
-<a class="jxr_linenumber" name="L527" href="#L527">527</a>         sink.section3_();
-<a class="jxr_linenumber" name="L528" href="#L528">528</a>     }
-<a class="jxr_linenumber" name="L529" href="#L529">529</a> 
-<a class="jxr_linenumber" name="L530" href="#L530">530</a> }
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>             sink.section3_();
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> 
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>             details.getDependencyVersions().entrySet()
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>                 .forEach( entry -&gt; renderDependencyDetail( entry.getKey(), entry.getValue() ) );
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>         }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>         sink.section2_();
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>     }
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> renderDependencyDetail( Dependency dependency, <a name="ArtifactVersions" href="../../../../org/codehaus/mojo/versions/api/ArtifactVersions.html#ArtifactVersions">ArtifactVersions</a> details )
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>     {
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>         sink.section3();
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>         sink.sectionTitle3();
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>         sink.text( MessageFormat.format( getText( <span class="jxr_string">"report.pluginDependency"</span> ), <strong class="jxr_keyword">new</strong> Object[] {
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>             ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )} ) );
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>         sink.sectionTitle3_();
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>         renderDependencyDetailTable( dependency, details, false, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>         sink.section3_();
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>     }
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> 
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>

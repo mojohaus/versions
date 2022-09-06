@@ -27,11 +27,11 @@
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * under the License.</em>
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> org.apache.maven.artifact.versioning.ArtifactVersion;
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.math.BigInteger;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.util.StringTokenizer;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.math.BigInteger;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.StringTokenizer;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.apache.maven.artifact.versioning.ArtifactVersion;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment"> * A comparator which will compare all segments of a dot separated version string as numbers if possible, i.e. 1.3.34</em>
@@ -170,178 +170,179 @@
 <a class="jxr_linenumber" name="L162" href="#L162">162</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">     * {@inheritDoc}</em>
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L165" href="#L165">165</a>     <strong class="jxr_keyword">protected</strong> ArtifactVersion innerIncrementSegment( ArtifactVersion v, <strong class="jxr_keyword">int</strong> segment )
-<a class="jxr_linenumber" name="L166" href="#L166">166</a>     {
-<a class="jxr_linenumber" name="L167" href="#L167">167</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> segmentCount = innerGetSegmentCount( v );
-<a class="jxr_linenumber" name="L168" href="#L168">168</a>         <strong class="jxr_keyword">if</strong> ( segment &lt; 0 || segment &gt; segmentCount )
-<a class="jxr_linenumber" name="L169" href="#L169">169</a>         {
-<a class="jxr_linenumber" name="L170" href="#L170">170</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidSegmentException" href="../../../../../org/codehaus/mojo/versions/ordering/InvalidSegmentException.html#InvalidSegmentException">InvalidSegmentException</a>( segment, segmentCount, v.toString() );
-<a class="jxr_linenumber" name="L171" href="#L171">171</a>         }
-<a class="jxr_linenumber" name="L172" href="#L172">172</a>         <strong class="jxr_keyword">final</strong> String version = v.toString();
-<a class="jxr_linenumber" name="L173" href="#L173">173</a>         StringBuilder buf = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L174" href="#L174">174</a>         StringTokenizer tok = <strong class="jxr_keyword">new</strong> StringTokenizer( version, <span class="jxr_string">"."</span> );
-<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <strong class="jxr_keyword">boolean</strong> first = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L176" href="#L176">176</a>         <strong class="jxr_keyword">while</strong> ( segment &gt;= 0 &amp;&amp; tok.hasMoreTokens() )
-<a class="jxr_linenumber" name="L177" href="#L177">177</a>         {
-<a class="jxr_linenumber" name="L178" href="#L178">178</a>             <strong class="jxr_keyword">if</strong> ( first )
-<a class="jxr_linenumber" name="L179" href="#L179">179</a>             {
-<a class="jxr_linenumber" name="L180" href="#L180">180</a>                 first = false;
-<a class="jxr_linenumber" name="L181" href="#L181">181</a>             }
-<a class="jxr_linenumber" name="L182" href="#L182">182</a>             <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L183" href="#L183">183</a>             {
-<a class="jxr_linenumber" name="L184" href="#L184">184</a>                 buf.append( '.' );
-<a class="jxr_linenumber" name="L185" href="#L185">185</a>             }
-<a class="jxr_linenumber" name="L186" href="#L186">186</a>             String p = tok.nextToken();
-<a class="jxr_linenumber" name="L187" href="#L187">187</a>             String q = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L188" href="#L188">188</a>             <strong class="jxr_keyword">if</strong> ( p.indexOf( '-' ) &gt;= 0 )
-<a class="jxr_linenumber" name="L189" href="#L189">189</a>             {
-<a class="jxr_linenumber" name="L190" href="#L190">190</a>                 <strong class="jxr_keyword">int</strong> index = p.indexOf( '-' );
-<a class="jxr_linenumber" name="L191" href="#L191">191</a>                 q = p.substring( index + 1 );
-<a class="jxr_linenumber" name="L192" href="#L192">192</a>                 p = p.substring( 0, index );
-<a class="jxr_linenumber" name="L193" href="#L193">193</a>             }
-<a class="jxr_linenumber" name="L194" href="#L194">194</a> 
-<a class="jxr_linenumber" name="L195" href="#L195">195</a>             <strong class="jxr_keyword">if</strong> ( segment == 0 )
-<a class="jxr_linenumber" name="L196" href="#L196">196</a>             {
-<a class="jxr_linenumber" name="L197" href="#L197">197</a>                 <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L198" href="#L198">198</a>                 {
-<a class="jxr_linenumber" name="L199" href="#L199">199</a>                     BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( p );
-<a class="jxr_linenumber" name="L200" href="#L200">200</a>                     p = n.add( BIG_INTEGER_ONE ).toString();
-<a class="jxr_linenumber" name="L201" href="#L201">201</a>                     q = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L202" href="#L202">202</a>                 }
-<a class="jxr_linenumber" name="L203" href="#L203">203</a>                 <strong class="jxr_keyword">catch</strong> ( NumberFormatException e )
-<a class="jxr_linenumber" name="L204" href="#L204">204</a>                 {
-<a class="jxr_linenumber" name="L205" href="#L205">205</a>                     <em class="jxr_comment">// ok, let's try some common tricks</em>
-<a class="jxr_linenumber" name="L206" href="#L206">206</a>                     <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"alpha"</span>.equalsIgnoreCase( p ) )
-<a class="jxr_linenumber" name="L207" href="#L207">207</a>                     {
-<a class="jxr_linenumber" name="L208" href="#L208">208</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L209" href="#L209">209</a>                         {
-<a class="jxr_linenumber" name="L210" href="#L210">210</a>                             p = <span class="jxr_string">"beta"</span>;
-<a class="jxr_linenumber" name="L211" href="#L211">211</a>                         }
-<a class="jxr_linenumber" name="L212" href="#L212">212</a>                         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L213" href="#L213">213</a>                         {
-<a class="jxr_linenumber" name="L214" href="#L214">214</a>                             <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L215" href="#L215">215</a>                             {
-<a class="jxr_linenumber" name="L216" href="#L216">216</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
-<a class="jxr_linenumber" name="L217" href="#L217">217</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
-<a class="jxr_linenumber" name="L218" href="#L218">218</a>                             }
-<a class="jxr_linenumber" name="L219" href="#L219">219</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
-<a class="jxr_linenumber" name="L220" href="#L220">220</a>                             {
-<a class="jxr_linenumber" name="L221" href="#L221">221</a>                                 p = <span class="jxr_string">"beta"</span>;
-<a class="jxr_linenumber" name="L222" href="#L222">222</a>                                 q = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L223" href="#L223">223</a>                             }
-<a class="jxr_linenumber" name="L224" href="#L224">224</a>                         }
-<a class="jxr_linenumber" name="L225" href="#L225">225</a>                     }
-<a class="jxr_linenumber" name="L226" href="#L226">226</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"beta"</span>.equalsIgnoreCase( p ) )
-<a class="jxr_linenumber" name="L227" href="#L227">227</a>                     {
-<a class="jxr_linenumber" name="L228" href="#L228">228</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L229" href="#L229">229</a>                         {
-<a class="jxr_linenumber" name="L230" href="#L230">230</a>                             p = <span class="jxr_string">"milestone"</span>;
-<a class="jxr_linenumber" name="L231" href="#L231">231</a>                         }
-<a class="jxr_linenumber" name="L232" href="#L232">232</a>                         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L233" href="#L233">233</a>                         {
-<a class="jxr_linenumber" name="L234" href="#L234">234</a>                             <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L235" href="#L235">235</a>                             {
-<a class="jxr_linenumber" name="L236" href="#L236">236</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
-<a class="jxr_linenumber" name="L237" href="#L237">237</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
-<a class="jxr_linenumber" name="L238" href="#L238">238</a>                             }
-<a class="jxr_linenumber" name="L239" href="#L239">239</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
-<a class="jxr_linenumber" name="L240" href="#L240">240</a>                             {
-<a class="jxr_linenumber" name="L241" href="#L241">241</a>                                 p = <span class="jxr_string">"milestone"</span>;
-<a class="jxr_linenumber" name="L242" href="#L242">242</a>                                 q = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L243" href="#L243">243</a>                             }
-<a class="jxr_linenumber" name="L244" href="#L244">244</a>                         }
-<a class="jxr_linenumber" name="L245" href="#L245">245</a>                     }
-<a class="jxr_linenumber" name="L246" href="#L246">246</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"milestone"</span>.equalsIgnoreCase( p ) )
-<a class="jxr_linenumber" name="L247" href="#L247">247</a>                     {
-<a class="jxr_linenumber" name="L248" href="#L248">248</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L249" href="#L249">249</a>                         {
-<a class="jxr_linenumber" name="L250" href="#L250">250</a>                             p = <span class="jxr_string">"rc"</span>;
-<a class="jxr_linenumber" name="L251" href="#L251">251</a>                         }
-<a class="jxr_linenumber" name="L252" href="#L252">252</a>                         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L253" href="#L253">253</a>                         {
-<a class="jxr_linenumber" name="L254" href="#L254">254</a>                             <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L255" href="#L255">255</a>                             {
-<a class="jxr_linenumber" name="L256" href="#L256">256</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
-<a class="jxr_linenumber" name="L257" href="#L257">257</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
-<a class="jxr_linenumber" name="L258" href="#L258">258</a>                             }
-<a class="jxr_linenumber" name="L259" href="#L259">259</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
-<a class="jxr_linenumber" name="L260" href="#L260">260</a>                             {
-<a class="jxr_linenumber" name="L261" href="#L261">261</a>                                 p = <span class="jxr_string">"rc"</span>;
-<a class="jxr_linenumber" name="L262" href="#L262">262</a>                                 q = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L263" href="#L263">263</a>                             }
-<a class="jxr_linenumber" name="L264" href="#L264">264</a>                         }
-<a class="jxr_linenumber" name="L265" href="#L265">265</a>                     }
-<a class="jxr_linenumber" name="L266" href="#L266">266</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"cr"</span>.equalsIgnoreCase( p ) || <span class="jxr_string">"rc"</span>.equalsIgnoreCase( p ) )
-<a class="jxr_linenumber" name="L267" href="#L267">267</a>                     {
-<a class="jxr_linenumber" name="L268" href="#L268">268</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L269" href="#L269">269</a>                         {
-<a class="jxr_linenumber" name="L270" href="#L270">270</a>                             p = <span class="jxr_string">"ga"</span>;
-<a class="jxr_linenumber" name="L271" href="#L271">271</a>                         }
-<a class="jxr_linenumber" name="L272" href="#L272">272</a>                         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L273" href="#L273">273</a>                         {
-<a class="jxr_linenumber" name="L274" href="#L274">274</a>                             <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L275" href="#L275">275</a>                             {
-<a class="jxr_linenumber" name="L276" href="#L276">276</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
-<a class="jxr_linenumber" name="L277" href="#L277">277</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
-<a class="jxr_linenumber" name="L278" href="#L278">278</a>                             }
-<a class="jxr_linenumber" name="L279" href="#L279">279</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
-<a class="jxr_linenumber" name="L280" href="#L280">280</a>                             {
-<a class="jxr_linenumber" name="L281" href="#L281">281</a>                                 p = <span class="jxr_string">"ga"</span>;
-<a class="jxr_linenumber" name="L282" href="#L282">282</a>                                 q = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L283" href="#L283">283</a>                             }
-<a class="jxr_linenumber" name="L284" href="#L284">284</a>                         }
-<a class="jxr_linenumber" name="L285" href="#L285">285</a>                     }
-<a class="jxr_linenumber" name="L286" href="#L286">286</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"ga"</span>.equalsIgnoreCase( p ) || <span class="jxr_string">"final"</span>.equalsIgnoreCase( p ) )
-<a class="jxr_linenumber" name="L287" href="#L287">287</a>                     {
-<a class="jxr_linenumber" name="L288" href="#L288">288</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L289" href="#L289">289</a>                         {
-<a class="jxr_linenumber" name="L290" href="#L290">290</a>                             p = <span class="jxr_string">"sp"</span>;
-<a class="jxr_linenumber" name="L291" href="#L291">291</a>                             q = <span class="jxr_string">"1"</span>;
-<a class="jxr_linenumber" name="L292" href="#L292">292</a>                         }
-<a class="jxr_linenumber" name="L293" href="#L293">293</a>                         <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L294" href="#L294">294</a>                         {
-<a class="jxr_linenumber" name="L295" href="#L295">295</a>                             <strong class="jxr_keyword">try</strong>
-<a class="jxr_linenumber" name="L296" href="#L296">296</a>                             {
-<a class="jxr_linenumber" name="L297" href="#L297">297</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
-<a class="jxr_linenumber" name="L298" href="#L298">298</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
-<a class="jxr_linenumber" name="L299" href="#L299">299</a>                             }
-<a class="jxr_linenumber" name="L300" href="#L300">300</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
-<a class="jxr_linenumber" name="L301" href="#L301">301</a>                             {
-<a class="jxr_linenumber" name="L302" href="#L302">302</a>                                 p = <span class="jxr_string">"sp"</span>;
-<a class="jxr_linenumber" name="L303" href="#L303">303</a>                                 q = <span class="jxr_string">"1"</span>;
-<a class="jxr_linenumber" name="L304" href="#L304">304</a>                             }
-<a class="jxr_linenumber" name="L305" href="#L305">305</a>                         }
-<a class="jxr_linenumber" name="L306" href="#L306">306</a>                     }
-<a class="jxr_linenumber" name="L307" href="#L307">307</a>                     <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L308" href="#L308">308</a>                     {
-<a class="jxr_linenumber" name="L309" href="#L309">309</a>                         p = VersionComparators.alphaNumIncrement( p );
-<a class="jxr_linenumber" name="L310" href="#L310">310</a>                     }
-<a class="jxr_linenumber" name="L311" href="#L311">311</a>                 }
-<a class="jxr_linenumber" name="L312" href="#L312">312</a>             }
-<a class="jxr_linenumber" name="L313" href="#L313">313</a>             buf.append( p );
-<a class="jxr_linenumber" name="L314" href="#L314">314</a>             <strong class="jxr_keyword">if</strong> ( q != <strong class="jxr_keyword">null</strong> )
-<a class="jxr_linenumber" name="L315" href="#L315">315</a>             {
-<a class="jxr_linenumber" name="L316" href="#L316">316</a>                 buf.append( '-' );
-<a class="jxr_linenumber" name="L317" href="#L317">317</a>                 buf.append( q );
-<a class="jxr_linenumber" name="L318" href="#L318">318</a>             }
-<a class="jxr_linenumber" name="L319" href="#L319">319</a>             segment--;
-<a class="jxr_linenumber" name="L320" href="#L320">320</a>         }
-<a class="jxr_linenumber" name="L321" href="#L321">321</a>         <strong class="jxr_keyword">while</strong> ( tok.hasMoreTokens() )
-<a class="jxr_linenumber" name="L322" href="#L322">322</a>         {
-<a class="jxr_linenumber" name="L323" href="#L323">323</a>             <strong class="jxr_keyword">if</strong> ( first )
-<a class="jxr_linenumber" name="L324" href="#L324">324</a>             {
-<a class="jxr_linenumber" name="L325" href="#L325">325</a>                 first = false;
-<a class="jxr_linenumber" name="L326" href="#L326">326</a>             }
-<a class="jxr_linenumber" name="L327" href="#L327">327</a>             <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L328" href="#L328">328</a>             {
-<a class="jxr_linenumber" name="L329" href="#L329">329</a>                 buf.append( '.' );
-<a class="jxr_linenumber" name="L330" href="#L330">330</a>             }
-<a class="jxr_linenumber" name="L331" href="#L331">331</a>             tok.nextToken();
-<a class="jxr_linenumber" name="L332" href="#L332">332</a>             buf.append( <span class="jxr_string">"0"</span> );
-<a class="jxr_linenumber" name="L333" href="#L333">333</a>         }
-<a class="jxr_linenumber" name="L334" href="#L334">334</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( buf.toString() );
-<a class="jxr_linenumber" name="L335" href="#L335">335</a>     }
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> }
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>     @SuppressWarnings( <span class="jxr_string">"checkstyle:MethodLength"</span> )
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>     <strong class="jxr_keyword">protected</strong> ArtifactVersion innerIncrementSegment( ArtifactVersion v, <strong class="jxr_keyword">int</strong> segment ) <strong class="jxr_keyword">throws</strong> <a name="InvalidSegmentException" href="../../../../../org/codehaus/mojo/versions/ordering/InvalidSegmentException.html#InvalidSegmentException">InvalidSegmentException</a>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>     {
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> segmentCount = innerGetSegmentCount( v );
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>         <strong class="jxr_keyword">if</strong> ( segment &lt; 0 || segment &gt; segmentCount )
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidSegmentException" href="../../../../../org/codehaus/mojo/versions/ordering/InvalidSegmentException.html#InvalidSegmentException">InvalidSegmentException</a>( segment, segmentCount, v );
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>         }
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>         <strong class="jxr_keyword">final</strong> String version = v.toString();
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>         StringBuilder buf = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>         StringTokenizer tok = <strong class="jxr_keyword">new</strong> StringTokenizer( version, <span class="jxr_string">"."</span> );
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>         <strong class="jxr_keyword">boolean</strong> first = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         <strong class="jxr_keyword">while</strong> ( segment &gt;= 0 &amp;&amp; tok.hasMoreTokens() )
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>         {
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>             <strong class="jxr_keyword">if</strong> ( first )
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>             {
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>                 first = false;
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>             }
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>             {
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>                 buf.append( '.' );
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>             }
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>             String p = tok.nextToken();
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>             String q = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>             <strong class="jxr_keyword">if</strong> ( p.indexOf( '-' ) &gt;= 0 )
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>             {
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                 <strong class="jxr_keyword">int</strong> index = p.indexOf( '-' );
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>                 q = p.substring( index + 1 );
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>                 p = p.substring( 0, index );
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>             }
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>             <strong class="jxr_keyword">if</strong> ( segment == 0 )
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>             {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>                 <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>                 {
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>                     BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( p );
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>                     p = n.add( BIG_INTEGER_ONE ).toString();
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>                     q = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>                 }
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>                 <strong class="jxr_keyword">catch</strong> ( NumberFormatException e )
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>                 {
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>                     <em class="jxr_comment">// ok, let's try some common tricks</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>                     <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"alpha"</span>.equalsIgnoreCase( p ) )
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>                     {
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>                         {
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>                             p = <span class="jxr_string">"beta"</span>;
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>                         }
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>                         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>                         {
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>                             <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>                             {
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>                             }
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>                             {
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>                                 p = <span class="jxr_string">"beta"</span>;
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>                                 q = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>                             }
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>                         }
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>                     }
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"beta"</span>.equalsIgnoreCase( p ) )
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>                     {
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>                         {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>                             p = <span class="jxr_string">"milestone"</span>;
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>                         }
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>                         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>                         {
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>                             <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>                             {
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>                             }
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>                             {
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>                                 p = <span class="jxr_string">"milestone"</span>;
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>                                 q = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>                             }
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>                         }
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>                     }
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"milestone"</span>.equalsIgnoreCase( p ) )
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>                     {
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>                         {
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>                             p = <span class="jxr_string">"rc"</span>;
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>                         }
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>                         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>                         {
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>                             <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>                             {
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>                             }
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>                             {
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>                                 p = <span class="jxr_string">"rc"</span>;
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>                                 q = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>                             }
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>                         }
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>                     }
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"cr"</span>.equalsIgnoreCase( p ) || <span class="jxr_string">"rc"</span>.equalsIgnoreCase( p ) )
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>                     {
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>                         {
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>                             p = <span class="jxr_string">"ga"</span>;
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>                         }
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>                         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>                         {
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>                             <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>                             {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>                             }
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>                             {
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>                                 p = <span class="jxr_string">"ga"</span>;
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>                                 q = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>                             }
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>                         }
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>                     }
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>                     <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( <span class="jxr_string">"ga"</span>.equalsIgnoreCase( p ) || <span class="jxr_string">"final"</span>.equalsIgnoreCase( p ) )
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>                     {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>                         <strong class="jxr_keyword">if</strong> ( q == <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>                         {
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>                             p = <span class="jxr_string">"sp"</span>;
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>                             q = <span class="jxr_string">"1"</span>;
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>                         }
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>                         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>                         {
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>                             <strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>                             {
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>                                 BigInteger n = <strong class="jxr_keyword">new</strong> BigInteger( q );
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>                                 q = n.add( BIG_INTEGER_ONE ).toString();
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>                             }
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>                             <strong class="jxr_keyword">catch</strong> ( NumberFormatException e1 )
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>                             {
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>                                 p = <span class="jxr_string">"sp"</span>;
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>                                 q = <span class="jxr_string">"1"</span>;
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>                             }
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>                         }
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>                     }
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>                     <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>                     {
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>                         p = VersionComparators.alphaNumIncrement( p );
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>                     }
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>                 }
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>             }
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>             buf.append( p );
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>             <strong class="jxr_keyword">if</strong> ( q != <strong class="jxr_keyword">null</strong> )
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>             {
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>                 buf.append( '-' );
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>                 buf.append( q );
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>             }
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>             segment--;
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>         }
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>         <strong class="jxr_keyword">while</strong> ( tok.hasMoreTokens() )
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>         {
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>             <strong class="jxr_keyword">if</strong> ( first )
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>             {
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>                 first = false;
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>             }
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>             {
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>                 buf.append( '.' );
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>             }
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>             tok.nextToken();
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>             buf.append( <span class="jxr_string">"0"</span> );
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>         }
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> DefaultArtifactVersion( buf.toString() );
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>     }
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>

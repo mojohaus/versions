@@ -54,21 +54,22 @@
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>      }
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>      @Override
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> recordUpdate( <strong class="jxr_keyword">final</strong> String kind, <strong class="jxr_keyword">final</strong> String groupId, <strong class="jxr_keyword">final</strong> String artifactId, <strong class="jxr_keyword">final</strong> String oldVersion, <strong class="jxr_keyword">final</strong> String newVersion )
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>      {
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>          Objects.requireNonNull( kind, <span class="jxr_string">"kind"</span> );
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>          Objects.requireNonNull( groupId, <span class="jxr_string">"groupId"</span> );
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>          Objects.requireNonNull( artifactId, <span class="jxr_string">"artifactId"</span> );
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>          Objects.requireNonNull( oldVersion, <span class="jxr_string">"oldVersion"</span> );
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>          Objects.requireNonNull( newVersion, <span class="jxr_string">"newVersion"</span> );
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>      }
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>      @Override
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> serialize( <strong class="jxr_keyword">final</strong> OutputStream outputStream ) <strong class="jxr_keyword">throws</strong> IOException
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>      {
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>      }
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  }
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> recordUpdate( <strong class="jxr_keyword">final</strong> String kind, <strong class="jxr_keyword">final</strong> String groupId, <strong class="jxr_keyword">final</strong> String artifactId,
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>                                      <strong class="jxr_keyword">final</strong> String oldVersion, <strong class="jxr_keyword">final</strong> String newVersion )
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>      {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>          Objects.requireNonNull( kind, <span class="jxr_string">"kind"</span> );
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>          Objects.requireNonNull( groupId, <span class="jxr_string">"groupId"</span> );
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>          Objects.requireNonNull( artifactId, <span class="jxr_string">"artifactId"</span> );
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>          Objects.requireNonNull( oldVersion, <span class="jxr_string">"oldVersion"</span> );
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>          Objects.requireNonNull( newVersion, <span class="jxr_string">"newVersion"</span> );
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>      }
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      @Override
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> serialize( <strong class="jxr_keyword">final</strong> OutputStream outputStream ) <strong class="jxr_keyword">throws</strong> IOException
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>      {
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>      }
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
