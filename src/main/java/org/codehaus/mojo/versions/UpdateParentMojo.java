@@ -134,14 +134,12 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         ArtifactVersion artifactVersion;
         try
         {
-            artifactVersion = findLatestVersion( artifact, versionRange, false, true,
-                    allowDowngrade );
+            artifactVersion = findLatestVersion( artifact, versionRange, null, false, allowDowngrade );
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
-
 
         if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion, forceUpdate ) )
         {
