@@ -126,6 +126,11 @@ public class UpdateParentMojoTest
                                 new DefaultArtifactVersion( "1.0.0" ),
                                 new DefaultArtifactVersion( "0.9.0" ) );
                     }
+                    else if ( "issue-670-artifact".equals( artifact.getArtifactId() ) )
+                    {
+                        return Arrays.asList( new DefaultArtifactVersion( "0.0.1-1" ),
+                                new DefaultArtifactVersion( "0.0.1-1-impl-SNAPSHOT" ) );
+                    }
                     else if ( "unknown-artifact".equals( artifact.getArtifactId() ) )
                     {
                         return Collections.emptyList();
@@ -235,5 +240,52 @@ public class UpdateParentMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(), is( empty() ) );
+    }
+
+    @Test
+    public void testAllowSnapshots()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException
+    {
+        mojo.allowSnapshots = true;
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "issue-670-artifact" );
+            setVersion( "0.0.1-1" );
+        }} );
+
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) )
+                    .thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(), hasItem( new VersionChange( "default-group",
+                "issue-670-artifact", "0.0.1-1",
+                "0.0.1-1-impl-SNAPSHOT" ) ) );
+    }
+
+    @Test
+    public void testAllowSnapshotsWithParentVersion()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException
+    {
+        mojo.allowSnapshots = true;
+        mojo.parentVersion = "0.0.1-1-impl-SNAPSHOT";
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "issue-670-artifact" );
+            setVersion( "0.0.1-1" );
+        }} );
+
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) )
+                    .thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(), hasItem( new VersionChange( "default-group",
+                "issue-670-artifact", "0.0.1-1",
+                "0.0.1-1-impl-SNAPSHOT" ) ) );
     }
 }
