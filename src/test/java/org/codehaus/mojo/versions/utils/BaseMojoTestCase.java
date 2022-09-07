@@ -3,9 +3,12 @@ package org.codehaus.mojo.versions.utils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.model.Build;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.Mojo;
@@ -116,6 +119,18 @@ public abstract class BaseMojoTestCase extends AbstractMojoTestCase
         public Properties getProperties()
         {
             return getModel().getProperties();
+        }
+
+        @Override
+        public List<Dependency> getDependencies()
+        {
+            return getModel().getDependencies();
+        }
+
+        @Override
+        public DependencyManagement getDependencyManagement()
+        {
+            return getModel().getDependencyManagement();
         }
     }
 }
