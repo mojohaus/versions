@@ -93,33 +93,39 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
             List<String> failures = new ArrayList<>();
             if ( !isBlank( newTag ) )
             {
-                getLog().info( "Updating tag: " + scm.getTag() + " -> " + newTag );
-                if ( !PomHelper.setProjectValue( pom, "/project/scm/tag", newTag ) )
+                getLog().info( "Updating tag: " + ( scm != null && scm.getTag() != null
+                        ? scm.getTag() : "(empty)" ) + " -> " + newTag );
+                if ( !PomHelper.setElementValue( pom, "/project/scm", "tag", newTag ) )
                 {
                     failures.add( "tag: " + newTag );
                 }
             }
             if ( !isBlank( connection ) )
             {
-                getLog().info( "Updating connection: " + scm.getConnection() + " -> " + connection );
-                if ( !PomHelper.setProjectValue( pom, "/project/scm/connection", connection ) )
+                getLog().info( "Updating connection: " + ( scm != null && scm.getConnection() != null
+                        ? scm.getConnection() : "(empty)" ) + " -> " + connection );
+                if ( !PomHelper.setElementValue( pom, "/project/scm", "connection", connection ) )
                 {
                     failures.add( "connection: " + connection );
                 }
             }
             if ( !isBlank( developerConnection ) )
             {
-                getLog().info( "Updating developerConnection: " + scm.getDeveloperConnection() + " -> "
+                getLog().info( "Updating developerConnection: "
+                        + ( scm != null && scm.getDeveloperConnection() != null
+                        ? scm.getDeveloperConnection() : "(empty)" ) + " -> "
                         + developerConnection );
-                if ( !PomHelper.setProjectValue( pom, "/project/scm/developerConnection", developerConnection ) )
+                if ( !PomHelper.setElementValue( pom, "/project/scm", "developerConnection",
+                        developerConnection ) )
                 {
                     failures.add( "developerConnection: " + developerConnection );
                 }
             }
             if ( !isBlank( url ) )
             {
-                getLog().info( "Updating url: " + scm.getUrl() + " -> " + url );
-                if ( !PomHelper.setProjectValue( pom, "/project/scm/url", url ) )
+                getLog().info( "Updating url: " + ( scm != null && scm.getUrl() != null
+                        ? scm.getUrl() : "(empty)" ) + " -> " + url );
+                if ( !PomHelper.setElementValue( pom, "/project/scm", "url", url ) )
                 {
                     failures.add( "url: " + url );
                 }

@@ -1,6 +1,7 @@
 package org.codehaus.mojo.versions.api;
 
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 
 import java.io.File;
 import java.io.StringReader;
@@ -12,8 +13,13 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.codehaus.mojo.versions.utils.ModifiedPomXMLEventReaderUtils.matches;
+import static org.codehaus.stax2.XMLInputFactory2.P_PRESERVE_LOCATION;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,6 +31,14 @@ import static org.junit.Assert.assertTrue;
  */
 public class PomHelperTest
 {
+    private static final XMLInputFactory INPUT_FACTORY = XMLInputFactory2.newInstance();
+
+    @BeforeClass
+    public static void setUp()
+    {
+        INPUT_FACTORY.setProperty( P_PRESERVE_LOCATION, Boolean.TRUE );
+    }
+
     /**
      * Tests if imported POMs are properly read from dependency management section. Such logic is required to resolve
      * <a href="https://github.com/mojohaus/versions-maven-plugin/issues/134">bug #134</a>
@@ -36,11 +50,12 @@ public class PomHelperTest
         throws Exception
     {
         URL url = getClass().getResource( "PomHelperTest.dependencyManagementBOMs.pom.xml" );
+        assert url != null;
         File file = new File( url.getPath() );
         StringBuilder input = PomHelper.readXmlFile( file );
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-        inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
+        inputFactory.setProperty( P_PRESERVE_LOCATION, Boolean.TRUE );
 
         ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory, file.getAbsolutePath() );
 
@@ -68,11 +83,12 @@ public class PomHelperTest
         throws Exception
     {
         URL url = getClass().getResource( "PomHelperTest.testLongProperties.pom.xml" );
+        assert url != null;
         File file = new File( url.getPath() );
         StringBuilder input = PomHelper.readXmlFile( file );
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-        inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
+        inputFactory.setProperty( P_PRESERVE_LOCATION, Boolean.TRUE );
 
         ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory, file.getAbsolutePath() );
 
@@ -92,6 +108,7 @@ public class PomHelperTest
         throws Exception
     {
         URL url = getClass().getResource( "PomHelperTest.noGroupIdOnChild.pom.xml" );
+        assert url != null;
         StringBuilder input = PomHelper.readXmlFile( new File( url.getPath() ) );
         MavenXpp3Reader reader = new MavenXpp3Reader();
         Model model = reader.read( new StringReader( input.toString() ) );
@@ -187,4 +204,65 @@ public class PomHelperTest
 
     }
 
+    @Test
+    public void testSetElementValueExistingValue() throws XMLStreamException
+    {
+        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
+                new StringBuilder( "<super-parent><parent><child>test</child></parent></super-parent>" ),
+                INPUT_FACTORY, null );
+
+        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
+                "child", "value" ), is( true ) );
+        assertThat( xmlEventReader,
+                matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+    }
+
+    @Test
+    public void testSetElementValueEmptyChild() throws XMLStreamException
+    {
+        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
+                new StringBuilder( "<super-parent><parent><child/></parent></super-parent>" ), INPUT_FACTORY, null );
+
+        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
+                "child", "value" ), is( true ) );
+        assertThat( xmlEventReader,
+                matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+    }
+
+    @Test
+    public void testSetElementValueNewValueEmptyParent() throws XMLStreamException
+    {
+        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
+                new StringBuilder( "<super-parent><parent/></super-parent>" ), INPUT_FACTORY, null );
+
+        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
+                "child", "value" ), is( true ) );
+        assertThat( xmlEventReader,
+                matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+    }
+
+    @Test
+    public void testSetElementValueNewValueNoChild() throws XMLStreamException
+    {
+        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
+                new StringBuilder( "<super-parent><parent><child2/></parent></super-parent>" ), INPUT_FACTORY, null );
+
+        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
+                "child", "value" ), is( true ) );
+        assertThat( xmlEventReader,
+                matches( "<super-parent><parent><child2/><child>value</child></parent></super-parent>" ) );
+    }
+
+    @Test
+    public void testSetProjectValueNewValueNonEmptyParent() throws XMLStreamException
+    {
+        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
+                new StringBuilder( "<super-parent><parent><child>test</child></parent></super-parent>" ), INPUT_FACTORY,
+                null );
+
+        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
+                "child", "value" ), is( true ) );
+        assertThat( xmlEventReader,
+                matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+    }
 }

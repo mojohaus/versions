@@ -71,6 +71,8 @@ import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
+import static java.util.stream.IntStream.range;
+
 /**
  * Helper class for modifying pom files.
  *
@@ -232,59 +234,156 @@ public class PomHelper
     public static boolean setProjectVersion( final ModifiedPomXMLEventReader pom, final String value )
         throws XMLStreamException
     {
-        return setProjectValue( pom, "/project/version", value );
+        return setElementValue( pom, "/project", "version", value, false );
     }
 
     /**
-     * Searches the pom re-defining a project value using the given pattern.
+     * Sets the value of the given element given its parent element path.
+     * Will only consider the first found occurrence of the parent element.
+     * If the element is not found in the parent element, the method will create the element.
      *
-     * @param pom     The pom to modify.
-     * @param pattern The pattern to look for.
-     * @param value   The new value of the property.
-     * @return <code>true</code> if a replacement was made.
-     * @throws XMLStreamException if something went wrong.
+     * @param pom           pom to modify
+     * @param parentPath    path of the parent element
+     * @param elementName   name of the element to set or create
+     * @param value         the new value of the element
+     * @return              {@code true} if the element was created or replaced
+     * @throws XMLStreamException if something went wrong
      */
-    public static boolean setProjectValue( final ModifiedPomXMLEventReader pom, String pattern, final String value )
-        throws XMLStreamException
+    public static boolean setElementValue( ModifiedPomXMLEventReader pom, String parentPath,
+                                                   String elementName, String value )
+            throws XMLStreamException
     {
-        Stack<String> stack = new Stack<>();
-        String path = "";
-        final Pattern matchScopeRegex;
-        boolean madeReplacement = false;
-        matchScopeRegex = Pattern.compile( pattern );
-
         pom.rewind();
+        return setElementValue( pom, parentPath, elementName, value, true );
+    }
 
-        while ( pom.hasNext() )
+    /**
+     * Sets the value of the given element given its parent element path.
+     * Will only consider the first found occurrence of the parent element.
+     * If the element is not found in the parent element, the method will create the element
+     * if {@code shouldCreate} is {@code true}.
+     *
+     * @param pom           pom to modify
+     * @param parentPath    path of the parent element
+     * @param elementName   name of the element to set or create
+     * @param value         the new value of the element
+     * @param shouldCreate  should the element be created if it's not found in the first encountered parent element
+     *                      matching the parentPath
+     * @return              {@code true} if the element was created or replaced
+     * @throws XMLStreamException if something went wrong
+     */
+    public static boolean setElementValue( ModifiedPomXMLEventReader pom, String parentPath,
+                                           String elementName, String value, boolean shouldCreate )
+            throws XMLStreamException
+    {
+        class ElementValueInternal
         {
-            XMLEvent event = pom.nextEvent();
-            if ( event.isStartElement() )
-            {
-                stack.push( path );
-                path = path + "/" + event.asStartElement().getName().getLocalPart();
+            private final String parentName;
+            private final String superParentPath;
 
-                if ( matchScopeRegex.matcher( path ).matches() )
+            private static final int MARK_CHILD_BEGIN = 0;
+            private static final int MARK_OPTION = 1;
+            private static final int PARENT_BEGIN = 2;
+
+            ElementValueInternal()
+            {
+                int lastDelimeterIndex = parentPath.lastIndexOf( '/' );
+                parentName = parentPath.substring( lastDelimeterIndex + 1 );
+                superParentPath = parentPath.substring( 0, lastDelimeterIndex );
+            }
+
+            boolean process( String currentPath ) throws XMLStreamException
+            {
+                boolean replacementMade = false;
+                while ( !replacementMade && pom.hasNext() )
                 {
-                    pom.mark( 0 );
+                    XMLEvent event = pom.nextEvent();
+                    if ( event.isStartElement() )
+                    {
+                        String currentElementName = event.asStartElement().getName().getLocalPart();
+
+                        // here, we will only mark the beginning of the child or the parent element
+                        if ( currentPath.equals( parentPath ) && elementName.equals( currentElementName ) )
+                        {
+                            pom.mark( MARK_CHILD_BEGIN );
+                        }
+                        else if ( currentPath.equals( superParentPath ) && currentElementName.equals( parentName ) )
+                        {
+                              pom.mark( PARENT_BEGIN );
+                        }
+                        // process child element
+                        replacementMade = process( currentPath + "/" + currentElementName );
+                    }
+                    else if ( event.isEndElement() )
+                    {
+                        // here we're doing the replacement
+                        if ( currentPath.equals( parentPath + "/" + elementName ) )
+                        {
+                            // end of the child
+                            replaceValueInChild();
+                            replacementMade = true;
+                        }
+                        else if ( shouldCreate && currentPath.equals( parentPath ) )
+                        {
+                            // end of the parent
+                            replaceValueInParent();
+                            replacementMade = true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return replacementMade;
+            }
+
+            private void replaceValueInChild()
+            {
+                pom.mark( MARK_OPTION );
+                if ( pom.getBetween( MARK_CHILD_BEGIN, MARK_OPTION ).length() > 0 )
+                {
+                    pom.replaceBetween( 0, 1, value );
+                }
+                else
+                {
+                    pom.replace( String.format( "<%1$s>%2$s</%1$s>", elementName, value ) );
                 }
             }
-            if ( event.isEndElement() )
+
+            private void replaceValueInParent()
             {
-                if ( matchScopeRegex.matcher( path ).matches() )
+                pom.mark( MARK_OPTION );
+                if ( pom.hasMark( PARENT_BEGIN ) )
                 {
-                    pom.mark( 1 );
-                    if ( pom.hasMark( 0 ) && pom.hasMark( 1 ) )
+                    if ( pom.getBetween( PARENT_BEGIN, MARK_OPTION ).length() > 0 )
                     {
-                        pom.replaceBetween( 0, 1, value );
-                        madeReplacement = true;
+                        pom.replace( String.format( "<%2$s>%3$s</%2$s></%1$s>",
+                                parentName, elementName, value ) );
                     }
-                    pom.clearMark( 0 );
-                    pom.clearMark( 1 );
+                    else
+                    {
+                        pom.replace( String.format( "<%1$s><%2$s>%3$s</%2$s></%1$s>",
+                                parentName, elementName, value ) );
+                    }
                 }
-                path = stack.pop();
+                else
+                {
+                    pom.replace( String.format( "<%1$s><%2$s>%3$s</%2$s></%1$s>",
+                            parentName, elementName, value ) );
+                }
             }
         }
-        return madeReplacement;
+
+        try
+        {
+            pom.rewind();
+            return new ElementValueInternal().process( "" );
+        }
+        finally
+        {
+            range( 0, 3 ).forEach( pom::clearMark );
+        }
     }
 
     /**
