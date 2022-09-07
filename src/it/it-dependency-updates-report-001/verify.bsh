@@ -17,7 +17,7 @@ try
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
-    if ( result.indexOf( "1.1.0-2 Next Version" ) < 0)
+    if ( result.indexOf( "1.1.0-2 Latest Subincremental" ) < 0)
     {
         System.out.println( "Did not identify next version" );
         System.out.println( "Result = \"" + result +"\"" );

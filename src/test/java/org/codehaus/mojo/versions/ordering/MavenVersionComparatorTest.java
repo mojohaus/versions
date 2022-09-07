@@ -45,8 +45,7 @@ public class MavenVersionComparatorTest
     }
 
     @Test
-    public void testSegmentIncrementing()
-        throws InvalidSegmentException
+    public void testSegmentIncrementing() throws InvalidSegmentException
     {
         assertIncrement( "6", "5", MAJOR );
         assertIncrement( "6.0", "5.0", MAJOR );
@@ -56,15 +55,15 @@ public class MavenVersionComparatorTest
         assertIncrement( "5.alpha-1.2", "5.alpha-1.1", MAJOR );
         assertIncrement( "5.alpha-1.ba", "5.alpha-1.az", MAJOR );
         assertIncrement( "5.alpha-wins.2", "5.alpha-wins.1", MAJOR );
-        assertIncrement( "1.0-alpha-3-SNAPSHOT", "1.0-alpha-2-SNAPSHOT", SUBINCREMENTAL );
-        assertIncrement( "1.0-alpha-90-SNAPSHOT", "1.0-alpha-9-SNAPSHOT", SUBINCREMENTAL );
-        assertIncrement( "1.0-za-SNAPSHOT", "1.0-z-SNAPSHOT", SUBINCREMENTAL );
-        assertIncrement( "1.0-z90-SNAPSHOT", "1.0-z9-SNAPSHOT", SUBINCREMENTAL );
+        assertIncrement( "1.0-alpha-3", "1.0-alpha-2-SNAPSHOT", SUBINCREMENTAL );
+        assertIncrement( "1.0-alpha-90", "1.0-alpha-9-SNAPSHOT", SUBINCREMENTAL );
+        assertIncrement( "1.0-za", "1.0-z-SNAPSHOT", SUBINCREMENTAL );
+        assertIncrement( "1.0-z90", "1.0-z9-SNAPSHOT", SUBINCREMENTAL );
     }
 
     private void assertIncrement( String expected, String initial, Segment segment ) throws InvalidSegmentException
     {
-        assertEquals( expected,
+        assertEquals( expected + "-SNAPSHOT",
                       instance.incrementSegment( new DefaultArtifactVersion( initial ), segment ).toString() );
     }
 }

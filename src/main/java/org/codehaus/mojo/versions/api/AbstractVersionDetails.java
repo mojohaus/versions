@@ -507,7 +507,7 @@ public abstract class AbstractVersionDetails
      * Checks if the candidate version is in the range of the restriction.
      * a custom comparator is/can be used to have milestones and rcs before final releases,
      * which is not yet possible with {@link Restriction#containsVersion(ArtifactVersion)}.
-     * @PARAM RESTRICTION THE RANGE TO CHECK AGAINST.
+     * @param restriction the range to check against.
      * @param candidate the version to check.
      * @return true if the candidate version is within the range of the restriction parameter.
      */

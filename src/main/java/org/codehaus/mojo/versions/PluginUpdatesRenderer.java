@@ -436,67 +436,18 @@ public class PluginUpdatesRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals(
-                    versions[i], details.getArtifactVersions().getOldestUpdate( of( SUBINCREMENTAL ) ) )
-                    || equals( versions[i],
-                               details.getArtifactVersions().getNewestUpdate( of( SUBINCREMENTAL ) ) )
-                    || equals( versions[i], details.getArtifactVersions().getOldestUpdate( of( INCREMENTAL ) ) )
-                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate( of( INCREMENTAL ) ) )
-                    || equals( versions[i], details.getArtifactVersions().getOldestUpdate( of( MINOR ) ) )
-                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate( of( MINOR ) ) )
-                    || equals( versions[i], details.getArtifactVersions().getOldestUpdate( of( MAJOR ) ) )
-                    || equals( versions[i], details.getArtifactVersions().getNewestUpdate( of( MAJOR ) ) );
-                if ( bold )
+                String label = getLabel( versions[i], details.getArtifactVersions() );
+                if ( label != null )
                 {
                     safeBold();
                 }
                 sink.text( versions[i].toString() );
-                if ( bold )
+                if ( label != null )
                 {
                     safeBold_();
                     sink.nonBreakingSpace();
                     safeItalic();
-                    if ( equals( versions[i],
-                                 details.getArtifactVersions().getOldestUpdate( of( SUBINCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.nextVersion" ) );
-                    }
-                    else if ( equals( versions[i],
-                                      details.getArtifactVersions().getNewestUpdate( of( SUBINCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.latestSubIncremental" ) );
-                    }
-                    else if ( equals( versions[i],
-                                      details.getArtifactVersions().getOldestUpdate( of( INCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.nextIncremental" ) );
-                    }
-                    else if ( equals( versions[i],
-                                      details.getArtifactVersions().getNewestUpdate( of( INCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.latestIncremental" ) );
-                    }
-                    else if ( equals( versions[i],
-                                      details.getArtifactVersions().getOldestUpdate( of( MINOR ) ) ) )
-                    {
-                        sink.text( getText( "report.nextMinor" ) );
-                    }
-                    else if ( equals( versions[i],
-                                      details.getArtifactVersions().getNewestUpdate( of( MINOR ) ) ) )
-                    {
-                        sink.text( getText( "report.latestMinor" ) );
-                    }
-                    else if ( equals( versions[i],
-                                      details.getArtifactVersions().getOldestUpdate( of( MAJOR ) ) ) )
-                    {
-                        sink.text( getText( "report.nextMajor" ) );
-                    }
-                    else if ( equals( versions[i],
-                                      details.getArtifactVersions().getNewestUpdate( of( MAJOR ) ) ) )
-                    {
-                        sink.text( getText( "report.latestMajor" ) );
-                    }
-
+                    sink.text( label );
                     safeItalic_();
                 }
             }
