@@ -127,7 +127,8 @@ public class ComparableVersion
     private static class StringItem
         implements Item
     {
-        private static final String[] QUALIFIERS = {"snapshot", "alpha", "beta", "milestone", "rc", "", "sp"};
+        private static final String[] QUALIFIERS = {
+                "snapshot", "alpha", "beta", "milestone", "preview", "rc", "", "sp" };
 
         private static final List<String> QUALIFIERS_LIST = Arrays.asList( QUALIFIERS );
 
@@ -135,9 +136,10 @@ public class ComparableVersion
 
         static
         {
-            ALIASES.put( "ga", "" );
-            ALIASES.put( "final", "" );
+            ALIASES.put( "mr", "milestone" );
             ALIASES.put( "cr", "rc" );
+            ALIASES.put( "final", "" );
+            ALIASES.put( "ga", "" );
         }
 
         /**

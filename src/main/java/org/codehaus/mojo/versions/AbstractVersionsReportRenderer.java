@@ -33,6 +33,7 @@ import org.apache.maven.doxia.sink.SinkEventAttributes;
 import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
+import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PropertyVersions;
@@ -432,57 +433,18 @@ public abstract class AbstractVersionsReportRenderer
                 {
                     sink.lineBreak();
                 }
-                boolean bold = equals( versions[i], details.getOldestUpdate( of( SUBINCREMENTAL ) ) )
-                    || equals( versions[i], details.getNewestUpdate( of( SUBINCREMENTAL ) ) )
-                    || equals( versions[i], details.getOldestUpdate( of( INCREMENTAL ) ) )
-                    || equals( versions[i], details.getNewestUpdate( of( INCREMENTAL ) ) )
-                    || equals( versions[i], details.getOldestUpdate( of( MINOR ) ) )
-                    || equals( versions[i], details.getNewestUpdate( of( MINOR ) ) )
-                    || equals( versions[i], details.getOldestUpdate( of( MAJOR ) ) )
-                    || equals( versions[i], details.getNewestUpdate( of( MAJOR ) ) );
-                if ( bold )
+                String label = getLabel( versions[i], details );
+                if ( label != null )
                 {
                     safeBold();
                 }
                 sink.text( versions[i].toString() );
-                if ( bold )
+                if ( label != null )
                 {
                     safeBold_();
                     sink.nonBreakingSpace();
                     safeItalic();
-                    if ( equals( versions[i], details.getOldestUpdate( of( SUBINCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.nextVersion" ) );
-                    }
-                    else if ( equals( versions[i], details.getNewestUpdate( of( SUBINCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.latestSubIncremental" ) );
-                    }
-                    else if ( equals( versions[i], details.getOldestUpdate( of( INCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.nextIncremental" ) );
-                    }
-                    else if ( equals( versions[i], details.getNewestUpdate( of( INCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.latestIncremental" ) );
-                    }
-                    else if ( equals( versions[i], details.getOldestUpdate( of( MINOR ) ) ) )
-                    {
-                        sink.text( getText( "report.nextMinor" ) );
-                    }
-                    else if ( equals( versions[i], details.getNewestUpdate( of( MINOR ) ) ) )
-                    {
-                        sink.text( getText( "report.latestMinor" ) );
-                    }
-                    else if ( equals( versions[i], details.getOldestUpdate( of( MAJOR ) ) ) )
-                    {
-                        sink.text( getText( "report.nextMajor" ) );
-                    }
-                    else if ( equals( versions[i], details.getNewestUpdate( of( MAJOR ) ) ) )
-                    {
-                        sink.text( getText( "report.latestMajor" ) );
-                    }
-
+                    sink.text( label );
                     safeItalic_();
                 }
             }
@@ -707,25 +669,18 @@ public abstract class AbstractVersionsReportRenderer
                     sink.lineBreak();
                 }
                 boolean allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );
-                boolean bold = equals( artifactVersions[i], versions.getOldestUpdate( of( SUBINCREMENTAL ) ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( of( SUBINCREMENTAL ) ) )
-                    || equals( artifactVersions[i], versions.getOldestUpdate( of( INCREMENTAL ) ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( of( INCREMENTAL ) ) )
-                    || equals( artifactVersions[i], versions.getOldestUpdate( of( MINOR ) ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( of( MINOR ) ) )
-                    || equals( artifactVersions[i], versions.getOldestUpdate( of( MAJOR ) ) )
-                    || equals( artifactVersions[i], versions.getNewestUpdate( of( MAJOR ) ) );
+                String label = getLabel( artifactVersions[i], versions );
                 if ( !allowed )
                 {
                     sink.text( "* " );
                     someNotAllowed = true;
                 }
-                if ( allowed && bold )
+                if ( allowed && label != null )
                 {
                     safeBold();
                 }
                 sink.text( artifactVersions[i].toString() );
-                if ( bold )
+                if ( label != null )
                 {
                     if ( allowed )
                     {
@@ -733,39 +688,7 @@ public abstract class AbstractVersionsReportRenderer
                     }
                     sink.nonBreakingSpace();
                     safeItalic();
-                    if ( equals( artifactVersions[i], versions.getOldestUpdate( of( SUBINCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.nextVersion" ) );
-                    }
-                    else if ( equals( artifactVersions[i], versions.getNewestUpdate( of( SUBINCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.latestSubIncremental" ) );
-                    }
-                    else if ( equals( artifactVersions[i], versions.getOldestUpdate( of( INCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.nextIncremental" ) );
-                    }
-                    else if ( equals( artifactVersions[i], versions.getNewestUpdate( of( INCREMENTAL ) ) ) )
-                    {
-                        sink.text( getText( "report.latestIncremental" ) );
-                    }
-                    else if ( equals( artifactVersions[i], versions.getOldestUpdate( of( MINOR ) ) ) )
-                    {
-                        sink.text( getText( "report.nextMinor" ) );
-                    }
-                    else if ( equals( artifactVersions[i], versions.getNewestUpdate( of( MINOR ) ) ) )
-                    {
-                        sink.text( getText( "report.latestMinor" ) );
-                    }
-                    else if ( equals( artifactVersions[i], versions.getOldestUpdate( of( MAJOR ) ) ) )
-                    {
-                        sink.text( getText( "report.nextMajor" ) );
-                    }
-                    else if ( equals( artifactVersions[i], versions.getNewestUpdate( of( MAJOR ) ) ) )
-                    {
-                        sink.text( getText( "report.latestMajor" ) );
-                    }
-
+                    sink.text( label );
                     safeItalic_();
                 }
             }
@@ -853,6 +776,44 @@ public abstract class AbstractVersionsReportRenderer
             rangeVersions.add( artifactVersion.toString() );
         }
         return rangeVersions;
+    }
+
+    protected String getLabel( ArtifactVersion version, AbstractVersionDetails versions )
+    {
+        String label = null;
+        if ( equals( version, versions.getNewestUpdate( of( MAJOR ) ) ) )
+        {
+            label = getText( "report.latestMajor" );
+        }
+        else if ( equals( version, versions.getOldestUpdate( of( MAJOR ) ) ) )
+        {
+            label = getText( "report.nextMajor" );
+        }
+        else if ( equals( version, versions.getNewestUpdate( of( MINOR ) ) ) )
+        {
+            label = getText( "report.latestMinor" );
+        }
+        else if ( equals( version, versions.getOldestUpdate( of( MINOR ) ) ) )
+        {
+            label = getText( "report.nextMinor" );
+        }
+        else if ( equals( version, versions.getNewestUpdate( of( INCREMENTAL ) ) ) )
+        {
+            label = getText( "report.latestIncremental" );
+        }
+        else if ( equals( version, versions.getOldestUpdate( of( INCREMENTAL ) ) ) )
+        {
+            label = getText( "report.nextIncremental" );
+        }
+        else if ( equals( version, versions.getNewestUpdate( of( SUBINCREMENTAL ) ) ) )
+        {
+            label = getText( "report.latestSubIncremental" );
+        }
+        else if ( equals( version, versions.getOldestUpdate( of( SUBINCREMENTAL ) ) ) )
+        {
+            label = getText( "report.nextVersion" );
+        }
+        return label;
     }
 
 }
