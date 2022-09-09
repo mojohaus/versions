@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.nio.file.Files;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.mojo.versions.utils.BaseMojoTestCase;
 import org.junit.Test;
@@ -26,6 +28,7 @@ import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
 
 /**
  * Basic tests for {@linkplain SetPropertyMojoTest}.
@@ -39,18 +42,37 @@ public class SetPropertyMojoTest extends BaseMojoTestCase
             throws Exception
     {
         SetPropertyMojo mojo = createMojo( "set-property",
-                "src/test/resources/org/codehaus/mojo/set-property/null-new-version-pom.xml" );
+                "target/test-classes/org/codehaus/mojo/set-property/pom.xml" );
         assertThat( mojo.getProject().getProperties(), is( mojo.getProject().getModel().getProperties() ) );
-        try
-        {
-            mojo.execute();
-            fail();
-        }
-        catch ( MojoExecutionException e )
-        {
-            assertThat( e.getMessage(),
-                    containsString( "Invalid execution arguments: newVersion must not be empty" ) );
-        }
+
+        setVariableValueToObject( mojo, "property", "dummy-api-version" );
+        setVariableValueToObject( mojo, "newVersion", null );
+
+        mojo.execute();
+
+        String output = String.join( "", Files.readAllLines( mojo.getProject().getFile().toPath() ) )
+                .replaceAll( "\\s*", "" );
+        assertThat( output,
+                matchesPattern( ".*<properties>.*<dummy-api-version></dummy-api-version>.*</properties>.*" ) );
+    }
+
+    @Test
+    public void testNewVersionEmpty()
+            throws Exception
+    {
+        SetPropertyMojo mojo = createMojo( "set-property",
+                "target/test-classes/org/codehaus/mojo/set-property/pom.xml" );
+        assertThat( mojo.getProject().getProperties(), is( mojo.getProject().getModel().getProperties() ) );
+
+        setVariableValueToObject( mojo, "property", "dummy-api-version" );
+        setVariableValueToObject( mojo, "newVersion", "" );
+
+        mojo.execute();
+
+        String output = String.join( "", Files.readAllLines( mojo.getProject().getFile().toPath() ) )
+                .replaceAll( "\\s*", "" );
+        assertThat( output,
+                matchesPattern( ".*<properties>.*<dummy-api-version></dummy-api-version>.*</properties>.*" ) );
     }
 
     @Test
@@ -58,7 +80,11 @@ public class SetPropertyMojoTest extends BaseMojoTestCase
             throws Exception
     {
         SetPropertyMojo mojo = createMojo( "set-property",
-                "src/test/resources/org/codehaus/mojo/set-property/null-property-pom.xml" );
+                "src/test/resources/org/codehaus/mojo/set-property/pom.xml" );
+
+        setVariableValueToObject( mojo, "property", null );
+        setVariableValueToObject( mojo, "propertiesVersionsFile", null );
+        setVariableValueToObject( mojo, "newVersion", "2.0.0" );
         try
         {
             mojo.execute();
@@ -67,7 +93,7 @@ public class SetPropertyMojoTest extends BaseMojoTestCase
         catch ( MojoExecutionException e )
         {
             assertThat( e.getMessage(),
-                    containsString( "Invalid execution arguments: property must not be empty" ) );
+                    containsString( "Please provide either 'property' or 'propertiesVersionsFile' parameter." ) );
         }
     }
 }

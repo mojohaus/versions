@@ -22,12 +22,9 @@ package org.codehaus.mojo.versions;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -37,7 +34,9 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.PropertiesVersionsFileReader;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.split;
 
 /**
  * Set a property to a given version without any sanity checks. Please be careful this can lead to changes which might
@@ -84,31 +83,6 @@ public class SetPropertyMojo
     private String propertiesVersionsFile;
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
-        List<String> problems = new ArrayList<>();
-        if ( isBlank( propertiesVersionsFile ) )
-        {
-            if ( isBlank( newVersion ) )
-            {
-                problems.add( "newVersion must not be empty" );
-            }
-            if ( isBlank( property ) )
-            {
-                problems.add( "property must not be empty" );
-            }
-        }
-        if ( !problems.isEmpty() )
-        {
-            throw new MojoExecutionException( "Invalid execution arguments: " + String.join( ", ", problems ) );
-        }
-        super.execute();
-    }
-
-    /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException   when things go wrong in a very bad way
@@ -118,9 +92,9 @@ public class SetPropertyMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        Property[] propertiesConfig = null;
-        String properties = "";
-        if ( !StringUtils.isEmpty( propertiesVersionsFile ) )
+        Property[] propertiesConfig;
+        String properties;
+        if ( !isEmpty( propertiesVersionsFile ) )
         {
             logWrongConfigWarning();
             getLog().debug( "Reading properties and versions to update from file: " + propertiesVersionsFile );
@@ -139,10 +113,10 @@ public class SetPropertyMojo
             propertiesConfig = reader.getPropertiesConfig();
             properties = reader.getProperties();
         }
-        else if ( !StringUtils.isEmpty( property ) )
+        else if ( !isEmpty( property ) )
         {
             getLog().debug( "Reading properties and versions to update from property and newVersion " );
-            propertiesConfig = Arrays.stream( StringUtils.split( property, "," ) ).map(
+            propertiesConfig = Arrays.stream( split( property, "," ) ).map(
                     prp ->
                     {
                         Property propertyConfig = new Property( prp );
@@ -177,17 +151,18 @@ public class SetPropertyMojo
             {
                 continue;
             }
-            PomHelper.setPropertyVersion( pom, version.getProfileId(), currentProperty.getName(), newVersionGiven );
+            PomHelper.setPropertyVersion( pom, version.getProfileId(), currentProperty.getName(), 
+                    defaultString( newVersionGiven ) );
         }
     }
 
     private void logWrongConfigWarning()
     {
-        if ( !StringUtils.isEmpty( property ) )
+        if ( !isEmpty( property ) )
         {
             getLog().warn( "-Dproperty provided but will be ignored as -DpropertiesVersionsFile is used" );
         }
-        if ( !StringUtils.isEmpty( newVersion ) )
+        if ( !isEmpty( newVersion ) )
         {
             getLog().warn( "-DnewVersion provided but will be ignored as -DpropertiesVersionsFile is used" );
         }
