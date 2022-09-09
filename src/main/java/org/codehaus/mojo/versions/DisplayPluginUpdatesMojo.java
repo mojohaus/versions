@@ -1813,7 +1813,6 @@ public class DisplayPluginUpdatesMojo
         // do nothing
     }
 
-    @SuppressWarnings( "unchecked" )
     private static int compare( ArtifactVersion a, ArtifactVersion b )
     {
         return a.compareTo( b );

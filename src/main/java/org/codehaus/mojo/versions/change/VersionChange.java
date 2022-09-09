@@ -90,12 +90,7 @@ public final class VersionChange
         {
             return false;
         }
-        if ( !Objects.equals( oldVersion, versionChange.oldVersion ) )
-        {
-            return false;
-        }
-
-        return true;
+        return Objects.equals( oldVersion, versionChange.oldVersion );
     }
 
     public int hashCode()

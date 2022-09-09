@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -55,6 +56,7 @@ import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.recording.ChangeRecorderNull;
@@ -216,16 +218,56 @@ public abstract class AbstractVersionsUpdaterMojo
      */
     private ChangeRecorder changeRecorder;
 
+    /**
+     * <p>Allows specifying the {@linkplain RuleSet} object describing rules
+     * on artifact versions to ignore when considering updates.</p>
+     *
+     * @see <a href="https://www.mojohaus.org/versions-maven-plugin/version-rules.html#Using_the_ruleSet_element_in_the_POM">
+     *     Using the ruleSet element in the POM</a>
+     *
+     * @since 2.13.0
+     */
+    @Parameter
+    protected RuleSet ruleSet;
+
+    /**
+     * <p>Allows specifying ignored versions directly as an alternative
+     * to providing the {@linkplain #ruleSet} parameter; mainly created
+     * for {@code -D} property usage.</p>
+     *
+     * <p>
+     * Example: {@code "1\.0\.1,.+-M.,.*-SNAPSHOT"}
+     * </p>
+     *
+     * <p><em>Currently, this parameter will override the defined {@link #ruleSet}</em></p>
+     * @since 2.13.0
+     */
+    @Parameter( property = "maven.version.ignore" )
+    protected Set<String> ignoredVersions;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     public VersionsHelper getHelper() throws MojoExecutionException
     {
         if ( helper == null )
         {
-            helper = new DefaultVersionsHelper( repositorySystem, artifactResolver, artifactMetadataSource,
-                                                remoteArtifactRepositories, remotePluginRepositories, localRepository,
-                                                wagonManager, settings, serverId, rulesUri, getLog(),
-                                                session, mojoExecution );
+            helper = new DefaultVersionsHelper.Builder()
+                    .withRepositorySystem( repositorySystem )
+                    .withArtifactResolver( artifactResolver )
+                    .withArtifactMetadataSource( artifactMetadataSource )
+                    .withRemoteArtifactRepositories( remoteArtifactRepositories )
+                    .withRemotePluginRepositories( remotePluginRepositories )
+                    .withLocalRepository( localRepository )
+                    .withWagonManager( wagonManager )
+                    .withSettings( settings )
+                    .withServerId( serverId )
+                    .withRulesUri( rulesUri )
+                    .withRuleSet( ruleSet )
+                    .withIgnoredVersions( ignoredVersions )
+                    .withLog( getLog() )
+                    .withMavenSession( session )
+                    .withMojoExecution( mojoExecution )
+                    .build();
         }
         return helper;
     }

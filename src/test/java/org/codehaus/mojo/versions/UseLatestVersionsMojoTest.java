@@ -4,28 +4,31 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.change.VersionChange;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
+import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
+import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -33,7 +36,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings( "deprecation" )
-public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
+public class UseLatestVersionsMojoTest
 {
     private UseLatestVersionsMojo mojo;
     private TestChangeRecorder changeRecorder;
@@ -41,7 +44,6 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
     @Before
     public void setUp() throws Exception
     {
-        super.setUp();
         RepositorySystem repositorySystemMock = mock( RepositorySystem.class );
         when( repositorySystemMock.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer( invocation ->
         {
@@ -51,30 +53,13 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
                     dependency.getClassifier() != null ? dependency.getClassifier() : "default", null );
         } );
 
-        ArtifactMetadataSource artifactMetadataSourceMock = mock( ArtifactMetadataSource.class );
-        when( artifactMetadataSourceMock.retrieveAvailableVersions( any( Artifact.class ), any(), any() ) ).then(
-                invocation ->
-                {
-                    Artifact artifact = invocation.getArgument( 0 );
-                    if ( "dependency-artifact".equals( artifact.getArtifactId() ) )
-                    {
-                        return Arrays.asList( new DefaultArtifactVersion( "1.1.1-SNAPSHOT" ),
-                                new DefaultArtifactVersion( "1.1.0" ), new DefaultArtifactVersion( "1.1.0-SNAPSHOT" ),
-                                new DefaultArtifactVersion( "1.0.0" ), new DefaultArtifactVersion( "1.0.0-SNAPSHOT" ),
-                                new DefaultArtifactVersion( "0.9.0" ) );
-                    }
-                    else if ( "poison-artifact".equals( artifact.getArtifactId() ) )
-                    {
-                        return Arrays.asList( new DefaultArtifactVersion( "1.1.1.1-SNAPSHOT" ),
-                                new DefaultArtifactVersion( "1.1.1.0" ),
-                                new DefaultArtifactVersion( "1.1.1.0-SNAPSHOT" ),
-                                new DefaultArtifactVersion( "1.0.0.0" ),
-                                new DefaultArtifactVersion( "1.0.0.0-SNAPSHOT" ),
-                                new DefaultArtifactVersion( "0.9.0.0" ) );
-                    }
-                    fail();
-                    return null;
-                } );
+        ArtifactMetadataSource artifactMetadataSourceMock = mockArtifactMetadataSource( new HashMap<String, String[]>()
+        {{
+            put( "dependency-artifact", new String[] {"1.1.1-SNAPSHOT", "1.1.0", "1.1.0-SNAPSHOT", "1.0.0",
+                    "1.0.0-SNAPSHOT", "0.9.0"} );
+            put( "poison-artifact", new String[] {"1.1.1.1-SNAPSHOT", "1.1.1.0", "1.1.1.0-SNAPSHOT", "1.0.0.0",
+                    "1.0.0.0-SNAPSHOT", "0.9.0.0"} );
+        }} );
 
         mojo = new UseLatestVersionsMojo()
         {{
@@ -254,4 +239,19 @@ public class UseLatestVersionsMojoTest extends AbstractMojoTestCase
                         "1.0.0" ) ) );
     }
 
+    @Test
+    public void testIgnoredVersions()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+    {
+        setVariableValueToObject( mojo, "processDependencies", true );
+        setVariableValueToObject( mojo, "ignoredVersions", singleton( "1.1.0" ) );
+
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
+                    .thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(), Is.is( empty() ) );
+    }
 }

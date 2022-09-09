@@ -114,12 +114,7 @@ final class DefaultArtifactAssociation
         {
             return false;
         }
-        if ( !getGroupId().equals( that.getGroupId() ) )
-        {
-            return false;
-        }
-
-        return true;
+        return getGroupId().equals( that.getGroupId() );
     }
 
     public int hashCode()

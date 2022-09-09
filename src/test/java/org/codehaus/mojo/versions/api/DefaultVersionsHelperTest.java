@@ -20,8 +20,10 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -34,19 +36,28 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.model.IgnoreVersion;
+import org.codehaus.mojo.versions.model.Rule;
+import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
@@ -204,32 +215,76 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
     {
         final String resourcePath = "/" + getClass().getPackage().getName().replace( '.', '/' ) + "/rules.xml";
         final String rulesUri = getClass().getResource( resourcePath ).toExternalForm();
-        DefaultVersionsHelper helper = createHelper( rulesUri, metadataSource );
-        return helper;
+        return new DefaultVersionsHelper.Builder()
+                .withRepositorySystem( lookup( RepositorySystem.class ) )
+                .withArtifactResolver( new DefaultArtifactResolver() )
+                .withArtifactMetadataSource( metadataSource )
+                .withRemoteArtifactRepositories( new ArrayList<>() )
+                .withRemotePluginRepositories( new ArrayList<>() )
+                .withLocalRepository( new DefaultArtifactRepository(
+                        "", "", new DefaultRepositoryLayout() ) )
+                .withWagonManager( lookup( WagonManager.class ) )
+                .withSettings( new Settings() )
+                .withServerId( "" )
+                .withRulesUri( rulesUri )
+                .withLog( mock( Log.class ) )
+                .withMavenSession( mock( MavenSession.class ) )
+                .withMojoExecution( mock( MojoExecution.class ) ).build();
     }
 
-    private DefaultVersionsHelper createHelper( String rulesUri, ArtifactMetadataSource metadataSource )
-        throws Exception
+    @Test
+    public void testIgnoredVersionsShouldBeTheOnlyPresentInAnEmptyRuleSet()
+            throws MojoExecutionException, IllegalAccessException
     {
-        WagonManager wagonManager = lookup( WagonManager.class );
-        //        new DefaultWagonManager()
-        //        {
-        //            @Override
-        //            public Wagon getWagon( String protocol )
-        //                throws UnsupportedProtocolException
-        //            {
-        //                return new FileWagon();
-        //            }
-        //        };
-
-        DefaultVersionsHelper helper =
-            new DefaultVersionsHelper( lookup( RepositorySystem.class ), new DefaultArtifactResolver(), metadataSource,
-                                       new ArrayList(),
-                                       new ArrayList(),
-                                       new DefaultArtifactRepository( "", "", new DefaultRepositoryLayout() ),
-                                       wagonManager, new Settings(), "", rulesUri, mock( Log.class ),
-                                       mock( MavenSession.class ), mock( MojoExecution.class ) );
-        return helper;
+        DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
+                .withLog( new SystemStreamLog() )
+                .withIgnoredVersions( Arrays.asList( ".*-M.", ".*-SNAPSHOT" ) )
+                .build();
+        RuleSet ruleSet = (RuleSet) getVariableValueFromObject( versionsHelper, "ruleSet" );
+        assertThat( ruleSet.getIgnoreVersions(), hasSize( 2 ) );
+        assertThat( ruleSet.getIgnoreVersions().stream().map( IgnoreVersion::getVersion )
+                .collect( Collectors.toList() ), containsInAnyOrder( ".*-M.", ".*-SNAPSHOT" ) );
     }
 
+    @Test
+    public void testDefaultsShouldBePresentInAnEmptyRuleSet()
+            throws MojoExecutionException, IllegalAccessException
+    {
+        DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
+                .withLog( new SystemStreamLog() )
+                .withIgnoredVersions( singletonList( ".*-M." ) )
+                .build();
+        RuleSet ruleSet = (RuleSet) getVariableValueFromObject( versionsHelper, "ruleSet" );
+        assertThat( ruleSet.getComparisonMethod(), is( "maven" ) );
+    }
+
+    @Test
+    public void testIgnoredVersionsShouldExtendTheRuleSet() throws MojoExecutionException, IllegalAccessException
+    {
+        DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
+                .withLog( new SystemStreamLog() )
+                .withRuleSet( new RuleSet()
+                {{
+                    setIgnoreVersions( new ArrayList<>( singletonList( new IgnoreVersion()
+                    {{
+                        setVersion( "1.0.0" );
+                    }} ) ) );
+                    setRules( singletonList( new Rule()
+                    {{
+                        setGroupId( "org.slf4j" );
+                        setArtifactId( "slf4j-api" );
+                        setIgnoreVersions( singletonList( new IgnoreVersion()
+                        {{
+                            setType( "regex" );
+                            setVersion( "^[^1]\\.*" );
+                        }} ) );
+                    }} ) );
+                }} )
+                .withIgnoredVersions( Arrays.asList( ".*-M.", ".*-SNAPSHOT" ) )
+                .build();
+        RuleSet ruleSet = (RuleSet) getVariableValueFromObject( versionsHelper, "ruleSet" );
+        assertThat( ruleSet.getIgnoreVersions(), hasSize( 3 ) );
+        assertThat( ruleSet.getIgnoreVersions().stream().map( IgnoreVersion::getVersion )
+                .collect( Collectors.toList() ), containsInAnyOrder( ".*-M.", ".*-SNAPSHOT", "1.0.0" ) );
+    }
 }

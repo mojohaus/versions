@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions.recording;
  * under the License.
  */
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
 
@@ -57,7 +56,7 @@ public class ChangeRecorderNull implements ChangeRecorder
     }
 
     @Override
-    public final void serialize( final OutputStream outputStream ) throws IOException
+    public final void serialize( final OutputStream outputStream )
     {
 
     }

@@ -1,0 +1,57 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>default-group</groupId>
+  <artifactId>default-artifact</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-api</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>localhost</groupId>
+      <artifactId>dummy-api</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <goals>
+          <goal>display-dependency-updates</goal>
+        </goals>
+        <configuration>
+          <!-- pluginContext is necessary: it's not being injected by lookupConfiguredMojo -->
+          <pluginContext/>
+          <ruleSet>
+            <ignoreVersions>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.+-SNAPSHOT</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.+-M\d+</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <version>1.0.1</version>
+              </ignoreVersion>
+            </ignoreVersions>
+          </ruleSet>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -47,7 +47,7 @@ public abstract class AbstractVersionsDisplayMojo
      * @since 2.2
      */
     @Parameter( property = "versions.outputFile" )
-    private File outputFile;
+    protected File outputFile;
 
     /**
      * Controls whether the display output is logged to the console.
@@ -55,7 +55,7 @@ public abstract class AbstractVersionsDisplayMojo
      * @since 2.2
      */
     @Parameter( property = "versions.logOutput", defaultValue = "true" )
-    private boolean logOutput;
+    protected boolean logOutput;
 
     /**
      * The character encoding to use when writing to {@link #outputFile}.
@@ -63,7 +63,7 @@ public abstract class AbstractVersionsDisplayMojo
      * @since 2.2
      */
     @Parameter( property = "outputEncoding", defaultValue = "${project.reporting.outputEncoding}" )
-    private String outputEncoding;
+    protected String outputEncoding;
 
     /**
      * Line width which should be used to format the padding of the version info list output.
@@ -72,7 +72,7 @@ public abstract class AbstractVersionsDisplayMojo
      */
     @Parameter( property = "versions.outputLineWidth",
                 defaultValue = AbstractVersionsDisplayMojo.DEFAULT_OUTPUT_LINE_WIDTH + "" )
-    private int outputLineWidth;
+    protected int outputLineWidth;
 
     private boolean outputFileError = false;
 
