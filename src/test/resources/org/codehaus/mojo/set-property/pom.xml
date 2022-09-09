@@ -22,9 +22,7 @@
         <plugins>
             <plugin>
                 <artifactId>versions-maven-plugin</artifactId>
-                <configuration>
-                    <property>dummy-api-version</property>
-                </configuration>
+                <configuration/>
             </plugin>
         </plugins>
     </build>

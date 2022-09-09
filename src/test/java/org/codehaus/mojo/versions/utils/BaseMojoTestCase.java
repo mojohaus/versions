@@ -57,6 +57,7 @@ public abstract class BaseMojoTestCase extends AbstractMojoTestCase
      * Lookup the mojo leveraging the actual subprojects pom
      * and injects the project using the given pom file path.
      *
+     * @param <T>         target Mojo subclass
      * @param goal        to execute on the plugin
      * @param pomFilePath path to the pom project to inject
      * @return a Mojo instance
