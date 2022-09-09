@@ -166,8 +166,7 @@ public final class VersionComparators
         {
             destination = stripSnapshot( destination );
         }
-        Pattern matchSnapshotRegex = SNAPSHOT_PATTERN;
-        final Matcher matcher = matchSnapshotRegex.matcher( source.toString() );
+        final Matcher matcher = SNAPSHOT_PATTERN.matcher( source.toString() );
         if ( matcher.find() )
         {
             return new DefaultArtifactVersion( destination.toString() + "-" + matcher.group( 0 ) );

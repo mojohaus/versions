@@ -44,6 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
@@ -111,62 +112,61 @@ public class DefaultVersionsHelper
      * The artifact comparison rules to use.
      *
      * @since 1.0-alpha-3
-     * @deprecated
      */
-    private final RuleSet ruleSet;
+    private RuleSet ruleSet;
 
     /**
      * The artifact metadata source to use.
      *
      * @since 1.0-alpha-3
      */
-    private final ArtifactMetadataSource artifactMetadataSource;
+    private ArtifactMetadataSource artifactMetadataSource;
 
     /**
      * The local repository to consult.
      *
      * @since 1.0-alpha-3
      */
-    private final ArtifactRepository localRepository;
+    private ArtifactRepository localRepository;
 
     /**
      * The remote artifact repositories to consult.
      *
      * @since 1.0-alpha-3
      */
-    private final List<ArtifactRepository> remoteArtifactRepositories;
+    private List<ArtifactRepository> remoteArtifactRepositories;
 
     /**
      * The remote plugin repositories to consult.
      *
      * @since 1.0-alpha-3
      */
-    private final List<ArtifactRepository> remotePluginRepositories;
+    private List<ArtifactRepository> remotePluginRepositories;
 
-    private final RepositorySystem repositorySystem;
+    private RepositorySystem repositorySystem;
 
     /**
      * The {@link Log} to send log messages to.
      *
      * @since 1.0-alpha-3
      */
-    private final Log log;
+    private Log log;
 
     /**
      * The maven session.
      *
      * @since 1.0-beta-1
      */
-    private final MavenSession mavenSession;
+    private MavenSession mavenSession;
 
     /**
      * The artifact resolver.
      *
      * @since 1.3
      */
-    private final ArtifactResolver artifactResolver;
+    private ArtifactResolver artifactResolver;
 
-    private final MojoExecution mojoExecution;
+    private MojoExecution mojoExecution;
 
     /**
      * A cache mapping artifacts to their best fitting rule, since looking up
@@ -177,42 +177,10 @@ public class DefaultVersionsHelper
     private final Map<String, Rule> artifactBestFitRule = new HashMap<>();
 
     /**
-     * Constructs a new {@link DefaultVersionsHelper}.
-     *
-     * @param repositorySystem           The repositorySystem.
-     * @param artifactResolver           Artifact resolver
-     * @param artifactMetadataSource     The artifact metadata source to use.
-     * @param remoteArtifactRepositories The remote artifact repositories to consult.
-     * @param remotePluginRepositories   The remote plugin repositories to consult.
-     * @param localRepository            The local repository to consult.
-     * @param wagonManager               The wagon manager (used if rules need to be retrieved).
-     * @param settings                   The settings (used to provide proxy information to the wagon manager).
-     * @param serverId                   The serverId hint for the wagon manager.
-     * @param rulesUri                   The URL to retrieve the versioning rules from.
-     * @param log                        The {@link org.apache.maven.plugin.logging.Log} to send log messages to.
-     * @param mavenSession               The maven session information.
-     * @throws MojoExecutionException if something goes wrong.
-     * @since 1.0-alpha-3
+     * Private constructor used by the builder
      */
-    @SuppressWarnings( "checkstyle:ParameterNumber" )
-    public DefaultVersionsHelper( RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                  ArtifactMetadataSource artifactMetadataSource,
-                                  List<ArtifactRepository> remoteArtifactRepositories,
-                                  List<ArtifactRepository> remotePluginRepositories, ArtifactRepository localRepository,
-                                  WagonManager wagonManager, Settings settings, String serverId, String rulesUri,
-                                  Log log, MavenSession mavenSession, MojoExecution mojoExecution )
-        throws MojoExecutionException
+    private DefaultVersionsHelper()
     {
-        this.repositorySystem = repositorySystem;
-        this.artifactResolver = artifactResolver;
-        this.mavenSession = mavenSession;
-        this.mojoExecution = mojoExecution;
-        this.ruleSet = loadRuleSet( serverId, settings, wagonManager, rulesUri, log );
-        this.artifactMetadataSource = artifactMetadataSource;
-        this.localRepository = localRepository;
-        this.remoteArtifactRepositories = remoteArtifactRepositories;
-        this.remotePluginRepositories = remotePluginRepositories;
-        this.log = log;
     }
 
     @Deprecated
@@ -264,30 +232,48 @@ public class DefaultVersionsHelper
         return p.matcher( value ).matches();
     }
 
-    private static RuleSet loadRuleSet( String serverId, Settings settings, WagonManager wagonManager, String rulesUri,
-                                        Log logger )
-        throws MojoExecutionException
+    /**
+     * <p>Creates the enriched version of the ruleSet given as parameter; the ruleSet will contain the
+     * set of ignored versions passed on top of its own (if defined).</p>
+     *
+     * <p>If the {@code originalRuleSet} is {@code null}, a new {@linkplain RuleSet} will be created as
+     * a result.</p>
+     *
+     * <p><em>The method does not change the {@code originalRuleSet} object.</em></p>
+     *
+     * @param ignoredVersions collection of ignored version to enrich the clone of the original rule set
+     * @param originalRuleSet original rule set
+     * @return new RuleSet object containing the (if passed) cloned version of the rule set, enriched with
+     *         the given set of ignored versions
+     */
+    @SuppressWarnings( "checkstyle:AvoidNestedBlocks" )
+    private static RuleSet enrichRuleSet( Collection<String> ignoredVersions, RuleSet originalRuleSet )
     {
         RuleSet ruleSet = new RuleSet();
-        boolean rulesUriGiven = isRulesUriNotBlank( rulesUri );
-
-        if ( rulesUriGiven )
+        if ( originalRuleSet != null )
         {
-            RuleSet loadedRules;
-
-            if ( isClasspathUri( rulesUri ) )
+            ruleSet.setComparisonMethod( originalRuleSet.getComparisonMethod() );
+            if ( originalRuleSet.getRules() != null )
             {
-                loadedRules = getRulesFromClasspath( rulesUri, logger );
+                ruleSet.setRules( new ArrayList<>( originalRuleSet.getRules() ) );
             }
-            else
+            if ( originalRuleSet.getIgnoreVersions() != null )
             {
-                loadedRules = getRulesViaWagon( rulesUri, logger, serverId, serverId, wagonManager,
-                                                settings );
+                ruleSet.setIgnoreVersions( new ArrayList<>( originalRuleSet.getIgnoreVersions() ) );
             }
-
-            ruleSet.setIgnoreVersions( loadedRules.getIgnoreVersions() );
-            ruleSet.setRules( loadedRules.getRules() );
         }
+
+        if ( ruleSet.getIgnoreVersions() == null )
+        {
+            ruleSet.setIgnoreVersions( new ArrayList<>() );
+        }
+        ruleSet.getIgnoreVersions().addAll( ignoredVersions.stream().map( v ->
+        {
+            IgnoreVersion ignoreVersion = new IgnoreVersion();
+            ignoreVersion.setType( TYPE_REGEX );
+            ignoreVersion.setVersion( v );
+            return ignoreVersion;
+        } ).collect( Collectors.toList() ) );
 
         return ruleSet;
     }
@@ -318,11 +304,6 @@ public class DefaultVersionsHelper
         {
             throw new MojoExecutionException( "Could not load specified rules from " + uri, e );
         }
-    }
-
-    private static boolean isRulesUriNotBlank( String rulesUri )
-    {
-        return rulesUri != null && rulesUri.trim().length() != 0;
     }
 
     private static RuleSet getRulesViaWagon( String rulesUri, Log logger, String serverId, String id,
@@ -1039,4 +1020,167 @@ public class DefaultVersionsHelper
         }
     }
 
+    /**
+     * Builder class for {@linkplain DefaultVersionsHelper}
+     */
+    public static class Builder
+    {
+        private RepositorySystem repositorySystem;
+        private ArtifactResolver artifactResolver;
+        private ArtifactMetadataSource artifactMetadataSource;
+        private List<ArtifactRepository> remoteArtifactRepositories;
+        private List<ArtifactRepository> remotePluginRepositories;
+        private ArtifactRepository localRepository;
+        private Collection<String> ignoredVersions;
+        private RuleSet ruleSet;
+        private WagonManager wagonManager;
+        private Settings settings;
+        private String serverId;
+        private String rulesUri;
+        private Log log;
+        private MavenSession mavenSession;
+        private MojoExecution mojoExecution;
+
+        public Builder()
+        {
+        }
+
+        public Builder withRepositorySystem( RepositorySystem repositorySystem )
+        {
+            this.repositorySystem = repositorySystem;
+            return this;
+        }
+
+        public Builder withArtifactResolver( ArtifactResolver artifactResolver )
+        {
+            this.artifactResolver = artifactResolver;
+            return this;
+        }
+
+        public Builder withArtifactMetadataSource( ArtifactMetadataSource artifactMetadataSource )
+        {
+            this.artifactMetadataSource = artifactMetadataSource;
+            return this;
+        }
+
+        public Builder withRemoteArtifactRepositories(
+                List<ArtifactRepository> remoteArtifactRepositories )
+        {
+            this.remoteArtifactRepositories = remoteArtifactRepositories;
+            return this;
+        }
+
+        public Builder withRemotePluginRepositories(
+                List<ArtifactRepository> remotePluginRepositories )
+        {
+            this.remotePluginRepositories = remotePluginRepositories;
+            return this;
+        }
+
+        public Builder withLocalRepository( ArtifactRepository localRepository )
+        {
+            this.localRepository = localRepository;
+            return this;
+        }
+
+        public Builder withIgnoredVersions( Collection<String> ignoredVersions )
+        {
+            this.ignoredVersions = ignoredVersions;
+            return this;
+        }
+
+        public Builder withRuleSet( RuleSet ruleSet )
+        {
+            this.ruleSet = ruleSet;
+            return this;
+        }
+
+        public Builder withWagonManager( WagonManager wagonManager )
+        {
+            this.wagonManager = wagonManager;
+            return this;
+        }
+
+        public Builder withSettings( Settings settings )
+        {
+            this.settings = settings;
+            return this;
+        }
+
+        public Builder withServerId( String serverId )
+        {
+            this.serverId = serverId;
+            return this;
+        }
+
+        public Builder withRulesUri( String rulesUri )
+        {
+            this.rulesUri = rulesUri;
+            return this;
+        }
+
+        public Builder withLog( Log log )
+        {
+            this.log = log;
+            return this;
+        }
+
+        public Builder withMavenSession( MavenSession mavenSession )
+        {
+            this.mavenSession = mavenSession;
+            return this;
+        }
+
+        public Builder withMojoExecution( MojoExecution mojoExecution )
+        {
+            this.mojoExecution = mojoExecution;
+            return this;
+        }
+
+        /**
+         * Builds the constructed {@linkplain DefaultVersionsHelper} object
+         * @return constructed {@linkplain DefaultVersionsHelper}
+         * @throws MojoExecutionException should the constructor with the Wagon go wrong
+         */
+        public DefaultVersionsHelper build() throws MojoExecutionException
+        {
+            DefaultVersionsHelper instance = new DefaultVersionsHelper();
+            instance.repositorySystem = repositorySystem;
+            instance.artifactResolver = artifactResolver;
+            instance.mavenSession = mavenSession;
+            instance.mojoExecution = mojoExecution;
+            if ( ruleSet != null )
+            {
+                if ( !isBlank( rulesUri ) )
+                {
+                    log.warn( "rulesUri is ignored if rules are specified in pom or as parameters" );
+                }
+                instance.ruleSet = ruleSet;
+            }
+            else
+            {
+                instance.ruleSet = isBlank( rulesUri )
+                        ? new RuleSet()
+                        : isClasspathUri( rulesUri )
+                        ? getRulesFromClasspath( rulesUri, log )
+                        : getRulesViaWagon( rulesUri, log, serverId, serverId, wagonManager,
+                        settings );
+            }
+            if ( ignoredVersions != null && !ignoredVersions.isEmpty() )
+            {
+                instance.ruleSet = enrichRuleSet( ignoredVersions, instance.ruleSet );
+            }
+            instance.artifactMetadataSource = artifactMetadataSource;
+            instance.localRepository = localRepository;
+            instance.remoteArtifactRepositories = remoteArtifactRepositories;
+            instance.remotePluginRepositories = remotePluginRepositories;
+            instance.log = log;
+            return instance;
+        }
+
+        private static boolean isBlank( String s )
+        {
+            return s == null || s.trim().isEmpty();
+        }
+    }
 }

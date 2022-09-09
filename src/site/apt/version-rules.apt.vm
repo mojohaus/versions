@@ -60,7 +60,13 @@ Version number rules
 
 * Rules.xml
 
-  To specify the version schemes to use, you must define a {{{./rule.html}rule-set xml file}}, for example:
+  To specify the version schemes to use, you may define a {{{./rule.html}rule-set xml file}}, use the <<<ruleSet>>>
+  element in the <<<versions-maven-plugin>>> plugin configuration, or specify ignored versions via
+  the <<<maven.version.ignore>>> property.
+
+** Using the <<<Rules.xml>>> file
+
+  The <<<rules.xml>>> file should conform to the xsd specified in the example below.
 
 ---
 <ruleset comparisonMethod="maven"
@@ -82,10 +88,84 @@ Version number rules
 
   Note: the <<<groupId>>> attribute in the <<<rule>>> elements has a lazy <<<.*>>> at the end, such that
   <<<com.mycompany>>> will match <<<com.mycompany>>>, <<<com.mycompany.foo>>>, <<<com.mycompany.foo.bar>>>, etc.
-  
+
+** Using the <<<ruleSet>>> element in the POM
+
+  As an alternative to providing a separate <<<rules.xml>>> file, starting with version <<<2.13.0>>> it is possible
+  to provide the <<<ruleSet>>> element directly in the POM. The structure is somewhat simpler to
+  the <<<rules.xml>>> file:
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
+        <configuration>
+          <ruleSet>
+            <!-- zero or more elements -->
+            <ignoreVersions>
+              <!-- zero or more elements -->
+              <ignoreVersion>
+                <version>1.0.0</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <!-- can be either: 'exact' (default) or 'regex' -->
+                <type>regex</type>
+                <version>(.+-SNAPSHOT|.+-M\d)</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.+-(alpha|beta)</version>
+              </ignoreVersion>
+          </ignoreVersions>
+
+          <!-- zero or more elements -->
+          <rules>
+            <!-- zero or more elements -->
+            <rule>
+              <!-- if provided, restricts the groupId for the rule -->
+              <groupId>org.codehaus.mojo</groupId>
+
+              <!-- if provided,
+              <artifactId>versions-maven-plugin</artifactId>
+
+              <!-- syntax the same as for the general ignoreVersions -->
+              <ignoreVersions>
+                ...
+              </ignoreVersions>
+
+              <!-- optional, comparison method for the rule, one of: maven (default), numeric, mercury -->
+              <comparisonMethod>maven</comparisonMethod>
+            </rule>
+          </rules>
+      </ruleSet>
+---
+
+** Using the <<<maven.version.ignore>>> property
+
+  The <<<maven.version.ignore>>> property can list *comma-separated* list of global version **regex** patterns, which
+  will be ignored when considering available versions.
+
+  Examples:
+
+  * <<<1.0.0>>>
+
+  * <<<.+-SNAPSHOT>>>
+
+  * <<<(.+-SNAPSHOT|.+-M\d),.+-(alpha|beta),3.0.0>>>
+
 ** Ignoring certain versions
 
   It is possible to ignore versions on a global and on a per-rule basis.
+
+  The other methods (via the <<<<ruleSet>>>> element and via the <<<maven.version.ignore>>>) property have been
+  explained above. The described
 
 ---
 <ruleset comparisonMethod="maven"

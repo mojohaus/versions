@@ -2,15 +2,14 @@ package org.codehaus.mojo.versions;
 
 import javax.xml.stream.XMLStreamException;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
@@ -27,14 +26,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
+import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -58,7 +58,12 @@ public class UpdateParentMojoTest
     public static void setUpStatic() throws ArtifactMetadataRetrievalException
     {
         repositorySystem = mockRepositorySystem();
-        artifactMetadataSource = mockArtifactMetaDataSource();
+        artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
+        {{
+            put( "parent-artifact", new String[] { "1.0.1-SNAPSHOT", "1.0.0", "0.9.0" } );
+            put( "issue-670-artifact", new String[] { "0.0.1-1", "0.0.1-1-impl-SNAPSHOT" } );
+            put( "unknown-artifact", new String[0] );
+        }} );
     }
 
     @Before
@@ -110,35 +115,6 @@ public class UpdateParentMojoTest
                     ? dependency.getClassifier() : "default", null );
         } );
         return repositorySystem;
-    }
-
-    @SuppressWarnings( "deprecation" )
-    private static ArtifactMetadataSource mockArtifactMetaDataSource() throws ArtifactMetadataRetrievalException
-    {
-        ArtifactMetadataSource artifactMetadataSource = mock( ArtifactMetadataSource.class );
-        when( artifactMetadataSource.retrieveAvailableVersions( any( Artifact.class ), any(), any() ) ).then(
-                invocation ->
-                {
-                    Artifact artifact = invocation.getArgument( 0 );
-                    if ( "parent-artifact".equals( artifact.getArtifactId() ) )
-                    {
-                        return Arrays.asList( new DefaultArtifactVersion( "1.0.1-SNAPSHOT" ),
-                                new DefaultArtifactVersion( "1.0.0" ),
-                                new DefaultArtifactVersion( "0.9.0" ) );
-                    }
-                    else if ( "issue-670-artifact".equals( artifact.getArtifactId() ) )
-                    {
-                        return Arrays.asList( new DefaultArtifactVersion( "0.0.1-1" ),
-                                new DefaultArtifactVersion( "0.0.1-1-impl-SNAPSHOT" ) );
-                    }
-                    else if ( "unknown-artifact".equals( artifact.getArtifactId() ) )
-                    {
-                        return Collections.emptyList();
-                    }
-                    fail();
-                    return null;
-                } );
-        return artifactMetadataSource;
     }
 
     @Test
@@ -287,5 +263,24 @@ public class UpdateParentMojoTest
         assertThat( changeRecorder.getChanges(), hasItem( new VersionChange( "default-group",
                 "issue-670-artifact", "0.0.1-1",
                 "0.0.1-1-impl-SNAPSHOT" ) ) );
+    }
+
+    @Test
+    public void testIgnoredVersions()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+    {
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "parent-artifact" );
+            setVersion( "0.9.0" );
+        }} );
+        setVariableValueToObject( mojo, "ignoredVersions", singleton( "1.0.0" ) );
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) ).thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(), is( empty() ) );
     }
 }

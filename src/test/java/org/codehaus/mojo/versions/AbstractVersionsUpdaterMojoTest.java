@@ -44,11 +44,9 @@ public class AbstractVersionsUpdaterMojoTest
     /**
      * Basic test.
      *
-     * @throws Exception when the test fails.
      */
     @Test
     public void testBasic()
-        throws Exception
     {
         assertEquals( 0, instanceCompare( "1", "1" ) );
         assertTrue( instanceCompare( "1", "2" ) < 0 );

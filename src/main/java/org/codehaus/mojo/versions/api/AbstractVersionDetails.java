@@ -378,19 +378,16 @@ public abstract class AbstractVersionDetails
     }
 
     public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
-            throws InvalidSegmentException
     {
         return getOldestUpdate( currentVersion, updateScope, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
-            throws InvalidSegmentException
     {
         return getNewestUpdate( currentVersion, updateScope, isIncludeSnapshots() );
     }
 
     public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope )
-            throws InvalidSegmentException
     {
         return getAllUpdates( currentVersion, updateScope, isIncludeSnapshots() );
     }

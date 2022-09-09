@@ -25,12 +25,10 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.doxia.tools.SiteTool;
@@ -41,15 +39,18 @@ import org.apache.maven.model.PluginManagement;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.plexus.i18n.I18N;
 import org.junit.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -64,7 +65,6 @@ public class PluginUpdatesReportTest
 {
     private static class TestPluginUpdatesReport extends PluginUpdatesReport
     {
-        @SuppressWarnings( "deprecation" )
         TestPluginUpdatesReport()
         {
             mockPlexusComponents();
@@ -73,32 +73,7 @@ public class PluginUpdatesReportTest
             project.setBuild( new Build() );
             project.getBuild().setPluginManagement( new PluginManagement() );
 
-            artifactMetadataSource = mock( ArtifactMetadataSource.class );
-            try
-            {
-                when( artifactMetadataSource.retrieveAvailableVersions( any( Artifact.class ), any(), any() ) ).then(
-                    invocation ->
-                    {
-                        Artifact artifact = invocation.getArgument( 0 );
-                        if ( "artifactA".equals( artifact.getArtifactId() ) && "1.0.0".equals(
-                            artifact.getVersion() ) )
-                        {
-                            return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
-                                                  new DefaultArtifactVersion( "2.0.0" ) );
-                        }
-                        if ( "artifactB".equals( artifact.getArtifactId() ) && "1.0.0".equals(
-                            artifact.getVersion() ) )
-                        {
-                            return Arrays.asList( new DefaultArtifactVersion( artifact.getVersion() ),
-                                                  new DefaultArtifactVersion( "1.1.0" ) );
-                        }
-                        return Collections.singletonList( new DefaultArtifactVersion( artifact.getVersion() ) );
-                    } );
-            }
-            catch ( ArtifactMetadataRetrievalException e )
-            {
-                throw new RuntimeException( e );
-            }
+            artifactMetadataSource = mockArtifactMetadataSource();
         }
 
         public TestPluginUpdatesReport withPlugins( Plugin... plugins )
@@ -122,6 +97,20 @@ public class PluginUpdatesReportTest
         public TestPluginUpdatesReport withOnlyProjectPlugins( boolean onlyProjectPlugins )
         {
             this.onlyProjectPlugins = onlyProjectPlugins;
+            return this;
+        }
+
+        public TestPluginUpdatesReport withRuleSet(
+                RuleSet ruleSet )
+        {
+            this.ruleSet = ruleSet;
+            return this;
+        }
+
+        public TestPluginUpdatesReport withIgnoredVersions(
+                Set<String> ignoredVersions )
+        {
+            this.ignoredVersions = ignoredVersions;
             return this;
         }
 
@@ -223,5 +212,24 @@ public class PluginUpdatesReportTest
         String output = os.toString();
         assertThat( output, containsString( "artifactA" ) );
         assertThat( output, not( anyOf( containsString( "artifactB" ), containsString( "artifactC" ) ) ) );
+    }
+
+    @Test
+    public void testOnlyProjectPluginsWithIgnoredVersions() throws IOException, MavenReportException
+    {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        new TestPluginUpdatesReport()
+                .withPlugins( pluginOf( "artifactA" ) )
+                .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
+                        pluginOf( "artifactC" ) )
+                .withOnlyUpgradable( true )
+                .withOnlyProjectPlugins( true )
+                .withIgnoredVersions( Collections.singleton( "2.0.0" ) )
+                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+
+        String output = os.toString().replaceAll( "\\s", " " )
+                .replaceAll( "<[^>]+>", " " ).replaceAll( "&[^;]+;", " " );
+        assertThat( output, matchesPattern( ".*\\breport.overview.numNewerVersionAvailable\\s+0\\b.*" ) );
     }
 }
