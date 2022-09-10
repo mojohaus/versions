@@ -26,9 +26,12 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
+                <goals>
+                    <goal>set</goal>
+                </goals>
                 <configuration>
-                    <updateBuildOutputTimestampPolicy>onchange</updateBuildOutputTimestampPolicy>
                     <artifactId>dummy-api</artifactId>
                     <newVersion>2.0</newVersion>
                 </configuration>

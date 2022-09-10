@@ -19,8 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
+
 import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.mojo.versions.utils.BaseMojoTestCase;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.MojoRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,14 +36,18 @@ import static org.hamcrest.Matchers.is;
  *
  * @author Andrzej Jarmoniuk
  */
-public class SetPropertyMojoTest extends BaseMojoTestCase
+public class SetPropertyMojoTest extends AbstractMojoTestCase
 {
+    @Rule
+    MojoRule mojoRule = new MojoRule( this );
+
     @Test
     public void testNullNewVersion()
             throws Exception
     {
-        SetPropertyMojo mojo = createMojo( "set-property",
-                "src/test/resources/org/codehaus/mojo/set-property/null-new-version-pom.xml" );
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(
+                new File( "target/test-classes/org/codehaus/mojo/set-property/null-new-version" ),
+                "set-property" );
         assertThat( mojo.getProject().getProperties(), is( mojo.getProject().getModel().getProperties() ) );
         try
         {
@@ -57,8 +65,9 @@ public class SetPropertyMojoTest extends BaseMojoTestCase
     public void testNullProperty()
             throws Exception
     {
-        SetPropertyMojo mojo = createMojo( "set-property",
-                "src/test/resources/org/codehaus/mojo/set-property/null-property-pom.xml" );
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(
+                new File( "target/test-classes/org/codehaus/mojo/set-property/null-property" ),
+                "set-property" );
         try
         {
             mojo.execute();
