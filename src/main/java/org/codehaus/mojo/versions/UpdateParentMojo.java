@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -33,6 +34,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+
+import static org.apache.maven.shared.utils.StringUtils.isBlank;
 
 /**
  * Sets the parent version to the latest parent version.
@@ -50,8 +53,12 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
     // ------------------------------ FIELDS ------------------------------
 
     /**
-     * Version specification to control artifact resolution.
+     * <p>If {@code skipResolution} is not set, specifies the <em>bottom</em> version considered
+     * for target version resolution. If it is a version range, the resolved version will be
+     * restricted by that range.</p>
      *
+     * <p>If {@code skipResolution} is {@code true}, will specify the target version to which
+     * the parent artifact will be updated.</p>
      * @since 1.0-alpha-1
      */
     @Parameter( property = "parentVersion" )
@@ -64,6 +71,15 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      */
     @Parameter( property = "forceUpdate", defaultValue = "false" )
     protected boolean forceUpdate = false;
+
+    /**
+     * Skips version resolution, only valid if {@code parentVersion} is set.
+     * Will effectively set the new parent version to the one from {@code parentVersion}
+     *
+     * @since 2.13.0
+     */
+    @Parameter( property = "skipResolution", defaultValue = "false" )
+    protected boolean skipResolution = false;
 
     /**
      * <p>Whether to downgrade a snapshot dependency if <code>allowSnapshots</code> is <code>false</code>
@@ -87,7 +103,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         if ( getProject().getParent() == null )
         {
@@ -101,60 +117,70 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
             return;
         }
 
-        String currentVersion = getProject().getParent().getVersion();
-        String version = currentVersion;
-
-        if ( parentVersion != null )
+        if ( skipResolution && isBlank( parentVersion ) )
         {
-            version = parentVersion;
+            throw new MojoExecutionException( "skipResolution is only valid if parentVersion is set" );
         }
 
-        Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
-                .withGroupId( getProject().getParent().getGroupId() )
-                .withArtifactId( getProject().getParent().getArtifactId() )
-                .withVersion( version )
-                .withType( "pom" )
-                .build() );
-
-        VersionRange versionRange;
+        String initialVersion = parentVersion == null ? getProject().getParent().getVersion() : parentVersion;
         try
         {
-            versionRange = VersionRange.createFromVersionSpec( version );
-            if ( versionRange.getRecommendedVersion() != null )
+            ArtifactVersion artifactVersion = skipResolution ? new DefaultArtifactVersion( parentVersion )
+                    : resolveTargetVersion( initialVersion );
+            if ( artifactVersion != null )
             {
-                versionRange = versionRange.restrict(
-                        VersionRange.createFromVersionSpec( "[" + versionRange.getRecommendedVersion() + ",)" ) );
+                getLog().info( "Updating parent from " + getProject().getParent().getVersion()
+                        + " to " + artifactVersion.toString() );
+
+                if ( PomHelper.setProjectParentVersion( pom, artifactVersion.toString() ) )
+                {
+                    if ( getLog().isDebugEnabled() )
+                    {
+                        getLog().debug( "Made an update from " + getProject().getParent().getVersion()
+                                + " to " + artifactVersion );
+                    }
+                    getChangeRecorder().recordUpdate( "updateParent", getProject().getParent().getGroupId(),
+                            getProject().getParent().getArtifactId(), getProject().getParent().getVersion(),
+                            artifactVersion.toString() );
+                }
             }
         }
         catch ( InvalidVersionSpecificationException e )
         {
-            throw new MojoExecutionException( "Invalid version range specification: " + version, e );
-        }
-
-        ArtifactVersion artifactVersion;
-        try
-        {
-            artifactVersion = findLatestVersion( artifact, versionRange, null, false, allowDowngrade );
+            throw new MojoExecutionException( "Invalid version range specification: " + initialVersion, e );
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
+    }
 
-        if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion, forceUpdate ) )
+    private ArtifactVersion resolveTargetVersion( String initialVersion )
+            throws MojoExecutionException, ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+    {
+        Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder
+                .newBuilder()
+                .withGroupId( getProject().getParent().getGroupId() )
+                .withArtifactId( getProject().getParent().getArtifactId() )
+                .withVersion( initialVersion )
+                .withType( "pom" )
+                .build() );
+
+        VersionRange targetVersionRange = VersionRange.createFromVersionSpec( initialVersion );
+        if ( targetVersionRange.getRecommendedVersion() != null )
         {
-            return;
+            targetVersionRange = targetVersionRange.restrict(
+                    VersionRange.createFromVersionSpec( "[" + targetVersionRange.getRecommendedVersion() + ",)" ) );
         }
 
-        getLog().info( "Updating parent from " + currentVersion + " to " + artifactVersion.toString() );
-
-        if ( PomHelper.setProjectParentVersion( pom, artifactVersion.toString() ) )
+        ArtifactVersion artifactVersion = findLatestVersion( artifact, targetVersionRange, null,
+                false, allowDowngrade );
+        if ( !shouldApplyUpdate( artifact, getProject().getParent().getVersion(), artifactVersion, forceUpdate ) )
         {
-            getLog().debug( "Made an update from " + currentVersion + " to " + artifactVersion );
-
-            this.getChangeRecorder().recordUpdate( "updateParent", artifact.getGroupId(), artifact.getArtifactId(),
-                                                   currentVersion, artifactVersion.toString() );
+            getLog().debug( "Update not applied. Exiting." );
+            return null;
         }
+        return artifactVersion;
     }
 
 }

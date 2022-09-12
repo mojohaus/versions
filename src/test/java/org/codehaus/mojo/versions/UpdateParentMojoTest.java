@@ -50,17 +50,15 @@ public class UpdateParentMojoTest
 
     private static RepositorySystem repositorySystem;
 
-    @SuppressWarnings( "deprecation" )
     private static ArtifactMetadataSource artifactMetadataSource;
 
     @BeforeClass
-    @SuppressWarnings( "deprecation" )
-    public static void setUpStatic() throws ArtifactMetadataRetrievalException
+    public static void setUpStatic()
     {
         repositorySystem = mockRepositorySystem();
         artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
         {{
-            put( "parent-artifact", new String[] { "1.0.1-SNAPSHOT", "1.0.0", "0.9.0" } );
+            put( "parent-artifact", new String[] { "0.9.0", "1.0.0", "1.0.1-SNAPSHOT" } );
             put( "issue-670-artifact", new String[] { "0.0.1-1", "0.0.1-1-impl-SNAPSHOT" } );
             put( "unknown-artifact", new String[0] );
         }} );
@@ -282,5 +280,49 @@ public class UpdateParentMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(), is( empty() ) );
+    }
+
+    @Test
+    public void testSkipResolutionDowngradeUnknownVersion()
+    {
+        testSkipResolution( "0.8.0" );
+    }
+
+    @Test
+    public void testSkipResolutionDowngrade()
+    {
+        testSkipResolution( "0.9.0" );
+    }
+
+    @Test
+    public void testSkipResolutionUpgradeUnknownVersion()
+    {
+        testSkipResolution( "2.0.0" );
+    }
+
+    private void testSkipResolution( String version )
+    {
+        mojo.parentVersion = version;
+        mojo.skipResolution = true;
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "parent-artifact" );
+            setVersion( "1.0.0" );
+        }} );
+
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) )
+                    .thenReturn( true );
+            mojo.update( null );
+        }
+        catch ( MojoExecutionException | XMLStreamException | MojoFailureException e )
+        {
+            throw new RuntimeException( e );
+        }
+
+        assertThat( changeRecorder.getChanges(), hasItem( new VersionChange( "default-group",
+                "parent-artifact", "1.0.0", version ) ) );
     }
 }
