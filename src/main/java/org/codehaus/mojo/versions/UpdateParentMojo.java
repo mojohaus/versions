@@ -26,13 +26,13 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
 /**
  * Sets the parent version to the latest parent version.
@@ -109,12 +109,12 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
             version = parentVersion;
         }
 
-        Dependency dependency = new Dependency();
-        dependency.setGroupId( getProject().getParent().getGroupId() );
-        dependency.setArtifactId( getProject().getParent().getArtifactId() );
-        dependency.setVersion( version );
-        dependency.setType( "pom" );
-        Artifact artifact = getHelper().createDependencyArtifact( dependency );
+        Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
+                .withGroupId( getProject().getParent().getGroupId() )
+                .withArtifactId( getProject().getParent().getArtifactId() )
+                .withVersion( version )
+                .withType( "pom" )
+                .build() );
 
         VersionRange versionRange;
         try

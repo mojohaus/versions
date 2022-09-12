@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.maven.model.Dependency;
-import org.codehaus.mojo.versions.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

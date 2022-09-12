@@ -62,6 +62,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
@@ -1667,13 +1668,13 @@ public class PomHelper
                 {
                     if ( "pom".equals( depData.get( typeElement ) ) && "import".equals( depData.get( scopeElement ) ) )
                     {
-                        Dependency dependency = new Dependency();
-                        dependency.setGroupId( depData.get( groupIdElement ) );
-                        dependency.setArtifactId( depData.get( artifactIdElement ) );
-                        dependency.setVersion( depData.get( versionElement ) );
-                        dependency.setType( depData.get( typeElement ) );
-                        dependency.setScope( depData.get( scopeElement ) );
-                        importedPOMs.add( dependency );
+                        importedPOMs.add( DependencyBuilder.newBuilder()
+                                .withGroupId( depData.get( groupIdElement ) )
+                                .withArtifactId( depData.get( artifactIdElement ) )
+                                .withVersion( depData.get( versionElement ) )
+                                .withType( depData.get( typeElement ) )
+                                .withScope( depData.get( scopeElement ) )
+                                .build() );
                     }
                     depData.clear();
                 }

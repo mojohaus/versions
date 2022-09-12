@@ -26,11 +26,11 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
 /**
  * Displays any updates of the project's parent project
@@ -75,13 +75,12 @@ public class DisplayParentUpdatesMojo
             throw new MojoExecutionException( "Invalid version range specification: " + version, e );
         }
 
-        Dependency dependency = new Dependency();
-        dependency.setGroupId( getProject().getParent().getGroupId() );
-        dependency.setArtifactId( getProject().getParent().getArtifactId() );
-        dependency.setVersion( version );
-        dependency.setType( "pom" );
-
-        Artifact artifact = getHelper().createDependencyArtifact( dependency );
+        Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
+                .withGroupId( getProject().getParent().getGroupId() )
+                .withArtifactId( getProject().getParent().getArtifactId() )
+                .withVersion( version )
+                .withType( "pom" )
+                .build() );
 
         ArtifactVersion artifactVersion;
         try

@@ -39,6 +39,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.plexus.i18n.I18N;
 import org.junit.Test;
@@ -64,6 +65,7 @@ public class DependencyUpdatesReportTest
 {
     private static class TestDependencyUpdatesReport extends DependencyUpdatesReport
     {
+        @SuppressWarnings( "deprecation" )
         TestDependencyUpdatesReport()
         {
             mockPlexusComponents();

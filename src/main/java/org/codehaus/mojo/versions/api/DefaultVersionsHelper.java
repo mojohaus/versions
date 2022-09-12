@@ -81,6 +81,7 @@ import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.utils.RegexUtils;
@@ -622,15 +623,15 @@ public class DefaultVersionsHelper
     public Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
                                               String classifier, String scope, boolean optional )
     {
-        Dependency dependency = new Dependency();
-        dependency.setGroupId( groupId );
-        dependency.setArtifactId( artifactId );
-        dependency.setType( type );
-        dependency.setClassifier( classifier );
-        dependency.setScope( scope );
-        dependency.setOptional( optional );
-        dependency.setVersion( StringUtils.isNotBlank( version ) ? version : "[0,]" );
-        return repositorySystem.createDependencyArtifact( dependency );
+        return repositorySystem.createDependencyArtifact( DependencyBuilder.newBuilder()
+                .withGroupId( groupId )
+                .withArtifactId( artifactId )
+                .withType( type )
+                .withClassifier( classifier )
+                .withScope( scope )
+                .withOptional( optional )
+                .withVersion( StringUtils.isNotBlank( version ) ? version : "[0,]" )
+                .build() );
     }
 
     @Override

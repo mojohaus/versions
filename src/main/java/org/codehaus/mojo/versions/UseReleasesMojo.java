@@ -38,6 +38,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
 /**
  * Replaces any -SNAPSHOT versions with the corresponding release version (if it has been released).
@@ -119,13 +120,12 @@ public class UseReleasesMojo
 
             final MavenProject parent = getProject().getParent();
 
-            Dependency dependency = new Dependency();
-            dependency.setGroupId( parent.getGroupId() );
-            dependency.setArtifactId( parent.getArtifactId() );
-            dependency.setVersion( releaseVersion );
-            dependency.setType( "pom" );
-
-            Artifact artifact = getHelper().createDependencyArtifact( dependency );
+            Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
+                    .withGroupId( parent.getGroupId() )
+                    .withArtifactId( parent.getArtifactId() )
+                    .withVersion( releaseVersion )
+                    .withType( "pom" )
+                    .build() );
             if ( !isIncluded( artifact ) )
             {
                 return;

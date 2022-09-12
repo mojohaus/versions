@@ -44,6 +44,7 @@ import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
 /**
  * Compare dependency versions of the current project to dependencies or dependency management of a remote repository
@@ -146,12 +147,10 @@ public class CompareDependenciesMojo
         String rArtifactId = remotePomParts[1];
         String rVersion = remotePomParts[2];
 
-        Dependency remoteDependency = new Dependency();
-        remoteDependency.setGroupId( rGroupId );
-        remoteDependency.setArtifactId( rArtifactId );
-        remoteDependency.setVersion( rVersion );
-
-        Artifact remoteArtifact = this.toArtifact( remoteDependency );
+        Artifact remoteArtifact = this.toArtifact( DependencyBuilder.newBuilder()
+                .withGroupId( rGroupId )
+                .withArtifactId( rArtifactId )
+                .withVersion( rVersion ).build() );
         MavenProject remoteMavenProject = null;
         try
         {
