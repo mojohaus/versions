@@ -23,7 +23,6 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -40,6 +39,9 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Replaces any version with the latest version.
@@ -129,12 +131,12 @@ public class UseLatestVersionsMojo
             }
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                Dependency dependency = new Dependency();
-                dependency.setArtifactId( getProject().getParent().getArtifactId() );
-                dependency.setGroupId( getProject().getParent().getGroupId() );
-                dependency.setVersion( getProject().getParent().getVersion() );
-                dependency.setType( "pom" );
-                useLatestVersions( pom, Collections.singletonList( dependency ) );
+                useLatestVersions( pom, singletonList( DependencyBuilder.newBuilder()
+                        .withGroupId( getProject().getParent().getGroupId() )
+                        .withArtifactId( getProject().getParent().getArtifactId() )
+                        .withVersion( getProject().getParent().getVersion() )
+                        .withType( "pom" )
+                        .build() ) );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )

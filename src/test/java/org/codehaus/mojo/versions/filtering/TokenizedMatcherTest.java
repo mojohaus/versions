@@ -1,7 +1,7 @@
 package org.codehaus.mojo.versions.filtering;
 
 import org.apache.maven.model.Dependency;
-import org.codehaus.mojo.versions.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -92,13 +92,13 @@ class TokenizedMatcherTest
         @Nested
         class NullClassifier
         {
-            private final DependencyBuilder depBuilder = DependencyBuilder.newBuilder(
-                "foo",
-                "foo",
-                "foo",
-                "foo",
-                "foo",
-                "foo" );
+            private final DependencyBuilder depBuilder = DependencyBuilder.newBuilder()
+                    .withGroupId( "foo" )
+                    .withArtifactId( "foo" )
+                    .withVersion( "foo" )
+                    .withType( "foo" )
+                    .withClassifier( "foo" )
+                    .withScope( "foo" );
 
             private final TokenizedMatcher matcher = TokenizedMatcher
                 .parse( "*:*:*:*:null:*" );
@@ -127,13 +127,13 @@ class TokenizedMatcherTest
         @Nested
         class NullScope
         {
-            private final DependencyBuilder depBuilder = DependencyBuilder.newBuilder(
-                "foo",
-                "foo",
-                "foo",
-                "foo",
-                "foo",
-                "foo" );
+            private final DependencyBuilder depBuilder = DependencyBuilder.newBuilder()
+                    .withGroupId( "foo" )
+                    .withArtifactId( "foo" )
+                    .withVersion( "foo" )
+                    .withType( "foo" )
+                    .withClassifier( "foo" )
+                    .withScope( "foo" );
 
             private final TokenizedMatcher matcher = TokenizedMatcher
                 .parse( "*:*:*:*:*:null" );

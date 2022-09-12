@@ -34,6 +34,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
 /**
  * Base class for a mojo that updates dependency versions.
@@ -239,13 +240,13 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     protected Artifact toArtifact( Parent model )
         throws MojoExecutionException
     {
-        Dependency d = new Dependency();
-        d.setArtifactId( model.getArtifactId() );
-        d.setGroupId( model.getGroupId() );
-        d.setVersion( model.getVersion() );
-        d.setType( "pom" );
-        d.setScope( Artifact.SCOPE_COMPILE );
-        return this.toArtifact( d );
+        return this.toArtifact( DependencyBuilder.newBuilder()
+                .withGroupId( model.getGroupId() )
+                .withArtifactId( model.getArtifactId() )
+                .withVersion( model.getVersion() )
+                .withType( "pom" )
+                .withScope( Artifact.SCOPE_COMPILE )
+                .build() );
     }
 
     protected String toString( MavenProject project )

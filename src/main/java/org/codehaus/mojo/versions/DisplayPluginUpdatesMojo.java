@@ -61,7 +61,6 @@ import org.apache.maven.lifecycle.Lifecycle;
 import org.apache.maven.lifecycle.LifecycleExecutionException;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.mapping.LifecycleMapping;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Prerequisites;
@@ -92,6 +91,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.IOUtil;
@@ -427,15 +427,13 @@ public class DisplayPluginUpdatesMojo
                 ArtifactVersion minRequires = null;
                 for ( int j = newerVersions.length - 1; j >= 0; j-- )
                 {
-
-                    Dependency dependency = new Dependency();
-                    dependency.setGroupId( groupId );
-                    dependency.setArtifactId( artifactId );
-                    dependency.setVersion( newerVersions[j].toString() );
-                    dependency.setType( "pom" );
-                    dependency.setScope( "runtime" );
-
-                    Artifact probe = getHelper().createDependencyArtifact( dependency );
+                    Artifact probe = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
+                        .withGroupId( groupId )
+                        .withArtifactId( artifactId )
+                        .withVersion( newerVersions[j].toString() )
+                        .withType( "pom" )
+                        .withScope( Artifact.SCOPE_RUNTIME )
+                        .build() );
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
@@ -493,14 +491,13 @@ public class DisplayPluginUpdatesMojo
                 }
                 if ( effectiveVersion != null )
                 {
-                    Dependency dependency = new Dependency();
-                    dependency.setGroupId( groupId );
-                    dependency.setArtifactId( artifactId );
-                    dependency.setVersion( effectiveVersion );
-                    dependency.setType( "pom" );
-                    dependency.setScope( "runtime" );
-
-                    Artifact probe = getHelper().createDependencyArtifact( dependency );
+                    Artifact probe = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
+                            .withGroupId( groupId )
+                            .withArtifactId( artifactId )
+                            .withVersion( effectiveVersion )
+                            .withType( "pom" )
+                            .withScope( Artifact.SCOPE_RUNTIME )
+                            .build() );
                     try
                     {
                         getHelper().resolveArtifact( probe, true );
