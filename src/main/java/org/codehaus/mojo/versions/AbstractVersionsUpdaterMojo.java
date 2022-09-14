@@ -313,18 +313,9 @@ public abstract class AbstractVersionsUpdaterMojo
                                                  boolean allowDowngrade )
         throws ArtifactMetadataRetrievalException, MojoExecutionException
     {
-        boolean includeSnapshots = this.allowSnapshots;
-        if ( Boolean.TRUE.equals( allowingSnapshots ) )
-        {
-            includeSnapshots = true;
-        }
-        if ( Boolean.FALSE.equals( allowingSnapshots ) )
-        {
-            includeSnapshots = false;
-        }
+        boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : this.allowSnapshots;
         final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
-        return artifactVersions.getNewestVersion( versionRange, null, null, includeSnapshots,
-                true, true, allowDowngrade );
+        return artifactVersions.getNewestVersion( versionRange, null, includeSnapshots, allowDowngrade );
     }
 
     /**

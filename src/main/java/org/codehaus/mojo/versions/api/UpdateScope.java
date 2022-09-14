@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.Restriction;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
@@ -54,11 +55,13 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 3
-                        ? null
-                        : versionDetails.getOldestVersion( currentVersion,
-                        versionComparator.incrementSegment( currentVersion, 2 ),
-                        includeSnapshots, false, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 3 )
+                {
+                    return null;
+                }
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 2 );
+                Restriction restriction = new Restriction( currentVersion, false, upperBound, false );
+                return versionDetails.getOldestVersion( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -73,11 +76,13 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 3
-                        ? null
-                        : versionDetails.getNewestVersion( currentVersion,
-                        versionComparator.incrementSegment( currentVersion, 2 ),
-                        includeSnapshots, false, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 3 )
+                {
+                    return null;
+                }
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 2 );
+                Restriction restriction = new Restriction( currentVersion, false, upperBound, false );
+                return versionDetails.getNewestVersion( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -92,10 +97,13 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                                : versionDetails.getVersions( currentVersion,
-                                                              versionComparator.incrementSegment( currentVersion, 2 ),
-                                                              includeSnapshots, false, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 3 )
+                {
+                    return null;
+                }
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 2 );
+                Restriction restriction = new Restriction( currentVersion, false, upperBound, false );
+                return versionDetails.getVersions( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -120,10 +128,14 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                        : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
-                        versionComparator.incrementSegment( currentVersion, 1 ),
-                        includeSnapshots, true, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 3 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 2 );
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 1 );
+                Restriction restriction = new Restriction( lowerBound, true, upperBound, false );
+                return versionDetails.getOldestVersion( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -138,10 +150,14 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                        : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 2 ),
-                        versionComparator.incrementSegment( currentVersion, 1 ),
-                        includeSnapshots, true, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 3 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 2 );
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 1 );
+                Restriction restriction = new Restriction( lowerBound, true, upperBound, false );
+                return versionDetails.getNewestVersion( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -156,10 +172,14 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 3 ? null
-                        : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 2 ),
-                                versionComparator.incrementSegment( currentVersion, 1 ), includeSnapshots, true,
-                                false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 3 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 2 );
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 1 );
+                Restriction restriction = new Restriction( lowerBound, true, upperBound, false );
+                return versionDetails.getVersions( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -184,10 +204,14 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
-                        : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
-                        versionComparator.incrementSegment( currentVersion, 0 ),
-                        includeSnapshots, true, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 2 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 1 );
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 0 );
+                Restriction restriction = new Restriction( lowerBound, true, upperBound, false );
+                return versionDetails.getOldestVersion( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -202,10 +226,14 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
-                        : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 1 ),
-                                versionComparator.incrementSegment( currentVersion, 0 ), includeSnapshots, true,
-                                false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 2 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 1 );
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 0 );
+                Restriction restriction = new Restriction( lowerBound, true, upperBound, false );
+                return versionDetails.getNewestVersion( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -220,10 +248,14 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 2 ? null
-                        : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 1 ),
-                        versionComparator.incrementSegment( currentVersion, 0 ),
-                        includeSnapshots, true, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 2 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 1 );
+                ArtifactVersion upperBound = versionComparator.incrementSegment( currentVersion, 0 );
+                Restriction restriction = new Restriction( lowerBound, true, upperBound, false );
+                return versionDetails.getVersions( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -248,9 +280,13 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 1 ? null
-                        : versionDetails.getOldestVersion( versionComparator.incrementSegment( currentVersion, 0 ),
-                                                                   null, includeSnapshots, true, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 1 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 0 );
+                Restriction restriction = new Restriction( lowerBound, true, null, false );
+                return versionDetails.getOldestVersion( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -265,9 +301,13 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 1 ? null
-                        : versionDetails.getNewestVersion( versionComparator.incrementSegment( currentVersion, 0 ),
-                                                                   null, includeSnapshots, true, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 1 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 0 );
+                Restriction restriction = new Restriction( lowerBound, true, null, false );
+                return versionDetails.getNewestVersion( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -282,10 +322,13 @@ public abstract class UpdateScope
             VersionComparator versionComparator = versionDetails.getVersionComparator();
             try
             {
-                return versionComparator.getSegmentCount( currentVersion ) < 1
-                        ? null
-                        : versionDetails.getVersions( versionComparator.incrementSegment( currentVersion, 0 ),
-                        null, includeSnapshots, true, false );
+                if ( versionComparator.getSegmentCount( currentVersion ) < 1 )
+                {
+                    return null;
+                }
+                ArtifactVersion lowerBound = versionComparator.incrementSegment( currentVersion, 0 );
+                Restriction restriction = new Restriction( lowerBound, true, null, false );
+                return versionDetails.getVersions( restriction, includeSnapshots );
             }
             catch ( InvalidSegmentException e )
             {
@@ -306,21 +349,24 @@ public abstract class UpdateScope
         public ArtifactVersion getOldestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
         {
-            return versionDetails.getOldestVersion( currentVersion, null, includeSnapshots, false, false );
+            Restriction restriction = new Restriction( currentVersion, false, null, false );
+            return versionDetails.getOldestVersion( restriction, includeSnapshots );
         }
 
         /** {@inheritDoc} */
         public ArtifactVersion getNewestUpdate( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
         {
-            return versionDetails.getNewestVersion( currentVersion, null, includeSnapshots, false, false );
+            Restriction restriction = new Restriction( currentVersion, false, null, false );
+            return versionDetails.getNewestVersion( restriction, includeSnapshots );
         }
 
         /** {@inheritDoc} */
         public ArtifactVersion[] getAllUpdates( VersionDetails versionDetails, ArtifactVersion currentVersion,
                                                 boolean includeSnapshots )
         {
-            return versionDetails.getVersions( currentVersion, null, includeSnapshots, false, false );
+            Restriction restriction = new Restriction( currentVersion, false, null, false );
+            return versionDetails.getVersions( restriction, includeSnapshots );
         }
 
     };

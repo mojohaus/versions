@@ -234,18 +234,10 @@ public abstract class AbstractVersionsReport
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
-                                                 boolean allowingSnapshots, boolean usePluginRepositories )
+                                                 Boolean allowingSnapshots, boolean usePluginRepositories )
         throws MavenReportException
     {
-        boolean includeSnapshots = this.allowSnapshots;
-        if ( allowingSnapshots )
-        {
-            includeSnapshots = true;
-        }
-        if ( allowingSnapshots )
-        {
-            includeSnapshots = false;
-        }
+        boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : this.allowSnapshots;
         try
         {
             final ArtifactVersions artifactVersions =

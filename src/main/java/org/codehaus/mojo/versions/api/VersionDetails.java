@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.api;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
@@ -100,32 +101,24 @@ public interface VersionDetails
     /**
      * Returns all available versions within the specified bounds.
      *
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param restriction version criteria.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return all available versions within the specified version range.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots,
-                                   boolean includeLower, boolean includeUpper );
+    ArtifactVersion[] getVersions( Restriction restriction, boolean includeSnapshots );
 
     /**
      * Returns all available versions within the specified bounds.
      *
      * @param versionRange The version range within which the version must exist where <code>null</code> imples
      *            <code>[,)</code>.
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param restriction version criteria.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return all available versions within the specified version range.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getVersions( VersionRange versionRange, ArtifactVersion lowerBound, ArtifactVersion upperBound,
-                                   boolean includeSnapshots, boolean includeLower, boolean includeUpper );
+    ArtifactVersion[] getVersions( VersionRange versionRange, Restriction restriction, boolean includeSnapshots );
 
     /**
      * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
@@ -155,16 +148,12 @@ public interface VersionDetails
      * Returns the latest version newer than the specified current version, but less than the specified upper bound or
      * <code>null</code> if no such version exists.
      *
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param restriction version criteria.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots,
-                                      boolean includeLower, boolean includeUpper );
+    ArtifactVersion getNewestVersion( Restriction restriction, boolean includeSnapshots );
 
     /**
      * Returns the latest version newer than the specified current version, but less than the specified upper bound or
@@ -172,16 +161,12 @@ public interface VersionDetails
      *
      * @param versionRange The version range within which the version must exist where <code>null</code> imples
      *            <code>[,)</code>.
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param restriction version criteria.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getNewestVersion( VersionRange versionRange, ArtifactVersion lowerBound, ArtifactVersion upperBound,
-                                      boolean includeSnapshots, boolean includeLower, boolean includeUpper );
+    ArtifactVersion getNewestVersion( VersionRange versionRange, Restriction restriction, boolean includeSnapshots );
 
     /**
      * Returns the latest version within the specified version range or <code>null</code> if no such version exists.
@@ -230,32 +215,24 @@ public interface VersionDetails
     /**
      * Returns the oldest version within the specified bounds or <code>null</code> if no such version exists.
      *
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param restriction version criteria.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return the oldest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots,
-                                      boolean includeLower, boolean includeUpper );
+    ArtifactVersion getOldestVersion( Restriction restriction, boolean includeSnapshots );
 
     /**
      * Returns the oldest version within the specified bounds or <code>null</code> if no such version exists.
      *
      * @param versionRange The version range within which the version must exist where <code>null</code> imples
      *            <code>[,)</code>.
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
+     * @param restriction version criteria.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @param includeLower <code>true</code> if the lower bound is inclusive.
-     * @param includeUpper <code>true</code> if the upper bound is inclusive.
      * @return the oldest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-beta-1
      */
-    ArtifactVersion getOldestVersion( VersionRange versionRange, ArtifactVersion lowerBound, ArtifactVersion upperBound,
-                                      boolean includeSnapshots, boolean includeLower, boolean includeUpper );
+    ArtifactVersion getOldestVersion( VersionRange versionRange, Restriction restriction, boolean includeSnapshots );
 
     /**
      * Returns the oldest version newer than the specified current version, but within the the specified update scope or
