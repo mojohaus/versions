@@ -36,6 +36,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
+import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.Property;
@@ -342,25 +343,25 @@ public class PropertyVersions
                 ? VersionRange.createFromVersionSpec( property.getVersion() ) : null;
         helper.getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
 
-        ArtifactVersion lowerBoundArtifactVersion = helper.createArtifactVersion( currentVersion );
+        ArtifactVersion lowerBound = helper.createArtifactVersion( currentVersion );
         if ( allowDowngrade )
         {
-            Optional<String> updatedVersion = getLowerBound( lowerBoundArtifactVersion, unchangedSegment );
-            lowerBoundArtifactVersion = updatedVersion.map( helper::createArtifactVersion ).orElse( null );
+            Optional<String> updatedVersion = getLowerBound( lowerBound, unchangedSegment );
+            lowerBound = updatedVersion.map( helper::createArtifactVersion ).orElse( null );
         }
         if ( helper.getLog().isDebugEnabled() )
         {
-            helper.getLog().debug( "lowerBoundArtifactVersion: " + lowerBoundArtifactVersion );
+            helper.getLog().debug( "lowerBoundArtifactVersion: " + lowerBound );
         }
 
         ArtifactVersion upperBound = null;
         if ( unchangedSegment != -1 )
         {
-            upperBound = getVersionComparator().incrementSegment( lowerBoundArtifactVersion, unchangedSegment );
+            upperBound = getVersionComparator().incrementSegment( lowerBound, unchangedSegment );
             helper.getLog().debug( "Property ${" + property.getName() + "}: upperBound is: " + upperBound );
         }
-        ArtifactVersion result =
-            getNewestVersion( range, lowerBoundArtifactVersion, upperBound, includeSnapshots, false, false );
+        Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
+        ArtifactVersion result = getNewestVersion( range, restriction, includeSnapshots );
 
         helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
 
@@ -427,7 +428,8 @@ public class PropertyVersions
         {
             upperBound = getVersionComparator().incrementSegment( lowerBound, segment );
         }
-        return getNewestVersion( range, lowerBound, upperBound, includeSnapshots, false, false );
+        Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
+        return getNewestVersion( range, restriction, includeSnapshots );
     }
 
     private final class PropertyVersionComparator

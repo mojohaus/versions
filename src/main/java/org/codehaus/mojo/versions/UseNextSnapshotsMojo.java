@@ -30,6 +30,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -155,7 +156,8 @@ public class UseNextSnapshotsMojo
                     ArtifactVersion upperBound =
                             segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
                     getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
-                    ArtifactVersion[] newer = versions.getVersions( lowerBound, upperBound, true, false, false );
+                    Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
+                    ArtifactVersion[] newer = versions.getVersions( restriction, true );
                     getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
                     for ( ArtifactVersion artifactVersion : newer )
                     {
