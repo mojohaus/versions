@@ -147,7 +147,7 @@ public abstract class AbstractVersionDetails
 
     private ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
     {
-         Restriction restriction = new Restriction( version, false, null, false );
+        Restriction restriction = new Restriction( version, false, null, false );
         return getVersions( restriction, includeSnapshots );
     }
 
@@ -187,7 +187,7 @@ public abstract class AbstractVersionDetails
             {
                 continue;
             }
-            if ( restriction != null && !restriction.containsVersion( candidate ) )
+            if ( restriction != null && !isVersionInRestriction( restriction, candidate ) )
             {
                 continue;
             }
@@ -307,7 +307,7 @@ public abstract class AbstractVersionDetails
             {
                 continue;
             }
-            if ( restriction != null && !restriction.containsVersion( candidate ) )
+            if ( restriction != null && !isVersionInRestriction( restriction, candidate ) )
             {
                 continue;
             }
@@ -343,7 +343,7 @@ public abstract class AbstractVersionDetails
             {
                 continue;
             }
-            if ( restriction != null && !restriction.containsVersion( candidate ) )
+            if ( restriction != null && !isVersionInRestriction( restriction, candidate ) )
             {
                 continue;
             }
@@ -568,4 +568,33 @@ public abstract class AbstractVersionDetails
         }
         return of( newVersion.toString() );
     }
+
+    /**
+     * Checks if the candidate version is in the range of the restriction.
+     * a custom comparator is/can be used to have milestones and rcs before final releases,
+     * which is not yet possible with {@link Restriction#containsVersion(ArtifactVersion)}.
+     * @param restriction the range to check against.
+     * @param candidate the version to check.
+     * @return true if the candidate version is within the range of the restriction parameter.
+     */
+    private boolean isVersionInRestriction( Restriction restriction, ArtifactVersion candidate )
+    {
+        ArtifactVersion lowerBound = restriction.getLowerBound();
+        ArtifactVersion upperBound = restriction.getUpperBound();
+        boolean includeLower = restriction.isLowerBoundInclusive();
+        boolean includeUpper = restriction.isUpperBoundInclusive();
+        final VersionComparator versionComparator = getVersionComparator();
+        int lower = lowerBound == null ? -1 : versionComparator.compare( lowerBound, candidate );
+        int upper = upperBound == null ? +1 : versionComparator.compare( upperBound, candidate );
+        if ( lower > 0 || upper < 0 )
+        {
+            return false;
+        }
+        if ( ( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 ) )
+        {
+            return false;
+        }
+        return true;
+    }
+
 }
