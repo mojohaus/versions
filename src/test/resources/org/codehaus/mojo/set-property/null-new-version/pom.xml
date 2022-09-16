@@ -6,20 +6,15 @@
     <version>1.0</version>
     <packaging>pom</packaging>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>localhost</groupId>
-                <artifactId>dummy-api</artifactId>
-                <version>1.1</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <properties>
+        <dummy-api-version>1.0.0</dummy-api-version>
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>localhost</groupId>
             <artifactId>dummy-api</artifactId>
+            <version>${dummy-api-version}</version>
         </dependency>
     </dependencies>
 
@@ -28,12 +23,8 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <goals>
-                    <goal>set</goal>
-                </goals>
                 <configuration>
-                    <artifactId>dummy-api</artifactId>
-                    <newVersion>2.0</newVersion>
+                    <property>dummy-api-version</property>
                 </configuration>
             </plugin>
         </plugins>

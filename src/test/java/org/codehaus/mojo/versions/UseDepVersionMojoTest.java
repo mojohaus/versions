@@ -19,9 +19,12 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
 import java.util.Collections;
 
-import org.codehaus.mojo.versions.utils.BaseMojoTestCase;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.MojoRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -29,13 +32,17 @@ import org.junit.Test;
  *
  * @author Andrzej Jarmoniuk
  */
-public class UseDepVersionMojoTest extends BaseMojoTestCase
+public class UseDepVersionMojoTest extends AbstractMojoTestCase
 {
+    @Rule
+    MojoRule mojoRule = new MojoRule( this );
+
     @Test
     public void testIssue673() throws Exception
     {
-        UseDepVersionMojo mojo = createMojo( "use-dep-version",
-                "src/test/resources/org/codehaus/mojo/use-dep-version/issue-637-pom.xml" );
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(
+                new File( "target/test-classes/org/codehaus/mojo/use-dep-version/issue-637" ),
+                "use-dep-version" );
         setVariableValueToObject( mojo, "processDependencies", true );
         setVariableValueToObject( mojo, "processDependencyManagement", true );
         setVariableValueToObject( mojo, "excludeReactor", true );
