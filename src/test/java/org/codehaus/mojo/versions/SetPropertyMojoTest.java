@@ -19,15 +19,25 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Objects;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.mojo.versions.utils.BaseMojoTestCase;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.MojoRule;
+import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 
 /**
@@ -35,17 +45,45 @@ import static org.hamcrest.Matchers.matchesPattern;
  *
  * @author Andrzej Jarmoniuk
  */
-public class SetPropertyMojoTest extends BaseMojoTestCase
+public class SetPropertyMojoTest extends AbstractMojoTestCase
 {
-    @Test
+    @Rule
+    MojoRule mojoRule = new MojoRule( this );
+
+    private Path pomDir;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        super.setUp();
+        pomDir = Files.createTempDirectory( "set-property-" );
+    }
+
+    @After
+    public void tearDown() throws Exception
+    {
+        try
+        {
+            if ( pomDir != null && pomDir.toFile().exists() )
+            {
+                Arrays.stream( Objects.requireNonNull( pomDir.toFile().listFiles() ) ).forEach( File::delete );
+                pomDir.toFile().delete();
+            }
+        }
+        finally
+        {
+            super.tearDown();
+        }
+    }
+       @Test
     public void testNullNewVersion()
             throws Exception
     {
-        SetPropertyMojo mojo = createMojo( "set-property",
-                "target/test-classes/org/codehaus/mojo/set-property/pom.xml" );
-        assertThat( mojo.getProject().getProperties(), is( mojo.getProject().getModel().getProperties() ) );
-
-        setVariableValueToObject( mojo, "property", "dummy-api-version" );
+        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-new-version/pom.xml" ),
+                Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
+                "set-property" );
+        mojo.localRepository = new StubArtifactRepository( pomDir.toString() );
         setVariableValueToObject( mojo, "newVersion", null );
 
         mojo.execute();
@@ -60,11 +98,11 @@ public class SetPropertyMojoTest extends BaseMojoTestCase
     public void testNewVersionEmpty()
             throws Exception
     {
-        SetPropertyMojo mojo = createMojo( "set-property",
-                "target/test-classes/org/codehaus/mojo/set-property/pom.xml" );
-        assertThat( mojo.getProject().getProperties(), is( mojo.getProject().getModel().getProperties() ) );
-
-        setVariableValueToObject( mojo, "property", "dummy-api-version" );
+        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-new-version/pom.xml" ),
+                Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
+                "set-property" );
+        mojo.localRepository = new StubArtifactRepository( pomDir.toString() );
         setVariableValueToObject( mojo, "newVersion", "" );
 
         mojo.execute();
@@ -79,15 +117,14 @@ public class SetPropertyMojoTest extends BaseMojoTestCase
     public void testNullProperty()
             throws Exception
     {
-        SetPropertyMojo mojo = createMojo( "set-property",
-                "src/test/resources/org/codehaus/mojo/set-property/pom.xml" );
+        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-property/pom.xml" ),
+                Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
+                "set-property" );
 
-        setVariableValueToObject( mojo, "property", null );
-        setVariableValueToObject( mojo, "propertiesVersionsFile", null );
-        setVariableValueToObject( mojo, "newVersion", "2.0.0" );
         try
         {
-            mojo.execute();
+            mojo.update( null );
             fail();
         }
         catch ( MojoExecutionException e )
