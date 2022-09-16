@@ -1,17 +1,23 @@
 package org.codehaus.mojo.versions;
 
+import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Scm;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -59,6 +65,16 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
      */
     @Parameter( property = "url" )
     private String url;
+
+    @Inject
+    public SetScmTagMojo( RepositorySystem repositorySystem,
+                                           MavenProjectBuilder projectBuilder,
+                                           ArtifactMetadataSource artifactMetadataSource,
+                                           WagonManager wagonManager,
+                                           ArtifactResolver artifactResolver )
+    {
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+    }
 
     /**
      * Called when this mojo is executed.

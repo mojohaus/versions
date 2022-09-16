@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
@@ -48,10 +49,13 @@ import java.util.regex.Pattern;
 import org.apache.maven.BuildFailureException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -81,11 +85,12 @@ import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.version.PluginVersionNotFoundException;
 import org.apache.maven.plugin.version.PluginVersionResolutionException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.DefaultProjectBuilderConfiguration;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -135,13 +140,11 @@ public class DisplayPluginUpdatesMojo
     /**
      * @since 1.0-alpha-1
      */
-    @Component
     private LifecycleExecutor lifecycleExecutor;
 
     /**
      * @since 1.0-alpha-3
      */
-    @Component
     private ModelInterpolator modelInterpolator;
 
     /**
@@ -149,16 +152,33 @@ public class DisplayPluginUpdatesMojo
      *
      * @since 1.0-alpha-1
      */
-    @Component
     private PluginManager pluginManager;
 
     /**
      * @since 1.3
      */
-    @Component
     private RuntimeInformation runtimeInformation;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
+
+    @Inject
+    @SuppressWarnings( "checkstyle:ParameterNumber" )
+    public DisplayPluginUpdatesMojo( RepositorySystem repositorySystem,
+                                     MavenProjectBuilder projectBuilder,
+                                     ArtifactMetadataSource artifactMetadataSource,
+                                     WagonManager wagonManager,
+                                     ArtifactResolver artifactResolver,
+                                     LifecycleExecutor lifecycleExecutor,
+                                     ModelInterpolator modelInterpolator,
+                                     PluginManager pluginManager,
+                                     RuntimeInformation runtimeInformation )
+    {
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        this.lifecycleExecutor = lifecycleExecutor;
+        this.modelInterpolator = modelInterpolator;
+        this.pluginManager = pluginManager;
+        this.runtimeInformation = runtimeInformation;
+    }
 
     /**
      * Returns the pluginManagement section of the super-pom.

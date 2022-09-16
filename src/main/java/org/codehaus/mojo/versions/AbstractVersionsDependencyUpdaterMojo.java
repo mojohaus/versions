@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,12 +28,17 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
@@ -136,6 +143,16 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     @Parameter( property = "excludeReactor", defaultValue = "true" )
     private boolean excludeReactor;
+
+    @Inject
+    protected AbstractVersionsDependencyUpdaterMojo( RepositorySystem repositorySystem,
+                                           MavenProjectBuilder projectBuilder,
+                                           ArtifactMetadataSource artifactMetadataSource,
+                                           WagonManager wagonManager,
+                                           ArtifactResolver artifactResolver )
+    {
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+    }
 
     /**
      * Should the project/dependencies section of the pom be processed.

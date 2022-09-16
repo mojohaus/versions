@@ -28,8 +28,12 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.doxia.tools.SiteTool;
+import org.apache.maven.doxia.tools.SiteToolException;
+import org.codehaus.plexus.i18n.I18N;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -82,5 +86,29 @@ public class MockUtils
             throw new RuntimeException( e );
         }
         return artifactMetadataSource;
+    }
+
+    public static I18N mockI18N()
+    {
+        I18N i18n = mock( I18N.class );
+        when( i18n.getString( anyString(), any(), anyString() ) ).thenAnswer(
+            invocation -> invocation.getArgument( 2 ) );
+        return i18n;
+    }
+
+    public static SiteTool mockSiteTool()
+    {
+        Artifact skinArtifact = mock( Artifact.class );
+        when( skinArtifact.getId() ).thenReturn( "" );
+        SiteTool siteTool = mock( SiteTool.class );
+        try
+        {
+            when( siteTool.getSkinArtifactFromRepository( any(), any(), any() ) ).thenReturn( skinArtifact );
+        }
+        catch ( SiteToolException e )
+        {
+            throw new RuntimeException( e );
+        }
+        return siteTool;
     }
 }

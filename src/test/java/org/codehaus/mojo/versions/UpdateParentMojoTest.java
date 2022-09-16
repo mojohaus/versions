@@ -70,14 +70,14 @@ public class UpdateParentMojoTest
         changeRecorder = new TestChangeRecorder();
         artifactResolver = mock( ArtifactResolver.class );
 
-        mojo = new UpdateParentMojo()
+        mojo = new UpdateParentMojo( repositorySystem,
+                null,
+                artifactMetadataSource,
+                null,
+                artifactResolver )
         {{
             setProject( createProject() );
             reactorProjects = Collections.emptyList();
-            repositorySystem = UpdateParentMojoTest.repositorySystem;
-            artifactMetadataSource = UpdateParentMojoTest.artifactMetadataSource;
-            resolver = UpdateParentMojoTest.this.artifactResolver;
-
             setVariableValueToObject( this, "changeRecorder", changeRecorder );
         }};
     }

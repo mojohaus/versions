@@ -19,21 +19,28 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+
 import java.io.File;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.plexus.i18n.I18N;
 
 import static java.util.Collections.EMPTY_MAP;
 import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
@@ -92,6 +99,13 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
      */
     @Parameter( property = "onlyUpgradable", defaultValue = "false" )
     protected boolean onlyUpgradable;
+
+    @Inject
+    protected DependencyUpdatesReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
+                                       ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager )
+    {
+        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager );
+    }
 
     /**
      * {@inheritDoc}

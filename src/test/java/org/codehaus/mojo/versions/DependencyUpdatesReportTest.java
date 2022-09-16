@@ -27,12 +27,9 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
-import org.apache.maven.doxia.tools.SiteTool;
-import org.apache.maven.doxia.tools.SiteToolException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -41,18 +38,18 @@ import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.model.RuleSet;
-import org.codehaus.plexus.i18n.I18N;
+import org.codehaus.mojo.versions.utils.MockUtils;
 import org.junit.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,14 +65,13 @@ public class DependencyUpdatesReportTest
         @SuppressWarnings( "deprecation" )
         TestDependencyUpdatesReport()
         {
-            mockPlexusComponents();
+            super( mockI18N(), mockRepositorySystem(), null, mockArtifactMetadataSource(), null );
+            siteTool = MockUtils.mockSiteTool();
 
             project = new MavenProject();
             project.setOriginalModel( new Model() );
             project.getOriginalModel().setDependencyManagement( new DependencyManagement() );
             project.getModel().setDependencyManagement( new DependencyManagement() );
-
-            artifactMetadataSource = mockArtifactMetadataSource();
         }
 
         public TestDependencyUpdatesReport withDependencies( Dependency... dependencies )
@@ -138,22 +134,9 @@ public class DependencyUpdatesReportTest
             return this;
         }
 
-        /**
-         * <p></p>Mocks some Plexus components to speed up test execution.</p>
-         * <p>Note: these components could just as well be injected using
-         * <code>org.codehaus.plexus.PlexusTestCase.lookup</code>,
-         * but that method greatly slows down test execution.</p>
-         *
-         * @see <a href="https://codehaus-plexus.github.io/guides/developer-guide/building-components/component-testing.html">
-         * Testing Plexus Components</a>
-         */
-        private void mockPlexusComponents()
+        private static RepositorySystem mockRepositorySystem()
         {
-            i18n = mock( I18N.class );
-            when( i18n.getString( anyString(), any(), anyString() ) ).thenAnswer(
-                invocation -> invocation.getArgument( 2 ) );
-
-            repositorySystem = mock( RepositorySystem.class );
+            RepositorySystem repositorySystem = mock( RepositorySystem.class );
             when( repositorySystem.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer(
                 invocation ->
                 {
@@ -162,18 +145,7 @@ public class DependencyUpdatesReportTest
                                                 dependency.getVersion(), dependency.getScope(), dependency.getType(),
                                                 dependency.getClassifier(), null );
                 } );
-
-            Artifact skinArtifact = mock( Artifact.class );
-            when( skinArtifact.getId() ).thenReturn( "" );
-            siteTool = mock( SiteTool.class );
-            try
-            {
-                when( siteTool.getSkinArtifactFromRepository( any(), any(), any() ) ).thenReturn( skinArtifact );
-            }
-            catch ( SiteToolException e )
-            {
-                throw new RuntimeException( e );
-            }
+            return repositorySystem;
         }
     }
 

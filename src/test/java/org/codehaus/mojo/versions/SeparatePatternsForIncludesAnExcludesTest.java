@@ -21,7 +21,7 @@ public class SeparatePatternsForIncludesAnExcludesTest
     public void setUp()
         throws Exception
     {
-        mojo = new AbstractVersionsDependencyUpdaterMojo()
+        mojo = new AbstractVersionsDependencyUpdaterMojo( null, null, null, null, null )
         {
             protected void update( ModifiedPomXMLEventReader pom )
                 throws MojoExecutionException, MojoFailureException, XMLStreamException

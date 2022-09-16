@@ -19,18 +19,25 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
+import org.codehaus.plexus.i18n.I18N;
 
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
@@ -76,6 +83,13 @@ public class PropertyUpdatesReport
      */
     @Parameter( property = "autoLinkItems", defaultValue = "true" )
     private boolean autoLinkItems;
+
+    @Inject
+    protected PropertyUpdatesReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
+                                      ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager )
+    {
+        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager );
+    }
 
     /**
      * {@inheritDoc}

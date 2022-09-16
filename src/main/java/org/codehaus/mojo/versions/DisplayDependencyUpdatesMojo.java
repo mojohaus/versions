@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.ArrayList;
@@ -32,7 +33,10 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
@@ -43,6 +47,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
@@ -338,6 +344,16 @@ public class DisplayDependencyUpdatesMojo
     private List<String> pluginManagementDependencyExcludes;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
+
+    @Inject
+    public DisplayDependencyUpdatesMojo( RepositorySystem repositorySystem,
+                                MavenProjectBuilder projectBuilder,
+                                ArtifactMetadataSource artifactMetadataSource,
+                                WagonManager wagonManager,
+                                ArtifactResolver artifactResolver )
+    {
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+    }
 
     private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )
     {
