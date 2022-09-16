@@ -62,7 +62,11 @@ public class UseLatestVersionsMojoTest
                     "1.0.0.0-SNAPSHOT", "0.9.0.0"} );
         }} );
 
-        mojo = new UseLatestVersionsMojo()
+        mojo = new UseLatestVersionsMojo( repositorySystemMock,
+                null,
+                artifactMetadataSourceMock,
+                null,
+                null )
         {{
             MavenProject project = new MavenProject()
             {{
@@ -83,8 +87,6 @@ public class UseLatestVersionsMojoTest
                 }} );
             }};
             setProject( project );
-            repositorySystem = repositorySystemMock;
-            artifactMetadataSource = artifactMetadataSourceMock;
 
             changeRecorder = new TestChangeRecorder();
             setVariableValueToObject( this, "changeRecorder", changeRecorder );

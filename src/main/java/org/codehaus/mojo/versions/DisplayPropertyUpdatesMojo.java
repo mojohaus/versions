@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.ArrayList;
@@ -26,13 +27,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -117,6 +123,16 @@ public class DisplayPropertyUpdatesMojo
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
+
+    @Inject
+    public DisplayPropertyUpdatesMojo( RepositorySystem repositorySystem,
+                                           MavenProjectBuilder projectBuilder,
+                                           ArtifactMetadataSource artifactMetadataSource,
+                                           WagonManager wagonManager,
+                                           ArtifactResolver artifactResolver )
+    {
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+    }
 
     public void execute()
         throws MojoExecutionException, MojoFailureException

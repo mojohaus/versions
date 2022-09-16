@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,7 +29,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.repository.RepositorySystem;
 
 /**
  * Abstract base class for the Display___ mojos.
@@ -75,6 +82,16 @@ public abstract class AbstractVersionsDisplayMojo
     protected int outputLineWidth;
 
     private boolean outputFileError = false;
+
+    @Inject
+    protected AbstractVersionsDisplayMojo( RepositorySystem repositorySystem,
+                                           MavenProjectBuilder projectBuilder,
+                                           ArtifactMetadataSource artifactMetadataSource,
+                                           WagonManager wagonManager,
+                                           ArtifactResolver artifactResolver )
+    {
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+    }
 
     protected void logInit()
     {

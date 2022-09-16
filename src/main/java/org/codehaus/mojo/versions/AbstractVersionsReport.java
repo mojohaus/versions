@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
@@ -37,7 +39,6 @@ import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
@@ -64,17 +65,9 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-3
      */
-    @Component
     protected I18N i18n;
 
-    @Component
     protected RepositorySystem repositorySystem;
-
-    /**
-     * @since 1.0-alpha-3
-     */
-    @Component
-    private ArtifactResolver resolver;
 
     /**
      * Skip entire check.
@@ -89,7 +82,6 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-1
      */
-    @Component
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
@@ -107,7 +99,6 @@ public abstract class AbstractVersionsReport
     /**
      * @since 1.0-alpha-3
      */
-    @Component
     private WagonManager wagonManager;
 
     /**
@@ -168,7 +159,6 @@ public abstract class AbstractVersionsReport
     @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
     private MojoExecution mojoExecution;
 
-    @Component
     protected ArtifactResolver artifactResolver;
 
     /**
@@ -199,6 +189,17 @@ public abstract class AbstractVersionsReport
     protected Set<String> ignoredVersions;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
+
+    @Inject
+    protected AbstractVersionsReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
+                                   ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager )
+    {
+        this.i18n = i18n;
+        this.repositorySystem = repositorySystem;
+        this.artifactResolver = artifactResolver;
+        this.artifactMetadataSource = artifactMetadataSource;
+        this.wagonManager = wagonManager;
+    }
 
     public VersionsHelper getHelper()
         throws MavenReportException
@@ -357,11 +358,6 @@ public abstract class AbstractVersionsReport
     public String getComparisonMethod()
     {
         return comparisonMethod;
-    }
-
-    public ArtifactResolver getResolver()
-    {
-        return resolver;
     }
 
     public I18N getI18n()

@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
@@ -45,7 +46,6 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
@@ -86,19 +86,11 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( defaultValue = "${project}", required = true, readonly = true )
     protected MavenProject project;
 
-    @Component
     protected RepositorySystem repositorySystem;
 
     /**
      * @since 1.0-alpha-1
      */
-    @Component
-    protected org.apache.maven.artifact.resolver.ArtifactResolver resolver;
-
-    /**
-     * @since 1.0-alpha-1
-     */
-    @Component
     protected MavenProjectBuilder projectBuilder;
 
     /**
@@ -112,7 +104,6 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Component
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
@@ -136,7 +127,6 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * @since 1.0-alpha-3
      */
-    @Component
     private WagonManager wagonManager;
 
     /**
@@ -195,7 +185,6 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
     private MojoExecution mojoExecution;
 
-    @Component
     protected ArtifactResolver artifactResolver;
     /**
      * The format used to record changes. If "none" is specified, no changes are recorded.
@@ -246,6 +235,20 @@ public abstract class AbstractVersionsUpdaterMojo
     protected Set<String> ignoredVersions;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
+
+    @Inject
+    protected AbstractVersionsUpdaterMojo( RepositorySystem repositorySystem,
+                                          MavenProjectBuilder projectBuilder,
+                                          ArtifactMetadataSource artifactMetadataSource,
+                                          WagonManager wagonManager,
+                                          ArtifactResolver artifactResolver )
+    {
+        this.repositorySystem = repositorySystem;
+        this.projectBuilder = projectBuilder;
+        this.artifactMetadataSource = artifactMetadataSource;
+        this.wagonManager = wagonManager;
+        this.artifactResolver = artifactResolver;
+    }
 
     public VersionsHelper getHelper() throws MojoExecutionException
     {
@@ -526,7 +529,7 @@ public abstract class AbstractVersionsUpdaterMojo
         artifact.setVersion( updateVersion.toString() );
         try
         {
-            resolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
+            artifactResolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
         }
         catch ( ArtifactResolutionException e )
         {

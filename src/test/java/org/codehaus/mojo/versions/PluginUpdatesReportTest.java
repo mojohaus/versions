@@ -27,12 +27,9 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
-import org.apache.maven.doxia.tools.SiteTool;
-import org.apache.maven.doxia.tools.SiteToolException;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
@@ -40,11 +37,12 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.model.RuleSet;
-import org.codehaus.plexus.i18n.I18N;
+import org.codehaus.mojo.versions.utils.MockUtils;
 import org.junit.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
@@ -52,7 +50,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +64,8 @@ public class PluginUpdatesReportTest
     {
         TestPluginUpdatesReport()
         {
-            mockPlexusComponents();
+            super( mockI18N(), mockRepositorySystem(), null, mockArtifactMetadataSource(), null );
+            siteTool = MockUtils.mockSiteTool();
 
             project = new MavenProject();
             project.setBuild( new Build() );
@@ -114,22 +112,9 @@ public class PluginUpdatesReportTest
             return this;
         }
 
-        /**
-         * <p></p>Mocks some Plexus components to speed up test execution.</p>
-         * <p>Note: these components could just as well be injected using
-         * <code>org.codehaus.plexus.PlexusTestCase.lookup</code>,
-         * but that method greatly slows down test execution.</p>
-         *
-         * @see <a href="https://codehaus-plexus.github.io/guides/developer-guide/building-components/component-testing.html">
-         * Testing Plexus Components</a>
-         */
-        private void mockPlexusComponents()
+        private static RepositorySystem mockRepositorySystem()
         {
-            i18n = mock( I18N.class );
-            when( i18n.getString( anyString(), any(), anyString() ) ).thenAnswer(
-                invocation -> invocation.getArgument( 2 ) );
-
-            repositorySystem = mock( RepositorySystem.class );
+            RepositorySystem repositorySystem = mock( RepositorySystem.class );
             when( repositorySystem.createPluginArtifact( any( Plugin.class ) ) ).thenAnswer(
                 invocation ->
                 {
@@ -137,18 +122,7 @@ public class PluginUpdatesReportTest
                     return new DefaultArtifact( plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(),
                                                 SCOPE_RUNTIME, "maven-plugin", "jar", null );
                 } );
-
-            Artifact skinArtifact = mock( Artifact.class );
-            when( skinArtifact.getId() ).thenReturn( "" );
-            siteTool = mock( SiteTool.class );
-            try
-            {
-                when( siteTool.getSkinArtifactFromRepository( any(), any(), any() ) ).thenReturn( skinArtifact );
-            }
-            catch ( SiteToolException e )
-            {
-                throw new RuntimeException( e );
-            }
+            return repositorySystem;
         }
     }
 
