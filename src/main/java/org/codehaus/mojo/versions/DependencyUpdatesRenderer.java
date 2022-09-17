@@ -27,9 +27,14 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.UpdateScope;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.i18n.I18N;
+
+import static java.util.Optional.of;
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
+import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
  * @since 1.0-beta-1
@@ -118,19 +123,19 @@ public class DependencyUpdatesRenderer
         int numCur = 0;
         for ( ArtifactVersions details : allUpdates.values() )
         {
-            if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
+            if ( details.getOldestUpdate( of( SUBINCREMENTAL ) ) != null )
             {
                 numAny++;
             }
-            else if ( details.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
+            else if ( details.getOldestUpdate( of( INCREMENTAL ) ) != null )
             {
                 numInc++;
             }
-            else if ( details.getOldestUpdate( UpdateScope.MINOR ) != null )
+            else if ( details.getOldestUpdate( of( MINOR ) ) != null )
             {
                 numMin++;
             }
-            else if ( details.getOldestUpdate( UpdateScope.MAJOR ) != null )
+            else if ( details.getOldestUpdate( of( MAJOR ) ) != null )
             {
                 numMaj++;
             }

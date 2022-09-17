@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -43,14 +44,19 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.UpdateScope;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.util.StringUtils;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
 
 /**
  * Displays all dependencies that have newer versions available.
@@ -669,31 +675,14 @@ public class DisplayDependencyUpdatesMojo
         }
     }
 
-    private UpdateScope calculateUpdateScope()
+    private Optional<Segment> calculateUpdateScope()
     {
-        UpdateScope result = UpdateScope.ANY;
-        if ( !allowAnyUpdates )
-        {
-            if ( allowMajorUpdates )
-            {
-                result = UpdateScope.MAJOR;
-            }
-            else
-            {
-                if ( allowMinorUpdates )
-                {
-                    result = UpdateScope.MINOR;
-                }
-                else
-                {
-                    if ( allowIncrementalUpdates )
-                    {
-                        result = UpdateScope.INCREMENTAL;
-                    }
-                }
-            }
-        }
-        return result;
+        return !allowAnyUpdates
+                ? allowMajorUpdates ? of( MAJOR )
+                : allowMinorUpdates ? of( MINOR )
+                : allowIncrementalUpdates ? of( INCREMENTAL )
+                : empty()
+                : empty();
     }
 
     private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )

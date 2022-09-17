@@ -24,14 +24,22 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.UpdateScope;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
+import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
  * XML renderer for DependencyUpdatesReport creates an xml file in target directory and writes report about available
@@ -145,19 +153,19 @@ public class DependencyUpdatesXmlRenderer
         int numCur = 0;
         for ( ArtifactVersions details : allUpdates )
         {
-            if ( details.getOldestUpdate( UpdateScope.SUBINCREMENTAL ) != null )
+            if ( details.getOldestUpdate( of( SUBINCREMENTAL ) ) != null )
             {
                 numAny++;
             }
-            else if ( details.getOldestUpdate( UpdateScope.INCREMENTAL ) != null )
+            else if ( details.getOldestUpdate( of( INCREMENTAL ) ) != null )
             {
                 numInc++;
             }
-            else if ( details.getOldestUpdate( UpdateScope.MINOR ) != null )
+            else if ( details.getOldestUpdate( of( MINOR ) ) != null )
             {
                 numMin++;
             }
-            else if ( details.getOldestUpdate( UpdateScope.MAJOR ) != null )
+            else if ( details.getOldestUpdate( of( MAJOR ) ) != null )
             {
                 numMaj++;
             }
@@ -190,17 +198,17 @@ public class DependencyUpdatesXmlRenderer
         sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( versions.isCurrentVersionDefined()
                         ? versions.getCurrentVersion().toString() : versions.getArtifact().getVersionRange().toString(),
                 CURRENT_VERSION ) ).append( NL );
-        ArtifactVersion nextVersion = versions.getOldestUpdate( UpdateScope.ANY );
+        ArtifactVersion nextVersion = versions.getOldestUpdate( empty() );
         if ( nextVersion != null )
         {
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( nextVersion.toString(),
                                                                                     NEXT_VERSION ) ).append( NL );
 
-            String incrementalsBlock = getVersionsInScopeBlock( versions, UpdateScope.INCREMENTAL );
+            String incrementalsBlock = getVersionsInScopeBlock( versions, of( INCREMENTAL ) );
             sBuilder.append( incrementalsBlock );
-            String minorsBlock = getVersionsInScopeBlock( versions, UpdateScope.MINOR );
+            String minorsBlock = getVersionsInScopeBlock( versions, of( MINOR ) );
             sBuilder.append( minorsBlock );
-            String majorsBlock = getVersionsInScopeBlock( versions, UpdateScope.MAJOR );
+            String majorsBlock = getVersionsInScopeBlock( versions, of( MAJOR ) );
             sBuilder.append( majorsBlock );
 
             String status = null;
@@ -259,9 +267,9 @@ public class DependencyUpdatesXmlRenderer
         return sBuilder.toString();
     }
 
-    private static String getVersionsInScopeBlock( ArtifactVersions av, UpdateScope scope )
+    private static String getVersionsInScopeBlock( ArtifactVersions av, Optional<Segment> scope )
     {
-        String versionsTag = scope.toString().toLowerCase() + "s";
+        String versionsTag = scope.map( s -> s.name().toLowerCase() + "s" ).orElse( "any" );
         StringBuilder sBuilder = new StringBuilder();
 
         ArtifactVersion nextVersion = av.getOldestUpdate( scope );

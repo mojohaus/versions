@@ -73,12 +73,6 @@ public abstract class AbstractVersionDetails
     {
     }
 
-    protected AbstractVersionDetails( ArtifactVersion currentVersion, boolean includeSnapshots )
-    {
-        this.currentVersion = currentVersion;
-        this.includeSnapshots = includeSnapshots;
-    }
-
     public final boolean isCurrentVersionDefined()
     {
         return getCurrentVersion() != null;
@@ -273,21 +267,9 @@ public abstract class AbstractVersionDetails
         return getVersions( restriction, includeSnapshots );
     }
 
-    public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
-    {
-        return getOldestVersion( lowerBound, upperBound, true );
-    }
-
     public final ArtifactVersion getOldestVersion( VersionRange versionRange, boolean includeSnapshots )
     {
         return getOldestVersion( versionRange, null, includeSnapshots );
-    }
-
-    public final ArtifactVersion getOldestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
-                                                   boolean includeSnapshots )
-    {
-        Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
-        return getOldestVersion( restriction, includeSnapshots );
     }
 
     public final ArtifactVersion getOldestVersion( Restriction restriction,
@@ -356,88 +338,61 @@ public abstract class AbstractVersionDetails
         return result.toArray( new ArtifactVersion[0] );
     }
 
-    public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
-    {
-        return getOldestUpdate( currentVersion, updateScope, isIncludeSnapshots() );
-    }
-
-    public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope )
-    {
-        return getNewestUpdate( currentVersion, updateScope, isIncludeSnapshots() );
-    }
-
-    public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope )
-    {
-        return getAllUpdates( currentVersion, updateScope, isIncludeSnapshots() );
-    }
-
-    public ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, VersionRange versionRange )
-    {
-        return getOldestUpdate( currentVersion, versionRange, isIncludeSnapshots() );
-    }
-
-    public ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, VersionRange versionRange )
-    {
-        return getNewestUpdate( currentVersion, versionRange, isIncludeSnapshots() );
-    }
-
-    public ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, VersionRange versionRange )
-    {
-        return getAllUpdates( currentVersion, versionRange, isIncludeSnapshots() );
-    }
-
-    public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
+    public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
                                                   boolean includeSnapshots )
     {
-        return updateScope.getOldestUpdate( this, currentVersion, includeSnapshots );
+        try
+        {
+            return getOldestVersion( restrictionFor( currentVersion, updateScope ), includeSnapshots );
+        }
+        catch ( InvalidSegmentException e )
+        {
+            return null;
+        }
     }
 
-    public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, UpdateScope updateScope,
+    public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
                                                   boolean includeSnapshots )
     {
-        return updateScope.getNewestUpdate( this, currentVersion, includeSnapshots );
+        try
+        {
+            return getNewestVersion( restrictionFor( currentVersion, updateScope ), includeSnapshots );
+        }
+        catch ( InvalidSegmentException e )
+        {
+            return null;
+        }
     }
 
-    public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, UpdateScope updateScope,
+    public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, Optional<Segment> updateScope,
                                                   boolean includeSnapshots )
     {
-        return updateScope.getAllUpdates( this, currentVersion, includeSnapshots );
+        try
+        {
+            return getVersions( restrictionFor( currentVersion, updateScope ), includeSnapshots );
+        }
+        catch ( InvalidSegmentException e )
+        {
+            return null;
+        }
     }
 
-    public ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, VersionRange versionRange,
-                                            boolean includeSnapshots )
-    {
-        return getOldestVersion( versionRange, includeSnapshots );
-    }
-
-    public ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, VersionRange versionRange,
-                                            boolean includeSnapshots )
-    {
-        return getNewestVersion( versionRange, includeSnapshots );
-    }
-
-    public ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, VersionRange versionRange,
-                                            boolean includeSnapshots )
-    {
-        return new ArtifactVersion[0]; // To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    public final ArtifactVersion getOldestUpdate( UpdateScope updateScope )
+    public final ArtifactVersion getOldestUpdate( Optional<Segment> updateScope )
     {
         return getOldestUpdate( updateScope, isIncludeSnapshots() );
     }
 
-    public final ArtifactVersion getNewestUpdate( UpdateScope updateScope )
+    public final ArtifactVersion getNewestUpdate( Optional<Segment> updateScope )
     {
         return getNewestUpdate( updateScope, isIncludeSnapshots() );
     }
 
-    public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope )
+    public final ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope )
     {
         return getAllUpdates( updateScope, isIncludeSnapshots() );
     }
 
-    public final ArtifactVersion getOldestUpdate( UpdateScope updateScope, boolean includeSnapshots )
+    public final ArtifactVersion getOldestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
     {
         if ( isCurrentVersionDefined() )
         {
@@ -446,7 +401,7 @@ public abstract class AbstractVersionDetails
         return null;
     }
 
-    public final ArtifactVersion getNewestUpdate( UpdateScope updateScope, boolean includeSnapshots )
+    public final ArtifactVersion getNewestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
     {
         if ( isCurrentVersionDefined() )
         {
@@ -455,7 +410,7 @@ public abstract class AbstractVersionDetails
         return null;
     }
 
-    public final ArtifactVersion[] getAllUpdates( UpdateScope updateScope, boolean includeSnapshots )
+    public final ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope, boolean includeSnapshots )
     {
         if ( isCurrentVersionDefined() )
         {
@@ -464,31 +419,9 @@ public abstract class AbstractVersionDetails
         return null;
     }
 
-    public final ArtifactVersion getOldestUpdate( VersionRange versionRange )
-    {
-        return getOldestUpdate( versionRange, isIncludeSnapshots() );
-    }
-
-    public final ArtifactVersion getNewestUpdate( VersionRange versionRange )
-    {
-        return getNewestUpdate( versionRange, isIncludeSnapshots() );
-    }
-
     public final ArtifactVersion[] getAllUpdates( VersionRange versionRange )
     {
         return getAllUpdates( versionRange, isIncludeSnapshots() );
-    }
-
-    public ArtifactVersion getOldestUpdate( VersionRange versionRange, boolean includeSnapshots )
-    {
-        Restriction restriction = new Restriction( getCurrentVersion(), false, null, false );
-        return getOldestVersion( versionRange, restriction, includeSnapshots );
-    }
-
-    public ArtifactVersion getNewestUpdate( VersionRange versionRange, boolean includeSnapshots )
-    {
-        Restriction restriction = new Restriction( getCurrentVersion(), false, null, false );
-        return getNewestVersion( versionRange, restriction, includeSnapshots );
     }
 
     public ArtifactVersion[] getAllUpdates( VersionRange versionRange, boolean includeSnapshots )
@@ -573,7 +506,7 @@ public abstract class AbstractVersionDetails
      * Checks if the candidate version is in the range of the restriction.
      * a custom comparator is/can be used to have milestones and rcs before final releases,
      * which is not yet possible with {@link Restriction#containsVersion(ArtifactVersion)}.
-     * @param restriction the range to check against.
+     * @PARAM RESTRICTION THE RANGE TO CHECK AGAINST.
      * @param candidate the version to check.
      * @return true if the candidate version is within the range of the restriction parameter.
      */
@@ -590,11 +523,28 @@ public abstract class AbstractVersionDetails
         {
             return false;
         }
-        if ( ( !includeLower && lower == 0 ) || ( !includeUpper && upper == 0 ) )
-        {
-            return false;
-        }
-        return true;
+        return ( includeLower || lower != 0 ) && ( includeUpper || upper != 0 );
     }
 
+    /**
+     * Helper method to get the artifact boundaries for computing updates
+     *
+     * @param currentVersion The current version.
+     * @param scope scope of the restriction or Optional.empty() for no restriction
+     * @return {@linkplain Restriction} object based on the arguments
+     * @throws InvalidSegmentException if {@code segment} ∉ [0, segmentCount)
+     */
+    protected Restriction restrictionFor( ArtifactVersion currentVersion, Optional<Segment> scope )
+            throws InvalidSegmentException
+    {
+        VersionComparator versionComparator = getVersionComparator();
+        ArtifactVersion lowerBound = scope.isPresent() && scope.get().value() < Segment.SUBINCREMENTAL.value()
+                ? versionComparator.incrementSegment( currentVersion, scope.get().value() )
+                : currentVersion;
+        ArtifactVersion upperBound = scope.isPresent() && scope.get().value() > Segment.MAJOR.value()
+                ? versionComparator.incrementSegment( currentVersion, scope.get().value() - 1 )
+                : null;
+        return new Restriction( lowerBound, lowerBound != currentVersion,
+                upperBound, false );
+    }
 }
