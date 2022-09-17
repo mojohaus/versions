@@ -672,18 +672,6 @@ public class DefaultVersionsHelper
     }
 
     @Override
-    public ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots,
-                                                   boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException
-    {
-        ArtifactVersions artifactVersions = lookupArtifactVersions( artifact, usePluginRepositories );
-
-        artifactVersions.setIncludeSnapshots( allowSnapshots );
-
-        return artifactVersions;
-    }
-
-    @Override
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                         boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException

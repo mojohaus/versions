@@ -25,7 +25,8 @@ import java.util.Objects;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.UpdateScope;
+
+import static java.util.Optional.empty;
 
 /**
  * Details of a plugin's updates.
@@ -65,7 +66,7 @@ public class PluginUpdatesDetails
      */
     public boolean isArtifactUpdateAvailable()
     {
-        return artifactVersions.getAllUpdates( UpdateScope.ANY, includeSnapshots ).length > 0;
+        return artifactVersions.getAllUpdates( empty(), includeSnapshots ).length > 0;
     }
 
     /**
@@ -77,7 +78,7 @@ public class PluginUpdatesDetails
     {
         for ( ArtifactVersions versions : dependencyVersions.values() )
         {
-            ArtifactVersion[] dependencyUpdates = versions.getAllUpdates( UpdateScope.ANY, includeSnapshots );
+            ArtifactVersion[] dependencyUpdates = versions.getAllUpdates( empty(), includeSnapshots );
             if ( dependencyUpdates != null && dependencyUpdates.length > 0 )
             {
                 return true;
