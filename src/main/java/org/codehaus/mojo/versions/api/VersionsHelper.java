@@ -159,18 +159,6 @@ public interface VersionsHelper
         throws ArtifactMetadataRetrievalException;
 
     /**
-     * Looks up the updates of an artifact.
-     *
-     * @param artifact The artifact to look up
-     * @param allowSnapshots Include snapshots in the list of updates.
-     * @param usePluginRepositories Search the plugin repositories.
-     * @return The artifact update details.
-     * @throws ArtifactMetadataRetrievalException When things go wrong.
-     */
-    ArtifactVersions lookupArtifactUpdates( Artifact artifact, boolean allowSnapshots, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException;
-
-    /**
      * Looks up the updates for a set of dependencies.
      *
      * @param dependencies The set of {@link Dependency} instances to look up.
