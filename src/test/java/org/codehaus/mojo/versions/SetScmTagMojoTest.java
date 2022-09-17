@@ -23,7 +23,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.codehaus.mojo.versions.utils.BaseMojoTestCase;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.MojoRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,15 +37,19 @@ import static org.hamcrest.Matchers.matchesPattern;
  *
  * @author Andrzej Jarmoniuk
  */
-public class SetScmTagMojoTest extends BaseMojoTestCase
+public class SetScmTagMojoTest extends AbstractMojoTestCase
 {
+    @Rule
+    MojoRule mojoRule = new MojoRule( this );
+
     @Test
     public void testNewScmValues() throws Exception
     {
-        Path pomFile = Paths.get( "target/test-classes/org/codehaus/mojo/set-scm-tag/issue-342-pom.xml" );
-        createMojo( "set-scm-tag", pomFile.toString() )
-                .execute();
-        String output = String.join( "", Files.readAllLines( pomFile ) )
+        Path projectPath = Paths.get( "target/test-classes/org/codehaus/mojo/set-scm-tag" );
+        SetScmTagMojo mojo = (SetScmTagMojo) mojoRule.lookupConfiguredMojo( projectPath.toFile(), "set-scm-tag" );
+        mojo.execute();
+
+        String output = String.join( "", Files.readAllLines( projectPath.resolve( "pom.xml" ) ) )
                 .replaceAll( "\\s*", "" );
         assertThat( output, allOf(
                         matchesPattern( ".*<scm>.*<tag>\\s*newTag\\s*</tag>.*</scm>.*" ),
