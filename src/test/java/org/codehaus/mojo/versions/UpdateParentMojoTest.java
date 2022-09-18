@@ -325,4 +325,25 @@ public class UpdateParentMojoTest
         assertThat( changeRecorder.getChanges(), hasItem( new VersionChange( "default-group",
                 "parent-artifact", "1.0.0", version ) ) );
     }
+
+    @Test
+    public void testShouldUpgradeToSnapshot() throws MojoExecutionException, XMLStreamException, MojoFailureException
+    {
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "parent-artifact" );
+            setVersion( "0.9.0" );
+        }} );
+        mojo.allowSnapshots = true;
+        mojo.parentVersion = "[0,1.0.1-SNAPSHOT]";
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) ).thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(),
+                hasItem( new VersionChange( "default-group", "parent-artifact", "0.9.0",
+                        "1.0.1-SNAPSHOT" ) ) );
+    }
 }
