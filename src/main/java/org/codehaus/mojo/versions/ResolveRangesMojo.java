@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +45,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -310,11 +312,12 @@ public class ResolveRangesMojo
 
             property.setVersion( currentVersion );
 
-            int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+            Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                    allowIncrementalUpdates );
             // TODO: Check if we could add allowDowngrade ? 
             try
             {
-                updatePropertyToNewestVersion( pom, property, version, currentVersion, false, segment );
+                updatePropertyToNewestVersion( pom, property, version, currentVersion, false, unchangedSegment );
             }
             catch ( InvalidSegmentException | InvalidVersionSpecificationException e )
             {

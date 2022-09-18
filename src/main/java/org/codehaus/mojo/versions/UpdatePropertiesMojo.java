@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -37,6 +38,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -179,13 +181,13 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
 
             if ( canUpdateProperty )
             {
-                int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
                                                          allowIncrementalUpdates );
                 try
                 {
                     ArtifactVersion targetVersion =
                             updatePropertyToNewestVersion( pom, property, version, currentVersion,
-                                    allowDowngrade, segment );
+                                    allowDowngrade, unchangedSegment );
 
                     if ( targetVersion != null )
                     {

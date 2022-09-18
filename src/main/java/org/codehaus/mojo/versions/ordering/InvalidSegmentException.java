@@ -20,13 +20,14 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.codehaus.mojo.versions.api.Segment;
 
 /**
  * Represents an invalid segment being identified within a version.
  */
 public class InvalidSegmentException extends Exception
 {
-    private final int segment;
+    private final Segment segment;
 
     private final int segmentCount;
 
@@ -39,9 +40,9 @@ public class InvalidSegmentException extends Exception
      * @param segmentCount the number of segments.
      * @param version the version object.
      */
-    public InvalidSegmentException( int segment, int segmentCount, ArtifactVersion version )
+    public InvalidSegmentException( Segment segment, int segmentCount, ArtifactVersion version )
     {
-        super( String.format( "Invalid segment, %d, for the %d segment version: '%s'", segment, segmentCount,
+        super( String.format( "Invalid segment %s for the %d segment version: '%s'", segment.toString(), segmentCount,
                 version.toString() ) );
         this.segment = segment;
         this.segmentCount = segmentCount;
@@ -51,7 +52,7 @@ public class InvalidSegmentException extends Exception
     /**
      * @return segment
      */
-    public int getSegment()
+    public Segment getSegment()
     {
         return segment;
     }

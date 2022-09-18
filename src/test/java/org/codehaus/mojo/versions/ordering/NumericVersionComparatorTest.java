@@ -22,6 +22,9 @@ package org.codehaus.mojo.versions.ordering;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.junit.Test;
 
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -104,20 +107,21 @@ public class NumericVersionComparatorTest
         throws Exception
     {
         assertEquals( new DefaultArtifactVersion( "6" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5" ), 0 ).toString() );
+                      instance.incrementSegment( new DefaultArtifactVersion( "5" ), MAJOR ).toString() );
         assertEquals( new DefaultArtifactVersion( "6.0" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), 0 ).toString() );
+                      instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), MAJOR ).toString() );
         assertEquals( new DefaultArtifactVersion( "5.1" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), 1 ).toString() );
+                      instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), MINOR ).toString() );
         assertEquals( new DefaultArtifactVersion( "5.1.0" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0.1" ), 1 ).toString() );
+                      instance.incrementSegment( new DefaultArtifactVersion( "5.0.1" ), MINOR ).toString() );
         assertEquals( new DefaultArtifactVersion( "5.beta.0" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha.1" ), 1 ).toString() );
+                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha.1" ), MINOR ).toString() );
         assertEquals( new DefaultArtifactVersion( "5.alpha-2.0" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.1" ), 1 ).toString() );
+                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.1" ), MINOR ).toString() );
         assertEquals( new DefaultArtifactVersion( "5.alpha-1.2" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.1" ), 2 ).toString() );
+                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.1" ), INCREMENTAL )
+                              .toString() );
         assertEquals( new DefaultArtifactVersion( "5.beta.0" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-wins.1" ), 1 ).toString() );
+                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-wins.1" ), MINOR ).toString() );
     }
 }

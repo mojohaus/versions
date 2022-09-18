@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions.ordering;
 import java.util.Comparator;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.codehaus.mojo.versions.api.Segment;
 
 /**
  * A rule for comparing and manipulating versions.
@@ -47,5 +48,5 @@ public interface VersionComparator
      * @since 1.0-beta-1
      * @throws InvalidSegmentException if {@code segment} ∉ [0, segmentCount)
      */
-    ArtifactVersion incrementSegment( ArtifactVersion artifactVersion, int segment ) throws InvalidSegmentException;
+    ArtifactVersion incrementSegment( ArtifactVersion artifactVersion, Segment segment ) throws InvalidSegmentException;
 }

@@ -28,8 +28,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.text.CaseUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -55,6 +57,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
@@ -66,6 +69,12 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
+
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -568,43 +577,33 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param allowIncrementalUpdates Allow incremental updates
      * @return Returns the segment (0-based) that is unchangable. If any segment can change, returns -1.
      */
-    protected int determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,
-                                             boolean allowIncrementalUpdates )
+    protected Optional<Segment> determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,
+                                                           boolean allowIncrementalUpdates )
     {
-        int segment;
-        if ( allowMajorUpdates )
+        Optional<Segment> unchangedSegment = allowMajorUpdates ? empty()
+                : allowMinorUpdates ? of( MAJOR )
+                : allowIncrementalUpdates ? of( MINOR )
+                : of( INCREMENTAL );
+        if ( getLog().isInfoEnabled() )
         {
-            segment = -1;
-            getLog().info( "Major version changes allowed" );
+            getLog().info(
+                    unchangedSegment.map( s ->
+                                    CaseUtils.toCamelCase( Segment.of( s.value() + 1 ).toString(), true ) )
+                            .orElse( "All" ) + " version changes allowed" );
         }
-        else if ( allowMinorUpdates )
-        {
-            segment = 0;
-            getLog().info( "Minor version changes allowed" );
-        }
-        else if ( allowIncrementalUpdates )
-        {
-            segment = 1;
-            getLog().info( "Incremental version changes allowed" );
-        }
-        else
-        {
-            segment = 2;
-            getLog().info( "Subincremental version changes allowed" );
-        }
-
-        return segment;
+        return unchangedSegment;
     }
 
     protected ArtifactVersion updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
                                                              PropertyVersions version, String currentVersion,
-                                                             boolean allowDowngrade, int segment )
+                                                             boolean allowDowngrade,
+                                                             Optional<Segment> unchangedSegment )
             throws XMLStreamException, InvalidVersionSpecificationException,
             InvalidSegmentException, MojoExecutionException
     {
         ArtifactVersion winner =
             version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                      this.getHelper(), allowDowngrade, segment );
+                                      this.getHelper(), allowDowngrade, unchangedSegment );
 
         if ( winner == null || currentVersion.equals( winner.toString() ) )
         {

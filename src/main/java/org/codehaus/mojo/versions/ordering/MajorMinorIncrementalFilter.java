@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.ordering;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.AbstractVersionDetails;
@@ -39,7 +40,7 @@ import org.codehaus.mojo.versions.api.AbstractVersionDetails;
  * <li>3.1.0</li>
  * <li>3.3.0</li>
  * </ul>
- * The {@link AbstractVersionDetails#getNewerVersions(String, int, boolean)} will use an upper version of
+ * The {@link AbstractVersionDetails#getNewerVersions(String, Optional, boolean, boolean)} will use an upper version of
  * <code>2.1.0</code> to limit the versions to use. The result of this would be using <code>2.1.0-M1</code> which
  * contradicts the wish of the user of not updating the minor version. The root cause of this is the comparison of Maven
  * versions which will defined <code>2.1.0-M1</code> as less than <code>2.1.0</code>. The method

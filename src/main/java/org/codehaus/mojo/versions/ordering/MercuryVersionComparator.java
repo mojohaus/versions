@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.codehaus.mojo.versions.api.Segment;
 
 /**
  * A comparator which uses Mercury's version rules.
@@ -52,18 +53,13 @@ public class MercuryVersionComparator
         return tok.countTokens();
     }
 
-    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment ) throws InvalidSegmentException
+    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, Segment segment ) throws InvalidSegmentException
     {
-        final int segmentCount = getSegmentCount( v );
-        if ( segment < 0 || segment > segmentCount )
-        {
-            throw new InvalidSegmentException( segment, segmentCount, v );
-        }
         final String version = v.toString();
         StringBuilder result = new StringBuilder( version.length() + 10 );
         StringTokenizer tok = new StringTokenizer( version, ".-" );
         int index = 0;
-        while ( tok.hasMoreTokens() && segment > 0 )
+        while ( tok.hasMoreTokens() && segment.value() > 0 )
         {
             String token = tok.nextToken();
             result.append( token );
@@ -74,9 +70,9 @@ public class MercuryVersionComparator
                 result.append( version.substring( index, index + 1 ) );
                 index++;
             }
-            segment--;
+            segment = Segment.of( segment.value() - 1 );
         }
-        if ( segment == 0 )
+        if ( segment.value() == 0 )
         {
             if ( tok.hasMoreTokens() )
             {

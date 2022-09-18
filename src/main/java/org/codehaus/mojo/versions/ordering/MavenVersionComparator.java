@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.ordering;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.plexus.util.StringUtils;
 
 /**
@@ -29,8 +30,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public class MavenVersionComparator
-    extends AbstractVersionComparator
+public class MavenVersionComparator extends AbstractVersionComparator
 {
 
     /**
@@ -92,15 +92,10 @@ public class MavenVersionComparator
     /**
      * {@inheritDoc}
      */
-    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, int segment ) throws InvalidSegmentException
+    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, Segment segment ) throws InvalidSegmentException
     {
-        int segmentCount = innerGetSegmentCount( v );
-        if ( segment < 0 || segment >= segmentCount )
-        {
-            throw new InvalidSegmentException( segment, segmentCount, v );
-        }
         String version = v.toString();
-        if ( segmentCount == 1 )
+        if ( innerGetSegmentCount( v ) == 1 )
         {
             // only the qualifier
             version = VersionComparators.alphaNumIncrement( version );
@@ -124,14 +119,14 @@ public class MavenVersionComparator
 
             switch ( segment )
             {
-                case 0:
+                case MAJOR:
                     major++;
                     minor = 0;
                     incremental = 0;
                     build = 0;
                     qualifier = null;
                     break;
-                case 1:
+                case MINOR:
                     minor++;
                     incremental = 0;
                     build = 0;
@@ -140,12 +135,12 @@ public class MavenVersionComparator
                         qualifier = "SNAPSHOT";
                     }
                     break;
-                case 2:
+                case INCREMENTAL:
                     incremental++;
                     build = 0;
                     qualifier = null;
                     break;
-                case 3:
+                case SUBINCREMENTAL:
                     if ( haveQualifier )
                     {
                         qualifier = qualifierIncrement( qualifier );
