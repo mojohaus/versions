@@ -54,7 +54,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "use-next-snapshots", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "use-next-snapshots", threadSafe = true )
 public class UseNextSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

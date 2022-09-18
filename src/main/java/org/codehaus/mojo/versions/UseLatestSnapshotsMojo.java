@@ -59,7 +59,7 @@ import static java.util.Collections.singletonList;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "use-latest-snapshots", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "use-latest-snapshots", threadSafe = true )
 public class UseLatestSnapshotsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

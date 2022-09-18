@@ -49,10 +49,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Paul Gier
  * @since 1.0-alpha-3
  */
-@Mojo( name = "unlock-snapshots",
-       requiresProject = true,
-       requiresDirectInvocation = true,
-       threadSafe = true )
+@Mojo( name = "unlock-snapshots", threadSafe = true )
 public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
 {
 

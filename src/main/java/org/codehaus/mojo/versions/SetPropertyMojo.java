@@ -52,7 +52,7 @@ import static org.apache.commons.lang3.StringUtils.split;
  * @author Karl Heinz Marbaise
  * @since 2.5
  */
-@Mojo( name = "set-property", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "set-property", threadSafe = true )
 public class SetPropertyMojo
     extends AbstractVersionsUpdaterMojo
 {

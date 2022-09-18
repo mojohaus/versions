@@ -57,7 +57,7 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
  * @author Paul Gier
  * @since 1.3
  */
-@Mojo( name = "compare-dependencies", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "compare-dependencies", threadSafe = true )
 public class CompareDependenciesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

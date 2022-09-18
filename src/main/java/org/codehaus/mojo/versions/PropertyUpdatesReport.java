@@ -46,7 +46,7 @@ import org.codehaus.plexus.i18n.I18N;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "property-updates-report", requiresProject = true, requiresDependencyResolution = ResolutionScope.RUNTIME,
+@Mojo( name = "property-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME,
        threadSafe = true )
 public class PropertyUpdatesReport
     extends AbstractVersionsReport

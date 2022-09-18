@@ -36,7 +36,7 @@ import org.codehaus.plexus.util.FileUtils;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "revert", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "revert", threadSafe = true )
 public class RevertMojo
     extends AbstractMojo
 {

@@ -52,7 +52,7 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "use-releases", threadSafe = true )
 public class UseReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

@@ -44,7 +44,7 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
  * @author Stephen Connolly
  * @since 2.2
  */
-@Mojo( name = "display-parent-updates", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "display-parent-updates", threadSafe = true )
 public class DisplayParentUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {

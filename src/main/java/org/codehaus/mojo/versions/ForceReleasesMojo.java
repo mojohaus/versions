@@ -48,7 +48,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 2.2
  */
-@Mojo( name = "force-releases", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "force-releases", threadSafe = true )
 public class ForceReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

@@ -54,7 +54,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Paul Gier
  * @since 1.0-alpha-3
  */
-@Mojo( name = "resolve-ranges", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "resolve-ranges", threadSafe = true )
 public class ResolveRangesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
