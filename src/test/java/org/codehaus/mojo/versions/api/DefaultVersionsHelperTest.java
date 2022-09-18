@@ -181,7 +181,7 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
             new Property( "bar.version" )
         };
         // should not throw an IllegalStateException
-        Map result =
+        Map<Property, PropertyVersions> result =
             helper.getVersionPropertiesMap( project, propertyDefinitions, "foo.version", "bar.version", false );
         assertTrue( result.isEmpty() );
     }

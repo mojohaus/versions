@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.is;
 public class SetMojoTest extends AbstractMojoTestCase
 {
     @Rule
-    MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule( this );
 
     @Test
     public void testGetIncrementedVersion() throws MojoExecutionException

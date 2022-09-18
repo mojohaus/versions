@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -704,10 +703,8 @@ public class DisplayDependencyUpdatesMojo
     {
         List<String> withUpdates = new ArrayList<>();
         List<String> usingCurrent = new ArrayList<>();
-        Iterator i = updates.values().iterator();
-        while ( i.hasNext() )
+        for ( ArtifactVersions versions : updates.values() )
         {
-            ArtifactVersions versions = (ArtifactVersions) i.next();
             String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
             final String current;
             ArtifactVersion latest;
@@ -719,12 +716,12 @@ public class DisplayDependencyUpdatesMojo
             else
             {
                 ArtifactVersion newestVersion =
-                    versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
+                        versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null ? null
-                    : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
+                        : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
                 if ( latest != null
-                    && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
+                        && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
                 {
                     latest = null;
                 }
@@ -740,7 +737,7 @@ public class DisplayDependencyUpdatesMojo
             else
             {
                 t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), "." )
-                           + right );
+                        + right );
             }
         }
 
@@ -757,10 +754,9 @@ public class DisplayDependencyUpdatesMojo
             else
             {
                 logLine( false, "The following dependencies in " + section + " are using the newest version:" );
-                i = usingCurrent.iterator();
-                while ( i.hasNext() )
+                for ( String s : usingCurrent )
                 {
-                    logLine( false, (String) i.next() );
+                    logLine( false, s );
                 }
                 logLine( false, "" );
             }
@@ -778,10 +774,9 @@ public class DisplayDependencyUpdatesMojo
         else
         {
             logLine( false, "The following dependencies in " + section + " have newer versions:" );
-            i = withUpdates.iterator();
-            while ( i.hasNext() )
+            for ( String withUpdate : withUpdates )
             {
-                logLine( false, (String) i.next() );
+                logLine( false, withUpdate );
             }
             logLine( false, "" );
         }

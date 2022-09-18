@@ -143,7 +143,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
             if ( artifactVersion != null )
             {
                 getLog().info( "Updating parent from " + getProject().getParent().getVersion()
-                        + " to " + artifactVersion.toString() );
+                        + " to " + artifactVersion );
 
                 if ( PomHelper.setProjectParentVersion( pom, artifactVersion.toString() ) )
                 {

@@ -196,7 +196,7 @@ public class DisplayPluginUpdatesMojo
             {
                 Method getPluginsBoundByDefaultToAllLifecycles =
                     LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles",
-                                                       new Class[] {String.class} );
+                            String.class );
                 Set<Plugin> plugins =
                     (Set<Plugin>) getPluginsBoundByDefaultToAllLifecycles.invoke( lifecycleExecutor, new Object[] {
                         getProject().getPackaging()} );
@@ -1102,7 +1102,7 @@ public class DisplayPluginUpdatesMojo
             {
                 Method getPluginsBoundByDefaultToAllLifecycles =
                     LifecycleExecutor.class.getMethod( "getPluginsBoundByDefaultToAllLifecycles",
-                                                       new Class[] {String.class} );
+                            String.class );
                 Set<Plugin> plugins =
                     (Set<Plugin>) getPluginsBoundByDefaultToAllLifecycles.invoke( lifecycleExecutor, new Object[] {
                         project.getPackaging() == null ? "jar" : project.getPackaging()} );
@@ -1127,7 +1127,7 @@ public class DisplayPluginUpdatesMojo
         getLog().debug( "Using Maven 2.0.10+ strategy to determine lifecycle defined plugins" );
         try
         {
-            Method getLifecycles = LifecycleExecutor.class.getMethod( "getLifecycles", new Class[0] );
+            Method getLifecycles = LifecycleExecutor.class.getMethod( "getLifecycles" );
             lifecycles = (List) getLifecycles.invoke( lifecycleExecutor, new Object[0] );
         }
         catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException e1 )
@@ -1221,7 +1221,7 @@ public class DisplayPluginUpdatesMojo
             plugins.add( plugin );
         }
 
-        plugins.addAll( (List<Plugin>) project.getBuildPlugins() );
+        plugins.addAll( project.getBuildPlugins() );
 
         return plugins;
     }
@@ -1261,8 +1261,8 @@ public class DisplayPluginUpdatesMojo
             {
                 if ( defaultMappings == null )
                 {
-                    throw new LifecycleExecutionException( "Cannot find lifecycle mapping for packaging: \'" + packaging
-                                                               + "\'.", e );
+                    throw new LifecycleExecutionException( "Cannot find lifecycle mapping for packaging: '" + packaging
+                                                               + "'.", e );
                 }
             }
         }
@@ -1271,8 +1271,8 @@ public class DisplayPluginUpdatesMojo
         {
             if ( defaultMappings == null )
             {
-                throw new LifecycleExecutionException( "Cannot find lifecycle mapping for packaging: \'" + packaging
-                                                           + "\', and there is no default" );
+                throw new LifecycleExecutionException( "Cannot find lifecycle mapping for packaging: '" + packaging
+                                                           + "', and there is no default" );
             }
             else
             {
@@ -1446,7 +1446,7 @@ public class DisplayPluginUpdatesMojo
 
         for ( Lifecycle lifecycle : lifecycles )
         {
-            for ( String phase : (List<String>) lifecycle.getPhases() )
+            for ( String phase : lifecycle.getPhases() )
             {
                 if ( phaseToLifecycleMap.containsKey( phase ) )
                 {
@@ -1507,7 +1507,7 @@ public class DisplayPluginUpdatesMojo
         debugVersionMap( "super-pom version map", superPomPluginManagement );
         debugVersionMap( "parent version map", parentPluginManagement );
 
-        Map<String, String> excludePluginManagement = new HashMap<String, String>( superPomPluginManagement );
+        Map<String, String> excludePluginManagement = new HashMap<>( superPomPluginManagement );
         excludePluginManagement.putAll( parentPluginManagement );
 
         debugVersionMap( "aggregate version map", excludePluginManagement );

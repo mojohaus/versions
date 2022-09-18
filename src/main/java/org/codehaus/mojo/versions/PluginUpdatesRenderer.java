@@ -356,8 +356,8 @@ public class PluginUpdatesRenderer
         headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "80%" );
         sink.section2();
         sink.sectionTitle2();
-        sink.text( MessageFormat.format( getText( "report.plugin" ), new Object[] {
-            ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
+        sink.text( MessageFormat.format( getText( "report.plugin" ),
+                ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) ) );
         sink.sectionTitle2_();
         sink.table();
         sink.tableRows( new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false );
@@ -510,16 +510,16 @@ public class PluginUpdatesRenderer
         {
             sink.section3();
             sink.sectionTitle3();
-            sink.text( MessageFormat.format( getText( "report.pluginDependencies" ), new Object[] {
-                ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )} ) );
+            sink.text( MessageFormat.format( getText( "report.pluginDependencies" ),
+                    ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) ) );
             sink.sectionTitle3_();
 
             renderDependencySummaryTable( details.getDependencyVersions(), false, true, true );
 
             sink.section3_();
 
-            details.getDependencyVersions().entrySet()
-                .forEach( entry -> renderDependencyDetail( entry.getKey(), entry.getValue() ) );
+            details.getDependencyVersions()
+                    .forEach( this::renderDependencyDetail );
         }
         sink.section2_();
     }
@@ -528,8 +528,8 @@ public class PluginUpdatesRenderer
     {
         sink.section3();
         sink.sectionTitle3();
-        sink.text( MessageFormat.format( getText( "report.pluginDependency" ), new Object[] {
-            ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )} ) );
+        sink.text( MessageFormat.format( getText( "report.pluginDependency" ),
+                ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() ) ) );
         sink.sectionTitle3_();
         renderDependencyDetailTable( dependency, details, false, true, true );
         sink.section3_();

@@ -225,19 +225,18 @@ public class UseLatestReleasesMojo
     private ArtifactVersion[] filterVersionsWithIncludes( ArtifactVersion[] newer, Artifact artifact )
     {
         List<ArtifactVersion> filteredNewer = new ArrayList<>( newer.length );
-        for ( int j = 0; j < newer.length; j++ )
+        for ( ArtifactVersion artifactVersion : newer )
         {
-            ArtifactVersion artifactVersion = newer[j];
             Artifact artefactWithNewVersion =
-                new DefaultArtifact( artifact.getGroupId(), artifact.getArtifactId(),
-                                     VersionRange.createFromVersion( artifactVersion.toString() ), artifact.getScope(),
-                                     artifact.getType(), null, new DefaultArtifactHandler(), false );
+                    new DefaultArtifact( artifact.getGroupId(), artifact.getArtifactId(),
+                            VersionRange.createFromVersion( artifactVersion.toString() ), artifact.getScope(),
+                            artifact.getType(), null, new DefaultArtifactHandler(), false );
             if ( isIncluded( artefactWithNewVersion ) )
             {
                 filteredNewer.add( artifactVersion );
             }
         }
-        return filteredNewer.toArray( new ArtifactVersion[filteredNewer.size()] );
+        return filteredNewer.toArray( new ArtifactVersion[0] );
     }
 
 }

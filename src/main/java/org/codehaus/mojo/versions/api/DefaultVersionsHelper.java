@@ -21,10 +21,10 @@ package org.codehaus.mojo.versions.api;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -192,7 +192,7 @@ public class DefaultVersionsHelper
         try
         {
             wagon.get( remoteURI, tempFile );
-            try ( InputStream is = new FileInputStream( tempFile ) )
+            try ( InputStream is = Files.newInputStream( tempFile.toPath() ) )
             {
                 return readRulesFromStream( is );
             }
@@ -356,7 +356,7 @@ public class DefaultVersionsHelper
         {
             throw new MojoExecutionException( "Authorization failure trying to load rules from " + rulesUri, e );
         }
-        catch ( ResourceDoesNotExistException e )
+        catch ( ResourceDoesNotExistException | IOException e )
         {
             throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
         }
@@ -371,10 +371,6 @@ public class DefaultVersionsHelper
         catch ( ConnectionException e )
         {
             throw new MojoExecutionException( "Could not establish connection to " + rulesUri, e );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
         }
 
         return loadedRules;
@@ -395,7 +391,8 @@ public class DefaultVersionsHelper
     public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
-        List remoteRepositories = usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
+        List<ArtifactRepository> remoteRepositories = usePluginRepositories
+                ? remotePluginRepositories : remoteArtifactRepositories;
         final List<ArtifactVersion> versions =
             artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
         final List<IgnoreVersion> ignoredVersions = getIgnoredVersions( artifact );

@@ -42,7 +42,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.i18n.I18N;
 
-import static java.util.Collections.EMPTY_MAP;
+import static java.util.Collections.emptyMap;
 import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 
 /**
@@ -190,7 +190,7 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
 
             Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
                 processDependencyManagement ? getHelper().lookupDependenciesUpdates( dependencyManagement, false )
-                    : EMPTY_MAP;
+                    : emptyMap();
 
             if ( onlyUpgradable )
             {

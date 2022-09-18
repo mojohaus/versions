@@ -1,5 +1,6 @@
 package org.codehaus.mojo.versions.filtering;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,7 +30,8 @@ class DependencyFilterTest
         @Test
         void removesExcludedDepsWithExactMatch()
         {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList( "localhost:my-impl:3" ) );
+            DependencyFilter exclusions = DependencyFilter.parseFrom(
+                    Collections.singletonList( "localhost:my-impl:3" ) );
 
             Set<Dependency> actual = exclusions.removingFrom( input );
 
@@ -45,7 +47,8 @@ class DependencyFilterTest
         @Test
         void removesExcludedDepsWithWildcardInVersion()
         {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList( "localhost:my-impl:*" ) );
+            DependencyFilter exclusions = DependencyFilter.parseFrom(
+                    Collections.singletonList( "localhost:my-impl:*" ) );
 
             Set<Dependency> actual = exclusions.removingFrom( input );
 
@@ -61,7 +64,7 @@ class DependencyFilterTest
         @Test
         void removesExcludedDepsWithWildcardInGroupId()
         {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList( "localhost:*:*" ) );
+            DependencyFilter exclusions = DependencyFilter.parseFrom( Collections.singletonList( "localhost:*:*" ) );
 
             Set<Dependency> actual = exclusions.removingFrom( input );
 
@@ -76,7 +79,7 @@ class DependencyFilterTest
         @Test
         void removesExcludedDepsWithAllWildcards()
         {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList( "*:*:*" ) );
+            DependencyFilter exclusions = DependencyFilter.parseFrom( Collections.singletonList( "*:*:*" ) );
 
             Set<Dependency> actual = exclusions.removingFrom( input );
 
@@ -118,7 +121,8 @@ class DependencyFilterTest
         @Test
         void retainsOnlyDepsWithExactMatch()
         {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList( "localhost:my-impl:3" ) );
+            DependencyFilter exclusions = DependencyFilter.parseFrom(
+                    Collections.singletonList( "localhost:my-impl:3" ) );
 
             Set<Dependency> actual = exclusions.retainingIn( input );
 
@@ -133,7 +137,8 @@ class DependencyFilterTest
         @Test
         void retainsOnlyDepsMatchingWildcardInVersion()
         {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList( "localhost:my-api:*" ) );
+            DependencyFilter exclusions = DependencyFilter.parseFrom(
+                    Collections.singletonList( "localhost:my-api:*" ) );
 
             Set<Dependency> actual = exclusions.retainingIn( input );
 
@@ -148,7 +153,7 @@ class DependencyFilterTest
         @Test
         void retainsOnlyDepsWithMultipleWildcards()
         {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList( "localhost:my-*:*" ) );
+            DependencyFilter exclusions = DependencyFilter.parseFrom( Collections.singletonList( "localhost:my-*:*" ) );
 
             Set<Dependency> actual = exclusions.retainingIn( input );
 
@@ -164,7 +169,7 @@ class DependencyFilterTest
         @Test
         void retainsAllOnAllWildcards()
         {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList( "*:*:*" ) );
+            DependencyFilter exclusions = DependencyFilter.parseFrom( Collections.singletonList( "*:*:*" ) );
 
             Set<Dependency> actual = exclusions.retainingIn( input );
 

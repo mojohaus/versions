@@ -309,7 +309,7 @@ public class PropertyVersions
     }
 
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
-                                             List reactorProjects, VersionsHelper helper )
+                                             List<MavenProject> reactorProjects, VersionsHelper helper )
             throws InvalidVersionSpecificationException, InvalidSegmentException
     {
         return getNewestVersion( currentVersion, property, allowSnapshots, reactorProjects, helper,

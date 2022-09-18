@@ -320,16 +320,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      */
     protected boolean isProducedByReactor( Dependency dependency )
     {
-        for ( Object reactorProject : reactorProjects )
-        {
-            MavenProject project = (MavenProject) reactorProject;
-            if ( compare( project, dependency ) )
-            {
-                return true;
-            }
-        }
-        return false;
-
+        return reactorProjects.stream()
+                .anyMatch( reactorProject -> compare( reactorProject, dependency ) );
     }
 
     /**

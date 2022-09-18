@@ -70,7 +70,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     "group:artifact:version:type" ), 3, "" );
             fail( "Method should have thrown a MojoExecutionException" );
         }
-        catch ( MojoExecutionException e )
+        catch ( MojoExecutionException ignored )
         {
         }
     }
