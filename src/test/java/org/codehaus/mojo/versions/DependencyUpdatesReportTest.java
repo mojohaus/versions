@@ -62,11 +62,12 @@ public class DependencyUpdatesReportTest
 {
     private static class TestDependencyUpdatesReport extends DependencyUpdatesReport
     {
-        @SuppressWarnings( "deprecation" )
         TestDependencyUpdatesReport()
         {
-            super( mockI18N(), mockRepositorySystem(), null, mockArtifactMetadataSource(), null );
             siteTool = MockUtils.mockSiteTool();
+            i18n = mockI18N();
+            repositorySystem = mockRepositorySystem();
+            artifactMetadataSource = mockArtifactMetadataSource();
 
             project = new MavenProject();
             project.setOriginalModel( new Model() );

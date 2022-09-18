@@ -65,8 +65,10 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-3
      */
+    @Inject
     protected I18N i18n;
 
+    @Inject
     protected RepositorySystem repositorySystem;
 
     /**
@@ -82,6 +84,7 @@ public abstract class AbstractVersionsReport
      *
      * @since 1.0-alpha-1
      */
+    @Inject
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
@@ -99,6 +102,7 @@ public abstract class AbstractVersionsReport
     /**
      * @since 1.0-alpha-3
      */
+    @Inject
     private WagonManager wagonManager;
 
     /**
@@ -159,6 +163,7 @@ public abstract class AbstractVersionsReport
     @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
     private MojoExecution mojoExecution;
 
+    @Inject
     protected ArtifactResolver artifactResolver;
 
     /**
@@ -187,19 +192,6 @@ public abstract class AbstractVersionsReport
      */
     @Parameter( property = "maven.version.ignore" )
     protected Set<String> ignoredVersions;
-
-    // --------------------- GETTER / SETTER METHODS ---------------------
-
-    @Inject
-    protected AbstractVersionsReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                   ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager )
-    {
-        this.i18n = i18n;
-        this.repositorySystem = repositorySystem;
-        this.artifactResolver = artifactResolver;
-        this.artifactMetadataSource = artifactMetadataSource;
-        this.wagonManager = wagonManager;
-    }
 
     public VersionsHelper getHelper()
         throws MavenReportException

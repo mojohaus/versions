@@ -86,11 +86,13 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( defaultValue = "${project}", required = true, readonly = true )
     protected MavenProject project;
 
+    @Inject
     protected RepositorySystem repositorySystem;
 
     /**
      * @since 1.0-alpha-1
      */
+    @Inject
     protected MavenProjectBuilder projectBuilder;
 
     /**
@@ -104,6 +106,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
+    @Inject
     protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
@@ -127,6 +130,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * @since 1.0-alpha-3
      */
+    @Inject
     private WagonManager wagonManager;
 
     /**
@@ -185,7 +189,9 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
     private MojoExecution mojoExecution;
 
+    @Inject
     protected ArtifactResolver artifactResolver;
+
     /**
      * The format used to record changes. If "none" is specified, no changes are recorded.
      *
@@ -235,20 +241,6 @@ public abstract class AbstractVersionsUpdaterMojo
     protected Set<String> ignoredVersions;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
-
-    @Inject
-    protected AbstractVersionsUpdaterMojo( RepositorySystem repositorySystem,
-                                          MavenProjectBuilder projectBuilder,
-                                          ArtifactMetadataSource artifactMetadataSource,
-                                          WagonManager wagonManager,
-                                          ArtifactResolver artifactResolver )
-    {
-        this.repositorySystem = repositorySystem;
-        this.projectBuilder = projectBuilder;
-        this.artifactMetadataSource = artifactMetadataSource;
-        this.wagonManager = wagonManager;
-        this.artifactResolver = artifactResolver;
-    }
 
     public VersionsHelper getHelper() throws MojoExecutionException
     {

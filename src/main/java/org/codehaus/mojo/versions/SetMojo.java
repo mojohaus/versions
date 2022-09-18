@@ -40,9 +40,6 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -50,8 +47,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.change.VersionChange;
 import org.codehaus.mojo.versions.change.VersionChanger;
@@ -168,6 +163,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
     /**
      * Component used to prompt for input
      */
+    @Inject
     private Prompter prompter;
 
     /**
@@ -241,18 +237,6 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
      * The changes to module coordinates. Guarded by this.
      */
     private final transient List<VersionChange> sourceChanges = new ArrayList<>();
-
-    @Inject
-    public SetMojo( RepositorySystem repositorySystem,
-                       MavenProjectBuilder projectBuilder,
-                       ArtifactMetadataSource artifactMetadataSource,
-                       WagonManager wagonManager,
-                       ArtifactResolver artifactResolver,
-                       Prompter prompter )
-    {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
-        this.prompter = prompter;
-    }
 
     private synchronized void addChange( String groupId, String artifactId, String oldVersion, String newVersion )
     {

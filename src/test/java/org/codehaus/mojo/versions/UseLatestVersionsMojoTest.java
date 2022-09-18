@@ -62,12 +62,11 @@ public class UseLatestVersionsMojoTest
                     "1.0.0.0-SNAPSHOT", "0.9.0.0"} );
         }} );
 
-        mojo = new UseLatestVersionsMojo( repositorySystemMock,
-                null,
-                artifactMetadataSourceMock,
-                null,
-                null )
+        mojo = new UseLatestVersionsMojo()
         {{
+            this.repositorySystem = repositorySystemMock;
+            this.artifactMetadataSource = artifactMetadataSourceMock;
+
             MavenProject project = new MavenProject()
             {{
                 setModel( new Model()
