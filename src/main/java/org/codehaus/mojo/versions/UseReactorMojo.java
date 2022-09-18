@@ -106,9 +106,9 @@ public class UseReactorMojo
                 continue;
             }
 
-            for ( Object reactorProject : reactorProjects )
+            for ( MavenProject reactorProject : reactorProjects )
             {
-                MavenProject project = (MavenProject) reactorProject;
+                MavenProject project = reactorProject;
                 if ( StringUtils.equals( project.getGroupId(), dep.getGroupId() )
                     && StringUtils.equals( project.getArtifactId(), dep.getArtifactId() )
                     && !StringUtils.equals( project.getVersion(), dep.getVersion() ) )
@@ -127,9 +127,8 @@ public class UseReactorMojo
     private void useReactor( ModifiedPomXMLEventReader pom, MavenProject parent )
         throws XMLStreamException, ArtifactMetadataRetrievalException
     {
-        for ( Object reactorProject : reactorProjects )
+        for ( MavenProject project : reactorProjects )
         {
-            MavenProject project = (MavenProject) reactorProject;
             if ( StringUtils.equals( project.getGroupId(), parent.getGroupId() )
                 && StringUtils.equals( project.getArtifactId(), parent.getArtifactId() )
                 && !StringUtils.equals( project.getVersion(), parent.getVersion() ) )

@@ -71,7 +71,7 @@ public class MercuryVersionComparator
             if ( tok.hasMoreTokens() )
             {
                 // grab the token separator
-                result.append( version.substring( index, index + 1 ) );
+                result.append( version.charAt( index ) );
                 index++;
             }
             segment--;
@@ -122,7 +122,7 @@ public class MercuryVersionComparator
                 if ( tok.hasMoreTokens() )
                 {
                     // grab the token separator
-                    result.append( version.substring( index, index + 1 ) );
+                    result.append( version.charAt( index ) );
                     index++;
                 }
 
@@ -141,7 +141,7 @@ public class MercuryVersionComparator
             if ( tok.hasMoreTokens() )
             {
                 // grab the token separator
-                result.append( version.substring( index, index + 1 ) );
+                result.append( version.charAt( index ) );
                 index++;
             }
         }

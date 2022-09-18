@@ -29,6 +29,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Stack;
 
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -36,7 +37,7 @@ import org.codehaus.stax2.XMLInputFactory2;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Basic tests for rewriting XML with a StAX (JSR-173) implementation.
@@ -54,7 +55,7 @@ public class RewriteWithStAXTest
             + "    <artifactId>mojo-&amp;sandbox-parent</artifactId>\n" + "    <version>5-SNAPSHOT</version>\r"
             + "  </parent>\r" + "<build/></project>";
 
-        byte[] rawInput = input.getBytes( "utf-8" );
+        byte[] rawInput = input.getBytes( StandardCharsets.UTF_8 );
         ByteArrayInputStream source = new ByteArrayInputStream( rawInput );
         ByteArrayOutputStream dest = new ByteArrayOutputStream();
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
@@ -67,9 +68,9 @@ public class RewriteWithStAXTest
             eventWriter.add( eventReader.nextEvent() );
         }
 
-        String output = new String( dest.toByteArray(), "utf-8" );
+        String output = dest.toString( "utf-8" );
 
-        assertFalse( "StAX implementation is not good enough", input.equals( output ) );
+        assertNotEquals( "StAX implementation is not good enough", input, output );
     }
 
     @Test
@@ -212,7 +213,7 @@ public class RewriteWithStAXTest
         inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
         ModifiedPomXMLEventReader eventReader = new ModifiedPomXMLEventReader( output, inputFactory, null );
 
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         String path = "";
 
         while ( eventReader.hasNext() )

@@ -35,7 +35,7 @@ import org.junit.Test;
 public class UseDepVersionMojoTest extends AbstractMojoTestCase
 {
     @Rule
-    MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule( this );
 
     @Test
     public void testIssue673() throws Exception

@@ -30,7 +30,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1300,9 +1299,8 @@ public class PomHelper
         {
             return;
         }
-        for ( Enumeration<String> j = (Enumeration<String>) properties.propertyNames(); j.hasMoreElements(); )
+        for ( String propertyName :  properties.stringPropertyNames() )
         {
-            String propertyName = j.nextElement();
             if ( !result.containsKey( propertyName ) )
             {
                 result.put( propertyName, new PropertyVersionsBuilder( profileId, propertyName, helper ) );

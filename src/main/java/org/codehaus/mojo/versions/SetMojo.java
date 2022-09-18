@@ -348,11 +348,11 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
             getLog().info( "Local aggregation root: " + project.getBasedir() );
             Map<String, Model> reactorModels = PomHelper.getReactorModels( project, getLog() );
             final SortedMap<String, Model> reactor =
-                new TreeMap<String, Model>( new ReactorDepthComparator( reactorModels ) );
+                    new TreeMap<>( new ReactorDepthComparator( reactorModels ) );
             reactor.putAll( reactorModels );
 
             // set of files to update
-            final Set<File> files = new LinkedHashSet<File>();
+            final Set<File> files = new LinkedHashSet<>();
 
             getLog().info(
                 "Processing change of " + groupId + ":" + artifactId + ":" + oldVersion + " -> " + newVersion );

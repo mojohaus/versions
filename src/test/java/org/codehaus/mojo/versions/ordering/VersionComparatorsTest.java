@@ -57,10 +57,10 @@ public class VersionComparatorsTest
 
     public void assertVersions( VersionComparator instance ) throws InvalidSegmentException
     {
-        for ( int i = 0; i < versionDataset.length; i++ )
+        for ( String s : versionDataset )
         {
-            assertLater( versionDataset[i], instance );
-            assertLater( versionDataset[i] + "-SNAPSHOT", instance );
+            assertLater( s, instance );
+            assertLater( s + "-SNAPSHOT", instance );
         }
     }
 

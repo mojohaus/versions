@@ -35,8 +35,8 @@ public class PropertiesVersionsFileReaderTest
         {
             return false;
         }
-        Set<String> listExpected = new HashSet<String>( Arrays.asList( csvExpected.split( "," ) ) );
-        Set<String> listActual = new HashSet<String>( Arrays.asList( csvActual.split( "," ) ) );
+        Set<String> listExpected = new HashSet<>( Arrays.asList( csvExpected.split( "," ) ) );
+        Set<String> listActual = new HashSet<>( Arrays.asList( csvActual.split( "," ) ) );
         return listExpected.equals( listActual );
     }
 }

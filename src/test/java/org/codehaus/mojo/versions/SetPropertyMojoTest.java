@@ -48,7 +48,7 @@ import static org.hamcrest.Matchers.matchesPattern;
 public class SetPropertyMojoTest extends AbstractMojoTestCase
 {
     @Rule
-    MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule( this );
 
     private Path pomDir;
 
