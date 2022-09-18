@@ -55,7 +55,7 @@ import static java.util.Collections.singletonList;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-latest-versions", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "use-latest-versions", threadSafe = true )
 public class UseLatestVersionsMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {

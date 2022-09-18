@@ -49,10 +49,7 @@ import static org.apache.maven.shared.utils.StringUtils.isBlank;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "update-parent",
-       requiresProject = true,
-       requiresDirectInvocation = true,
-       threadSafe = true )
+@Mojo( name = "update-parent", threadSafe = true )
 public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
 {
 

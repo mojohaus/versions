@@ -109,7 +109,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "display-plugin-updates", requiresProject = true, requiresDirectInvocation = false, threadSafe = true )
+@Mojo( name = "display-plugin-updates", threadSafe = true )
 public class DisplayPluginUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {

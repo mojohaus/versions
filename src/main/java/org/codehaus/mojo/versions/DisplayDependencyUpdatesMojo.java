@@ -72,8 +72,7 @@ import static org.codehaus.mojo.versions.api.Segment.MINOR;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "display-dependency-updates", requiresProject = true, requiresDirectInvocation = false,
-       threadSafe = true )
+@Mojo( name = "display-dependency-updates", threadSafe = true )
 public class DisplayDependencyUpdatesMojo
     extends AbstractVersionsDisplayMojo
 {

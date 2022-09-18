@@ -30,7 +30,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @author Anton Johansson
  * @since 2.5
  */
-@Mojo( name = "set-scm-tag", requiresDirectInvocation = true, aggregator = true, threadSafe = true )
+@Mojo( name = "set-scm-tag", aggregator = true, threadSafe = true )
 public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
 {
 

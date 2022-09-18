@@ -48,9 +48,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Dan Arcari
  * @since 2.3
  */
-@Mojo( name = "use-dep-version",
-       requiresProject = true,
-       threadSafe = true )
+@Mojo( name = "use-dep-version", threadSafe = true )
 public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
 {
 

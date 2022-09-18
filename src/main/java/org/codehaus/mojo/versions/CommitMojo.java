@@ -36,7 +36,7 @@ import org.codehaus.plexus.util.FileUtils;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "commit", requiresProject = true, requiresDirectInvocation = true, threadSafe = true )
+@Mojo( name = "commit", threadSafe = true )
 public class CommitMojo
     extends AbstractMojo
 {

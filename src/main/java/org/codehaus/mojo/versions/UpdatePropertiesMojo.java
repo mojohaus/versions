@@ -46,10 +46,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "update-properties",
-       requiresProject = true,
-       requiresDirectInvocation = true,
-       threadSafe = true )
+@Mojo( name = "update-properties", threadSafe = true )
 public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
 {
 
