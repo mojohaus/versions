@@ -64,8 +64,11 @@ public class PluginUpdatesReportTest
     {
         TestPluginUpdatesReport()
         {
-            super( mockI18N(), mockRepositorySystem(), null, mockArtifactMetadataSource(), null );
             siteTool = MockUtils.mockSiteTool();
+            i18n = mockI18N();
+            repositorySystem = mockRepositorySystem();
+            artifactMetadataSource = mockArtifactMetadataSource();
+
 
             project = new MavenProject();
             project.setBuild( new Build() );

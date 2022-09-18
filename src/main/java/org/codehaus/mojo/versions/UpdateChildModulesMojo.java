@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.File;
@@ -29,16 +28,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.project.MavenProjectBuilder;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -68,16 +62,6 @@ public class UpdateChildModulesMojo
      * The version that we are updating to. Guarded by this.
      */
     private transient String sourceVersion = null;
-
-    @Inject
-    public UpdateChildModulesMojo( RepositorySystem repositorySystem,
-                                           MavenProjectBuilder projectBuilder,
-                                           ArtifactMetadataSource artifactMetadataSource,
-                                           WagonManager wagonManager,
-                                           ArtifactResolver artifactResolver )
-    {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
-    }
 
     /**
      * Called when this mojo is executed.

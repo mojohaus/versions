@@ -32,9 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -43,7 +40,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
@@ -116,21 +112,8 @@ public class CompareDependenciesMojo
     /**
      * The project builder used to initialize the remote project.
      */
-    protected MavenProjectBuilder mavenProjectBuilder;
-
-    // ------------------------------ METHODS --------------------------
-
     @Inject
-    public CompareDependenciesMojo( RepositorySystem repositorySystem,
-                                    MavenProjectBuilder projectBuilder,
-                                    ArtifactMetadataSource artifactMetadataSource,
-                                    WagonManager wagonManager,
-                                    ArtifactResolver artifactResolver,
-                                    MavenProjectBuilder mavenProjectBuilder )
-    {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
-        this.mavenProjectBuilder = mavenProjectBuilder;
-    }
+    protected MavenProjectBuilder mavenProjectBuilder;
 
     /**
      * @param pom the pom to update.
