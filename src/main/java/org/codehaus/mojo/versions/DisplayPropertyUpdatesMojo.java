@@ -25,6 +25,7 @@ import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeSet;
 
 import org.apache.maven.artifact.manager.WagonManager;
@@ -40,6 +41,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -155,11 +157,12 @@ public class DisplayPropertyUpdatesMojo
                 continue;
             }
 
-            int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+            Optional<Segment> unchangedSegment =
+                    determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
             try
             {
                 ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                        this.reactorProjects, this.getHelper(), false, segment );
+                        this.reactorProjects, this.getHelper(), false, unchangedSegment );
                 if ( winner != null && !currentVersion.equals( winner.toString() ) )
                 {
                     StringBuilder buf = new StringBuilder();

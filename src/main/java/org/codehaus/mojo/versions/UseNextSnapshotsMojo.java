@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,9 +45,12 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 
 /**
  * Replaces any release versions with the next snapshot version (if it has been deployed).
@@ -132,7 +136,9 @@ public class UseNextSnapshotsMojo
     private void useNextSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+        Optional<Segment>
+                unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                allowIncrementalUpdates );
 
         for ( Dependency dep : dependencies )
         {
@@ -162,15 +168,18 @@ public class UseNextSnapshotsMojo
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 final VersionComparator versionComparator = versions.getVersionComparator();
                 final DefaultArtifactVersion lowerBound = new DefaultArtifactVersion( version );
-                if ( segment + 1 > versionComparator.getSegmentCount( lowerBound ) )
+                if ( unchangedSegment.isPresent()
+                        && unchangedSegment.get().value() >= versionComparator.getSegmentCount( lowerBound ) )
                 {
                     getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
                     continue;
                 }
                 try
                 {
-                    ArtifactVersion upperBound =
-                            segment >= 0 ? versionComparator.incrementSegment( lowerBound, segment ) : null;
+                    ArtifactVersion upperBound = unchangedSegment.isPresent()
+                            && unchangedSegment.get().value() >= MAJOR.value()
+                            ? versionComparator.incrementSegment( lowerBound, unchangedSegment.get() )
+                            : null;
                     getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
                     Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
                     ArtifactVersion[] newer = versions.getVersions( restriction, true );

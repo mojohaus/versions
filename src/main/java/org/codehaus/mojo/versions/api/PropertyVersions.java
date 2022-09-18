@@ -43,6 +43,8 @@ import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
+import static java.util.Optional.empty;
+
 /**
  * Manages a property that is associated with one or more artifacts.
  *
@@ -310,7 +312,8 @@ public class PropertyVersions
                                              List reactorProjects, VersionsHelper helper )
             throws InvalidVersionSpecificationException, InvalidSegmentException
     {
-        return getNewestVersion( currentVersion, property, allowSnapshots, reactorProjects, helper, false, -1 );
+        return getNewestVersion( currentVersion, property, allowSnapshots, reactorProjects, helper,
+                false, empty() );
     }
 
     /**
@@ -332,7 +335,7 @@ public class PropertyVersions
      */
     public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
                                              Collection<MavenProject> reactorProjects, VersionsHelper helper,
-                                             boolean allowDowngrade, int unchangedSegment )
+                                             boolean allowDowngrade, Optional<Segment> unchangedSegment )
             throws InvalidSegmentException, InvalidVersionSpecificationException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && allowSnapshots;
@@ -355,9 +358,9 @@ public class PropertyVersions
         }
 
         ArtifactVersion upperBound = null;
-        if ( unchangedSegment != -1 )
+        if ( unchangedSegment.isPresent() )
         {
-            upperBound = getVersionComparator().incrementSegment( lowerBound, unchangedSegment );
+            upperBound = getVersionComparator().incrementSegment( lowerBound, unchangedSegment.get() );
             helper.getLog().debug( "Property ${" + property.getName() + "}: upperBound is: " + upperBound );
         }
         Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
@@ -418,22 +421,22 @@ public class PropertyVersions
         return result;
     }
 
-    private ArtifactVersion getNewestVersion( String currentVersion, VersionsHelper helper, int segment,
+    private ArtifactVersion getNewestVersion( String currentVersion, VersionsHelper helper,
+                                              Optional<Segment> unchangedSegment,
                                               boolean includeSnapshots, VersionRange range )
             throws InvalidSegmentException
     {
         ArtifactVersion lowerBound = helper.createArtifactVersion( currentVersion );
         ArtifactVersion upperBound = null;
-        if ( segment != -1 )
+        if ( unchangedSegment.isPresent() )
         {
-            upperBound = getVersionComparator().incrementSegment( lowerBound, segment );
+            upperBound = getVersionComparator().incrementSegment( lowerBound, unchangedSegment.get() );
         }
         Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
         return getNewestVersion( range, restriction, includeSnapshots );
     }
 
-    private final class PropertyVersionComparator
-        implements VersionComparator
+    private final class PropertyVersionComparator implements VersionComparator
     {
         public int compare( ArtifactVersion v1, ArtifactVersion v2 )
         {
@@ -494,7 +497,7 @@ public class PropertyVersions
             return result;
         }
 
-        public ArtifactVersion incrementSegment( ArtifactVersion v, int segment ) throws InvalidSegmentException
+        public ArtifactVersion incrementSegment( ArtifactVersion v, Segment segment ) throws InvalidSegmentException
         {
             if ( !isAssociated() )
             {

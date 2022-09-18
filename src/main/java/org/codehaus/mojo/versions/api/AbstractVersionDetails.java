@@ -225,16 +225,18 @@ public abstract class AbstractVersionDetails
      * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
      * should be included.
      *
-     * @param version current version
-     * @param upperBoundSegment the upper bound segment
-     * @param includeSnapshots whether snapshot versions should be included
-     * @deprecated please use {@link AbstractVersionDetails#getNewerVersions(String, int, boolean, boolean)} instead
+     * @param version           current version
+     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
+     * @param includeSnapshots  whether snapshot versions should be included
      * @return array of newer versions fulfilling the criteria
      * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
-     * the segment count)
+     *                                 the segment count)
+     * @deprecated please use {@link AbstractVersionDetails#getNewerVersions(String, Optional, boolean, boolean)},
+     * boolean, boolean)} instead
      */
     @Deprecated
-    public final ArtifactVersion[] getNewerVersions( String version, int upperBoundSegment, boolean includeSnapshots )
+    public final ArtifactVersion[] getNewerVersions( String version, Optional<Segment> upperBoundSegment,
+                                                     boolean includeSnapshots )
             throws InvalidSegmentException
     {
         return getNewerVersions( version, upperBoundSegment, includeSnapshots, false );
@@ -245,7 +247,7 @@ public abstract class AbstractVersionDetails
      * should be included.
      *
      * @param versionString current version
-     * @param upperBoundSegment the upper bound segment
+     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
      * @param includeSnapshots whether snapshot versions should be included
      * @param allowDowngrade whether to allow downgrading if the current version is a snapshots and snapshots
      *                       are disallowed
@@ -253,15 +255,15 @@ public abstract class AbstractVersionDetails
      * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
      * the segment count)
      */
-    public final ArtifactVersion[] getNewerVersions( String versionString, int upperBoundSegment,
+    public final ArtifactVersion[] getNewerVersions( String versionString, Optional<Segment> upperBoundSegment,
                                                      boolean includeSnapshots, boolean allowDowngrade )
             throws InvalidSegmentException
     {
         ArtifactVersion currentVersion = new DefaultArtifactVersion( versionString );
         ArtifactVersion lowerBound =
                 allowDowngrade ? getLowerBoundArtifactVersion( currentVersion, upperBoundSegment ) : currentVersion;
-        ArtifactVersion upperBound = upperBoundSegment == -1 ? null
-                : getVersionComparator().incrementSegment( lowerBound, upperBoundSegment );
+        ArtifactVersion upperBound = !upperBoundSegment.isPresent() ? null
+                : getVersionComparator().incrementSegment( lowerBound, upperBoundSegment.get() );
 
         Restriction restriction = new Restriction( lowerBound, allowDowngrade, upperBound, allowDowngrade );
         return getVersions( restriction, includeSnapshots );
@@ -436,13 +438,14 @@ public abstract class AbstractVersionDetails
      * implying that there is also no string designation of the lower bound version.
      *
      * @param version {@link ArtifactVersion} object specyfing the verion for which the lower bound is being computed
-     * @param unchangedSegment 0-based index of the first segment not to be changed; -1 means everything can change
+     * @param unchangedSegment first segment not to be changed; empty() means any segment can change
      * @return {@link ArtifactVersion} the lowest artifact version with the given segment held or null if no such
      * version can be found
      * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
      * the segment count)
      */
-    protected ArtifactVersion getLowerBoundArtifactVersion( ArtifactVersion version, int unchangedSegment )
+    protected ArtifactVersion getLowerBoundArtifactVersion( ArtifactVersion version,
+                                                            Optional<Segment> unchangedSegment )
             throws InvalidSegmentException
     {
         Optional<String> lowerBound = getLowerBound( version, unchangedSegment );
@@ -455,48 +458,46 @@ public abstract class AbstractVersionDetails
      * implying that there is also no string designation of the lower bound version.
      *
      * @param version {@link ArtifactVersion} object specyfing the verion for which the lower bound is being computed
-     * @param unchangedSegment 0-based index of the first segment not to be changed; -1 means everything can change
+     * @param unchangedSegment first segment not to be changed; empty() means anything can change
      * @return {@link Optional} string containing the lowest artifact version with the given segment held
      * @throws InvalidSegmentException if the requested segment is outside of the bounds (less than 1 or greater than
      * the segment count)
      */
-    protected Optional<String> getLowerBound( ArtifactVersion version, int unchangedSegment )
+    protected Optional<String> getLowerBound( ArtifactVersion version, Optional<Segment> unchangedSegment )
             throws InvalidSegmentException
     {
-        if ( unchangedSegment < 0 )
+        if ( !unchangedSegment.isPresent() )
         {
             return empty();
         }
 
         int segmentCount = getVersionComparator().getSegmentCount( version );
-        if ( unchangedSegment > segmentCount )
+        if ( unchangedSegment.get().value() > segmentCount )
         {
-            throw new InvalidSegmentException( unchangedSegment, segmentCount, version );
+            throw new InvalidSegmentException( unchangedSegment.get(), segmentCount, version );
         }
 
         StringBuilder newVersion = new StringBuilder();
         newVersion.append( version.getMajorVersion() );
+
         if ( segmentCount > 0 )
         {
-            newVersion.append( "." )
-                    .append( unchangedSegment >= 1 ? version.getMinorVersion() : 0 );
+            newVersion.append( "." ).append( unchangedSegment.get().value() >= 1 ? version.getMinorVersion() : 0 );
         }
         if ( segmentCount > 1 )
         {
             newVersion.append( "." )
-                    .append( unchangedSegment >= 2 ? version.getIncrementalVersion() : 0 );
+                    .append( unchangedSegment.get().value() >= 2 ? version.getIncrementalVersion() : 0 );
         }
         if ( segmentCount > 2 )
         {
             if ( version.getQualifier() != null )
             {
-                newVersion.append( "-" )
-                        .append( unchangedSegment >= 3 ? version.getQualifier() : "0" );
+                newVersion.append( "-" ).append( unchangedSegment.get().value() >= 3 ? version.getQualifier() : "0" );
             }
             else
             {
-                newVersion.append( "-" )
-                        .append( unchangedSegment >= 3 ? version.getBuildNumber() : "0" );
+                newVersion.append( "-" ).append( unchangedSegment.get().value() >= 3 ? version.getBuildNumber() : "0" );
             }
         }
         return of( newVersion.toString() );
@@ -539,10 +540,10 @@ public abstract class AbstractVersionDetails
     {
         VersionComparator versionComparator = getVersionComparator();
         ArtifactVersion lowerBound = scope.isPresent() && scope.get().value() < Segment.SUBINCREMENTAL.value()
-                ? versionComparator.incrementSegment( currentVersion, scope.get().value() )
+                ? versionComparator.incrementSegment( currentVersion, scope.get() )
                 : currentVersion;
         ArtifactVersion upperBound = scope.isPresent() && scope.get().value() > Segment.MAJOR.value()
-                ? versionComparator.incrementSegment( currentVersion, scope.get().value() - 1 )
+                ? versionComparator.incrementSegment( currentVersion, Segment.of( scope.get().value() - 1 ) )
                 : null;
         return new Restriction( lowerBound, lowerBound != currentVersion,
                 upperBound, false );
