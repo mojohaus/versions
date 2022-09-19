@@ -65,6 +65,8 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.StringUtils;
 
+import static org.codehaus.plexus.util.StringUtils.isEmpty;
+
 /**
  * Sets the current project's version and based on that change propagates that change onto any child modules as
  * necessary.
@@ -298,8 +300,13 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
             getLog().info( "SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion );
         }
 
-        if ( StringUtils.isEmpty( newVersion ) )
+        if ( isEmpty( newVersion ) )
         {
+            if ( removeSnapshot )
+            {
+                getLog().info( "removeSnapshot enabled whilst the version is not a snapshot: nothing to do." );
+                return;
+            }
             if ( settings.isInteractiveMode() )
             {
                 try
@@ -318,12 +325,6 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
                                                       + "property (that is -DnewVersion=... on the command line) "
                                                       + "or run in interactive mode" );
             }
-        }
-        if ( StringUtils.isEmpty( newVersion ) )
-        {
-            throw new MojoExecutionException( "You must specify the new version, either by using the newVersion "
-                                                  + "property (that is -DnewVersion=... on the command line) "
-                                                  + "or run in interactive mode" );
         }
 
         if ( !"onchange".equals( updateBuildOutputTimestampPolicy ) && !"always".equals(
@@ -614,7 +615,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
     {
         String buildOutputTimestamp = model.getProperties().getProperty( "project.build.outputTimestamp" );
 
-        if ( buildOutputTimestamp == null || StringUtils.isEmpty( buildOutputTimestamp ) )
+        if ( buildOutputTimestamp == null || isEmpty( buildOutputTimestamp ) )
         {
             // no Reproducible Builds output timestamp defined
             return;
