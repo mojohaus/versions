@@ -19,6 +19,9 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
+import com.ctc.wstx.stax.WstxInputFactory;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -58,5 +61,17 @@ public class ModifiedPomXMLEventReaderUtils
                 return pom.asStringBuilder().toString().replaceAll( "\\s", "" );
             }
         };
+    }
+
+    /**
+     * Creates a simple ModifiedPomXMLEventReader initialised with the XML string given in the argument.
+     *
+     * @param xml string contents of the pom.xml file
+     * @return a {@linkplain ModifiedPomXMLEventReader} instance
+     * @throws XMLStreamException thrown if parsing the xml in the argument fails
+     */
+    public static ModifiedPomXMLEventReader createModifiedPomXMLEventReader( String xml ) throws XMLStreamException
+    {
+        return new ModifiedPomXMLEventReader( new StringBuilder( xml ), new WstxInputFactory(), "" );
     }
 }

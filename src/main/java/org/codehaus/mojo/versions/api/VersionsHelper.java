@@ -144,6 +144,7 @@ public interface VersionsHelper
      */
     ArtifactVersion createArtifactVersion( String version );
 
+
     /**
      * Looks up the versions of the specified artifact that are available in either the local repository, or the
      * appropriate remote repositories.
@@ -156,6 +157,24 @@ public interface VersionsHelper
      * @since 1.0-alpha-3
      */
     ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
+            throws ArtifactMetadataRetrievalException;
+
+    /**
+     * Looks up the versions of the specified artifact that are available in either the local repository, or the
+     * appropriate remote repositories, and, optionally, the snapshots repository.
+     *
+     * @param artifact The artifact to look for versions of.
+     * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
+     *            consult the repositories for normal dependencies.
+     * @param useSnapshotsRepository if snapshots repository should be <em>added</em> to the lookup; if the argument
+     *                               is true, the results from the snapshots repository are added to the rest of the
+     *                               lookup
+     * @return The details of the available artifact versions.
+     * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @since 1.0-alpha-3
+     */
+    ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories,
+                                             boolean useSnapshotsRepository )
         throws ArtifactMetadataRetrievalException;
 
     /**

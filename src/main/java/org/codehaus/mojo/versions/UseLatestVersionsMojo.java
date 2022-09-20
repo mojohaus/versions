@@ -86,6 +86,15 @@ public class UseLatestVersionsMojo
     private boolean allowIncrementalUpdates;
 
     /**
+     * If set to true, the snapshot repository will be used for artifact version resolution instead
+     * of the remote repositories.
+     *
+     * @since 2.13.0
+     */
+    @Parameter( property = "useSnapshotsRepository", defaultValue = "false" )
+    private boolean useSnapshotsRepository;
+
+    /**
      * <p>Whether to downgrade a snapshot dependency if <code>allowSnapshots</code> is <code>false</code>
      * and there exists a non-snapshot version within the range fulfilling the criteria.</p>
      * <p>Only valid if <code>allowSnapshots</code> is <code>false</code>.</p>
@@ -195,7 +204,8 @@ public class UseLatestVersionsMojo
             getLog().debug( "Selected version:" + selectedVersion );
 
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
-            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+
+            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false, useSnapshotsRepository );
 
             try
             {

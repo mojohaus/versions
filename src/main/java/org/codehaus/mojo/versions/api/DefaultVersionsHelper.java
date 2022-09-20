@@ -176,6 +176,7 @@ public class DefaultVersionsHelper
      * @since 2.12
      */
     private final Map<String, Rule> artifactBestFitRule = new HashMap<>();
+    private ArtifactRepository deploymentArtifactRepository;
 
     /**
      * Private constructor used by the builder
@@ -311,7 +312,7 @@ public class DefaultVersionsHelper
                                              WagonManager wagonManager, Settings settings )
         throws MojoExecutionException
     {
-        RuleSet loadedRules = new RuleSet();
+        RuleSet loadedRules;
 
         int split = rulesUri.lastIndexOf( '/' );
         String baseUri = rulesUri;
@@ -335,16 +336,14 @@ public class DefaultVersionsHelper
             {
                 logger.debug( "Rule set loaded" );
 
-                if ( wagon != null )
+                assert wagon != null;
+                try
                 {
-                    try
-                    {
-                        wagon.disconnect();
-                    }
-                    catch ( ConnectionException e )
-                    {
-                        logger.warn( "Could not disconnect wagon!", e );
-                    }
+                    wagon.disconnect();
+                }
+                catch ( ConnectionException e )
+                {
+                    logger.warn( "Could not disconnect wagon!", e );
                 }
             }
         }
@@ -387,14 +386,44 @@ public class DefaultVersionsHelper
         return log;
     }
 
-    @Override
-    public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
+    /**
+     * {@inheritDoc}
+     */
+    public ArtifactVersions lookupArtifactVersions( Artifact artifact,
+                                                    boolean usePluginRepositories )
+            throws ArtifactMetadataRetrievalException
+    {
+        return lookupArtifactVersions( artifact, usePluginRepositories, false );
+    }
+    /**
+     * {@inheritDoc}
+     */
+    public ArtifactVersions lookupArtifactVersions( Artifact artifact,
+                                                               boolean usePluginRepositories,
+                                                               boolean useSnapshotsRepository )
         throws ArtifactMetadataRetrievalException
     {
-        List<ArtifactRepository> remoteRepositories = usePluginRepositories
-                ? remotePluginRepositories : remoteArtifactRepositories;
-        final List<ArtifactVersion> versions =
-            artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
+        final List<ArtifactRepository> remoteRepositories;
+        if ( usePluginRepositories )
+        {
+            getLog().debug( "Looking in plugin repositories" );
+            remoteRepositories = remotePluginRepositories;
+        }
+        else
+        {
+            getLog().debug( "Looking in remote artifact repositories" );
+            remoteRepositories = remoteArtifactRepositories;
+        }
+        List<ArtifactVersion> availableVersions = artifactMetadataSource
+                .retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
+        if ( useSnapshotsRepository )
+        {
+            Set<ArtifactVersion> snapshotSearchResult = new HashSet<>( artifactMetadataSource
+                    .retrieveAvailableVersionsFromDeploymentRepository( artifact, localRepository,
+                            deploymentArtifactRepository ) );
+            snapshotSearchResult.addAll( availableVersions );
+            availableVersions = new ArrayList<>( snapshotSearchResult );
+        }
         final List<IgnoreVersion> ignoredVersions = getIgnoredVersions( artifact );
         if ( !ignoredVersions.isEmpty() )
         {
@@ -403,7 +432,7 @@ public class DefaultVersionsHelper
                 getLog().debug( "Found ignored versions: " + showIgnoredVersions( ignoredVersions ) );
             }
 
-            final Iterator<ArtifactVersion> i = versions.iterator();
+            final Iterator<ArtifactVersion> i = availableVersions.iterator();
             while ( i.hasNext() )
             {
                 final String version = i.next().toString();
@@ -443,7 +472,7 @@ public class DefaultVersionsHelper
                 }
             }
         }
-        return new ArtifactVersions( artifact, versions, getVersionComparator( artifact ) );
+        return new ArtifactVersions( artifact, availableVersions, getVersionComparator( artifact ) );
     }
 
     /**
@@ -768,8 +797,6 @@ public class DefaultVersionsHelper
         getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
                             + " for updates newer than " + version );
 
-        boolean includeSnapshots = allowSnapshots;
-
         final ArtifactVersions pluginArtifactVersions =
             lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), version ),
                                     true );
@@ -782,7 +809,7 @@ public class DefaultVersionsHelper
         Map<Dependency, ArtifactVersions> pluginDependencyDetails =
             lookupDependenciesUpdates( pluginDependencies, false );
 
-        return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, includeSnapshots );
+        return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, allowSnapshots );
     }
 
     @Override
@@ -1017,6 +1044,7 @@ public class DefaultVersionsHelper
         private List<ArtifactRepository> remoteArtifactRepositories;
         private List<ArtifactRepository> remotePluginRepositories;
         private ArtifactRepository localRepository;
+        private ArtifactRepository deploymentArtifactRepository;
         private Collection<String> ignoredVersions;
         private RuleSet ruleSet;
         private WagonManager wagonManager;
@@ -1066,6 +1094,12 @@ public class DefaultVersionsHelper
         public Builder withLocalRepository( ArtifactRepository localRepository )
         {
             this.localRepository = localRepository;
+            return this;
+        }
+
+        public Builder withDeploymentArtifactRepository( ArtifactRepository deploymentArtifactRepository )
+        {
+            this.deploymentArtifactRepository = deploymentArtifactRepository;
             return this;
         }
 
@@ -1160,6 +1194,7 @@ public class DefaultVersionsHelper
             instance.localRepository = localRepository;
             instance.remoteArtifactRepositories = remoteArtifactRepositories;
             instance.remotePluginRepositories = remotePluginRepositories;
+            instance.deploymentArtifactRepository = deploymentArtifactRepository;
             instance.log = log;
             return instance;
         }

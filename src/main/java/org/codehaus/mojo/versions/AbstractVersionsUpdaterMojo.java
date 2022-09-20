@@ -124,6 +124,13 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * @since 1.0-alpha-3
      */
+    @Parameter( defaultValue = "${project.distributionManagementArtifactRepository}", readonly = true )
+    protected ArtifactRepository snapshotsRepository;
+
+
+    /**
+     * @since 1.0-alpha-3
+     */
     @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
     protected List<ArtifactRepository> remotePluginRepositories;
 
@@ -269,6 +276,7 @@ public abstract class AbstractVersionsUpdaterMojo
                     .withArtifactMetadataSource( artifactMetadataSource )
                     .withRemoteArtifactRepositories( remoteArtifactRepositories )
                     .withRemotePluginRepositories( remotePluginRepositories )
+                    .withDeploymentArtifactRepository( snapshotsRepository )
                     .withLocalRepository( localRepository )
                     .withWagonManager( wagonManager )
                     .withSettings( settings )

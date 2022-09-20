@@ -3,11 +3,13 @@ package org.codehaus.mojo.versions;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -25,9 +27,11 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.ModifiedPomXMLEventReaderUtils.createModifiedPomXMLEventReader;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -60,6 +64,7 @@ public class UseLatestVersionsMojoTest
                     "1.0.0-SNAPSHOT", "0.9.0"} );
             put( "poison-artifact", new String[] {"1.1.1.1-SNAPSHOT", "1.1.1.0", "1.1.1.0-SNAPSHOT", "1.0.0.0",
                     "1.0.0.0-SNAPSHOT", "0.9.0.0"} );
+            put( "parent-artifact", new String[] {"1.1.0", "1.0.0" } );
         }} );
 
         mojo = new UseLatestVersionsMojo( repositorySystemMock,
@@ -76,12 +81,12 @@ public class UseLatestVersionsMojoTest
                     setArtifactId( "project-artifact" );
                     setVersion( "1.0.0-SNAPSHOT" );
 
-                    setDependencies( Collections.singletonList(
+                    setDependencies( singletonList(
                             DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
                                     "default", "pom", SCOPE_COMPILE ) ) );
 
                     setDependencyManagement( new DependencyManagement() );
-                    getDependencyManagement().setDependencies( Collections.singletonList(
+                    getDependencyManagement().setDependencies( singletonList(
                             DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
                                     "default", "pom", SCOPE_COMPILE ) ) );
                 }} );
@@ -256,5 +261,39 @@ public class UseLatestVersionsMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(), Is.is( empty() ) );
+    }
+
+    @Test
+    public void testUseRemoteRepositories()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            ArtifactMetadataRetrievalException
+    {
+        setVariableValueToObject( mojo, "processParent", true );
+        setVariableValueToObject( mojo, "allowSnapshots", true );
+        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
+        setVariableValueToObject( mojo, "useSnapshotsRepository", true );
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "parent-artifact" );
+            setVersion( "1.1.0" );
+        }} );
+        mojo.getProject().setParentArtifact( new DefaultArtifact( "default-group", "parent-artifact",
+                "1.1.0", SCOPE_COMPILE, "pom", "default", null ) );
+
+        when( mojo.artifactMetadataSource
+                .retrieveAvailableVersionsFromDeploymentRepository( any( Artifact.class ), any(), any() ) )
+                .thenReturn( singletonList( new DefaultArtifactVersion( "1.1.1-SNAPSHOT" ) ) );
+
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
+                    .thenReturn( true );
+            mojo.update( createModifiedPomXMLEventReader( "<project><version>1.1.0</version></project>" ) );
+        }
+        assertThat( changeRecorder.getChanges(),
+                hasItem( new VersionChange( "default-group", "parent-artifact",
+                        "1.1.0",
+                        "1.1.1-SNAPSHOT" ) ) );
     }
 }
