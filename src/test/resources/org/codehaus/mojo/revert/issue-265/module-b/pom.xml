@@ -1,0 +1,17 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>localhost</groupId>
+    <artifactId>dummy-artifact-b</artifactId>
+    <version>NEW</version>
+    <packaging>pom</packaging>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>localhost</groupId>
+                <artifactId>dummy-artifact</artifactId>
+                <version>VERSION</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
