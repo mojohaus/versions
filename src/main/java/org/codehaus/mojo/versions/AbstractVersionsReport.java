@@ -108,21 +108,23 @@ public abstract class AbstractVersionsReport
     private Settings settings;
 
     /**
-     * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
-     *
+     * <p>settings.xml's server id for the URL. This is used when wagon needs extra authentication information.</p>
+     * <p><em>Before version 2.13.0 the user property was {@code maven.version.rules.serverId}</em></p>
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "maven.version.rules.serverId", defaultValue = "serverId" )
+    @Parameter( property = "mojohaus.versions.rules.serverId", defaultValue = "serverId" )
     private String serverId;
-
+    
     /**
-     * URI of a ruleSet file containing the rules that control how to compare
+     * <p>URI of a ruleSet file containing the rules that control how to compare
      * version numbers. The URI could be either a Wagon URI or a classpath URI
-     * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
+     * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).</p>
+     *
+     * <p><em>Before version 2.13.0 the user property was {@code maven.version.rules}</em></p>
      *
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "maven.version.rules" )
+    @Parameter( property = "mojohaus.versions.rules" )
     private String rulesUri;
 
     /**
@@ -183,9 +185,10 @@ public abstract class AbstractVersionsReport
      * </p>
      *
      * <p><em>Currently, this parameter will override the defined {@link #ruleSet}</em></p>
+     *
      * @since 2.13.0
      */
-    @Parameter( property = "maven.version.ignore" )
+    @Parameter( property = "mojohaus.versions.ignore" )
     protected Set<String> ignoredVersions;
 
     // --------------------- GETTER / SETTER METHODS ---------------------

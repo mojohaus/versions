@@ -62,7 +62,7 @@ Version number rules
 
   To specify the version schemes to use, you may define a {{{./rule.html}rule-set xml file}}, use the <<<ruleSet>>>
   element in the <<<versions-maven-plugin>>> plugin configuration, or specify ignored versions via
-  the <<<maven.version.ignore>>> property.
+  the <<<mojohaus.versions.ignore>>> property.
 
 ** Using the <<<Rules.xml>>> file
 
@@ -147,9 +147,9 @@ Version number rules
       </ruleSet>
 ---
 
-** Using the <<<maven.version.ignore>>> property
+** Using the <<<mojohaus.versions.ignore>>> property
 
-  The <<<maven.version.ignore>>> property can list *comma-separated* list of global version **regex** patterns, which
+  The <<<mojohaus.versions.ignore>>> property can list *comma-separated* list of global version **regex** patterns, which
   will be ignored when considering available versions.
 
   Examples:
@@ -164,7 +164,7 @@ Version number rules
 
   It is possible to ignore versions on a global and on a per-rule basis.
 
-  The other methods (via the <<<<ruleSet>>>> element and via the <<<maven.version.ignore>>>) property have been
+  The other methods (via the <<<<ruleSet>>>> element and via the <<<mojohaus.versions.ignore>>>) property have been
   explained above. The described
 
 ---
