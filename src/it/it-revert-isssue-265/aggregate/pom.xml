@@ -1,0 +1,21 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>localhost</groupId>
+    <artifactId>dummy-artifact</artifactId>
+    <version>OLD</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>../module-a</module>
+    </modules>
+
+    <profiles>
+        <profile>
+            <id>module-b</id>
+
+            <modules>
+                <module>../module-b</module>
+            </modules>
+        </profile>
+    </profiles>
+</project>

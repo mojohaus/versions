@@ -19,16 +19,25 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
+import javax.inject.Inject;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
+
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.codehaus.mojo.versions.api.PomHelper;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * Restores the pom from the initial backup.
@@ -37,8 +46,7 @@ import org.codehaus.plexus.util.FileUtils;
  * @since 1.0-alpha-3
  */
 @Mojo( name = "revert", threadSafe = true )
-public class RevertMojo
-    extends AbstractMojo
+public class RevertMojo extends AbstractMojo
 {
     /**
      * The Maven Project.
@@ -48,24 +56,62 @@ public class RevertMojo
     @Parameter( defaultValue = "${project}", required = true, readonly = true )
     private MavenProject project;
 
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
-        File outFile = project.getFile();
-        File backupFile = new File( outFile.getParentFile(), outFile.getName() + ".versionsBackup" );
+    /**
+     * Whether to start processing at the local aggregation root (which might be a parent module
+     * of that module where Maven is executed in, and the version change may affect parent and sibling modules).
+     * Setting to false makes sure only the module (and it's submodules) where Maven is executed for is affected.
+     *
+     * @since 2.13.0
+     */
+    @Parameter( property = "processFromLocalAggregationRoot", defaultValue = "true" )
+    private boolean processFromLocalAggregationRoot;
 
-        if ( backupFile.exists() )
+    protected MavenProjectBuilder projectBuilder;
+
+    @Parameter( defaultValue = "${localRepository}", readonly = true )
+    protected ArtifactRepository localRepository;
+
+    @Inject
+    protected RevertMojo( MavenProjectBuilder projectBuilder )
+    {
+        this.projectBuilder = projectBuilder;
+    }
+
+    public void execute() throws MojoExecutionException, MojoFailureException
+    {
+        final MavenProject projectToProcess = !processFromLocalAggregationRoot
+                ? PomHelper.getLocalRoot( projectBuilder, this.project, localRepository, null, getLog() )
+                : this.project;
+
+        getLog().info( "Local aggregation root: " + projectToProcess.getBasedir() );
+        Set<String> reactor = PomHelper.getAllChildModules( projectToProcess, getLog() );
+        reactor.add( "." );
+
+        reactor.forEach( entry ->
         {
-            getLog().info( "Restoring " + outFile + " from " + backupFile );
-            try
+            Path pomFile = projectToProcess.getBasedir().toPath().resolve( entry ).resolve( "pom.xml" ).normalize();
+            getLog().debug( "Processing:" + pomFile );
+            Path backupFile = Paths.get( pomFile + ".versionsBackup" );
+            if ( Files.exists( backupFile ) )
             {
-                FileUtils.copyFile( backupFile, outFile );
-                FileUtils.forceDelete( backupFile );
+                getLog().info( "Restoring " + pomFile + " from " + backupFile );
+                try
+                {
+                    Files.copy( backupFile, pomFile, REPLACE_EXISTING );
+                    try
+                    {
+                        Files.delete( backupFile );
+                    }
+                    catch ( IOException e )
+                    {
+                        getLog().warn( "Error deleting " + backupFile );
+                    }
+                }
+                catch ( IOException e )
+                {
+                    getLog().warn( "Error copying " + backupFile + " onto " + pomFile );
+                }
             }
-            catch ( IOException e )
-            {
-                throw new MojoExecutionException( e.getMessage(), e );
-            }
-        }
+        } );
     }
 }
