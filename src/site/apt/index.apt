@@ -116,6 +116,9 @@ Versions Maven Plugin
   * {{{./property-updates-report-mojo.html}versions:property-updates-report}} produces a report of
   those properties which are used to control artifact versions and which properties have newer versions available.
 
+  * {{{./parent-updates-report-mojo.html}versions:parent-updates-report}} produces a report on possible parent artifact
+  upgrades.
+
 * Usage
 
   General instructions on how to use the Versions Plugin can be found on the {{{./usage.html}usage page}}. Some more
