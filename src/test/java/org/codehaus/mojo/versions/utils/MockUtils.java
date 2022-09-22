@@ -25,11 +25,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.doxia.tools.SiteTool;
 import org.apache.maven.doxia.tools.SiteToolException;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.i18n.I18N;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -110,5 +113,19 @@ public class MockUtils
             throw new RuntimeException( e );
         }
         return siteTool;
+    }
+
+    public static RepositorySystem mockRepositorySystem()
+    {
+        RepositorySystem repositorySystem = mock( RepositorySystem.class );
+        when( repositorySystem.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer(
+            invocation ->
+            {
+                Dependency dependency = invocation.getArgument( 0 );
+                return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
+                                            dependency.getVersion(), dependency.getScope(), dependency.getType(),
+                                            dependency.getClassifier(), null );
+            } );
+        return repositorySystem;
     }
 }

@@ -72,10 +72,9 @@ public class DependencyUpdatesRenderer
 
         renderSummaryTotalsTable( allUpdates );
 
-        renderSummaryTable( "report.overview.dependencyManagement", dependencyManagementUpdates,
-                            "report.overview.noDependencyManagement" );
+        renderDependencyManagementSummary();
 
-        renderSummaryTable( "report.overview.dependency", dependencyUpdates, "report.overview.noDependency" );
+        renderDependencySummary();
 
         sink.section1_();
 
@@ -94,7 +93,18 @@ public class DependencyUpdatesRenderer
         sink.section1_();
     }
 
-    private void renderSummaryTable( String titleKey, Map<Dependency, ArtifactVersions> contents, String emptyKey )
+    protected void renderDependencySummary()
+    {
+        renderSummaryTable( "report.overview.dependency", dependencyUpdates, "report.overview.noDependency" );
+    }
+
+    protected void renderDependencyManagementSummary()
+    {
+        renderSummaryTable( "report.overview.dependencyManagement", dependencyManagementUpdates,
+                            "report.overview.noDependencyManagement" );
+    }
+
+    protected void renderSummaryTable( String titleKey, Map<Dependency, ArtifactVersions> contents, String emptyKey )
     {
         sink.section2();
         sink.sectionTitle2();
@@ -114,7 +124,7 @@ public class DependencyUpdatesRenderer
         sink.section2_();
     }
 
-    private void renderSummaryTotalsTable( Map<Dependency, ArtifactVersions> allUpdates )
+    protected void renderSummaryTotalsTable( Map<Dependency, ArtifactVersions> allUpdates )
     {
         int numInc = 0;
         int numMin = 0;
@@ -203,7 +213,7 @@ public class DependencyUpdatesRenderer
         sink.table_();
     }
 
-    private void renderDependencyDetail( Dependency dependency, ArtifactVersions details )
+    protected void renderDependencyDetail( Dependency dependency, ArtifactVersions details )
     {
         sink.section2();
         sink.sectionTitle2();

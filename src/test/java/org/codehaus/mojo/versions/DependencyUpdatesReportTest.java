@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Dependency;
@@ -35,9 +34,8 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.repository.RepositorySystem;
-import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.model.RuleSet;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.junit.Test;
 
@@ -49,9 +47,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Basic tests for {@linkplain DependencyUpdatesReport}.
@@ -65,7 +60,7 @@ public class DependencyUpdatesReportTest
         @SuppressWarnings( "deprecation" )
         TestDependencyUpdatesReport()
         {
-            super( mockI18N(), mockRepositorySystem(), null, mockArtifactMetadataSource(), null );
+            super( mockI18N(), MockUtils.mockRepositorySystem(), null, mockArtifactMetadataSource(), null );
             siteTool = MockUtils.mockSiteTool();
 
             project = new MavenProject();
@@ -132,20 +127,6 @@ public class DependencyUpdatesReportTest
         {
             this.ignoredVersions = ignoredVersions;
             return this;
-        }
-
-        private static RepositorySystem mockRepositorySystem()
-        {
-            RepositorySystem repositorySystem = mock( RepositorySystem.class );
-            when( repositorySystem.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer(
-                invocation ->
-                {
-                    Dependency dependency = invocation.getArgument( 0 );
-                    return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                                dependency.getVersion(), dependency.getScope(), dependency.getType(),
-                                                dependency.getClassifier(), null );
-                } );
-            return repositorySystem;
         }
     }
 
