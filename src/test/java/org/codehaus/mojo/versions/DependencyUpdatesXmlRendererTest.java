@@ -30,6 +30,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlRenderer;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 

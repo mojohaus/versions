@@ -36,6 +36,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
+import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -48,10 +50,8 @@ import org.codehaus.plexus.i18n.I18N;
  */
 @Mojo( name = "property-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME,
        threadSafe = true )
-public class PropertyUpdatesReport
-    extends AbstractVersionsReport
+public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUpdatesModel>
 {
-
     /**
      * Any restrictions that apply to specific properties.
      *
@@ -85,10 +85,12 @@ public class PropertyUpdatesReport
     private boolean autoLinkItems;
 
     @Inject
-    protected PropertyUpdatesReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                      ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager )
+    protected PropertyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
+                                         ArtifactResolver artifactResolver,
+                                         ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+                                         ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager );
+        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager, rendererFactory );
     }
 
     /**
@@ -115,7 +117,7 @@ public class PropertyUpdatesReport
     protected void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException
     {
-        final Map<Property, PropertyVersions> updateSet = new TreeMap<>( new PropertyComparator() );
+        final Map<Property, PropertyVersions> updateSet = new TreeMap<>( PropertyComparator.INSTANCE );
         try
         {
             updateSet.putAll( getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties,
@@ -125,9 +127,8 @@ public class PropertyUpdatesReport
         {
             throw new MavenReportException( e.getMessage(), e );
         }
-        PropertyUpdatesRenderer renderer =
-            new PropertyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, updateSet );
-        renderer.render();
+        rendererFactory.createReportRenderer( getOutputName(), getSink(), locale,
+                new PropertyUpdatesModel( updateSet ) ).render();
     }
 
     /**
@@ -138,3 +139,4 @@ public class PropertyUpdatesReport
         return "property-updates-report";
     }
 }
+

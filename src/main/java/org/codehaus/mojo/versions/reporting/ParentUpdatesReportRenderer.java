@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions.utils;
+package org.codehaus.mojo.versions.reporting;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,37 +19,30 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import java.util.Comparator;
+import java.util.Locale;
 
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.mojo.versions.Property;
+import org.apache.maven.doxia.sink.Sink;
+import org.codehaus.mojo.versions.reporting.model.ParentUpdatesModel;
+import org.codehaus.plexus.i18n.I18N;
 
 /**
- * A comparator used to sort {@link Property} instances.
- *
  * @since 1.0-beta-1
  */
-public enum PropertyComparator implements Comparator<Property>
+public class ParentUpdatesReportRenderer extends DependencyUpdatesReportRenderer<ParentUpdatesModel>
 {
-    INSTANCE;
-    
-    /**
-     * Compares to {@link Property} instances.
-     *
-     * @param p1 the first object
-     * @param p2 the second object.
-     * @return the comparison result
-     * @see java.util.Comparator#compare(Object, Object)
-     * @since 1.0-beta-1
-     */
-    public int compare( Property p1, Property p2 )
+    public ParentUpdatesReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName,
+                                        ParentUpdatesModel model )
     {
-        return p1 == p2
-                ? 0
-                : p1 == null
-                    ? 1
-                    : p2 == null
-                        ? -1
-                        : StringUtils.compare( p1.getName(), p2.getName() );
+        super( i18n, sink, locale, bundleName, model );
+    }
+
+    @Override
+    protected void renderOverview()
+    {
+    }
+
+    @Override
+    protected void renderManagementSummaryTable()
+    {
     }
 }

@@ -54,6 +54,7 @@ final class DefaultArtifactAssociation
         return artifact.getArtifactId();
     }
 
+
     public Artifact getArtifact()
     {
         return artifact;

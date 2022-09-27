@@ -287,4 +287,5 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
         assertThat( ruleSet.getIgnoreVersions().stream().map( IgnoreVersion::getVersion )
                 .collect( Collectors.toList() ), containsInAnyOrder( ".*-M.", ".*-SNAPSHOT", "1.0.0" ) );
     }
+
 }

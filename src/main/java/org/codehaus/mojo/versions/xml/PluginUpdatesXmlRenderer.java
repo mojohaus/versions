@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions;
+package org.codehaus.mojo.versions.xml;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,19 +21,16 @@ package org.codehaus.mojo.versions;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.maven.model.Plugin;
 import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 
-import static org.codehaus.mojo.versions.DependencyUpdatesXmlRenderer.getVersionsBlocks;
-import static org.codehaus.mojo.versions.DependencyUpdatesXmlRenderer.wrapElement;
+import static org.codehaus.mojo.versions.xml.DependencyUpdatesXmlRenderer.getVersionsBlocks;
+import static org.codehaus.mojo.versions.xml.DependencyUpdatesXmlRenderer.wrapElement;
 
 /**
  * XML renderer for PluginUpdatesReport creates an xml file in target directory and writes report about available
@@ -83,7 +80,7 @@ public class PluginUpdatesXmlRenderer
     {
         StringBuilder sb = new StringBuilder();
         sb.append( "<PluginUpdatesReport>" ).append( NL );
-        Map<Plugin, PluginUpdatesDetails> allUpdates = new TreeMap<>( new PluginComparator() );
+        Map<Plugin, PluginUpdatesDetails> allUpdates = new TreeMap<>( PluginComparator.INSTANCE );
         allUpdates.putAll( pluginManagementUpdates );
         allUpdates.putAll( pluginUpdates );
         sb.append( getSummaryBlock( allUpdates ) );
@@ -105,10 +102,7 @@ public class PluginUpdatesXmlRenderer
 
     private static String getSummaryBlock( Map<Plugin, PluginUpdatesDetails> allUpdates )
     {
-        Collection<ArtifactVersions> allVersions = allUpdates.values().stream()
-            .map( PluginUpdatesDetails::getArtifactVersions )
-            .collect( Collectors.toList() );
-        return DependencyUpdatesXmlRenderer.getSummaryBlock( allVersions );
+        return DependencyUpdatesXmlRenderer.getSummaryBlock( allUpdates.values() );
     }
 
     private static String getPluginsInfoBlock( Map<Plugin, PluginUpdatesDetails> pluginUpdates, String blockName,
@@ -116,22 +110,21 @@ public class PluginUpdatesXmlRenderer
     {
         StringBuilder sBuilder = new StringBuilder();
         sBuilder.append( TAB ).append( OPEN_TAG ).append( blockName ).append( CLOSE_TAG ).append( NL );
-        for ( Entry<Plugin, PluginUpdatesDetails> entry : pluginUpdates.entrySet() )
+        pluginUpdates.forEach( ( plugin, value ) ->
         {
             sBuilder.append( TAB ).append( TAB ).append( OPEN_TAG ).append( subblockName ).append( CLOSE_TAG )
-                .append( NL );
+                    .append( NL );
 
-            Plugin plugin = entry.getKey();
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( plugin.getGroupId(),
-                                                                                    GROUP_ID ) ).append( NL );
+                    GROUP_ID ) ).append( NL );
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( plugin.getArtifactId(),
-                                                                                    ARTIFACT_ID ) ).append( NL );
+                    ARTIFACT_ID ) ).append( NL );
 
-            sBuilder.append( getVersionsBlocks( entry.getValue().getArtifactVersions() ) );
+            sBuilder.append( getVersionsBlocks( value ) );
 
             sBuilder.append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( subblockName ).append( CLOSE_TAG )
-                .append( NL );
-        }
+                    .append( NL );
+        } );
         sBuilder.append( TAB ).append( OPEN_CLOSING_TAG ).append( blockName ).append( CLOSE_TAG ).append( NL );
         return sBuilder.toString();
     }

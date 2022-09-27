@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions.utils;
+package org.codehaus.mojo.versions.reporting.model;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,37 +19,28 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 
-import org.apache.commons.lang3.StringUtils;
 import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.utils.PropertyComparator;
 
 /**
- * A comparator used to sort {@link Property} instances.
- *
- * @since 1.0-beta-1
+ * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
  */
-public enum PropertyComparator implements Comparator<Property>
+public class PropertyUpdatesModel
 {
-    INSTANCE;
-    
-    /**
-     * Compares to {@link Property} instances.
-     *
-     * @param p1 the first object
-     * @param p2 the second object.
-     * @return the comparison result
-     * @see java.util.Comparator#compare(Object, Object)
-     * @since 1.0-beta-1
-     */
-    public int compare( Property p1, Property p2 )
+    private final Map<Property, PropertyVersions> allUpdates;
+
+    public PropertyUpdatesModel( Map<Property, PropertyVersions> propertyUpdates )
     {
-        return p1 == p2
-                ? 0
-                : p1 == null
-                    ? 1
-                    : p2 == null
-                        ? -1
-                        : StringUtils.compare( p1.getName(), p2.getName() );
+        this.allUpdates = new TreeMap<>( PropertyComparator.INSTANCE );
+        this.allUpdates.putAll( propertyUpdates );
+    }
+
+    public Map<Property, PropertyVersions> getAllUpdates()
+    {
+        return allUpdates;
     }
 }

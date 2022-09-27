@@ -355,7 +355,7 @@ public class DisplayDependencyUpdatesMojo
 
     private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )
     {
-        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> result = new TreeSet<>( DependencyComparator.INSTANCE );
         if ( build.getPluginManagement() != null )
         {
             for ( Plugin plugin : build.getPluginManagement().getPlugins() )
@@ -371,7 +371,7 @@ public class DisplayDependencyUpdatesMojo
 
     private static Set<Dependency> extractDependenciesFromPlugins( List<Plugin> plugins )
     {
-        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> result = new TreeSet<>( DependencyComparator.INSTANCE );
         for ( Plugin plugin : plugins )
         {
             if ( plugin.getDependencies() != null && !plugin.getDependencies().isEmpty() )
@@ -395,7 +395,7 @@ public class DisplayDependencyUpdatesMojo
     private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies,
                                                               Set<Dependency> dependencyManagement )
     {
-        Set<Dependency> result = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> result = new TreeSet<>( DependencyComparator.INSTANCE );
         for ( Dependency dependency : dependencies )
         {
             boolean matched = false;
@@ -488,7 +488,7 @@ public class DisplayDependencyUpdatesMojo
 
         validateInput();
 
-        Set<Dependency> dependencyManagement = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> dependencyManagement = new TreeSet<>( DependencyComparator.INSTANCE );
         DependencyManagement projectDependencyManagement = getProjectDependencyManagement( getProject() );
         if ( projectDependencyManagement != null )
         {
@@ -537,7 +537,7 @@ public class DisplayDependencyUpdatesMojo
             }
         }
 
-        Set<Dependency> dependencies = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> dependencies = new TreeSet<>( DependencyComparator.INSTANCE );
         dependencies.addAll( getProject().getDependencies() );
 
         if ( isProcessingDependencyManagement() )
@@ -545,14 +545,14 @@ public class DisplayDependencyUpdatesMojo
             dependencies = removeDependencyManagment( dependencies, dependencyManagement );
         }
 
-        Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> pluginDependencies = new TreeSet<>( DependencyComparator.INSTANCE );
 
         if ( isProcessingPluginDependencies() )
         {
             pluginDependencies = extractDependenciesFromPlugins( getProject().getBuildPlugins() );
         }
 
-        Set<Dependency> pluginDependenciesInPluginManagement = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> pluginDependenciesInPluginManagement = new TreeSet<>( DependencyComparator.INSTANCE );
         if ( isProcessPluginDependenciesInDependencyManagement() )
         {
             pluginDependenciesInPluginManagement =

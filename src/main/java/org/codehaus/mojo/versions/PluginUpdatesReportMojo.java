@@ -38,6 +38,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.xml.PluginUpdatesXmlRenderer;
+import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
+import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -51,7 +54,7 @@ import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
  */
 @Mojo( name = "plugin-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME,
        threadSafe = true )
-public class PluginUpdatesReport extends AbstractVersionsReport
+public class PluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdatesModel>
 {
 
     /**
@@ -78,10 +81,11 @@ public class PluginUpdatesReport extends AbstractVersionsReport
     protected boolean onlyUpgradable;
 
     @Inject
-    protected PluginUpdatesReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                       ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager )
+    protected PluginUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
+                                       ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+                                       ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager );
+        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager, rendererFactory );
     }
 
     /**
@@ -121,19 +125,19 @@ public class PluginUpdatesReport extends AbstractVersionsReport
      */
     protected void doGenerateReport( Locale locale, Sink sink ) throws MavenReportException
     {
-        Set<Plugin> pluginManagement = new TreeSet<>( new PluginComparator() );
+        Set<Plugin> pluginManagement = new TreeSet<>( PluginComparator.INSTANCE );
         if ( haveBuildPluginManagementPlugins() )
         {
             pluginManagement.addAll( getProject().getBuild().getPluginManagement().getPlugins() );
         }
 
-        Set<Plugin> plugins = new TreeSet<>( new PluginComparator() );
+        Set<Plugin> plugins = new TreeSet<>( PluginComparator.INSTANCE );
         if ( haveBuildPlugins() )
         {
             plugins.addAll( getProject().getBuild().getPlugins() );
         }
 
-        PluginComparator comparator = new PluginComparator();
+        PluginComparator comparator = PluginComparator.INSTANCE;
         if ( !onlyProjectPlugins )
         {
             // Retains only plugins not present in pluginManagement
@@ -157,19 +161,18 @@ public class PluginUpdatesReport extends AbstractVersionsReport
             if ( onlyUpgradable )
             {
                 pluginUpdates =
-                        filter( pluginUpdates, plugin -> plugin.getArtifactVersions().getVersions().length > 1 );
+                        filter( pluginUpdates, plugin -> plugin.getVersions().length > 1 );
                 pluginManagementUpdates = filter( pluginManagementUpdates,
-                        plugin -> plugin.getArtifactVersions().getVersions().length > 1 );
+                        plugin -> plugin.getVersions().length > 1 );
             }
 
             for ( String format : formats )
             {
                 if ( "html".equals( format ) )
                 {
-                    PluginUpdatesRenderer renderer =
-                            new PluginUpdatesRenderer( sink, getI18n(), getOutputName(), locale, pluginUpdates,
-                                    pluginManagementUpdates );
-                    renderer.render();
+                    rendererFactory.createReportRenderer( getOutputName(), getSink(), locale,
+                                    new PluginUpdatesModel( pluginUpdates, pluginManagementUpdates ) )
+                            .render();
                 }
                 else if ( "xml".equals( format ) )
                 {
@@ -201,5 +204,5 @@ public class PluginUpdatesReport extends AbstractVersionsReport
     {
         return "plugin-updates-report";
     }
-
 }
+

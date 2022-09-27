@@ -31,10 +31,8 @@ import static java.util.Optional.empty;
 /**
  * Details of a plugin's updates.
  */
-public class PluginUpdatesDetails
+public class PluginUpdatesDetails extends ArtifactVersions
 {
-    private final ArtifactVersions artifactVersions;
-
     private final Map<Dependency, ArtifactVersions> dependencyVersions;
 
     private final boolean includeSnapshots;
@@ -42,16 +40,12 @@ public class PluginUpdatesDetails
     public PluginUpdatesDetails( ArtifactVersions artifactVersions,
                                  Map<Dependency, ArtifactVersions> dependencyVersions, boolean includeSnapshots )
     {
+        super( artifactVersions );
         Objects.requireNonNull( artifactVersions );
         Objects.requireNonNull( dependencyVersions );
-        this.artifactVersions = artifactVersions;
+
         this.dependencyVersions = dependencyVersions;
         this.includeSnapshots = includeSnapshots;
-    }
-
-    public ArtifactVersions getArtifactVersions()
-    {
-        return artifactVersions;
     }
 
     public Map<Dependency, ArtifactVersions> getDependencyVersions()
@@ -66,7 +60,8 @@ public class PluginUpdatesDetails
      */
     public boolean isArtifactUpdateAvailable()
     {
-        return artifactVersions.getAllUpdates( empty(), includeSnapshots ).length > 0;
+        ArtifactVersion[] updates = getAllUpdates( empty(), includeSnapshots );
+        return updates != null && updates.length > 0;
     }
 
     /**
@@ -76,15 +71,11 @@ public class PluginUpdatesDetails
      */
     public boolean isDependencyUpdateAvailable()
     {
-        for ( ArtifactVersions versions : dependencyVersions.values() )
+        return dependencyVersions.values().stream().anyMatch( versions ->
         {
             ArtifactVersion[] dependencyUpdates = versions.getAllUpdates( empty(), includeSnapshots );
-            if ( dependencyUpdates != null && dependencyUpdates.length > 0 )
-            {
-                return true;
-            }
-        }
-        return false;
+            return dependencyUpdates != null && dependencyUpdates.length > 0;
+        } );
     }
 
     /**

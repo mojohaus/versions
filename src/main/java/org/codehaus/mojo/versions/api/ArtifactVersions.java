@@ -30,6 +30,8 @@ import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
+import static org.apache.commons.lang3.StringUtils.compare;
+
 /**
  * Holds the results of a search for versions of an artifact.
  *
@@ -37,7 +39,7 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
  * @since 1.0-alpha-3
  */
 public class ArtifactVersions
-    extends AbstractVersionDetails
+    extends AbstractVersionDetails implements Comparable<ArtifactVersions>
 {
     /**
      * The artifact that who's versions we hold details of.
@@ -78,6 +80,36 @@ public class ArtifactVersions
         {
             setCurrentVersion( artifact.getVersion() );
         }
+    }
+
+    /**
+     * Creates a new {@link ArtifactVersions} instance as shallow copy of the other
+     *
+     * @param other other object to be linked to
+     * @since 2.13.0
+     */
+    public ArtifactVersions( ArtifactVersions other )
+    {
+        artifact = other.artifact;
+        versionComparator = other.versionComparator;
+        versions = other.versions;
+        setCurrentVersion( other.getCurrentVersion() );
+        setIncludeSnapshots( other.isIncludeSnapshots() );
+    }
+
+    @SuppressWarnings( "checkstyle:InnerAssignment" )
+    public int compareTo( ArtifactVersions that )
+    {
+        int rv;
+        return this == that
+                ? 0
+                : that == null || getClass() != that.getClass()
+                    ? 1
+                    : ( rv = compare( getGroupId(), that.getGroupId() ) ) != 0
+                        ? rv
+                        : ( rv = compare( getArtifactId(), that.getArtifactId() ) ) != 0
+                            ? rv
+                            : compare( getVersion(), that.getVersion() );
     }
 
     /**
@@ -134,7 +166,7 @@ public class ArtifactVersions
     }
 
     /**
-     * Returns the groupId of the artifact who's versions we are holding.
+     * Returns the groupId of the artifact which versions we are holding.
      *
      * @return the groupId.
      * @since 1.0-alpha-3
@@ -145,7 +177,7 @@ public class ArtifactVersions
     }
 
     /**
-     * Returns the artifactId of the artifact who's versions we are holding.
+     * Returns the artifactId of the artifact which versions we are holding.
      *
      * @return the artifactId.
      * @since 1.0-alpha-3
@@ -153,6 +185,17 @@ public class ArtifactVersions
     public String getArtifactId()
     {
         return getArtifact().getArtifactId();
+    }
+
+    /**
+     * Returns the artifactId of the artifact which versions we are holding.
+     *
+     * @return current version
+     * @since 2.13.0
+     */
+    public String getVersion()
+    {
+        return getArtifact().getVersion();
     }
 
     public ArtifactVersion[] getVersions( boolean includeSnapshots )

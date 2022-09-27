@@ -62,6 +62,6 @@ public class DependencyFilter
     {
         return dependencies.stream()
                 .filter( predicate )
-                .collect( Collectors.toCollection( () -> new TreeSet<>( new DependencyComparator() ) ) );
+                .collect( Collectors.toCollection( () -> new TreeSet<>( DependencyComparator.INSTANCE ) ) );
     }
 }

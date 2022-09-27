@@ -417,14 +417,16 @@
         </reportSets>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>versions-maven-plugin</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>${project.artifactId}</artifactId>
+        <version>${project.version}</version>
         <reportSets>
           <reportSet>
             <reports>
               <report>dependency-updates-report</report>
               <report>plugin-updates-report</report>
               <report>property-updates-report</report>
+              <report>parent-updates-report</report>
             </reports>
           </reportSet>
         </reportSets>

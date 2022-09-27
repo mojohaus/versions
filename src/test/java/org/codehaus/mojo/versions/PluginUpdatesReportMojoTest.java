@@ -37,7 +37,9 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.model.RuleSet;
+import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
 import org.codehaus.mojo.versions.utils.MockUtils;
+import org.codehaus.plexus.i18n.I18N;
 import org.junit.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
@@ -54,17 +56,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Basic tests for {@linkplain PluginUpdatesReport}.
+ * Basic tests for {@linkplain PluginUpdatesReportMojo}.
  *
  * @author Andrzej Jarmoniuk
  */
-public class PluginUpdatesReportTest
+public class PluginUpdatesReportMojoTest
 {
-    private static class TestPluginUpdatesReport extends PluginUpdatesReport
+    private static class TestPluginUpdatesReportMojo extends PluginUpdatesReportMojo
     {
-        TestPluginUpdatesReport()
+        static final I18N MOCK_I18N = mockI18N();
+        TestPluginUpdatesReportMojo()
         {
-            super( mockI18N(), mockRepositorySystem(), null, mockArtifactMetadataSource(), null );
+            super( MOCK_I18N, mockRepositorySystem(), null, mockArtifactMetadataSource(),
+                    null, new ReportRendererFactoryImpl( MOCK_I18N ) );
             siteTool = MockUtils.mockSiteTool();
 
             project = new MavenProject();
@@ -74,38 +78,38 @@ public class PluginUpdatesReportTest
             artifactMetadataSource = mockArtifactMetadataSource();
         }
 
-        public TestPluginUpdatesReport withPlugins( Plugin... plugins )
+        public TestPluginUpdatesReportMojo withPlugins( Plugin... plugins )
         {
             project.getBuild().setPlugins( Arrays.asList( plugins ) );
             return this;
         }
 
-        public TestPluginUpdatesReport withPluginManagement( Plugin... pluginManagement )
+        public TestPluginUpdatesReportMojo withPluginManagement( Plugin... pluginManagement )
         {
             project.getBuild().getPluginManagement().setPlugins( Arrays.asList( pluginManagement ) );
             return this;
         }
 
-        public TestPluginUpdatesReport withOnlyUpgradable( boolean onlyUpgradable )
+        public TestPluginUpdatesReportMojo withOnlyUpgradable( boolean onlyUpgradable )
         {
             this.onlyUpgradable = onlyUpgradable;
             return this;
         }
 
-        public TestPluginUpdatesReport withOnlyProjectPlugins( boolean onlyProjectPlugins )
+        public TestPluginUpdatesReportMojo withOnlyProjectPlugins( boolean onlyProjectPlugins )
         {
             this.onlyProjectPlugins = onlyProjectPlugins;
             return this;
         }
 
-        public TestPluginUpdatesReport withRuleSet(
+        public TestPluginUpdatesReportMojo withRuleSet(
                 RuleSet ruleSet )
         {
             this.ruleSet = ruleSet;
             return this;
         }
 
-        public TestPluginUpdatesReport withIgnoredVersions(
+        public TestPluginUpdatesReportMojo withIgnoredVersions(
                 Set<String> ignoredVersions )
         {
             this.ignoredVersions = ignoredVersions;
@@ -143,7 +147,7 @@ public class PluginUpdatesReportTest
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestPluginUpdatesReport()
+        new TestPluginUpdatesReportMojo()
             .withPlugins( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
                           pluginOf( "artifactC" ) )
             .withOnlyUpgradable( true )
@@ -159,7 +163,7 @@ public class PluginUpdatesReportTest
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestPluginUpdatesReport()
+        new TestPluginUpdatesReportMojo()
             .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
                                    pluginOf( "artifactC" ) )
             .withOnlyUpgradable( true )
@@ -175,7 +179,7 @@ public class PluginUpdatesReportTest
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestPluginUpdatesReport()
+        new TestPluginUpdatesReportMojo()
             .withPlugins( pluginOf( "artifactA" ) )
             .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
                                    pluginOf( "artifactC" ) )
@@ -193,7 +197,7 @@ public class PluginUpdatesReportTest
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestPluginUpdatesReport()
+        new TestPluginUpdatesReportMojo()
                 .withPlugins( pluginOf( "artifactA" ) )
                 .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
                         pluginOf( "artifactC" ) )

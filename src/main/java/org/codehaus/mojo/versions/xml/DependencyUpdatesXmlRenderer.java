@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions;
+package org.codehaus.mojo.versions.xml;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
 
@@ -77,11 +76,11 @@ public class DependencyUpdatesXmlRenderer
 
     private static final String TAB = "\t";
 
-    private Map<Dependency, ArtifactVersions> dependencyUpdates;
+    private final Map<Dependency, ArtifactVersions> dependencyUpdates;
 
-    private Map<Dependency, ArtifactVersions> dependencyManagementUpdates;
+    private final Map<Dependency, ArtifactVersions> dependencyManagementUpdates;
 
-    private String outputFileName;
+    private final String outputFileName;
 
     public DependencyUpdatesXmlRenderer( Map<Dependency, ArtifactVersions> dependencyUpdates,
                                          Map<Dependency, ArtifactVersions> dependencyManagementUpdates,
@@ -102,7 +101,7 @@ public class DependencyUpdatesXmlRenderer
     {
         StringBuilder sb = new StringBuilder();
         sb.append( "<DependencyUpdatesReport>" ).append( NL );
-        Map<Dependency, ArtifactVersions> allUpdates = new TreeMap<>( new DependencyComparator() );
+        Map<Dependency, ArtifactVersions> allUpdates = new TreeMap<>( DependencyComparator.INSTANCE );
         allUpdates.putAll( dependencyManagementUpdates );
         allUpdates.putAll( dependencyUpdates );
         sb.append( getSummaryBlock( allUpdates.values() ) );
@@ -144,7 +143,7 @@ public class DependencyUpdatesXmlRenderer
      * @param allUpdates all dependencies versions
      * @return summary in xml format
      */
-    public static String getSummaryBlock( Collection<ArtifactVersions> allUpdates )
+    public static String getSummaryBlock( Collection<? extends ArtifactVersions> allUpdates )
     {
         int numInc = 0;
         int numMin = 0;
@@ -241,28 +240,27 @@ public class DependencyUpdatesXmlRenderer
     {
         StringBuilder sBuilder = new StringBuilder();
         sBuilder.append( TAB ).append( OPEN_TAG ).append( blockName ).append( CLOSE_TAG ).append( NL );
-        for ( Entry<Dependency, ArtifactVersions> entry : dependencyUpdates.entrySet() )
+        dependencyUpdates.forEach( ( dep, value ) ->
         {
             sBuilder.append( TAB ).append( TAB ).append( OPEN_TAG ).append( subblockName ).append( CLOSE_TAG )
-                .append( NL );
+                    .append( NL );
 
-            Dependency dep = entry.getKey();
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( dep.getGroupId(),
-                                                                                    GROUP_ID ) ).append( NL );
+                    GROUP_ID ) ).append( NL );
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( dep.getArtifactId(),
-                                                                                    ARTIFACT_ID ) ).append( NL );
+                    ARTIFACT_ID ) ).append( NL );
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( dep.getScope(),
-                                                                                    SCOPE ) ).append( NL );
+                    SCOPE ) ).append( NL );
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( dep.getClassifier(),
-                                                                                    CLASSIFIER ) ).append( NL );
+                    CLASSIFIER ) ).append( NL );
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( wrapElement( dep.getType(),
-                                                                                    TYPE ) ).append( NL );
+                    TYPE ) ).append( NL );
 
-            sBuilder.append( getVersionsBlocks( entry.getValue() ) );
+            sBuilder.append( getVersionsBlocks( value ) );
 
             sBuilder.append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( subblockName ).append( CLOSE_TAG )
-                .append( NL );
-        }
+                    .append( NL );
+        } );
         sBuilder.append( TAB ).append( OPEN_CLOSING_TAG ).append( blockName ).append( CLOSE_TAG ).append( NL );
         return sBuilder.toString();
     }
