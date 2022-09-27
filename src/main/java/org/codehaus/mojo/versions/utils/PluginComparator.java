@@ -29,9 +29,9 @@ import org.apache.maven.model.ReportPlugin;
  *
  * @since 1.0-beta-1
  */
-public class PluginComparator
-    implements Comparator<Object>
+public enum PluginComparator implements Comparator<Object>
 {
+    INSTANCE;
 
     /**
      * Compares to {@link Plugin} or {@link ReportPlugin} instances.

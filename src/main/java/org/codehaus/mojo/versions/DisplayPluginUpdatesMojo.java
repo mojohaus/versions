@@ -1645,7 +1645,7 @@ public class DisplayPluginUpdatesMojo
             }
             debugPluginMap( "after adding reporting plugins for profile " + profile.getId(), plugins );
         }
-        Set<Plugin> result = new TreeSet<>( new PluginComparator() );
+        Set<Plugin> result = new TreeSet<>( PluginComparator.INSTANCE );
         result.addAll( plugins.values() );
         return result;
     }
@@ -1702,7 +1702,7 @@ public class DisplayPluginUpdatesMojo
     {
         if ( getLog().isDebugEnabled() )
         {
-            Set<Plugin> sorted = new TreeSet<>( new PluginComparator() );
+            Set<Plugin> sorted = new TreeSet<>( PluginComparator.INSTANCE );
             sorted.addAll( plugins.values() );
             StringBuilder buf = new StringBuilder( description );
             for ( Plugin plugin : sorted )

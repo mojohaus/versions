@@ -39,6 +39,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlRenderer;
+import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
+import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -53,7 +56,7 @@ import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
  */
 @Mojo( name = "dependency-updates-report",
        requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true )
-public class DependencyUpdatesReport extends AbstractVersionsReport
+public class DependencyUpdatesReportMojo extends AbstractVersionsReport<DependencyUpdatesModel>
 {
 
     /**
@@ -101,10 +104,12 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
     protected boolean onlyUpgradable;
 
     @Inject
-    protected DependencyUpdatesReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                       ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager )
+    protected DependencyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
+                                           ArtifactResolver artifactResolver,
+                                           ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+                                           ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager );
+        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager, rendererFactory );
     }
 
     /**
@@ -132,10 +137,10 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
     @SuppressWarnings( "deprecation" )
     protected void doGenerateReport( Locale locale, Sink sink ) throws MavenReportException
     {
-        Set<Dependency> dependencies = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> dependencies = new TreeSet<>( DependencyComparator.INSTANCE );
         dependencies.addAll( getProject().getDependencies() );
 
-        Set<Dependency> dependencyManagement = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> dependencyManagement = new TreeSet<>( DependencyComparator.INSTANCE );
 
         if ( processDependencyManagement )
         {
@@ -202,11 +207,9 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
             {
                 if ( "html".equals( format ) )
                 {
-                    DependencyUpdatesRenderer renderer =
-                        new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale, dependencyUpdates,
-                                                       dependencyManagementUpdates );
-                    renderer.render();
-
+                    rendererFactory.createReportRenderer( getOutputName(), sink, locale,
+                            new DependencyUpdatesModel( dependencyUpdates, dependencyManagementUpdates ) )
+                            .render();
                 }
                 else if ( "xml".equals( format ) )
                 {
@@ -254,5 +257,5 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
     {
         return "dependency-updates-report";
     }
-
 }
+

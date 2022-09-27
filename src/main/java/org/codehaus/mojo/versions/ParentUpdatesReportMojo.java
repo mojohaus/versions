@@ -23,14 +23,12 @@ import javax.inject.Inject;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -38,11 +36,10 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
+import org.codehaus.mojo.versions.reporting.model.ParentUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.plexus.i18n.I18N;
-
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
 
 /**
  * Generates a report on available updates for parent artifacts
@@ -51,17 +48,18 @@ import static java.util.Collections.singletonMap;
  * @since 2.13.0
  */
 @Mojo( name = "parent-updates-report",
-       requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = false )
-public class ParentUpdatesReport extends AbstractVersionsReport
+       requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true )
+public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdatesModel>
 {
     @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
     protected List<MavenProject> reactorProjects;
 
     @Inject
-    protected ParentUpdatesReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                   ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager )
+    protected ParentUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
+                                       ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+                                       ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager );
+        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager, rendererFactory );
     }
 
     /**
@@ -106,28 +104,16 @@ public class ParentUpdatesReport extends AbstractVersionsReport
             ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( project.getParentArtifact(),
                     false );
             artifactVersions.setIncludeSnapshots( allowSnapshots );
-            Dependency parent = DependencyBuilder.newBuilder()
-                    .withGroupId( artifactVersions.getGroupId() )
-                    .withArtifactId( artifactVersions.getArtifactId() )
-                    .withVersion( artifactVersions.getArtifact().getVersion() )
-                    .withScope( artifactVersions.getArtifact().getScope() )
-                    .withType( artifactVersions.getArtifact().getType() )
-                    .withClassifier( artifactVersions.getArtifact().getClassifier() )
-                    .build();
-            new DependencyUpdatesRenderer( sink, getI18n(), getOutputName(), locale,
-                    singletonMap( parent, artifactVersions ), emptyMap() )
-            {
-                @Override
-                protected void renderSummaryTotalsTable( Map<Dependency, ArtifactVersions> allUpdates )
-                {
-                }
-
-                @Override
-                protected void renderDependencyManagementSummary()
-                {
-                }
-            }
-            .renderBody();
+            rendererFactory.createReportRenderer( getOutputName(), sink, locale,
+                            new ParentUpdatesModel( DependencyBuilder.newBuilder()
+                                    .withGroupId( artifactVersions.getGroupId() )
+                                    .withArtifactId( artifactVersions.getArtifactId() )
+                                    .withVersion( artifactVersions.getArtifact().getVersion() )
+                                    .withScope( artifactVersions.getArtifact().getScope() )
+                                    .withType( artifactVersions.getArtifact().getType() )
+                                    .withClassifier( artifactVersions.getArtifact().getClassifier() )
+                                    .build(), artifactVersions ) )
+                    .render();
         }
         catch ( ArtifactMetadataRetrievalException e )
         {

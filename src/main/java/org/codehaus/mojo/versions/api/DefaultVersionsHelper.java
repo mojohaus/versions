@@ -311,7 +311,7 @@ public class DefaultVersionsHelper
                                              WagonManager wagonManager, Settings settings )
         throws MojoExecutionException
     {
-        RuleSet loadedRules = new RuleSet();
+        RuleSet loadedRules;
 
         int split = rulesUri.lastIndexOf( '/' );
         String baseUri = rulesUri;
@@ -681,7 +681,7 @@ public class DefaultVersionsHelper
             requestsForDetails.add( new DependencyLookup( dependency, usePluginRepositories ) );
         }
 
-        final Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>( new DependencyComparator() );
+        final Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>( DependencyComparator.INSTANCE );
 
         // Lookup details in parallel...
         final ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
@@ -731,7 +731,7 @@ public class DefaultVersionsHelper
             requestsForDetails.add( new PluginLookup( plugin, allowSnapshots ) );
         }
 
-        Map<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>( new PluginComparator() );
+        Map<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>( PluginComparator.INSTANCE );
 
         // Lookup details in parallel...
         ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
@@ -768,13 +768,11 @@ public class DefaultVersionsHelper
         getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
                             + " for updates newer than " + version );
 
-        boolean includeSnapshots = allowSnapshots;
-
         final ArtifactVersions pluginArtifactVersions =
             lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), version ),
                                     true );
 
-        Set<Dependency> pluginDependencies = new TreeSet<>( new DependencyComparator() );
+        Set<Dependency> pluginDependencies = new TreeSet<>( DependencyComparator.INSTANCE );
         if ( plugin.getDependencies() != null )
         {
             pluginDependencies.addAll( plugin.getDependencies() );
@@ -782,7 +780,7 @@ public class DefaultVersionsHelper
         Map<Dependency, ArtifactVersions> pluginDependencyDetails =
             lookupDependenciesUpdates( pluginDependencies, false );
 
-        return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, includeSnapshots );
+        return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, allowSnapshots );
     }
 
     @Override
