@@ -45,6 +45,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
+import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
@@ -166,6 +167,8 @@ public class UseLatestVersionsMojo
     {
         Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
                 allowIncrementalUpdates );
+        MajorMinorIncrementalFilter majorMinorIncfilter =
+            new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         for ( Dependency dep : dependencies )
         {
@@ -197,9 +200,10 @@ public class UseLatestVersionsMojo
             try
             {
                 // TODO consider creating a getNewestVersion method in the Details services.
-                ArtifactVersion[] filteredVersions = versions.getNewerVersions( version, unchangedSegment,
-                        allowSnapshots, allowDowngrade );
+                ArtifactVersion[] newerVersions = versions.getNewerVersions( version, unchangedSegment, allowSnapshots,
+                        allowDowngrade );
 
+                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
                 if ( filteredVersions.length > 0 )
                 {
                     String newVersion = filteredVersions[filteredVersions.length - 1].toString();
