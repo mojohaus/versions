@@ -48,7 +48,6 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
@@ -151,8 +150,6 @@ public class UseLatestSnapshotsMojo
     {
         Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
                 allowIncrementalUpdates );
-        MajorMinorIncrementalFilter majorMinorIncfilter =
-            new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
 
         for ( Dependency dep : dependencies )
         {
@@ -201,6 +198,7 @@ public class UseLatestSnapshotsMojo
                     ArtifactVersion[] newer = versions.getVersions( restriction, true );
                     getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
 
+                    // TODO consider creating a search + filter in the Details services to get latest snapshot.
                     String latestVersion;
                     ArrayList<ArtifactVersion> snapshotsOnly = new ArrayList<>();
 
@@ -212,13 +210,8 @@ public class UseLatestSnapshotsMojo
                             snapshotsOnly.add( artifactVersion );
                         }
                     }
-                    getLog().debug( "Snapshot Only versions " + snapshotsOnly );
-
-                    ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter(
-                            selectedVersion, snapshotsOnly.toArray( new ArtifactVersion[0] ) );
-                    getLog().debug( "Filtered versions " + Arrays.asList( filteredVersions ) );
-
-
+                    ArtifactVersion[] filteredVersions = snapshotsOnly.toArray(
+                            new ArtifactVersion[snapshotsOnly.size()] );
                     if ( filteredVersions.length > 0 )
                     {
                         latestVersion = filteredVersions[filteredVersions.length - 1].toString();

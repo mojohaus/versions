@@ -266,6 +266,7 @@ public abstract class AbstractVersionDetails
                 : getVersionComparator().incrementSegment( lowerBound, upperBoundSegment.get() );
 
         Restriction restriction = new Restriction( lowerBound, allowDowngrade, upperBound, allowDowngrade );
+        // TODO shouldn't allowDowngrade boolean be passed to this call ?
         return getVersions( restriction, includeSnapshots );
     }
 
