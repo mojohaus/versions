@@ -5,6 +5,7 @@ import javax.xml.stream.XMLStreamException;
 import java.util.Collections;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -33,6 +34,7 @@ public class UpdateParentMojoTest
                 forceUpdate = true;
 
                 repositorySystem = mock( RepositorySystem.class );
+                artifactMetadataSource = mock( ArtifactMetadataSource.class );
                 when( repositorySystem.createDependencyArtifact( any() ) )
                     .thenReturn( new ProjectArtifact( project ) );
             }
