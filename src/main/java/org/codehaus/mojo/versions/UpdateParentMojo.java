@@ -34,7 +34,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -104,7 +103,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-1
      */
     @Override
-	protected void update( ModifiedPomXMLEventReader pom )
+    protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         if ( getProject().getParent() == null )
@@ -122,7 +121,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         String currentVersion = getProject().getParent().getVersion();
         String version = currentVersion;
 
-        if ( parentVersion != null && !parentVersion.equals("null") )
+        if ( parentVersion != null && !parentVersion.equals( "null" ) )
         {
             version = parentVersion;
         }
@@ -148,17 +147,14 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         try
         {
             int segment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
-            MajorMinorIncrementalFilter majorMinorIncfilter =
-                new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
-
+            ArtifactVersion upperBound = null;
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-            ArtifactVersion[] newerVersions = versions.getNewerVersions( version, segment, allowSnapshots );
-
-            ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
-            ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
-            if (filteredVersions.length > 0) {
-            	artifactVersion = filteredVersions[filteredVersions.length - 1];
+            if ( segment != -1 )
+            {
+                upperBound = versions.getVersionComparator().incrementSegment( artifactVersion, segment );
             }
+            artifactVersion  = versions.getNewestVersion( versionRange, artifactVersion, upperBound,
+                    allowSnapshots, true, false );
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
