@@ -72,13 +72,13 @@ Goal Matrix
 
   The columns in the above goal matrix are as follows:
 
-  * <Modified Release dependencies> when scanning the <<<pom.xml>>> for depenendency to update, include those dependencies which 
+  * <Modified Release dependencies> when scanning the <<<pom.xml>>> for dependency to update, include those dependencies which
     are for release versions (i.e. non-SNAPSHOT versions).
 
-  * <Modified -SNAPSHOT dependencies> when scanning the <<<pom.xml>>> for depenendency to update, include those dependencies which 
+  * <Modified -SNAPSHOT dependencies> when scanning the <<<pom.xml>>> for dependency to update, include those dependencies which
     are for -SNAPSHOT versions.
 
-  * <Condsiders releases> when building the list of newer versions of a dependency, include release versions (i.e. non-SNAPSHOT
+  * <Considers releases> when building the list of newer versions of a dependency, include release versions (i.e. non-SNAPSHOT
     versions) in the list.
 
   * <Condsiders releases> when building the list of newer versions of a dependency, include -SNAPSHOT versions in the list.

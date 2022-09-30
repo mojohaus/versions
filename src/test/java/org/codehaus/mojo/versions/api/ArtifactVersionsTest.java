@@ -31,10 +31,14 @@ import org.codehaus.mojo.versions.ordering.MercuryVersionComparator;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import static java.util.Optional.of;
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 
 public class ArtifactVersionsTest
 {
@@ -104,5 +108,22 @@ public class ArtifactVersionsTest
             artifactVersions[i] = new DefaultArtifactVersion( versions[i] );
         }
         return artifactVersions;
+    }
+
+    @Test
+    public void testReportLabels()
+    {
+        ArtifactVersion[] versions = versions( "1.0.1", "1.0", "1.1.0-2", "1.1.1", "1.1.1-2", "1.1.2",
+                "1.1.2-SNAPSHOT", "1.1.3", "1.1", "1.1-SNAPSHOT", "1.2.1", "1.2.2", "1.2", "1.3",
+                "1.9.1-SNAPSHOT", "2.0", "2.1.1-SNAPSHOT", "2.1", "3.0", "3.1.1-SNAPSHOT",
+                "3.1.5-SNAPSHOT", "3.4.0-SNAPSHOT" );
+        ArtifactVersions instance =
+                new ArtifactVersions( new DefaultArtifact( "default-group", "dummy-api",
+                        "1.1", "foo", "bar",
+                        "jar", null ),
+                        Arrays.asList( versions ), new MavenVersionComparator() );
+
+        assertThat( instance.getNewestUpdate( of( SUBINCREMENTAL ) ).toString(), is( "1.1.0-2" ) );
+        assertThat( instance.getOldestUpdate( of( INCREMENTAL ) ).toString(), is( "1.1.1" ) );
     }
 }

@@ -20,24 +20,37 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.ArtifactStubFactory;
 import org.apache.maven.plugin.testing.MojoRule;
+import org.apache.maven.plugin.testing.stubs.StubArtifactResolver;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.model.TestIgnoreVersions;
+import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.TYPE_REGEX;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.matches;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
@@ -112,6 +125,109 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
         finally
         {
             assert outputFile == null || !outputFile.exists() || outputFile.delete();
+        }
+    }
+
+    private MavenProject createProject()
+    {
+        return new MavenProject( new Model()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "default-artifact" );
+            setVersion( "1.0.0-SNAPSHOT" );
+
+            setDependencies( singletonList( DependencyBuilder.newBuilder()
+                    .withGroupId( "default-group" )
+                    .withArtifactId( "default-dependency" )
+                    .withVersion( "1.0.0" )
+                    .build() ) );
+        }} )
+        {{
+            setOriginalModel( getModel() );
+        }};
+    }
+
+    @Test
+    public void testVersionsWithQualifiersNotConsideredAsMinorUpdates()
+            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException
+    {
+        Path tempPath = null;
+        try
+        {
+            tempPath = Files.createTempFile( "display-dependency-updates", "" );
+            final File tempFile = tempPath.toFile();
+            new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
+                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
+            {{
+                put( "default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0-SNAPSHOT", "2.0.0-beta",
+                        "2.0.0-rc1"} );
+            }} ), null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+            {{
+                setProject( createProject() );
+                setVariableValueToObject( this, "allowMinorUpdates", true );
+                setVariableValueToObject( this, "processDependencies", true );
+                setVariableValueToObject( this, "dependencyIncludes",
+                        singletonList( WildcardMatcher.WILDCARD ) );
+                setVariableValueToObject( this, "dependencyExcludes", emptyList() );
+                this.allowSnapshots = true;
+                this.outputFile = tempFile;
+                setPluginContext( new HashMap<>() );
+            }}.execute();
+
+            assertThat( String.join( "", Files.readAllLines( tempPath ) ),
+                    not( anyOf( containsString( "2.0.0-SNAPSHOT" ),
+                            containsString( "2.0.0-beta" ),
+                            containsString( "2.0.0-rc1" ) ) ) );
+        }
+        finally
+        {
+            if ( tempPath != null && Files.exists( tempPath ) )
+            {
+                Files.delete( tempPath );
+            }
+        }
+    }
+
+    @Test
+    public void testVersionsWithQualifiersNotConsideredAsIncrementalUpdates()
+            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException
+    {
+        Path tempPath = null;
+        try
+        {
+            tempPath = Files.createTempFile( "display-dependency-updates", "" );
+            final File tempFile = tempPath.toFile();
+            new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
+                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
+            {{
+                put( "default-dependency", new String[] {"1.0.0", "1.1.0", "1.9.0-SNAPSHOT", "1.9.0-beta",
+                        "1.9.0-rc1"} );
+            }} ), null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+            {{
+                setProject( createProject() );
+                setVariableValueToObject( this, "allowIncrementalUpdates", true );
+                setVariableValueToObject( this, "processDependencies", true );
+                setVariableValueToObject( this, "dependencyIncludes",
+                        singletonList( WildcardMatcher.WILDCARD ) );
+                setVariableValueToObject( this, "dependencyExcludes", emptyList() );
+                this.allowSnapshots = true;
+                this.outputFile = tempFile;
+                setPluginContext( new HashMap<>() );
+            }}.execute();
+
+            assertThat( String.join( "", Files.readAllLines( tempPath ) ),
+                    not( anyOf( containsString( "1.9.0-SNAPSHOT" ),
+                            containsString( "1.9.0-beta" ),
+                            containsString( "1.9.0-rc1" ) ) ) );
+        }
+        finally
+        {
+            if ( tempPath != null && Files.exists( tempPath ) )
+            {
+                Files.delete( tempPath );
+            }
         }
     }
 }

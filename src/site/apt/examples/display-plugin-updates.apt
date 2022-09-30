@@ -88,7 +88,7 @@ mvn versions:display-plugin-updates
 
   The plugin will also warn if you have not specified the versions of any plugins that you are using and tell you what
   version you are currently using.  Best practice in Maven is to always specify the plugin versions in order to
-  ensure that builds are reproducable.
+  ensure that builds are reproducible.
 
   For example the following <<<pom.xml>>>:
 

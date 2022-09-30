@@ -59,8 +59,17 @@ public abstract class AbstractVersionComparator
      */
     public final ArtifactVersion incrementSegment( ArtifactVersion v, Segment segment ) throws InvalidSegmentException
     {
-        return VersionComparators.copySnapshot( v, innerIncrementSegment( VersionComparators.stripSnapshot( v ),
-                                                                          segment ) );
+        if ( VersionComparators.isSnapshot( v ) )
+        {
+            return VersionComparators.copySnapshot( v, innerIncrementSegment( VersionComparators.stripSnapshot( v ),
+                    segment ) );
+        }
+        int segmentCount = getSegmentCount( v );
+        if ( segment.value() >= segmentCount )
+        {
+            throw new InvalidSegmentException( segment, segmentCount, v );
+        }
+        return innerIncrementSegment( v, segment );
     }
 
     protected abstract ArtifactVersion innerIncrementSegment( ArtifactVersion v, Segment segment )

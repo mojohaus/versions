@@ -24,9 +24,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Dependency;
@@ -55,6 +57,7 @@ import static org.hamcrest.Matchers.anyOf;
  */
 public class DependencyUpdatesReportTest
 {
+
     private static class TestDependencyUpdatesReport extends DependencyUpdatesReport
     {
         @SuppressWarnings( "deprecation" )
@@ -126,6 +129,12 @@ public class DependencyUpdatesReportTest
                 Set<String> ignoredVersions )
         {
             this.ignoredVersions = ignoredVersions;
+            return this;
+        }
+
+        public TestDependencyUpdatesReport withArtifactMetadataSource( ArtifactMetadataSource artifactMetadataSource )
+        {
+            this.artifactMetadataSource = artifactMetadataSource;
             return this;
         }
     }
@@ -223,4 +232,43 @@ public class DependencyUpdatesReportTest
         String output = os.toString().replaceAll( "\n", "" );
         assertThat( output, containsString( "report.noUpdatesAvailable" ) );
     }
+
+
+    @Test
+    public void testSubincrementalUpdates()
+            throws IOException, MavenReportException
+    {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        new TestDependencyUpdatesReport()
+                .withDependencies( DependencyBuilder.newBuilder()
+                        .withGroupId( "localhost" )
+                        .withArtifactId( "dummy-api" )
+                        .withVersion( "1.1" )
+                        .withScope( SCOPE_COMPILE )
+                        .withType( "jar" )
+                        .build() )
+                .withArtifactMetadataSource( mockArtifactMetadataSource( new LinkedHashMap<String, String[]>()
+                {{
+                    put( "dummy-api", new String[] { "1.0.1", "1.0", "1.1.0-2", "1.1.1", "1.1.1-2", "1.1.2",
+                            "1.1.2-SNAPSHOT", "1.1.3", "1.1", "1.1-SNAPSHOT", "1.2.1", "1.2.2", "1.2", "1.3",
+                            "1.9.1-SNAPSHOT", "2.0", "2.1.1-SNAPSHOT", "2.1", "3.0", "3.1.1-SNAPSHOT",
+                            "3.1.5-SNAPSHOT", "3.4.0-SNAPSHOT"} );
+                }} ) )
+                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+
+        String output = os.toString()
+                .replaceAll( "<[^>]+>", " " )
+                .replaceAll( "&[^;]+;", " " )
+                .replaceAll( "\\s+", " " );
+        assertThat( output, containsString( "localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.3 1.3 3.0" ) );
+        assertThat( output, containsString( "1.1.0-2 report.latestSubIncremental" ) );
+        assertThat( output, containsString( "1.1.1 report.nextIncremental" ) );
+        assertThat( output, containsString( "1.1.3 report.latestIncremental" ) );
+        assertThat( output, containsString( "1.2 report.nextMinor" ) );
+        assertThat( output, containsString( "1.3 report.latestMinor" ) );
+        assertThat( output, containsString( "2.0 report.nextMajor" ) );
+        assertThat( output, containsString( "3.0 report.latestMajor" ) );
+    }
+
 }

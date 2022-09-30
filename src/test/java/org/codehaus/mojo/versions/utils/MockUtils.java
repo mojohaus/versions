@@ -32,6 +32,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.doxia.tools.SiteTool;
 import org.apache.maven.doxia.tools.SiteToolException;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -124,7 +125,7 @@ public class MockUtils
                 Dependency dependency = invocation.getArgument( 0 );
                 return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
                                             dependency.getVersion(), dependency.getScope(), dependency.getType(),
-                                            dependency.getClassifier(), null );
+                                            dependency.getClassifier(), new DefaultArtifactHandlerStub( "default" ) );
             } );
         return repositorySystem;
     }

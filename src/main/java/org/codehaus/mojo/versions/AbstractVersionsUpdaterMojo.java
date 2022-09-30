@@ -356,6 +356,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param versionRange          The version range.
      * @param allowingSnapshots     <code>null</code> for no override, otherwise the local override to apply.
      * @param usePluginRepositories Use plugin repositories
+     * @param allowDowngrade        whether downgrades should be allowed
      * @return The latest version of the specified artifact that matches the specified version range or
      * <code>null</code> if no matching version could be found.
      * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
@@ -515,6 +516,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param artifact       The artifact.
      * @param currentVersion The current version of the artifact.
      * @param updateVersion  The proposed new version of the artifact.
+     * @param forceUpdate    if true, LATEST and RELEASE versions will be overwritten with the real version
      * @return <code>true</code> if the update should be applied to the pom.
      * @since 2.9
      */
@@ -575,7 +577,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param allowMajorUpdates       Allow major updates
      * @param allowMinorUpdates       Allow minor updates
      * @param allowIncrementalUpdates Allow incremental updates
-     * @return Returns the segment (0-based) that is unchangable. If any segment can change, returns -1.
+     * @return Returns the segment (0-based) that is unchangeable. If any segment can change, returns -1.
      */
     protected Optional<Segment> determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,
                                                            boolean allowIncrementalUpdates )

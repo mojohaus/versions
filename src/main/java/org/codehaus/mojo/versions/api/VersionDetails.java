@@ -221,6 +221,7 @@ public interface VersionDetails
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
      *         version is available.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
@@ -235,6 +236,7 @@ public interface VersionDetails
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
      *         version is available.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
@@ -247,6 +249,7 @@ public interface VersionDetails
      * @param updateScope the update scope to include.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the all versions after currentVersion within the specified update scope.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, Optional<Segment> updateScope,
@@ -295,6 +298,7 @@ public interface VersionDetails
      * @param updateScope the update scope to include.
      * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
      *         version is available.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion getOldestUpdate( Optional<Segment> updateScope ) throws InvalidSegmentException;
@@ -306,6 +310,7 @@ public interface VersionDetails
      * @param updateScope the update scope to include.
      * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
      *         version is available.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion getNewestUpdate( Optional<Segment> updateScope ) throws InvalidSegmentException;
@@ -315,6 +320,7 @@ public interface VersionDetails
      *
      * @param updateScope the update scope to include.
      * @return the all versions after currentVersion within the specified update scope.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope ) throws InvalidSegmentException;
@@ -327,6 +333,7 @@ public interface VersionDetails
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
      *         version is available.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion getOldestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
@@ -340,6 +347,7 @@ public interface VersionDetails
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
      *         version is available.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion getNewestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
@@ -351,6 +359,7 @@ public interface VersionDetails
      * @param updateScope the update scope to include.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the all versions after currentVersion within the specified update scope.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
     ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope, boolean includeSnapshots )
