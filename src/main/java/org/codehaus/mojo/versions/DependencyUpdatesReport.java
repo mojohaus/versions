@@ -65,7 +65,7 @@ public class DependencyUpdatesReport extends AbstractVersionsReport
     protected boolean processDependencyManagement;
 
     /**
-     * Whether to process the depdendencyManagement part transitive or not.
+     * Whether to process the dependencyManagement part transitive or not.
      * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
      * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
      * by default to report also the imported dependencies.

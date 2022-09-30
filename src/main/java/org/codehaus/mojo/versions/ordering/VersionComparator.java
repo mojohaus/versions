@@ -20,9 +20,14 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import java.util.Comparator;
+import java.util.Optional;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.Restriction;
 import org.codehaus.mojo.versions.api.Segment;
+
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
  * A rule for comparing and manipulating versions.
@@ -49,4 +54,30 @@ public interface VersionComparator
      * @throws InvalidSegmentException if {@code segment} ∉ [0, segmentCount)
      */
     ArtifactVersion incrementSegment( ArtifactVersion artifactVersion, Segment segment ) throws InvalidSegmentException;
+
+    /**
+     * <p>Returns a {@linkplain Restriction} object for computing version <em>upgrades</em>
+     * with the given segment allowing updates, with all more major segments locked in place.</p>
+     * <p>The resulting restriction could be thought of as one
+     * retaining the versions on positions up to the held position,
+     * the position right after the position held in place will be incremented by one,
+     * and on all positions which are more minor than that, the range would contain -&infin;
+     * for the bottom bound and +&infin; for the above bound.</p>
+     * <p>This will allow matching the required versions while not matching versions which are considered
+     * inferior than the zeroth version, i.e. versions with a qualifier.</p>
+     *
+     * @param currentVersion The current version.
+     * @param scope most major segment where updates are allowed Optional.empty() for no restriction
+     * @return {@linkplain Restriction} object based on the arguments
+     */
+    default Restriction restrictionFor( ArtifactVersion currentVersion, Optional<Segment> scope )
+            throws InvalidSegmentException
+    {
+        ArtifactVersion nextVersion = scope.isPresent() && scope.get().isMajorTo( SUBINCREMENTAL )
+                ? incrementSegment( currentVersion, scope.get() )
+                : currentVersion;
+        return new Restriction( nextVersion, nextVersion != currentVersion, scope.filter( MAJOR::isMajorTo )
+                .map( s -> (ArtifactVersion) new BoundArtifactVersion( currentVersion, s ) ).orElse( null ),
+                false );
+    }
 }

@@ -780,40 +780,47 @@ public abstract class AbstractVersionsReportRenderer
 
     protected String getLabel( ArtifactVersion version, AbstractVersionDetails versions )
     {
-        String label = null;
+        if ( equals( version, versions.getNewestUpdate( of( SUBINCREMENTAL ) ) ) )
+        {
+            return getText( "report.latestSubIncremental" );
+        }
+
+        if ( equals( version, versions.getOldestUpdate( of( SUBINCREMENTAL ) ) ) )
+        {
+            return getText( "report.nextVersion" );
+        }
+
+        if ( equals( version, versions.getOldestUpdate( of( INCREMENTAL ) ) ) )
+        {
+            return getText( "report.nextIncremental" );
+        }
+
+        if ( equals( version, versions.getNewestUpdate( of( INCREMENTAL ) ) ) )
+        {
+            return getText( "report.latestIncremental" );
+        }
+
+        if ( equals( version, versions.getOldestUpdate( of( MINOR ) ) ) )
+        {
+            return getText( "report.nextMinor" );
+        }
+
+        if ( equals( version, versions.getNewestUpdate( of( MINOR ) ) ) )
+        {
+            return getText( "report.latestMinor" );
+        }
+
+        if ( equals( version, versions.getOldestUpdate( of( MAJOR ) ) ) )
+        {
+            return getText( "report.nextMajor" );
+        }
+
         if ( equals( version, versions.getNewestUpdate( of( MAJOR ) ) ) )
         {
-            label = getText( "report.latestMajor" );
+            return getText( "report.latestMajor" );
         }
-        else if ( equals( version, versions.getOldestUpdate( of( MAJOR ) ) ) )
-        {
-            label = getText( "report.nextMajor" );
-        }
-        else if ( equals( version, versions.getNewestUpdate( of( MINOR ) ) ) )
-        {
-            label = getText( "report.latestMinor" );
-        }
-        else if ( equals( version, versions.getOldestUpdate( of( MINOR ) ) ) )
-        {
-            label = getText( "report.nextMinor" );
-        }
-        else if ( equals( version, versions.getNewestUpdate( of( INCREMENTAL ) ) ) )
-        {
-            label = getText( "report.latestIncremental" );
-        }
-        else if ( equals( version, versions.getOldestUpdate( of( INCREMENTAL ) ) ) )
-        {
-            label = getText( "report.nextIncremental" );
-        }
-        else if ( equals( version, versions.getNewestUpdate( of( SUBINCREMENTAL ) ) ) )
-        {
-            label = getText( "report.latestSubIncremental" );
-        }
-        else if ( equals( version, versions.getOldestUpdate( of( SUBINCREMENTAL ) ) ) )
-        {
-            label = getText( "report.nextVersion" );
-        }
-        return label;
+
+        return "";
     }
 
 }

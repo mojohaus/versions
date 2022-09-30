@@ -43,9 +43,9 @@ public class ComparableVersion
 
     private String canonical;
 
-    private ListItem items;
+    protected ListItem items;
 
-    private interface Item
+    protected interface Item
     {
         int INTEGER_ITEM = 0;
 
@@ -63,10 +63,10 @@ public class ComparableVersion
     /**
      * Represents a numeric item in the version item list.
      */
-    private static class IntegerItem
+    protected static class IntegerItem
         implements Item
     {
-        private static final BigInteger BIG_INTEGEGER_ZERO = new BigInteger( "0" );
+        private static final BigInteger BIG_INTEGER_ZERO = new BigInteger( "0" );
 
         private final BigInteger value;
 
@@ -74,7 +74,7 @@ public class ComparableVersion
 
         private IntegerItem()
         {
-            this.value = BIG_INTEGEGER_ZERO;
+            this.value = BIG_INTEGER_ZERO;
         }
 
         IntegerItem( String str )
@@ -89,14 +89,14 @@ public class ComparableVersion
 
         public boolean isNull()
         {
-            return BIG_INTEGEGER_ZERO.equals( value );
+            return BIG_INTEGER_ZERO.equals( value );
         }
 
         public int compareTo( Item item )
         {
             if ( item == null )
             {
-                return BIG_INTEGEGER_ZERO.equals( value ) ? 0 : 1; // 1.0 == 1, 1.1 > 1
+                return BIG_INTEGER_ZERO.equals( value ) ? 0 : 1; // 1.0 == 1, 1.1 > 1
             }
 
             switch ( item.getType() )

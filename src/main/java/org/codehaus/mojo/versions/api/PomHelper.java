@@ -1476,9 +1476,10 @@ public class PomHelper
      * Finds the local root of the specified project.
      *
      * @param project              The project to find the local root for.
+     * @param builder              {@linkplain MavenProjectBuilder} object
      * @param localRepository      the local repo.
      * @param globalProfileManager the global profile manager.
-     * @param logger               The logger to log to.
+     * @param logger               The logger to log tog
      * @return The local root (note this may be the project passed as an argument).
      */
     public static MavenProject getLocalRoot( MavenProjectBuilder builder, MavenProject project,

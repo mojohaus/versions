@@ -402,9 +402,10 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
 
     /**
      * Returns the incremented version, with the nextSnapshotIndexToIncrement indicating the 1-based index,
-     * conunting from the left, or the most major version component, of the version string.
+     * from the left, or the most major version component, of the version string.
      *
      * @param version input version
+     * @param nextSnapshotIndexToIncrement 1-based segment number to be incremented
      * @return version with the incremented index specified by nextSnapshotIndexToIncrement or last index
      * @throws MojoExecutionException thrown if the input parameters are invalid
      */

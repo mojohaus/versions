@@ -94,7 +94,7 @@ public class DisplayDependencyUpdatesMojo
     private boolean processDependencyManagement;
 
     /**
-     * Whether to process the depdendencyManagement part transitive or not.
+     * Whether to process the dependencyManagement part transitive or not.
      * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
      * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
      * by default to report also the imported dependencies.
@@ -691,12 +691,28 @@ public class DisplayDependencyUpdatesMojo
 
     private Optional<Segment> calculateUpdateScope()
     {
-        return !allowAnyUpdates
-                ? allowMajorUpdates ? of( MAJOR )
-                : allowMinorUpdates ? of( MINOR )
-                : allowIncrementalUpdates ? of( INCREMENTAL )
-                : empty()
-                : empty();
+        if ( !allowIncrementalUpdates && !allowMinorUpdates && !allowMajorUpdates && !allowAnyUpdates )
+        {
+            throw new IllegalArgumentException( "One of: allowAnyUpdates, allowMajorUpdates, allowMinorUpdates, "
+                    + "allowIncrementalUpdates must be true" );
+        }
+
+        if ( allowAnyUpdates && allowMajorUpdates && allowMinorUpdates )
+        {
+            return empty();
+        }
+
+        if ( allowMajorUpdates && allowMinorUpdates )
+        {
+            return of( MAJOR );
+        }
+
+        if ( allowMinorUpdates )
+        {
+            return of( MINOR );
+        }
+
+        return of( INCREMENTAL );
     }
 
     private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
