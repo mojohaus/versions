@@ -128,7 +128,7 @@ public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUp
             throw new MavenReportException( e.getMessage(), e );
         }
         rendererFactory.createReportRenderer( getOutputName(), getSink(), locale,
-                new PropertyUpdatesModel( updateSet ) ).render();
+                new PropertyUpdatesModel( updateSet ), verboseSummary, verboseDetail ).render();
     }
 
     /**

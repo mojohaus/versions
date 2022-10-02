@@ -216,6 +216,10 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
+        if ( upToDate /*&& !verbose*/ )
+        {
+            return;
+        }
 
         sink.tableRow();
         sink.tableCell();

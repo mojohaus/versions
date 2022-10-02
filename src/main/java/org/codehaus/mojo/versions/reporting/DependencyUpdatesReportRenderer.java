@@ -23,11 +23,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
+
+import static java.util.Optional.empty;
 
 /**
  * @param <K> type of the model
@@ -91,6 +94,13 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel> e
 
     protected void renderDependencyDetail( Dependency artifact, ArtifactVersions details )
     {
+        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+        boolean upToDate = allUpdates == null || allUpdates.length == 0;
+        if ( upToDate && !verboseDetail )
+        {
+            return;
+        }
+
         sink.section2();
         sink.sectionTitle2();
         sink.text( ArtifactUtils.versionlessKey( artifact.getGroupId(), artifact.getArtifactId() ) );
@@ -98,4 +108,5 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel> e
         renderDependencyDetailTable( artifact, details, true );
         sink.section2_();
     }
+
 }

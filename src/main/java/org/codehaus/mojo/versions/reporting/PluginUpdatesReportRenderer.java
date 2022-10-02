@@ -150,6 +150,10 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     protected void renderSummaryTableRow( Dependency artifact, PluginUpdatesDetails details )
     {
         boolean upToDate = !details.isUpdateAvailable();
+        if ( upToDate && !verboseSummary )
+        {
+            return;
+        }
 
         sink.tableRow();
         sink.tableCell();
@@ -233,6 +237,12 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     @SuppressWarnings( "checkstyle:MethodLength" )
     private void renderPluginDetail( Dependency artifact, PluginUpdatesDetails details )
     {
+        boolean upToDate = !details.isUpdateAvailable();
+        if ( upToDate && !verboseDetail )
+        {
+            return;
+        }
+
         sink.section2();
         sink.sectionTitle2();
         sink.text( MessageFormat.format( getText( "report.plugin" ),

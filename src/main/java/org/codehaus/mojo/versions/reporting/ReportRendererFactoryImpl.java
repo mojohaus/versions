@@ -57,28 +57,36 @@ public class ReportRendererFactoryImpl implements ReportRendererFactory
      */
     @Override
     @SuppressWarnings( "unchecked" )
-    public <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model )
+    public <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model,
+                                                                 boolean verboseSummary, boolean verboseDetail )
             throws IllegalArgumentException
     {
+        AbstractVersionsReportRenderer renderer = null;
         if ( DEPENDENCY_UPDATES_REPORT.equals( reportName ) )
         {
-            return (T) new DependencyUpdatesReportRenderer<>( i18N, sink, locale, reportName,
+            renderer = new DependencyUpdatesReportRenderer<>( i18N, sink, locale, reportName,
                     (DependencyUpdatesModel) model );
         }
         if ( PLUGIN_UPDATES_REPORT.equals( reportName ) )
         {
-            return (T) new PluginUpdatesReportRenderer( i18N, sink, locale, reportName,
+            renderer = new PluginUpdatesReportRenderer( i18N, sink, locale, reportName,
                     (PluginUpdatesModel) model );
         }
         if ( PROPERTY_UPDATES_REPORT.equals( reportName ) )
         {
-            return (T) new PropertyUpdatesReportRenderer( i18N, sink, locale, reportName,
+            renderer = new PropertyUpdatesReportRenderer( i18N, sink, locale, reportName,
                     (PropertyUpdatesModel) model );
         }
         if ( PARENT_UPDATES_REPORT.equals( reportName ) )
         {
-            return (T) new ParentUpdatesReportRenderer( i18N, sink, locale, reportName,
+            renderer = new ParentUpdatesReportRenderer( i18N, sink, locale, reportName,
                     (ParentUpdatesModel) model );
+        }
+        if ( renderer != null )
+        {
+            renderer.setVerboseSummary( verboseSummary );
+            renderer.setVerboseDetail( verboseDetail );
+            return (T) renderer;
         }
         throw new IllegalArgumentException( "Invalid report name: " + reportName );
     }

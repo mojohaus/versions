@@ -174,7 +174,8 @@ public class PluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdate
             {
                 if ( "html".equals( format ) )
                 {
-                    rendererFactory.createReportRenderer( getOutputName(), getSink(), locale, model ).render();
+                    rendererFactory.createReportRenderer( getOutputName(), getSink(), locale, model,
+                                    verboseSummary, verboseDetail ).render();
                 }
                 else if ( "xml".equals( format ) )
                 {

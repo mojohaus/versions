@@ -86,6 +86,28 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
         sink.figureGraphics( "images/icon_success_sml.gif" );
     }
 
+    protected void renderStatRow( String textKey, int statCount, boolean forceSuccessIcon )
+    {
+        sink.tableRow();
+        sink.tableCell();
+        if ( statCount == 0 || forceSuccessIcon )
+        {
+            renderSuccessIcon();
+        }
+        else
+        {
+            renderWarningIcon();
+        }
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( getText( textKey ) );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( Integer.toString( statCount ) );
+        sink.tableCell_();
+        sink.tableRow_();
+    }
+
     protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
     {
         return v1 == v2 || ( v1 != null && v1.equals( v2 ) )

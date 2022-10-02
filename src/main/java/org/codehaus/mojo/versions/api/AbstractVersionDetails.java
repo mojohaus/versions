@@ -21,11 +21,13 @@ package org.codehaus.mojo.versions.api;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -49,6 +51,10 @@ public abstract class AbstractVersionDetails
     implements VersionDetails
 {
 
+    private static final Pattern PREVIEW_PATTERN =
+            Pattern.compile( "(?i)(?:.*[-.](a|alpha|b|beta|m|mr|rm|preview|rc|cr)"
+                    + "(\\d{0,2}[a-z]?|\\d{6}\\.\\d{4})|\\d{8}(?:\\.?\\d{6})?)$" );
+
     /**
      * The current version. Guarded by {@link #currentVersionLock}.
      *
@@ -62,6 +68,8 @@ public abstract class AbstractVersionDetails
      * @since 1.0-beta-1
      */
     private boolean includeSnapshots = false;
+
+    protected boolean verboseDetail = true;
 
     /**
      * Not sure if we need to be thread safe, but there's no harm being careful, after all we could be invoked from an
@@ -120,6 +128,14 @@ public abstract class AbstractVersionDetails
         synchronized ( currentVersionLock )
         {
             this.includeSnapshots = includeSnapshots;
+        }
+    }
+
+    public void setVerboseDetail( boolean verboseDetail )
+    {
+        synchronized ( currentVersionLock )
+        {
+            this.verboseDetail = verboseDetail;
         }
     }
 
@@ -285,7 +301,7 @@ public abstract class AbstractVersionDetails
                                                 boolean includeSnapshots )
     {
         final VersionComparator versionComparator = getVersionComparator();
-        Set<ArtifactVersion> result = new TreeSet<>( versionComparator );
+        TreeSet<ArtifactVersion> result = new TreeSet<>( versionComparator );
         for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
         {
             if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
@@ -302,6 +318,48 @@ public abstract class AbstractVersionDetails
             }
             result.add( candidate );
         }
+
+        // filter out intermediate minor versions.
+        if ( !verboseDetail )
+        {
+            String current = ".";
+            boolean needOneMore = false;
+            Iterator<ArtifactVersion> rev = result.descendingIterator(); // be cautious to keep latest ones.
+            for ( Iterator<ArtifactVersion> it = rev; it.hasNext(); )
+            {
+                ArtifactVersion version = it.next();
+                boolean isPreview = PREVIEW_PATTERN.matcher( version.toString() ).matches();
+
+                // encountered a version in same Major.Minor version, remove it.
+                if ( version.toString().startsWith( current + "." ) || version.toString().startsWith( current + "-" ) )
+                {
+                    if ( needOneMore && !isPreview )
+                    {
+                        needOneMore = false;
+                        continue;
+                    }
+                    it.remove();
+                    continue;
+                }
+
+                // if last version is a pre-release, also search for the last release.
+                needOneMore = isPreview;
+
+                // encountered a new Major.Minor version, keep it.
+                int indexOf = StringUtils.ordinalIndexOf( version.toString(), ".", Segment.MINOR.value() + 1 );
+                if ( indexOf > -1 )
+                {
+                    current = version.toString().substring( 0, indexOf );
+                    continue;
+                }
+                indexOf = version.toString().indexOf( "-" );
+                if ( indexOf > -1 )
+                {
+                    current = version.toString().substring( 0, indexOf );
+                }
+            }
+        }
+
         return result.toArray( new ArtifactVersion[0] );
     }
 
