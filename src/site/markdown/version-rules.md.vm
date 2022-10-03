@@ -1,0 +1,249 @@
+title: Version Rules
+autor: Stephen Connolly
+date: 2012-11-14
+
+<!---
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+  https://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+## Velocity uses # as a prefix for macros and ## as a prefix for comments
+#set($h1 = '#')
+#set($h2 = '##')
+#set($h3 = '###')
+#set($h4 = '####')
+
+$h1 Version number rules
+
+$h2 Introduction
+
+**Notice:** The limitations explained in this paragraph were true in Maven 2.x, but have been **fixed** in Maven 3.x (see
+[Maven Versioning Wiki page](https://cwiki.apache.org/confluence/display/MAVENOLD/Versioning) for more details)
+
+The current implementation of
+[DefaultArtifactVersion](https://maven.apache.org/ref/current/maven-artifact/xref/org/apache/maven/artifact/versioning/DefaultArtifactVersion.html)
+in the core of Maven expects that version numbers will have a very specific format:
+
+` <MajorVersion [> . <MinorVersion [> . <IncrementalVersion ] ] [> - <BuildNumber | Qualifier ]> `
+
+Where *MajorVersion*, *MinorVersion*, *IncrementalVersion* and *BuildNumber* are all numeric and *Qualifier*
+is a string. If your version number does not match this format, then the entire version number is treated as being
+the *Qualifier*.
+
+If your version numbers do not match this scheme, you may face issues with
+- version ranges (unfortunately there is nothing that the `versions-maven-plugin` can do to help you with
+  your problems with version ranges and your version numbering scheme... well you could replace your
+  version ranges with properties and use the update-properties goal)
+- goals in this plugin that sort versions, for example update-properties (you can do things to help with these
+  kinds of problems)
+
+The `versions-maven-plugin` knows three rules for comparing version numbers:
+- *maven*, The standard Maven 2.x and 3.x version numbering scheme.
+- *numeric*, An alternative version numbering scheme with no "special" qualifiers.
+- *mercury*, An alternative version numbering scheme, now defunct.
+
+The `versions-maven-plugin` will assume that all version numbers follow the `maven` scheme unless you tell
+it otherwise.
+
+$h2 Rules.xml
+
+To specify the version schemes to use, you may define a [rule-set xml file](./rule.html), use the `ruleSet`
+element in the `versions-maven-plugin` plugin configuration, or specify ignored versions via
+the `maven.version.ignore` property.
+
+$h3 Using the `Rules.xml` file
+
+The `rules.xml` file should conform to the xsd specified in the example below.
+
+```xml
+<ruleset comparisonMethod="maven"
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 https://www.mojohaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+  <rules>
+    <rule groupId="*.maven" comparisonMethod="mercury"/>
+    <rule groupId="com.mycompany" comparisonMethod="numeric"/>
+    <rule groupId="com.mycompany.maven" comparisonMethod="maven"/>
+    <rule groupId="com.mycompany.maven" artifactId="old-maven-plugin" comparisonMethod="mercury"/>
+  </rules>
+</ruleset>
+```
+
+The rule-set files must match the [XSD schema](./xsd/rule-2.0.0.xsd).
+
+You can then use the `rulesUri` parameter to specify the rule-set to be used by the
+`versions-maven-plugin`.
+
+Note: the `groupId` attribute in the `rule` elements has a lazy `.*` at the end, such that
+`com.mycompany` will match `com.mycompany`, `com.mycompany.foo`, `com.mycompany.foo.bar`, etc.
+
+$h3 Using the `ruleSet` element in the POM
+
+As an alternative to providing a separate `rules.xml` file, starting with version `2.13.0` it is possible
+to provide the `ruleSet` element directly in the POM. The structure is somewhat simpler to
+the `rules.xml` file:
+
+```xml
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
+        <configuration>
+          <ruleSet>
+            <!-- zero or more elements -->
+            <ignoreVersions>
+              <!-- zero or more elements -->
+              <ignoreVersion>
+                <version>1.0.0</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <!-- can be either: 'exact' (default) or 'regex' -->
+                <type>regex</type>
+                <version>(.+-SNAPSHOT|.+-M\d)</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.+-(alpha|beta)</version>
+              </ignoreVersion>
+          </ignoreVersions>
+
+          <!-- zero or more elements -->
+          <rules>
+            <!-- zero or more elements -->
+            <rule>
+              <!-- if provided, restricts the groupId for the rule -->
+              <groupId>org.codehaus.mojo</groupId>
+
+              <!-- if provided,
+              <artifactId>versions-maven-plugin</artifactId>
+
+              <!-- syntax the same as for the general ignoreVersions -->
+              <ignoreVersions>
+                ...
+              </ignoreVersions>
+
+              <!-- optional, comparison method for the rule, one of: maven (default), numeric, mercury -->
+              <comparisonMethod>maven</comparisonMethod>
+            </rule>
+          </rules>
+      </ruleSet>
+```
+
+$h3 Using the `maven.version.ignore` property
+
+The `maven.version.ignore` property can list *comma-separated* list of global version **regex** patterns, which
+will be ignored when considering available versions.
+
+Examples:
+- `1.0.0`
+- `.+-SNAPSHOT`
+- `(.+-SNAPSHOT|.+-M\d),.+-(alpha|beta),3.0.0`
+
+$h3 Ignoring certain versions
+
+It is possible to ignore versions on a global and on a per-rule basis.
+
+The other methods (via the `<ruleSet>` element and via the `maven.version.ignore`) property have been
+explained above. The described
+
+```xml
+<ruleset comparisonMethod="maven"
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 https://www.mojohaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+  <ignoreVersions>
+    <ignoreVersion type="regex">.*-beta</ignoreVersion>
+  </ignoreVersions>
+  <rules>
+    <rule groupId="com.mycompany.maven" comparisonMethod="maven">
+      <ignoreVersions>
+        <ignoreVersion type="regex">.*-RELEASE</ignoreVersion>
+        <ignoreVersion>2.1.0</ignoreVersion>
+      </ignoreVersions>
+    </rule>
+  </rules>
+</ruleset>
+```
+
+Note: it is possible to ignore versions using regular expressions.
+
+If you have your ruleset xml file hosted at, for example, http://www.mycompany.com/maven-version-rules.xml
+then the following configuration in your corporate pom would ensure that all projects use this rule set.
+
+```xml
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
+        <configuration>
+          ...
+          <rulesUri>http://www.mycompany.com/maven-version-rules.xml</rulesUri>
+          ...
+        </configuration>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+```
+
+You can provide your ruleset xml file also within a jar, if you want to distribute
+your ruleset xml as Maven artifact. Therefore you have to declare the containing
+jar as direct dependency of the **versions-maven-plugin** and to use classpath
+as protocol.
+
+```xml
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${pluginVersion}</version>
+        <configuration>
+          ...
+          <rulesUri>classpath:///package/foo/bar/rules.xml</rulesUri>
+          ...
+        </configuration>
+        <dependencies>
+            <dependency>
+                <groupId>com.mycompany</groupId>
+                <artifactId>version-rules</artifactId>
+                <version>1.0</version>
+            </dependency>
+        </dependencies>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+```
