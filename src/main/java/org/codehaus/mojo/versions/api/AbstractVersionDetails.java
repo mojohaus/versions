@@ -177,20 +177,19 @@ public abstract class AbstractVersionDetails
         // so we only need to find the first candidate fulfilling the criteria
         for ( ArtifactVersion candidate : reverse( getVersions( includeSnapshots ) ) )
         {
-            if ( !allowDowngrade && versionRange != null
-                    && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
+            if ( allowDowngrade || versionRange == null
+                    || ArtifactVersions.isVersionInRange( candidate, versionRange ) )
             {
-                continue;
+                if ( restriction != null && !isVersionInRestriction( restriction, candidate ) )
+                {
+                    continue;
+                }
+                if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
+                {
+                    continue;
+                }
+                return candidate;
             }
-            if ( restriction != null && !isVersionInRestriction( restriction, candidate ) )
-            {
-                continue;
-            }
-            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
-            {
-                continue;
-            }
-            return candidate;
         }
         return null;
     }

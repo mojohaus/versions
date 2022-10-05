@@ -10,6 +10,7 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
@@ -20,6 +21,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.change.VersionChange;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -34,6 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -60,6 +63,8 @@ public class UpdateParentMojoTest
         {{
             put( "parent-artifact", new String[] { "0.9.0", "1.0.0", "1.0.1-SNAPSHOT" } );
             put( "issue-670-artifact", new String[] { "0.0.1-1", "0.0.1-1-impl-SNAPSHOT" } );
+            put( "dummy-parent2", new String[] { "1.0", "2.0", "3.0", "3.0-alpha-1", "3.0-beta-1" } );
+            put( "test-incremental", new String[] { "1.0.0", "1.1.0", "1.1.1", "2.0.0" } );
             put( "unknown-artifact", new String[0] );
         }} );
     }
@@ -174,69 +179,46 @@ public class UpdateParentMojoTest
 
     @Test
     public void testParentDowngradeAllowedWithRange()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException
+            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.allowDowngrade = true;
         mojo.getProject().setParent( new MavenProject()
         {{
             setGroupId( "default-group" );
             setArtifactId( "parent-artifact" );
-            setVersion( "[1.0.1-SNAPSHOT,)" );
         }} );
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
-        }
-        assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "parent-artifact", "[1.0.1-SNAPSHOT,)",
-                        "1.0.0" ) ) );
+        ArtifactVersion newVersion = mojo.resolveTargetVersion( "[1.0.1-SNAPSHOT,)" );
+        assertThat( newVersion, notNullValue() );
+        assertThat( newVersion.toString(), is( "1.0.0" ) );
     }
 
     @Test
     public void testParentDowngradeForbiddenWithRange()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException
+            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.allowDowngrade = false;
-        mojo.getProject().setParent( new MavenProject()
-        {{
-            setGroupId( "default-group" );
-            setArtifactId( "parent-artifact" );
-            setVersion( "[1.0.1-SNAPSHOT,)" );
-        }} );
-
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
-        }
-        assertThat( changeRecorder.getChanges(), is( empty() ) );
+        ArtifactVersion newVersion = mojo.resolveTargetVersion( "[1.0.1-SNAPSHOT,)" );
+        assertThat( newVersion, nullValue() );
     }
 
     @Test
     public void testAllowSnapshots()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException
+            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.allowSnapshots = true;
         mojo.getProject().setParent( new MavenProject()
         {{
             setGroupId( "default-group" );
             setArtifactId( "issue-670-artifact" );
-            setVersion( "0.0.1-1" );
         }} );
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
-        }
-        assertThat( changeRecorder.getChanges(), hasItem( new VersionChange( "default-group",
-                "issue-670-artifact", "0.0.1-1",
-                "0.0.1-1-impl-SNAPSHOT" ) ) );
+        ArtifactVersion newVersion = mojo.resolveTargetVersion( "0.0.1-1" );
+        assertThat( newVersion, notNullValue() );
+        assertThat( newVersion.toString(), is( "0.0.1-1-impl-SNAPSHOT" ) );
     }
 
     @Test
@@ -265,21 +247,16 @@ public class UpdateParentMojoTest
 
     @Test
     public void testIgnoredVersions()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, IllegalAccessException,
+            ArtifactMetadataRetrievalException, InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.getProject().setParent( new MavenProject()
         {{
             setGroupId( "default-group" );
             setArtifactId( "parent-artifact" );
-            setVersion( "0.9.0" );
         }} );
         setVariableValueToObject( mojo, "ignoredVersions", singleton( "1.0.0" ) );
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) ).thenReturn( true );
-            mojo.update( null );
-        }
-        assertThat( changeRecorder.getChanges(), is( empty() ) );
+        assertThat( mojo.resolveTargetVersion( "0.9.0" ), nullValue() );
     }
 
     @Test
@@ -345,5 +322,86 @@ public class UpdateParentMojoTest
         assertThat( changeRecorder.getChanges(),
                 hasItem( new VersionChange( "default-group", "parent-artifact", "0.9.0",
                         "1.0.1-SNAPSHOT" ) ) );
+    }
+
+    @Test
+    public void testAllowMinorUpdates()
+            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            InvalidVersionSpecificationException, InvalidSegmentException
+    {
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "parent-artifact" );
+            setVersion( "0.8.0" );
+        }} );
+        mojo.allowMajorUpdates = false;
+        mojo.allowMinorUpdates = true;
+        mojo.allowIncrementalUpdates = false;
+
+        ArtifactVersion newVersion = mojo.resolveTargetVersion( "0.8.0" );
+
+        assertThat( newVersion, notNullValue() );
+        assertThat( newVersion.toString(), is( "0.9.0" ) );
+    }
+
+    @Test
+    public void testAllowIncrementalUpdates()
+            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            InvalidVersionSpecificationException, InvalidSegmentException
+    {
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "test-incremental" );
+        }} );
+        mojo.allowMajorUpdates = false;
+        mojo.allowMinorUpdates = false;
+        mojo.allowIncrementalUpdates = true;
+
+        ArtifactVersion newVersion = mojo.resolveTargetVersion( "1.1.0" );
+
+        assertThat( newVersion, notNullValue() );
+        assertThat( newVersion.toString(), is( "1.1.1" ) );
+    }
+
+    @Test
+    public void testParentVersionRange() throws MojoExecutionException, XMLStreamException, MojoFailureException
+    {
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "dummy-parent2" );
+            setVersion( "1.0" );
+        }} );
+        mojo.allowSnapshots = true;
+        mojo.parentVersion = "[,3.0-!)";
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) ).thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(),
+                hasItem( new VersionChange( "default-group", "dummy-parent2", "1.0",
+                        "2.0" ) ) );
+    }
+
+    @Test
+    public void testParentVersionRange2() throws MojoExecutionException, XMLStreamException, MojoFailureException
+    {
+        mojo.getProject().setParent( new MavenProject()
+        {{
+            setGroupId( "default-group" );
+            setArtifactId( "dummy-parent2" );
+            setVersion( "2.0" );
+        }} );
+        mojo.allowSnapshots = true;
+        mojo.parentVersion = "[,3.0-!)";
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), any() ) ).thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(), empty() );
     }
 }
