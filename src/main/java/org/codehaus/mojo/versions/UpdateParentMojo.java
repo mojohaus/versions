@@ -22,6 +22,11 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -37,7 +42,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
@@ -95,6 +103,30 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
                 defaultValue = "false" )
     protected boolean allowDowngrade;
 
+    /**
+     * Whether to allow the major version number to be changed.
+     *
+     * @since 2.13.0
+     */
+    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    protected boolean allowMajorUpdates = true;
+
+    /**
+     * Whether to allow the minor version number to be changed.
+     *
+     * @since 2.13.0
+     */
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    protected boolean allowMinorUpdates = true;
+
+    /**
+     * Whether to allow the incremental version number to be changed.
+     *
+     * @since 2.13.0
+     */
+    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    protected boolean allowIncrementalUpdates = true;
+
     // -------------------------- OTHER METHODS --------------------------
 
     @Inject
@@ -135,10 +167,13 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
             throw new MojoExecutionException( "skipResolution is only valid if parentVersion is set" );
         }
 
-        String initialVersion = parentVersion == null ? getProject().getParent().getVersion() : parentVersion;
+        String initialVersion = parentVersion == null
+                ? getProject().getParent().getVersion()
+                : parentVersion;
         try
         {
-            ArtifactVersion artifactVersion = skipResolution ? new DefaultArtifactVersion( parentVersion )
+            ArtifactVersion artifactVersion = skipResolution
+                    ? new DefaultArtifactVersion( parentVersion )
                     : resolveTargetVersion( initialVersion );
             if ( artifactVersion != null )
             {
@@ -166,10 +201,15 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
+        catch ( InvalidSegmentException e )
+        {
+            throw new MojoExecutionException( "Invalid segment specification for version " + initialVersion, e );
+        }
     }
 
-    private ArtifactVersion resolveTargetVersion( String initialVersion )
-            throws MojoExecutionException, ArtifactMetadataRetrievalException, InvalidVersionSpecificationException
+    protected ArtifactVersion resolveTargetVersion( String initialVersion )
+            throws MojoExecutionException, ArtifactMetadataRetrievalException, InvalidVersionSpecificationException,
+            InvalidSegmentException
     {
         Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder
                 .newBuilder()
@@ -186,14 +226,37 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
                     VersionRange.createFromVersionSpec( "[" + targetVersionRange.getRecommendedVersion() + ",)" ) );
         }
 
-        ArtifactVersion artifactVersion = findLatestVersion( artifact, targetVersionRange, null,
-                false, allowDowngrade );
-        if ( !shouldApplyUpdate( artifact, getProject().getParent().getVersion(), artifactVersion, forceUpdate ) )
+        final ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+        Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                allowIncrementalUpdates );
+
+        // currentVersion (set to parentVersion here) is not included in the version range for searching upgrades
+        // unless we set allowDowngrade to true
+        for ( ArtifactVersion candidate : reverse( versions.getNewerVersions( initialVersion, unchangedSegment,
+                allowSnapshots, !isBlank( parentVersion ) || allowDowngrade ) ) )
         {
-            getLog().debug( "Update not applied. Exiting." );
-            return null;
+            if ( allowDowngrade
+                    || targetVersionRange == null
+                    || ArtifactVersions.isVersionInRange( candidate, targetVersionRange ) )
+            {
+                if ( shouldApplyUpdate( artifact, getProject().getParent().getVersion(), candidate, forceUpdate ) )
+                {
+                    return candidate;
+                }
+                else
+                {
+                    getLog().debug( "Update not applied. Exiting." );
+                    return null;
+                }
+            }
         }
-        return artifactVersion;
+
+        getLog().info( "No versions found" );
+        return null;
     }
 
+    private static <T> Iterable<T> reverse( T[] array )
+    {
+        return Arrays.stream( array ).sorted( Collections.reverseOrder() ).collect( Collectors.toList() );
+    }
 }

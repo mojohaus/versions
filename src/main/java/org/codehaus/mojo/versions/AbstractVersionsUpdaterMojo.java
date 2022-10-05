@@ -346,31 +346,9 @@ public abstract class AbstractVersionsUpdaterMojo
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
             throws ArtifactMetadataRetrievalException, MojoExecutionException
     {
-        return findLatestVersion( artifact, versionRange, allowingSnapshots, usePluginRepositories, false );
-    }
-
-    /**
-     * Finds the latest version of the specified artifact that matches the version range.
-     *
-     * @param artifact              The artifact.
-     * @param versionRange          The version range.
-     * @param allowingSnapshots     <code>null</code> for no override, otherwise the local override to apply.
-     * @param usePluginRepositories Use plugin repositories
-     * @param allowDowngrade        whether downgrades should be allowed
-     * @return The latest version of the specified artifact that matches the specified version range or
-     * <code>null</code> if no matching version could be found.
-     * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
-     * @throws MojoExecutionException             if something goes wrong.
-     * @since 1.0-alpha-1
-     */
-    protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
-                                                 Boolean allowingSnapshots, boolean usePluginRepositories,
-                                                 boolean allowDowngrade )
-        throws ArtifactMetadataRetrievalException, MojoExecutionException
-    {
         boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : this.allowSnapshots;
         final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
-        return artifactVersions.getNewestVersion( versionRange, null, includeSnapshots, allowDowngrade );
+        return artifactVersions.getNewestVersion( versionRange, null, includeSnapshots, false );
     }
 
     /**
