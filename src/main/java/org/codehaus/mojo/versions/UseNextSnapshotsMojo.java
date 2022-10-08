@@ -49,6 +49,7 @@ import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 
@@ -74,6 +75,7 @@ public class UseNextSnapshotsMojo
     /**
      * Whether to allow the minor version number to be changed.
      *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      * @since 1.0-beta-1
      */
     @Parameter( property = "allowMinorUpdates", defaultValue = "false" )
@@ -82,6 +84,8 @@ public class UseNextSnapshotsMojo
     /**
      * Whether to allow the incremental version number to be changed.
      *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
+     * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      * @since 1.0-beta-1
      */
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
@@ -137,8 +141,8 @@ public class UseNextSnapshotsMojo
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         Optional<Segment>
-                unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates );
+                unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                allowIncrementalUpdates, getLog() );
 
         for ( Dependency dep : dependencies )
         {

@@ -41,6 +41,7 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 /**
  * Sets a property to the latest version in a given range of associated artifacts.
@@ -109,7 +110,9 @@ public class UpdatePropertyMojo
     protected boolean allowMajorUpdates;
 
     /**
-     * Whether to allow the minor version number to be changed.
+     * <p>Whether to allow the minor version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      *
      * @since 2.4
      */
@@ -117,7 +120,10 @@ public class UpdatePropertyMojo
     protected boolean allowMinorUpdates;
 
     /**
-     * Whether to allow the incremental version number to be changed.
+     * <p>Whether to allow the incremental version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
+     * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      *
      * @since 2.4
      */
@@ -166,7 +172,8 @@ public class UpdatePropertyMojo
             }
 
             Optional<Segment> unchangedSegment =
-                    determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+                    SegmentUtils.determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                            allowIncrementalUpdates, getLog() );
             try
             {
                 ArtifactVersion targetVersion = updatePropertyToNewestVersion( pom, property, version, currentVersion,

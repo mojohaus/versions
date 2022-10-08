@@ -45,9 +45,9 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static java.util.Collections.singletonList;
 
@@ -72,6 +72,7 @@ public class UseLatestVersionsMojo
     /**
      * Whether to allow the minor version number to be changed.
      *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      * @since 1.2
      */
     @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
@@ -80,6 +81,8 @@ public class UseLatestVersionsMojo
     /**
      * Whether to allow the incremental version number to be changed.
      *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
+     * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      * @since 1.2
      */
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
@@ -108,9 +111,6 @@ public class UseLatestVersionsMojo
         super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
@@ -165,10 +165,8 @@ public class UseLatestVersionsMojo
     private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates );
-        MajorMinorIncrementalFilter majorMinorIncfilter =
-            new MajorMinorIncrementalFilter( allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates );
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
+                allowMinorUpdates, allowIncrementalUpdates, getLog() );
 
         for ( Dependency dep : dependencies )
         {
@@ -199,11 +197,11 @@ public class UseLatestVersionsMojo
 
             try
             {
-                // TODO consider creating a getNewestVersion method in the Details services.
                 ArtifactVersion[] newerVersions = versions.getNewerVersions( version, unchangedSegment, allowSnapshots,
                         allowDowngrade );
 
-                ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newerVersions );
+                //ArtifactVersion[] filteredVersions = filter( unchangedSegment, selectedVersion, newerVersions );
+                ArtifactVersion[] filteredVersions = newerVersions;
                 if ( filteredVersions.length > 0 )
                 {
                     String newVersion = filteredVersions[filteredVersions.length - 1].toString();

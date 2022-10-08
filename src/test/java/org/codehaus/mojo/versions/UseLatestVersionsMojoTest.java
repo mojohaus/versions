@@ -122,8 +122,12 @@ public class UseLatestVersionsMojoTest
         setVariableValueToObject( mojo, "allowSnapshots", false );
         setVariableValueToObject( mojo, "allowMajorUpdates", false );
         setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", false );
+        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
         setVariableValueToObject( mojo, "allowDowngrade", true );
+
+        mojo.getProject().getModel().setDependencies( Collections.singletonList(
+                DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.0-SNAPSHOT",
+                        "default", "pom", SCOPE_COMPILE ) ) );
 
         try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
         {
@@ -132,7 +136,8 @@ public class UseLatestVersionsMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.0.0" ) ) );
+                hasItem( new VersionChange( "default-group", "dependency-artifact",
+                        "1.1.0-SNAPSHOT", "1.1.0" ) ) );
     }
 
     @Test
@@ -142,8 +147,8 @@ public class UseLatestVersionsMojoTest
         setVariableValueToObject( mojo, "processDependencies", true );
         setVariableValueToObject( mojo, "allowSnapshots", false );
         setVariableValueToObject( mojo, "allowMajorUpdates", true );
-        setVariableValueToObject( mojo, "allowMinorUpdates", false );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", false );
+        setVariableValueToObject( mojo, "allowMinorUpdates", true );
+        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
         setVariableValueToObject( mojo, "allowDowngrade", true );
 
         try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
@@ -153,7 +158,8 @@ public class UseLatestVersionsMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "0.9.0" ) ) );
+                hasItem( new VersionChange( "default-group", "dependency-artifact",
+                        "1.1.1-SNAPSHOT", "1.1.0" ) ) );
     }
 
     @Test
@@ -220,13 +226,13 @@ public class UseLatestVersionsMojoTest
                         "default", "pom", SCOPE_COMPILE ),
                 DependencyBuilder.dependencyWith( "default-group", "poison-artifact", "1.1.1.1-SNAPSHOT",
                         "default", "pom", SCOPE_COMPILE )
-                ) );
+        ) );
 
         setVariableValueToObject( mojo, "processDependencies", true );
         setVariableValueToObject( mojo, "allowSnapshots", false );
         setVariableValueToObject( mojo, "allowMajorUpdates", false );
         setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", false );
+        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
         setVariableValueToObject( mojo, "allowDowngrade", true );
 
         try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
@@ -239,7 +245,7 @@ public class UseLatestVersionsMojoTest
         // being present in the dependency list
         assertThat( changeRecorder.getChanges(),
                 hasItem( new VersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                        "1.0.0" ) ) );
+                        "1.1.0" ) ) );
     }
 
     @Test

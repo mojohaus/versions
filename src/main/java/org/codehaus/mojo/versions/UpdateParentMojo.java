@@ -48,6 +48,7 @@ import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static org.apache.maven.shared.utils.StringUtils.isBlank;
 
@@ -112,7 +113,9 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
     protected boolean allowMajorUpdates = true;
 
     /**
-     * Whether to allow the minor version number to be changed.
+     * <p>Whether to allow the minor version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      *
      * @since 2.13.0
      */
@@ -120,7 +123,10 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
     protected boolean allowMinorUpdates = true;
 
     /**
-     * Whether to allow the incremental version number to be changed.
+     * <p>Whether to allow the incremental version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
+     * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      *
      * @since 2.13.0
      */
@@ -227,8 +233,8 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         }
 
         final ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-        Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates );
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
+                allowMinorUpdates, allowIncrementalUpdates, getLog() );
 
         // currentVersion (set to parentVersion here) is not included in the version range for searching upgrades
         // unless we set allowDowngrade to true
