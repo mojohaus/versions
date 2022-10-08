@@ -54,14 +54,13 @@ import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.codehaus.plexus.util.StringUtils;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
 
 /**
  * Displays all dependencies that have newer versions available.
@@ -220,8 +219,9 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * Whether to allow the major version number to be changed.
-     * You need to set {@link #allowAnyUpdates} to <code>false</code> to
-     * get this configuration gets control.
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowAnyUpdates}
+     * to be {@code false}</b></p>
      *
      * @since 2.5
      */
@@ -229,9 +229,10 @@ public class DisplayDependencyUpdatesMojo
     private boolean allowMajorUpdates;
 
     /**
-     * Whether to allow the minor version number to be changed.
-     * You need to set {@link #allowMajorUpdates} to <code>false</code> to
-     * get this configuration gets control.
+     * <p>Whether to allow the minor version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowAnyUpdates}
+     * and {@linkplain #allowMajorUpdates} to be {@code false}</b></p>
      *
      * @since 2.5
      */
@@ -239,9 +240,11 @@ public class DisplayDependencyUpdatesMojo
     private boolean allowMinorUpdates;
 
     /**
-     * Whether to allow the incremental version number to be changed.
-     * You need to set {@link #allowMinorUpdates} to <code>false</code> to
-     * get this configuration gets control.
+     * <p>Whether to allow the incremental version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowAnyUpdates},
+     * {@linkplain #allowMajorUpdates}, and {@linkplain #allowMinorUpdates}
+     * to be {@code false}</b></p>
      *
      * @since 2.5
      */
@@ -691,28 +694,11 @@ public class DisplayDependencyUpdatesMojo
 
     private Optional<Segment> calculateUpdateScope()
     {
-        if ( !allowIncrementalUpdates && !allowMinorUpdates && !allowMajorUpdates && !allowAnyUpdates )
-        {
-            throw new IllegalArgumentException( "One of: allowAnyUpdates, allowMajorUpdates, allowMinorUpdates, "
-                    + "allowIncrementalUpdates must be true" );
-        }
-
-        if ( allowAnyUpdates && allowMajorUpdates && allowMinorUpdates )
-        {
-            return empty();
-        }
-
-        if ( allowMajorUpdates && allowMinorUpdates )
-        {
-            return of( MAJOR );
-        }
-
-        if ( allowMinorUpdates )
-        {
-            return of( MINOR );
-        }
-
-        return of( INCREMENTAL );
+        return allowAnyUpdates
+        ? empty()
+        : of( SegmentUtils.determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                allowIncrementalUpdates, getLog() ).map( s -> Segment.of( s.value() - 1 ) )
+                .orElse( MAJOR ) );
     }
 
     private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )

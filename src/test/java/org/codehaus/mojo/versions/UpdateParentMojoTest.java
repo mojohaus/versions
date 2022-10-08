@@ -337,7 +337,7 @@ public class UpdateParentMojoTest
         }} );
         mojo.allowMajorUpdates = false;
         mojo.allowMinorUpdates = true;
-        mojo.allowIncrementalUpdates = false;
+        mojo.allowIncrementalUpdates = true;
 
         ArtifactVersion newVersion = mojo.resolveTargetVersion( "0.8.0" );
 

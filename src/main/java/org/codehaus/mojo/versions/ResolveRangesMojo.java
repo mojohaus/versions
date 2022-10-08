@@ -48,6 +48,7 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 /**
  * Attempts to resolve dependency version ranges to the specific version being used in the build. For example a version
@@ -94,7 +95,9 @@ public class ResolveRangesMojo
     private boolean allowMajorUpdates;
 
     /**
-     * Whether to allow the minor version number to be changed.
+     * <p>Whether to allow the minor version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      *
      * @since 2.5
      */
@@ -102,7 +105,10 @@ public class ResolveRangesMojo
     private boolean allowMinorUpdates;
 
     /**
-     * Whether to allow the incremental version number to be changed.
+     * <p>Whether to allow the incremental version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
+     * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      *
      * @since 2.5
      */
@@ -312,8 +318,8 @@ public class ResolveRangesMojo
 
             property.setVersion( currentVersion );
 
-            Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                    allowIncrementalUpdates );
+            Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
+                    allowMinorUpdates, allowIncrementalUpdates, getLog() );
             // TODO: Check if we could add allowDowngrade ? 
             try
             {

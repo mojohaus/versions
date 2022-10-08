@@ -41,6 +41,7 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 /**
  * Sets properties to the latest versions of specific artifacts.
@@ -107,16 +108,20 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
     protected boolean allowMajorUpdates;
 
     /**
-     * Whether to allow the minor version number to be changed.
+     * <p>Whether to allow the minor version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      *
      * @since 2.4
      */
-    @Parameter( property = "allowMinorUpdates",
-                defaultValue = "true" )
+    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
     protected boolean allowMinorUpdates;
 
     /**
-     * Whether to allow the incremental version number to be changed.
+     * <p>Whether to allow the incremental version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
+     * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      *
      * @since 2.4
      */
@@ -181,8 +186,8 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
 
             if ( canUpdateProperty )
             {
-                Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                                                         allowIncrementalUpdates );
+                Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
+                        allowMinorUpdates, allowIncrementalUpdates, getLog() );
                 try
                 {
                     ArtifactVersion targetVersion =

@@ -52,6 +52,7 @@ import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static java.util.Collections.singletonList;
 
@@ -82,7 +83,9 @@ public class UseLatestReleasesMojo
     protected boolean allowMajorUpdates;
 
     /**
-     * Whether to allow the minor version number to be changed.
+     * <p>Whether to allow the minor version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      *
      * @since 1.2
      */
@@ -90,7 +93,10 @@ public class UseLatestReleasesMojo
     protected boolean allowMinorUpdates;
 
     /**
-     * Whether to allow the incremental version number to be changed.
+     * <p>Whether to allow the incremental version number to be changed.</p>
+     *
+     * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
+     * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      *
      * @since 1.2
      */
@@ -148,8 +154,8 @@ public class UseLatestReleasesMojo
     private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates );
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
+                allowMinorUpdates, allowIncrementalUpdates, getLog() );
 
         for ( Dependency dep : dependencies )
         {

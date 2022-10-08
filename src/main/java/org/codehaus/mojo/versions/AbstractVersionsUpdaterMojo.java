@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.text.CaseUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -69,12 +68,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
-
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -537,41 +530,6 @@ public abstract class AbstractVersionsUpdaterMojo
             return false;
         }
         return true;
-    }
-
-    /**
-     * <p>Based on the passed flags, determines which segment (0-based), which is not to be changed.</p>
-     * <p>The method will return, depending on the first parameter on the list to be true:
-     * <ul>
-     * <li>{@code allowMajorUpdates}: -1</li>
-     * <li>{@code allowMinorUpdates}: 0</li>
-     * <li>{@code allowIncrementalUpdates}: 1</li>
-     * <li>(none): 2</li>
-     * </ul>
-     *
-     * This can be used when determining an upper
-     * bound for the "latest" version.
-     *
-     * @param allowMajorUpdates       Allow major updates
-     * @param allowMinorUpdates       Allow minor updates
-     * @param allowIncrementalUpdates Allow incremental updates
-     * @return Returns the segment (0-based) that is unchangeable. If any segment can change, returns -1.
-     */
-    protected Optional<Segment> determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,
-                                                           boolean allowIncrementalUpdates )
-    {
-        Optional<Segment> unchangedSegment = allowMajorUpdates ? empty()
-                : allowMinorUpdates ? of( MAJOR )
-                : allowIncrementalUpdates ? of( MINOR )
-                : of( INCREMENTAL );
-        if ( getLog().isInfoEnabled() )
-        {
-            getLog().info(
-                    unchangedSegment.map( s ->
-                                    CaseUtils.toCamelCase( Segment.of( s.value() + 1 ).toString(), true ) )
-                            .orElse( "All" ) + " version changes allowed" );
-        }
-        return unchangedSegment;
     }
 
     protected ArtifactVersion updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
