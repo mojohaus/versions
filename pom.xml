@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>versions-maven-plugin</artifactId>
-  <version>2.12.1-SNAPSHOT</version>
+  <version>2.13.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Versions Maven Plugin</name>
@@ -115,7 +115,7 @@
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.7</sitePluginVersion>
-    <project.build.outputTimestamp>2022-09-06T06:39:51Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2022-10-10T21:19:23Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
