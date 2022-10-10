@@ -62,7 +62,7 @@ public class UpdatePropertyMojo
      * @since 1.3
      */
     @Parameter( property = "property" )
-    private String property = null;
+    protected String property = null;
 
     /**
      * The new version to set the property to (can be a version range to find a version within).

@@ -34,16 +34,19 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 import static java.util.Optional.empty;
+import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
  * Manages a property that is associated with one or more artifacts.
@@ -320,22 +323,21 @@ public class PropertyVersions
      * Retrieves the newest artifact version for the given property-denoted artifact or {@code null} if no newer
      * version could be found.
      *
-     * @param currentVersion current version of the artifact
+     * @param versionString current version of the artifact
      * @param property property name indicating the artifact
      * @param allowSnapshots whether snapshots should be considered
      * @param reactorProjects collection of reactor projects
      * @param helper VersionHelper object
      * @param allowDowngrade whether downgrades should be allowed
-     * @param unchangedSegment indicates the (0-based) most major segment which needs to stay unchanged;
-     *                         -1 means that the whole version can be changed
+     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
      * @return newest artifact version fulfilling the criteria or null if no newer version could be found
      * @throws InvalidSegmentException thrown if the {@code unchangedSegment} is not valid (e.g. greater than the number
      * of segments in the version string)
      * @throws InvalidVersionSpecificationException thrown if the version string in the property is not valid
      */
-    public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
+    public ArtifactVersion getNewestVersion( String versionString, Property property, boolean allowSnapshots,
                                              Collection<MavenProject> reactorProjects, VersionsHelper helper,
-                                             boolean allowDowngrade, Optional<Segment> unchangedSegment )
+                                             boolean allowDowngrade, Optional<Segment> upperBoundSegment )
             throws InvalidSegmentException, InvalidVersionSpecificationException
     {
         final boolean includeSnapshots = !property.isBanSnapshots() && allowSnapshots;
@@ -346,24 +348,33 @@ public class PropertyVersions
                 ? VersionRange.createFromVersionSpec( property.getVersion() ) : null;
         helper.getLog().debug( "Property ${" + property.getName() + "}: Restricting results to " + range );
 
-        ArtifactVersion lowerBound = helper.createArtifactVersion( currentVersion );
-        if ( allowDowngrade )
-        {
-            Optional<String> updatedVersion = getLowerBound( lowerBound, unchangedSegment );
-            lowerBound = updatedVersion.map( helper::createArtifactVersion ).orElse( null );
-        }
+
+        ArtifactVersion currentVersion = new DefaultArtifactVersion( versionString );
+        ArtifactVersion lowerBound = allowDowngrade
+                ? getLowerBound( currentVersion, upperBoundSegment )
+                .map( DefaultArtifactVersion::new )
+                .orElse( null )
+                : currentVersion;
         if ( helper.getLog().isDebugEnabled() )
         {
             helper.getLog().debug( "lowerBoundArtifactVersion: " + lowerBound );
         }
 
-        ArtifactVersion upperBound = null;
-        if ( unchangedSegment.isPresent() )
+        ArtifactVersion upperBound =
+                !upperBoundSegment.isPresent()
+                        ? null
+                        : upperBoundSegment
+                        .map( s -> (ArtifactVersion) new BoundArtifactVersion( currentVersion,
+                                s.isMajorTo( SUBINCREMENTAL )
+                                        ? Segment.of( s.value() + 1 )
+                                        : s ) )
+                        .orElse( null );
+        if ( helper.getLog().isDebugEnabled() )
         {
-            upperBound = getVersionComparator().incrementSegment( lowerBound, unchangedSegment.get() );
             helper.getLog().debug( "Property ${" + property.getName() + "}: upperBound is: " + upperBound );
         }
-        Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
+
+        Restriction restriction = new Restriction( lowerBound, allowDowngrade, upperBound, allowDowngrade );
         ArtifactVersion result = getNewestVersion( range, restriction, includeSnapshots );
 
         helper.getLog().debug( "Property ${" + property.getName() + "}: Current winner is: " + result );
