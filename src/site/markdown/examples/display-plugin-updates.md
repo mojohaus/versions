@@ -1,45 +1,41 @@
- ~~ Licensed to the Apache Software Foundation (ASF) under one
- ~~ or more contributor license agreements.  See the NOTICE file
- ~~ distributed with this work for additional information
- ~~ regarding copyright ownership.  The ASF licenses this file
- ~~ to you under the Apache License, Version 2.0 (the
- ~~ "License"); you may not use this file except in compliance
- ~~ with the License.  You may obtain a copy of the License at
- ~~
- ~~   http://www.apache.org/licenses/LICENSE-2.0
- ~~
- ~~ Unless required by applicable law or agreed to in writing,
- ~~ software distributed under the License is distributed on an
- ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~~ KIND, either express or implied.  See the License for the
- ~~ specific language governing permissions and limitations
- ~~ under the License.
+title: Checking for new plugin updates
+author: Stephen Connolly
+date: 2008-09-02
 
- -----
- Checking for new plugin updates
- -----
- Stephen Connolly
- ------
- 2008-09-02
- ------
+<!---
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+  https://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
-Checking for new plugin updates
+# Checking for new plugin updates
 
-  The <<<display-plugin-updates>>> goal will check all the plugins and reports used in your project and display a list
-  of those plugins with newer versions available, first staying with the same Maven version prerequisite, then
-  additional options if you update the Maven version prerequisite.
+The `display-plugin-updates` goal will check all the plugins and reports used in your project and display a list
+of those plugins with newer versions available, first staying with the same Maven version prerequisite, then
+additional options if you update the Maven version prerequisite.
 
-  Here are some examples of what this looks like:
+Here are some examples of what this looks like:
 
----
+```sh
 svn checkout http://svn.codehaus.org/mojo/trunk/mojo/build-helper-maven-plugin build-helper-maven-plugin
 cd build-helper-maven-plugin
 mvn versions:display-plugin-updates
----
+```
 
-  Which produces the following output:
+Which produces the following output:
 
----
+```log
 [INFO] ------------------------------------------------------------------------
 [INFO] Building Build Helper Maven Plugin
 [INFO]    task-segment: [versions:display-plugin-updates]
@@ -84,15 +80,15 @@ mvn versions:display-plugin-updates
 [INFO] Finished at: Wed Nov 30 21:59:36 GMT 2011
 [INFO] Final Memory: 21M/81M
 [INFO] ------------------------------------------------------------------------
----
+```
 
-  The plugin will also warn if you have not specified the versions of any plugins that you are using and tell you what
-  version you are currently using.  Best practice in Maven is to always specify the plugin versions in order to
-  ensure that builds are reproducible.
+The plugin will also warn if you have not specified the versions of any plugins that you are using and tell you what
+version you are currently using.  Best practice in Maven is to always specify the plugin versions in order to
+ensure that builds are reproducible.
 
-  For example the following <<<pom.xml>>>:
+For example the following `pom.xml`:
 
----
+```xml
 <project>
   <modelVersion>4.0.0</modelVersion>
 
@@ -135,11 +131,11 @@ mvn versions:display-plugin-updates
     </plugins>
   </build>
 </project>
----
+```
 
-  produces the following output (when run using Maven 2.0.6):
+produces the following output (when run using Maven 2.0.6):
 
----
+```log
 [INFO] ----------------------------------------------------------------------------
 [INFO] Building Unnamed - org.codehaus.mojo.versions-maven-plugin.it:parent:pom:2.0
 [INFO]    task-segment: [versions:display-plugin-updates]
@@ -202,18 +198,18 @@ mvn versions:display-plugin-updates
 [INFO] Finished at: Wed Nov 30 22:02:14 GMT 2011
 [INFO] Final Memory: 26M/81M
 [INFO] ------------------------------------------------------------------------
----
+```
 
-  Note: that because the POM does not specify versions for some plugins, Maven
-  defaults to using the latest compatible version (Maven 3 complains about the
-  version not being specified), and hence the reported minimum required Maven
-  version tends to be the same as the version of Maven that is running the mojo
+Note: that because the POM does not specify versions for some plugins, Maven
+defaults to using the latest compatible version (Maven 3 complains about the
+version not being specified), and hence the reported minimum required Maven
+version tends to be the same as the version of Maven that is running the mojo
 
-  When run with Maven 2.0.9 (which defines versions of core plugins in the
-  super-pom, and removes some plugin from the lifecycle for the pom lifecycle),
-  we get the following output:
+When run with Maven 2.0.9 (which defines versions of core plugins in the
+super-pom, and removes some plugin from the lifecycle for the pom lifecycle),
+we get the following output:
 
----
+```log
 [INFO] ------------------------------------------------------------------------
 [INFO] Building Unnamed - org.codehaus.mojo.versions-maven-plugin.it:parent:pom:2.0
 [INFO]    task-segment: [versions:display-plugin-updates]
@@ -264,11 +260,11 @@ mvn versions:display-plugin-updates
 [INFO] Finished at: Wed Nov 30 22:09:59 GMT 2011
 [INFO] Final Memory: 20M/81M
 [INFO] ------------------------------------------------------------------------
----
+```
 
-  And the following POM:
+And the following POM:
 
----
+```xml
 <project>
   <modelVersion>4.0.0</modelVersion>
 
@@ -312,11 +308,11 @@ mvn versions:display-plugin-updates
   </build>
 
 </project>
----
+```
 
   produces the following output:
 
----
+```log
 [INFO] ------------------------------------------------------------------------
 [INFO] Building Unnamed - org.codehaus.mojo.versions-maven-plugin.it:child:pom:2.0
 [INFO]    task-segment: [versions:display-plugin-updates]
@@ -351,4 +347,4 @@ mvn versions:display-plugin-updates
 [INFO] Finished at: Fri Nov 25 18:28:34 GMT 2011
 [INFO] Final Memory: 17M/81M
 [INFO] ------------------------------------------------------------------------
----
+```

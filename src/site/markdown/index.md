@@ -1,5 +1,5 @@
 title: Introduction
-autor: Stephen Connolly
+author: Stephen Connolly
 date: 2009-04-21
 
 <!---

@@ -1,5 +1,5 @@
 title: FAQ
-autor: Stephen Connolly
+author: Stephen Connolly
 
 <!---
 Licensed to the Apache Software Foundation (ASF) under one
