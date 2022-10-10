@@ -75,11 +75,13 @@ public abstract class AbstractVersionDetails
     {
     }
 
+    @Override
     public final boolean isCurrentVersionDefined()
     {
         return getCurrentVersion() != null;
     }
 
+    @Override
     public final ArtifactVersion getCurrentVersion()
     {
         synchronized ( currentVersionLock )
@@ -88,6 +90,7 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    @Override
     public final void setCurrentVersion( ArtifactVersion currentVersion )
     {
         synchronized ( currentVersionLock )
@@ -96,11 +99,13 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    @Override
     public final void setCurrentVersion( String currentVersion )
     {
         setCurrentVersion( currentVersion == null ? null : new DefaultArtifactVersion( currentVersion ) );
     }
 
+    @Override
     public final boolean isIncludeSnapshots()
     {
         synchronized ( currentVersionLock )
@@ -109,6 +114,7 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    @Override
     public final void setIncludeSnapshots( boolean includeSnapshots )
     {
         synchronized ( currentVersionLock )
@@ -117,23 +123,28 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    @Override
     public final ArtifactVersion[] getVersions()
     {
         return getVersions( isIncludeSnapshots() );
     }
 
+    @Override
     public abstract ArtifactVersion[] getVersions( boolean includeSnapshots );
 
+    @Override
     public final ArtifactVersion[] getVersions( VersionRange versionRange, boolean includeSnapshots )
     {
         return getVersions( versionRange, null, includeSnapshots );
     }
 
+    @Override
     public final ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound )
     {
         return getVersions( lowerBound, upperBound, isIncludeSnapshots() );
     }
 
+    @Override
     public final ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound,
                                                 boolean includeSnapshots )
     {
@@ -141,17 +152,13 @@ public abstract class AbstractVersionDetails
         return getVersions( restriction, includeSnapshots );
     }
 
-    private ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
-    {
-        Restriction restriction = new Restriction( version, false, null, false );
-        return getVersions( restriction, includeSnapshots );
-    }
-
+    @Override
     public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound )
     {
         return getNewestVersion( lowerBound, upperBound, isIncludeSnapshots() );
     }
 
+    @Override
     public final ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
                                                    boolean includeSnapshots )
     {
@@ -159,6 +166,7 @@ public abstract class AbstractVersionDetails
         return getNewestVersion( restriction, includeSnapshots );
     }
 
+    @Override
     public final ArtifactVersion getNewestVersion( VersionRange versionRange, Restriction restriction,
                                                    boolean includeSnapshots )
     {
@@ -170,6 +178,7 @@ public abstract class AbstractVersionDetails
         return Arrays.stream( array ).sorted( Collections.reverseOrder() ).collect( Collectors.toList() );
     }
 
+    @Override
     public final ArtifactVersion getNewestVersion( VersionRange versionRange, Restriction restriction,
                                                    boolean includeSnapshots, boolean allowDowngrade )
     {
@@ -194,16 +203,19 @@ public abstract class AbstractVersionDetails
         return null;
     }
 
+    @Override
     public final ArtifactVersion getNewestVersion( Restriction restriction, boolean includeSnapshots )
     {
         return getNewestVersion( null, restriction, includeSnapshots );
     }
 
+    @Override
     public final ArtifactVersion getNewestVersion( VersionRange versionRange, boolean includeSnapshots )
     {
         return getNewestVersion( versionRange, null, includeSnapshots );
     }
 
+    @Override
     public final boolean containsVersion( String version )
     {
         for ( ArtifactVersion candidate : getVersions( true ) )
@@ -216,25 +228,20 @@ public abstract class AbstractVersionDetails
         return false;
     }
 
+    private ArtifactVersion[] getNewerVersions( ArtifactVersion version, boolean includeSnapshots )
+    {
+        Restriction restriction = new Restriction( version, false, null, false );
+        return getVersions( restriction, includeSnapshots );
+    }
+
+    @Override
     public final ArtifactVersion[] getNewerVersions( String version, boolean includeSnapshots )
     {
         return getNewerVersions( new DefaultArtifactVersion( version ), includeSnapshots );
     }
 
-    /**
-     * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
-     * should be included.
-     *
-     * @param version           current version
-     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
-     * @param includeSnapshots  whether snapshot versions should be included
-     * @return array of newer versions fulfilling the criteria
-     * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
-     *                                 the segment count)
-     * @deprecated please use {@link AbstractVersionDetails#getNewerVersions(String, Optional, boolean, boolean)},
-     * boolean, boolean)} instead
-     */
     @Deprecated
+    @Override
     public final ArtifactVersion[] getNewerVersions( String version, Optional<Segment> upperBoundSegment,
                                                      boolean includeSnapshots )
             throws InvalidSegmentException
@@ -242,19 +249,7 @@ public abstract class AbstractVersionDetails
         return getNewerVersions( version, upperBoundSegment, includeSnapshots, false );
     }
 
-    /**
-     * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
-     * should be included.
-     *
-     * @param versionString current version
-     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
-     * @param includeSnapshots whether snapshot versions should be included
-     * @param allowDowngrade whether to allow downgrading if the current version is a snapshots and snapshots
-     *                       are disallowed
-     * @return array of newer versions fulfilling the criteria
-     * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
-     * the segment count)
-     */
+    @Override
     public final ArtifactVersion[] getNewerVersions( String versionString, Optional<Segment> upperBoundSegment,
                                                      boolean includeSnapshots, boolean allowDowngrade )
             throws InvalidSegmentException
@@ -279,17 +274,20 @@ public abstract class AbstractVersionDetails
         return getVersions( restriction, includeSnapshots );
     }
 
+    @Override
     public final ArtifactVersion getOldestVersion( VersionRange versionRange, boolean includeSnapshots )
     {
         return getOldestVersion( versionRange, null, includeSnapshots );
     }
 
+    @Override
     public final ArtifactVersion getOldestVersion( Restriction restriction,
                                                    boolean includeSnapshots )
     {
         return getOldestVersion( null, restriction, includeSnapshots );
     }
 
+    @Override
     public final ArtifactVersion getOldestVersion( VersionRange versionRange, Restriction restriction,
                                                    boolean includeSnapshots )
     {
@@ -321,11 +319,13 @@ public abstract class AbstractVersionDetails
         return oldest;
     }
 
+    @Override
     public final ArtifactVersion[] getVersions( Restriction restriction, boolean includeSnapshots )
     {
         return getVersions( null, restriction, includeSnapshots );
     }
 
+    @Override
     public final ArtifactVersion[] getVersions( VersionRange versionRange, Restriction restriction,
                                                 boolean includeSnapshots )
     {
@@ -350,6 +350,7 @@ public abstract class AbstractVersionDetails
         return result.toArray( new ArtifactVersion[0] );
     }
 
+    @Override
     public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
                                                   boolean includeSnapshots )
     {
@@ -364,6 +365,7 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    @Override
     public final ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
                                                   boolean includeSnapshots )
     {
@@ -378,6 +380,7 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    @Override
     public final ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, Optional<Segment> updateScope,
                                                   boolean includeSnapshots )
     {
@@ -392,21 +395,25 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    @Override
     public final ArtifactVersion getOldestUpdate( Optional<Segment> updateScope )
     {
         return getOldestUpdate( updateScope, isIncludeSnapshots() );
     }
 
+    @Override
     public final ArtifactVersion getNewestUpdate( Optional<Segment> updateScope )
     {
         return getNewestUpdate( updateScope, isIncludeSnapshots() );
     }
 
+    @Override
     public final ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope )
     {
         return getAllUpdates( updateScope, isIncludeSnapshots() );
     }
 
+    @Override
     public final ArtifactVersion getOldestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
     {
         if ( isCurrentVersionDefined() )
@@ -416,6 +423,7 @@ public abstract class AbstractVersionDetails
         return null;
     }
 
+    @Override
     public final ArtifactVersion getNewestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
     {
         if ( isCurrentVersionDefined() )
@@ -425,6 +433,7 @@ public abstract class AbstractVersionDetails
         return null;
     }
 
+    @Override
     public final ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope, boolean includeSnapshots )
     {
         if ( isCurrentVersionDefined() )
@@ -434,11 +443,13 @@ public abstract class AbstractVersionDetails
         return null;
     }
 
+    @Override
     public final ArtifactVersion[] getAllUpdates( VersionRange versionRange )
     {
         return getAllUpdates( versionRange, isIncludeSnapshots() );
     }
 
+    @Override
     public ArtifactVersion[] getAllUpdates( VersionRange versionRange, boolean includeSnapshots )
     {
         Restriction restriction = new Restriction( getCurrentVersion(), false, null, false );

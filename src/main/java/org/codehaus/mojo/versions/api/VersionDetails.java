@@ -45,6 +45,42 @@ public interface VersionDetails
     boolean containsVersion( String version );
 
     /**
+     * Returns <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
+     *
+     * @return <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
+     * @since 1.0-beta-1
+     */
+    boolean isCurrentVersionDefined();
+
+    /**
+     * Sets the current version.
+     *
+     * @param currentVersion The new current version.
+     * @since 1.0-beta-1
+     */
+    void setCurrentVersion( ArtifactVersion currentVersion );
+
+    /**
+     * Sets the current version.
+     *
+     * @param currentVersion The new current version.
+     * @since 1.0-beta-1
+     */
+    void setCurrentVersion( String currentVersion );
+
+    boolean isIncludeSnapshots();
+
+    void setIncludeSnapshots( boolean includeSnapshots );
+
+    /**
+     * Retrieves the current version.
+     *
+     * @return The current version (may be <code>null</code>).
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getCurrentVersion();
+
+    /**
      * Gets the rule for version comparison of this artifact.
      *
      * @return the rule for version comparison of this artifact.
@@ -123,6 +159,19 @@ public interface VersionDetails
     ArtifactVersion[] getVersions( VersionRange versionRange, Restriction restriction, boolean includeSnapshots );
 
     /**
+     * Returns the latest version given the version range, restricition, whether to include snapshots and/or
+     * allow downgrades, or {@code null} if no such version exists.
+     *
+     * @param versionRange range to look for the versions
+     * @param restriction restriction restricting the version lookup
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @param allowDowngrade whether downgrades are allowed
+     * @return the latest version satisfying the conditions or <code>null</code> if no version is available.
+     */
+    ArtifactVersion getNewestVersion( VersionRange versionRange, Restriction restriction,
+                                      boolean includeSnapshots, boolean allowDowngrade );
+
+    /**
      * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
      * <code>null</code> if no such version exists.
      *
@@ -181,6 +230,64 @@ public interface VersionDetails
     ArtifactVersion getNewestVersion( VersionRange versionRange, boolean includeSnapshots );
 
     /**
+     * Returns the newest version newer than the specified current version, but within the specified update scope or
+     * <code>null</code> if no such version exists.
+     *
+     * @param currentVersion the lower bound or <code>null</code> if the lower limit is unbounded.
+     * @param updateScope the update scope to include.
+     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
+     *         version is available.
+     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
+     * @since 1.0-beta-1
+     */
+    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
+                                     boolean includeSnapshots ) throws InvalidSegmentException;
+
+    /**
+     * Returns an array of newer versions than the given version, given whether snapshots
+     * should be included.
+     *
+     * @param version           current version in String format
+     * @param includeSnapshots  whether snapshot versions should be included
+     * @return array of newer versions fulfilling the criteria
+     */
+    ArtifactVersion[] getNewerVersions( String version, boolean includeSnapshots );
+
+    /**
+     * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
+     * should be included.
+     *
+     * @param version           current version
+     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
+     * @param includeSnapshots  whether snapshot versions should be included
+     * @return array of newer versions fulfilling the criteria
+     * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
+     *                                 the segment count)
+     * @deprecated please use {@link AbstractVersionDetails#getNewerVersions(String, Optional, boolean, boolean)},
+     * boolean, boolean)} instead
+     */
+    ArtifactVersion[] getNewerVersions( String version, Optional<Segment> upperBoundSegment,
+                                                     boolean includeSnapshots ) throws InvalidSegmentException;
+
+    /**
+     * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
+     * should be included.
+     *
+     * @param versionString current version
+     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
+     * @param includeSnapshots whether snapshot versions should be included
+     * @param allowDowngrade whether to allow downgrading if the current version is a snapshots and snapshots
+     *                       are disallowed
+     * @return array of newer versions fulfilling the criteria
+     * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
+     * the segment count)
+     */
+    ArtifactVersion[] getNewerVersions( String versionString, Optional<Segment> upperBoundSegment,
+                                                     boolean includeSnapshots, boolean allowDowngrade )
+            throws InvalidSegmentException;
+
+    /**
      * Returns the oldest version within the specified version range or <code>null</code> if no such version exists.
      *
      * @param versionRange The version range within which the version must exist.
@@ -228,21 +335,6 @@ public interface VersionDetails
                                      boolean includeSnapshots ) throws InvalidSegmentException;
 
     /**
-     * Returns the newest version newer than the specified current version, but within the specified update scope or
-     * <code>null</code> if no such version exists.
-     *
-     * @param currentVersion the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param updateScope the update scope to include.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
-     *         version is available.
-     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
-                                     boolean includeSnapshots ) throws InvalidSegmentException;
-
-    /**
      * Returns the all versions newer than the specified current version, but within the specified update scope.
      *
      * @param currentVersion the lower bound or <code>null</code> if the lower limit is unbounded.
@@ -254,42 +346,6 @@ public interface VersionDetails
      */
     ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, Optional<Segment> updateScope,
                                      boolean includeSnapshots ) throws InvalidSegmentException;
-
-    /**
-     * Returns <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
-     *
-     * @return <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
-     * @since 1.0-beta-1
-     */
-    boolean isCurrentVersionDefined();
-
-    /**
-     * Sets the current version.
-     *
-     * @param currentVersion The new current version.
-     * @since 1.0-beta-1
-     */
-    void setCurrentVersion( ArtifactVersion currentVersion );
-
-    /**
-     * Sets the current version.
-     *
-     * @param currentVersion The new current version.
-     * @since 1.0-beta-1
-     */
-    void setCurrentVersion( String currentVersion );
-
-    boolean isIncludeSnapshots();
-
-    void setIncludeSnapshots( boolean includeSnapshots );
-
-    /**
-     * Retrieves the current version.
-     *
-     * @return The current version (may be <code>null</code>).
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getCurrentVersion();
 
     /**
      * Returns the oldest version newer than the current version, but within the specified update scope or
