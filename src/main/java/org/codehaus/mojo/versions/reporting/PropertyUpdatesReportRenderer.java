@@ -394,19 +394,19 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         OverviewStats stats = new OverviewStats();
         model.getAllUpdates().values().forEach( details ->
         {
-            if ( details.getOldestUpdate( of( SUBINCREMENTAL ) ) != null )
+            if ( oldestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
             {
                 stats.incrementAny();
             }
-            else if ( details.getOldestUpdate( of( INCREMENTAL ) ) != null )
+            else if ( oldestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
             {
                 stats.incrementIncremental();
             }
-            else if ( details.getOldestUpdate( of( MINOR ) ) != null )
+            else if ( oldestUpdateCache.get( details, of( MINOR ) ) != null )
             {
                 stats.incrementMinor();
             }
-            else if ( details.getOldestUpdate( of( MAJOR ) ) != null )
+            else if ( oldestUpdateCache.get( details, of( MAJOR ) ) != null )
             {
                 stats.incrementMajor();
             }

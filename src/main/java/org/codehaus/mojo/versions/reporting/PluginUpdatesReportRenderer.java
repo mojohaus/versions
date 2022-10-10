@@ -30,7 +30,9 @@ import org.apache.maven.doxia.sink.SinkEventAttributes;
 import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -46,6 +48,9 @@ import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
  */
 public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<PluginUpdatesModel>
 {
+    protected ArtifactVersionsCache newestUpdateCache
+            = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
+
     public PluginUpdatesReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName,
                                         PluginUpdatesModel model )
     {
@@ -149,19 +154,19 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         PluginOverviewStats stats = new PluginOverviewStats();
         model.getAllUpdates().values().forEach( details ->
         {
-            if ( details.getOldestUpdate( of( SUBINCREMENTAL ) ) != null )
+            if ( oldestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
             {
                 stats.incrementAny();
             }
-            else if ( details.getOldestUpdate( of( INCREMENTAL ) ) != null )
+            else if ( oldestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
             {
                 stats.incrementIncremental();
             }
-            else if ( details.getOldestUpdate( of( MINOR ) ) != null )
+            else if ( oldestUpdateCache.get( details, of( MINOR ) ) != null )
             {
                 stats.incrementMinor();
             }
-            else if ( details.getOldestUpdate( of( MAJOR ) ) != null )
+            else if ( oldestUpdateCache.get( details, of( MAJOR ) ) != null )
             {
                 stats.incrementMajor();
             }
@@ -228,37 +233,37 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNewestUpdate( of( SUBINCREMENTAL ) ) != null )
+        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
         {
             safeBold();
-            sink.text( details.getNewestUpdate( of( SUBINCREMENTAL ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNewestUpdate( of( INCREMENTAL ) ) != null )
+        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
         {
             safeBold();
-            sink.text( details.getNewestUpdate( of( INCREMENTAL ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNewestUpdate( of( MINOR ) ) != null )
+        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
         {
             safeBold();
-            sink.text( details.getNewestUpdate( of( MINOR ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( details.getNewestUpdate( of( MAJOR ) ) != null )
+        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
         {
             safeBold();
-            sink.text( details.getNewestUpdate( of( MAJOR ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
