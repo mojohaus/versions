@@ -28,7 +28,9 @@ import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.sink.SinkEventAttributes;
 import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
 import org.apache.maven.model.Dependency;
+import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.api.ReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -55,6 +57,12 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @since 2.13.0
      */
     protected T model;
+
+    protected ArtifactVersionsCache oldestUpdateCache
+            = new ArtifactVersionsCache( AbstractVersionDetails::getOldestUpdate );
+
+    protected ArtifactVersionsCache allUpdatesCache
+            = new ArtifactVersionsCache( AbstractVersionDetails::getAllUpdates );
 
     /**
      * Constructor to be called by the dependency injection framework
@@ -319,26 +327,26 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        ArtifactVersion[] versions = details.getAllUpdates( empty() );
-        if ( details.getOldestUpdate( of( SUBINCREMENTAL ) ) != null )
+        ArtifactVersion[] versions = allUpdatesCache.get( details, empty() );
+        if ( oldestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
-        else if ( details.getOldestUpdate( of( INCREMENTAL ) ) != null )
+        else if ( oldestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.incrementalUpdatesAvailable" ) );
         }
-        else if ( details.getOldestUpdate( of( MINOR ) ) != null )
+        else if ( oldestUpdateCache.get( details, of( MINOR ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.minorUpdatesAvailable" ) );
         }
-        else if ( details.getOldestUpdate( of( MAJOR ) ) != null )
+        else if ( oldestUpdateCache.get( details, of( MAJOR ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
