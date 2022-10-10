@@ -41,7 +41,8 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.mojo.versions.utils.SegmentUtils;
+
+import static org.codehaus.mojo.versions.utils.SegmentUtils.determineUnchangedSegment;
 
 /**
  * Sets properties to the latest versions of specific artifacts.
@@ -105,7 +106,7 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
      */
     @Parameter( property = "allowMajorUpdates",
                 defaultValue = "true" )
-    protected boolean allowMajorUpdates;
+    protected boolean allowMajorUpdates = true;
 
     /**
      * <p>Whether to allow the minor version number to be changed.</p>
@@ -114,8 +115,9 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
      *
      * @since 2.4
      */
-    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
-    protected boolean allowMinorUpdates;
+    @Parameter( property = "allowMinorUpdates",
+                defaultValue = "true" )
+    protected boolean allowMinorUpdates = true;
 
     /**
      * <p>Whether to allow the incremental version number to be changed.</p>
@@ -127,7 +129,7 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
      */
     @Parameter( property = "allowIncrementalUpdates",
                 defaultValue = "true" )
-    protected boolean allowIncrementalUpdates;
+    protected boolean allowIncrementalUpdates = true;
 
     // -------------------------- STATIC METHODS --------------------------
 
@@ -186,8 +188,8 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
 
             if ( canUpdateProperty )
             {
-                Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
-                        allowMinorUpdates, allowIncrementalUpdates, getLog() );
+                Optional<Segment> unchangedSegment = determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
+                                                         allowIncrementalUpdates, getLog() );
                 try
                 {
                     ArtifactVersion targetVersion =
