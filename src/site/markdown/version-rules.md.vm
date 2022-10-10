@@ -20,21 +20,19 @@ under the License.
 -->
 
 ## Velocity uses # as a prefix for macros and ## as a prefix for comments
-#set($h1 = '#')
-#set($h2 = '##')
 #set($h3 = '###')
-#set($h4 = '####')
 
-$h1 Version number rules
+Version number rules
+====================
 
-$h2 Introduction
+Introduction
+------------
 
 **Notice:** The limitations explained in this paragraph were true in Maven 2.x, but have been **fixed** in Maven 3.x (see
 [Maven Versioning Wiki page](https://cwiki.apache.org/confluence/display/MAVENOLD/Versioning) for more details)
 
-The current implementation of
-[DefaultArtifactVersion](https://maven.apache.org/ref/current/maven-artifact/xref/org/apache/maven/artifact/versioning/DefaultArtifactVersion.html)
-in the core of Maven expects that version numbers will have a very specific format:
+The current implementation of the
+[Maven Version Order Specification](https://maven.apache.org/pom.html#version-order-specification) will have a very specific format:
 
 ` <MajorVersion [> . <MinorVersion [> . <IncrementalVersion ] ] [> - <BuildNumber | Qualifier ]> `
 
@@ -57,7 +55,8 @@ The `versions-maven-plugin` knows three rules for comparing version numbers:
 The `versions-maven-plugin` will assume that all version numbers follow the `maven` scheme unless you tell
 it otherwise.
 
-$h2 Rules.xml
+Rules.xml
+---------
 
 To specify the version schemes to use, you may define a [rule-set xml file](./rule.html), use the `ruleSet`
 element in the `versions-maven-plugin` plugin configuration, or specify ignored versions via
