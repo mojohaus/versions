@@ -29,12 +29,6 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
 
-import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
-import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
-
 /**
  * @param <K> type of the model
  * @since 1.0-beta-1
@@ -92,31 +86,7 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel> e
     @Override
     protected OverviewStats computeOverviewStats()
     {
-        OverviewStats stats = new OverviewStats();
-        model.getAllUpdates().values().forEach( details ->
-        {
-            if ( oldestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-            {
-                stats.incrementAny();
-            }
-            else if ( oldestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-            {
-                stats.incrementIncremental();
-            }
-            else if ( oldestUpdateCache.get( details, of( MINOR ) ) != null )
-            {
-                stats.incrementMinor();
-            }
-            else if ( oldestUpdateCache.get( details, of( MAJOR ) ) != null )
-            {
-                stats.incrementMajor();
-            }
-            else
-            {
-                stats.incrementUpToDate();
-            }
-        } );
-        return stats;
+        return OverviewStats.fromUpdates( model.getAllUpdates().values(), oldestUpdateCache );
     }
 
     protected void renderDependencyDetail( Dependency artifact, ArtifactVersions details )

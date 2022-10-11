@@ -1,6 +1,4 @@
 package org.codehaus.mojo.versions.reporting;
-
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,10 +21,10 @@ package org.codehaus.mojo.versions.reporting;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
-import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 
 import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
@@ -34,39 +32,38 @@ import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
-/**
- * Represents summary stats
- *
- * @author Andrzej Jarmoniuk
- */
-public class OverviewStats
+public class PluginOverviewStats extends OverviewStats
 {
-    private int major;
+    /**
+     * Extension of the {@linkplain OverviewStats} adding dependency stats
+     */
+    private int dependencies;
 
-    private int minor;
+    public int getDependencies()
+    {
+        return dependencies;
+    }
 
-    private int incremental;
-
-    private int any;
-
-    private int upToDate;
+    public void incrementDependencies()
+    {
+        dependencies++;
+    }
 
     /**
-     * Creates a {@linkplain OverviewStats} instance based on the collection of version updates in
+     * Creates a {@linkplain PluginOverviewStats} instance based on the collection of version updates in
      * the argument
      *
-     * @param updates collection of all version updates, typically from
-     * {@linkplain org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel#getAllUpdates()}
+     * @param updates collection of all version updates, typically from {@linkplain PluginUpdatesModel#getAllUpdates()}
      * @param cache if not null, cache to retrieve the version information, initialised with
      * the {@link ArtifactVersions#getOldestUpdate(Optional)} update information
-     * @param <T> subclass of {@linkplain OverviewStats}
-     * @param <V> subclass of {@linkplain ArtifactVersions}
-     * @return instance of the {@linkplain OverviewStats}
+     * @param <T> always equal to {@linkplain PluginOverviewStats}
+     * @param <V> always equal to {@linkplain org.codehaus.mojo.versions.PluginUpdatesDetails}
+     * @return instance of the {@linkplain PluginOverviewStats}, initialised with the update information
      */
     public static <T extends OverviewStats, V extends ArtifactVersions> T fromUpdates( Collection<V> updates,
                                                                                        ArtifactVersionsCache cache )
     {
-        OverviewStats stats = new OverviewStats();
+        PluginOverviewStats stats = new PluginOverviewStats();
         updates.forEach( details ->
         {
             if ( getOldestUpdate( cache, details, of( SUBINCREMENTAL ) ) != null )
@@ -89,64 +86,11 @@ public class OverviewStats
             {
                 stats.incrementUpToDate();
             }
+            if ( ( ( PluginUpdatesDetails ) details ).isDependencyUpdateAvailable() )
+            {
+                stats.incrementDependencies();
+            }
         } );
         return (T) stats;
-    }
-
-    protected static <V extends ArtifactVersions> ArtifactVersion getOldestUpdate( ArtifactVersionsCache cache,
-                                                                                   V details,
-                                                                                 Optional<Segment> segment )
-    {
-        return cache != null ? cache.get( details, segment ) : details.getOldestUpdate( segment );
-    }
-
-    public int getMajor()
-    {
-        return major;
-    }
-
-    public void incrementMajor()
-    {
-        major++;
-    }
-
-    public int getMinor()
-    {
-        return minor;
-    }
-
-    public void incrementMinor()
-    {
-        minor++;
-    }
-
-    public int getIncremental()
-    {
-        return incremental;
-    }
-
-    public void incrementIncremental()
-    {
-        incremental++;
-    }
-
-    public int getAny()
-    {
-        return any;
-    }
-
-    public void incrementAny()
-    {
-        any++;
-    }
-
-    public int getUpToDate()
-    {
-        return upToDate;
-    }
-
-    public void incrementUpToDate()
-    {
-        upToDate++;
     }
 }

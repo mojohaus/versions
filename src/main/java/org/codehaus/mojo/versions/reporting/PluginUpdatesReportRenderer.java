@@ -128,58 +128,12 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     }
 
     /**
-     * Extension of the {@linkplain OverviewStats} adding dependency stats
-     */
-    static class PluginOverviewStats extends OverviewStats
-    {
-        private int dependencies;
-
-        public int getDependencies()
-        {
-            return dependencies;
-        }
-
-        public void incrementDependencies()
-        {
-            dependencies++;
-        }
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     protected PluginOverviewStats computeOverviewStats()
     {
-        PluginOverviewStats stats = new PluginOverviewStats();
-        model.getAllUpdates().values().forEach( details ->
-        {
-            if ( oldestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-            {
-                stats.incrementAny();
-            }
-            else if ( oldestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-            {
-                stats.incrementIncremental();
-            }
-            else if ( oldestUpdateCache.get( details, of( MINOR ) ) != null )
-            {
-                stats.incrementMinor();
-            }
-            else if ( oldestUpdateCache.get( details, of( MAJOR ) ) != null )
-            {
-                stats.incrementMajor();
-            }
-            else
-            {
-                stats.incrementUpToDate();
-            }
-            if ( details.isDependencyUpdateAvailable() )
-            {
-                stats.incrementDependencies();
-            }
-        } );
-        return stats;
+        return PluginOverviewStats.fromUpdates( model.getAllUpdates().values(), oldestUpdateCache );
     }
 
     @Override
