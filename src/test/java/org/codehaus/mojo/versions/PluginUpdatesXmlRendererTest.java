@@ -22,15 +22,18 @@ package org.codehaus.mojo.versions;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.model.Plugin;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
-import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
+import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
+import org.codehaus.mojo.versions.xml.PluginUpdatesXmlReportRenderer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,14 +49,14 @@ import static org.hamcrest.Matchers.containsString;
  *
  * @author Andrzej Jarmoniuk
  */
-public class DependencyUpdatesXmlRendererTest
+public class PluginUpdatesXmlRendererTest
 {
     private Path tempFile;
 
     @Before
     public void setUp() throws IOException
     {
-        tempFile = Files.createTempFile( "xml-dependency-report", "" );
+        tempFile = Files.createTempFile( "xml-plugin-report", "" );
     }
 
     @After
@@ -68,23 +71,27 @@ public class DependencyUpdatesXmlRendererTest
     @Test
     public void testReportGeneration() throws IOException
     {
-        new DependencyUpdatesXmlReportRenderer( new DependencyUpdatesModel(
-                singletonMap( DependencyBuilder.newBuilder()
-                        .withGroupId( "default-group" )
-                        .withArtifactId( "artifactA" )
-                        .withVersion( "1.0.0" )
-                        .build(), new ArtifactVersions(
-                        new DefaultArtifact( "default-group", "artifactA",
-                                "1.0.0", SCOPE_COMPILE, "jar", "default",
-                                null ),
-                        Arrays.asList(
-                                new DefaultArtifactVersion( "1.0.0" ),
-                                new DefaultArtifactVersion( "1.0.1" ),
-                                new DefaultArtifactVersion( "1.1.0" ),
-                                new DefaultArtifactVersion( "2.0.0" )
-                        ),
-                        new MavenVersionComparator() ) ),
-                emptyMap() ), tempFile ).render();
+        PluginUpdatesModel pluginUpdates = new PluginUpdatesModel(
+                singletonMap(
+                        pluginOf( "default-group", "artifactA", "1.0.0" ),
+                        new PluginUpdatesDetails(
+                                new ArtifactVersions(
+                                        artifactOf( "default-group", "artifactA", "1.0.0" ),
+                                        Stream.of( "1.0.0", "1.0.1", "1.1.0", "2.0.0" )
+                                                .map( DefaultArtifactVersion::new )
+                                                .collect( Collectors.toList() ),
+                                        new MavenVersionComparator() ),
+                                singletonMap( DependencyBuilder.dependencyWith( "default-group", "artifactB",
+                                                "1.0.0" ),
+                                        new ArtifactVersions(
+                                                artifactOf( "default-group", "artifactB", "1.0.0" ),
+                                                Stream.of( "1.0.0", "1.0.1-SNAPSHOT", "1.1.0-rc1", "2.0.0" )
+                                                        .map( DefaultArtifactVersion::new )
+                                                        .collect( Collectors.toList() ),
+                                                new MavenVersionComparator() ) ), false ) ),
+                emptyMap() );
+        new PluginUpdatesXmlReportRenderer( pluginUpdates, tempFile ).render();
+
         String output = String.join( "", Files.readAllLines( tempFile ) )
                 .replaceAll( ">\\s*<", "><" );
 
@@ -93,6 +100,7 @@ public class DependencyUpdatesXmlRendererTest
         assertThat( output, containsString( "<nextIncrementalAvailable>1</nextIncrementalAvailable>" ) );
         assertThat( output, containsString( "<nextMinorAvailable>0</nextMinorAvailable>" ) );
         assertThat( output, containsString( "<nextMajorAvailable>0</nextMajorAvailable>" ) );
+        assertThat( output, containsString( "<dependencyUpdates>1</dependencyUpdates>" ) );
 
         assertThat( output, containsString( "<currentVersion>1.0.0</currentVersion>" ) );
         assertThat( output, containsString( "<nextVersion>1.0.1</nextVersion>" ) );
@@ -100,5 +108,21 @@ public class DependencyUpdatesXmlRendererTest
         assertThat( output, containsString( "<minor>1.1.0</minor>" ) );
         assertThat( output, containsString( "<major>2.0.0</major>" ) );
         assertThat( output, containsString( "<status>incremental available</status>" ) );
+    }
+
+    private static DefaultArtifact artifactOf( String groupId, String artifactId, String version )
+    {
+        return new DefaultArtifact( groupId, artifactId, version, SCOPE_COMPILE, "jar", "default",
+                null );
+    }
+
+    private static Plugin pluginOf( String groupId, String artifactId, String version )
+    {
+        return new Plugin()
+        {{
+            setGroupId( groupId );
+            setArtifactId( artifactId );
+            setVersion( version );
+        }};
     }
 }

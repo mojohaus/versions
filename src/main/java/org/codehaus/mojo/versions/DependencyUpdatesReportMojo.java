@@ -21,7 +21,10 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +42,10 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlRenderer;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
 import static java.util.Collections.emptyMap;
@@ -205,27 +208,28 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
 
             for ( String format : formats )
             {
+                DependencyUpdatesModel model =
+                        new DependencyUpdatesModel( dependencyUpdates, dependencyManagementUpdates );
                 if ( "html".equals( format ) )
                 {
-                    rendererFactory.createReportRenderer( getOutputName(), sink, locale,
-                            new DependencyUpdatesModel( dependencyUpdates, dependencyManagementUpdates ) )
-                            .render();
+                    rendererFactory.createReportRenderer( getOutputName(), sink, locale, model ).render();
                 }
                 else if ( "xml".equals( format ) )
                 {
-                    File outputDir = new File( getProject().getBuild().getDirectory() );
-                    if ( !outputDir.exists() )
+                    Path outputDir = Paths.get( getProject().getBuild().getDirectory() );
+                    if ( !Files.exists( outputDir ) )
                     {
-                        if ( !outputDir.mkdirs() )
+                        try
                         {
-                            throw new MavenReportException( "Could not create output directory" );
+                            Files.createDirectories( outputDir );
+                        }
+                        catch ( IOException e )
+                        {
+                            throw new MavenReportException( "Could not create the output directory" );
                         }
                     }
-                    String outputFile = outputDir.getAbsolutePath() + File.separator + getOutputName() + ".xml";
-                    DependencyUpdatesXmlRenderer xmlGenerator =
-                        new DependencyUpdatesXmlRenderer( dependencyUpdates, dependencyManagementUpdates,
-                                                          outputFile );
-                    xmlGenerator.render();
+                    Path outputFile = outputDir.resolve( getOutputName() + ".xml" );
+                    new DependencyUpdatesXmlReportRenderer( model, outputFile ).render();
                 }
             }
         }

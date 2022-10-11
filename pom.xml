@@ -313,7 +313,7 @@
         <artifactId>modello-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>generate-sources</id>
+            <id>generate-rule</id>
             <phase>generate-sources</phase>
             <goals>
               <!-- Generate the xpp3 reader code -->
@@ -323,6 +323,29 @@
               <!-- Generate the Java sources for the model itself -->
               <goal>java</goal>
             </goals>
+            <configuration>
+              <models>
+                <model>src/main/mdo/rule.mdo</model>
+              </models>
+              <version>2.0.0</version>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-reporting</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <!-- Generate the writer code -->
+              <goal>xpp3-writer</goal>
+              <!-- Generate the Java sources for the model itself -->
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <models>
+                <model>src/main/mdo/dependency-updates-report.mdo</model>
+                <model>src/main/mdo/plugin-updates-report.mdo</model>
+              </models>
+              <version>2.0.0</version>
+            </configuration>
           </execution>
           <execution>
             <id>site-doc</id>
@@ -345,6 +368,8 @@
         <configuration>
           <models>
             <model>src/main/mdo/rule.mdo</model>
+            <model>src/main/mdo/dependency-updates-report.mdo</model>
+            <model>src/main/mdo/plugin-updates-report.mdo</model>
           </models>
           <version>2.0.0</version>
         </configuration>
@@ -392,6 +417,8 @@
           <excludePackageNames>
             org.codehaus.mojo.versions.model,
             org.codehaus.mojo.versions.model.io.xpp3
+            org.codehaus.mojo.versions.reporting.model,
+            org.codehaus.mojo.versions.reporting.model.io.xpp3,
           </excludePackageNames>
         </configuration>
       </plugin>
