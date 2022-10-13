@@ -280,7 +280,8 @@ public class DependencyUpdatesXmlRenderer
             {
                 sBuilder.append( TAB ).append( TAB ).append( TAB ).append( TAB )
                     .append( wrapElement( version.toString(),
-                                          scope.toString().toLowerCase() ) ).append( NL );
+                                          scope.map( s -> s.toString().toLowerCase() ).orElse( "any" ) ) )
+                            .append( NL );
             }
             sBuilder.append( TAB ).append( TAB ).append( TAB ).append( OPEN_CLOSING_TAG ).append( versionsTag )
                 .append( CLOSE_TAG ).append( NL );
