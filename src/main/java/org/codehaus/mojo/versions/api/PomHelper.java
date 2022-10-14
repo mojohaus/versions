@@ -22,11 +22,13 @@ package org.codehaus.mojo.versions.api;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -103,15 +105,12 @@ public class PomHelper
      * @throws IOException if the file is not found or if the file does not parse.
      */
     public static Model getRawModel( File moduleProjectFile )
-        throws IOException
+            throws IOException
     {
-        try ( FileInputStream input = new FileInputStream( moduleProjectFile ) )
+        try ( Reader reader = new BufferedReader( new InputStreamReader( Files.newInputStream( moduleProjectFile
+                .toPath() ) ) ) )
         {
-            return new MavenXpp3Reader().read( input );
-        }
-        catch ( XmlPullParserException e )
-        {
-            throw new IOException( e.getMessage(), e );
+            return getRawModel( reader );
         }
     }
 
@@ -123,11 +122,27 @@ public class PomHelper
      * @throws IOException if the file is not found or if the file does not parse.
      */
     public static Model getRawModel( ModifiedPomXMLEventReader modifiedPomXMLEventReader )
-        throws IOException
+            throws IOException
     {
-        try ( StringReader stringReader = new StringReader( modifiedPomXMLEventReader.asStringBuilder().toString() ) )
+        try ( Reader reader = new StringReader( modifiedPomXMLEventReader.asStringBuilder().toString() ) )
         {
-            return new MavenXpp3Reader().read( stringReader );
+            return getRawModel( reader );
+        }
+    }
+
+    /**
+     * Gets the current raw model before any interpolation what-so-ever.
+     *
+     * @param reader The {@link Reader} to get the raw model for.
+     * @return The raw model.
+     * @throws IOException if the file is not found or if the file does not parse.
+     */
+    public static Model getRawModel( Reader reader )
+            throws IOException
+    {
+        try
+        {
+            return new MavenXpp3Reader().read( reader );
         }
         catch ( XmlPullParserException e )
         {
@@ -968,6 +983,37 @@ public class PomHelper
     }
 
     /**
+     * Traverses the project tree upwards, adding the raw models of every project it encounters to the map
+     *
+     * @param project maven project of the child for which the models need to be gathered
+     * @return gathered map of raw models per project
+     */
+    private static Map<MavenProject, Model> getRawModelWithParents( MavenProject project ) throws IOException
+    {
+        // constructs a tree sorted from children to parents
+        Map<MavenProject, Model> models = new TreeMap<>( ( p1, p2 ) ->
+        {
+            for ( MavenProject p = p1; p != null; p = p.getParent() )
+            {
+                if ( p == p2 ) // meaning p2 is an ancestor to p1 or p1 == p2
+                {
+                    return p == p1
+                            ? 0
+                            : -1; // p1 is the child
+                }
+            }
+            return 1;
+        } );
+        for ( MavenProject p = project; p != null; p = p.getParent() )
+        {
+            models.put( p, p.getFile() != null
+                    ? getRawModel( p )
+                    : p.getOriginalModel() );
+        }
+        return models;
+    }
+
+    /**
      * Examines the project to find any properties which are associated with versions of artifacts in the project.
      *
      * @param helper  Our versions helper.
@@ -978,11 +1024,12 @@ public class PomHelper
      * @since 1.0-alpha-3
      */
     public static PropertyVersionsBuilder[] getPropertyVersionsBuilders( VersionsHelper helper, MavenProject project )
-        throws ExpressionEvaluationException, IOException
+            throws ExpressionEvaluationException, IOException
     {
         ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator( project );
-        Model projectModel = getRawModel( project );
-        Map<String, PropertyVersionsBuilder> result = new TreeMap<>();
+        Map<MavenProject, Model> reactorModels = getRawModelWithParents( project );
+
+        Map<String, PropertyVersionsBuilder> propertiesMap = new TreeMap<>();
 
         Set<String> activeProfiles = new TreeSet<>();
         for ( Profile profile : project.getActiveProfiles() )
@@ -991,58 +1038,72 @@ public class PomHelper
         }
 
         // add any properties from profiles first (as they override properties from the project
-        for ( Profile profile : projectModel.getProfiles() )
+        for ( Iterator<Profile> it = reactorModels.values().stream()
+                .flatMap( model -> model.getProfiles().stream() )
+                .filter( profile -> activeProfiles.contains( profile.getId() ) )
+                .iterator(); it.hasNext(); )
         {
-            if ( !activeProfiles.contains( profile.getId() ) )
+            Profile profile = it.next();
+            try
             {
-                continue;
-            }
-            addProperties( helper, result, profile.getId(), profile.getProperties() );
-            if ( profile.getDependencyManagement() != null )
-            {
-                addDependencyAssocations( helper, expressionEvaluator, result,
-                                          profile.getDependencyManagement().getDependencies(), false );
-            }
-            addDependencyAssocations( helper, expressionEvaluator, result, profile.getDependencies(), false );
-            if ( profile.getBuild() != null )
-            {
-                if ( profile.getBuild().getPluginManagement() != null )
+                addProperties( helper, propertiesMap, profile.getId(), profile.getProperties() );
+                if ( profile.getDependencyManagement() != null )
                 {
-                    addPluginAssociations( helper, expressionEvaluator, result,
-                                           profile.getBuild().getPluginManagement().getPlugins() );
+                    addDependencyAssocations( helper, expressionEvaluator, propertiesMap,
+                            profile.getDependencyManagement().getDependencies(), false );
                 }
-                addPluginAssociations( helper, expressionEvaluator, result, profile.getBuild().getPlugins() );
+                addDependencyAssocations( helper, expressionEvaluator, propertiesMap,
+                        profile.getDependencies(),
+                        false );
+                if ( profile.getBuild() != null )
+                {
+                    if ( profile.getBuild().getPluginManagement() != null )
+                    {
+                        addPluginAssociations( helper, expressionEvaluator, propertiesMap,
+                                profile.getBuild().getPluginManagement().getPlugins() );
+                    }
+                    addPluginAssociations( helper, expressionEvaluator, propertiesMap,
+                            profile.getBuild().getPlugins() );
+                }
+                if ( profile.getReporting() != null )
+                {
+                    addReportPluginAssociations( helper, expressionEvaluator, propertiesMap,
+                            profile.getReporting().getPlugins() );
+                }
             }
-            if ( profile.getReporting() != null )
+            catch ( ExpressionEvaluationException e )
             {
-                addReportPluginAssociations( helper, expressionEvaluator, result, profile.getReporting().getPlugins() );
+                throw new RuntimeException( e );
             }
         }
 
         // second, we add all the properties in the pom
-        addProperties( helper, result, null, projectModel.getProperties() );
-        Model model = projectModel;
-        MavenProject currentPrj = project;
-        while ( currentPrj != null )
+        reactorModels.values().forEach( model -> addProperties( helper, propertiesMap, null, model.getProperties() ) );
+
+
+        for ( MavenProject currentPrj = project; currentPrj != null; currentPrj = currentPrj.getParent() )
         {
+            Model model = reactorModels.get( currentPrj );
+
             if ( model.getDependencyManagement() != null )
             {
-                addDependencyAssocations( helper, expressionEvaluator, result,
-                                          model.getDependencyManagement().getDependencies(), false );
+                addDependencyAssocations( helper, expressionEvaluator, propertiesMap,
+                        model.getDependencyManagement().getDependencies(), false );
             }
-            addDependencyAssocations( helper, expressionEvaluator, result, model.getDependencies(), false );
+            addDependencyAssocations( helper, expressionEvaluator, propertiesMap, model.getDependencies(), false );
             if ( model.getBuild() != null )
             {
                 if ( model.getBuild().getPluginManagement() != null )
                 {
-                    addPluginAssociations( helper, expressionEvaluator, result,
-                                           model.getBuild().getPluginManagement().getPlugins() );
+                    addPluginAssociations( helper, expressionEvaluator, propertiesMap,
+                            model.getBuild().getPluginManagement().getPlugins() );
                 }
-                addPluginAssociations( helper, expressionEvaluator, result, model.getBuild().getPlugins() );
+                addPluginAssociations( helper, expressionEvaluator, propertiesMap, model.getBuild().getPlugins() );
             }
             if ( model.getReporting() != null )
             {
-                addReportPluginAssociations( helper, expressionEvaluator, result, model.getReporting().getPlugins() );
+                addReportPluginAssociations( helper, expressionEvaluator, propertiesMap,
+                        model.getReporting().getPlugins() );
             }
 
             // third, we add any associations from the active profiles
@@ -1054,36 +1115,33 @@ public class PomHelper
                 }
                 if ( profile.getDependencyManagement() != null )
                 {
-                    addDependencyAssocations( helper, expressionEvaluator, result,
-                                              profile.getDependencyManagement().getDependencies(), false );
+                    addDependencyAssocations( helper, expressionEvaluator, propertiesMap,
+                            profile.getDependencyManagement().getDependencies(), false );
                 }
-                addDependencyAssocations( helper, expressionEvaluator, result, profile.getDependencies(), false );
+                addDependencyAssocations( helper, expressionEvaluator, propertiesMap, profile.getDependencies(),
+                        false );
                 if ( profile.getBuild() != null )
                 {
                     if ( profile.getBuild().getPluginManagement() != null )
                     {
-                        addPluginAssociations( helper, expressionEvaluator, result,
-                                               profile.getBuild().getPluginManagement().getPlugins() );
+                        addPluginAssociations( helper, expressionEvaluator, propertiesMap,
+                                profile.getBuild().getPluginManagement().getPlugins() );
                     }
-                    addPluginAssociations( helper, expressionEvaluator, result, profile.getBuild().getPlugins() );
+                    addPluginAssociations( helper, expressionEvaluator, propertiesMap,
+                            profile.getBuild().getPlugins() );
                 }
                 if ( profile.getReporting() != null )
                 {
-                    addReportPluginAssociations( helper, expressionEvaluator, result,
-                                                 profile.getReporting().getPlugins() );
+                    addReportPluginAssociations( helper, expressionEvaluator, propertiesMap,
+                            profile.getReporting().getPlugins() );
                 }
-            }
-            currentPrj = currentPrj.getParent();
-            if ( currentPrj != null )
-            {
-                model = currentPrj.getOriginalModel();
             }
         }
 
         // finally, remove any properties without associations
-        purgeProperties( result );
+        purgeProperties( propertiesMap );
 
-        return result.values().toArray( new PropertyVersionsBuilder[0] );
+        return propertiesMap.values().toArray( new PropertyVersionsBuilder[0] );
     }
 
     /**

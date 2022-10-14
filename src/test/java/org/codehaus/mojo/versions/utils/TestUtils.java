@@ -26,6 +26,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.text.CaseUtils.toCamelCase;
 
 /**
@@ -35,6 +36,7 @@ public class TestUtils
 {
     /**
      * Creates a temporary directory with the given name
+     *
      * @param name name of the directory to create
      * @return {@linkplain Path} object pointing to the directory
      * @throws IOException should the I/O operation fail
@@ -46,6 +48,7 @@ public class TestUtils
 
     /**
      * Deletes the given directory together with all its contents
+     *
      * @param dir directory to delete
      * @throws IOException should an I/O operation fail
      */
@@ -70,5 +73,35 @@ public class TestUtils
                 }
             } );
         }
+    }
+
+    /**
+     * Copies the {@code src} directory to {@code dst} recursively,
+     * creating the missing directories if necessary
+     *
+     * @param src source directory path
+     * @param dst destination directory path
+     * @throws IOException should an I/O error occur
+     */
+    public static void copyDir( Path src, Path dst ) throws IOException
+    {
+        Files.walkFileTree( src, new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs )
+                    throws IOException
+            {
+                Files.createDirectories( dst.resolve( src.relativize( dir ) ) );
+                return CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile( Path file, BasicFileAttributes attrs )
+                    throws IOException
+            {
+                Files.copy( file, dst.resolve( src.relativize( file ) ), REPLACE_EXISTING );
+                return CONTINUE;
+            }
+        } );
     }
 }
