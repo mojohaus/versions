@@ -54,6 +54,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -306,5 +307,26 @@ public class DependencyUpdatesReportMojoTest
 
         String output = os.toString().replaceAll( "\n", "" );
         assertThat( output, Matchers.stringContainsInOrder( "artifactB" ) );
+    }
+
+    @Test
+    public void testWrongReportBounds() throws IOException, MavenReportException
+    {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        new TestDependencyUpdatesReportMojo()
+                .withOnlyUpgradable( true )
+                .withDependencies(
+                        dependencyOf( "test-artifact" ) )
+                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                {{
+                   put( "test-artifact", new String[] { "1.0.0", "2.0.0-M1" } );
+                }} ) )
+                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+
+        String output = os.toString().replaceAll( "\n", "" ).replaceAll( "\r", "" );
+        assertThat( output, allOf(
+                matchesPattern( ".*<td>report.overview.numNewerMajorAvailable</td>\\s*<td>1</td>.*" ),
+                matchesPattern( ".*<td>report.overview.numUpToDate</td>\\s*<td>0</td>.*" ) ) );
     }
 }
