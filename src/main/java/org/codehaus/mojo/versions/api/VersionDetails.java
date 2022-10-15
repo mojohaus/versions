@@ -288,53 +288,6 @@ public interface VersionDetails
             throws InvalidSegmentException;
 
     /**
-     * Returns the oldest version within the specified version range or <code>null</code> if no such version exists.
-     *
-     * @param versionRange The version range within which the version must exist.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the oldest version between currentVersion and upperBound or <code>null</code> if no version is available.
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getOldestVersion( VersionRange versionRange, boolean includeSnapshots );
-
-    /**
-     * Returns the oldest version within the specified bounds or <code>null</code> if no such version exists.
-     *
-     * @param restriction version criteria.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the oldest version between lowerBound and upperBound or <code>null</code> if no version is available.
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getOldestVersion( Restriction restriction, boolean includeSnapshots );
-
-    /**
-     * Returns the oldest version within the specified bounds or <code>null</code> if no such version exists.
-     *
-     * @param versionRange The version range within which the version must exist where <code>null</code> imples
-     *            <code>[,)</code>.
-     * @param restriction version criteria.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the oldest version between lowerBound and upperBound or <code>null</code> if no version is available.
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getOldestVersion( VersionRange versionRange, Restriction restriction, boolean includeSnapshots );
-
-    /**
-     * Returns the oldest version newer than the specified current version, but within the specified update scope or
-     * <code>null</code> if no such version exists.
-     *
-     * @param currentVersion the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param updateScope the update scope to include.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
-     *         version is available.
-     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
-                                     boolean includeSnapshots ) throws InvalidSegmentException;
-
-    /**
      * Returns the all versions newer than the specified current version, but within the specified update scope.
      *
      * @param currentVersion the lower bound or <code>null</code> if the lower limit is unbounded.
@@ -346,18 +299,6 @@ public interface VersionDetails
      */
     ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, Optional<Segment> updateScope,
                                      boolean includeSnapshots ) throws InvalidSegmentException;
-
-    /**
-     * Returns the oldest version newer than the current version, but within the specified update scope or
-     * <code>null</code> if no such version exists.
-     *
-     * @param updateScope the update scope to include.
-     * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
-     *         version is available.
-     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getOldestUpdate( Optional<Segment> updateScope ) throws InvalidSegmentException;
 
     /**
      * Returns the newest version newer than the specified current version, but within the specified update scope or
@@ -380,20 +321,6 @@ public interface VersionDetails
      * @since 1.0-beta-1
      */
     ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope ) throws InvalidSegmentException;
-
-    /**
-     * Returns the oldest version newer than the specified current version, but within the specified update scope or
-     * <code>null</code> if no such version exists.
-     *
-     * @param updateScope the update scope to include.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the oldest version after currentVersion within the specified update scope or <code>null</code> if no
-     *         version is available.
-     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getOldestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
-            throws InvalidSegmentException;
 
     /**
      * Returns the newest version newer than the specified current version, but within the specified update scope or

@@ -86,7 +86,7 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel> e
     @Override
     protected OverviewStats computeOverviewStats()
     {
-        return OverviewStats.fromUpdates( model.getAllUpdates().values(), oldestUpdateCache );
+        return OverviewStats.fromUpdates( model.getAllUpdates().values(), newestUpdateCache );
     }
 
     protected void renderDependencyDetail( Dependency artifact, ArtifactVersions details )

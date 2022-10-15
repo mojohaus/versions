@@ -114,11 +114,14 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.table_();
     }
 
-    private void renderPropertySummaryTableRow( Property property, PropertyVersions versions )
+    private void renderPropertySummaryTableRow( Property property, PropertyVersions details )
     {
+        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+        boolean upToDate = allUpdates == null || allUpdates.length == 0;
+
         sink.tableRow();
         sink.tableCell();
-        if ( versions.getAllUpdates( empty() ).length == 0 )
+        if ( upToDate )
         {
             renderSuccessIcon();
         }
@@ -131,41 +134,41 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.text( "${" + property.getName() + "}" );
         sink.tableCell_();
         sink.tableCell();
-        sink.text( versions.getCurrentVersion().toString() );
+        sink.text( details.getCurrentVersion().toString() );
         sink.tableCell_();
 
         sink.tableCell();
-        if ( versions.getNewestUpdate( of( SUBINCREMENTAL ) ) != null )
+        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
         {
             safeBold();
-            sink.text( versions.getNewestUpdate( of( SUBINCREMENTAL ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( versions.getNewestUpdate( of( INCREMENTAL ) ) != null )
+        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
         {
             safeBold();
-            sink.text( versions.getNewestUpdate( of( INCREMENTAL ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( versions.getNewestUpdate( of( MINOR ) ) != null )
+        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
         {
             safeBold();
-            sink.text( versions.getNewestUpdate( of( MINOR ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( versions.getNewestUpdate( of( MAJOR ) ) != null )
+        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
         {
             safeBold();
-            sink.text( versions.getNewestUpdate( of( MAJOR ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
@@ -174,12 +177,15 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
     }
 
     @SuppressWarnings( "checkstyle:MethodLength" )
-    protected void renderPropertyDetailTable( Property property, PropertyVersions versions )
+    protected void renderPropertyDetailTable( Property property, PropertyVersions details )
     {
+        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+        boolean upToDate = allUpdates == null || allUpdates.length == 0;
+
         final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "20%" );
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "70%" );
         final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "80%" );
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "30%" );
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
         sink.tableRow();
@@ -187,27 +193,25 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        ArtifactVersion[] artifactVersions = versions.getAllUpdates( empty() );
-        Set<String> rangeVersions = getVersionsInRange( property, versions, artifactVersions );
-        if ( versions.getOldestUpdate( of( SUBINCREMENTAL ) ) != null )
+        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
-        else if ( versions.getOldestUpdate( of( INCREMENTAL ) ) != null )
+        else if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.incrementalUpdatesAvailable" ) );
         }
-        else if ( versions.getOldestUpdate( of( MINOR ) ) != null )
+        else if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.minorUpdatesAvailable" ) );
         }
-        else if ( versions.getOldestUpdate( of( MAJOR ) ) != null )
+        else if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
@@ -235,7 +239,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.text( getText( "report.associations" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        ArtifactAssociation[] associations = versions.getAssociations();
+        ArtifactAssociation[] associations = details.getAssociations();
         for ( int i = 0; i < associations.length; i++ )
         {
             if ( i > 0 )
@@ -252,25 +256,26 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        sink.text( versions.getCurrentVersion().toString() );
+        sink.text( details.getCurrentVersion().toString() );
         sink.tableCell_();
         sink.tableRow_();
-        if ( artifactVersions.length > 0 )
+        if ( !upToDate )
         {
+            Set<String> rangeVersions = getVersionsInRange( property, details, allUpdates );
             sink.tableRow();
             sink.tableHeaderCell( headerAttributes );
             sink.text( getText( "report.updateVersions" ) );
             sink.tableHeaderCell_();
             sink.tableCell( cellAttributes );
             boolean someNotAllowed = false;
-            for ( int i = 0; i < artifactVersions.length; i++ )
+            for ( int i = 0; i < allUpdates.length; i++ )
             {
                 if ( i > 0 )
                 {
                     sink.lineBreak();
                 }
-                boolean allowed = ( rangeVersions.contains( artifactVersions[i].toString() ) );
-                String label = getLabel( artifactVersions[i], versions );
+                boolean allowed = ( rangeVersions.contains( allUpdates[i].toString() ) );
+                String label = getLabel( allUpdates[i], details );
                 if ( !allowed )
                 {
                     sink.text( "* " );
@@ -280,7 +285,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
                 {
                     safeBold();
                 }
-                sink.text( artifactVersions[i].toString() );
+                sink.text( allUpdates[i].toString() );
                 if ( label != null )
                 {
                     if ( allowed )
@@ -394,19 +399,19 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         OverviewStats stats = new OverviewStats();
         model.getAllUpdates().values().forEach( details ->
         {
-            if ( oldestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
+            if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
             {
                 stats.incrementAny();
             }
-            else if ( oldestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
+            else if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
             {
                 stats.incrementIncremental();
             }
-            else if ( oldestUpdateCache.get( details, of( MINOR ) ) != null )
+            else if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
             {
                 stats.incrementMinor();
             }
-            else if ( oldestUpdateCache.get( details, of( MAJOR ) ) != null )
+            else if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
             {
                 stats.incrementMajor();
             }
@@ -418,13 +423,13 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         return stats;
     }
 
-    private void renderPropertyDetail( Property property, PropertyVersions versions )
+    private void renderPropertyDetail( Property property, PropertyVersions details )
     {
         sink.section2();
         sink.sectionTitle2();
         sink.text( "${" + property.getName() + "}" );
         sink.sectionTitle2_();
-        renderPropertyDetailTable( property, versions );
+        renderPropertyDetailTable( property, details );
         sink.section2_();
     }
 

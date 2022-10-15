@@ -30,9 +30,7 @@ import org.apache.maven.doxia.sink.SinkEventAttributes;
 import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
-import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -48,8 +46,6 @@ import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
  */
 public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<PluginUpdatesModel>
 {
-    protected ArtifactVersionsCache newestUpdateCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
 
     public PluginUpdatesReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName,
                                         PluginUpdatesModel model )
@@ -133,7 +129,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     @Override
     protected PluginOverviewStats computeOverviewStats()
     {
-        return PluginOverviewStats.fromUpdates( model.getAllUpdates().values(), oldestUpdateCache );
+        return PluginOverviewStats.fromUpdates( model.getAllUpdates().values(), newestUpdateCache );
     }
 
     @Override
@@ -157,9 +153,11 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
 
     protected void renderSummaryTableRow( Dependency artifact, PluginUpdatesDetails details )
     {
+        boolean upToDate = !details.isUpdateAvailable();
+
         sink.tableRow();
         sink.tableCell();
-        if ( !details.isUpdateAvailable() )
+        if ( upToDate )
         {
             renderSuccessIcon();
         }
@@ -237,44 +235,69 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     }
 
     @SuppressWarnings( "checkstyle:MethodLength" )
-    private void renderPluginDetail( Dependency artifact, PluginUpdatesDetails plugin )
+    private void renderPluginDetail( Dependency artifact, PluginUpdatesDetails details )
     {
-        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "20%" );
-        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "80%" );
         sink.section2();
         sink.sectionTitle2();
         sink.text( MessageFormat.format( getText( "report.plugin" ),
-                ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) ) );
+                ArtifactUtils.versionlessKey( details.getGroupId(), details.getArtifactId() ) ) );
         sink.sectionTitle2_();
+
+        renderPluginDetailTable( details );
+
+        if ( !details.getDependencyVersions().isEmpty() )
+        {
+            sink.section3();
+            sink.sectionTitle3();
+            sink.text( MessageFormat.format( getText( "report.pluginDependencies" ),
+                    ArtifactUtils.versionlessKey( details.getGroupId(), details.getArtifactId() ) ) );
+            sink.sectionTitle3_();
+
+            renderSummaryTable( details.getDependencyVersions(), false );
+
+            sink.section3_();
+
+            details.getDependencyVersions().forEach( this::renderDependencyDetail );
+        }
+        sink.section2_();
+    }
+
+    private void renderPluginDetailTable( PluginUpdatesDetails details )
+    {
+        // warning: using caches here may break plugin report
+        ArtifactVersion[] allUpdates = details.getAllUpdates( empty() );
+        boolean upToDate = allUpdates == null || allUpdates.length == 0;
+
+        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "70%" );
+        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "30%" );
         sink.table();
-        sink.tableRows( new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false );
+        sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
         sink.tableRow();
         sink.tableHeaderCell( headerAttributes );
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        ArtifactVersion[] versions = plugin.getAllUpdates( empty() );
-        if ( plugin.getOldestUpdate( of( SUBINCREMENTAL ) ) != null )
+        if ( details.getNewestUpdate( of( SUBINCREMENTAL ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
-        else if ( plugin.getOldestUpdate( of( INCREMENTAL ) ) != null )
+        else if ( details.getNewestUpdate( of( INCREMENTAL ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.incrementalUpdatesAvailable" ) );
         }
-        else if ( plugin.getOldestUpdate( of( MINOR ) ) != null )
+        else if ( details.getNewestUpdate( of( MINOR ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.minorUpdatesAvailable" ) );
         }
-        else if ( plugin.getOldestUpdate( of( MAJOR ) ) != null )
+        else if ( details.getNewestUpdate( of( MAJOR ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
@@ -293,7 +316,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         sink.text( getText( "report.groupId" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        sink.text( plugin.getGroupId() );
+        sink.text( details.getGroupId() );
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
@@ -301,7 +324,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         sink.text( getText( "report.artifactId" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        sink.text( plugin.getArtifactId() );
+        sink.text( details.getArtifactId() );
         sink.tableCell_();
         sink.tableRow_();
         sink.tableRow();
@@ -309,28 +332,28 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         sink.text( getText( "report.currentVersion" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        sink.text( plugin.getVersion() );
+        sink.text( details.getVersion() );
         sink.tableCell_();
         sink.tableRow_();
-        if ( versions != null && versions.length > 0 )
+        if ( !upToDate )
         {
             sink.tableRow();
             sink.tableHeaderCell( headerAttributes );
             sink.text( getText( "report.updateVersions" ) );
             sink.tableHeaderCell_();
             sink.tableCell( cellAttributes );
-            for ( int i = 0; i < versions.length; i++ )
+            for ( int i = 0; i < allUpdates.length; i++ )
             {
                 if ( i > 0 )
                 {
                     sink.lineBreak();
                 }
-                String label = getLabel( versions[i], plugin );
+                String label = getLabel( allUpdates[i], details );
                 if ( label != null )
                 {
                     safeBold();
                 }
-                sink.text( versions[i].toString() );
+                sink.text( allUpdates[i].toString() );
                 if ( label != null )
                 {
                     safeBold_();
@@ -345,22 +368,6 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         }
         sink.tableRows_();
         sink.table_();
-
-        if ( !plugin.getDependencyVersions().isEmpty() )
-        {
-            sink.section3();
-            sink.sectionTitle3();
-            sink.text( MessageFormat.format( getText( "report.pluginDependencies" ),
-                    ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() ) ) );
-            sink.sectionTitle3_();
-
-            renderSummaryTable( plugin.getDependencyVersions(), false );
-
-            sink.section3_();
-
-            plugin.getDependencyVersions().forEach( this::renderDependencyDetail );
-        }
-        sink.section2_();
     }
 }
 

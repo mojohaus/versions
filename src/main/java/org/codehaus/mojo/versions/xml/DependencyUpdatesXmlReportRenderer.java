@@ -62,8 +62,8 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer
 {
     private final DependencyUpdatesModel model;
     private final Path outputFile;
-    private final ArtifactVersionsCache oldestUpdateCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getOldestUpdate );
+    private final ArtifactVersionsCache newestUpdateCache
+            = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
     /**
      * Creates a new instance
      * @param model object containing the updates model
@@ -89,7 +89,7 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer
                 setSummary( new DependencyReportSummary()
                 {{
                     OverviewStats overviewStats = OverviewStats.fromUpdates( model.getAllUpdates().values(),
-                            oldestUpdateCache );
+                            newestUpdateCache );
                     setUsingLastVersion( String.valueOf( overviewStats.getUpToDate() ) );
                     setNextVersionAvailable( String.valueOf( overviewStats.getAny() ) );
                     setNextIncrementalAvailable( String.valueOf( overviewStats.getIncremental() ) );
@@ -127,14 +127,14 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer
             setType( e.getKey().getType() );
             setClassifier( e.getKey().getClassifier() );
 
-            ofNullable( e.getValue().getOldestUpdate( empty() ) )
-                    .map( ArtifactVersion::toString ).ifPresent( this::setNextVersion );
+            ofNullable( e.getValue().getNewestUpdate( empty() ) )
+                    .map( ArtifactVersion::toString ).ifPresent( this::setLastVersion );
 
             setSection( e.getValue(), INCREMENTAL, this::setIncrementals );
             setSection( e.getValue(), MINOR, this::setMinors );
             setSection( e.getValue(), MAJOR, this::setMajors );
 
-            setStatus( getNextVersion() == null
+            setStatus( getLastVersion() == null
                     ? "no new available"
                     : getIncrementals() != null
                     ? "incremental available"

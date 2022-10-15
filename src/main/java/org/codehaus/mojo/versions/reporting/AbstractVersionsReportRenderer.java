@@ -58,8 +58,8 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected T model;
 
-    protected ArtifactVersionsCache oldestUpdateCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getOldestUpdate );
+    protected ArtifactVersionsCache newestUpdateCache
+            = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
 
     protected ArtifactVersionsCache allUpdatesCache
             = new ArtifactVersionsCache( AbstractVersionDetails::getAllUpdates );
@@ -237,13 +237,15 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
                 "report.latestIncremental", "report.latestMinor", "report.latestMajor" );
     }
 
-    protected void renderSummaryTableRow( Dependency artifact, ArtifactVersions artifactVersions,
-                                        boolean includeScope )
+    protected void renderSummaryTableRow( Dependency artifact, ArtifactVersions details,
+                                          boolean includeScope )
     {
+        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+        boolean upToDate = allUpdates == null || allUpdates.length == 0;
+
         sink.tableRow();
         sink.tableCell();
-        ArtifactVersion[] allUpdates = artifactVersions.getAllUpdates( empty() );
-        if ( allUpdates == null || allUpdates.length == 0 )
+        if ( upToDate )
         {
             renderSuccessIcon();
         }
@@ -275,37 +277,37 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         sink.tableCell_();
 
         sink.tableCell();
-        if ( artifactVersions.getNewestUpdate( of( SUBINCREMENTAL ) ) != null )
+        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
         {
             safeBold();
-            sink.text( artifactVersions.getNewestUpdate( of( SUBINCREMENTAL ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( artifactVersions.getNewestUpdate( of( INCREMENTAL ) ) != null )
+        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
         {
             safeBold();
-            sink.text( artifactVersions.getNewestUpdate( of( INCREMENTAL ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( artifactVersions.getNewestUpdate( of( MINOR ) ) != null )
+        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
         {
             safeBold();
-            sink.text( artifactVersions.getNewestUpdate( of( MINOR ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
 
         sink.tableCell();
-        if ( artifactVersions.getNewestUpdate( of( MAJOR ) ) != null )
+        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
         {
             safeBold();
-            sink.text( artifactVersions.getNewestUpdate( of( MAJOR ) ).toString() );
+            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
             safeBold_();
         }
         sink.tableCell_();
@@ -316,10 +318,13 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     @SuppressWarnings( "checkstyle:MethodLength" )
     protected void renderDependencyDetailTable( Dependency artifact, ArtifactVersions details, boolean includeScope )
     {
+        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+        boolean upToDate = allUpdates == null || allUpdates.length == 0;
+
         final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "20%" );
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "70%" );
         final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "80%" );
+        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "30%" );
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
         sink.tableRow();
@@ -327,26 +332,25 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         sink.text( getText( "report.status" ) );
         sink.tableHeaderCell_();
         sink.tableCell( cellAttributes );
-        ArtifactVersion[] versions = allUpdatesCache.get( details, empty() );
-        if ( oldestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
+        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.otherUpdatesAvailable" ) );
         }
-        else if ( oldestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
+        else if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.incrementalUpdatesAvailable" ) );
         }
-        else if ( oldestUpdateCache.get( details, of( MINOR ) ) != null )
+        else if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text( getText( "report.minorUpdatesAvailable" ) );
         }
-        else if ( oldestUpdateCache.get( details, of( MAJOR ) ) != null )
+        else if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
         {
             renderWarningIcon();
             sink.nonBreakingSpace();
@@ -411,25 +415,25 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         sink.text( artifact.getType() );
         sink.tableCell_();
         sink.tableRow_();
-        if ( versions != null && versions.length > 0 )
+        if ( !upToDate )
         {
             sink.tableRow();
             sink.tableHeaderCell( headerAttributes );
             sink.text( getText( "report.updateVersions" ) );
             sink.tableHeaderCell_();
             sink.tableCell( cellAttributes );
-            for ( int i = 0; i < versions.length; i++ )
+            for ( int i = 0; i < allUpdates.length; i++ )
             {
                 if ( i > 0 )
                 {
                     sink.lineBreak();
                 }
-                String label = getLabel( versions[i], details );
+                String label = getLabel( allUpdates[i], details );
                 if ( label != null )
                 {
                     safeBold();
                 }
-                sink.text( versions[i].toString() );
+                sink.text( allUpdates[i].toString() );
                 if ( label != null )
                 {
                     safeBold_();
@@ -461,5 +465,31 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
                     sink.text( str );
                     sink.tableHeaderCell_();
                 } );
+    }
+
+    protected String getLabel( ArtifactVersion version, AbstractVersionDetails details )
+    {
+
+        if ( equals( version, newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) ) )
+        {
+            return getText( "report.latestSubIncremental" );
+        }
+
+        if ( equals( version, newestUpdateCache.get( details, of( INCREMENTAL ) ) ) )
+        {
+            return getText( "report.latestIncremental" );
+        }
+
+        if ( equals( version, newestUpdateCache.get( details, of( MINOR ) ) ) )
+        {
+            return getText( "report.latestMinor" );
+        }
+
+        if ( equals( version, newestUpdateCache.get( details, of( MAJOR ) ) ) )
+        {
+            return getText( "report.latestMajor" );
+        }
+
+        return null;
     }
 }

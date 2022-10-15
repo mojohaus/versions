@@ -28,7 +28,7 @@ import java.util.function.BiFunction;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * Utility providing a cached {@link ArtifactVersions#getOldestUpdate(Optional)} API
+ * Utility providing a cached {@link ArtifactVersions#getNewestUpdate(Optional)} API
  */
 public class ArtifactVersionsCache
 {

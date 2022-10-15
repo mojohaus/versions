@@ -103,7 +103,7 @@ public class PluginUpdatesXmlRendererTest
         assertThat( output, containsString( "<dependencyUpdates>1</dependencyUpdates>" ) );
 
         assertThat( output, containsString( "<currentVersion>1.0.0</currentVersion>" ) );
-        assertThat( output, containsString( "<nextVersion>1.0.1</nextVersion>" ) );
+        assertThat( output, containsString( "<lastVersion>2.0.0</lastVersion>" ) );
         assertThat( output, containsString( "<incremental>1.0.1</incremental>" ) );
         assertThat( output, containsString( "<minor>1.1.0</minor>" ) );
         assertThat( output, containsString( "<major>2.0.0</major>" ) );

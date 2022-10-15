@@ -25,14 +25,7 @@ import java.util.Locale;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
-import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.plexus.i18n.I18N;
-
-import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
-import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
  * Base class over AbstractVersionsReportRenderer providing base
@@ -149,48 +142,4 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
         }
     }
 
-    protected String getLabel( ArtifactVersion version, AbstractVersionDetails versions )
-    {
-        if ( equals( version, versions.getNewestUpdate( of( SUBINCREMENTAL ) ) ) )
-        {
-            return getText( "report.latestSubIncremental" );
-        }
-
-        if ( equals( version, versions.getOldestUpdate( of( SUBINCREMENTAL ) ) ) )
-        {
-            return getText( "report.nextVersion" );
-        }
-
-        if ( equals( version, versions.getOldestUpdate( of( INCREMENTAL ) ) ) )
-        {
-            return getText( "report.nextIncremental" );
-        }
-
-        if ( equals( version, versions.getNewestUpdate( of( INCREMENTAL ) ) ) )
-        {
-            return getText( "report.latestIncremental" );
-        }
-
-        if ( equals( version, versions.getOldestUpdate( of( MINOR ) ) ) )
-        {
-            return getText( "report.nextMinor" );
-        }
-
-        if ( equals( version, versions.getNewestUpdate( of( MINOR ) ) ) )
-        {
-            return getText( "report.latestMinor" );
-        }
-
-        if ( equals( version, versions.getOldestUpdate( of( MAJOR ) ) ) )
-        {
-            return getText( "report.nextMajor" );
-        }
-
-        if ( equals( version, versions.getNewestUpdate( of( MAJOR ) ) ) )
-        {
-            return getText( "report.latestMajor" );
-        }
-
-        return "";
-    }
 }

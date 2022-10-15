@@ -58,7 +58,7 @@ public class OverviewStats
      * @param updates collection of all version updates, typically from
      * {@linkplain org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel#getAllUpdates()}
      * @param cache if not null, cache to retrieve the version information, initialised with
-     * the {@link ArtifactVersions#getOldestUpdate(Optional)} update information
+     * the {@link ArtifactVersions#getNewestUpdate(Optional)} update information
      * @param <T> subclass of {@linkplain OverviewStats}
      * @param <V> subclass of {@linkplain ArtifactVersions}
      * @return instance of the {@linkplain OverviewStats}
@@ -69,19 +69,19 @@ public class OverviewStats
         OverviewStats stats = new OverviewStats();
         updates.forEach( details ->
         {
-            if ( getOldestUpdate( cache, details, of( SUBINCREMENTAL ) ) != null )
+            if ( getNewestUpdate( cache, details, of( SUBINCREMENTAL ) ) != null )
             {
                 stats.incrementAny();
             }
-            else if ( getOldestUpdate( cache, details, of( INCREMENTAL ) ) != null )
+            else if ( getNewestUpdate( cache, details, of( INCREMENTAL ) ) != null )
             {
                 stats.incrementIncremental();
             }
-            else if ( getOldestUpdate( cache, details, of( MINOR ) ) != null )
+            else if ( getNewestUpdate( cache, details, of( MINOR ) ) != null )
             {
                 stats.incrementMinor();
             }
-            else if ( getOldestUpdate( cache, details, of( MAJOR ) ) != null )
+            else if ( getNewestUpdate( cache, details, of( MAJOR ) ) != null )
             {
                 stats.incrementMajor();
             }
@@ -93,11 +93,11 @@ public class OverviewStats
         return (T) stats;
     }
 
-    protected static <V extends ArtifactVersions> ArtifactVersion getOldestUpdate( ArtifactVersionsCache cache,
+    protected static <V extends ArtifactVersions> ArtifactVersion getNewestUpdate( ArtifactVersionsCache cache,
                                                                                    V details,
-                                                                                 Optional<Segment> segment )
+                                                                                   Optional<Segment> segment )
     {
-        return cache != null ? cache.get( details, segment ) : details.getOldestUpdate( segment );
+        return cache != null ? cache.get( details, segment ) : details.getNewestUpdate( segment );
     }
 
     public int getMajor()

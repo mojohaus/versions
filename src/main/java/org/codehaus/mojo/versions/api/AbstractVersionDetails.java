@@ -275,51 +275,6 @@ public abstract class AbstractVersionDetails
     }
 
     @Override
-    public final ArtifactVersion getOldestVersion( VersionRange versionRange, boolean includeSnapshots )
-    {
-        return getOldestVersion( versionRange, null, includeSnapshots );
-    }
-
-    @Override
-    public final ArtifactVersion getOldestVersion( Restriction restriction,
-                                                   boolean includeSnapshots )
-    {
-        return getOldestVersion( null, restriction, includeSnapshots );
-    }
-
-    @Override
-    public final ArtifactVersion getOldestVersion( VersionRange versionRange, Restriction restriction,
-                                                   boolean includeSnapshots )
-    {
-        ArtifactVersion oldest = null;
-        final VersionComparator versionComparator = getVersionComparator();
-        for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
-        {
-            if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
-            {
-                continue;
-            }
-            if ( restriction != null && !isVersionInRestriction( restriction, candidate ) )
-            {
-                continue;
-            }
-            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
-            {
-                continue;
-            }
-            if ( oldest == null )
-            {
-                oldest = candidate;
-            }
-            else if ( versionComparator.compare( oldest, candidate ) > 0 )
-            {
-                oldest = candidate;
-            }
-        }
-        return oldest;
-    }
-
-    @Override
     public final ArtifactVersion[] getVersions( Restriction restriction, boolean includeSnapshots )
     {
         return getVersions( null, restriction, includeSnapshots );
@@ -348,21 +303,6 @@ public abstract class AbstractVersionDetails
             result.add( candidate );
         }
         return result.toArray( new ArtifactVersion[0] );
-    }
-
-    @Override
-    public final ArtifactVersion getOldestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
-                                                  boolean includeSnapshots )
-    {
-        try
-        {
-            return getOldestVersion( getVersionComparator().restrictionFor( currentVersion, updateScope ),
-                    includeSnapshots );
-        }
-        catch ( InvalidSegmentException e )
-        {
-            return null;
-        }
     }
 
     @Override
@@ -396,12 +336,6 @@ public abstract class AbstractVersionDetails
     }
 
     @Override
-    public final ArtifactVersion getOldestUpdate( Optional<Segment> updateScope )
-    {
-        return getOldestUpdate( updateScope, isIncludeSnapshots() );
-    }
-
-    @Override
     public final ArtifactVersion getNewestUpdate( Optional<Segment> updateScope )
     {
         return getNewestUpdate( updateScope, isIncludeSnapshots() );
@@ -411,16 +345,6 @@ public abstract class AbstractVersionDetails
     public final ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope )
     {
         return getAllUpdates( updateScope, isIncludeSnapshots() );
-    }
-
-    @Override
-    public final ArtifactVersion getOldestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
-    {
-        if ( isCurrentVersionDefined() )
-        {
-            return getOldestUpdate( getCurrentVersion(), updateScope, includeSnapshots );
-        }
-        return null;
     }
 
     @Override
