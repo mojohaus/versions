@@ -136,59 +136,33 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected <Q extends OverviewStats> void renderOverviewTableRow( Q stats )
     {
-        sink.tableCell();
-        renderSuccessIcon();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText( "report.overview.numUpToDate" ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( stats.getUpToDate() ) );
-        sink.tableCell_();
-        sink.tableRow_();
+        renderStatRow( "report.overview.numUpToDate", stats.getUpToDate(), true );
+        renderStatRow( "report.overview.numNewerVersionAvailable", stats.getAny(), false );
+        renderStatRow( "report.overview.numNewerIncrementalAvailable", stats.getIncremental(), false );
+        renderStatRow( "report.overview.numNewerMinorAvailable", stats.getMinor(), false );
+        renderStatRow( "report.overview.numNewerMajorAvailable", stats.getMajor(), false );
+    }
+
+    protected void renderStatRow( String textKey, int statCount, boolean forceSuccessIcon )
+    {
         sink.tableRow();
         sink.tableCell();
-        renderWarningIcon();
+        if ( statCount == 0 || forceSuccessIcon )
+        {
+            renderSuccessIcon();
+        }
+        else
+        {
+            renderWarningIcon();
+        }
         sink.tableCell_();
         sink.tableCell();
-        sink.text( getText( "report.overview.numNewerVersionAvailable" ) );
+        sink.text( getText( textKey ) );
         sink.tableCell_();
         sink.tableCell();
-        sink.text( Integer.toString( stats.getAny() ) );
+        sink.text( Integer.toString( statCount ) );
         sink.tableCell_();
         sink.tableRow_();
-        sink.tableRow();
-        sink.tableCell();
-        renderWarningIcon();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText( "report.overview.numNewerIncrementalAvailable" ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( stats.getIncremental() ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableCell();
-        renderWarningIcon();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText( "report.overview.numNewerMinorAvailable" ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( stats.getMinor() ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableCell();
-        renderWarningIcon();
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText( "report.overview.numNewerMajorAvailable" ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( stats.getMajor() ) );
-        sink.tableCell_();
     }
 
     /**

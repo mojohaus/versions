@@ -143,12 +143,8 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     protected <T extends OverviewStats> void renderOverviewTableRow( T stats )
     {
         super.renderOverviewTableRow( stats );
-        sink.tableCell();
-        sink.text( getText( "report.overview.numNewerDependenciesAvailable" ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( ( (PluginOverviewStats) stats ).getDependencies() ) );
-        sink.tableCell_();
+        super.renderStatRow( "report.overview.numNewerDependenciesAvailable",
+                ( (PluginOverviewStats) stats ).getDependencies(), false );
     }
 
     protected void renderSummaryTableRow( Dependency artifact, PluginUpdatesDetails details )
