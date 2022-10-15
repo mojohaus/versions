@@ -134,7 +134,7 @@ under the License.
                     <type>String</type>
                 </field>
                 <field>
-                    <name>nextVersion</name>
+                    <name>lastVersion</name>
                     <type>String</type>
                 </field>
                 <field>

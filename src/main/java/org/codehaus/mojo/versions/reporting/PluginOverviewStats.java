@@ -55,7 +55,7 @@ public class PluginOverviewStats extends OverviewStats
      *
      * @param updates collection of all version updates, typically from {@linkplain PluginUpdatesModel#getAllUpdates()}
      * @param cache if not null, cache to retrieve the version information, initialised with
-     * the {@link ArtifactVersions#getOldestUpdate(Optional)} update information
+     * the {@link ArtifactVersions#getNewestUpdate(Optional)} update information
      * @param <T> always equal to {@linkplain PluginOverviewStats}
      * @param <V> always equal to {@linkplain org.codehaus.mojo.versions.PluginUpdatesDetails}
      * @return instance of the {@linkplain PluginOverviewStats}, initialised with the update information
@@ -66,19 +66,19 @@ public class PluginOverviewStats extends OverviewStats
         PluginOverviewStats stats = new PluginOverviewStats();
         updates.forEach( details ->
         {
-            if ( getOldestUpdate( cache, details, of( SUBINCREMENTAL ) ) != null )
+            if ( getNewestUpdate( cache, details, of( SUBINCREMENTAL ) ) != null )
             {
                 stats.incrementAny();
             }
-            else if ( getOldestUpdate( cache, details, of( INCREMENTAL ) ) != null )
+            else if ( getNewestUpdate( cache, details, of( INCREMENTAL ) ) != null )
             {
                 stats.incrementIncremental();
             }
-            else if ( getOldestUpdate( cache, details, of( MINOR ) ) != null )
+            else if ( getNewestUpdate( cache, details, of( MINOR ) ) != null )
             {
                 stats.incrementMinor();
             }
-            else if ( getOldestUpdate( cache, details, of( MAJOR ) ) != null )
+            else if ( getNewestUpdate( cache, details, of( MAJOR ) ) != null )
             {
                 stats.incrementMajor();
             }

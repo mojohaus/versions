@@ -124,6 +124,6 @@ public class ArtifactVersionsTest
                         Arrays.asList( versions ), new MavenVersionComparator() );
 
         assertThat( instance.getNewestUpdate( of( SUBINCREMENTAL ) ).toString(), is( "1.1.0-2" ) );
-        assertThat( instance.getOldestUpdate( of( INCREMENTAL ) ).toString(), is( "1.1.1" ) );
+        assertThat( instance.getNewestUpdate( of( INCREMENTAL ) ).toString(), is( "1.1.3" ) );
     }
 }
