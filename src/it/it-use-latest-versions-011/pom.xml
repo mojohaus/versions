@@ -31,8 +31,6 @@
         <version>@project.version@</version>
         <configuration>
           <processParent>true</processParent>
-          <allowMajorUpdates>false</allowMajorUpdates>
-          <allowMinorUpdates>true</allowMinorUpdates>
           <allowIncrementalUpdates>false</allowIncrementalUpdates>
         </configuration>
       </plugin>

@@ -26,15 +26,16 @@ import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.ordering.MercuryVersionComparator;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -56,14 +57,14 @@ public class ArtifactVersionsTest
         assertEquals( "artifact", instance.getArtifactId() );
         assertEquals( "group", instance.getGroupId() );
         assertThat( instance.getVersions(),
-                    Matchers.arrayContaining( versions( "1.0.0.1", "1.0.0.2", "1.1.1", "2.100.0.1", "2.121.2.1",
+                    arrayContaining( versions( "1.0.0.1", "1.0.0.2", "1.1.1", "2.100.0.1", "2.121.2.1",
                                                         "3.1.0.1" ) ) );
         assertThat( instance.getVersions( new DefaultArtifactVersion( "1.1" ), null ),
-                    Matchers.arrayContaining( versions( "1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1" ) ) );
+                    arrayContaining( versions( "1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1" ) ) );
 
         assertThat( instance.getVersions( new DefaultArtifactVersion( "1.0.0.2" ), null ),
                     //Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));
-                    Matchers.arrayContaining( versions( "1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1" ) ) );
+                    arrayContaining( versions( "1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1" ) ) );
 
         assertEquals( new DefaultArtifactVersion( "2.121.2.1" ),
                       instance.getNewestVersion( new DefaultArtifactVersion( "1.0" ),
@@ -125,5 +126,19 @@ public class ArtifactVersionsTest
 
         assertThat( instance.getNewestUpdate( of( SUBINCREMENTAL ) ).toString(), is( "1.1.0-2" ) );
         assertThat( instance.getNewestUpdate( of( INCREMENTAL ) ).toString(), is( "1.1.3" ) );
+    }
+
+    @Test
+    public void testGetNewerVersionsWithSnapshot() throws InvalidSegmentException
+    {
+        ArtifactVersion[] versions = versions( "1.0.0-SNAPSHOT", "1.0.0" );
+        ArtifactVersions instance =
+                new ArtifactVersions( new DefaultArtifact( "default-group", "dummy-api",
+                        "1.0.0-SNAPSHOT", "foo", "bar",
+                        "jar", null ),
+                        Arrays.asList( versions ), new MavenVersionComparator() );
+
+        assertThat( instance.getNewerVersions( "1.0.0-SNAPSHOT", of( SUBINCREMENTAL ), false, false ),
+                arrayContaining( new DefaultArtifactVersion( "1.0.0" ) ) );
     }
 }

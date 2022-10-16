@@ -46,12 +46,10 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
-import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
+import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
-
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 
 /**
  * Replaces any release versions with the next snapshot version (if it has been deployed).
@@ -178,37 +176,31 @@ public class UseNextSnapshotsMojo
                     getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
                     continue;
                 }
-                try
-                {
-                    ArtifactVersion upperBound = unchangedSegment.isPresent()
-                            && unchangedSegment.get().value() >= MAJOR.value()
-                            ? versionComparator.incrementSegment( lowerBound, unchangedSegment.get() )
-                            : null;
-                    getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
-                    Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
-                    ArtifactVersion[] newer = versions.getVersions( restriction, true );
-                    getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
-                    for ( ArtifactVersion artifactVersion : newer )
-                    {
-                        String newVersion = artifactVersion.toString();
-                        if ( matchSnapshotRegex.matcher( newVersion ).matches() )
-                        {
-                            if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                    newVersion, getProject().getModel() ) )
-                            {
-                                getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
 
-                                this.getChangeRecorder().recordUpdate( "useNextSnapshots", dep.getGroupId(),
-                                        dep.getArtifactId(), version, newVersion );
-                            }
-                            break;
-                        }
-                    }
-                }
-                catch ( InvalidSegmentException e )
+                ArtifactVersion upperBound = unchangedSegment
+                        .map( s ->
+                    (ArtifactVersion) new BoundArtifactVersion( lowerBound, Segment.of( s.value() + 1 ) ) )
+                                .orElse( null );
+
+                getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
+                Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
+                ArtifactVersion[] newer = versions.getVersions( restriction, true );
+                getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
+                for ( ArtifactVersion artifactVersion : newer )
                 {
-                    getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s", dep.getGroupId(),
-                            dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
+                    String newVersion = artifactVersion.toString();
+                    if ( matchSnapshotRegex.matcher( newVersion ).matches() )
+                    {
+                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                                newVersion, getProject().getModel() ) )
+                        {
+                            getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+
+                            this.getChangeRecorder().recordUpdate( "useNextSnapshots", dep.getGroupId(),
+                                    dep.getArtifactId(), version, newVersion );
+                        }
+                        break;
+                    }
                 }
             }
         }
