@@ -20,11 +20,7 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -35,6 +31,7 @@ import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
+import static java.util.Collections.reverseOrder;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
@@ -173,34 +170,20 @@ public abstract class AbstractVersionDetails
         return getNewestVersion( versionRange, restriction, includeSnapshots, false );
     }
 
-    private static <T> Iterable<T> reverse( T[] array )
-    {
-        return Arrays.stream( array ).sorted( Collections.reverseOrder() ).collect( Collectors.toList() );
-    }
-
     @Override
     public final ArtifactVersion getNewestVersion( VersionRange versionRange, Restriction restriction,
                                                    boolean includeSnapshots, boolean allowDowngrade )
     {
-        // reverse( getVersions( ... ) ) will contain versions sorted from latest to oldest,
+        // reverseOrder( getVersions( ... ) ) will contain versions sorted from latest to oldest,
         // so we only need to find the first candidate fulfilling the criteria
-        for ( ArtifactVersion candidate : reverse( getVersions( includeSnapshots ) ) )
-        {
-            if ( allowDowngrade || versionRange == null
-                    || ArtifactVersions.isVersionInRange( candidate, versionRange ) )
-            {
-                if ( restriction != null && !isVersionInRestriction( restriction, candidate ) )
-                {
-                    continue;
-                }
-                if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
-                {
-                    continue;
-                }
-                return candidate;
-            }
-        }
-        return null;
+        return Arrays.stream( getVersions( includeSnapshots ) )
+                .sorted( reverseOrder() )
+                .filter( candidate -> allowDowngrade || versionRange == null
+                        || ArtifactVersions.isVersionInRange( candidate, versionRange ) )
+                .filter( candidate -> restriction == null || isVersionInRestriction( restriction, candidate ) )
+                .filter( candidate -> includeSnapshots || !ArtifactUtils.isSnapshot( candidate.toString() ) )
+                .findAny()
+                .orElse( null );
     }
 
     @Override
@@ -284,25 +267,14 @@ public abstract class AbstractVersionDetails
     public final ArtifactVersion[] getVersions( VersionRange versionRange, Restriction restriction,
                                                 boolean includeSnapshots )
     {
-        final VersionComparator versionComparator = getVersionComparator();
-        Set<ArtifactVersion> result = new TreeSet<>( versionComparator );
-        for ( ArtifactVersion candidate : getVersions( includeSnapshots ) )
-        {
-            if ( versionRange != null && !ArtifactVersions.isVersionInRange( candidate, versionRange ) )
-            {
-                continue;
-            }
-            if ( restriction != null && !isVersionInRestriction( restriction, candidate ) )
-            {
-                continue;
-            }
-            if ( !includeSnapshots && ArtifactUtils.isSnapshot( candidate.toString() ) )
-            {
-                continue;
-            }
-            result.add( candidate );
-        }
-        return result.toArray( new ArtifactVersion[0] );
+        return Arrays.stream( getVersions( includeSnapshots ) )
+                .filter( candidate ->
+                        versionRange == null || ArtifactVersions.isVersionInRange( candidate, versionRange ) )
+                .filter( candidate -> restriction == null || isVersionInRestriction( restriction, candidate ) )
+                .filter( candidate -> includeSnapshots || !ArtifactUtils.isSnapshot( candidate.toString() ) )
+                .sorted( getVersionComparator() )
+                .distinct()
+                .toArray( ArtifactVersion[]::new );
     }
 
     @Override
