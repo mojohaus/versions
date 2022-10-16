@@ -84,9 +84,9 @@ public class SegmentUtils
                     : allowIncrementalUpdates
                         ? of( MINOR )
                         : of( INCREMENTAL );
-        if ( log != null && log.isInfoEnabled() )
+        if ( log != null && log.isDebugEnabled() )
         {
-            log.info(
+            log.debug(
                     unchangedSegment.map( s -> Segment.of( s.value() + 1 ).toString() )
                             .orElse( "ALL" ) + " version changes allowed" );
         }
