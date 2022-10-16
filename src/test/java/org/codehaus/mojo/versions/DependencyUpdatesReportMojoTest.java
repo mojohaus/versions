@@ -329,4 +329,28 @@ public class DependencyUpdatesReportMojoTest
                 matchesPattern( ".*<td>report.overview.numNewerMajorAvailable</td>\\s*<td>1</td>.*" ),
                 matchesPattern( ".*<td>report.overview.numUpToDate</td>\\s*<td>0</td>.*" ) ) );
     }
+
+    @Test
+    public void testIt001Overview() throws IOException, MavenReportException
+    {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        new TestDependencyUpdatesReportMojo()
+                .withOnlyUpgradable( true )
+                .withDependencies(
+                        dependencyOf( "test-artifact", "1.1" ) )
+                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                {{
+                    put( "test-artifact", new String[] { "1.1.0-2", "1.1", "1.1.1", "1.1.1-2",
+                        "1.1.2", "1.1.3", "1.2", "1.2.1", "1.2.2", "1.3", "2.0", "2.1", "3.0"} );
+                }} ) )
+                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+
+        String output = os.toString()
+                .replaceAll( "<[^>]+>", " " )
+                .replaceAll( "&[^;]+;", " " )
+                .replaceAll( "\\s+", " " );
+        assertThat( "Did not generate summary correctly", output,
+                containsString( "groupA test-artifact 1.1 compile pom default 1.1.0-2 1.1.3 1.3 3.0" ) );
+    }
 }

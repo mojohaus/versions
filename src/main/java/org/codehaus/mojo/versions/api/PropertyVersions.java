@@ -432,21 +432,6 @@ public class PropertyVersions
         return result;
     }
 
-    private ArtifactVersion getNewestVersion( String currentVersion, VersionsHelper helper,
-                                              Optional<Segment> unchangedSegment,
-                                              boolean includeSnapshots, VersionRange range )
-            throws InvalidSegmentException
-    {
-        ArtifactVersion lowerBound = helper.createArtifactVersion( currentVersion );
-        ArtifactVersion upperBound = null;
-        if ( unchangedSegment.isPresent() )
-        {
-            upperBound = getVersionComparator().incrementSegment( lowerBound, unchangedSegment.get() );
-        }
-        Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
-        return getNewestVersion( range, restriction, includeSnapshots );
-    }
-
     private final class PropertyVersionComparator implements VersionComparator
     {
         public int compare( ArtifactVersion v1, ArtifactVersion v2 )
@@ -507,33 +492,5 @@ public class PropertyVersions
             }
             return result;
         }
-
-        public ArtifactVersion incrementSegment( ArtifactVersion v, Segment segment ) throws InvalidSegmentException
-        {
-            if ( !isAssociated() )
-            {
-                throw new IllegalStateException( "Cannot compare versions for a property with no associations" );
-            }
-            VersionComparator[] comparators = lookupComparators();
-            assert comparators.length >= 1 : "we have at least one association => at least one comparator";
-            ArtifactVersion result = comparators[0].incrementSegment( v, segment );
-            for ( int i = 1; i < comparators.length; i++ )
-            {
-                ArtifactVersion alt = comparators[i].incrementSegment( v, segment );
-                if ( !result.toString().equals( alt.toString() ) )
-                {
-                    throw new IllegalStateException(
-                        "Property " + name + " is associated with multiple artifacts"
-                            + " and these artifacts use different version sorting rules and these rules are effectively"
-                            + " incompatible for the two of versions being compared.\n"
-                            + "First rule says incrementSegment(\""
-                            + v + "\", " + segment + ") = " + result
-                            + "\nSecond rule says incrementSegment(\"" + v + "\", "
-                            + segment + ") = " + alt );
-                }
-            }
-            return result;
-        }
-
     }
 }

@@ -45,17 +45,6 @@ public interface VersionComparator
     int getSegmentCount( ArtifactVersion artifactVersion );
 
     /**
-     * Increment the specified segment of the supplied version.
-     *
-     * @param artifactVersion The artifact version to increment.
-     * @param segment The segment number to increment.
-     * @return An artifact version with the specified segment incremented.
-     * @since 1.0-beta-1
-     * @throws InvalidSegmentException if {@code segment} ∉ [0, segmentCount)
-     */
-    ArtifactVersion incrementSegment( ArtifactVersion artifactVersion, Segment segment ) throws InvalidSegmentException;
-
-    /**
      * <p>Returns a {@linkplain Restriction} object for computing version <em>upgrades</em>
      * with the given segment allowing updates, with all more major segments locked in place.</p>
      * <p>The resulting restriction could be thought of as one
@@ -73,10 +62,11 @@ public interface VersionComparator
     default Restriction restrictionFor( ArtifactVersion currentVersion, Optional<Segment> scope )
             throws InvalidSegmentException
     {
-        ArtifactVersion nextVersion = scope.isPresent() && scope.get().isMajorTo( SUBINCREMENTAL )
-                ? incrementSegment( currentVersion, scope.get() )
-                : currentVersion;
-        return new Restriction( nextVersion, nextVersion != currentVersion, scope.filter( MAJOR::isMajorTo )
+        ArtifactVersion nextVersion = scope.filter( s -> s.isMajorTo( SUBINCREMENTAL ) )
+                .map( s -> (ArtifactVersion)
+                        new BoundArtifactVersion( currentVersion, Segment.of( s.value() + 1 ) ) )
+                .orElse( currentVersion );
+        return new Restriction( nextVersion, false, scope.filter( MAJOR::isMajorTo )
                 .map( s -> (ArtifactVersion) new BoundArtifactVersion( currentVersion, s ) ).orElse( null ),
                 false );
     }

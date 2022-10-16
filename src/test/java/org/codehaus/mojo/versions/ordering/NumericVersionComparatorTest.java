@@ -22,15 +22,15 @@ package org.codehaus.mojo.versions.ordering;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.junit.Test;
 
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class NumericVersionComparatorTest
+public class NumericVersionComparatorTest extends VersionComparatorTestBase
 {
-    private NumericVersionComparator instance = new NumericVersionComparator();
+    public NumericVersionComparatorTest()
+    {
+        super( new NumericVersionComparator() );
+    }
 
     private int instanceCompare( String v1, String v2 )
     {
@@ -39,7 +39,6 @@ public class NumericVersionComparatorTest
 
     @Test
     public void testSmokes()
-        throws Exception
     {
         assertTrue( instanceCompare( "1.0.0.0.0", "1.0.0.0.1" ) < 0 );
         assertTrue( instanceCompare( "1.0.0.0.0", "2.0.0.0.1" ) < 0 );
@@ -50,7 +49,6 @@ public class NumericVersionComparatorTest
 
     @Test
     public void testBigValues()
-        throws Exception
     {
         assertTrue( instanceCompare( "1.92.0", "1.100000000000000000000000.0" ) < 0 );
         assertTrue( instanceCompare( "1.100000000000000000000000.0", "1.92.0" ) > 0 );
@@ -59,7 +57,6 @@ public class NumericVersionComparatorTest
 
     @Test
     public void testStringValues()
-        throws Exception
     {
         assertTrue( instanceCompare( "1.a20.0", "1.a3.0" ) < 0 );
         assertTrue( instanceCompare( "1.a20.0", "1.b10.0" ) < 0 );
@@ -81,7 +78,6 @@ public class NumericVersionComparatorTest
 
     @Test
     public void testQualifiers()
-        throws Exception
     {
         assertTrue( instanceCompare( "1.0-alpha.10", "1.0-alpha.20" ) < 0 );
         assertTrue( instanceCompare( "1.0-alpha.10", "1.0-beta.1" ) < 0 );
@@ -92,7 +88,6 @@ public class NumericVersionComparatorTest
 
     @Test
     public void testSegmentCounting()
-        throws Exception
     {
         assertEquals( 1, instance.getSegmentCount( new DefaultArtifactVersion( "5" ) ) );
         assertEquals( 2, instance.getSegmentCount( new DefaultArtifactVersion( "5.0" ) ) );
@@ -102,25 +97,15 @@ public class NumericVersionComparatorTest
         assertEquals( 0, instance.getSegmentCount( new DefaultArtifactVersion( "" ) ) );
     }
 
-    @Test
-    public void testSegmentIncrementing() throws Exception
+    @Override
+    public void testVersionComparatorRow5()
     {
-        assertEquals( new DefaultArtifactVersion( "6-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5" ), MAJOR ).toString() );
-        assertEquals( new DefaultArtifactVersion( "6.0-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), MAJOR ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.1-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0" ), MINOR ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.1.0-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.0.1" ), MINOR ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.beta.0-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha.1" ), MINOR ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.alpha-2.0-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.1" ), MINOR ).toString() );
-        assertEquals( new DefaultArtifactVersion( "5.alpha-1.2-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-1.1" ), INCREMENTAL )
-                              .toString() );
-        assertEquals( new DefaultArtifactVersion( "5.beta.0-SNAPSHOT" ).toString(),
-                      instance.incrementSegment( new DefaultArtifactVersion( "5.alpha-wins.1" ), MINOR ).toString() );
+        // non-numeric -- does not apply
+    }
+
+    @Override
+    public void testVersionComparatorRow6()
+    {
+        // non-numeric -- does not apply
     }
 }

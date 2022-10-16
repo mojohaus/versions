@@ -233,20 +233,18 @@ public abstract class AbstractVersionDetails
     }
 
     @Override
-    public final ArtifactVersion[] getNewerVersions( String versionString, Optional<Segment> upperBoundSegment,
+    public final ArtifactVersion[] getNewerVersions( String versionString, Optional<Segment> unchangedSegment,
                                                      boolean includeSnapshots, boolean allowDowngrade )
             throws InvalidSegmentException
     {
         ArtifactVersion currentVersion = new DefaultArtifactVersion( versionString );
         ArtifactVersion lowerBound = allowDowngrade
-                ? getLowerBound( currentVersion, upperBoundSegment )
+                ? getLowerBound( currentVersion, unchangedSegment )
                     .map( DefaultArtifactVersion::new )
                     .orElse( null )
                 : currentVersion;
         ArtifactVersion upperBound =
-                !upperBoundSegment.isPresent()
-                    ? null
-                    : upperBoundSegment
+                unchangedSegment
                         .map( s -> (ArtifactVersion) new BoundArtifactVersion( currentVersion,
                                         s.isMajorTo( SUBINCREMENTAL )
                                                 ? Segment.of( s.value() + 1 )

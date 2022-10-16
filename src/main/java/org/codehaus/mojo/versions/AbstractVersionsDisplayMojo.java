@@ -93,6 +93,7 @@ public abstract class AbstractVersionsDisplayMojo
         super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
     }
 
+    @SuppressWarnings( "unchecked" )
     protected void logInit()
     {
         if ( outputFile != null && !outputFileError )

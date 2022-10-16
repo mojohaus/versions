@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -110,6 +112,38 @@ public class ArtifactVersions
                         : ( rv = compare( getArtifactId(), that.getArtifactId() ) ) != 0
                             ? rv
                             : compare( getVersion(), that.getVersion() );
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o )
+        {
+            return true;
+        }
+
+        if ( !( o instanceof ArtifactVersions ) )
+        {
+            return false;
+        }
+
+        ArtifactVersions that = (ArtifactVersions) o;
+
+        return new EqualsBuilder()
+                .append( getArtifact(), that.getArtifact() )
+                .append( getVersions(), that.getVersions() )
+                .append( getVersionComparator(), that.getVersionComparator() )
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return new HashCodeBuilder( 17, 37 )
+                .append( getArtifact() )
+                .append( getVersions() )
+                .append( getVersionComparator() )
+                .toHashCode();
     }
 
     /**

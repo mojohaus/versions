@@ -77,7 +77,7 @@ public class SegmentUtils
             log.info( "Assuming allowMajorUpdates false because allowMinorUpdates is false." );
         }
 
-        Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates
+        Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
                 ? empty()
                 : allowMinorUpdates && allowIncrementalUpdates
                     ? of( MAJOR )

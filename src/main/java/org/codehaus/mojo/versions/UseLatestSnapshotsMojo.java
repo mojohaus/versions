@@ -47,14 +47,13 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
-import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
+import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static java.util.Collections.singletonList;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 
 /**
  * Replaces any release versions with the latest snapshot version (if it has been deployed).
@@ -191,64 +190,57 @@ public class UseLatestSnapshotsMojo
                     getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
                     continue;
                 }
-                try
+                ArtifactVersion upperBound = unchangedSegment
+                        .map( s ->
+                                (ArtifactVersion) new BoundArtifactVersion( lowerBound, Segment.of( s.value() + 1 ) ) )
+                        .orElse( null );
+
+                getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
+                Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
+                ArtifactVersion[] newer = versions.getVersions( restriction, true );
+                getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
+
+                // TODO consider creating a search + filter in the Details services to get latest snapshot.
+                String latestVersion;
+                ArrayList<ArtifactVersion> snapshotsOnly = new ArrayList<>();
+
+                for ( ArtifactVersion artifactVersion : newer )
                 {
-                    ArtifactVersion upperBound = unchangedSegment.isPresent()
-                            && unchangedSegment.get().value() >= MAJOR.value()
-                            ? versionComparator.incrementSegment( lowerBound, unchangedSegment.get() )
-                            : null;
-                    getLog().info( "Upper bound: " + ( upperBound == null ? "none" : upperBound.toString() ) );
-                    Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
-                    ArtifactVersion[] newer = versions.getVersions( restriction, true );
-                    getLog().debug( "Candidate versions " + Arrays.asList( newer ) );
-
-                    // TODO consider creating a search + filter in the Details services to get latest snapshot.
-                    String latestVersion;
-                    ArrayList<ArtifactVersion> snapshotsOnly = new ArrayList<>();
-
-                    for ( ArtifactVersion artifactVersion : newer )
+                    String newVersion = artifactVersion.toString();
+                    if ( matchSnapshotRegex.matcher( newVersion ).matches() )
                     {
-                        String newVersion = artifactVersion.toString();
-                        if ( matchSnapshotRegex.matcher( newVersion ).matches() )
-                        {
-                            snapshotsOnly.add( artifactVersion );
-                        }
-                    }
-                    ArtifactVersion[] filteredVersions = snapshotsOnly.toArray(
-                            new ArtifactVersion[snapshotsOnly.size()] );
-                    if ( filteredVersions.length > 0 )
-                    {
-                        latestVersion = filteredVersions[filteredVersions.length - 1].toString();
-                        if ( getProject().getParent() != null )
-                        {
-                            final Artifact parentArtifact = getProject().getParentArtifact();
-                            if ( artifact.getId().equals( parentArtifact.getId() ) && isProcessingParent() )
-                            {
-                                if ( PomHelper.setProjectParentVersion( pom, latestVersion ) )
-                                {
-                                    getLog().debug( "Made parent update from " + version + " to " + latestVersion );
-
-                                    this.getChangeRecorder()
-                                            .recordUpdate( "useLatestSnapshots", parentArtifact.getGroupId(),
-                                                    parentArtifact.getArtifactId(), version, latestVersion );
-                                }
-                            }
-                        }
-
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                latestVersion, getProject().getModel() ) )
-                        {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + latestVersion );
-
-                            this.getChangeRecorder().recordUpdate( "useLatestSnapshots", dep.getGroupId(),
-                                    dep.getArtifactId(), version, latestVersion );
-                        }
+                        snapshotsOnly.add( artifactVersion );
                     }
                 }
-                catch ( InvalidSegmentException e )
+                ArtifactVersion[] filteredVersions = snapshotsOnly.toArray(
+                        new ArtifactVersion[snapshotsOnly.size()] );
+                if ( filteredVersions.length > 0 )
                 {
-                    getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s", dep.getGroupId(),
-                            dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
+                    latestVersion = filteredVersions[filteredVersions.length - 1].toString();
+                    if ( getProject().getParent() != null )
+                    {
+                        final Artifact parentArtifact = getProject().getParentArtifact();
+                        if ( artifact.getId().equals( parentArtifact.getId() ) && isProcessingParent() )
+                        {
+                            if ( PomHelper.setProjectParentVersion( pom, latestVersion ) )
+                            {
+                                getLog().debug( "Made parent update from " + version + " to " + latestVersion );
+
+                                this.getChangeRecorder()
+                                        .recordUpdate( "useLatestSnapshots", parentArtifact.getGroupId(),
+                                                parentArtifact.getArtifactId(), version, latestVersion );
+                            }
+                        }
+                    }
+
+                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
+                            latestVersion, getProject().getModel() ) )
+                    {
+                        getLog().info( "Updated " + toString( dep ) + " to version " + latestVersion );
+
+                        this.getChangeRecorder().recordUpdate( "useLatestSnapshots", dep.getGroupId(),
+                                dep.getArtifactId(), version, latestVersion );
+                    }
                 }
             }
         }
