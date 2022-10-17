@@ -57,8 +57,7 @@ public class ReportRendererFactoryImpl implements ReportRendererFactory
      */
     @Override
     @SuppressWarnings( "unchecked" )
-    public <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model,
-                                                                 boolean verboseSummary, boolean verboseDetail )
+    public <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model )
             throws IllegalArgumentException
     {
         AbstractVersionsReportRenderer renderer = null;
@@ -84,8 +83,6 @@ public class ReportRendererFactoryImpl implements ReportRendererFactory
         }
         if ( renderer != null )
         {
-            renderer.setVerboseSummary( verboseSummary );
-            renderer.setVerboseDetail( verboseDetail );
             return (T) renderer;
         }
         throw new IllegalArgumentException( "Invalid report name: " + reportName );

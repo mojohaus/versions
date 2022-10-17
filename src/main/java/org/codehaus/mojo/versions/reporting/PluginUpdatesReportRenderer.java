@@ -26,11 +26,11 @@ import java.util.Map;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.doxia.sink.SinkEventAttributes;
-import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
 
@@ -46,7 +46,6 @@ import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
  */
 public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<PluginUpdatesModel>
 {
-
     public PluginUpdatesReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName,
                                         PluginUpdatesModel model )
     {
@@ -72,7 +71,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     @Override
     protected void renderDetails()
     {
-        model.getAllUpdates().forEach( this::renderPluginDetail );
+        model.getAllUpdates().forEach( ( artifact, details ) -> renderPluginDetail( artifact, details, true ) );
     }
 
     private void renderDependencyDetail( Dependency dependency, ArtifactVersions details )
@@ -114,7 +113,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         renderSummaryTableHeader( false, false );
         sink.tableRow_();
 
-        contents.forEach( this::renderSummaryTableRow );
+        contents.forEach( ( artifact, details ) -> renderSummaryTableRow( artifact, details, false ) );
 
         sink.tableRow();
         renderSummaryTableHeader( false, false );
@@ -147,107 +146,42 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
                 ( (PluginOverviewStats) stats ).getDependencies(), false );
     }
 
-    protected void renderSummaryTableRow( Dependency artifact, PluginUpdatesDetails details )
+    protected void renderSummaryTableRow( Dependency artifact, PluginUpdatesDetails details, boolean verbose )
     {
+        // THIS ONE
         boolean upToDate = !details.isUpdateAvailable();
-        if ( upToDate && !verboseSummary )
+        if ( upToDate && !verbose )
         {
             return;
         }
+        ArtifactVersionsCache cache = verbose ? allUpdatesCache : newestUpdateCache;
 
         sink.tableRow();
-        sink.tableCell();
-        if ( upToDate )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getGroupId() );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getArtifactId() );
-        sink.tableCell_();
-        sink.tableCell();
-        if ( !details.isArtifactUpdateAvailable() )
-        {
-            safeBold();
-        }
-        sink.text( artifact.getVersion() );
-        if ( !details.isArtifactUpdateAvailable() )
-        {
-            safeBold_();
-        }
-        sink.tableCell_();
 
         sink.tableCell();
-        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
-            safeBold_();
-        }
+        renderIcon( upToDate );
         sink.tableCell_();
 
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
+        renderCell( artifact.getGroupId() );
+        renderCell( artifact.getArtifactId() );
+        renderBoldCell( upToDate, artifact.getVersion() );
+        renderVersions( cache, details );
 
         sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( details.isDependencyUpdateAvailable() )
-        {
-            renderWarningIcon();
-        }
-        else
-        {
-            renderSuccessIcon();
-        }
+        renderIcon( !details.isDependencyUpdateAvailable() );
         sink.tableCell_();
 
         sink.tableRow_();
     }
 
     @SuppressWarnings( "checkstyle:MethodLength" )
-    private void renderPluginDetail( Dependency artifact, PluginUpdatesDetails details )
+    private void renderPluginDetail( Dependency artifact, PluginUpdatesDetails details, boolean verbose )
     {
         boolean upToDate = !details.isUpdateAvailable();
-        if ( upToDate && !verboseDetail )
+        if ( upToDate && !verbose )
         {
             return;
         }
-
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text( MessageFormat.format( getText( "report.plugin" ),
-                ArtifactUtils.versionlessKey( details.getGroupId(), details.getArtifactId() ) ) );
-        sink.sectionTitle2_();
 
         renderPluginDetailTable( details );
 
@@ -265,26 +199,62 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
 
             details.getDependencyVersions().forEach( this::renderDependencyDetail );
         }
-        sink.section2_();
+
     }
 
     private void renderPluginDetailTable( PluginUpdatesDetails details )
     {
+        // THAT ONE
         // warning: using caches here may break plugin report
         ArtifactVersion[] allUpdates = details.getAllUpdates( empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
-        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "70%" );
-        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "30%" );
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.status" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
+
+        renderTwoCellsRow( "report.status", () -> renderStatus( details ) );
+        renderTwoCellsRow( "report.groupId", details.getGroupId() );
+        renderTwoCellsRow( "report.artifactId", details.getArtifactId() );
+        renderTwoCellsRow( "report.currentVersion", details.getVersion() );
+        if ( !upToDate )
+        {
+            sink.tableRow();
+            sink.tableHeaderCell( headerAttributes );
+            sink.text( getText( "report.updateVersions" ) );
+            sink.tableHeaderCell_();
+            sink.tableCell();
+            for ( int i = 0; i < allUpdates.length; i++ )
+            {
+                if ( i > 0 )
+                {
+                    sink.lineBreak();
+                }
+                String label = getLabel( allUpdates[i], details );
+                if ( label != null )
+                {
+                    safeBold();
+                }
+                sink.text( allUpdates[i].toString() );
+                if ( label != null )
+                {
+                    safeBold_();
+                    sink.nonBreakingSpace();
+                    safeItalic();
+                    sink.text( label );
+                    safeItalic_();
+                }
+            }
+            sink.tableCell_();
+            sink.tableRow_();
+        }
+
+        sink.tableRows_();
+        sink.table_();
+    }
+
+    protected void renderStatus( AbstractVersionDetails details )
+    {
+        // warning: using caches here may break plugin report
         if ( details.getNewestUpdate( of( SUBINCREMENTAL ) ) != null )
         {
             renderWarningIcon();
@@ -315,65 +285,6 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
             sink.nonBreakingSpace();
             sink.text( getText( "report.noUpdatesAvailable" ) );
         }
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.groupId" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( details.getGroupId() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.artifactId" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( details.getArtifactId() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.currentVersion" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( details.getVersion() );
-        sink.tableCell_();
-        sink.tableRow_();
-        if ( !upToDate )
-        {
-            sink.tableRow();
-            sink.tableHeaderCell( headerAttributes );
-            sink.text( getText( "report.updateVersions" ) );
-            sink.tableHeaderCell_();
-            sink.tableCell( cellAttributes );
-            for ( int i = 0; i < allUpdates.length; i++ )
-            {
-                if ( i > 0 )
-                {
-                    sink.lineBreak();
-                }
-                String label = getLabel( allUpdates[i], details );
-                if ( label != null )
-                {
-                    safeBold();
-                }
-                sink.text( allUpdates[i].toString() );
-                if ( label != null )
-                {
-                    safeBold_();
-                    sink.nonBreakingSpace();
-                    safeItalic();
-                    sink.text( label );
-                    safeItalic_();
-                }
-            }
-            sink.tableCell_();
-            sink.tableRow_();
-        }
-        sink.tableRows_();
-        sink.table_();
     }
-}
 
+}

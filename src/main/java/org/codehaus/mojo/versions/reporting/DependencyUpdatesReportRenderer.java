@@ -22,7 +22,6 @@ package org.codehaus.mojo.versions.reporting;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
@@ -96,17 +95,12 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel> e
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
-        if ( upToDate && !verboseDetail )
+        if ( upToDate )
         {
             return;
         }
 
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text( ArtifactUtils.versionlessKey( artifact.getGroupId(), artifact.getArtifactId() ) );
-        sink.sectionTitle2_();
         renderDependencyDetailTable( artifact, details, true );
-        sink.section2_();
     }
 
 }

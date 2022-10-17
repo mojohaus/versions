@@ -69,8 +69,6 @@ public abstract class AbstractVersionDetails
      */
     private boolean includeSnapshots = false;
 
-    protected boolean verboseDetail = true;
-
     /**
      * Not sure if we need to be thread safe, but there's no harm being careful, after all we could be invoked from an
      * IDE.
@@ -128,14 +126,6 @@ public abstract class AbstractVersionDetails
         synchronized ( currentVersionLock )
         {
             this.includeSnapshots = includeSnapshots;
-        }
-    }
-
-    public void setVerboseDetail( boolean verboseDetail )
-    {
-        synchronized ( currentVersionLock )
-        {
-            this.verboseDetail = verboseDetail;
         }
     }
 
@@ -320,8 +310,7 @@ public abstract class AbstractVersionDetails
         }
 
         // filter out intermediate minor versions.
-        if ( !verboseDetail )
-        {
+//        {
             String current = ".";
             boolean needOneMore = false;
             Iterator<ArtifactVersion> rev = result.descendingIterator(); // be cautious to keep latest ones.
@@ -358,7 +347,7 @@ public abstract class AbstractVersionDetails
                     current = version.toString().substring( 0, indexOf );
                 }
             }
-        }
+//        }
 
         return result.toArray( new ArtifactVersion[0] );
     }

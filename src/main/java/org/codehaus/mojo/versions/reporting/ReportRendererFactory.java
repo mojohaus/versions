@@ -37,12 +37,9 @@ public interface ReportRendererFactory
      * @param sink sink to use for rendering
      * @param locale locale to use for rendering
      * @param model data to render
-     * @param verboseSummary <code>false</code> if up to date rows should be filtered out of report table.
-     * @param verboseDetail <code>false</code> if up to date rows should be filtered out of report table.
      * @return new report renderer
      * @throws IllegalArgumentException thrown if the report with the given name could not be found
      */
-    <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model,
-                                                          boolean verboseSummary, boolean verboseDetail )
+    <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model )
             throws IllegalArgumentException;
 }

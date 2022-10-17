@@ -212,8 +212,7 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
                         new DependencyUpdatesModel( dependencyUpdates, dependencyManagementUpdates );
                 if ( "html".equals( format ) )
                 {
-                    rendererFactory.createReportRenderer( getOutputName(), sink, locale, model,
-                                    verboseSummary, verboseDetail ).render();
+                    rendererFactory.createReportRenderer( getOutputName(), sink, locale, model ).render();
                 }
                 else if ( "xml".equals( format ) )
                 {

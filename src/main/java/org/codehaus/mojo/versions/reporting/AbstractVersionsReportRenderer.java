@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions.reporting;
  * under the License.
  */
 
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
@@ -58,11 +57,14 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected T model;
 
-    protected ArtifactVersionsCache newestUpdateCache
+    protected final ArtifactVersionsCache newestUpdateCache
             = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
 
-    protected ArtifactVersionsCache allUpdatesCache
+    protected final ArtifactVersionsCache allUpdatesCache
             = new ArtifactVersionsCache( AbstractVersionDetails::getAllUpdates );
+
+    protected final SinkEventAttributes headerAttributes
+            = new SinkEventAttributeSet( SinkEventAttributes.WIDTH, "30%" );
 
     /**
      * Constructor to be called by the dependency injection framework
@@ -147,14 +149,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     {
         sink.tableRow();
         sink.tableCell();
-        if ( statCount == 0 || forceSuccessIcon )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
+        renderIcon( statCount == 0 || forceSuccessIcon );
         sink.tableCell_();
         sink.tableCell();
         sink.text( getText( textKey ) );
@@ -163,6 +158,18 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         sink.text( Integer.toString( statCount ) );
         sink.tableCell_();
         sink.tableRow_();
+    }
+
+    protected void renderIcon( boolean success )
+    {
+        if ( success )
+        {
+            renderSuccessIcon();
+        }
+        else
+        {
+            renderWarningIcon();
+        }
     }
 
     /**
@@ -186,7 +193,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         sink.tableRow_();
 
         contents.forEach( ( artifact, artifactVersions ) ->
-                renderSummaryTableRow( artifact, artifactVersions, hasScope ) );
+                renderSummaryTableRow( artifact, artifactVersions, hasScope, false ) );
 
         sink.tableRow();
         renderSummaryTableHeader( hasScope, true );
@@ -211,105 +218,72 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
                 "report.latestIncremental", "report.latestMinor", "report.latestMajor" );
     }
 
-    protected void renderSummaryTableRow( Dependency artifact, ArtifactVersions details,
-                                          boolean includeScope )
+    protected void renderSummaryTableRow( Dependency artifact, ArtifactVersions details, boolean includeScope,
+                                          boolean verbose )
     {
+        // THIS ONE
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
-        if ( upToDate /*&& !verbose*/ )
+        if ( upToDate && !verbose )
         {
             return;
         }
+        ArtifactVersionsCache cache = verbose ? allUpdatesCache : newestUpdateCache;
 
         sink.tableRow();
+
         sink.tableCell();
-        if ( upToDate )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
+        renderIcon( upToDate );
         sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getGroupId() );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getArtifactId() );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getVersion() );
-        sink.tableCell_();
+
+        renderCell( artifact.getGroupId() );
+        renderCell( artifact.getArtifactId() );
+        renderCell( artifact.getVersion() );
         if ( includeScope )
         {
-            sink.tableCell();
-            sink.text( artifact.getScope() );
-            sink.tableCell_();
+            renderCell( artifact.getScope() );
         }
-        sink.tableCell();
-        sink.text( artifact.getClassifier() );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getType() );
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
+        renderCell( artifact.getClassifier() );
+        renderCell( artifact.getType() );
+        renderVersions( cache, details );
 
         sink.tableRow_();
     }
 
-    @SuppressWarnings( "checkstyle:MethodLength" )
-    protected void renderDependencyDetailTable( Dependency artifact, ArtifactVersions details, boolean includeScope )
+    protected void renderVersions( ArtifactVersionsCache cache, ArtifactVersions details )
     {
-        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
-        boolean upToDate = allUpdates == null || allUpdates.length == 0;
+        renderBoldCell( cache.get( details, of( SUBINCREMENTAL ) ) );
+        renderBoldCell( cache.get( details, of( INCREMENTAL ) ) );
+        renderBoldCell( cache.get( details, of( MINOR ) ) );
+        renderBoldCell( cache.get( details, of( MAJOR ) ) );
+    }
 
-        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "70%" );
-        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "30%" );
-        sink.table();
-        sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
+    protected void renderTwoCellsRow( String textKey, String textValue )
+    {
         sink.tableRow();
         sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.status" ) );
+        sink.text( getText( textKey ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
+        sink.tableCell();
+        sink.text( textValue );
+        sink.tableCell_();
+        sink.tableRow_();
+    }
+
+    protected void renderTwoCellsRow( String textKey, Runnable runnable )
+    {
+        sink.tableRow();
+        sink.tableHeaderCell( headerAttributes );
+        sink.text( getText( textKey ) );
+        sink.tableHeaderCell_();
+        sink.tableCell();
+        runnable.run();
+        sink.tableCell_();
+        sink.tableRow_();
+    }
+
+    protected void renderStatus( ArtifactVersions details )
+    {
         if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
         {
             renderWarningIcon();
@@ -340,109 +314,12 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
             sink.nonBreakingSpace();
             sink.text( getText( "report.noUpdatesAvailable" ) );
         }
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.groupId" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getGroupId() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.artifactId" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getArtifactId() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.currentVersion" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getVersion() );
-        sink.tableCell_();
-        sink.tableRow_();
-        if ( includeScope )
-        {
-            sink.tableRow();
-            sink.tableHeaderCell( headerAttributes );
-            sink.text( getText( "report.scope" ) );
-            sink.tableHeaderCell_();
-            sink.tableCell( cellAttributes );
-            sink.text( artifact.getScope() );
-            sink.tableCell_();
-            sink.tableRow_();
-        }
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.classifier" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getClassifier() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.type" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getType() );
-        sink.tableCell_();
-        sink.tableRow_();
-        if ( !upToDate )
-        {
-            sink.tableRow();
-            sink.tableHeaderCell( headerAttributes );
-            sink.text( getText( "report.updateVersions" ) );
-            sink.tableHeaderCell_();
-            sink.tableCell( cellAttributes );
-            for ( int i = 0; i < allUpdates.length; i++ )
-            {
-                if ( i > 0 )
-                {
-                    sink.lineBreak();
-                }
-                String label = getLabel( allUpdates[i], details );
-                if ( label != null )
-                {
-                    safeBold();
-                }
-                sink.text( allUpdates[i].toString() );
-                if ( label != null )
-                {
-                    safeBold_();
-                    sink.nonBreakingSpace();
-                    safeItalic();
-                    sink.text( label );
-                    safeItalic_();
-                }
-            }
-            sink.tableCell_();
-            sink.tableRow_();
-        }
-        sink.tableRows_();
-        sink.table_();
     }
 
-    /**
-     * Renders a table header containing elements denoted by the given keys
-     * @param keys variable argument list containing keys of the property file to retrieve the
-     *             headers from
-     */
-    protected void renderTableHeaderCells( String... keys )
+    @SuppressWarnings( "checkstyle:MethodLength" )
+    protected void renderDependencyDetailTable( Dependency artifact, ArtifactVersions details, boolean includeScope )
     {
-        Arrays.stream( keys )
-                .map( this::getText )
-                .forEachOrdered( str ->
-                {
-                    sink.tableHeaderCell();
-                    sink.text( str );
-                    sink.tableHeaderCell_();
-                } );
+        renderSummaryTableRow( artifact, details, includeScope, true );
     }
 
     protected String getLabel( ArtifactVersion version, AbstractVersionDetails details )

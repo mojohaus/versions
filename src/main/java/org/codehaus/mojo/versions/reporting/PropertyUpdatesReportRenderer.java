@@ -74,7 +74,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
     @Override
     protected void renderDetails()
     {
-        model.getAllUpdates().forEach( this::renderPropertyDetail );
+        model.getAllUpdates().forEach( ( artifact, details ) -> renderPropertyDetail( artifact , details , true ) );
     }
 
     protected void renderTable( String titleKey, Map<Property, PropertyVersions> contents, String emptyKey )
@@ -105,7 +105,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         renderSummaryTableHeader( false, false );
         sink.tableRow_();
 
-        contents.forEach( this::renderPropertySummaryTableRow );
+        contents.forEach( ( property, details ) -> renderPropertySummaryTableRow( property, details, false ) );
 
         sink.tableRow();
         renderSummaryTableHeader( false, false );
@@ -114,68 +114,27 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.table_();
     }
 
-    private void renderPropertySummaryTableRow( Property property, PropertyVersions details )
+    private void renderPropertySummaryTableRow( Property property, PropertyVersions details, boolean verbose )
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
-        if ( upToDate && !verboseSummary )
+        if ( upToDate && !verbose )
         {
             return;
         }
 
         sink.tableRow();
-        sink.tableCell();
-        if ( upToDate )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( "${" + property.getName() + "}" );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( details.getCurrentVersion().toString() );
-        sink.tableCell_();
 
         sink.tableCell();
-        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
-            safeBold_();
-        }
+        renderIcon( upToDate );
         sink.tableCell_();
 
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
+        renderCell( "${" + property.getName() + "}" );
+        renderCell( details.getCurrentVersion().toString() );
+        renderBoldCell( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) );
+        renderBoldCell( newestUpdateCache.get( details, of( INCREMENTAL ) ) );
+        renderBoldCell( newestUpdateCache.get( details, of( MINOR ) ) );
+        renderBoldCell( newestUpdateCache.get( details, of( MAJOR ) ) );
 
         sink.tableRow_();
     }
@@ -427,11 +386,11 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         return stats;
     }
 
-    private void renderPropertyDetail( Property property, PropertyVersions details )
+    private void renderPropertyDetail( Property property, PropertyVersions details, boolean verbose )
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
-        if ( upToDate && !verboseDetail )
+        if ( upToDate && !verbose )
         {
             return;
         }

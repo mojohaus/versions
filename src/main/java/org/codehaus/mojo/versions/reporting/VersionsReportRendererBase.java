@@ -20,6 +20,8 @@ package org.codehaus.mojo.versions.reporting;
  * under the License.
  */
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Locale;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -86,28 +88,6 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
         sink.figureGraphics( "images/icon_success_sml.gif" );
     }
 
-    protected void renderStatRow( String textKey, int statCount, boolean forceSuccessIcon )
-    {
-        sink.tableRow();
-        sink.tableCell();
-        if ( statCount == 0 || forceSuccessIcon )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( getText( textKey ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( Integer.toString( statCount ) );
-        sink.tableCell_();
-        sink.tableRow_();
-    }
-
     protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
     {
         return v1 == v2 || ( v1 != null && v1.equals( v2 ) )
@@ -162,6 +142,78 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
         {
             // ignore Maven 2.1.0
         }
+    }
+
+    /**
+     * Renders a table header containing elements denoted by the given keys
+     * @param keys variable argument list containing keys of the property file to retrieve the
+     *             headers from
+     */
+    protected void renderTableHeaderCells( String... keys )
+    {
+        Arrays.stream( keys )
+                .map( this::getText )
+                .forEachOrdered( str ->
+                {
+                    sink.tableHeaderCell();
+                    sink.text( str );
+                    sink.tableHeaderCell_();
+                } );
+    }
+
+    protected void renderBoldCell( boolean bold, Object o )
+    {
+        sink.tableCell();
+        if ( o != null )
+        {
+            if ( bold )
+            {
+                safeBold();
+            }
+            sink.text( o.toString() );
+            if ( bold )
+            {
+                safeBold_();
+            }
+        }
+        sink.tableCell_();
+    }
+
+    protected void renderBoldCell( Object o )
+    {
+        sink.tableCell();
+        if ( o != null )
+        {
+            safeBold();
+            if ( o.getClass().isArray() )
+            {
+                int length = Array.getLength( o );
+                for ( int i = 0; i < length; i++ )
+                {
+                    if ( i > 0 )
+                    {
+                        sink.lineBreak();
+                    }
+                    sink.text( Array.get( o, i ).toString() );
+                }
+            }
+            else
+            {
+                sink.text( o.toString() );
+            }
+            safeBold_();
+        }
+        sink.tableCell_();
+    }
+
+    protected void renderCell( Object o )
+    {
+        sink.tableCell();
+        if ( o != null )
+        {
+            sink.text( o.toString() );
+        }
+        sink.tableCell_();
     }
 
 }
