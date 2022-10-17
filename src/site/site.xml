@@ -30,8 +30,8 @@
       <item name="Changing aggregator project version" href="examples/setaggregator.html"/>
     </menu>
     <menu name="Reference">
-      <item name="Version number comparison rule-sets" href="rule.html"/>
-      <item name="XML schema for rules.xml" href="xsd/rule-2.0.0.xsd"/>
+      <item name="Version number comparison rule-sets" href="model/rule.html"/>
+      <item name="XML schemas" href="xsd/index.html"/>
     </menu>
   </body>
 </project>

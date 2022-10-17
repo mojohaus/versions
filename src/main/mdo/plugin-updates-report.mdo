@@ -21,8 +21,8 @@ under the License.
 
 <model xmlns="http://codehaus-plexus.github.io/MODELLO/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://codehaus-plexus.github.io/MODELLO/2.0.0 https://codehaus-plexus.github.io/modello/xsd/modello-2.0.0.xsd"
-       xsd.namespace="http://mojo.codehaus.org/versions-maven-plugin/plugin-updates-report/1.0.0"
-       xsd.targetNamespace="http://mojo.codehaus.org/versions-maven-plugin/plugin-updates-report/1.0.0">
+       xml.namespace="https://www.mojohaus.org/VERSIONS/PLUGIN-UPDATES-REPORT/${version}"
+       xml.schemaLocation="https://www.mojohaus.org/versions-maven-plugin/xsd/plugin-updates-report-${version}.xsd">
     <id>plugin-updates-report</id>
     <name>PluginUpdatesReport</name>
     <description>

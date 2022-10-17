@@ -313,8 +313,7 @@
         <artifactId>modello-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>generate-rule</id>
-            <phase>generate-sources</phase>
+            <id>generate-source</id>
             <goals>
               <!-- Generate the xpp3 reader code -->
               <goal>xpp3-reader</goal>
@@ -323,29 +322,6 @@
               <!-- Generate the Java sources for the model itself -->
               <goal>java</goal>
             </goals>
-            <configuration>
-              <models>
-                <model>src/main/mdo/rule.mdo</model>
-              </models>
-              <version>2.0.0</version>
-            </configuration>
-          </execution>
-          <execution>
-            <id>generate-reporting</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <!-- Generate the writer code -->
-              <goal>xpp3-writer</goal>
-              <!-- Generate the Java sources for the model itself -->
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <models>
-                <model>src/main/mdo/dependency-updates-report.mdo</model>
-                <model>src/main/mdo/plugin-updates-report.mdo</model>
-              </models>
-              <version>2.0.0</version>
-            </configuration>
           </execution>
           <execution>
             <id>site-doc</id>
@@ -353,6 +329,9 @@
             <goals>
               <goal>xdoc</goal>
             </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/generated-site/xdoc/model</outputDirectory>
+            </configuration>
           </execution>
           <execution>
             <id>site-xsd</id>
@@ -371,7 +350,7 @@
             <model>src/main/mdo/dependency-updates-report.mdo</model>
             <model>src/main/mdo/plugin-updates-report.mdo</model>
           </models>
-          <version>2.0.0</version>
+          <version>2.1.0</version>
         </configuration>
       </plugin>
       <plugin>
