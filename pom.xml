@@ -7,9 +7,9 @@
     <version>70</version>
   </parent>
 
-  <artifactId>versions-maven-plugin</artifactId>
+  <artifactId>versions-parent</artifactId>
   <version>2.13.0-SNAPSHOT</version>
-  <packaging>maven-plugin</packaging>
+  <packaging>pom</packaging>
 
   <name>Versions Maven Plugin</name>
   <url>https://www.mojohaus.org/versions-maven-plugin/</url>
@@ -105,6 +105,12 @@
     <tag>HEAD</tag>
   </scm>
 
+  <modules>
+    <module>versions-maven-plugin</module>
+    <module>versions-api</module>
+    <module>versions-model</module>
+  </modules>
+
   <properties>
     <mojo.java.target>1.8</mojo.java.target>
     <maven.compiler.source>${mojo.java.target}</maven.compiler.source>
@@ -129,158 +135,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <scope>provided</scope>
-    </dependency>
-  
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-compat</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-model</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-settings</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.reporting</groupId>
-      <artifactId>maven-reporting-api</artifactId>
-      <version>3.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.reporting</groupId>
-      <artifactId>maven-reporting-impl</artifactId>
-      <version>3.2.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>maven-common-artifact-filters</artifactId>
-      <version>3.3.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-provider-api</artifactId>
-      <version>${wagonVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-file</artifactId>
-      <version>${wagonVersion}</version>
-    </dependency>
-
-    <!-- Doxia -->
-    <dependency>
-      <groupId>org.apache.maven.doxia</groupId>
-      <artifactId>doxia-core</artifactId>
-      <version>${doxiaVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.doxia</groupId>
-      <artifactId>doxia-sink-api</artifactId>
-      <version>${doxiaVersion}</version>
-    </dependency>
-
-    <!-- Doxia-sitetools -->
-    <dependency>
-      <groupId>org.apache.maven.doxia</groupId>
-      <artifactId>doxia-site-renderer</artifactId>
-      <version>${doxia-sitetoolsVersion}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>3.4.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-interactivity-api</artifactId>
-      <version>1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.woodstox</groupId>
-      <artifactId>woodstox-core</artifactId>
-      <version>6.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.12.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven.plugin-testing</groupId>
-      <artifactId>maven-plugin-testing-harness</artifactId>
-      <version>3.3.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.hamcrest</groupId>
-          <artifactId>hamcrest-core</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>4.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.7.36</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>
@@ -308,193 +162,7 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.modello</groupId>
-        <artifactId>modello-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-source</id>
-            <goals>
-              <!-- Generate the xpp3 reader code -->
-              <goal>xpp3-reader</goal>
-              <!-- Generate the xpp3 writer code -->
-              <goal>xpp3-writer</goal>
-              <!-- Generate the Java sources for the model itself -->
-              <goal>java</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>site-doc</id>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>xdoc</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/generated-site/xdoc/model</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>site-xsd</id>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>xsd</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/generated-site/resources/xsd</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-        <configuration>
-          <models>
-            <model>src/main/mdo/rule.mdo</model>
-            <model>src/main/mdo/dependency-updates-report.mdo</model>
-            <model>src/main/mdo/plugin-updates-report.mdo</model>
-          </models>
-          <version>2.1.0</version>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-invoker-plugin</artifactId>
-        <configuration>
-          <projectsDirectory>src/it</projectsDirectory>
-          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
-          <settingsFile>src/it/settings.xml</settingsFile>
-          <showErrors>true</showErrors>
-          <streamLogs>true</streamLogs>
-          <!--
-            ! There seemed to be a problem with the indepance of the IT's
-            ! here. So we can't use more than one thread.
-            ! TODO: Dive more deeply into this problem.
-          -->
-          <parallelThreads>1</parallelThreads>
-          <pomIncludes>
-            <pomInclude>*/pom.xml</pomInclude>
-          </pomIncludes>
-          <pomExcludes>
-            <!--
-              ! This test is not really intended as part of regular integration test suite
-              ! as it highly depends on the minute conditions of the build cluster,
-              ! internet connection speed (since retrieval times are included in the timeout)
-              ! or individual machine where it's being tested.
-              ! Not deleting as it might be helpful with assessing performance measurements.
-            -->
-            <pomExclude>it-property-updates-report-002-slow/*</pomExclude>
-          </pomExcludes>
-          <postBuildHookScript>verify</postBuildHookScript>
-          <filterProperties>
-            <repository.proxy.url>${repository.proxy.url}</repository.proxy.url>
-          </filterProperties>
-          <mavenOpts>-Xmx256m</mavenOpts>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <!-- Exclude packages generated by Modello in JavaDocs -->
-          <excludePackageNames>
-            org.codehaus.mojo.versions.model,
-            org.codehaus.mojo.versions.model.io.xpp3
-            org.codehaus.mojo.versions.reporting.model,
-            org.codehaus.mojo.versions.reporting.model.io.xpp3,
-          </excludePackageNames>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <source>${mojo.java.target}</source>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-invoker-plugin</artifactId>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>report</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>${project.artifactId}</artifactId>
-        <version>${project.version}</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>dependency-updates-report</report>
-              <report>plugin-updates-report</report>
-              <report>property-updates-report</report>
-              <report>parent-updates-report</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    </plugins>
-  </reporting>
-
-  <profiles>
-    <profile>
-      <!-- run integration tests
-          to use this profile:
-          or run integration tests: ./mvnw -Prun-its
-      -->
-      <id>run-its</id>
-      <build>
-        <defaultGoal>verify</defaultGoal>
-
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>mrm-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>start</goal>
-                  <goal>stop</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <propertyName>repository.proxy.url</propertyName>
-              <repositories>
-                <mockRepo>
-                  <source>src/it-repo</source>
-                </mockRepo>
-                <localRepo>
-                  <source>${project.build.directory}/local-repo</source>
-                </localRepo>
-                <proxyRepo />
-              </repositories>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-invoker-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>integration-test</id>
-                <goals>
-                  <goal>install</goal>
-                  <goal>integration-test</goal>
-                  <goal>verify</goal>
-                </goals>
-                <configuration>
-                  <streamLogs>false</streamLogs>
-                  <debug>true</debug>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
