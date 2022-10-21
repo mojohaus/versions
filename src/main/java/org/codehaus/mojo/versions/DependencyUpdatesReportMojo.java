@@ -25,15 +25,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -202,8 +205,21 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
 
             if ( onlyUpgradable )
             {
-                dependencyUpdates = filter( dependencyUpdates, e -> e.getVersions().length > 1 );
-                dependencyManagementUpdates = filter( dependencyManagementUpdates, e -> e.getVersions().length > 1 );
+                dependencyUpdates = filter( dependencyUpdates, e -> e.getVersions().length > 0 );
+                dependencyManagementUpdates = filter( dependencyManagementUpdates, e -> e.getVersions().length > 0 );
+            }
+
+            if ( getLog().isDebugEnabled() )
+            {
+                getLog().debug( "Dependency versions:" );
+                dependencyUpdates.forEach( ( key, value ) -> getLog().debug( key.toString() + ": "
+                        + Arrays.stream( value.getVersions() ).map( ArtifactVersion::toString )
+                        .collect( Collectors.joining( ", " ) ) ) );
+
+                getLog().debug( "Dependency management versions:" );
+                dependencyManagementUpdates.forEach( ( key, value ) -> getLog().debug( key.toString() + ": "
+                        + Arrays.stream( value.getVersions() ).map( ArtifactVersion::toString )
+                        .collect( Collectors.joining( ", " ) ) ) );
             }
 
             for ( String format : formats )

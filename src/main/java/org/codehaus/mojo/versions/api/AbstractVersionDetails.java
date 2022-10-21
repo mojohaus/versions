@@ -340,6 +340,12 @@ public abstract class AbstractVersionDetails
     }
 
     @Override
+    public final ArtifactVersion[] getAllUpdates()
+    {
+        return getAllUpdates( (VersionRange) null, isIncludeSnapshots() );
+    }
+
+    @Override
     public final ArtifactVersion[] getAllUpdates( VersionRange versionRange )
     {
         return getAllUpdates( versionRange, isIncludeSnapshots() );

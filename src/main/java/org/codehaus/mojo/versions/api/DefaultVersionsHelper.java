@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,6 +45,8 @@ import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -668,109 +669,95 @@ public class DefaultVersionsHelper
         return new DefaultArtifactVersion( version );
     }
 
+    /**
+     * Returns a map of all possible updates per dependency. The lookup is done in parallel using
+     * {@code LOOKUP_PARALLEL_THREADS} threads.
+     *
+     * @param dependencies The set of {@link Dependency} instances to look up.
+     * @param usePluginRepositories Search the plugin repositories.
+     * @return map containing the ArtifactVersions object per dependency
+     * @throws ArtifactMetadataRetrievalException if the lookup does not succeed
+     */
     @Override
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                         boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
-        // Create the request for details collection for parallel lookup...
-        final List<Callable<DependencyArtifactVersions>> requestsForDetails =
-            new ArrayList<>( dependencies.size() );
-        for ( final Dependency dependency : dependencies )
-        {
-            requestsForDetails.add( new DependencyLookup( dependency, usePluginRepositories ) );
-        }
-
-        final Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>( DependencyComparator.INSTANCE );
-
-        // Lookup details in parallel...
-        final ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
+        ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
         try
         {
-            final List<Future<DependencyArtifactVersions>> responseForDetails =
-                executor.invokeAll( requestsForDetails );
-
-            // Construct the final results...
-            for ( final Future<DependencyArtifactVersions> details : responseForDetails )
+            Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>( DependencyComparator.INSTANCE );
+            List<Future<? extends Pair<Dependency, ArtifactVersions>>> futures = dependencies.stream()
+                    .map( dependency -> executor.submit( () -> new ImmutablePair<>
+                            ( dependency, lookupDependencyUpdates( dependency, usePluginRepositories ) ) ) )
+                    .collect( Collectors.toList() );
+            for ( Future<? extends Pair<Dependency, ArtifactVersions>> details : futures )
             {
-                final DependencyArtifactVersions dav = details.get();
-                dependencyUpdates.put( dav.getDependency(), dav.getArtifactVersions() );
+                Pair<Dependency, ArtifactVersions> pair = details.get();
+                dependencyUpdates.put( pair.getKey(), pair.getValue() );
             }
+
+            return dependencyUpdates;
         }
         catch ( ExecutionException | InterruptedException ie )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
-                                                              + ": " + ie.getMessage(), ie, null );
+                    + ": " + ie.getMessage(), ie, null );
         }
         finally
         {
-            executor.shutdownNow();
+            executor.shutdown();
         }
-        return dependencyUpdates;
     }
 
     @Override
     public ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
         throws ArtifactMetadataRetrievalException
     {
-        getLog().debug( "Checking "
-                            + ArtifactUtils.versionlessKey( dependency.getGroupId(), dependency.getArtifactId() )
-                            + " for updates newer than " + dependency.getVersion() );
-
-        return lookupArtifactVersions( createDependencyArtifact( dependency ), usePluginRepositories );
+        ArtifactVersions allVersions = lookupArtifactVersions( createDependencyArtifact( dependency ),
+                usePluginRepositories );
+        return new ArtifactVersions( allVersions.getArtifact(), Arrays.stream( allVersions.getAllUpdates() )
+                .collect( Collectors.toList() ), allVersions.getVersionComparator() );
     }
 
     @Override
     public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException
     {
-        // Create the request for details collection for parallel lookup...
-        List<Callable<PluginPluginUpdatesDetails>> requestsForDetails = new ArrayList<>( plugins.size() );
-        for ( final Plugin plugin : plugins )
-        {
-            requestsForDetails.add( new PluginLookup( plugin, allowSnapshots ) );
-        }
-
-        Map<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>( PluginComparator.INSTANCE );
-
-        // Lookup details in parallel...
         ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
         try
         {
-            final List<Future<PluginPluginUpdatesDetails>> responseForDetails =
-                executor.invokeAll( requestsForDetails );
-
-            // Construct the final results...
-            for ( final Future<PluginPluginUpdatesDetails> details : responseForDetails )
+            Map<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>( PluginComparator.INSTANCE );
+            List<Future<? extends Pair<Plugin, PluginUpdatesDetails>>> futures = plugins.stream()
+                    .map( p -> executor.submit( () -> new ImmutablePair<>
+                            ( p, lookupPluginUpdates( p, allowSnapshots ) ) ) )
+                    .collect( Collectors.toList() );
+            for ( Future<? extends Pair<Plugin, PluginUpdatesDetails>> details : futures )
             {
-                final PluginPluginUpdatesDetails pud = details.get();
-                pluginUpdates.put( pud.getPlugin(), pud.getPluginUpdatesDetails() );
+                Pair<Plugin, PluginUpdatesDetails> pair = details.get();
+                pluginUpdates.put( pair.getKey(), pair.getValue() );
             }
+
+            return pluginUpdates;
         }
         catch ( ExecutionException | InterruptedException ie )
         {
             throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
-                                                              + ie.getMessage(), ie, null );
+                    + ie.getMessage(), ie, null );
         }
         finally
         {
-            executor.shutdownNow();
+            executor.shutdown();
         }
-        return pluginUpdates;
     }
 
     @Override
     public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
         throws ArtifactMetadataRetrievalException
     {
-        String version = plugin.getVersion();
-        version = version == null ? "LATEST" : version;
-        getLog().debug( "Checking " + ArtifactUtils.versionlessKey( plugin.getGroupId(), plugin.getArtifactId() )
-                            + " for updates newer than " + version );
-
-        final ArtifactVersions pluginArtifactVersions =
-            lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), version ),
-                                    true );
+        String version = plugin.getVersion() != null
+                ? plugin.getVersion()
+                : "LATEST";
 
         Set<Dependency> pluginDependencies = new TreeSet<>( DependencyComparator.INSTANCE );
         if ( plugin.getDependencies() != null )
@@ -780,7 +767,13 @@ public class DefaultVersionsHelper
         Map<Dependency, ArtifactVersions> pluginDependencyDetails =
             lookupDependenciesUpdates( pluginDependencies, false );
 
-        return new PluginUpdatesDetails( pluginArtifactVersions, pluginDependencyDetails, allowSnapshots );
+        ArtifactVersions allVersions =
+                lookupArtifactVersions( createPluginArtifact( plugin.getGroupId(), plugin.getArtifactId(), version ),
+                        true );
+        ArtifactVersions updatedVersions = new ArtifactVersions( allVersions.getArtifact(),
+                Arrays.stream( allVersions.getAllUpdates() ).collect( Collectors.toList() ),
+                allVersions.getVersionComparator() );
+        return new PluginUpdatesDetails( updatedVersions, pluginDependencyDetails, allowSnapshots );
     }
 
     @Override
@@ -832,8 +825,8 @@ public class DefaultVersionsHelper
             }
         }
 
-        List<String> includePropertiesList = getSplittedProperties( includeProperties );
-        List<String> excludePropertiesList = getSplittedProperties( excludeProperties );
+        List<String> includePropertiesList = getSplitProperties( includeProperties );
+        List<String> excludePropertiesList = getSplitProperties( excludeProperties );
 
         getLog().debug( "Searching for properties associated with builders" );
         Iterator<Property> i = properties.values().iterator();
@@ -902,7 +895,7 @@ public class DefaultVersionsHelper
         return propertyVersions;
     }
 
-    private List<String> getSplittedProperties( String commaSeparatedProperties )
+    private List<String> getSplitProperties( String commaSeparatedProperties )
     {
         List<String> propertiesList = Collections.emptyList();
         if ( StringUtils.isNotEmpty( commaSeparatedProperties ) )
@@ -911,97 +904,6 @@ public class DefaultVersionsHelper
             propertiesList = Arrays.asList( StringUtils.stripAll( splittedProps ) );
         }
         return propertiesList;
-    }
-
-    // This is a data container to hold the result of a Dependency lookup to its ArtifactVersions.
-    private static class DependencyArtifactVersions
-    {
-        private final Dependency dependency;
-
-        private final ArtifactVersions artifactVersions;
-
-        DependencyArtifactVersions( final Dependency dependency, final ArtifactVersions artifactVersions )
-        {
-            this.dependency = dependency;
-            this.artifactVersions = artifactVersions;
-        }
-
-        public Dependency getDependency()
-        {
-            return dependency;
-        }
-
-        public ArtifactVersions getArtifactVersions()
-        {
-            return artifactVersions;
-        }
-    }
-
-    // This is a data container to hold the result of a Dependency lookup to its ArtifactVersions.
-    private static class PluginPluginUpdatesDetails
-    {
-        private final Plugin plugin;
-
-        private final PluginUpdatesDetails pluginUpdatesDetails;
-
-        PluginPluginUpdatesDetails( final Plugin plugin, final PluginUpdatesDetails pluginUpdatesDetails )
-        {
-            this.plugin = plugin;
-            this.pluginUpdatesDetails = pluginUpdatesDetails;
-        }
-
-        public Plugin getPlugin()
-        {
-            return plugin;
-        }
-
-        public PluginUpdatesDetails getPluginUpdatesDetails()
-        {
-            return pluginUpdatesDetails;
-        }
-    }
-
-    // This Callable wraps lookupDependencyUpdates so that it can be run in parallel.
-    private class DependencyLookup
-        implements Callable<DependencyArtifactVersions>
-    {
-        private final Dependency dependency;
-
-        private final boolean usePluginRepositories;
-
-        DependencyLookup( final Dependency dependency, final boolean usePluginRepositories )
-        {
-            this.dependency = dependency;
-            this.usePluginRepositories = usePluginRepositories;
-        }
-
-        public DependencyArtifactVersions call()
-            throws Exception
-        {
-            return new DependencyArtifactVersions( dependency,
-                                                   lookupDependencyUpdates( dependency, usePluginRepositories ) );
-        }
-    }
-
-    // This Callable wraps lookupPluginUpdates so that it can be run in parallel.
-    private class PluginLookup
-        implements Callable<PluginPluginUpdatesDetails>
-    {
-        private final Plugin plugin;
-
-        private final boolean allowSnapshots;
-
-        PluginLookup( final Plugin plugin, final Boolean allowSnapshots )
-        {
-            this.plugin = plugin;
-            this.allowSnapshots = allowSnapshots;
-        }
-
-        public PluginPluginUpdatesDetails call()
-            throws Exception
-        {
-            return new PluginPluginUpdatesDetails( plugin, lookupPluginUpdates( plugin, allowSnapshots ) );
-        }
     }
 
     /**
