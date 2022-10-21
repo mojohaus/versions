@@ -149,6 +149,12 @@ public class DependencyUpdatesReportMojoTest
             return this;
         }
 
+        public TestDependencyUpdatesReportMojo withAllowSnapshots( boolean allowSnapshots )
+        {
+            this.allowSnapshots = allowSnapshots;
+            return this;
+        }
+
         private static RepositorySystem mockRepositorySystem()
         {
             RepositorySystem repositorySystem = mock( RepositorySystem.class );
@@ -183,13 +189,21 @@ public class DependencyUpdatesReportMojoTest
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestDependencyUpdatesReportMojo()
             .withOnlyUpgradable( true )
+                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                {{
+                    put( "artifactA", new String[] { "1.0.0", "2.0.0" } );
+                    put( "artifactB", new String[] { "1.0.0" } );
+                    put( "artifactC", new String[] { "1.0.0", "2.0.0" } );
+                }} ) )
             .withDependencies(
-                dependencyOf( "artifactA" ), dependencyOf( "artifactB" ),
-                dependencyOf( "artifactC" ) )
+                dependencyOf( "artifactA", "1.0.0" ),
+                dependencyOf( "artifactB", "1.0.0" ),
+                dependencyOf( "artifactC", "2.0.0" ) )
             .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
-        assertThat( output, allOf( containsString( "artifactA" ), containsString( "artifactB" ) ) );
+        assertThat( output, containsString( "artifactA" ) );
+        assertThat( output, not( containsString( "artifactB" ) ) );
         assertThat( output, not( containsString( "artifactC" ) ) );
     }
 

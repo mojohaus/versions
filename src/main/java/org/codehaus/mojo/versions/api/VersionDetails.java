@@ -349,6 +349,14 @@ public interface VersionDetails
             throws InvalidSegmentException;
 
     /**
+     * Returns the all versions newer than the specified current version
+     *
+     * @return the all versions after currentVersion
+     * @since 2.13.0
+     */
+    ArtifactVersion[] getAllUpdates();
+
+    /**
      * Returns the all versions newer than the specified current version, but within the specified update scope.
      *
      * @param versionRange the version range to include.

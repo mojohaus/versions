@@ -24,10 +24,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Build;
@@ -45,7 +47,6 @@ import org.junit.Test;
 import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
-import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -81,6 +82,13 @@ public class PluginUpdatesReportMojoTest
         public TestPluginUpdatesReportMojo withPlugins( Plugin... plugins )
         {
             project.getBuild().setPlugins( Arrays.asList( plugins ) );
+            return this;
+        }
+
+        public TestPluginUpdatesReportMojo withArtifactMetadataSource(
+                ArtifactMetadataSource artifactMetadataSource )
+        {
+            this.artifactMetadataSource = artifactMetadataSource;
             return this;
         }
 
@@ -132,12 +140,17 @@ public class PluginUpdatesReportMojoTest
 
     private static Plugin pluginOf( String artifactId )
     {
+        return pluginOf( artifactId, "1.0.0" );
+    }
+
+    private static Plugin pluginOf( String artifactId, String version )
+    {
         return new Plugin()
         {
             {
                 setGroupId( "defaultGroup" );
                 setArtifactId( artifactId );
-                setVersion( "1.0.0" );
+                setVersion( version );
             }
         };
     }
@@ -148,13 +161,21 @@ public class PluginUpdatesReportMojoTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReportMojo()
-            .withPlugins( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
-                          pluginOf( "artifactC" ) )
-            .withOnlyUpgradable( true )
-            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                {{
+                    put( "artifactA", new String[] { "1.0.0", "2.0.0" } );
+                    put( "artifactB", new String[] { "1.0.0" } );
+                    put( "artifactC", new String[] { "1.0.0", "2.0.0" } );
+                }} ) )
+                .withPlugins( pluginOf( "artifactA", "1.0.0" ),
+                        pluginOf( "artifactB", "1.0.0" ),
+                        pluginOf( "artifactC", "2.0.0" ) )
+                .withOnlyUpgradable( true )
+                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
-        assertThat( output, allOf( containsString( "artifactA" ), containsString( "artifactB" ) ) );
+        assertThat( output, containsString( "artifactA" ) );
+        assertThat( output, not( containsString( "artifactB" ) ) );
         assertThat( output, not( containsString( "artifactC" ) ) );
     }
 
@@ -164,13 +185,21 @@ public class PluginUpdatesReportMojoTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReportMojo()
-            .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
-                                   pluginOf( "artifactC" ) )
+            .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+            {{
+                put( "artifactA", new String[] { "1.0.0", "2.0.0" } );
+                put( "artifactB", new String[] { "1.0.0" } );
+                put( "artifactC", new String[] { "1.0.0", "2.0.0" } );
+            }} ) )
+            .withPluginManagement( pluginOf( "artifactA", "1.0.0" ),
+                    pluginOf( "artifactB", "1.0.0" ),
+                    pluginOf( "artifactC", "2.0.0" ) )
             .withOnlyUpgradable( true )
             .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();
-        assertThat( output, allOf( containsString( "artifactA" ), containsString( "artifactB" ) ) );
+        assertThat( output, containsString( "artifactA" ) );
+        assertThat( output, not( containsString( "artifactB" ) ) );
         assertThat( output, not( containsString( "artifactC" ) ) );
     }
 

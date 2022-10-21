@@ -163,10 +163,8 @@ public class PluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdate
 
             if ( onlyUpgradable )
             {
-                pluginUpdates =
-                        filter( pluginUpdates, plugin -> plugin.getVersions().length > 1 );
-                pluginManagementUpdates = filter( pluginManagementUpdates,
-                        plugin -> plugin.getVersions().length > 1 );
+                pluginUpdates = filter( pluginUpdates, p -> p.getVersions().length > 0 );
+                pluginManagementUpdates = filter( pluginManagementUpdates, p -> p.getVersions().length > 0 );
             }
 
             PluginUpdatesModel model = new PluginUpdatesModel( pluginUpdates, pluginManagementUpdates );
