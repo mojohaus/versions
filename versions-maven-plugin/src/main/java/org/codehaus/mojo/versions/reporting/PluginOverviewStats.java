@@ -57,7 +57,7 @@ public class PluginOverviewStats extends OverviewStats
      * @param cache if not null, cache to retrieve the version information, initialised with
      * the {@link ArtifactVersions#getNewestUpdate(Optional)} update information
      * @param <T> always equal to {@linkplain PluginOverviewStats}
-     * @param <V> always equal to {@linkplain org.codehaus.mojo.versions.PluginUpdatesDetails}
+     * @param <V> always equal to {@linkplain PluginUpdatesDetails}
      * @return instance of the {@linkplain PluginOverviewStats}, initialised with the update information
      */
     public static <T extends OverviewStats, V extends ArtifactVersions> T fromUpdates( Collection<V> updates,

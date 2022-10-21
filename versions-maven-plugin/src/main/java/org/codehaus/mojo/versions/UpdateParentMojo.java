@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.Arrays;
@@ -44,11 +43,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.utils.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.PomHelper;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static org.apache.maven.shared.utils.StringUtils.isBlank;
@@ -146,14 +145,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
     }
 
-    /**
-     * @param pom the pom to update.
-     * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException   when things go wrong in a very bad way
-     * @throws XMLStreamException     when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(XMLEventReader)
-     * @since 1.0-alpha-1
-     */
+    @Override
     protected void update( ModifiedPomXMLEventReader pom )
             throws MojoExecutionException, MojoFailureException, XMLStreamException
     {

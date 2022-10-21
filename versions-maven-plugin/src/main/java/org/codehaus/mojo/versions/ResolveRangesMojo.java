@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.Collection;
@@ -136,13 +135,7 @@ public class ResolveRangesMojo
         super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
     }
 
-    /**
-     * @param pom the pom to update.
-     * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException   when things go wrong in a very bad way
-     * @throws XMLStreamException     when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(XMLEventReader)
-     */
+    @Override
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
