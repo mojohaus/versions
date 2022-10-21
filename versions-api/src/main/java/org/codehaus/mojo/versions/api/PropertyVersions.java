@@ -44,7 +44,6 @@ import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
-import static java.util.Optional.empty;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
@@ -73,6 +72,14 @@ public class PropertyVersions
 
     private final PropertyVersions.PropertyVersionComparator comparator;
 
+    /**
+     * Creates a new instance
+     * @param profileId profile id
+     * @param name property name
+     * @param helper {@link VersionsHelper} instance
+     * @param associations a set of {@link ArtifactAssociation} linking property names with artifacts
+     * @throws ArtifactMetadataRetrievalException thrown if artifact metadata lookup fails
+     */
     public PropertyVersions( String profileId, String name, VersionsHelper helper,
                              Set<ArtifactAssociation> associations )
         throws ArtifactMetadataRetrievalException
@@ -144,11 +151,17 @@ public class PropertyVersions
         return comparator;
     }
 
+    /**
+     * Returns the artifact associations as array
+     * @return array of artifact associations
+     */
+    // TODO: this conversion to array is completely unnecessary here
     public ArtifactAssociation[] getAssociations()
     {
         return associations.toArray( new ArtifactAssociation[0] );
     }
 
+    // TODO: perhaps it's better to simply return a set?
     private VersionComparator[] lookupComparators()
     {
         return associations.stream().map( association -> helper.getVersionComparator( association.getArtifact() ) )
@@ -164,6 +177,7 @@ public class PropertyVersions
      * is also associated to an artifact that has not been provided).
      * @since 1.0-alpha-3
      */
+    // TODO: why convert to array?
     public ArtifactVersion[] getVersions( Collection<Artifact> artifacts )
     {
         List<ArtifactVersion> result = new ArrayList<>();
@@ -227,7 +241,7 @@ public class PropertyVersions
     }
 
     /**
-     * Uses the {@link DefaultVersionsHelper} to find all available versions that match all the associations with this
+     * Uses the {@link VersionsHelper} to find all available versions that match all the associations with this
      * property.
      *
      * @param includeSnapshots Whether to include snapshot versions in our search.
@@ -290,33 +304,40 @@ public class PropertyVersions
         }
     }
 
+    /**
+     * Returns the property name
+     * @return name of the property
+     */
     public String getName()
     {
         return name;
     }
 
+    /**
+     * Returns the profile id
+     * @return profile id
+     */
     public String getProfileId()
     {
         return profileId;
     }
 
+    /**
+     * Returns {@code true} if the property is associated with an artifact version
+     * @return {@code true} if the property is associated with an artifact version
+     */
     public boolean isAssociated()
     {
         return !associations.isEmpty();
     }
 
+    /**
+     * Returns the string representation of the object instance
+     */
     public String toString()
     {
         return "PropertyVersions{" + ( profileId == null ? "" : "profileId='" + profileId + "', " ) + "name='" + name
             + '\'' + ", associations=" + associations + '}';
-    }
-
-    public ArtifactVersion getNewestVersion( String currentVersion, Property property, boolean allowSnapshots,
-                                             List<MavenProject> reactorProjects, VersionsHelper helper )
-            throws InvalidVersionSpecificationException, InvalidSegmentException
-    {
-        return getNewestVersion( currentVersion, property, allowSnapshots, reactorProjects, helper,
-                false, empty() );
     }
 
     /**
@@ -432,21 +453,6 @@ public class PropertyVersions
         return result;
     }
 
-    private ArtifactVersion getNewestVersion( String currentVersion, VersionsHelper helper,
-                                              Optional<Segment> unchangedSegment,
-                                              boolean includeSnapshots, VersionRange range )
-            throws InvalidSegmentException
-    {
-        ArtifactVersion lowerBound = helper.createArtifactVersion( currentVersion );
-        ArtifactVersion upperBound = null;
-        if ( unchangedSegment.isPresent() )
-        {
-            upperBound = getVersionComparator().incrementSegment( lowerBound, unchangedSegment.get() );
-        }
-        Restriction restriction = new Restriction( lowerBound, false, upperBound, false );
-        return getNewestVersion( range, restriction, includeSnapshots );
-    }
-
     private final class PropertyVersionComparator implements VersionComparator
     {
         public int compare( ArtifactVersion v1, ArtifactVersion v2 )
@@ -481,6 +487,13 @@ public class PropertyVersions
             return result;
         }
 
+        /**
+         * Returns the number of segments in the associated artifact. If the property is not associated
+         * with any artifact, {@link IllegalStateException} is thrown.
+         * @param v The artifact version to count the segments of.
+         * @return number of segments in the linked artifact
+         * @throws IllegalStateException if the property is not associated with any artifact
+         */
         public int getSegmentCount( ArtifactVersion v )
         {
             if ( !isAssociated() )
@@ -508,6 +521,17 @@ public class PropertyVersions
             return result;
         }
 
+        /**
+         * Increments the given segment of the property version. If the property is not associated
+         *          * with any artifact, {@link IllegalStateException} is thrown.
+         * @param v The artifact version to increment.
+         * @param segment The segment number to increment.
+         * @return artifact version of the associated artifact with incremented segment at the specified segment
+         * location
+         * @throws InvalidSegmentException thrown if the segment argument exceeds the number of segments
+         * of the associated artifact
+         * @throws IllegalStateException thrown if the property is not associated with any artifact
+         */
         public ArtifactVersion incrementSegment( ArtifactVersion v, Segment segment ) throws InvalidSegmentException
         {
             if ( !isAssociated() )
