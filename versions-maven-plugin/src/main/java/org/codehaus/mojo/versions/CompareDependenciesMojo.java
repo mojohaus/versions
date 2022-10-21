@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.File;
@@ -134,13 +133,7 @@ public class CompareDependenciesMojo
         this.mavenProjectBuilder = mavenProjectBuilder;
     }
 
-    /**
-     * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the plugin itself
-     * @throws org.apache.maven.plugin.MojoFailureException   The plugin detected an error in the build
-     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(XMLEventReader)
-     */
+    @Override
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
