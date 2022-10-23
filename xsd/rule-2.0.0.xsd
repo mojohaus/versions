@@ -89,21 +89,21 @@
       <xs:annotation>
         <xs:documentation source="version">1.0.0+</xs:documentation>
         <xs:documentation source="description">
-            The for groupId to which this rule applies. Wildcards with ? and * are valid.
-            A rule applies to all child groupIds unless overridden by a subsequent rule.
-            A rule without wildcards will override a rule with wildcards.
-            A rule with ? wildcards will override a rule with * wildcards.
-          </xs:documentation>
+          The for groupId to which this rule applies. Wildcards with ? and * are valid.
+          A rule applies to all child groupIds unless overridden by a subsequent rule.
+          A rule without wildcards will override a rule with wildcards.
+          A rule with ? wildcards will override a rule with * wildcards.
+        </xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="artifactId" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation source="version">1.0.0+</xs:documentation>
         <xs:documentation source="description">
-            The artifactId to which this rule applies. Wildcards with ? and * are valid.
-            A rule without wildcards will override a rule with wildcards.
-            A rule with ? wildcards will override a rule with * wildcards.
-          </xs:documentation>
+          The artifactId to which this rule applies. Wildcards with ? and * are valid.
+          A rule without wildcards will override a rule with wildcards.
+          A rule with ? wildcards will override a rule with * wildcards.
+        </xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="comparisonMethod" type="xs:string" use="required">

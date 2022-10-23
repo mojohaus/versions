@@ -52,22 +52,20 @@
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">     * Basic test.</em>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">     * @throws Exception when the test fails.</em>
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>      @Test
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testBasic()
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>          <strong class="jxr_keyword">throws</strong> Exception
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>      {
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>          assertEquals( 0, instanceCompare( <span class="jxr_string">"1"</span>, <span class="jxr_string">"1"</span> ) );
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>          assertTrue( instanceCompare( <span class="jxr_string">"1"</span>, <span class="jxr_string">"2"</span> ) &lt; 0 );
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>          assertTrue( instanceCompare( <span class="jxr_string">"2"</span>, <span class="jxr_string">"1"</span> ) &gt; 0 );
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>          assertTrue( instanceCompare( <span class="jxr_string">"1"</span>, <span class="jxr_string">"1-SNAPSHOT"</span> ) &gt; 0 );
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>          assertTrue( instanceCompare( <span class="jxr_string">"1"</span>, <span class="jxr_string">"1.0"</span> ) &gt; 0 );
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>          assertTrue( instanceCompare( <span class="jxr_string">"1.1"</span>, <span class="jxr_string">"1"</span> ) &gt; 0 );
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>          assertTrue( instanceCompare( <span class="jxr_string">"5.1.0.0.24"</span>, <span class="jxr_string">"5.1.0.0.9"</span> ) &gt; 0 );
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>          assertTrue( instanceCompare( <span class="jxr_string">"5.1.0.0.2a4"</span>, <span class="jxr_string">"5.1.0.0.9"</span> ) &lt; 0 );
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>      }
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  }
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      @Test
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testBasic()
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      {
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>          assertEquals( 0, instanceCompare( <span class="jxr_string">"1"</span>, <span class="jxr_string">"1"</span> ) );
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>          assertTrue( instanceCompare( <span class="jxr_string">"1"</span>, <span class="jxr_string">"2"</span> ) &lt; 0 );
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>          assertTrue( instanceCompare( <span class="jxr_string">"2"</span>, <span class="jxr_string">"1"</span> ) &gt; 0 );
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>          assertTrue( instanceCompare( <span class="jxr_string">"1"</span>, <span class="jxr_string">"1-SNAPSHOT"</span> ) &gt; 0 );
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>          assertTrue( instanceCompare( <span class="jxr_string">"1"</span>, <span class="jxr_string">"1.0"</span> ) &gt; 0 );
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>          assertTrue( instanceCompare( <span class="jxr_string">"1.1"</span>, <span class="jxr_string">"1"</span> ) &gt; 0 );
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>          assertTrue( instanceCompare( <span class="jxr_string">"5.1.0.0.24"</span>, <span class="jxr_string">"5.1.0.0.9"</span> ) &gt; 0 );
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>          assertTrue( instanceCompare( <span class="jxr_string">"5.1.0.0.2a4"</span>, <span class="jxr_string">"5.1.0.0.9"</span> ) &lt; 0 );
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      }
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2008&#x2013;2022 <a href="https://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>

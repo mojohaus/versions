@@ -70,7 +70,7 @@
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>      {
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>          <strong class="jxr_keyword">return</strong> dependencies.stream()
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>                  .filter( predicate )
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>                  .collect( Collectors.toCollection( () -&gt; <strong class="jxr_keyword">new</strong> TreeSet&lt;&gt;( <strong class="jxr_keyword">new</strong> <a name="DependencyComparator" href="../../../../../org/codehaus/mojo/versions/utils/DependencyComparator.html#DependencyComparator">DependencyComparator</a>() ) ) );
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>                  .collect( Collectors.toCollection( () -&gt; <strong class="jxr_keyword">new</strong> TreeSet&lt;&gt;( DependencyComparator.INSTANCE ) ) );
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>      }
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  }
 </pre>

@@ -6,5 +6,9 @@ org.codehaus.mojo.versions.model
 org.codehaus.mojo.versions.model.io.xpp3
 org.codehaus.mojo.versions.ordering
 org.codehaus.mojo.versions.recording
+org.codehaus.mojo.versions.reporting
+org.codehaus.mojo.versions.reporting.model
+org.codehaus.mojo.versions.reporting.model.io.xpp3
 org.codehaus.mojo.versions.rewriting
 org.codehaus.mojo.versions.utils
+org.codehaus.mojo.versions.xml
