@@ -1,35 +1,32 @@
- ~~ Licensed to the Apache Software Foundation (ASF) under one
- ~~ or more contributor license agreements.  See the NOTICE file
- ~~ distributed with this work for additional information
- ~~ regarding copyright ownership.  The ASF licenses this file
- ~~ to you under the Apache License, Version 2.0 (the
- ~~ "License"); you may not use this file except in compliance
- ~~ with the License.  You may obtain a copy of the License at
- ~~
- ~~   http://www.apache.org/licenses/LICENSE-2.0
- ~~
- ~~ Unless required by applicable law or agreed to in writing,
- ~~ software distributed under the License is distributed on an
- ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~~ KIND, either express or implied.  See the License for the
- ~~ specific language governing permissions and limitations
- ~~ under the License.
+title: Changing the version of an Aggregator
+author: Karl Heinz Marbaise
+date: 2017-06-17
 
- -----
- Changing the version of an Aggregator
- -----
- Karl Heinz Marbaise
- ------
- 2017-06-17
- ------
+<!---
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+  https://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+# Changing the version of an Aggregator
 
-Changing the version of an Aggregator
+Let us assume we have a multi-module project which consists of the following
+modules:
 
-  Let us assume we have a multi module project which consists of the following
-  modules:
-
-+----+
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>localdomain.localhost</groupId>
@@ -49,13 +46,15 @@ Changing the version of an Aggregator
   </modules>
 ..
 </project>
-+---+
+```
 
-  A module <<<separate-module>>>:
+A module `separate-module`:
 
-+----+
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.soebes.smpp</groupId>
@@ -70,13 +69,15 @@ Changing the version of an Aggregator
   <version>2.0.7-SNAPSHOT</version>
 
 </project>
-+----+
+```
 
-  And two other modules first <<module-a2>> which looks like this:
+And two other modules first `module-a2` which looks like this:
 
-+----+
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>localdomain.localhost</groupId>
@@ -90,13 +91,15 @@ Changing the version of an Aggregator
   <version>1.2.0</version>
 
 </project>
-+----+
+```
 
-  An finally the module <<module-a3>> which looks like this:
+An finally the module `module-a3` which looks like this:
 
-+----+
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>localdomain.localhost</groupId>
@@ -109,18 +112,17 @@ Changing the version of an Aggregator
   <packaging>pom</packaging>
 
 </project>
-+----+
+```
 
-  So now you decide to change the version of the module to a different version like 
-  <<3.6.0>>.
+So now you decide to change the version of the module to a different version like `3.6.0`.
 
-+---+
+```shell
 mvn versions:set -DnewVersion=3.6.0
-+---+
+```
 
-  So the following output will be generated:
+So the following output will be generated:
 
-+----+
+```log
 [INFO] Scanning for projects...
 [INFO] ------------------------------------------------------------------------
 [INFO] Reactor Build Order:
@@ -166,30 +168,30 @@ mvn versions:set -DnewVersion=3.6.0
 [INFO] Finished at: 2017-06-17T14:17:50+02:00
 [INFO] Final Memory: 23M/369M
 [INFO] ------------------------------------------------------
-+----+
+```
 
-  If you have carefully read the output you have seen that the module <<separate-module>>
-  is not listed here with something like <<Processing ...>>>.
+If you have carefully read the output you have seen that the module `separate-module`
+is not listed here with something like `Processing ...`.
 
-  This means that this module has not been changed to get a new version as you wished by the
-  call.
+This means that this module has not been changed to get a new version as you wished by the
+call.
 
-  To get that working you need to add supplemental command line parameters:
+To get that working you need to add supplemental command line parameters:
 
 
-+---+
+```shell
 mvn versions:set -DnewVersion=3.6.0 -DoldVersion=* -DgroupId=* -DartifactId=*
-+---+
+```
 
-  This is needed otherwise the filter for the versions (via <<-DoldVersion=*>>) would have
-  filtered out that module cause it has a different version than the rest of modules.
-  Furthermore you need to add the <<-DgroupId=*>> and <<-DartifactId=*>> otherwise
-  the <<separate-module>> will also filtered out based on the differences in groupId
-  and artifactId.
+This is needed otherwise the filter for the versions (via `-DoldVersion=*`) would have
+filtered out that module cause it has a different version than the rest of modules.
+Furthermore you need to add the `-DgroupId=*` and `-DartifactId=*` otherwise
+the `separate-module` will also filtered out based on the differences in groupId
+and artifactId.
 
-  So in end the result of the above call looks like this:
+So in end the result of the above call looks like this:
 
-+----+
+```log
 [INFO] Scanning for projects...
 [INFO] ------------------------------------------------------------------------
 [INFO] Reactor Build Order:
@@ -239,7 +241,4 @@ mvn versions:set -DnewVersion=3.6.0 -DoldVersion=* -DgroupId=* -DartifactId=*
 [INFO] Finished at: 2017-06-17T16:17:51+02:00
 [INFO] Final Memory: 23M/310M
 [INFO] ------------------------------------------------------------------------
-+----+
-
-  []
-
+```
