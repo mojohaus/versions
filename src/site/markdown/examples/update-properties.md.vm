@@ -1,35 +1,31 @@
- ~~ Licensed to the Apache Software Foundation (ASF) under one
- ~~ or more contributor license agreements.  See the NOTICE file
- ~~ distributed with this work for additional information
- ~~ regarding copyright ownership.  The ASF licenses this file
- ~~ to you under the Apache License, Version 2.0 (the
- ~~ "License"); you may not use this file except in compliance
- ~~ with the License.  You may obtain a copy of the License at
- ~~
- ~~   http://www.apache.org/licenses/LICENSE-2.0
- ~~
- ~~ Unless required by applicable law or agreed to in writing,
- ~~ software distributed under the License is distributed on an
- ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~~ KIND, either express or implied.  See the License for the
- ~~ specific language governing permissions and limitations
- ~~ under the License.
+title: Update Properties
+author: Stephen Connolly
+date: 2009-03-27
 
- -----
- Update Properties
- -----
- Stephen Connolly
- ------
- 2009-03-27
- ------
+<!---
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+  https://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
-Update Properties
+# Update Properties
 
-  This goal is useful when you define dependency versions using properties. For example if you have a suite of projects
-  and you want to ensure that you use the same version of each dependency in the suite, you might have a dependency
-  section that looks like this:
+This goal is useful when you define dependency versions using properties. For example if you have a suite of projects
+and you want to ensure that you use the same version of each dependency in the suite, you might have a dependency
+section that looks like this:
 
----
+```xml
 <project>
   ...
   <dependencies>
@@ -55,15 +51,15 @@ Update Properties
   </properties>
   ...
 </project>
----
+```
 
-  The aim being to allow updating the version of all the suite components in one go.  The versions-maven-plugin can help
-  you to automate these updates.
+The aim being to allow updating the version of all the suite components in one go.  The versions-maven-plugin can help
+you to automate these updates.
 
-  By default, the versions-maven-plugin will look at the dependencies in your POM.  If any dependencies declare a version
-  which depends on evaluating a single property that is defined in the POM, for example:
+By default, the versions-maven-plugin will look at the dependencies in your POM.  If any dependencies declare a version
+which depends on evaluating a single property that is defined in the POM, for example:
 
----
+```xml
     <!-- strongly recommend this version -->
     <dependency>
       <groupId>com.foo.bar</groupId>
@@ -91,16 +87,16 @@ Update Properties
       <artifactId>manchu-core</artifactId>
       <version>[1.0.0,${manchu.version}]</version>
     </dependency>
----
+```
 
-  If multiple dependencies use the property to define the version, then the all dependencies will be used to determine
-  what versions are available (and consequently what version to update the property to).  The version chosen in such 
-  cases must be available for all associated dependencies.
+If multiple dependencies use the property to define the version, then the all dependencies will be used to determine
+what versions are available (and consequently what version to update the property to).  The version chosen in such 
+cases must be available for all associated dependencies.
 
-  The automatic detection can be assisted by adding a version-maven-plugin configuration section to the POM,
-  for example if we add the following to the POM:
+The automatic detection can be assisted by adding a version-maven-plugin configuration section to the POM,
+for example if we add the following to the POM:
 
----
+```xml
 <project>
   ...
   <build>
@@ -137,16 +133,16 @@ Update Properties
   </build>
   ...
 </project>
----
+```
 
-  Then executing the <<<update-properties>>> goal will update the <<<manchu.version>>> property to the latest common 
-  version of both manchu-core and manchu-wibble available to  you (i.e. based on your local repository and all 
-  currently active remote repositories).
+Then executing the `update-properties` goal will update the `manchu.version` property to the latest common 
+version of both manchu-core and manchu-wibble available to  you (i.e. based on your local repository and all 
+currently active remote repositories).
 
-  If you want to restrict updates to within a specific range, for example, suppose we only want the 1.5 stream of
-  manchu:
+If you want to restrict updates to within a specific range, for example, suppose we only want the 1.5 stream of
+manchu:
 
----
+```xml
 <project>
   ...
   <build>
@@ -178,11 +174,11 @@ Update Properties
   </build>
   ...
 </project>
----
+```
 
-  Additionally, if you want to disable the automatic detection of properties set the autoLinkItemDependencies to false
+Additionally, if you want to disable the automatic detection of properties set the autoLinkItemDependencies to false
 
----
+```xml
 <project>
   ...
   <build>
@@ -214,13 +210,13 @@ Update Properties
   </build>
   ...
 </project>
----
+```
 
 
-  By default, the reactor will also be searched to see if it can satisfy the property's associated dependencies.
-  If you want to disable the preference given to the reactor (i.e. stop the reactor version always winning)
+By default, the reactor will also be searched to see if it can satisfy the property's associated dependencies.
+If you want to disable the preference given to the reactor (i.e. stop the reactor version always winning)
 
----
+```xml
 <project>
   ...
   <build>
@@ -252,11 +248,11 @@ Update Properties
   </build>
   ...
 </project>
----
+```
 
-  If you want to disable the searching the reactor at all:
+If you want to disable the searching the reactor at all:
 
----
+```xml
 <project>
   ...
   <build>
@@ -288,12 +284,12 @@ Update Properties
   </build>
   ...
 </project>
----
+```
 
-  The allowSnapshots property and configuration option allow the inclusion of snapshots, if you want to ensure that
-  snapshots are never resolved,
+The allowSnapshots property and configuration option allow the inclusion of snapshots, if you want to ensure that
+snapshots are *never* resolved,
 
----
+```xml
 <project>
   ...
   <build>
@@ -327,22 +323,22 @@ Update Properties
   </build>
   ...
 </project>
----
+```
 
-* Restricting the properties to be updated using includes / excludes
+## Restricting the properties to be updated using includes / excludes
 
-  The <<includes>> and <<excludes>>> parameters follow the format <<<groupId:artifactId:type:classifier>>>.
-  Use a comma separated separated list to specify multiple includes.  Wildcards (*) can also be used to match
-  multiple values.
+The **includes** and **excludes` parameters follow the format `groupId:artifactId:type:classifier`.
+Use a comma separated separated list to specify multiple includes.  Wildcards (*) can also be used to match
+multiple values.
 
-  This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and
-  artifactId matching "junit".
+This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and
+artifactId matching "junit".
 
-  Only properties that map to artifacts that are allowed by the inclusion and exclusion patterns will be updated.
+Only properties that map to artifacts that are allowed by the inclusion and exclusion patterns will be updated.
 
-  With a project that looks like this:
+With a project that looks like this:
 
----
+```xml
 <project>
   ...
   <dependencies>
@@ -375,29 +371,21 @@ Update Properties
   </properties>
   ...
 </project>
----
+```
 
-  To update the property for only the "com.foo.bar" dependencies, you can run:
+To update the property for only the "com.foo.bar" dependencies, you can run:
 
-+---+
+```shell
 mvn versions:update-properties -Dincludes=com.foo.bar:*
-+---+
+```
 
-  Would result in the property for the manchu.version being updated, but not the blarg.version property.
+Would result in the property for the manchu.version being updated, but not the blarg.version property.
 
-  In the above example, you could achieve the same result using:
+In the above example, you could achieve the same result using:
 
-+---+
+```shell
 mvn versions:update-properties -Dexcludes=org.blarg:*
-+---+
+```
 
-  If a property is used by artifacts that are not allowed by the set of specified <<includes>> and <<excludes>> then the property
-  will not be updated.
-
-
-
-
-
-
-
-
+If a property is used by artifacts that are not allowed by the set of specified **includes** and **excludes** then the property
+will not be updated.
