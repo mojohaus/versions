@@ -1,0 +1,114 @@
+
+title: Introduction
+author: Andrzej Jarmoniuk
+date: 2022-10-27
+
+<!---
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+  https://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+Max Dependency Updates
+======================
+
+This Maven Enforcer rule checks if the number of dependency updates does not exceed the given threshold.
+
+The following parameters are supported by this rule:
+
+| Parameter                                     |  Default   | Description                                                                                                                                                                                                                                                                      |
+|-----------------------------------------------|:----------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `maxUpdates`                                  |    `0`     | The total maximum allowed number of dependency updates.                                                                                                                                                                                                                          |
+| `processDependencies`                         |   `true`   | Whether to process the dependencies section of the project.                                                                                                                                                                                                                      |     
+| `processDependencyManagement`                 |   `true`   | Whether to process the dependencyManagement section of the project.                                                                                                                                                                                                              |
+| `processDependencyManagementTransitive`       |   `true`   | Whether to process the dependencyManagement part transitive or not. In case of *type* `pom` and *scope* `import`, this means by default to report also the imported dependencies. If the parameter is set to false the report will only show updates of the imported pom itself. |
+| `processPluginDependencies`                   |   `true`   | Whether to process the dependencies sections of plugins.                                                                                                                                                                                                                         |
+| `processPluginDependenciesInPluginManagement` |   `true`   | Whether to process the dependencies sections of plugins which are defined in pluginManagement.                                                                                                                                                                                   | 
+| `ignoreMinorUpdates`                          |  `false`   | Whether minor updates should be ignored. Default `false`.<br/>**Note:** when true, will also assume that `ignoreIncrementalUpdates` and `ignoreSubIncrementalUpdates` are also `true`.                                                                                           |
+| `ignoreIncrementalUpdates`                    |  `false`   | Whether incremental updates should be ignored. Default `false`.<br/>**Note:** when true, will also assume that `ignoreSubIncrementalUpdates` is also `true`.                                                                                                                     |
+| `ignoreSubIncrementalUpdates`                 |  `false`   | Whether sub-incremental updates should be ignored. Default `false`.                                                                                                                                                                                                              |
+| `dependencyIncludes`                          |    `*`     | List of dependency inclusion patterns. Only dependencies matching all the patterns will be considered.<br/>The wildcard (`*`) can be used as the only, first, last or both characters in each token. The version token does support version ranges.                              |
+| `dependencyExcludes`                          |  (empty)   | List of dependency exclusion patterns. Only dependencies matching none of the patterns will be considered.<br/>The wildcard (`*`) can be used as the only, first, last or both characters in each token. The version token does support version ranges.                          |
+| `dependencyManagementIncludes`                |    `*`     | List of dependency management inclusion patterns. Only dependencies matching all the patterns will be considered.<br/>The wildcard (`*`) can be used as the only, first, last or both characters in each token. The version token does support version ranges.                   |
+| `dependencyManagementExcludes`                |  (empty)   | List of dependency management exclusion patterns. Only dependencies matching none of the patterns will be considered.<br/>The wildcard (`*`) can be used as the only, first, last or both characters in each token. The version token does support version ranges.               |
+| `pluginDependencyIncludes`                    |    `*`     | List of plugin dependency inclusion patterns. Only dependencies matching all the patterns will be considered.<br/>The wildcard (`*`) can be used as the only, first, last or both characters in each token. The version token does support version ranges.                       |
+| `pluginDependencyExcludes`                    |  (empty)   | List of plugin dependency exclusion patterns. Only dependencies matching none of the patterns will be considered.<br/>The wildcard (`*`) can be used as the only, first, last or both characters in each token. The version token does support version ranges.                   |
+| `pluginManagementDependencyIncludes`          |    `*`     | List of plugin management dependency inclusion patterns. Only dependencies matching all the patterns will be considered.<br/>The wildcard (`*`) can be used as the only, first, last or both characters in each token. The version token does support version ranges.            |
+| `pluginManagementDependencyExcludes`          |  (empty)   | List of plugin management dependency exclusion patterns. Only dependencies matching none of the patterns will be considered.<br/>The wildcard (`*`) can be used as the only, first, last or both characters in each token. The version token does support version ranges.        |
+| `serverId`                                    | `serverId` | *settings.xml*'s server id for the URL. This is used when wagon needs extra authentication information.                                                                                                                                                                          |
+| `rulesUri`                                    |            | URI of a ruleSet file containing the rules that control how to compare version numbers. The URI could be either a Wagon URI or a classpath URI (e.g. *classpath:\/\/\/package/sub/package/rules.xml*).                                                                           |
+| `ruleSet`                                     |            | Allows specifying the `RuleSet` object describing rules on artifact versions to ignore when considering updates.<br/> See: [Using the ruleSet element in the POM](../version-rules.html#Using_the_ruleSet_element_in_the_POM)                                                    |
+
+**Note:** Inclusion/exclusion parameters like `dependencyIncludes`, `dependencyExcludes`, etc. work the same way as parameters
+of the same name of the [versions:display-dependency-updates](../display-dependency-updates-mojo.html) goal
+of the plugin.
+
+The parameters accept a list of *extended GAV* patterns, meaning patterns of:
+
+`groupId:artifactId:version:type:classifier:scope`
+
+of which only `groupId` is obligatory. On top of that, all of the components can be replaced with the asterisk (`*`)
+character in which case it will match all values.
+
+So, e.g. both of the below patterns:
+- `org.codehaus.mojo`
+- `org.codehaus.mojo:*`
+
+will match all artifacts with groupId `org.codehaus.mojo`.
+
+### Sample Plugin Configuration
+
+Below a rundimentary example of using the enforcer rule.
+
+The below example specifies a rule which will not allow any updates except for updates of `localhost:dummy-api`.
+It will also ignore all sub-incremental updates.
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    ...
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin-version}</version>
+                <goals>
+                    <goal>enforce</goal>
+                </goals>
+                <configuration>
+                    <rules>
+                        <maxDependencyUpdates>
+                            <maxUpdates>0</maxUpdates>
+                            <dependencyExcludes>
+                                <dependencyExclude>localhost:dummy-api</dependencyExclude>
+                            </dependencyExcludes>
+                            <ignoreSubIncrementalUpdates>true</ignoreSubIncrementalUpdates>
+                        </maxDependencyUpdates>
+                    </rules>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.mojo.versions</groupId>
+                        <artifactId>versions-enforcer</artifactId>
+                        <version>${pluginVersion}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+```

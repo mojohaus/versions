@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions.filtering;
  * under the License.
  */
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -26,6 +27,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.maven.model.Dependency;
+import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 
 public class DependencyFilter
@@ -62,12 +64,12 @@ public class DependencyFilter
         return String.format( "%s{%s}", getClass().getSimpleName(), pattern );
     }
 
-    public Set<Dependency> retainingIn( Set<Dependency> dependencies )
+    public Set<Dependency> retainingIn( Collection<Dependency> dependencies )
     {
         return filterBy( dependencies, this::matchersMatch );
     }
 
-    public Set<Dependency> removingFrom( Set<Dependency> dependencies )
+    public Set<Dependency> removingFrom( Collection<Dependency> dependencies )
     {
         return filterBy( dependencies, not( this::matchersMatch ) );
     }
@@ -77,10 +79,51 @@ public class DependencyFilter
         return matchers.stream().anyMatch( m -> m.test( dependency ) );
     }
 
-    private TreeSet<Dependency> filterBy( Set<Dependency> dependencies, Predicate<Dependency> predicate )
+    private TreeSet<Dependency> filterBy( Collection<Dependency> dependencies, Predicate<Dependency> predicate )
     {
         return dependencies.stream()
                 .filter( predicate )
                 .collect( Collectors.toCollection( () -> new TreeSet<>( DependencyComparator.INSTANCE ) ) );
+    }
+
+    /**
+     * Returns a set of dependencies filtered by the given include- and exclude filters.
+     * @param dependencies collection of dependencies to filter
+     * @param includes a list of dependency includes
+     * @param excludes a list of dependency excludes
+     * @param section if log is not null, dependency section name for the debug log
+     * @param log null or log to which debug information will be logged
+     * @return filtered set of dependencies
+     */
+    public static Set<Dependency> filterDependencies(
+            Collection<Dependency> dependencies,
+            List<String> includes,
+            List<String> excludes,
+            String section,
+            Log log
+    )
+    {
+        DependencyFilter includeDeps = DependencyFilter.parseFrom( includes );
+        DependencyFilter excludeDeps = DependencyFilter.parseFrom( excludes );
+
+        Set<Dependency> filtered = includeDeps.retainingIn( dependencies );
+        filtered = excludeDeps.removingFrom( filtered );
+
+        if ( log != null && log.isDebugEnabled() )
+        {
+            log.debug( String.format( "parsed includes in %s: %s -> %s", section, includes, includeDeps ) );
+            log.debug( String.format( "parsed excludes in %s: %s -> %s", section, excludes, excludeDeps ) );
+            log.debug( String.format( "Unfiltered %s: ", section ) + output( dependencies ) );
+            log.debug( String.format( "Filtered %s: ", section ) + output( filtered ) );
+        }
+
+        return filtered;
+    }
+
+    private static String output( Collection<Dependency> dependencies )
+    {
+        return dependencies.stream()
+                .map( d -> String.format( "%s:%s:%s", d.getGroupId(), d.getArtifactId(), d.getVersion() ) )
+                .collect( Collectors.joining( ", " ) );
     }
 }

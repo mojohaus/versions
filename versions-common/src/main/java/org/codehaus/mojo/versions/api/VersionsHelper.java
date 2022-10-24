@@ -414,14 +414,4 @@ public interface VersionsHelper
      */
     void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactResolutionException, ArtifactNotFoundException;
-
-    /**
-     * Attempts to interpolate the version from model properties.
-     *
-     * @param dependency the dependency
-     * @param project the maven project
-     * @return the dependency with interpolated property (as far as possible)
-     * @since 2.14.0
-     */
-    Dependency interpolateVersion( Dependency dependency, MavenProject project );
 }

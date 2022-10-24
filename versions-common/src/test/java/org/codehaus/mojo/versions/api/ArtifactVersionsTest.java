@@ -25,6 +25,7 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
@@ -33,9 +34,12 @@ import org.junit.Test;
 
 import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -140,5 +144,64 @@ public class ArtifactVersionsTest
 
         assertThat( instance.getNewerVersions( "1.0.0-SNAPSHOT", of( SUBINCREMENTAL ), false, false ),
                 arrayContaining( new DefaultArtifactVersion( "1.0.0" ) ) );
+    }
+
+    @Test
+    public void testAllVersionsForIgnoreScopeSubIncremental()
+    {
+        ArtifactVersion[] versions = versions( "1.0.0", "1.0.0-1", "1.0.1" );
+        ArtifactVersions instance =
+                new ArtifactVersions( new DefaultArtifact( "default-group", "dummy-api",
+                        "1.0.0", "foo", "bar",
+                        "jar", null ),
+                        Arrays.asList( versions ), new MavenVersionComparator() );
+        Restriction restriction = instance.restrictionForIgnoreScope( of( SUBINCREMENTAL ) );
+        ArtifactVersion[] filteredVersions = instance.getVersions( restriction, false );
+        assertThat( filteredVersions, arrayWithSize( 1 ) );
+        assertThat( filteredVersions, arrayContaining( new DefaultArtifactVersion( "1.0.1" ) ) );
+    }
+
+    @Test
+    public void testAllVersionsForIgnoreScopeIncremental()
+    {
+        ArtifactVersion[] versions = versions( "1.0.0", "1.0.0-1", "1.0.1", "1.1.0" );
+        ArtifactVersions instance =
+                new ArtifactVersions( new DefaultArtifact( "default-group", "dummy-api",
+                        "1.0.0", "foo", "bar",
+                        "jar", null ),
+                        Arrays.asList( versions ), new MavenVersionComparator() );
+        Restriction restriction = instance.restrictionForIgnoreScope( of( INCREMENTAL ) );
+        ArtifactVersion[] filteredVersions = instance.getVersions( restriction, false );
+        assertThat( filteredVersions, arrayWithSize( 1 ) );
+        assertThat( filteredVersions, arrayContaining( new DefaultArtifactVersion( "1.1.0" ) ) );
+    }
+
+    @Test
+    public void testAllVersionsForIgnoreScopeMinor()
+    {
+        ArtifactVersion[] versions = versions( "1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0" );
+        ArtifactVersions instance =
+                new ArtifactVersions( new DefaultArtifact( "default-group", "dummy-api",
+                        "1.0.0", "foo", "bar",
+                        "jar", null ),
+                        Arrays.asList( versions ), new MavenVersionComparator() );
+        Restriction restriction = instance.restrictionForIgnoreScope( of( MINOR ) );
+        ArtifactVersion[] filteredVersions = instance.getVersions( restriction, false );
+        assertThat( filteredVersions, arrayWithSize( 1 ) );
+        assertThat( filteredVersions, arrayContaining( new DefaultArtifactVersion( "2.0.0" ) ) );
+    }
+
+    @Test
+    public void testAllVersionsForIgnoreScopeMajor()
+    {
+        ArtifactVersion[] versions = versions( "1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0" );
+        ArtifactVersions instance =
+                new ArtifactVersions( new DefaultArtifact( "default-group", "dummy-api",
+                        "1.0.0", "foo", "bar",
+                        "jar", null ),
+                        Arrays.asList( versions ), new MavenVersionComparator() );
+        Restriction restriction = instance.restrictionForIgnoreScope( of( MAJOR ) );
+        ArtifactVersion[] filteredVersions = instance.getVersions( restriction, false );
+        assertThat( filteredVersions, arrayWithSize( 0 ) );
     }
 }
