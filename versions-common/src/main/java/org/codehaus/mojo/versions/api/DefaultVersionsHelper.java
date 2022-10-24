@@ -858,24 +858,6 @@ public class DefaultVersionsHelper
         return propertyVersions;
     }
 
-    @Override
-    public Dependency interpolateVersion( final Dependency dependency, final MavenProject project )
-    {
-
-        // resolve version from model properties if necessary (e.g. "${mycomponent.myversion}"
-        if ( dependency.getVersion().startsWith( "${" ) )
-        {
-            final String resolvedVersion = project.getOriginalModel()
-                .getProperties().getProperty(
-                    dependency.getVersion().substring( 2, dependency.getVersion().length() - 1 ) );
-            if ( resolvedVersion != null && !resolvedVersion.isEmpty() )
-            {
-                dependency.setVersion( resolvedVersion );
-            }
-        }
-        return dependency;
-    }
-
     /**
      * Builder class for {@linkplain DefaultVersionsHelper}
      */

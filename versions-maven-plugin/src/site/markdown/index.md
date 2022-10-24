@@ -86,6 +86,12 @@ The Versions Plugin has the following reporting goals.
 * [versions:parent-updates-report](./parent-updates-report-mojo.html) produces a report on possible parent artifact
   upgrades.
 
+## Enforcer rules overview
+
+The Versions Plugin currently provides one Maven Enforcer Plugin rule:
+* [maxDependencyUpdates](../versions-enforcer/max-dependency-updates.html) allows the user to specify a maximum number of updates which,
+  if exceeded, will trigger the enforcer plugin to fail.
+
 ## Usage
 
 General instructions on how to use the Versions Plugin can be found on the [usage page](./usage.html). Some more

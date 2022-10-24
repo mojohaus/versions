@@ -28,38 +28,37 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.codehaus.plexus.util.StringUtils;
 
+import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.filtering.DependencyFilter.filterDependencies;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromDependencyManagement;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDependenciesFromPluginsInPluginManagement;
 
 /**
  * Displays all dependencies that have newer versions available.
@@ -357,68 +356,6 @@ public class DisplayDependencyUpdatesMojo
                 changeRecorders );
     }
 
-    private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )
-    {
-        Set<Dependency> result = new TreeSet<>( DependencyComparator.INSTANCE );
-        if ( build.getPluginManagement() != null )
-        {
-            for ( Plugin plugin : build.getPluginManagement().getPlugins() )
-            {
-                if ( plugin.getDependencies() != null && !plugin.getDependencies().isEmpty() )
-                {
-                    result.addAll( plugin.getDependencies() );
-                }
-            }
-        }
-        return result;
-    }
-
-    private static Set<Dependency> extractDependenciesFromPlugins( List<Plugin> plugins )
-    {
-        Set<Dependency> result = new TreeSet<>( DependencyComparator.INSTANCE );
-        for ( Plugin plugin : plugins )
-        {
-            if ( plugin.getDependencies() != null && !plugin.getDependencies().isEmpty() )
-            {
-                result.addAll( plugin.getDependencies() );
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Returns a set of dependencies where the dependencies which are defined in the dependency management section have
-     * been filtered out.
-     *
-     * @param dependencies         The set of dependencies.
-     * @param dependencyManagement The set of dependencies from the dependency management section.
-     * @return A new set of dependencies which are from the set of dependencies but not from the set of dependency
-     * management dependencies.
-     * @since 1.0-beta-1
-     */
-    private static Set<Dependency> removeDependencyManagment( Set<Dependency> dependencies,
-                                                              Set<Dependency> dependencyManagement )
-    {
-        Set<Dependency> result = new TreeSet<>( DependencyComparator.INSTANCE );
-        for ( Dependency dependency : dependencies )
-        {
-            boolean matched = false;
-            for ( Dependency managedDependency : dependencyManagement )
-            {
-                if ( dependenciesMatch( dependency, managedDependency ) )
-                {
-                    matched = true;
-                    break;
-                }
-            }
-            if ( !matched )
-            {
-                result.add( dependency );
-            }
-        }
-        return result;
-    }
-
     // open for tests
     protected static boolean dependenciesMatch( Dependency dependency, Dependency managedDependency )
     {
@@ -491,106 +428,48 @@ public class DisplayDependencyUpdatesMojo
         logInit();
         validateInput();
 
-        Set<Dependency> dependencyManagement = new TreeSet<>( DependencyComparator.INSTANCE );
-        DependencyManagement projectDependencyManagement = getProjectDependencyManagement( getProject() );
-        if ( projectDependencyManagement != null )
-        {
-
-            List<Dependency> dependenciesFromPom = projectDependencyManagement.getDependencies();
-            for ( Dependency dependency : dependenciesFromPom )
-            {
-                getLog().debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
-                                    + ":" + dependency.getVersion() + ":" + dependency.getScope() );
-                if ( dependency.getVersion() == null )
-                {
-                    // get parent and get the information from there.
-                    if ( getProject().hasParent() )
-                    {
-                        getLog().debug( "Reading parent dependencyManagement information" );
-                        DependencyManagement parentProjectDependencyManagement =
-                            getProjectDependencyManagement( getProject().getParent() );
-                        if ( parentProjectDependencyManagement != null )
-                        {
-                            List<Dependency> parentDeps = parentProjectDependencyManagement.getDependencies();
-                            for ( Dependency parentDep : parentDeps )
-                            {
-                                // only groupId && artifactId needed cause version is null
-                                if ( dependency.getGroupId().equals( parentDep.getGroupId() )
-                                    && dependency.getArtifactId().equals( parentDep.getArtifactId() )
-                                    && dependency.getType().equals( parentDep.getType() ) )
-                                {
-                                    dependencyManagement.add( parentDep );
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        String message = "We can't get the version for the dependency " + dependency.getGroupId() + ":"
-                            + dependency.getArtifactId() + " cause there does not exist a parent.";
-                        getLog().error( message );
-                        // Throw error cause we will not able to get a version for a dependency.
-                        throw new MojoExecutionException( message );
-                    }
-                }
-                else
-                {
-                    dependency = getHelper().interpolateVersion( dependency, getProject() );
-                    dependencyManagement.add( dependency );
-                }
-            }
-        }
-
-        Set<Dependency> dependencies = new TreeSet<>( DependencyComparator.INSTANCE );
-        dependencies.addAll( getProject().getDependencies() );
-
-        if ( isProcessingDependencyManagement() )
-        {
-            dependencies = removeDependencyManagment( dependencies, dependencyManagement );
-        }
-
-        Set<Dependency> pluginDependencies = new TreeSet<>( DependencyComparator.INSTANCE );
-
-        if ( isProcessingPluginDependencies() )
-        {
-            pluginDependencies = extractDependenciesFromPlugins( getProject().getBuildPlugins() );
-        }
-
-        Set<Dependency> pluginDependenciesInPluginManagement = new TreeSet<>( DependencyComparator.INSTANCE );
-        if ( isProcessPluginDependenciesInDependencyManagement() )
-        {
-            pluginDependenciesInPluginManagement =
-                extractPluginDependenciesFromPluginsInPluginManagement( getProject().getBuild() );
-        }
+        Set<Dependency> dependencyManagement = emptySet();
 
         try
         {
             if ( isProcessingDependencyManagement() )
             {
-                dependencyManagement = filterDependencyManagementIncludes( dependencyManagement );
+                dependencyManagement = filterDependencies( extractDependenciesFromDependencyManagement( getProject(),
+                                processDependencyManagementTransitive, getLog() ),
+                        dependencyManagementIncludes, dependencyManagementExcludes, "Dependecy Management",
+                        getLog() );
 
-                logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement, false ),
-                            "Dependency Management" );
+                logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement,
+                                false ), "Dependency Management" );
             }
             if ( isProcessingDependencies() )
             {
-                dependencies = filterDependencyIncludes( dependencies );
-
-                logUpdates( getHelper().lookupDependenciesUpdates( dependencies, false ), "Dependencies" );
+                Set<Dependency> finalDependencyManagement = dependencyManagement;
+                logUpdates( getHelper().lookupDependenciesUpdates(
+                        filterDependencies( getProject().getDependencies()
+                            .parallelStream()
+                            .filter( dep -> finalDependencyManagement.parallelStream()
+                                    .noneMatch( depMan -> dependenciesMatch( dep, depMan ) ) )
+                            .collect( () -> new TreeSet<>( DependencyComparator.INSTANCE ), Set::add, Set::addAll ),
+                            dependencyIncludes, dependencyExcludes, "Dependencies", getLog() ),
+                                false ),
+                        "Dependencies" );
             }
             if ( isProcessPluginDependenciesInDependencyManagement() )
             {
-                pluginDependenciesInPluginManagement =
-                        filterPluginManagementIncludes( pluginDependenciesInPluginManagement );
-
-                logUpdates( getHelper().lookupDependenciesUpdates( pluginDependenciesInPluginManagement, false ),
-                            "pluginManagement of plugins" );
+                logUpdates( getHelper().lookupDependenciesUpdates( filterDependencies(
+                                extractPluginDependenciesFromPluginsInPluginManagement( getProject() ),
+                                pluginManagementDependencyIncludes, pluginManagementDependencyExcludes,
+                                "Plugin Management Dependencies", getLog() ), false ),
+                        "pluginManagement of plugins" );
             }
             if ( isProcessingPluginDependencies() )
             {
-                pluginDependencies = filterPluginDependencyIncludes( pluginDependencies );
-
-                logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
+                logUpdates( getHelper().lookupDependenciesUpdates( filterDependencies(
+                                extractDependenciesFromPlugins( getProject() ),
+                                pluginDependencyIncludes, pluginDependencyExcludes, "Plugin Dependencies",
+                                getLog() ), false ),
+                        "Plugin Dependencies" );
             }
         }
         catch ( VersionRetrievalException e )
@@ -625,72 +504,6 @@ public class DisplayDependencyUpdatesMojo
         if ( gavList != null && gavList.stream().anyMatch( gav -> countMatches( gav, ":" ) >= numSections ) )
         {
             throw new MojoExecutionException( argumentName + " should not contain more than 6 segments" );
-        }
-    }
-
-    private Set<Dependency> filterDependencyIncludes( Set<Dependency> dependencies )
-    {
-        return filterDependencies( dependencies, dependencyIncludes, dependencyExcludes, "Dependencies" );
-    }
-
-    private Set<Dependency> filterDependencyManagementIncludes( Set<Dependency> dependencyManagement )
-    {
-        return filterDependencies( dependencyManagement,
-                                   dependencyManagementIncludes, dependencyManagementExcludes, "Dependecy Management" );
-    }
-
-    private Set<Dependency> filterPluginDependencyIncludes( Set<Dependency> dependencies )
-    {
-        return filterDependencies( dependencies, pluginDependencyIncludes, pluginDependencyExcludes,
-                "Plugin Dependencies" );
-    }
-
-    private Set<Dependency> filterPluginManagementIncludes( Set<Dependency> dependencyManagement )
-    {
-        return filterDependencies( dependencyManagement,
-                pluginManagementDependencyIncludes, pluginManagementDependencyExcludes,
-                "Plugin Management Dependencies" );
-    }
-
-    private Set<Dependency> filterDependencies(
-        Set<Dependency> dependencies,
-        List<String> includes,
-        List<String> excludes,
-        String section
-    )
-    {
-        DependencyFilter includeDeps = DependencyFilter.parseFrom( includes );
-        DependencyFilter excludeDeps = DependencyFilter.parseFrom( excludes );
-
-        Set<Dependency> filtered = includeDeps.retainingIn( dependencies );
-        filtered = excludeDeps.removingFrom( filtered );
-
-        if ( getLog().isDebugEnabled() )
-        {
-            getLog().debug( String.format( "parsed includes in %s: %s -> %s", section, includes, includeDeps ) );
-            getLog().debug( String.format( "parsed excludes in %s: %s -> %s", section, excludes, excludeDeps ) );
-            getLog().debug( String.format( "Unfiltered %s: ", section ) + output( dependencies ) );
-            getLog().debug( String.format( "Filtered %s: ", section ) + output( filtered ) );
-        }
-
-        return filtered;
-    }
-
-    private String output( Set<Dependency> dependencies )
-    {
-        return dependencies.stream()
-                .map( d -> String.format( "%s:%s:%s", d.getGroupId(), d.getArtifactId(), d.getVersion() ) )
-                .collect( Collectors.joining( ", " ) );
-    }
-    private DependencyManagement getProjectDependencyManagement( MavenProject project )
-    {
-        if ( processDependencyManagementTransitive )
-        {
-            return project.getDependencyManagement();
-        }
-        else
-        {
-            return project.getOriginalModel().getDependencyManagement();
         }
     }
 

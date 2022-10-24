@@ -29,14 +29,10 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 public abstract class AbstractVersionComparator
     implements VersionComparator
 {
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public abstract int compare( ArtifactVersion o1, ArtifactVersion o2 );
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final int getSegmentCount( ArtifactVersion v )
     {
         if ( v == null )
@@ -58,6 +54,7 @@ public abstract class AbstractVersionComparator
      *
      * @return the hash code.
      */
+    @Override
     public int hashCode()
     {
         return getClass().hashCode();
@@ -71,6 +68,7 @@ public abstract class AbstractVersionComparator
      * @see #hashCode()
      * @see java.util.Hashtable
      */
+    @Override
     public boolean equals( Object obj )
     {
         return obj == this || ( obj != null && getClass().equals( obj.getClass() ) );

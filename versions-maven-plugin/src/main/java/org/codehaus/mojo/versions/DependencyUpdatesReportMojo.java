@@ -51,6 +51,7 @@ import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
 import static java.util.Collections.emptyMap;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.interpolateVersion;
 import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 
 /**
@@ -174,7 +175,7 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
                     // TODO: I'm not 100% sure if this will work correctly in all cases.
                     for ( Dependency dep : getProject().getOriginalModel().getDependencyManagement().getDependencies() )
                     {
-                        dep = getHelper().interpolateVersion( dep, getProject() );
+                        dep = interpolateVersion( dep, getProject() );
 
                         getLog().debug( "Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
                             + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );

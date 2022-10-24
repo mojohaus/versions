@@ -34,6 +34,7 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
 import static java.util.Collections.reverseOrder;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
@@ -70,6 +71,29 @@ public abstract class AbstractVersionDetails
 
     protected AbstractVersionDetails()
     {
+    }
+
+    @Override
+    public Restriction restrictionFor( Optional<Segment> scope )
+            throws InvalidSegmentException
+    {
+        ArtifactVersion nextVersion = scope
+                .filter( s -> s.isMajorTo( SUBINCREMENTAL ) )
+                .map( s -> (ArtifactVersion)
+                        new BoundArtifactVersion( currentVersion, Segment.of( s.value() + 1 ) ) )
+                .orElse( currentVersion );
+        return new Restriction( nextVersion, false, scope.filter( MAJOR::isMajorTo )
+                .map( s -> (ArtifactVersion) new BoundArtifactVersion( currentVersion, s ) ).orElse( null ),
+                false );
+    }
+
+    @Override
+    public Restriction restrictionForIgnoreScope( Optional<Segment> ignored )
+    {
+        ArtifactVersion nextVersion = ignored
+                .map( s -> (ArtifactVersion) new BoundArtifactVersion( currentVersion, s ) )
+                .orElse( currentVersion );
+        return new Restriction( nextVersion, false, null, false );
     }
 
     @Override
@@ -307,7 +331,7 @@ public abstract class AbstractVersionDetails
     {
         try
         {
-            return getNewestVersion( getVersionComparator().restrictionFor( currentVersion, updateScope ),
+            return getNewestVersion( restrictionFor( updateScope ),
                     includeSnapshots );
         }
         catch ( InvalidSegmentException e )
@@ -322,7 +346,7 @@ public abstract class AbstractVersionDetails
     {
         try
         {
-            return getVersions( getVersionComparator().restrictionFor( currentVersion, updateScope ),
+            return getVersions( restrictionFor( updateScope ),
                     includeSnapshots );
         }
         catch ( InvalidSegmentException e )

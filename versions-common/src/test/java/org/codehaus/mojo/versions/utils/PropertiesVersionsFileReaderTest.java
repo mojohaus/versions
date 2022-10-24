@@ -25,10 +25,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class PropertiesVersionsFileReaderTest
 {
@@ -43,9 +41,9 @@ public class PropertiesVersionsFileReaderTest
         reader.read();
 
         int numberOfPropertiesConfig = 3;
-        assertTrue( equalsCvsUnordered( "booking-api.version,booking-lib.version,be-air-impl.version",
+        Assert.assertTrue( equalsCvsUnordered( "booking-api.version,booking-lib.version,be-air-impl.version",
                                         reader.getProperties() ) );
-        assertEquals( numberOfPropertiesConfig, reader.getPropertiesConfig().length );
+        Assert.assertEquals( numberOfPropertiesConfig, reader.getPropertiesConfig().length );
     }
 
     private boolean equalsCvsUnordered( String csvExpected, String csvActual )

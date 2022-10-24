@@ -100,6 +100,8 @@
     <module>model-ruleset</module>
     <module>versions-api</module>
     <module>versions-common</module>
+    <module>versions-enforcer</module>
+    <module>versions-test</module>
     <module>versions-maven-plugin</module>
   </modules>
 
@@ -139,6 +141,11 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.apache.maven.enforcer</groupId>
+        <artifactId>enforcer-api</artifactId>
+        <version>3.1.0</version>
+      </dependency>
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
