@@ -226,7 +226,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 2.5
      */
     @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
-    private boolean allowMajorUpdates;
+    private boolean allowMajorUpdates = true;
 
     /**
      * <p>Whether to allow the minor version number to be changed.</p>
@@ -237,7 +237,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 2.5
      */
     @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
-    private boolean allowMinorUpdates;
+    private boolean allowMinorUpdates = true;
 
     /**
      * <p>Whether to allow the incremental version number to be changed.</p>
@@ -249,7 +249,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 2.5
      */
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
-    private boolean allowIncrementalUpdates;
+    private boolean allowIncrementalUpdates = true;
 
     /**
      * Whether to allow any version change to be allowed. This keeps
@@ -263,7 +263,7 @@ public class DisplayDependencyUpdatesMojo
      */
     @Deprecated
     @Parameter( property = "allowAnyUpdates", defaultValue = "true" )
-    private boolean allowAnyUpdates;
+    private boolean allowAnyUpdates = true;
 
     /**
      * Whether to show additional information such as dependencies that do not need updating. Defaults to false.
@@ -697,7 +697,8 @@ public class DisplayDependencyUpdatesMojo
         return allowAnyUpdates
         ? empty()
         : of( SegmentUtils.determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates, getLog() ).map( s -> Segment.of( s.value() - 1 ) )
+                allowIncrementalUpdates, getLog() )
+                .map( s -> Segment.of( s.value() + 1 ) )
                 .orElse( MAJOR ) );
     }
 
