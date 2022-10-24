@@ -165,7 +165,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
             {{
                 setProject( createProject() );
-                setVariableValueToObject( this, "allowMinorUpdates", true );
+                setVariableValueToObject( this, "allowAnyUpdates", false );
+                setVariableValueToObject( this, "allowMajorUpdates", false );
                 setVariableValueToObject( this, "processDependencies", true );
                 setVariableValueToObject( this, "dependencyIncludes",
                         singletonList( WildcardMatcher.WILDCARD ) );
@@ -179,6 +180,132 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     not( anyOf( containsString( "2.0.0-SNAPSHOT" ),
                             containsString( "2.0.0-beta" ),
                             containsString( "2.0.0-rc1" ) ) ) );
+        }
+        finally
+        {
+            if ( tempPath != null && Files.exists( tempPath ) )
+            {
+                Files.delete( tempPath );
+            }
+        }
+    }
+
+    @Test
+    public void testAllowMajorUpdatesFalse()
+            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException
+    {
+        Path tempPath = null;
+        try
+        {
+            tempPath = Files.createTempFile( "display-dependency-updates", "" );
+            final File tempFile = tempPath.toFile();
+            new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
+                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
+            {{
+                put( "default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0"} );
+            }} ), null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+            {{
+                setProject( createProject() );
+                setVariableValueToObject( this, "allowAnyUpdates", false );
+                setVariableValueToObject( this, "allowMajorUpdates", false );
+                setVariableValueToObject( this, "processDependencies", true );
+                setVariableValueToObject( this, "dependencyIncludes",
+                        singletonList( WildcardMatcher.WILDCARD ) );
+                setVariableValueToObject( this, "dependencyExcludes", emptyList() );
+                this.outputFile = tempFile;
+                setPluginContext( new HashMap<>() );
+            }}.execute();
+
+            String output = String.join( "", Files.readAllLines( tempPath ) );
+
+            assertThat( output, containsString( "1.1.0" ) );
+            assertThat( output, not( containsString( "2.0.0" ) ) );
+        }
+        finally
+        {
+            if ( tempPath != null && Files.exists( tempPath ) )
+            {
+                Files.delete( tempPath );
+            }
+        }
+    }
+
+    @Test
+    public void testAllowMinorUpdatesFalse()
+            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException
+    {
+        Path tempPath = null;
+        try
+        {
+            tempPath = Files.createTempFile( "display-dependency-updates", "" );
+            final File tempFile = tempPath.toFile();
+            new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
+                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
+            {{
+                put( "default-dependency", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0"} );
+            }} ), null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+            {{
+                setProject( createProject() );
+                setVariableValueToObject( this, "allowAnyUpdates", false );
+                setVariableValueToObject( this, "allowMinorUpdates", false );
+                setVariableValueToObject( this, "processDependencies", true );
+                setVariableValueToObject( this, "dependencyIncludes",
+                        singletonList( WildcardMatcher.WILDCARD ) );
+                setVariableValueToObject( this, "dependencyExcludes", emptyList() );
+                this.outputFile = tempFile;
+                setPluginContext( new HashMap<>() );
+            }}.execute();
+
+            String output = String.join( "", Files.readAllLines( tempPath ) );
+
+            assertThat( output, containsString( "1.0.1" ) );
+            assertThat( output, not( containsString( "1.1.0" ) ) );
+            assertThat( output, not( containsString( "2.0.0" ) ) );
+        }
+        finally
+        {
+            if ( tempPath != null && Files.exists( tempPath ) )
+            {
+                Files.delete( tempPath );
+            }
+        }
+    }
+
+    @Test
+    public void testAllowIncrementalUpdatesFalse()
+            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException
+    {
+        Path tempPath = null;
+        try
+        {
+            tempPath = Files.createTempFile( "display-dependency-updates", "" );
+            final File tempFile = tempPath.toFile();
+            new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
+                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
+            {{
+                put( "default-dependency", new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"} );
+            }} ), null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+            {{
+                setProject( createProject() );
+                setVariableValueToObject( this, "allowAnyUpdates", false );
+                setVariableValueToObject( this, "allowIncrementalUpdates", false );
+                setVariableValueToObject( this, "processDependencies", true );
+                setVariableValueToObject( this, "dependencyIncludes",
+                        singletonList( WildcardMatcher.WILDCARD ) );
+                setVariableValueToObject( this, "dependencyExcludes", emptyList() );
+                this.outputFile = tempFile;
+                setPluginContext( new HashMap<>() );
+            }}.execute();
+
+            String output = String.join( "", Files.readAllLines( tempPath ) );
+
+            assertThat( output, containsString( "1.0.0-1" ) );
+            assertThat( output, not( containsString( "1.0.1" ) ) );
+            assertThat( output, not( containsString( "1.1.0" ) ) );
+            assertThat( output, not( containsString( "2.0.0" ) ) );
         }
         finally
         {
@@ -207,7 +334,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
             {{
                 setProject( createProject() );
-                setVariableValueToObject( this, "allowIncrementalUpdates", true );
+                setVariableValueToObject( this, "allowAnyUpdates", false );
+                setVariableValueToObject( this, "allowMinorUpdates", false );
                 setVariableValueToObject( this, "processDependencies", true );
                 setVariableValueToObject( this, "dependencyIncludes",
                         singletonList( WildcardMatcher.WILDCARD ) );
@@ -228,6 +356,47 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             {
                 Files.delete( tempPath );
             }
+        }
+    }
+
+    @Test
+    public void testDetermineUpdatedSegment() throws Exception
+    {
+        File outputFile = null;
+        try
+        {
+            outputFile = File.createTempFile( "display-dependency-updates", "" );
+            assert outputFile.exists();
+
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
+                    new File( "target/test-classes/org/codehaus/mojo/display-dependency-updates/ruleset" ),
+                    "display-dependency-updates" );
+
+            assertThat( mojo.ruleSet, notNullValue() );
+            assertThat( mojo.ruleSet.getIgnoreVersions(), notNullValue() );
+            assertThat( mojo.ruleSet.getIgnoreVersions(), Matchers.hasSize( 3  ) );
+            assertThat( mojo.ruleSet.getIgnoreVersions(), hasItem( matches(
+                    new TestIgnoreVersions().withVersion( "1.0.1" ) ) ) );
+            assertThat( mojo.ruleSet.getIgnoreVersions(), containsInAnyOrder(
+                    matches( new TestIgnoreVersions().withVersion( "1.0.1" ) ),
+                    matches( new TestIgnoreVersions().withType( TYPE_REGEX ).withVersion( ".+-SNAPSHOT" ) ),
+                    matches( new TestIgnoreVersions().withType( TYPE_REGEX ).withVersion( ".+-M\\d+" ) ) ) );
+
+            // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
+            mojo.outputFile = outputFile;
+            mojo.artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
+            {{
+                put( "dummy-api", new String[] { "1.0.0", "1.0.1", "1.1.0-M1", "1.2.0-SNAPSHOT" } );
+            }} );
+
+            assertThat( mojo.ruleSet.getIgnoreVersions(), Matchers.hasSize( 3 ) );
+            mojo.execute();
+            List<String> output = Files.readAllLines( outputFile.toPath(), UTF_8 );
+            assertThat( output, not( hasItem( containsString( "1.1.0-M1" ) ) ) );
+        }
+        finally
+        {
+            assert outputFile == null || !outputFile.exists() || outputFile.delete();
         }
     }
 }
