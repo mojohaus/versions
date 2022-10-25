@@ -221,19 +221,192 @@ public interface VersionsHelper
      * {@link org.codehaus.mojo.versions.Property} instances consisting of the properties defined in the project which
      * are associated with version information.
      *
-     * @param project The project.
-     * @param propertyDefinitions Any extra hints about properties.
-     * @param includeProperties A comma separated list of properties to include.
-     * @param excludeProperties A comma separated list of properties to exclude.
-     * @param autoLinkItems whether to automatically infer associations
+     * @param request {@link VersionPropertiesMapRequest} instance containing the arguments
      * @return a map of {@link org.codehaus.mojo.versions.api.PropertyVersions} values keyed by
      *         {@link org.codehaus.mojo.versions.Property} instances.
      * @throws MojoExecutionException if something goes wrong.
      */
-    Map<Property, PropertyVersions> getVersionPropertiesMap( MavenProject project, Property[] propertyDefinitions,
-                                                             String includeProperties, String excludeProperties,
-                                                             boolean autoLinkItems )
+    Map<Property, PropertyVersions> getVersionPropertiesMap( VersionPropertiesMapRequest request )
         throws MojoExecutionException;
+
+    /**
+     * Argument builder class for
+     * {@link VersionsHelper#getVersionPropertiesMap(VersionPropertiesMapRequest)}.
+     */
+    class VersionPropertiesMapRequest
+    {
+        private MavenProject mavenProject;
+        private Property[] propertyDefinitions;
+        private String includeProperties;
+        private String excludeProperties;
+        private boolean includeParent;
+        private boolean autoLinkItems;
+
+        /**
+         * Returns the {@link MavenProject} object
+         * @return {@link MavenProject} object
+         */
+        protected MavenProject getMavenProject()
+        {
+            return mavenProject;
+        }
+
+        /**
+         * Returns the {@link Property} array
+         * @return {@link Property} array
+         */
+        protected Property[] getPropertyDefinitions()
+        {
+            return propertyDefinitions;
+        }
+
+        /**
+         * Returns the value of {@link #includeProperties}
+         * @return value of {@link #includeProperties}
+         */
+        protected String getIncludeProperties()
+        {
+            return includeProperties;
+        }
+
+        /**
+         * Returns the value of {@link #excludeProperties}
+         * @return value of {@link #excludeProperties}
+         */
+        protected String getExcludeProperties()
+        {
+            return excludeProperties;
+        }
+
+        /**
+         * Returns the value of {@link #includeParent}.
+         * If not set, it is assumed to be {@code true}
+         *
+         * @return value of {@link #includeParent}
+         */
+        protected boolean isIncludeParent()
+        {
+            return includeParent;
+        }
+
+        /**
+         * Returns the value of {@link #autoLinkItems}
+         * If not set, it is assumed to be {@code true}
+         * @return value of {@link #autoLinkItems}
+         */
+        protected boolean isAutoLinkItems()
+        {
+            return autoLinkItems;
+        }
+
+        /**
+         * Returns a new {@link Builder} instance
+         * @return new {@link Builder} instance
+         */
+        public static Builder builder()
+        {
+            return new Builder();
+        }
+
+        /**
+         * Builder class for {@link VersionPropertiesMapRequest}
+         */
+        public static class Builder
+        {
+            private MavenProject mavenProject;
+            private Property[] propertyDefinitions;
+            private String includeProperties;
+            private String excludeProperties;
+            private Boolean includeParent;
+            private Boolean autoLinkItems;
+
+            private Builder()
+            {
+            }
+
+            /**
+             * Supplies the {@link MavenProject} instance
+             * @param mavenProject {@link MavenProject} instance
+             * @return {@link Builder} instance
+             */
+            public Builder withMavenProject( MavenProject mavenProject )
+            {
+                this.mavenProject = mavenProject;
+                return this;
+            }
+
+            /**
+             * Supplies the {@link MavenProject} instance
+             * @param propertyDefinitions array of property definitions
+             * @return {@link Builder} instance
+             */
+            public Builder withPropertyDefinitions( Property[] propertyDefinitions )
+            {
+                this.propertyDefinitions = propertyDefinitions;
+                return this;
+            }
+
+            /**
+             * Supplies the properties to include
+             * @param includeProperties comma-delimited properties to include
+             * @return {@link Builder} instance
+             */
+            public Builder withIncludeProperties( String includeProperties )
+            {
+                this.includeProperties = includeProperties;
+                return this;
+            }
+
+            /**
+             * Supplies the properties to exclude
+             * @param excludeProperties comma-delimited properties to exclude
+             * @return {@link Builder} instance
+             */
+            public Builder withExcludeProperties( String excludeProperties )
+            {
+                this.excludeProperties = excludeProperties;
+                return this;
+            }
+
+            /**
+             * Supplies the includeParent parameter (whether parent POMs should be included)
+             * @param includeParent whether parent POMs should be included
+             * @return {@link Builder} instance
+             */
+            public Builder withIncludeParent( boolean includeParent )
+            {
+                this.includeParent = includeParent;
+                return this;
+            }
+
+            /**
+             * Supplies the information whether to automatically infer associations
+             * @param autoLinkItems whether to automatically infer associations
+             * @return {@link Builder} instance
+             */
+            public Builder withAutoLinkItems( boolean autoLinkItems )
+            {
+                this.autoLinkItems = autoLinkItems;
+                return this;
+            }
+
+            /**
+             * Returns the {@link VersionPropertiesMapRequest} instance
+             * @return {@link VersionPropertiesMapRequest} instance
+             */
+            public VersionPropertiesMapRequest build()
+            {
+                VersionPropertiesMapRequest instance = new VersionPropertiesMapRequest();
+                instance.mavenProject = this.mavenProject;
+                instance.propertyDefinitions = propertyDefinitions;
+                instance.includeProperties = includeProperties;
+                instance.excludeProperties = excludeProperties;
+                instance.includeParent = includeParent == null || includeParent;
+                instance.autoLinkItems = autoLinkItems == null || autoLinkItems;
+                return instance;
+            }
+        }
+    }
 
     /**
      * Attempts to resolve the artifact.

@@ -47,6 +47,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
@@ -206,7 +207,8 @@ public class CompareDependenciesMojo
         if ( updatePropertyVersions )
         {
             Map<Property, PropertyVersions> versionProperties =
-                this.getHelper().getVersionPropertiesMap( getProject(), null, null, null, true );
+                    this.getHelper().getVersionPropertiesMap( VersionsHelper.VersionPropertiesMapRequest.builder()
+                            .withMavenProject( getProject() ).build() );
             List<String> diff = updatePropertyVersions( pom, versionProperties, remoteDepsMap );
             propertyDiffs.addAll( diff );
         }

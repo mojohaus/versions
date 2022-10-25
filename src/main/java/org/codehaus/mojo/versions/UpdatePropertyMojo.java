@@ -39,6 +39,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
@@ -158,8 +159,13 @@ public class UpdatePropertyMojo
         Property propertyConfig = new Property( property );
         propertyConfig.setVersion( newVersion );
         Map<Property, PropertyVersions> propertyVersions =
-            this.getHelper().getVersionPropertiesMap( getProject(), new Property[] {propertyConfig}, property, "",
-                                                      autoLinkItems );
+            this.getHelper().getVersionPropertiesMap(
+                    VersionsHelper.VersionPropertiesMapRequest.builder()
+                            .withMavenProject( getProject() )
+                            .withPropertyDefinitions( new Property[] {propertyConfig} )
+                            .withIncludeProperties( property )
+                            .withAutoLinkItems( autoLinkItems )
+                            .build() );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property property = entry.getKey();
