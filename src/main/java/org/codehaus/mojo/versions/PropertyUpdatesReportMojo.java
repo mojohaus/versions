@@ -36,6 +36,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
@@ -84,6 +85,14 @@ public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUp
     @Parameter( property = "autoLinkItems", defaultValue = "true" )
     private boolean autoLinkItems;
 
+    /**
+     * <p>Whether to include property updates from parent.</p>
+     *
+     * @since 2.14.0
+     */
+    @Parameter( property = "includeParent", defaultValue = "true" )
+    private boolean includeParent = true;
+
     @Inject
     protected PropertyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
                                          ArtifactResolver artifactResolver,
@@ -120,8 +129,14 @@ public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUp
         final Map<Property, PropertyVersions> updateSet = new TreeMap<>( PropertyComparator.INSTANCE );
         try
         {
-            updateSet.putAll( getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties,
-                                                                   excludeProperties, autoLinkItems ) );
+            updateSet.putAll( getHelper().getVersionPropertiesMap( VersionsHelper.VersionPropertiesMapRequest.builder()
+                    .withMavenProject( getProject() )
+                    .withPropertyDefinitions( properties )
+                    .withIncludeProperties( includeProperties )
+                    .withExcludeProperties( excludeProperties )
+                    .withIncludeParent( includeParent )
+                    .withAutoLinkItems( autoLinkItems )
+                    .build() ) );
         }
         catch ( MojoExecutionException e )
         {

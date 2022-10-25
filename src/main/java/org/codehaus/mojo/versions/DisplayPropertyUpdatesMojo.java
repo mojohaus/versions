@@ -42,6 +42,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
@@ -128,6 +129,14 @@ public class DisplayPropertyUpdatesMojo
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
     private boolean allowIncrementalUpdates;
 
+    /**
+     * <p>Whether to include property updates from parent.</p>
+     *
+     * @since 2.14.0
+     */
+    @Parameter( property = "includeParent", defaultValue = "true" )
+    protected boolean includeParent = true;
+
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
@@ -150,8 +159,14 @@ public class DisplayPropertyUpdatesMojo
         List<String> updates = new ArrayList<>();
 
         Map<Property, PropertyVersions> propertyVersions =
-            this.getHelper().getVersionPropertiesMap( getProject(), properties, includeProperties, excludeProperties,
-                                                      autoLinkItems );
+                this.getHelper().getVersionPropertiesMap( VersionsHelper.VersionPropertiesMapRequest.builder()
+                        .withMavenProject( getProject() )
+                        .withPropertyDefinitions( properties )
+                        .withIncludeProperties( includeProperties )
+                        .withExcludeProperties( excludeProperties )
+                        .withIncludeParent( includeParent )
+                        .withAutoLinkItems( autoLinkItems )
+                        .build() );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property property = entry.getKey();

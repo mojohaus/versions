@@ -783,27 +783,22 @@ public class DefaultVersionsHelper
     }
 
     @Override
-    public Map<Property, PropertyVersions> getVersionPropertiesMap( MavenProject project,
-                                                                    Property[] propertyDefinitions,
-                                                                    String includeProperties, String excludeProperties,
-                                                                    boolean autoLinkItems )
+    public Map<Property, PropertyVersions> getVersionPropertiesMap( VersionPropertiesMapRequest request )
         throws MojoExecutionException
     {
         Map<String, Property> properties = new HashMap<>();
-        if ( propertyDefinitions != null )
+        if ( request.getPropertyDefinitions() != null )
         {
-            for ( Property propertyDefinition : propertyDefinitions )
-            {
-                properties.put( propertyDefinition.getName(), propertyDefinition );
-            }
+            Arrays.stream( request.getPropertyDefinitions() ).forEach( p -> properties.put( p.getName(), p ) );
         }
         Map<String, PropertyVersionsBuilder> builders = new HashMap<>();
-        if ( autoLinkItems )
+        if ( request.isAutoLinkItems() )
         {
             final PropertyVersionsBuilder[] propertyVersionsBuilders;
             try
             {
-                propertyVersionsBuilders = PomHelper.getPropertyVersionsBuilders( this, project );
+                propertyVersionsBuilders = PomHelper.getPropertyVersionsBuilders( this, request.getMavenProject(),
+                        request.isIncludeParent() );
             }
             catch ( ExpressionEvaluationException | IOException e )
             {
@@ -825,8 +820,12 @@ public class DefaultVersionsHelper
             }
         }
 
-        List<String> includePropertiesList = getSplitProperties( includeProperties );
-        List<String> excludePropertiesList = getSplitProperties( excludeProperties );
+        List<String> includePropertiesList = request.getIncludeProperties() != null
+            ? Arrays.asList( request.getIncludeProperties().split( "\\s*,\\s*" ) )
+            : Collections.emptyList();
+        List<String> excludePropertiesList = request.getExcludeProperties() != null
+            ? Arrays.asList( request.getExcludeProperties().split( "\\s*,\\s*" ) )
+                : Collections.emptyList();
 
         getLog().debug( "Searching for properties associated with builders" );
         Iterator<Property> i = properties.values().iterator();
@@ -884,7 +883,8 @@ public class DefaultVersionsHelper
                                         + builder.getVersionRange() );
                     property.setVersion( builder.getVersionRange() );
                 }
-                versions.setCurrentVersion( project.getProperties().getProperty( property.getName() ) );
+                versions.setCurrentVersion( request.getMavenProject().getProperties()
+                        .getProperty( property.getName() ) );
                 propertyVersions.put( property, versions );
             }
             catch ( ArtifactMetadataRetrievalException e )
@@ -893,17 +893,6 @@ public class DefaultVersionsHelper
             }
         }
         return propertyVersions;
-    }
-
-    private List<String> getSplitProperties( String commaSeparatedProperties )
-    {
-        List<String> propertiesList = Collections.emptyList();
-        if ( StringUtils.isNotEmpty( commaSeparatedProperties ) )
-        {
-            String[] splittedProps = StringUtils.split( commaSeparatedProperties, "," );
-            propertiesList = Arrays.asList( StringUtils.stripAll( splittedProps ) );
-        }
-        return propertiesList;
     }
 
     /**

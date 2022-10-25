@@ -39,6 +39,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -156,11 +157,14 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        Map<Property, PropertyVersions> propertyVersions = this.getHelper().getVersionPropertiesMap( getProject(),
-                                                                                                     properties,
-                                                                                                     includeProperties,
-                                                                                                     excludeProperties,
-                                                                                                     autoLinkItems );
+        Map<Property, PropertyVersions> propertyVersions = getHelper().getVersionPropertiesMap(
+                VersionsHelper.VersionPropertiesMapRequest.builder()
+                        .withMavenProject( getProject() )
+                        .withPropertyDefinitions( properties )
+                        .withIncludeProperties( includeProperties )
+                        .withExcludeProperties( excludeProperties )
+                        .withAutoLinkItems( autoLinkItems )
+                        .build() );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property property = entry.getKey();

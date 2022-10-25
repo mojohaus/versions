@@ -35,6 +35,7 @@ import org.junit.Test;
 import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 
 /**
  * Unit tests for {@link DisplayPropertyUpdatesMojo}
@@ -84,5 +85,26 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase
 
         assertThat( String.join( "", Files.readAllLines( tempFile ) ),
                 matchesPattern( ".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*" ) );
+    }
+
+    @Test
+    public void testDisablePropertiesFromParent() throws Exception
+    {
+        Path tempFile = Files.createTempFile( tempDir, "output", "" );
+
+        TestUtils.copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/display-property-updates/issue-367" ),
+                tempDir );
+        DisplayPropertyUpdatesMojo mojo =
+                (DisplayPropertyUpdatesMojo) mojoRule.lookupConfiguredMojo( tempDir.resolve( "child" ).toFile(),
+                        "display-property-updates" );
+        mojo.outputEncoding = UTF_8;
+        mojo.outputFile = tempFile.toFile();
+        mojo.setPluginContext( new HashMap<>() );
+        mojo.artifactMetadataSource = MockUtils.mockArtifactMetadataSource();
+        mojo.includeParent = false;
+        mojo.execute();
+
+        assertThat( String.join( "", Files.readAllLines( tempFile ) ),
+                not( matchesPattern( ".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*" ) ) );
     }
 }

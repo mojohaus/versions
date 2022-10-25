@@ -37,6 +37,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.PropertiesVersionsFileReader;
 
@@ -154,8 +155,12 @@ public class SetPropertyMojo
         throws MojoExecutionException, XMLStreamException
     {
         Map<Property, PropertyVersions> propertyVersions =
-            this.getHelper().getVersionPropertiesMap( getProject(), propertiesConfig, properties, "",
-                                                      autoLinkItems );
+                this.getHelper().getVersionPropertiesMap( VersionsHelper.VersionPropertiesMapRequest.builder()
+                        .withMavenProject( getProject() )
+                        .withPropertyDefinitions( propertiesConfig )
+                        .withIncludeProperties( properties )
+                        .withAutoLinkItems( autoLinkItems )
+                        .build() );
         for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
         {
             Property currentProperty = entry.getKey();

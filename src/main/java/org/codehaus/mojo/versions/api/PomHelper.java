@@ -72,6 +72,7 @@ import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
+import static java.util.Collections.singletonMap;
 import static java.util.stream.IntStream.range;
 
 /**
@@ -1018,16 +1019,20 @@ public class PomHelper
      *
      * @param helper  Our versions helper.
      * @param project The project to examine.
+     * @param includeParent whether parent POMs should be included
      * @return An array of properties that are associated within the project.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      * @throws IOException                   if the project's pom file cannot be parsed.
      * @since 1.0-alpha-3
      */
-    public static PropertyVersionsBuilder[] getPropertyVersionsBuilders( VersionsHelper helper, MavenProject project )
+    public static PropertyVersionsBuilder[] getPropertyVersionsBuilders( VersionsHelper helper, MavenProject project,
+                                                                         boolean includeParent )
             throws ExpressionEvaluationException, IOException
     {
         ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator( project );
-        Map<MavenProject, Model> reactorModels = getRawModelWithParents( project );
+        Map<MavenProject, Model> reactorModels = includeParent
+                ? getRawModelWithParents( project )
+                : singletonMap( project, getRawModel( project ) );
 
         Map<String, PropertyVersionsBuilder> propertiesMap = new TreeMap<>();
 
@@ -1081,7 +1086,9 @@ public class PomHelper
         reactorModels.values().forEach( model -> addProperties( helper, propertiesMap, null, model.getProperties() ) );
 
 
-        for ( MavenProject currentPrj = project; currentPrj != null; currentPrj = currentPrj.getParent() )
+        for ( MavenProject currentPrj = project; currentPrj != null; currentPrj = includeParent
+                        ? currentPrj.getParent()
+                        : null )
         {
             Model model = reactorModels.get( currentPrj );
 
