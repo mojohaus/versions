@@ -155,6 +155,12 @@ public class DependencyUpdatesReportMojoTest
             return this;
         }
 
+        public TestDependencyUpdatesReportMojo withOriginalProperty( String name, String value )
+        {
+            project.getOriginalModel().getProperties().put( name, value );
+            return this;
+        }
+
         private static RepositorySystem mockRepositorySystem()
         {
             RepositorySystem repositorySystem = mock( RepositorySystem.class );
@@ -366,5 +372,28 @@ public class DependencyUpdatesReportMojoTest
                 .replaceAll( "\\s+", " " );
         assertThat( "Did not generate summary correctly", output,
                 containsString( "groupA test-artifact 1.1 compile pom default 1.1.0-2 1.1.3 1.3 3.0" ) );
+    }
+
+    @Test
+    public void testResolvedVersionsWithoutTransitiveDependencyManagement() throws IOException, MavenReportException
+    {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        new TestDependencyUpdatesReportMojo()
+            .withOriginalDependencyManagement(
+                dependencyOf( "artifactA", "1.0.0" ),
+                dependencyOf( "artifactB", "${mycomponent.version}" ) )
+            .withDependencyManagement(
+                dependencyOf( "artifactA", "1.0.0" ),
+                dependencyOf( "artifactB", "${mycomponent.version}" ) )
+            .withProcessDependencyManagement( true )
+            .withProcessDependencyManagementTransitive( false )
+            .withOnlyUpgradable( false )
+            .withOriginalProperty( "mycomponent.version", "1.2.3" )
+            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+
+        String output = os.toString();
+        assertThat( output, Matchers
+            .stringContainsInOrder( "artifactA", "1.0.0", "artifactB", "1.2.3" ) );
     }
 }
