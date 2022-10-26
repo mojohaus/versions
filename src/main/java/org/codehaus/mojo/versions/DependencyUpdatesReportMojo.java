@@ -174,8 +174,20 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
                     // TODO: I'm not 100% sure if this will work correctly in all cases.
                     for ( Dependency dep : getProject().getOriginalModel().getDependencyManagement().getDependencies() )
                     {
+                        // resolve version from model properties if necessary (e.g. "${mycomponent.myversion}"
+                        if ( dep.getVersion().startsWith( "${" ) )
+                        {
+                            final String resolvedVersion = getProject().getOriginalModel()
+                                .getProperties().getProperty(
+                                    dep.getVersion().substring( 2, dep.getVersion().length() - 1 ) );
+                            if ( resolvedVersion != null && !resolvedVersion.isEmpty() )
+                            {
+                                dep.setVersion( resolvedVersion );
+                            }
+                        }
+
                         getLog().debug( "Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
-                                            + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );
+                            + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );
                     }
                     dependencyManagement.addAll(
                         getProject().getOriginalModel().getDependencyManagement().getDependencies() );
