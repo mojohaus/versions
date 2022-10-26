@@ -399,4 +399,34 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             assert outputFile == null || !outputFile.exists() || outputFile.delete();
         }
     }
+
+    @Test
+    public void testVersionInterpolation() throws Exception
+    {
+        File outputFile = null;
+        try
+        {
+            outputFile = File.createTempFile( "display-dependency-updates", "" );
+            assert outputFile.exists();
+
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
+                new File( "target/test-classes/org/codehaus/mojo/display-dependency-updates/version-interpolation" ),
+                "display-dependency-updates" );
+
+            // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
+            mojo.outputFile = outputFile;
+            mojo.artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
+            {{
+                put( "dummy-api", new String[] { "2.0.1" } );
+            }} );
+            setVariableValueToObject( mojo, "processDependencyManagementTransitive", false );
+            mojo.execute();
+            List<String> output = Files.readAllLines( outputFile.toPath(), UTF_8 );
+            assertThat( output, not( hasItem( containsString( "mycomponent.version" ) ) ) );
+        }
+        finally
+        {
+            assert outputFile == null || !outputFile.exists() || outputFile.delete();
+        }
+    }
 }
