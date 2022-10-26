@@ -1,11 +1,10 @@
 package org.codehaus.mojo.versions;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Objects;
 
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.Model;
@@ -14,6 +13,9 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.utils.TestUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -21,11 +23,27 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 public class SetMojoTest extends AbstractMojoTestCase
 {
     @Rule
     public MojoRule mojoRule = new MojoRule( this );
+
+    private Path tempDir;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        super.setUp();
+        tempDir = TestUtils.createTempDir( "set" );
+    }
+
+    @After
+    public void tearDown() throws IOException
+    {
+        TestUtils.tearDownTempDir( tempDir );
+    }
 
     @Test
     public void testGetIncrementedVersion() throws MojoExecutionException
@@ -118,33 +136,46 @@ public class SetMojoTest extends AbstractMojoTestCase
     public void testRemoveSnapshotIdempotency()
             throws Exception
     {
-        Path pomDir = Files.createTempDirectory( "set-" );
-        try
-        {
-            Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/set/remove-snapshot/pom.xml" ),
-                    Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
+        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/set/remove-snapshot/pom.xml" ),
+                Paths.get( tempDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
 
-            SetMojo firstRun = (SetMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(), "set" );
-            firstRun.execute();
-            assertThat( String.join( "", Files.readAllLines( Paths.get( pomDir.toString(), "pom.xml" ) ) ),
-                    containsString( "<version>1.0</version>" ) );
+        SetMojo firstRun = (SetMojo) mojoRule.lookupConfiguredMojo( tempDir.toFile(), "set" );
+        firstRun.execute();
+        assertThat( String.join( "", Files.readAllLines( tempDir.resolve( "pom.xml" ) ) ),
+                containsString( "<version>1.0</version>" ) );
 
-            // no exception should be thrown, the file should stay with version "1.0"
-            SetMojo secondRun = (SetMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(), "set" );
-            MavenExecutionRequest request =
-                    (MavenExecutionRequest) getVariableValueFromObject( secondRun.settings, "request" );
-            setVariableValueToObject( request, "interactiveMode", false );
-            secondRun.execute();
-            assertThat( String.join( "", Files.readAllLines( Paths.get( pomDir.toString(), "pom.xml" ) ) ),
-                    containsString( "<version>1.0</version>" ) );
-        }
-        finally
-        {
-            if ( pomDir != null && pomDir.toFile().exists() )
-            {
-                Arrays.stream( Objects.requireNonNull( pomDir.toFile().listFiles() ) ).forEach( File::delete );
-                pomDir.toFile().delete();
-            }
-        }
+        // no exception should be thrown, the file should stay with version "1.0"
+        SetMojo secondRun = (SetMojo) mojoRule.lookupConfiguredMojo( tempDir.toFile(), "set" );
+        MavenExecutionRequest request =
+                (MavenExecutionRequest) getVariableValueFromObject( secondRun.settings, "request" );
+        setVariableValueToObject( request, "interactiveMode", false );
+        secondRun.execute();
+        assertThat( String.join( "", Files.readAllLines( tempDir.resolve( "pom.xml" ) ) ),
+                containsString( "<version>1.0</version>" ) );
+    }
+
+    @Test
+    public void testSetOldVersionMismatch() throws Exception
+    {
+        TestUtils.copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/set/issue-794" ), tempDir );
+        SetMojo mojo = (SetMojo) mojoRule.lookupConfiguredMojo( tempDir.toFile(), "set" );
+        setVariableValueToObject( mojo, "oldVersion", "foo" );
+        setVariableValueToObject( mojo, "newVersion", "bar" );
+        mojo.execute();
+        assertThat( String.join( "", Files.readAllLines( tempDir.resolve( "pom.xml" ) ) ),
+                not( containsString( "<version>bar</version>" ) ) );
+    }
+
+    @Test
+    public void testSetOldVersionMismatchProcessAllModules() throws Exception
+    {
+        TestUtils.copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/set/issue-794" ), tempDir );
+        SetMojo mojo = (SetMojo) mojoRule.lookupConfiguredMojo( tempDir.toFile(), "set" );
+        setVariableValueToObject( mojo, "oldVersion", "foo" );
+        setVariableValueToObject( mojo, "newVersion", "bar" );
+        setVariableValueToObject( mojo, "processAllModules", true );
+        mojo.execute();
+        assertThat( String.join( "", Files.readAllLines( tempDir.resolve( "pom.xml" ) ) ),
+                not( containsString( "<version>bar</version>" ) ) );
     }
 }
