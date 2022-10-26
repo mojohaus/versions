@@ -535,6 +535,7 @@ public class DisplayDependencyUpdatesMojo
                 }
                 else
                 {
+                    dependency = getHelper().interpolateVersion( dependency, getProject() );
                     dependencyManagement.add( dependency );
                 }
             }
