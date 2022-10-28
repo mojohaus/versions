@@ -1,0 +1,45 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>localhost</groupId>
+  <artifactId>it-xml-property-updates-report-001</artifactId>
+  <version>1.0</version>
+
+  <properties>
+    <api-version>1.0</api-version>
+    <impl-version>2.0</impl-version>
+    <plugin-version>3.0</plugin-version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>localhost</groupId>
+      <artifactId>dummy-api</artifactId>
+      <version>[${api-version},2.1-!)</version>
+    </dependency>
+    <dependency>
+      <groupId>localhost</groupId>
+      <artifactId>dummy-impl</artifactId>
+      <version>${impl-version}</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>localhost</groupId>
+          <artifactId>dummy-maven-plugin</artifactId>
+          <version>${plugin-version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>localhost</groupId>
+              <artifactId>dummy-api</artifactId>
+              <version>${plugin-version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

@@ -21,6 +21,10 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,6 +44,7 @@ import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
+import org.codehaus.mojo.versions.xml.PropertyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
 /**
@@ -93,6 +98,14 @@ public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUp
     @Parameter( property = "includeParent", defaultValue = "true" )
     private boolean includeParent = true;
 
+    /**
+     * Report formats (html and/or xml). HTML by default.
+     *
+     * @since 2.14.0
+     */
+    @Parameter( property = "propertyUpdatesReportFormats", defaultValue = "html" )
+    protected String[] formats = new String[] {"html"};
+
     @Inject
     protected PropertyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
                                          ArtifactResolver artifactResolver,
@@ -142,8 +155,31 @@ public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUp
         {
             throw new MavenReportException( e.getMessage(), e );
         }
-        rendererFactory.createReportRenderer( getOutputName(), getSink(), locale,
-                new PropertyUpdatesModel( updateSet ) ).render();
+        PropertyUpdatesModel model = new PropertyUpdatesModel( updateSet );
+        for ( String format : formats )
+        {
+            if ( "html".equals( format ) )
+            {
+                rendererFactory.createReportRenderer( getOutputName(), getSink(), locale, model ).render();
+            }
+            else if ( "xml".equals( format ) )
+            {
+                Path outputDir = Paths.get( getProject().getBuild().getDirectory() );
+                if ( !Files.exists( outputDir ) )
+                {
+                    try
+                    {
+                        Files.createDirectories( outputDir );
+                    }
+                    catch ( IOException e )
+                    {
+                        throw new MavenReportException( "Could not create the output directory" );
+                    }
+                }
+                Path outputFile = outputDir.resolve( getOutputName() + ".xml" );
+                new PropertyUpdatesXmlReportRenderer( model, outputFile ).render();
+            }
+        }
     }
 
     /**

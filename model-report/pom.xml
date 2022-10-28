@@ -62,6 +62,7 @@
                     <models>
                         <model>src/main/mdo/dependency-updates-report.mdo</model>
                         <model>src/main/mdo/plugin-updates-report.mdo</model>
+                        <model>src/main/mdo/property-updates-report.mdo</model>
                     </models>
                     <version>${modelloNamespaceReportVersion}</version>
                 </configuration>

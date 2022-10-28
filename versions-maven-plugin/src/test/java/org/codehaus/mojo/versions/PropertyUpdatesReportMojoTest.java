@@ -74,7 +74,7 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase
     }
 
     @Test
-    public void testIncludeParentFalseShouldNotCountainProperty() throws Exception
+    public void testIncludeParentFalseShouldNotContainProperty() throws Exception
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();

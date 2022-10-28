@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
@@ -60,8 +61,8 @@ public class PluginOverviewStats extends OverviewStats
      * @param <V> always equal to {@linkplain org.codehaus.mojo.versions.PluginUpdatesDetails}
      * @return instance of the {@linkplain PluginOverviewStats}, initialised with the update information
      */
-    public static <T extends OverviewStats, V extends ArtifactVersions> T fromUpdates( Collection<V> updates,
-                                                                                       ArtifactVersionsCache cache )
+    public static <T extends OverviewStats, V extends AbstractVersionDetails>
+    T fromUpdates( Collection<V> updates, ArtifactVersionsCache cache )
     {
         PluginOverviewStats stats = new PluginOverviewStats();
         updates.forEach( details ->
