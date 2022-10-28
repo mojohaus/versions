@@ -396,31 +396,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
     @Override
     protected OverviewStats computeOverviewStats()
     {
-        OverviewStats stats = new OverviewStats();
-        model.getAllUpdates().values().forEach( details ->
-        {
-            if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-            {
-                stats.incrementAny();
-            }
-            else if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-            {
-                stats.incrementIncremental();
-            }
-            else if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-            {
-                stats.incrementMinor();
-            }
-            else if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-            {
-                stats.incrementMajor();
-            }
-            else
-            {
-                stats.incrementUpToDate();
-            }
-        } );
-        return stats;
+        return OverviewStats.fromUpdates( model.getAllUpdates().values(), newestUpdateCache );
     }
 
     private void renderPropertyDetail( Property property, PropertyVersions details )

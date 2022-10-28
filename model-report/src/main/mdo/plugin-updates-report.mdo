@@ -85,7 +85,6 @@ under the License.
                 </field>
                 <field>
                     <name>nextIncrementalAvailable</name>
-                    <version>1.0.0+</version>
                     <required>true</required>
                     <type>String</type>
                 </field>

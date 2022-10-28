@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.api.Segment;
@@ -63,8 +64,8 @@ public class OverviewStats
      * @param <V> subclass of {@linkplain ArtifactVersions}
      * @return instance of the {@linkplain OverviewStats}
      */
-    public static <T extends OverviewStats, V extends ArtifactVersions> T fromUpdates( Collection<V> updates,
-                                                                                       ArtifactVersionsCache cache )
+    public static <T extends OverviewStats, V extends AbstractVersionDetails>
+    T fromUpdates( Collection<V> updates, ArtifactVersionsCache cache )
     {
         OverviewStats stats = new OverviewStats();
         updates.forEach( details ->
@@ -93,7 +94,7 @@ public class OverviewStats
         return (T) stats;
     }
 
-    protected static <V extends ArtifactVersions> ArtifactVersion getNewestUpdate( ArtifactVersionsCache cache,
+    protected static <V extends AbstractVersionDetails> ArtifactVersion getNewestUpdate( ArtifactVersionsCache cache,
                                                                                    V details,
                                                                                    Optional<Segment> segment )
     {

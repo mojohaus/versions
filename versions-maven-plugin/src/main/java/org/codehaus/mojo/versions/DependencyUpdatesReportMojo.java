@@ -224,10 +224,9 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
                         .collect( Collectors.joining( ", " ) ) ) );
             }
 
+            DependencyUpdatesModel model = new DependencyUpdatesModel( dependencyUpdates, dependencyManagementUpdates );
             for ( String format : formats )
             {
-                DependencyUpdatesModel model =
-                        new DependencyUpdatesModel( dependencyUpdates, dependencyManagementUpdates );
                 if ( "html".equals( format ) )
                 {
                     rendererFactory.createReportRenderer( getOutputName(), sink, locale, model ).render();

@@ -24,20 +24,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.api.AbstractVersionDetails;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.api.ReportRenderer;
-import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.reporting.PluginOverviewStats;
 import org.codehaus.mojo.versions.reporting.model.PluginInfo;
 import org.codehaus.mojo.versions.reporting.model.PluginReportSummary;
@@ -46,11 +42,12 @@ import org.codehaus.mojo.versions.reporting.model.PluginUpdatesReport;
 import org.codehaus.mojo.versions.reporting.model.io.xpp3.PluginUpdatesReportXpp3Writer;
 
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.MINOR;
+import static org.codehaus.mojo.versions.xml.CommonXmlReportRendererUtils.setSection;
+import static org.codehaus.mojo.versions.xml.CommonXmlReportRendererUtils.statusFor;
 
 /**
  * XML renderer for DependencyUpdatesReport creates an xml file in target directory and writes report about available
@@ -108,15 +105,6 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer
         }
     }
 
-    private static void setSection( ArtifactVersions versions, Segment segment, Consumer<List<String>> setterFunction )
-    {
-        ofNullable( versions.getAllUpdates( of( segment ) ) )
-                .map( v -> Arrays.stream( v )
-                        .map( ArtifactVersion::toString )
-                        .collect( Collectors.toList() ) )
-                .ifPresent( setterFunction );
-    }
-
     private static List<PluginInfo> createPluginInfo( Map<Dependency, PluginUpdatesDetails> versions )
     {
         return versions.entrySet().stream().map( e ->
@@ -136,13 +124,7 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer
             setSection( e.getValue(), MINOR, this::setMinors );
             setSection( e.getValue(), MAJOR, this::setMajors );
 
-            setStatus( getLastVersion() == null
-                    ? "no new available"
-                    : getIncrementals() != null
-                    ? "incremental available"
-                    : getMinors() != null
-                    ? "minor available"
-                    : "major available" );
+            setStatus( statusFor( getLastVersion(), getIncrementals(), getMinors() ) );
         }} ).collect( Collectors.toList() );
     }
 }

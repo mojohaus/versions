@@ -21,12 +21,12 @@ under the License.
 
 <model xmlns="http://codehaus-plexus.github.io/MODELLO/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://codehaus-plexus.github.io/MODELLO/2.0.0 https://codehaus-plexus.github.io/modello/xsd/modello-2.0.0.xsd"
-       xml.namespace="https://www.mojohaus.org/VERSIONS/DEPENDENCY-UPDATES-REPORT/${version}"
-       xml.schemaLocation="https://www.mojohaus.org/versions-maven-plugin/xsd/dependency-updates-report-${version}.xsd">
-    <id>dependency-updates-report</id>
-    <name>DependencyUpdatesReport</name>
+       xml.namespace="https://www.mojohaus.org/VERSIONS/PROPERTY-UPDATES-REPORT/${version}"
+       xml.schemaLocation="https://www.mojohaus.org/versions/model-report/xsd/property-updates-report-${version}.xsd">
+    <id>property-updates-report</id>
+    <name>PropertyUpdatesReport</name>
     <description>
-        XML version of the Dependency Updates Report
+        XML version of the Property Updates Report
     </description>
 
     <defaults>
@@ -42,28 +42,21 @@ under the License.
 
     <classes>
 
-        <class rootElement="true" xml.tagName="DependencyUpdatesReport">
-            <name>DependencyUpdatesReport</name>
+        <class rootElement="true" xml.tagName="PropertyUpdatesReport">
+            <name>PropertyUpdatesReport</name>
             <fields>
                 <field>
                     <name>summary</name>
                     <required>true</required>
                     <association>
-                        <type>DependencyReportSummary</type>
+                        <type>PropertyReportSummary</type>
                         <multiplicity>1</multiplicity>
                     </association>
                 </field>
                 <field>
-                    <name>dependencyManagements</name>
-                    <association xml.itemsStyle="wrapped" xml.tagName="dependencyManagement">
-                        <type>DependencyInfo</type>
-                        <multiplicity>*</multiplicity>
-                    </association>
-                </field>
-                <field>
-                    <name>dependencies</name>
-                    <association xml.itemsStyle="wrapped" xml.tagName="dependency">
-                        <type>DependencyInfo</type>
+                    <name>properties</name>
+                    <association xml.itemsStyle="wrapped" xml.tagName="property">
+                        <type>PropertyInfo</type>
                         <multiplicity>*</multiplicity>
                     </association>
                 </field>
@@ -71,7 +64,7 @@ under the License.
         </class>
 
         <class>
-            <name>DependencyReportSummary</name>
+            <name>PropertyReportSummary</name>
             <fields>
                 <field>
                     <name>usingLastVersion</name>
@@ -102,31 +95,19 @@ under the License.
         </class>
 
         <class>
-            <name>DependencyInfo</name>
+            <name>PropertyInfo</name>
             <fields>
                 <field>
-                    <name>groupId</name>
+                    <name>propertyName</name>
                     <required>true</required>
                     <type>String</type>
                 </field>
                 <field>
-                    <name>artifactId</name>
-                    <required>true</required>
-                    <type>String</type>
-                </field>
-                <field>
-                    <name>scope</name>
-                    <required>true</required>
-                    <type>String</type>
-                </field>
-                <field>
-                    <name>classifier</name>
-                    <type>String</type>
-                </field>
-                <field>
-                    <name>type</name>
-                    <required>true</required>
-                    <type>String</type>
+                    <name>propertyAssociations</name>
+                    <association xml.itemsStyle="wrapped" xml.tagName="propertyAssociation">
+                        <type>PropertyAssociation</type>
+                        <multiplicity>*</multiplicity>
+                    </association>
                 </field>
                 <field>
                     <name>currentVersion</name>
@@ -167,6 +148,20 @@ under the License.
                 <field>
                     <name>status</name>
                     <required>true</required>
+                    <type>String</type>
+                </field>
+            </fields>
+        </class>
+
+        <class>
+            <name>PropertyAssociation</name>
+            <fields>
+                <field>
+                    <name>groupId</name>
+                    <type>String</type>
+                </field>
+                <field>
+                    <name>artifactId</name>
                     <type>String</type>
                 </field>
             </fields>
