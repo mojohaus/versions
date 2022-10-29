@@ -1,0 +1,20 @@
+title: XML schemas
+author: Slawomir Jaranowski
+date: 2022-10-17
+
+<!-- GitHub pages doesn't generate index page ... we need prepare one -->
+
+Versions - XML schemas
+======================
+
+dependency-updates-report.xsd
+-----------------------------
+ - [dependency-updates-report-${modelloNamespaceVersion}.xsd](../../model-report/xsd/dependency-updates-report-${modelloNamespaceVersion}.xsd)
+
+plugin-updates-report.xsd
+-------------------------
+ - [plugin-updates-report-${modelloNamespaceVersion}.xsd](../../model-report/xsd/plugin-updates-report-${modelloNamespaceVersion}.xsd)
+
+rule.xsd
+--------
+ - [rule-${modelloNamespaceVersion}.xsd](../../model/xsd/rule-${modelloNamespaceVersion}.xsd)
