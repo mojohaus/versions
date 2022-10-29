@@ -1,37 +1,37 @@
-<project xmlns="http://maven.apache.org/DECORATION/1.8.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd">
-  <body>
-    <breadcrumbs>
-      <item name="MojoHaus" href="https://www.mojohaus.org/"/>
-      <item name="${this.name}" href="${this.url}" />
-    </breadcrumbs>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/DECORATION/1.8.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0
+         http://maven.apache.org/xsd/decoration-1.8.0.xsd">
 
-    <menu name="Overview">
-      <item name="Introduction" href="index.html"/>
-      <item name="Goals" href="plugin-info.html"/>
-      <item name="Usage" href="usage.html"/>
-      <item name="FAQ" href="faq.html"/>
-      <item name="Version number rules" href="version-rules.html"/>
-    </menu>
-    <menu name="Examples">
-      <item name="Advancing dependency versions" href="examples/advancing-dependency-versions.html"/>
-      <item name="Comparing remote dependencies" href="examples/compare-dependencies.html"/>
-      <item name="Checking for new dependency updates" href="examples/display-dependency-updates.html"/>
-      <item name="Checking for new plugin updates" href="examples/display-plugin-updates.html"/>
-      <item name="Checking for new property-linked updates" href="examples/display-property-updates.html"/>
-      <item name="Updating the Parent version" href="examples/update-parent.html"/>
-      <item name="Updating a version specified in a property" href="examples/update-properties.html"/>
-      <item name="Fixing a multi-module build" href="examples/update-child-modules.html"/>
-      <item name="Resolve version ranges" href="examples/resolve-ranges.html"/>
-      <item name="Locking snapshot dependencies" href="examples/lock-snapshots.html"/>
-      <item name="Unlocking snapshot dependencies" href="examples/unlock-snapshots.html"/>
-      <item name="Replacing -SNAPSHOT versions with their corresponding releases" href="examples/use-releases.html"/>
-      <item name="Changing the project version" href="examples/set.html"/>
-      <item name="Changing aggregator project version" href="examples/setaggregator.html"/>
-    </menu>
-    <menu name="Reference">
-      <item name="Version number comparison rule-sets" href="model/rule.html"/>
-      <item name="XML schemas" href="xsd/index.html"/>
-    </menu>
-  </body>
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.8</version>
+    </skin>
+
+    <custom>
+        <fluidoSkin>
+            <gitHub>
+                <projectId>mojohaus/versions-maven-plugin</projectId>
+                <ribbonOrientation>right</ribbonOrientation>
+                <ribbonColor>gray</ribbonColor>
+            </gitHub>
+        </fluidoSkin>
+    </custom>
+
+    <body>
+        <menu name="Overview">
+            <item name="Introduction" href="index.html"/>
+            <!-- According to https://issues.apache.org/jira/browse/MNGSITE-152 -->
+            <item name="License" href="http://www.apache.org/licenses/"/>
+        </menu>
+
+        <footer>
+            <![CDATA[
+		  <p>Apache ${project.name}, ${project.name}, Apache, the Apache feather logo, and the Apache ${project.name} project logos are trademarks of The Apache Software Foundation.</p>
+        ]]>
+        </footer>
+
+    </body>
 </project>
