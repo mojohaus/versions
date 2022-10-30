@@ -22,7 +22,7 @@ under the License.
 <model xmlns="http://codehaus-plexus.github.io/MODELLO/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://codehaus-plexus.github.io/MODELLO/2.0.0 https://codehaus-plexus.github.io/modello/xsd/modello-2.0.0.xsd"
        xml.namespace="https://www.mojohaus.org/VERSIONS/RULE/${version}"
-       xml.schemaLocation="https://www.mojohaus.org/versions-maven-plugin/xsd/rule-${version}.xsd">
+       xml.schemaLocation="https://www.mojohaus.org/versions/model-ruleset/xsd/rule-${version}.xsd">
   <id>rule</id>
   <name>Rule</name>
   <description>

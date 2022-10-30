@@ -1,10 +1,6 @@
 <project xmlns="http://maven.apache.org/DECORATION/1.8.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd">
   <body>
-    <breadcrumbs>
-      <item name="MojoHaus" href="https://www.mojohaus.org/"/>
-      <item name="${this.name}" href="${this.url}" />
-    </breadcrumbs>
 
     <menu name="Overview">
       <item name="Introduction" href="./index.html"/>
@@ -32,9 +28,11 @@
     </menu>
 
     <menu name="Reference">
-      <item name="Version number comparison rule-sets" href="model/rule.html"/>
-      <item name="XML schemas" href="xsd/index.html"/>
+      <item name="Version number comparison rule-sets" href="../model-ruleset/rule.html"/>
+      <item name="XML schemas" href="../model-ruleset/xsd/index.html"/>
     </menu>
+
+    <menu ref="parent"/>
 
   </body>
 </project>

@@ -9,7 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>model</artifactId>
+    <artifactId>model-ruleset</artifactId>
+
+    <name>Versions ruleSet model</name>
+    <description>Modello model for ruleSet</description>
 
     <dependencies>
         <dependency>
@@ -31,8 +34,6 @@
                         <goals>
                             <!-- Generate the xpp3 reader code -->
                             <goal>xpp3-reader</goal>
-                            <!-- Generate the xpp3 writer code -->
-                            <goal>xpp3-writer</goal>
                             <!-- Generate the Java sources for the model itself -->
                             <goal>java</goal>
                         </goals>
@@ -59,14 +60,7 @@
                     <models>
                         <model>src/main/mdo/rule.mdo</model>
                     </models>
-                    <version>${modelloNamespaceVersion}</version>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
+                    <version>${modelloNamespaceRuleVersion}</version>
                 </configuration>
             </plugin>
 
@@ -77,29 +71,7 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>check-java18</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <signature>
-                                <groupId>org.codehaus.mojo.signature</groupId>
-                                <artifactId>java18</artifactId>
-                                <version>1.0</version>
-                            </signature>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
-
     </build>
 
 </project>
