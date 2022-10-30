@@ -14,12 +14,10 @@
   <version>2.14.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Versions Maven Plugin</name>
-  <url>https://www.mojohaus.org/versions-maven-plugin/</url>
+  <name>Versions</name>
+  <description>Managing Maven versions in projects.</description>
+  <url>https://www.mojohaus.org/versions/</url>
 
-  <description>
-    Versions Plugin for Maven. The Versions Plugin updates the versions of components in the POM.
-  </description>
   <inceptionYear>2008</inceptionYear>
 
   <licenses>
@@ -97,22 +95,28 @@
     </contributor>
   </contributors>
 
-  <prerequisites>
-    <maven>${mavenVersion}</maven>
-  </prerequisites>
-
-  <scm>
-    <connection>scm:git:https://github.com/mojohaus/versions-maven-plugin.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions-maven-plugin.git</developerConnection>
-    <url>https://github.com/mojohaus/versions-maven-plugin/tree/master</url>
-    <tag>2.13.0</tag>
-  </scm>
-
   <modules>
     <module>versions-maven-plugin</module>
-    <module>model</module>
+    <module>model-ruleset</module>
     <module>model-report</module>
   </modules>
+
+  <scm>
+    <connection>scm:git:https://github.com/mojohaus/versions.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions.git</developerConnection>
+    <url>https://github.com/mojohaus/versions/tree/master</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/mojohaus/versions/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>GitHub</system>
+    <url>https://github.com/mojohaus/versions/actions</url>
+  </ciManagement>
 
   <properties>
     <mojo.java.target>1.8</mojo.java.target>
@@ -124,7 +128,9 @@
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.7</sitePluginVersion>
-    <modelloNamespaceVersion>2.0.0</modelloNamespaceVersion>
+    <modelloNamespaceRuleVersion>2.1.0</modelloNamespaceRuleVersion>
+    <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
+    <scmpublish.content>${project.build.directory}/staging</scmpublish.content><!-- mono-module doesn't require site:stage for scm-publish -->
     <project.build.outputTimestamp>2022-10-23T15:41:47Z</project.build.outputTimestamp>
   </properties>
 
@@ -218,5 +224,73 @@
       </plugin>
     </plugins>
   </build>
+
+  <reporting>
+    <!-- disable some reports from parent pom, by setting empty reports or override configuration ... -->
+    <!-- by the way I will try to remove such reports from parent -->
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports/>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports/>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <configuration>
+              <skipSurefireReport>true</skipSurefireReport>
+            </configuration>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>taglist-maven-plugin</artifactId>
+        <version>${taglist-maven-plugin.version}</version>
+        <reportSets>
+          <reportSet>
+            <reports/>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 
 </project>

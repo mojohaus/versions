@@ -4,34 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0
          http://maven.apache.org/xsd/decoration-1.8.0.xsd">
 
-    <skin>
-        <groupId>org.apache.maven.skins</groupId>
-        <artifactId>maven-fluido-skin</artifactId>
-        <version>1.8</version>
-    </skin>
-
-    <custom>
-        <fluidoSkin>
-            <gitHub>
-                <projectId>mojohaus/versions-maven-plugin</projectId>
-                <ribbonOrientation>right</ribbonOrientation>
-                <ribbonColor>gray</ribbonColor>
-            </gitHub>
-        </fluidoSkin>
-    </custom>
-
     <body>
-        <menu name="Overview">
-            <item name="Introduction" href="index.html"/>
-            <!-- According to https://issues.apache.org/jira/browse/MNGSITE-152 -->
-            <item name="License" href="http://www.apache.org/licenses/"/>
-        </menu>
+        <breadcrumbs>
+            <item name="MojoHaus" href="https://www.mojohaus.org/"/>
+            <item name="${this.name}" href="${this.url}" />
+        </breadcrumbs>
 
-        <footer>
-            <![CDATA[
-		  <p>Apache ${project.name}, ${project.name}, Apache, the Apache feather logo, and the Apache ${project.name} project logos are trademarks of The Apache Software Foundation.</p>
-        ]]>
-        </footer>
-
+        <menu ref="modules"/>
     </body>
 </project>
