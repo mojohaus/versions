@@ -27,6 +27,13 @@ jobs:
       ff-maven: "3.8.6"                     # Maven version for fail-fast-build
       maven-matrix: '[ "3.2.5", "3.8.6" ]'  # Maven versions matrix for verify builds
 
+  install:
+    name: Install
+    run: mvn -DskipTests install
+    with:
+      ff-maven: "3.8.6"                     # Maven version for fail-fast-build
+      maven-matrix: '[ "3.2.5", "3.8.6" ]'  # Maven versions matrix for verify builds
+
   deploy:
     name: Deploy
     needs: build
