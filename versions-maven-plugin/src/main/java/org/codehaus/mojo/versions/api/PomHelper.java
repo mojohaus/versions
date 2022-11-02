@@ -46,7 +46,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -498,67 +497,6 @@ public class PomHelper
             }
         }
         return madeReplacement;
-    }
-
-    /**
-     * Gets the parent artifact from the pom.
-     *
-     * @param pom    The pom.
-     * @param helper The helper (used to create the artifact).
-     * @return The parent artifact or <code>null</code> if no parent is specified.
-     * @throws XMLStreamException if something went wrong.
-     */
-    public static Artifact getProjectParent( final ModifiedPomXMLEventReader pom, VersionsHelper helper )
-        throws XMLStreamException
-    {
-        Stack<String> stack = new Stack<>();
-        String path = "";
-        final Pattern matchScopeRegex = Pattern.compile( "/project/parent((/groupId)|(/artifactId)|(/version))" );
-        String groupId = null;
-        String artifactId = null;
-        String version = null;
-
-        pom.rewind();
-
-        while ( pom.hasNext() )
-        {
-            XMLEvent event = pom.nextEvent();
-            if ( event.isStartElement() )
-            {
-                stack.push( path );
-                final String elementName = event.asStartElement().getName().getLocalPart();
-                path = path + "/" + elementName;
-
-                if ( matchScopeRegex.matcher( path ).matches() )
-                {
-                    if ( "groupId".equals( elementName ) )
-                    {
-                        groupId = pom.getElementText().trim();
-                        path = stack.pop();
-                    }
-                    else if ( "artifactId".equals( elementName ) )
-                    {
-                        artifactId = pom.getElementText().trim();
-                        path = stack.pop();
-                    }
-                    else if ( "version".equals( elementName ) )
-                    {
-                        version = pom.getElementText().trim();
-                        path = stack.pop();
-                    }
-                }
-            }
-            if ( event.isEndElement() )
-            {
-                path = stack.pop();
-            }
-        }
-        if ( groupId == null || artifactId == null || version == null )
-        {
-            return null;
-        }
-        return helper.createDependencyArtifact( groupId, artifactId, version, "pom",
-                                                null, null );
     }
 
     /**
@@ -1436,18 +1374,6 @@ public class PomHelper
      * Modifies the collection of child modules removing those which cannot be found relative to the parent.
      *
      * @param logger       The logger to log to.
-     * @param project      the project.
-     * @param childModules the child modules.
-     */
-    public static void removeMissingChildModules( Log logger, MavenProject project, Collection<String> childModules )
-    {
-        removeMissingChildModules( logger, project.getBasedir(), childModules );
-    }
-
-    /**
-     * Modifies the collection of child modules removing those which cannot be found relative to the parent.
-     *
-     * @param logger       The logger to log to.
      * @param basedir      the project basedir.
      * @param childModules the child modules.
      */
@@ -1619,51 +1545,42 @@ public class PomHelper
     private static Map<String, Model> getReactorModels( String path, Model model, MavenProject project, Log logger )
         throws IOException
     {
-        if ( path.length() > 0 && !path.endsWith( "/" ) )
-        {
-            path += '/';
-        }
         Map<String, Model> result = new LinkedHashMap<>();
         Map<String, Model> childResults = new LinkedHashMap<>();
-
-        File baseDir = path.length() > 0 ? new File( project.getBasedir(), path ) : project.getBasedir();
-
         Set<String> childModules = getAllChildModules( model, logger );
 
+        File baseDir = path.length() > 0
+                ? new File( project.getBasedir(), path )
+                : project.getBasedir();
         removeMissingChildModules( logger, baseDir, childModules );
 
-        for ( String moduleName : childModules )
-        {
-            String modulePath = path + moduleName;
+        childModules.stream()
+                .map( moduleName -> new File( baseDir, moduleName ) )
+                .filter( File::exists )
+                .forEach( moduleFile ->
+                {
+                    File pomFile = moduleFile.isDirectory()
+                            ? new File( moduleFile, "/pom.xml" )
+                            : moduleFile;
+                    String modulePath = ( !path.isEmpty() && !path.endsWith( "/" )
+                            ?  path + "/"
+                            : path )
+                            + pomFile.getParentFile().getName();
 
-            File moduleDir = new File( baseDir, moduleName );
+                    try
+                    {
+                        // the aim of this goal is to fix problems when the project cannot be parsed by Maven,
+                        // so we have to work with the raw model and not the interpolated parsed model from maven
+                        Model moduleModel = getRawModel( pomFile );
+                        result.put( modulePath, moduleModel );
+                        childResults.putAll( getReactorModels( modulePath, moduleModel, project, logger ) );
+                    }
+                    catch ( IOException e )
+                    {
+                        logger.debug( "Could not parse " + pomFile.getPath(), e );
+                    }
+                } );
 
-            File moduleProjectFile;
-
-            if ( moduleDir.isDirectory() )
-            {
-                moduleProjectFile = new File( moduleDir, "pom.xml" );
-            }
-            else
-            {
-                // i don't think this should ever happen... but just in case
-                // the module references the file-name
-                moduleProjectFile = moduleDir;
-            }
-
-            try
-            {
-                // the aim of this goal is to fix problems when the project cannot be parsed by Maven
-                // so we have to work with the raw model and not the interpolated parsed model from maven
-                Model moduleModel = getRawModel( moduleProjectFile );
-                result.put( modulePath, moduleModel );
-                childResults.putAll( getReactorModels( modulePath, moduleModel, project, logger ) );
-            }
-            catch ( IOException e )
-            {
-                logger.debug( "Could not parse " + moduleProjectFile.getPath(), e );
-            }
-        }
         result.putAll( childResults ); // more efficient update order if all children are added after siblings
         return result;
     }
