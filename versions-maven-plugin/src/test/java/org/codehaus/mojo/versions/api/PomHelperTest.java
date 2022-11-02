@@ -7,34 +7,39 @@ import java.io.File;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.plugin.logging.SystemStreamLog;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.MojoRule;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.codehaus.mojo.versions.utils.ModifiedPomXMLEventReaderUtils.matches;
 import static org.codehaus.stax2.XMLInputFactory2.P_PRESERVE_LOCATION;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests the methods of {@link PomHelper}.
  */
-public class PomHelperTest
+public class PomHelperTest extends AbstractMojoTestCase
 {
+    @Rule
+    public MojoRule mojoRule = new MojoRule( this );
+
     private static final XMLInputFactory INPUT_FACTORY = XMLInputFactory2.newInstance();
 
     @BeforeClass
-    public static void setUp()
+    public static void setUpClass()
     {
         INPUT_FACTORY.setProperty( P_PRESERVE_LOCATION, Boolean.TRUE );
     }
@@ -264,5 +269,14 @@ public class PomHelperTest
                 "child", "value" ), is( true ) );
         assertThat( xmlEventReader,
                 matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+    }
+
+    @Test
+    public void testIssue505ChildModules() throws Exception
+    {
+        MavenProject project = mojoRule.readMavenProject(
+                new File( "src/test/resources/org/codehaus/mojo/versions/api/issue-505" ) );
+        Map<String, Model> reactorModels = PomHelper.getReactorModels( project, new SystemStreamLog() );
+        assertThat( reactorModels.keySet(), hasSize( 3 ) );
     }
 }
