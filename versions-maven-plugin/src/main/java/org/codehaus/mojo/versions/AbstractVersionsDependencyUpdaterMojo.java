@@ -507,5 +507,4 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         }
         return nextRangeStartDelimiterIndex;
     }
-
 }

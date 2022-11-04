@@ -31,6 +31,8 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSou
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -60,6 +62,7 @@ public class UseLatestVersionsMojoTest
                     "1.0.0-SNAPSHOT", "0.9.0"} );
             put( "poison-artifact", new String[] {"1.1.1.1-SNAPSHOT", "1.1.1.0", "1.1.1.0-SNAPSHOT", "1.0.0.0",
                     "1.0.0.0-SNAPSHOT", "0.9.0.0"} );
+            put( "other-artifact", new String[] {"1.0", "2.0"} );
         }} );
 
         mojo = new UseLatestVersionsMojo( repositorySystemMock,
@@ -262,5 +265,57 @@ public class UseLatestVersionsMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(), Is.is( empty() ) );
+    }
+
+    @Test
+    public void testIncludeFilter()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+    {
+        mojo.getProject().getModel().setDependencies( Arrays.asList(
+                DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "0.9.0",
+                        "default", "pom", SCOPE_COMPILE ),
+                DependencyBuilder.dependencyWith( "default-group", "other-artifact", "1.0",
+                        "default", "pom", SCOPE_COMPILE )
+        ) );
+        setVariableValueToObject( mojo, "processDependencies", true );
+        setVariableValueToObject( mojo, "includes", new String[] {"default-group:other-artifact"} );
+
+
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
+                    .thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(), hasSize( 1 ) );
+        assertThat( changeRecorder.getChanges(),
+                hasItem( new VersionChange( "default-group", "other-artifact", "1.0",
+                        "2.0" ) ) );
+    }
+
+    @Test
+    public void testExcludeFilter()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+    {
+        mojo.getProject().getModel().setDependencies( Arrays.asList(
+                DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "0.9.0",
+                        "default", "pom", SCOPE_COMPILE ),
+                DependencyBuilder.dependencyWith( "default-group", "other-artifact", "1.0",
+                        "default", "pom", SCOPE_COMPILE )
+        ) );
+        setVariableValueToObject( mojo, "processDependencies", true );
+        setVariableValueToObject( mojo, "excludes", new String[] {"default-group:other-artifact"} );
+
+
+        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
+        {
+            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
+                    .thenReturn( true );
+            mojo.update( null );
+        }
+        assertThat( changeRecorder.getChanges(), hasSize( 1 ) );
+        assertThat( changeRecorder.getChanges(),
+                not( hasItem( new VersionChange( "default-group", "other-artifact", "1.0",
+                        "2.0" ) ) ) );
     }
 }
