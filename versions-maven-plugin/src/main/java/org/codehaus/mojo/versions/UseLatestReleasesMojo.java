@@ -22,11 +22,9 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.Artifact;
@@ -37,7 +35,6 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -46,8 +43,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -55,16 +50,20 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static java.util.Collections.singletonList;
+import static java.util.Optional.empty;
 
 /**
- * Replaces any release versions with the latest release version.
+ * Replaces any <em>release</em> versions (i.e. versions that are not snapshots and do not
+ * have a year-month-day suffix) with the latest <em>release</em> version. This goal
+ * will <em>not</em> replace versions of dependencies which use snapshots
+ * or versions with a year-month-day suffix.
  *
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
 @Mojo( name = "use-latest-releases", threadSafe = true )
 public class UseLatestReleasesMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends UseLatestVersionsMojoBase
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -80,7 +79,7 @@ public class UseLatestReleasesMojo
      * @since 1.2
      */
     @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
-    protected boolean allowMajorUpdates;
+    protected boolean allowMajorUpdates = true;
 
     /**
      * <p>Whether to allow the minor version number to be changed.</p>
@@ -90,7 +89,7 @@ public class UseLatestReleasesMojo
      * @since 1.2
      */
     @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
-    protected boolean allowMinorUpdates;
+    protected boolean allowMinorUpdates = true;
 
     /**
      * <p>Whether to allow the incremental version number to be changed.</p>
@@ -101,7 +100,7 @@ public class UseLatestReleasesMojo
      * @since 1.2
      */
     @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
-    protected boolean allowIncrementalUpdates;
+    protected boolean allowIncrementalUpdates = true;
 
     // ------------------------------ METHODS --------------------------
 
@@ -151,94 +150,51 @@ public class UseLatestReleasesMojo
         }
     }
 
+    @SuppressWarnings( "unchecked" )
     private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+            throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
                 allowMinorUpdates, allowIncrementalUpdates, getLog() );
 
-        for ( Dependency dep : dependencies )
-        {
-            if ( isExcludeReactor() && isProducedByReactor( dep ) )
-            {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
-                continue;
-            }
-
-            if ( isHandledByProperty( dep ) )
-            {
-                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
-                continue;
-            }
-
-            String version = dep.getVersion();
-            Matcher versionMatcher = matchSnapshotRegex.matcher( version );
-            if ( !versionMatcher.matches() )
-            {
-                Artifact artifact = this.toArtifact( dep );
-                if ( !isIncluded( artifact ) )
+        useLatestVersions( pom, dependencies,
+                ( dep, versions ) ->
                 {
-                    continue;
-                }
-
-                ArtifactVersion selectedVersion = new DefaultArtifactVersion( version );
-                getLog().debug( "Selected version: " + selectedVersion );
-
-                getLog().debug( "Looking for newer versions of " + toString( dep ) );
-                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                try
-                {
-                    // TODO consider creating a search + filter in the Details services to get latest release.
-                    ArtifactVersion[] newer = versions.getNewerVersions( version, unchangedSegment, false, false );
-                    ArtifactVersion[] filteredVersions = filterVersionsWithIncludes( newer, artifact );
-                    if ( filteredVersions.length > 0 )
+                    try
                     {
-                        String newVersion = filteredVersions[filteredVersions.length - 1].toString();
-                        if ( getProject().getParent() != null )
-                        {
-                            if ( artifact.getId().equals( getProject().getParentArtifact().getId() )
-                                    && isProcessingParent() )
-                            {
-                                if ( PomHelper.setProjectParentVersion( pom, newVersion ) )
-                                {
-                                    getLog().debug( "Made parent update from " + version + " to " + newVersion );
-                                }
-                            }
-                        }
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                newVersion, getProject().getModel() ) )
-                        {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
-
-                            this.getChangeRecorder().recordUpdate( "useLatestReleases", dep.getGroupId(),
-                                    dep.getArtifactId(), version, newVersion );
-                        }
+                        return getLastFiltered( versions.getNewerVersions( dep.getVersion(), unchangedSegment,
+                                false, false ), dep );
                     }
-                }
-                catch ( InvalidSegmentException e )
-                {
-                    getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s", dep.getGroupId(),
-                            dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
-                }
-            }
-        }
+                    catch ( InvalidSegmentException e )
+                    {
+                        getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s",
+                                dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
+                    }
+                    return empty();
+                }, "useLatestReleases",
+                dep -> !matchSnapshotRegex.matcher( dep.getVersion() ).matches() );
     }
 
-    private ArtifactVersion[] filterVersionsWithIncludes( ArtifactVersion[] newer, Artifact artifact )
+    /**
+     * Returns the last element of the given {@link ArtifactVersion} array such as every version of the array
+     * is included in the {@code includes} and excluded by the {@code excludes} filters
+     *
+     * @param newer array of {@link ArtifactVersion} with newer versions
+     * @param dependency dependency prototype to create the artifacts from
+     * @return the newest version fulfilling the criteria
+     */
+    private Optional<ArtifactVersion> getLastFiltered( ArtifactVersion[] newer, Dependency dependency )
     {
-        List<ArtifactVersion> filteredNewer = new ArrayList<>( newer.length );
-        for ( ArtifactVersion artifactVersion : newer )
-        {
-            Artifact artefactWithNewVersion =
-                    new DefaultArtifact( artifact.getGroupId(), artifact.getArtifactId(),
-                            VersionRange.createFromVersion( artifactVersion.toString() ), artifact.getScope(),
-                            artifact.getType(), null, new DefaultArtifactHandler(), false );
-            if ( isIncluded( artefactWithNewVersion ) )
-            {
-                filteredNewer.add( artifactVersion );
-            }
-        }
-        return filteredNewer.toArray( new ArtifactVersion[0] );
+        return Arrays.stream( newer )
+                .filter( version ->
+                {
+                    Artifact artefactWithNewVersion =
+                            new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
+                                    VersionRange.createFromVersion( version.toString() ), dependency.getScope(),
+                                    dependency.getType(), null, new DefaultArtifactHandler(), false );
+                    return isIncluded( artefactWithNewVersion );
+                } )
+                .reduce( ( v1, v2 ) -> v2 );
     }
 
 }

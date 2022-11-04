@@ -256,6 +256,32 @@ public abstract class AbstractVersionDetails
     }
 
     @Override
+    public Optional<ArtifactVersion> getNewestVersion( String versionString, Optional<Segment> upperBoundSegment,
+                                                       boolean includeSnapshots, boolean allowDowngrade )
+            throws InvalidSegmentException
+    {
+        ArtifactVersion currentVersion = new DefaultArtifactVersion( versionString );
+        ArtifactVersion lowerBound = allowDowngrade
+                ? getLowerBound( currentVersion, upperBoundSegment )
+                .map( DefaultArtifactVersion::new )
+                .orElse( null )
+                : currentVersion;
+        ArtifactVersion upperBound =
+                upperBoundSegment
+                        .map( s -> (ArtifactVersion) new BoundArtifactVersion( currentVersion,
+                                s.isMajorTo( SUBINCREMENTAL )
+                                        ? Segment.of( s.value() + 1 )
+                                        : s ) )
+                        .orElse( null );
+
+        Restriction restriction = new Restriction( lowerBound, allowDowngrade, upperBound, allowDowngrade );
+        return Arrays.stream( getVersions( includeSnapshots ) )
+                .filter( candidate -> isVersionInRestriction( restriction, candidate ) )
+                .filter( candidate -> includeSnapshots || !ArtifactUtils.isSnapshot( candidate.toString() ) )
+                .max( getVersionComparator() );
+    }
+
+    @Override
     public final ArtifactVersion[] getVersions( Restriction restriction, boolean includeSnapshots )
     {
         return getVersions( null, restriction, includeSnapshots );

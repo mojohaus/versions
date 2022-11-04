@@ -59,8 +59,7 @@ The Versions Plugin has the following goals.
   released and replaces them with the corresponding release version.
 * [versions:use-next-releases](./use-next-releases-mojo.html) searches the pom for all non-SNAPSHOT versions which
   have been a newer release and replaces them with the next release version.
-* [versions:use-latest-releases](./use-latest-releases-mojo.html) searches the pom for all non-SNAPSHOT versions which
-  have been a newer release and replaces them with the latest release version.
+* [versions:use-latest-releases](./use-latest-releases-mojo.html) searches the pom for all dependencies using *release* versions (i.e. not SNAPSHOT and not versions ending with a year-month-day suffix) and replaces them with the latest *release* version.
 * [versions:use-next-snapshots](./use-next-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions which
   have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
 * [versions:use-latest-snapshots](./use-latest-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions
