@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions;
+package org.codehaus.mojo.versions.api;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one

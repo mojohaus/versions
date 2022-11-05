@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions.reporting.model;
+package org.codehaus.mojo.versions.filtering;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,28 +19,23 @@ package org.codehaus.mojo.versions.reporting.model;
  * under the License.
  */
 
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.codehaus.mojo.versions.api.Property;
-import org.codehaus.mojo.versions.api.PropertyVersions;
-import org.codehaus.mojo.versions.utils.PropertyComparator;
-
-/**
- * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
- */
-public class PropertyUpdatesModel
+public class NullAwareWildcardMatcher extends WildcardMatcher
 {
-    private final Map<Property, PropertyVersions> allUpdates;
+    public static final String NULL_KEYWORD = "null";
 
-    public PropertyUpdatesModel( Map<Property, PropertyVersions> propertyUpdates )
+    public NullAwareWildcardMatcher( String pattern )
     {
-        this.allUpdates = new TreeMap<>( PropertyComparator.INSTANCE );
-        this.allUpdates.putAll( propertyUpdates );
+        super( pattern );
     }
 
-    public Map<Property, PropertyVersions> getAllUpdates()
+    @Override
+    public boolean test( String token )
     {
-        return allUpdates;
+        if ( NULL_KEYWORD.equals( getPattern() ) )
+        {
+            return token == null;
+        }
+
+        return super.test( token );
     }
 }

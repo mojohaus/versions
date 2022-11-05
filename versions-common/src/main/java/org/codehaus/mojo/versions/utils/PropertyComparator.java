@@ -22,7 +22,7 @@ package org.codehaus.mojo.versions.utils;
 import java.util.Comparator;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.mojo.versions.Property;
+import org.codehaus.mojo.versions.api.Property;
 
 /**
  * A comparator used to sort {@link Property} instances.

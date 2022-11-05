@@ -22,7 +22,7 @@ package org.codehaus.mojo.versions.reporting.model;
 import java.util.Map;
 
 import org.apache.maven.model.Plugin;
-import org.codehaus.mojo.versions.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
 /**
@@ -30,6 +30,11 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
  */
 public class PluginUpdatesModel extends AbstractUpdatesModel<PluginUpdatesDetails>
 {
+    /**
+     * Creates a new instance
+     * @param pluginUpdates map of plugin updates per plugin
+     * @param pluginManagementUpdates map of plugin management updates per plugin
+     */
     public PluginUpdatesModel( Map<Plugin, PluginUpdatesDetails> pluginUpdates,
                                Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates )
     {
