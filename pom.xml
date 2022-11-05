@@ -99,6 +99,7 @@
     <module>versions-maven-plugin</module>
     <module>model-ruleset</module>
     <module>model-report</module>
+    <module>versions-common</module>
   </modules>
 
   <scm>

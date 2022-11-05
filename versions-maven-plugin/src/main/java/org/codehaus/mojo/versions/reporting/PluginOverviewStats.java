@@ -21,10 +21,10 @@ package org.codehaus.mojo.versions.reporting;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
+import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 
 import static java.util.Optional.of;
@@ -58,7 +58,7 @@ public class PluginOverviewStats extends OverviewStats
      * @param cache if not null, cache to retrieve the version information, initialised with
      * the {@link ArtifactVersions#getNewestUpdate(Optional)} update information
      * @param <T> always equal to {@linkplain PluginOverviewStats}
-     * @param <V> always equal to {@linkplain org.codehaus.mojo.versions.PluginUpdatesDetails}
+     * @param <V> always equal to {@linkplain PluginUpdatesDetails}
      * @return instance of the {@linkplain PluginOverviewStats}, initialised with the update information
      */
     public static <T extends OverviewStats, V extends AbstractVersionDetails>

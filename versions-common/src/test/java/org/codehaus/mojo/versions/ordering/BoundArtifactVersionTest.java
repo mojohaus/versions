@@ -20,9 +20,12 @@ package org.codehaus.mojo.versions.ordering;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.codehaus.mojo.versions.api.Segment;
 import org.junit.Test;
 
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
+import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
@@ -36,7 +39,7 @@ public class BoundArtifactVersionTest
     public void testMajorUpperBoundGreaterThanNextMajor()
     {
         BoundArtifactVersion bound = new BoundArtifactVersion( new DefaultArtifactVersion( "1.2.3" ),
-                Segment.MAJOR );
+                MAJOR );
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( "2.0.0" );
         assertThat( bound.compareTo( artifactVersion ), greaterThan( 0 ) );
     }
@@ -45,7 +48,7 @@ public class BoundArtifactVersionTest
     public void testSubIncrementalUpperBoundGreaterThanNextSubIncremental()
     {
         BoundArtifactVersion bound = new BoundArtifactVersion( new DefaultArtifactVersion( "1.2.3-2" ),
-                Segment.SUBINCREMENTAL );
+                SUBINCREMENTAL );
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( "1.2.3-3" );
         assertThat( bound.compareTo( artifactVersion ), greaterThan( 0 ) );
     }
@@ -54,7 +57,7 @@ public class BoundArtifactVersionTest
     public void testVersionShorterThanSegment()
     {
         BoundArtifactVersion bound = new BoundArtifactVersion( new DefaultArtifactVersion( "1.1" ),
-                Segment.INCREMENTAL );
+                INCREMENTAL );
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( "1.1.3" );
         assertThat( bound.compareTo( artifactVersion ), greaterThan( 0 ) );
     }
@@ -63,7 +66,7 @@ public class BoundArtifactVersionTest
     public void testVersionBoundArtifactVersionShorterThanConcreteVersionAndSegment()
     {
         BoundArtifactVersion bound = new BoundArtifactVersion( new DefaultArtifactVersion( "1.1" ),
-                Segment.SUBINCREMENTAL );
+                SUBINCREMENTAL );
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( "1.1.3" );
         assertThat( bound.compareTo( artifactVersion ), lessThan( 0 ) );
     }
@@ -72,7 +75,7 @@ public class BoundArtifactVersionTest
     public void testVersionSubIncrementalBoundGreaterThanSubIncremental()
     {
         BoundArtifactVersion bound = new BoundArtifactVersion( new DefaultArtifactVersion( "1.1" ),
-                Segment.SUBINCREMENTAL );
+                SUBINCREMENTAL );
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( "1.1.0-2" );
         assertThat( bound.compareTo( artifactVersion ), greaterThan( 0 ) );
     }
@@ -81,7 +84,7 @@ public class BoundArtifactVersionTest
     public void testVersionSubIncrementalBoundGreaterThanIncremental()
     {
         BoundArtifactVersion bound = new BoundArtifactVersion( new DefaultArtifactVersion( "1.1" ),
-                Segment.INCREMENTAL );
+                INCREMENTAL );
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( "1.1.3" );
         assertThat( bound.compareTo( artifactVersion ), greaterThan( 0 ) );
     }
@@ -90,7 +93,7 @@ public class BoundArtifactVersionTest
     public void testVersionSubIncrementalBoundGreaterThanMinor()
     {
         BoundArtifactVersion bound = new BoundArtifactVersion( new DefaultArtifactVersion( "1.1" ),
-                Segment.MINOR );
+                MINOR );
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( "1.3" );
         assertThat( bound.compareTo( artifactVersion ), greaterThan( 0 ) );
     }
@@ -99,7 +102,7 @@ public class BoundArtifactVersionTest
     public void testSnapshotWithSubIncremental()
     {
         BoundArtifactVersion bound = new BoundArtifactVersion( new DefaultArtifactVersion( "1.0.0-SNAPSHOT" ),
-                Segment.MINOR );
+                MINOR );
         ArtifactVersion artifactVersion = new DefaultArtifactVersion( "1.0.0" );
         assertThat( bound.compareTo( artifactVersion ), greaterThan( 0 ) );
     }

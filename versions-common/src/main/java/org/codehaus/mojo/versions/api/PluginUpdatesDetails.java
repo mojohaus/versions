@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions;
+package org.codehaus.mojo.versions.api;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -24,7 +24,6 @@ import java.util.Objects;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
 
 import static java.util.Optional.empty;
 

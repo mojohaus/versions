@@ -34,8 +34,6 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.PluginUpdatesDetails;
-import org.codehaus.mojo.versions.Property;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 
@@ -188,7 +186,7 @@ public interface VersionsHelper
      *
      * @param plugins The set of {@link Plugin} instances to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
-     * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.PluginUpdatesDetails}.
+     * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.api.PluginUpdatesDetails}.
      * @throws ArtifactMetadataRetrievalException When things go wrong.
      * @since 1.0-beta-1
      */
@@ -218,12 +216,12 @@ public interface VersionsHelper
 
     /**
      * Returns a map of {@link org.codehaus.mojo.versions.api.PropertyVersions} values keyed by
-     * {@link org.codehaus.mojo.versions.Property} instances consisting of the properties defined in the project which
+     * {@link Property} instances consisting of the properties defined in the project which
      * are associated with version information.
      *
      * @param request {@link VersionPropertiesMapRequest} instance containing the arguments
      * @return a map of {@link org.codehaus.mojo.versions.api.PropertyVersions} values keyed by
-     *         {@link org.codehaus.mojo.versions.Property} instances.
+     *         {@link Property} instances.
      * @throws MojoExecutionException if something goes wrong.
      */
     Map<Property, PropertyVersions> getVersionPropertiesMap( VersionPropertiesMapRequest request )

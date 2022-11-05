@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
-import org.codehaus.mojo.versions.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
+import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.api.ReportRenderer;
 import org.codehaus.mojo.versions.reporting.PluginOverviewStats;
 import org.codehaus.mojo.versions.reporting.model.PluginInfo;
