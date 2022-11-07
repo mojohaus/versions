@@ -64,7 +64,7 @@ public final class ChangeRecorderXMLTest
 
         copyResource( "expectedFile.xml", file0 );
 
-        final ChangeRecorder recorder = ChangeRecorderXML.create();
+        final ChangeRecorder recorder = new ChangeRecorderXML();
         recorder.recordUpdate( "exampleKind", "org.codehaus", "example0", "0.0.1", "0.0.2" );
         recorder.recordUpdate( "exampleKind", "org.codehaus", "example1", "1.0.0", "2.0.0" );
 

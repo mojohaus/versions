@@ -23,24 +23,22 @@ import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.Collection;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+
+import static java.util.Collections.singletonList;
+import static java.util.Optional.of;
 
 /**
  * Replaces any release versions with the next release version (if it has been released).
@@ -50,7 +48,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  */
 @Mojo( name = "use-next-releases", threadSafe = true )
 public class UseNextReleasesMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends UseLatestVersionsMojoBase
 {
 
     // ------------------------------ FIELDS ------------------------------
@@ -90,53 +88,17 @@ public class UseNextReleasesMojo
         {
             useNextReleases( pom, getProject().getDependencies() );
         }
-    }
-
-    private void useNextReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
-    {
-        for ( Dependency dep : dependencies )
+        if ( getProject().getParent() != null && isProcessingParent() )
         {
-            if ( isExcludeReactor() && isProducedByReactor( dep ) )
-            {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
-                continue;
-            }
-
-            if ( isHandledByProperty( dep ) )
-            {
-                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
-                continue;
-            }
-
-            String version = dep.getVersion();
-            Matcher versionMatcher = MATCH_SNAPSHOT_REGEX.matcher( version );
-            if ( !versionMatcher.matches() )
-            {
-                getLog().debug( "Looking for newer versions of " + toString( dep ) );
-                Artifact artifact = this.toArtifact( dep );
-                if ( !isIncluded( artifact ) )
-                {
-                    continue;
-                }
-
-                ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                ArtifactVersion[] newer = versions.getNewerVersions( version, false );
-                if ( newer.length > 0 )
-                {
-                    String newVersion = newer[0].toString();
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         newVersion, getProject().getModel() ) )
-
-                    {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
-
-                        this.getChangeRecorder().recordUpdate( "useNextReleases", dep.getGroupId(),
-                                dep.getArtifactId(), version, newVersion );
-                    }
-                }
-            }
+            useNextReleases( pom, singletonList( getParentDependency() ) );
         }
     }
 
+    private void useNextReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
+            throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+    {
+        useLatestVersions( pom, dependencies,
+                ( dep, versions ) -> of( versions.getNewerVersions( dep.getVersion(), false )[0] ),
+                "useNextReleases", dep -> !SNAPSHOT_REGEX.matcher( dep.getVersion() ).matches() );
+    }
 }

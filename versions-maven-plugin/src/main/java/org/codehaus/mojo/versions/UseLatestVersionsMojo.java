@@ -42,7 +42,6 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static java.util.Collections.singletonList;
@@ -145,12 +144,7 @@ public class UseLatestVersionsMojo
             }
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                useLatestVersions( pom, singletonList( DependencyBuilder.newBuilder()
-                        .withGroupId( getProject().getParent().getGroupId() )
-                        .withArtifactId( getProject().getParent().getArtifactId() )
-                        .withVersion( getProject().getParent().getVersion() )
-                        .withType( "pom" )
-                        .build() ) );
+                useLatestVersions( pom, singletonList( getParentDependency() ) );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -159,7 +153,6 @@ public class UseLatestVersionsMojo
         }
     }
 
-    @SuppressWarnings( "unchecked" )
     private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
             throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {

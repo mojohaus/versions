@@ -37,8 +37,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Updates a dependency to a specific version.
@@ -107,6 +108,11 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
             {
                 useDepVersion( pom, getProject().getDependencies() );
             }
+
+            if ( getProject().getParent() != null && isProcessingParent() )
+            {
+                useDepVersion( pom, singletonList( getParentDependency() ) );
+            }
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
@@ -146,17 +152,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
                                            depVersion, artifact.getGroupId(), artifact.getArtifactId() ) );
                     }
                 }
-
-                String version = dep.getVersion();
-
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, depVersion,
-                                                     getProject().getModel() ) )
-                {
-                    getLog().info( "Updated " + toString( dep ) + " to version " + depVersion );
-
-                    this.getChangeRecorder().recordUpdate( "useDependencyVersion", dep.getGroupId(),
-                                                           dep.getArtifactId(), version, depVersion );
-                }
+                updateDependencyVersion( pom, dep, depVersion, "useDependencyVersion" );
             }
         }
     }

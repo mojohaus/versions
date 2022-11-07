@@ -39,7 +39,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -110,37 +109,12 @@ public abstract class UseLatestVersionsMojoBase
 
             ArtifactVersion selectedVersion = new DefaultArtifactVersion( dep.getVersion() );
             getLog().debug( "Selected version:" + selectedVersion );
-
             getLog().debug( "Looking for newer versions of " + toString( dep ) );
             ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
             Optional<ArtifactVersion> newestVer = newestVersionProducer.apply( dep, versions );
             if ( newestVer.isPresent() )
             {
-                String verStr = newestVer.get().toString();
-                if ( getProject().getParent() != null )
-                {
-                    final Artifact parentArtifact = getProject().getParentArtifact();
-                    if ( artifact.getId().equals( parentArtifact.getId() ) && isProcessingParent() )
-                    {
-                        if ( PomHelper.setProjectParentVersion( pom, verStr ) )
-                        {
-                            getLog().debug( "Made parent update from " + dep.getVersion() + " to " + verStr );
-
-                            this.getChangeRecorder().recordUpdate( changeRecorderTitle, parentArtifact.getGroupId(),
-                                    parentArtifact.getArtifactId(), dep.getVersion(),
-                                    verStr );
-                        }
-                    }
-                }
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                        verStr,
-                        getProject().getModel() ) )
-                {
-                    getLog().info( "Updated " + toString( dep ) + " to version " + verStr );
-
-                    this.getChangeRecorder().recordUpdate( changeRecorderTitle, dep.getGroupId(),
-                            dep.getArtifactId(), dep.getVersion(), verStr );
-                }
+                updateDependencyVersion( pom, dep, newestVer.get().toString(), changeRecorderTitle );
             }
         }
     }

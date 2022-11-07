@@ -52,6 +52,8 @@ import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
+import static java.util.Collections.singletonList;
+
 /**
  * Compare dependency versions of the current project to dependencies or dependency management of a remote repository
  * project. Can optionally update locally the project instead of reporting the comparison
@@ -182,36 +184,56 @@ public class CompareDependenciesMojo
         Map<String, Dependency> remoteDepsMap = new HashMap<>();
         if ( !ignoreRemoteDependencyManagement )
         {
-            List<Dependency> remoteProjectDepMgmtDeps = ( remoteMavenProject.getDependencyManagement() == null ) ? null
-                : remoteMavenProject.getDependencyManagement().getDependencies();
-            mapDependencies( remoteDepsMap, remoteProjectDepMgmtDeps );
+            List<Dependency> remoteProjectDepMgmtDeps = remoteMavenProject.getDependencyManagement() == null
+                    ? null
+                    : remoteMavenProject.getDependencyManagement().getDependencies();
+            if ( remoteProjectDepMgmtDeps != null )
+            {
+                remoteProjectDepMgmtDeps.forEach( dep -> remoteDepsMap.putIfAbsent( dep.getManagementKey(), dep ) );
+            }
         }
-        if ( !ignoreRemoteDependencies )
+        if ( !ignoreRemoteDependencies && remoteMavenProject.getDependencies() != null )
         {
-            List<Dependency> remoteProjectDeps = remoteMavenProject.getDependencies();
-            mapDependencies( remoteDepsMap, remoteProjectDeps );
+            remoteMavenProject.getDependencies().forEach( dep ->
+                    remoteDepsMap.putIfAbsent( dep.getManagementKey(), dep ) );
         }
 
         List<String> totalDiffs = new ArrayList<>();
         List<String> propertyDiffs = new ArrayList<>();
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
-            List<String> depManDiffs =
-                compareVersions( pom, getProject().getDependencyManagement().getDependencies(), remoteDepsMap );
-            totalDiffs.addAll( depManDiffs );
+            totalDiffs.addAll(
+                    compareVersions( pom, getProject().getDependencyManagement().getDependencies(), remoteDepsMap ) );
         }
         if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
-            List<String> depDiffs = compareVersions( pom, getProject().getDependencies(), remoteDepsMap );
-            totalDiffs.addAll( depDiffs );
+            totalDiffs.addAll( compareVersions( pom, getProject().getDependencies(), remoteDepsMap ) );
         }
         if ( updatePropertyVersions )
         {
             Map<Property, PropertyVersions> versionProperties =
                     this.getHelper().getVersionPropertiesMap( VersionsHelper.VersionPropertiesMapRequest.builder()
                             .withMavenProject( getProject() ).build() );
-            List<String> diff = updatePropertyVersions( pom, versionProperties, remoteDepsMap );
-            propertyDiffs.addAll( diff );
+            propertyDiffs.addAll( updatePropertyVersions( pom, versionProperties, remoteDepsMap ) );
+        }
+        if ( getProject().getParent() != null
+                        && remoteMavenProject.getParent() != null
+                        && isProcessingParent() )
+        {
+            Dependency parent = DependencyBuilder.newBuilder()
+                    .withGroupId( remoteMavenProject.getParentArtifact().getGroupId() )
+                    .withArtifactId( remoteMavenProject.getParentArtifact().getArtifactId() )
+                    .withVersion( remoteMavenProject.getParentArtifact().getVersion() )
+                    .withType( remoteMavenProject.getParentArtifact().getType() )
+                    .withScope( remoteMavenProject.getParentArtifact().getScope() )
+                    .withClassifier( remoteMavenProject.getParentArtifact().getClassifier() )
+                    .build();
+            if ( getLog().isDebugEnabled() )
+            {
+                getLog().debug( "Processing parent dependency: " + parent );
+            }
+            remoteDepsMap.putIfAbsent( parent.getManagementKey(), parent );
+            totalDiffs.addAll( compareVersions( pom, singletonList( getParentDependency() ), remoteDepsMap ) );
         }
 
         if ( reportMode )
@@ -271,19 +293,13 @@ public class CompareDependenciesMojo
             if ( remoteDep != null )
             {
                 String remoteVersion = remoteDep.getVersion();
-
                 if ( !dep.getVersion().equals( remoteVersion ) )
                 {
                     StringBuilder buf = writeDependencyDiffMessage( dep, remoteVersion );
                     updates.add( buf.toString() );
                     if ( !reportMode )
                     {
-                        if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(),
-                                                             dep.getVersion(), remoteVersion,
-                                                             getProject().getModel() ) )
-                        {
-                            getLog().info( "Updated " + toString( dep ) + " to version " + remoteVersion );
-                        }
+                        updateDependencyVersion( pom, dep, remoteVersion, "compareDependencies" );
                     }
 
                 }
@@ -442,23 +458,6 @@ public class CompareDependenciesMojo
         buf.append( " -> " );
         buf.append( targetVersion );
         return buf;
-    }
-
-    /**
-     * Add a list of dependencies to a Map for easy access
-     *
-     * @param map
-     * @param deps
-     */
-    private void mapDependencies( Map<String, Dependency> map, List<Dependency> deps )
-    {
-        if ( deps != null )
-        {
-            for ( Dependency nextDep : deps )
-            {
-                map.put( nextDep.getManagementKey(), nextDep );
-            }
-        }
     }
 
     /**

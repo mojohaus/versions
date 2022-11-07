@@ -25,7 +25,6 @@ import javax.xml.stream.XMLStreamException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -46,7 +45,6 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static java.util.Collections.singletonList;
@@ -67,11 +65,6 @@ public class UseLatestReleasesMojo
 {
 
     // ------------------------------ FIELDS ------------------------------
-
-    /**
-     * Pattern to match a snapshot version.
-     */
-    private final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
 
     /**
      * Whether to allow the major version number to be changed.
@@ -136,12 +129,7 @@ public class UseLatestReleasesMojo
             }
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                useLatestReleases( pom, singletonList( DependencyBuilder.newBuilder()
-                        .withGroupId( getProject().getParent().getGroupId() )
-                        .withArtifactId( getProject().getParent().getArtifactId() )
-                        .withVersion( getProject().getParent().getVersion() )
-                        .withType( "pom" )
-                        .build() ) );
+                useLatestReleases( pom, singletonList( getParentDependency() ) );
             }
         }
         catch ( ArtifactMetadataRetrievalException e )
@@ -150,7 +138,6 @@ public class UseLatestReleasesMojo
         }
     }
 
-    @SuppressWarnings( "unchecked" )
     private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
             throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
@@ -172,7 +159,7 @@ public class UseLatestReleasesMojo
                     }
                     return empty();
                 }, "useLatestReleases",
-                dep -> !matchSnapshotRegex.matcher( dep.getVersion() ).matches() );
+                dep -> !SNAPSHOT_REGEX.matcher( dep.getVersion() ).matches() );
     }
 
     /**

@@ -205,6 +205,7 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( property = "changeRecorderOutputFile",
                 defaultValue = "${project.build.directory}/versions-changes.xml" )
     private File changeRecorderOutputFile;
+
     /**
      * The change recorder implementation.
      */
@@ -317,12 +318,25 @@ public abstract class AbstractVersionsUpdaterMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        validateInput();
         File outFile = project.getFile();
         process( outFile );
     }
 
     // -------------------------- OTHER METHODS --------------------------
 
+    /**
+     * Validates input parameters
+     *
+     * @throws MojoExecutionException thrown if any of input parameters is invalid
+     */
+    protected void validateInput() throws MojoExecutionException
+    {
+        if ( !"none".equals( changeRecorderFormat ) && !"xml".equals( changeRecorderFormat ) )
+        {
+            throw new MojoExecutionException( "Only 'xml' or 'none' formats are supported for change recordings" );
+        }
+    }
     /**
      * Finds the latest version of the specified artifact that matches the version range.
      *
@@ -560,25 +574,16 @@ public abstract class AbstractVersionsUpdaterMojo
      * Configure and return the change recorder.
      *
      * @return The change recorder
-     * @throws MojoExecutionException If the provided change recorder format is not valid
      */
-
-    protected ChangeRecorder getChangeRecorder() throws MojoExecutionException
+    protected ChangeRecorder getChangeRecorder()
     {
         if ( changeRecorder == null )
         {
-            if ( "none".equals( this.changeRecorderFormat ) )
-            {
-                changeRecorder = ChangeRecorderNull.create();
-            }
-            else if ( "xml".equals( this.changeRecorderFormat ) )
-            {
-                changeRecorder = ChangeRecorderXML.create();
-            }
-            else
-            {
-                throw new MojoExecutionException( "Only 'xml' or 'none' formats are supported for change recordings" );
-            }
+            changeRecorder = "none".equals( this.changeRecorderFormat )
+                    ? new ChangeRecorderNull()
+                    : "xml".equals( this.changeRecorderFormat )
+                        ? new ChangeRecorderXML()
+                        : null;
         }
 
         return changeRecorder;
