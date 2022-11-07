@@ -58,7 +58,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
      */
-    private final Pattern matchSnapshotRegex = Pattern.compile( "-(\\d{8}\\.\\d{6})-(\\d+)$" );
+    private static final Pattern TIMESTAMPED_SNAPSHOT_REGEX = Pattern.compile( "-(\\d{8}\\.\\d{6})-(\\d+)$" );
 
     // ------------------------------ METHODS --------------------------
 
@@ -120,7 +120,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
             }
 
             String version = dep.getVersion();
-            Matcher versionMatcher = matchSnapshotRegex.matcher( version );
+            Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher( version );
             if ( versionMatcher.find() && versionMatcher.end() == version.length() )
             {
                 String unlockedVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
@@ -153,7 +153,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
         Artifact parentArtifact = parent.getArtifact();
         String parentVersion = parentArtifact.getVersion();
 
-        Matcher versionMatcher = matchSnapshotRegex.matcher( parentVersion );
+        Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher( parentVersion );
         if ( versionMatcher.find() && versionMatcher.end() == parentVersion.length() )
         {
             String unlockedParentVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );

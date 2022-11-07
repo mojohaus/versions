@@ -24,7 +24,6 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Collection;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -32,15 +31,18 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Replaces any -SNAPSHOT versions with a release version, older if necessary (if there has been a release).
@@ -52,13 +54,13 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 public class ForceReleasesMojo
     extends AbstractVersionsDependencyUpdaterMojo
 {
-
-    // ------------------------------ FIELDS ------------------------------
-
     /**
-     * Pattern to match a snapshot version.
+     * Whether to fail if a SNAPSHOT could not be replaced
+     *
+     * @since 2.14.0
      */
-    private final Pattern matchSnapshotRegex = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
+    @Parameter( property = "failIfNotReplaced", defaultValue = "false" )
+    protected boolean failIfNotReplaced;
 
     // ------------------------------ METHODS --------------------------
 
@@ -92,6 +94,10 @@ public class ForceReleasesMojo
             {
                 useReleases( pom, getProject().getDependencies() );
             }
+            if ( getProject().getParent() != null && isProcessingParent() )
+            {
+                useReleases( pom, singletonList( getParentDependency() ) );
+            }
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
@@ -116,8 +122,7 @@ public class ForceReleasesMojo
                 continue;
             }
 
-            String version = dep.getVersion();
-            Matcher versionMatcher = matchSnapshotRegex.matcher( version );
+            Matcher versionMatcher = SNAPSHOT_REGEX.matcher( dep.getVersion() );
             if ( versionMatcher.matches() )
             {
                 String releaseVersion = versionMatcher.group( 1 );
@@ -131,23 +136,24 @@ public class ForceReleasesMojo
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 if ( versions.containsVersion( releaseVersion ) )
                 {
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         releaseVersion, getProject().getModel() ) )
-                    {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + releaseVersion );
-                    }
+                    updateDependencyVersion( pom, dep, releaseVersion, "forceReleases" );
                 }
                 else
                 {
-                    ArtifactVersion[] v = versions.getVersions( false );
-                    if ( v.length == 0 )
+                    ArtifactVersion newestRelease = versions.getNewestVersion( (VersionRange) null, null,
+                            false, true );
+                    if ( newestRelease == null )
                     {
                         getLog().info( "No release of " + toString( dep ) + " to force." );
+                        if ( failIfNotReplaced )
+                        {
+                            throw new MojoExecutionException( "No matching release of " + toString( dep )
+                                    + " found for update." );
+                        }
                     }
-                    else if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                              v[v.length - 1].toString(), getProject().getModel() ) )
+                    else
                     {
-                        getLog().info( "Reverted " + toString( dep ) + " to version " + v[v.length - 1].toString() );
+                        updateDependencyVersion( pom, dep, newestRelease.toString(), "forceReleases" );
                     }
                 }
             }

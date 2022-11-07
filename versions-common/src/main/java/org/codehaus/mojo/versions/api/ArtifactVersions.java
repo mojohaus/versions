@@ -253,4 +253,5 @@ public class ArtifactVersions
         return "ArtifactVersions" + "{artifact=" + artifact + ", versions=" + versions + ", versionComparator="
             + versionComparator + '}';
     }
+
 }

@@ -488,7 +488,6 @@ public class DisplayDependencyUpdatesMojo
         throws MojoExecutionException, MojoFailureException
     {
         logInit();
-
         validateInput();
 
         Set<Dependency> dependencyManagement = new TreeSet<>( DependencyComparator.INSTANCE );
@@ -599,7 +598,8 @@ public class DisplayDependencyUpdatesMojo
         }
     }
 
-    private void validateInput() throws MojoExecutionException
+    @Override
+    protected void validateInput() throws MojoExecutionException
     {
         validateGAVList( dependencyIncludes, 6, "dependencyIncludes" );
         validateGAVList( dependencyExcludes, 6, "dependencyExcludes" );

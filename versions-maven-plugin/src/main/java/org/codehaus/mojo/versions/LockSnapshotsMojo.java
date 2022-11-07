@@ -59,7 +59,7 @@ public class LockSnapshotsMojo
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
      */
-    private final Pattern matchSnapshotRegex = Pattern.compile( "-" + Artifact.SNAPSHOT_VERSION );
+    private static final Pattern TIMESTAMPED_SNAPSHOT_REGEX = Pattern.compile( "-" + Artifact.SNAPSHOT_VERSION );
 
     // ------------------------------ METHODS --------------------------
 
@@ -120,7 +120,7 @@ public class LockSnapshotsMojo
             }
 
             String version = dep.getVersion();
-            Matcher versionMatcher = matchSnapshotRegex.matcher( version );
+            Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher( version );
             if ( versionMatcher.find() && versionMatcher.end() == version.length() )
             {
                 String lockedVersion = resolveSnapshotVersion( dep );
@@ -154,7 +154,7 @@ public class LockSnapshotsMojo
         Artifact parentArtifact = parent.getArtifact();
         String parentVersion = parentArtifact.getVersion();
 
-        Matcher versionMatcher = matchSnapshotRegex.matcher( parentVersion );
+        Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher( parentVersion );
         if ( versionMatcher.find() && versionMatcher.end() == parentVersion.length() )
         {
             String lockedParentVersion = resolveSnapshotVersion( parentArtifact );

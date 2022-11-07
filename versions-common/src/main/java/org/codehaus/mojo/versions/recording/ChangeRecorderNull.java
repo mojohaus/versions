@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions.recording;
  */
 
 import java.io.OutputStream;
-import java.util.Objects;
 
 /**
  * A recorder that ignores updates.
@@ -29,35 +28,20 @@ import java.util.Objects;
 public class ChangeRecorderNull implements ChangeRecorder
 {
     /**
-     * Create a new change recorder that serializes to XML.
-     *
-     * @return A new change recorder
+     * Creates a new instance
      */
-
-    public static ChangeRecorder create()
+    public ChangeRecorderNull()
     {
-        return new ChangeRecorderNull();
-    }
-
-    private ChangeRecorderNull()
-    {
-
     }
 
     @Override
     public final void recordUpdate( final String kind, final String groupId, final String artifactId,
                                     final String oldVersion, final String newVersion )
     {
-        Objects.requireNonNull( kind, "kind" );
-        Objects.requireNonNull( groupId, "groupId" );
-        Objects.requireNonNull( artifactId, "artifactId" );
-        Objects.requireNonNull( oldVersion, "oldVersion" );
-        Objects.requireNonNull( newVersion, "newVersion" );
     }
 
     @Override
     public final void serialize( final OutputStream outputStream )
     {
-
     }
 }

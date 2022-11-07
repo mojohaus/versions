@@ -53,32 +53,22 @@ public class ChangeRecorderXML implements ChangeRecorder
     private final Element root;
 
     /**
-     * Create a new change recorder that serializes to XML.
-     *
-     * @return A new change recorder
+     * Creates a new instance
      */
-
-    public static ChangeRecorder create()
+    public ChangeRecorderXML()
     {
         try
         {
             final DocumentBuilderFactory documentBuilders = DocumentBuilderFactory.newInstance();
             final DocumentBuilder documentBuilder = documentBuilders.newDocumentBuilder();
-            final Document document = documentBuilder.newDocument();
-            final Element root = document.createElementNS( CHANGES_NAMESPACE, "updates" );
+            document = documentBuilder.newDocument();
+            root = document.createElementNS( CHANGES_NAMESPACE, "updates" );
             document.appendChild( root );
-            return new ChangeRecorderXML( document, root );
         }
         catch ( final ParserConfigurationException | DOMException e )
         {
             throw new IllegalStateException( e );
         }
-    }
-
-    private ChangeRecorderXML( final Document document, final Element root )
-    {
-        this.document = Objects.requireNonNull( document, "document" );
-        this.root = Objects.requireNonNull( root, "root" );
     }
 
     @Override

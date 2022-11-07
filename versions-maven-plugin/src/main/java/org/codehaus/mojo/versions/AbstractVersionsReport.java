@@ -301,17 +301,13 @@ public abstract class AbstractVersionsReport<T>
         }
     }
 
-    /**
-     * @see org.apache.maven.reporting.AbstractMavenReport#getProject()
-     */
+    @Override
     protected MavenProject getProject()
     {
         return project;
     }
 
-    /**
-     * @see org.apache.maven.reporting.AbstractMavenReport#getOutputDirectory()
-     */
+    @Override
     protected String getOutputDirectory()
     {
         if ( !outputDirectory.isAbsolute() )
@@ -322,25 +318,19 @@ public abstract class AbstractVersionsReport<T>
         return outputDirectory.getAbsolutePath();
     }
 
-    /**
-     * @see org.apache.maven.reporting.AbstractMavenReport#getSiteRenderer()
-     */
+    @Override
     protected Renderer getSiteRenderer()
     {
         return siteRenderer;
     }
 
-    /**
-     * @see org.apache.maven.reporting.MavenReport#getDescription(java.util.Locale)
-     */
+    @Override
     public String getDescription( Locale locale )
     {
         return getText( locale, "report.description" );
     }
 
-    /**
-     * @see org.apache.maven.reporting.MavenReport#getName(java.util.Locale)
-     */
+    @Override
     public String getName( Locale locale )
     {
         return getText( locale, "report.title" );

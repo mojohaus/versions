@@ -52,6 +52,8 @@ public class ArtifactVersionsCache
      * If the information is already present in cache, the cached version is returned. Otherwise,
      * the {@code artifactVersions} object is queried and the response is cached.
      *
+     * @param <V> concrete implementation of {@linkplain AbstractVersionDetails}
+     * @param <R> return type of the cached function
      * @param artifactVersions {@linkplain ArtifactVersions} object referring to the given dependency
      * @param updateScope      update scope
      * @return last retrieved update information

@@ -24,21 +24,20 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Collection;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+
+import static java.util.Collections.singletonList;
+import static java.util.Optional.of;
 
 /**
  * Replaces any version with the latest version.
@@ -48,7 +47,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  */
 @Mojo( name = "use-next-versions", threadSafe = true )
 public class UseNextVersionsMojo
-    extends AbstractVersionsDependencyUpdaterMojo
+    extends UseLatestVersionsMojoBase
 {
 
     // ------------------------------ METHODS --------------------------
@@ -83,6 +82,10 @@ public class UseNextVersionsMojo
             {
                 useNextVersions( pom, getProject().getDependencies() );
             }
+            if ( getProject().getParent() != null && isProcessingParent() )
+            {
+                useNextVersions( pom, singletonList( getParentDependency() ) );
+            }
         }
         catch ( ArtifactMetadataRetrievalException e )
         {
@@ -91,45 +94,10 @@ public class UseNextVersionsMojo
     }
 
     private void useNextVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+            throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
-        for ( Dependency dep : dependencies )
-        {
-            if ( isExcludeReactor() && isProducedByReactor( dep ) )
-            {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
-                continue;
-            }
-
-            if ( isHandledByProperty( dep ) )
-            {
-                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
-                continue;
-            }
-
-            String version = dep.getVersion();
-            Artifact artifact = this.toArtifact( dep );
-            if ( !isIncluded( artifact ) )
-            {
-                continue;
-            }
-
-            getLog().debug( "Looking for newer versions of " + toString( dep ) );
-            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-            ArtifactVersion[] newer = versions.getNewerVersions( version, Boolean.TRUE.equals( allowSnapshots ) );
-            if ( newer.length > 0 )
-            {
-                String newVersion = newer[0].toString();
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version, newVersion,
-                                                     getProject().getModel() ) )
-                {
-                    getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
-
-                    this.getChangeRecorder().recordUpdate( "useNextVersions", dep.getGroupId(),
-                                                           dep.getArtifactId(), version, newVersion );
-                }
-            }
-        }
+        useLatestVersions( pom, dependencies,
+                ( dep, versions ) -> of( versions.getNewerVersions( dep.getVersion(), allowSnapshots )[0] ),
+                "useNextVersions" );
     }
-
 }

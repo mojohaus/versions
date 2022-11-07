@@ -20,11 +20,13 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
+import javax.xml.stream.XMLStreamException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
@@ -41,7 +43,11 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
+import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
 
 /**
  * Base class for a mojo that updates dependency versions.
@@ -53,10 +59,15 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 public abstract class AbstractVersionsDependencyUpdaterMojo
     extends AbstractVersionsUpdaterMojo
 {
-
     private static final String END_RANGE_CHARS = "])";
 
     private static final String START_RANGE_CHARS = "[(";
+
+    /**
+     * Pattern to match snapshot versions
+     */
+    protected static final Pattern SNAPSHOT_REGEX = Pattern.compile( "^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$" );
+
 
     /**
      * A comma separated list of artifact patterns to include. Follows the pattern
@@ -104,7 +115,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @since 1.0-alpha-3
      */
     @Parameter( property = "processDependencies", defaultValue = "true" )
-    private boolean processDependencies;
+    private boolean processDependencies = true;
 
     /**
      * Whether to process the dependencyManagement section of the project.
@@ -112,7 +123,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @since 1.0-alpha-3
      */
     @Parameter( property = "processDependencyManagement", defaultValue = "true" )
-    private boolean processDependencyManagement;
+    private boolean processDependencyManagement = true;
 
     /**
      * Whether to process the parent section of the project. If not set will default to false.
@@ -142,7 +153,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @since 1.0-alpha-3
      */
     @Parameter( property = "excludeReactor", defaultValue = "true" )
-    private boolean excludeReactor;
+    private boolean excludeReactor = true;
 
     @Inject
     protected AbstractVersionsDependencyUpdaterMojo( RepositorySystem repositorySystem,
@@ -264,6 +275,20 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
                 .withType( "pom" )
                 .withScope( Artifact.SCOPE_COMPILE )
                 .build() );
+    }
+
+    /**
+     * Returns the {@link Dependency} instance for the parent project
+     * @return {@link Dependency} object for the parent
+     */
+    protected Dependency getParentDependency()
+    {
+        return DependencyBuilder.newBuilder()
+                .withGroupId( getProject().getParent().getGroupId() )
+                .withArtifactId( getProject().getParent().getArtifactId() )
+                .withVersion( getProject().getParent().getVersion() )
+                .withType( "pom" )
+                .build();
     }
 
     protected String toString( MavenProject project )
@@ -507,4 +532,58 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
         }
         return nextRangeStartDelimiterIndex;
     }
+
+    /**
+     * Attempts to update the dependency {@code dep} to the given {@code newVersion}. The dependency can either
+     * be the parent project or any given dependency.
+     *
+     * @param pom {@link ModifiedPomXMLEventReader} instance to update the POM XML document
+     * @param dep dependency to be updated (can also be a dependency made from the parent)
+     * @param newVersion new version to update the dependency to
+     * @param changeRecorderTitle title for the {@link ChangeRecorder} log
+     * @return {@code true} if an update has been made, {@code false} otherwise
+     * @throws XMLStreamException thrown if updating the XML doesn't succeed
+     */
+    protected boolean updateDependencyVersion( ModifiedPomXMLEventReader pom, Dependency dep,
+                                               String newVersion, String changeRecorderTitle )
+            throws XMLStreamException
+    {
+        boolean updated = false;
+        if ( isProcessingParent()
+                && getProject().getParent() != null
+                && DependencyComparator.INSTANCE.compare( dep, DependencyBuilder.newBuilder()
+                        .withGroupId( getProject().getParentArtifact().getGroupId() )
+                        .withArtifactId( getProject().getParentArtifact().getArtifactId() )
+                        .withVersion( getProject().getParentArtifact().getVersion() )
+                        .build() ) == 0
+                && PomHelper.setProjectParentVersion( pom, newVersion ) )
+        {
+            if ( getLog().isDebugEnabled() )
+            {
+                getLog().debug( "Made parent update from " + dep.getVersion() + " to " + newVersion );
+            }
+            getChangeRecorder().recordUpdate( changeRecorderTitle,
+                    dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
+                    newVersion );
+            updated = true;
+        }
+
+        if ( PomHelper.setDependencyVersion( pom,
+                dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
+                newVersion, getProject().getModel() ) )
+        {
+            if ( getLog().isInfoEnabled() )
+            {
+                getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
+            }
+            getChangeRecorder().recordUpdate( changeRecorderTitle,
+                    dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
+                    newVersion );
+            updated = true;
+        }
+
+        return updated;
+    }
+
+    // TODO: add an updatePropertyVersion as well??? (like in CompareDependenciesMojo)
 }

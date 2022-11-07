@@ -144,6 +144,9 @@ public class DependencyBuilder
 
     /**
      * Convenience builder method
+     * @param groupId groupId of the dependency
+     * @param artifactId artifactId of the dependency
+     * @param version version of the dependency
      * @return new instance of {@linkplain Dependency}
      */
     public static Dependency dependencyWith( String groupId, String artifactId, String version )
@@ -157,6 +160,12 @@ public class DependencyBuilder
 
     /**
      * Convenience builder method
+     * @param groupId groupId of the dependency
+     * @param artifactId artifactId of the dependency
+     * @param version version of the dependency
+     * @param type type of the dependency
+     * @param classifier classifier of the dependency
+     * @param scope scope of the dependency
      * @return new instance of {@linkplain Dependency}
      */
     public static Dependency dependencyWith( String groupId, String artifactId, String version, String type,

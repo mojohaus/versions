@@ -64,10 +64,6 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     protected ArtifactVersionsCache allUpdatesCache
             = new ArtifactVersionsCache( AbstractVersionDetails::getAllUpdates );
 
-    /**
-     * Constructor to be called by the dependency injection framework
-     * @param i18n i18n object to be injected
-     */
     protected AbstractVersionsReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName, T model )
     {
         super( sink, i18n, locale, bundleName );

@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
@@ -71,6 +72,7 @@ public class UseLatestVersionsMojoTest
                 null,
                 null )
         {{
+            reactorProjects = emptyList();
             MavenProject project = new MavenProject()
             {{
                 setModel( new Model()
@@ -90,10 +92,10 @@ public class UseLatestVersionsMojoTest
                 }} );
             }};
             setProject( project );
-
-            changeRecorder = new TestChangeRecorder();
-            setVariableValueToObject( this, "changeRecorder", changeRecorder );
         }};
+        changeRecorder = new TestChangeRecorder();
+        setVariableValueToObject( mojo, "processDependencyManagement", false );
+        setVariableValueToObject( mojo, "changeRecorder", changeRecorder );
     }
 
     @Test

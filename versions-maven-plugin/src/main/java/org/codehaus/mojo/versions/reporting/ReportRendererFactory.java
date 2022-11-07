@@ -32,6 +32,7 @@ public interface ReportRendererFactory
     /**
      * Creates a new {@linkplain ReportRenderer} instance for the given report renderer name.
      *
+     * @param <U> class of the model being rendered
      * @param <T> concrete class of the report renderer
      * @param reportName name of the report to generate
      * @param sink sink to use for rendering
