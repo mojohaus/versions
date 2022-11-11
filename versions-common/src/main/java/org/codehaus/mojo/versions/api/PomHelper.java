@@ -29,7 +29,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,7 +61,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
@@ -1688,78 +1686,5 @@ public class PomHelper
     public static String getGAV( Model model )
     {
         return getGroupId( model ) + ":" + getArtifactId( model ) + ":" + getVersion( model );
-    }
-
-    /**
-     * Reads imported POMs from the dependency management section.
-     *
-     * @param pom POM
-     * @return a non-null list of {@link Dependency} for each imported POM
-     * @throws XMLStreamException XML stream exception
-     * @see <a href="https://github.com/mojohaus/versions-maven-plugin/issues/134">bug #134</a>
-     * @since 2.4
-     */
-    public static List<Dependency> readImportedPOMsFromDependencyManagementSection( ModifiedPomXMLEventReader pom )
-        throws XMLStreamException
-    {
-        List<Dependency> importedPOMs = new ArrayList<>();
-        Stack<String> stack = new Stack<>();
-
-        String groupIdElement = "groupId";
-        String artifactIdElement = "artifactId";
-        String versionElement = "version";
-        String typeElement = "type";
-        String scopeElement = "scope";
-        Set<String> recognizedElements =
-            new HashSet<>( Arrays.asList( groupIdElement, artifactIdElement, versionElement, typeElement,
-                                          scopeElement ) );
-        Map<String, String> depData = new HashMap<>();
-
-        pom.rewind();
-
-        String depMgmtDependencyPath = "/project/dependencyManagement/dependencies/dependency";
-
-        while ( pom.hasNext() )
-        {
-            XMLEvent event = pom.nextEvent();
-
-            if ( event.isStartElement() )
-            {
-                final String elementName = event.asStartElement().getName().getLocalPart();
-                String parent = "";
-                if ( !stack.isEmpty() )
-                {
-                    parent = stack.peek();
-                }
-                String currentPath = parent + "/" + elementName;
-                stack.push( currentPath );
-
-                if ( currentPath.startsWith( depMgmtDependencyPath ) && recognizedElements.contains( elementName ) )
-                {
-                    final String elementText = pom.getElementText().trim();
-                    depData.put( elementName, elementText );
-                    stack.pop();
-                }
-            }
-            if ( event.isEndElement() )
-            {
-                String path = stack.pop();
-                if ( depMgmtDependencyPath.equals( path ) )
-                {
-                    if ( "pom".equals( depData.get( typeElement ) ) && "import".equals( depData.get( scopeElement ) ) )
-                    {
-                        importedPOMs.add( DependencyBuilder.newBuilder()
-                                .withGroupId( depData.get( groupIdElement ) )
-                                .withArtifactId( depData.get( artifactIdElement ) )
-                                .withVersion( depData.get( versionElement ) )
-                                .withType( depData.get( typeElement ) )
-                                .withScope( depData.get( scopeElement ) )
-                                .build() );
-                    }
-                    depData.clear();
-                }
-            }
-        }
-        return importedPOMs;
     }
 }

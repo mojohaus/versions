@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +32,7 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -83,17 +85,29 @@ public class LockSnapshotsMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+        try
         {
-            lockSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
+            if ( isProcessingDependencyManagement() )
+            {
+                DependencyManagement dependencyManagement =
+                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
+                if ( dependencyManagement != null )
+                {
+                    lockSnapshots( pom, dependencyManagement.getDependencies() );
+                }
+            }
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
+            {
+                lockSnapshots( pom, getProject().getDependencies() );
+            }
+            if ( getProject().getParent() != null && isProcessingParent() )
+            {
+                lockParentSnapshot( pom, getProject().getParent() );
+            }
         }
-        if ( getProject().getDependencies() != null && isProcessingDependencies() )
+        catch ( IOException e )
         {
-            lockSnapshots( pom, getProject().getDependencies() );
-        }
-        if ( getProject().getParent() != null && isProcessingParent() )
-        {
-            lockParentSnapshot( pom, getProject().getParent() );
+            throw new MojoExecutionException( e.getMessage(), e );
         }
     }
 

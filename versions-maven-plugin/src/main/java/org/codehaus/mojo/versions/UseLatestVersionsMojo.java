@@ -129,7 +129,7 @@ public class UseLatestVersionsMojo
     {
         try
         {
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+            if ( isProcessingDependencyManagement() )
             {
                 DependencyManagement dependencyManagement =
                     PomHelper.getRawModel( getProject() ).getDependencyManagement();

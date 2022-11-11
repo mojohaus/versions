@@ -97,6 +97,8 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase
         {
             pomHelper.when( () -> PomHelper.setProjectParentVersion( any(), anyString() ) )
                             .thenReturn( true );
+            pomHelper.when( () -> PomHelper.getRawModel( any( MavenProject.class ) ) )
+                    .thenReturn(  mojo.getProject().getModel() );
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
@@ -119,6 +121,8 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase
             pomHelper.when( () -> PomHelper.setDependencyVersion( any(), anyString(), anyString(), anyString(),
                             anyString(), any( Model.class ) ) )
                     .thenReturn( true );
+            pomHelper.when( () -> PomHelper.getRawModel( any( MavenProject.class ) ) )
+                    .thenReturn(  mojo.getProject().getModel() );
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
@@ -141,6 +145,8 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase
             pomHelper.when( () -> PomHelper.setDependencyVersion( any(), anyString(), anyString(), anyString(),
                             anyString(), any( Model.class ) ) )
                     .thenReturn( true );
+            pomHelper.when( () -> PomHelper.getRawModel( any( MavenProject.class ) ) )
+                    .thenReturn(  mojo.getProject().getModel() );
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
@@ -163,6 +169,8 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase
             pomHelper.when( () -> PomHelper.setDependencyVersion( any(), anyString(), anyString(), anyString(),
                             anyString(), any( Model.class ) ) )
                     .thenReturn( true );
+            pomHelper.when( () -> PomHelper.getRawModel( any( MavenProject.class ) ) )
+                    .thenReturn(  mojo.getProject().getModel() );
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
@@ -188,6 +196,8 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase
             pomHelper.when( () -> PomHelper.setDependencyVersion( any(), anyString(), anyString(), anyString(),
                             anyString(), any( Model.class ) ) )
                     .thenReturn( true );
+            pomHelper.when( () -> PomHelper.getRawModel( any( MavenProject.class ) ) )
+                    .thenReturn(  mojo.getProject().getModel() );
             mojo.update( null );
             fail( "MojoExecutionException is expected" );
         }

@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -30,11 +31,13 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Collections.singletonList;
@@ -80,13 +83,26 @@ public class UseNextReleasesMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
-        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+        try
         {
-            useNextReleases( pom, getProject().getDependencyManagement().getDependencies() );
+            if ( isProcessingDependencyManagement() )
+            {
+                DependencyManagement dependencyManagement =
+                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
+                if ( dependencyManagement != null )
+                {
+                    useNextReleases( pom, dependencyManagement.getDependencies() );
+                }
+            }
+
+            if ( getProject().getDependencies() != null && isProcessingDependencies() )
+            {
+                useNextReleases( pom, getProject().getDependencies() );
+            }
         }
-        if ( getProject().getDependencies() != null && isProcessingDependencies() )
+        catch ( ArtifactMetadataRetrievalException | IOException e )
         {
-            useNextReleases( pom, getProject().getDependencies() );
+            throw new MojoExecutionException( e.getMessage(), e );
         }
         if ( getProject().getParent() != null && isProcessingParent() )
         {
