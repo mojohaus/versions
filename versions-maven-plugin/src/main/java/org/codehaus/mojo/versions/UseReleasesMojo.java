@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
@@ -34,6 +35,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -101,10 +103,14 @@ public class UseReleasesMojo
     {
         try
         {
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+            if ( isProcessingDependencyManagement() )
             {
-                useReleases( pom, PomHelper.readImportedPOMsFromDependencyManagementSection( pom ) );
-                useReleases( pom, getProject().getDependencyManagement().getDependencies() );
+                DependencyManagement dependencyManagement =
+                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
+                if ( dependencyManagement != null )
+                {
+                    useReleases( pom, dependencyManagement.getDependencies() );
+                }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
@@ -115,7 +121,7 @@ public class UseReleasesMojo
                 useReleases( pom, singletonList( getParentDependency() ) );
             }
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( ArtifactMetadataRetrievalException | IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }

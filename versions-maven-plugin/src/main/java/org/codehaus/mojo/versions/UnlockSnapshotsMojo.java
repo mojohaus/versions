@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +32,7 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -82,10 +84,16 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
     protected void update( ModifiedPomXMLEventReader pom )
         throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
-
-        if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+        try
         {
-            unlockSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
+        if ( isProcessingDependencyManagement() )
+        {
+            DependencyManagement dependencyManagement =
+                    PomHelper.getRawModel( getProject() ).getDependencyManagement();
+            if ( dependencyManagement != null )
+            {
+                unlockSnapshots( pom, dependencyManagement.getDependencies() );
+            }
         }
         if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
@@ -94,6 +102,11 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
         if ( getProject().getParent() != null && isProcessingParent() )
         {
             unlockParentSnapshot( pom, getProject().getParent() );
+        }
+        }
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
         }
     }
 

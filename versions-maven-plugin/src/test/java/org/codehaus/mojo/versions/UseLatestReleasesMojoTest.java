@@ -101,6 +101,8 @@ public class UseLatestReleasesMojoTest
         {
             pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
                     .thenReturn( true );
+            pomHelper.when( () -> PomHelper.getRawModel( any( MavenProject.class ) ) )
+                    .thenReturn(  mojo.getProject().getModel() );
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(), Matchers.empty() );

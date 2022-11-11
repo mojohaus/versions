@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -79,16 +81,21 @@ public class UseReactorMojo
             {
                 useReactor( pom, getProject().getParent() );
             }
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+            if ( isProcessingDependencyManagement() )
             {
-                useReactor( pom, getProject().getDependencyManagement().getDependencies() );
+                DependencyManagement dependencyManagement =
+                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
+                if ( dependencyManagement != null )
+                {
+                    useReactor( pom, dependencyManagement.getDependencies() );
+                }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
                 useReactor( pom, getProject().getDependencies() );
             }
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( ArtifactMetadataRetrievalException | IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }

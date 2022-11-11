@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
@@ -31,12 +32,14 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -109,9 +112,11 @@ public class UseNextSnapshotsMojo
     {
         try
         {
-            if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
+            DependencyManagement dependencyManagement =
+                    PomHelper.getRawModel( getProject() ).getDependencyManagement();
+            if ( dependencyManagement != null )
             {
-                useNextSnapshots( pom, getProject().getDependencyManagement().getDependencies() );
+                useNextSnapshots( pom, dependencyManagement.getDependencies() );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
@@ -122,7 +127,7 @@ public class UseNextSnapshotsMojo
                 useNextSnapshots( pom, singletonList( getParentDependency() ) );
             }
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( ArtifactMetadataRetrievalException | IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }

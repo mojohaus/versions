@@ -25,10 +25,8 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.SystemStreamLog;
@@ -62,39 +60,6 @@ public class PomHelperTest extends AbstractMojoTestCase
     public static void setUpClass()
     {
         INPUT_FACTORY.setProperty( P_PRESERVE_LOCATION, Boolean.TRUE );
-    }
-
-    /**
-     * Tests if imported POMs are properly read from dependency management section. Such logic is required to resolve
-     * <a href="https://github.com/mojohaus/versions-maven-plugin/issues/134">bug #134</a>
-     *
-     * @throws Exception if the test fails.
-     */
-    @Test
-    public void testImportedPOMsRetrievedFromDependencyManagement()
-        throws Exception
-    {
-        URL url = getClass().getResource( "PomHelperTest.dependencyManagementBOMs.pom.xml" );
-        assert url != null;
-        File file = new File( url.getPath() );
-        StringBuilder input = PomHelper.readXmlFile( file );
-
-        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-        inputFactory.setProperty( P_PRESERVE_LOCATION, Boolean.TRUE );
-
-        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory, file.getAbsolutePath() );
-
-        List<Dependency> dependencies = PomHelper.readImportedPOMsFromDependencyManagementSection( pom );
-
-        assertNotNull( dependencies );
-        assertEquals( 1, dependencies.size() );
-
-        Dependency dependency = dependencies.get( 0 );
-        assertEquals( "org.group1", dependency.getGroupId() );
-        assertEquals( "artifact-pom", dependency.getArtifactId() );
-        assertEquals( "1.0-SNAPSHOT", dependency.getVersion() );
-        assertEquals( "import", dependency.getScope() );
-        assertEquals( "pom", dependency.getType() );
     }
 
     /**
