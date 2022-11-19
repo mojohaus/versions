@@ -81,6 +81,7 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext( new HashMap<>() );
         mojo.artifactMetadataSource = MockUtils.mockArtifactMetadataSource();
+        mojo.includeParent = true;
         mojo.execute();
 
         assertThat( String.join( "", Files.readAllLines( tempFile ) ),

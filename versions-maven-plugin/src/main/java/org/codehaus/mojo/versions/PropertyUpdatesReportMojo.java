@@ -92,11 +92,11 @@ public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUp
     private boolean autoLinkItems;
 
     /**
-     * <p>Whether to include property updates from parent.</p>
+     * <p>Whether to include property updates from parent. Default: {@code false}</p>
      *
      * @since 2.14.0
      */
-    @Parameter( property = "includeParent", defaultValue = "true" )
+    @Parameter( property = "includeParent", defaultValue = "false" )
     private boolean includeParent = true;
 
     /**
