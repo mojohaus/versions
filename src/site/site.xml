@@ -2,14 +2,24 @@
 <project xmlns="http://maven.apache.org/DECORATION/1.8.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0
-         http://maven.apache.org/xsd/decoration-1.8.0.xsd">
+         https://maven.apache.org/xsd/decoration-1.8.0.xsd">
 
-    <body>
-        <breadcrumbs>
-            <item name="MojoHaus" href="https://www.mojohaus.org/"/>
-            <item name="${this.name}" href="${this.url}" />
-        </breadcrumbs>
+  <custom>
+    <fluidoSkin>
+      <gitHub>
+        <projectId>mojohaus/versions</projectId>
+        <ribbonOrientation>right</ribbonOrientation>
+        <ribbonColor>gray</ribbonColor>
+      </gitHub>
+    </fluidoSkin>
+  </custom>
 
-        <menu ref="modules"/>
-    </body>
+  <body>
+    <breadcrumbs>
+      <item name="MojoHaus" href="https://www.mojohaus.org/"/>
+      <item name="${this.name}" href="${this.url}"/>
+    </breadcrumbs>
+
+    <menu ref="modules"/>
+  </body>
 </project>

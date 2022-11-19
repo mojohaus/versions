@@ -53,5 +53,8 @@ For publishing the site do the following:
 
 ```
 cd target/checkout
-../mvnw verify site site:stage scm-publish:publish-scm
+../mvnw site
+../mvnw scm-publish:publish-scm
 ```
+
+for multi module site - we need two executions
