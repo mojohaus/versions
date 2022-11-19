@@ -131,11 +131,11 @@ public class DisplayPropertyUpdatesMojo
     private boolean allowIncrementalUpdates;
 
     /**
-     * <p>Whether to include property updates from parent.</p>
+     * <p>Whether to include property updates from parent. Default: {@code false}</p>
      *
      * @since 2.14.0
      */
-    @Parameter( property = "includeParent", defaultValue = "true" )
+    @Parameter( property = "includeParent", defaultValue = "false" )
     protected boolean includeParent = true;
 
     // -------------------------- STATIC METHODS --------------------------
