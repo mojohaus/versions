@@ -41,7 +41,10 @@ import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
+import org.codehaus.mojo.versions.recording.DefaultChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 
@@ -141,9 +144,11 @@ public class UpdatePropertyMojo
                                 MavenProjectBuilder projectBuilder,
                                 ArtifactMetadataSource artifactMetadataSource,
                                 WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                                ArtifactResolver artifactResolver,
+                               Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**
@@ -190,9 +195,12 @@ public class UpdatePropertyMojo
                 {
                     for ( final ArtifactAssociation association : version.getAssociations() )
                     {
-                        this.getChangeRecorder().recordUpdate( "updateProperty", association.getGroupId(),
-                                association.getArtifactId(), currentVersion,
-                                targetVersion.toString() );
+                        this.getChangeRecorder().recordChange( DefaultChangeRecord.builder()
+                                                                   .withKind( ChangeRecord.ChangeKind.PROPERTY )
+                                                                   .withArtifact( association.getArtifact() )
+                                                                   .withOldVersion( currentVersion )
+                                                                   .withNewVersion( targetVersion.toString() )
+                                                                   .build() );
                     }
                 }
             }

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +45,9 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.recording.DefaultChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
@@ -157,12 +160,14 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     @Inject
     protected AbstractVersionsDependencyUpdaterMojo( RepositorySystem repositorySystem,
-                                           MavenProjectBuilder projectBuilder,
-                                           ArtifactMetadataSource artifactMetadataSource,
-                                           WagonManager wagonManager,
-                                           ArtifactResolver artifactResolver )
+                                                     MavenProjectBuilder projectBuilder,
+                                                     ArtifactMetadataSource artifactMetadataSource,
+                                                     WagonManager wagonManager,
+                                                     ArtifactResolver artifactResolver,
+                                                     Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**
@@ -540,13 +545,13 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * @param pom {@link ModifiedPomXMLEventReader} instance to update the POM XML document
      * @param dep dependency to be updated (can also be a dependency made from the parent)
      * @param newVersion new version to update the dependency to
-     * @param changeRecorderTitle title for the {@link ChangeRecorder} log
+     * @param changeKind title for the {@link ChangeRecorder} log
      * @return {@code true} if an update has been made, {@code false} otherwise
      * @throws XMLStreamException thrown if updating the XML doesn't succeed
      */
     protected boolean updateDependencyVersion( ModifiedPomXMLEventReader pom, Dependency dep,
-                                               String newVersion, String changeRecorderTitle )
-            throws XMLStreamException
+                                               String newVersion, ChangeRecord.ChangeKind changeKind )
+        throws XMLStreamException, MojoExecutionException
     {
         boolean updated = false;
         if ( isProcessingParent()
@@ -562,9 +567,11 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
             {
                 getLog().debug( "Made parent update from " + dep.getVersion() + " to " + newVersion );
             }
-            getChangeRecorder().recordUpdate( changeRecorderTitle,
-                    dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                    newVersion );
+            getChangeRecorder().recordChange( DefaultChangeRecord.builder()
+                                                  .withKind( changeKind )
+                                                  .withDependency( dep )
+                                                  .withNewVersion( newVersion )
+                                                  .build() );
             updated = true;
         }
 
@@ -576,9 +583,11 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
             {
                 getLog().info( "Updated " + toString( dep ) + " to version " + newVersion );
             }
-            getChangeRecorder().recordUpdate( changeRecorderTitle,
-                    dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                    newVersion );
+            getChangeRecorder().recordChange( DefaultChangeRecord.builder()
+                                                  .withKind( changeKind )
+                                                  .withDependency( dep )
+                                                  .withNewVersion( newVersion )
+                                                  .build() );
             updated = true;
         }
 

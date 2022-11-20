@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 
 /**
  * Abstract base class for the Display___ mojos.
@@ -88,9 +90,11 @@ public abstract class AbstractVersionsDisplayMojo
                                            MavenProjectBuilder projectBuilder,
                                            ArtifactMetadataSource artifactMetadataSource,
                                            WagonManager wagonManager,
-                                           ArtifactResolver artifactResolver )
+                                           ArtifactResolver artifactResolver,
+                                           Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     @SuppressWarnings( "unchecked" )

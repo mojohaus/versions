@@ -20,7 +20,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.change.VersionChange;
+import org.codehaus.mojo.versions.change.DefaultVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.junit.Before;
@@ -76,14 +76,14 @@ public class UpdateParentMojoTest
         artifactResolver = mock( ArtifactResolver.class );
 
         mojo = new UpdateParentMojo( repositorySystem,
-                null,
-                artifactMetadataSource,
-                null,
-                artifactResolver )
+                                     null,
+                                     artifactMetadataSource,
+                                     null,
+                                     artifactResolver,
+                                     changeRecorder.asTestMap() )
         {{
             setProject( createProject() );
             reactorProjects = Collections.emptyList();
-            setVariableValueToObject( this, "changeRecorder", changeRecorder );
         }};
     }
 
@@ -159,8 +159,8 @@ public class UpdateParentMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "parent-artifact", "1.0.1-SNAPSHOT",
-                        "1.0.0" ) ) );
+                hasItem( new DefaultVersionChange( "default-group", "parent-artifact", "1.0.1-SNAPSHOT",
+                                                   "1.0.0" ) ) );
     }
 
     @Test
@@ -240,9 +240,9 @@ public class UpdateParentMojoTest
                     .thenReturn( true );
             mojo.update( null );
         }
-        assertThat( changeRecorder.getChanges(), hasItem( new VersionChange( "default-group",
-                "issue-670-artifact", "0.0.1-1",
-                "0.0.1-1-impl-SNAPSHOT" ) ) );
+        assertThat( changeRecorder.getChanges(), hasItem( new DefaultVersionChange( "default-group",
+                                                                                    "issue-670-artifact", "0.0.1-1",
+                                                                                    "0.0.1-1-impl-SNAPSHOT" ) ) );
     }
 
     @Test
@@ -299,8 +299,8 @@ public class UpdateParentMojoTest
             throw new RuntimeException( e );
         }
 
-        assertThat( changeRecorder.getChanges(), hasItem( new VersionChange( "default-group",
-                "parent-artifact", "1.0.0", version ) ) );
+        assertThat( changeRecorder.getChanges(), hasItem(
+            new DefaultVersionChange( "default-group", "parent-artifact", "1.0.0", version ) ) );
     }
 
     @Test
@@ -320,8 +320,8 @@ public class UpdateParentMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "parent-artifact", "0.9.0",
-                        "1.0.1-SNAPSHOT" ) ) );
+                hasItem( new DefaultVersionChange( "default-group", "parent-artifact", "0.9.0",
+                                                   "1.0.1-SNAPSHOT" ) ) );
     }
 
     @Test
@@ -382,8 +382,8 @@ public class UpdateParentMojoTest
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "dummy-parent2", "1.0",
-                        "2.0" ) ) );
+                hasItem( new DefaultVersionChange( "default-group", "dummy-parent2", "1.0",
+                                                   "2.0" ) ) );
     }
 
     @Test

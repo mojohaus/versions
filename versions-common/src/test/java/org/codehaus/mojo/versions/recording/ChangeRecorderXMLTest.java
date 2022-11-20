@@ -23,12 +23,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
-import org.apache.commons.io.IOUtils;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -38,43 +40,52 @@ import org.xml.sax.SAXException;
 
 public final class ChangeRecorderXMLTest
 {
-    private static void copyResource( final String name, final File output ) throws IOException
+    private static void copyResource( final String name, final Path output ) throws IOException
     {
-        try ( FileOutputStream outputStream = new FileOutputStream( output ) )
+        try ( InputStream inputStream = ChangeRecorderXMLTest.class.getResourceAsStream( name ) )
         {
-            try ( InputStream inputStream = ChangeRecorderXMLTest.class.getResourceAsStream( name ) )
-            {
-                IOUtils.copy( inputStream, outputStream );
-            }
+            Files.copy( inputStream, output, StandardCopyOption.REPLACE_EXISTING );
         }
     }
 
-    private static Document parseXML( final File file ) throws ParserConfigurationException, IOException, SAXException
+    private static Document parseXML( final Path path ) throws ParserConfigurationException, IOException, SAXException
     {
         final DocumentBuilderFactory documentBuilders = DocumentBuilderFactory.newInstance();
         final DocumentBuilder documentBuilder = documentBuilders.newDocumentBuilder();
-        return documentBuilder.parse( file );
+        return documentBuilder.parse( path.toFile() );
     }
 
     @Test
     public void testChanges() throws Exception
     {
-        final File file0 = File.createTempFile( "ChangeRecorderTest", ".xml" );
-        final File file1 = File.createTempFile( "ChangeRecorderTest", ".xml" );
+        final Path path0 = Files.createTempFile( "ChangeRecorderTest", ".xml" );
+        final Path path1 = Files.createTempDirectory( "ChangeRecorderTest" )
+            .resolve( "subDirectory" )
+            .resolve( "ChangeRecorderTest.xml" );
 
-        copyResource( "expectedFile.xml", file0 );
+        copyResource( "expectedFile.xml", path0 );
 
         final ChangeRecorder recorder = new ChangeRecorderXML();
-        recorder.recordUpdate( "exampleKind", "org.codehaus", "example0", "0.0.1", "0.0.2" );
-        recorder.recordUpdate( "exampleKind", "org.codehaus", "example1", "1.0.0", "2.0.0" );
+        recorder.recordChange( DefaultChangeRecord.builder()
+                                   .withKind( ChangeRecord.ChangeKind.DEPENDENCY )
+                                   .withGroupId( "org.codehaus" )
+                                   .withArtifactId( "example0" )
+                                   .withOldVersion( "0.0.1" )
+                                   .withNewVersion( "0.0.2" )
+                                   .build() );
 
-        try ( FileOutputStream outputStream = new FileOutputStream( file1 ) )
-        {
-            recorder.serialize( outputStream );
-        }
+        recorder.recordChange( DefaultChangeRecord.builder()
+                                   .withKind( ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT )
+                                   .withGroupId( "org.codehaus" )
+                                   .withArtifactId( "example1" )
+                                   .withOldVersion( "1.0.0" )
+                                   .withNewVersion( "2.0.0" )
+                                   .build() );
 
-        final Document document0 = parseXML( file0 );
-        final Document document1 = parseXML( file1 );
+        recorder.writeReport( path1 );
+
+        final Document document0 = parseXML( path0 );
+        final Document document1 = parseXML( path1 );
 
         final NodeList elements0 = document0.getElementsByTagNameNS( ChangeRecorderXML.CHANGES_NAMESPACE, "updated" );
         final NodeList elements1 = document1.getElementsByTagNameNS( ChangeRecorderXML.CHANGES_NAMESPACE, "updated" );
@@ -87,13 +98,29 @@ public final class ChangeRecorderXMLTest
             final Element element1 = (Element) elements1.item( index );
 
             Assert.assertEquals( element0.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "artifactId" ),
-                    element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "artifactId" ) );
+                                 element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "artifactId" ) );
             Assert.assertEquals( element0.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "groupId" ),
-                    element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "groupId" ) );
+                                 element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "groupId" ) );
             Assert.assertEquals( element0.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "oldVersion" ),
-                    element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "oldVersion" ) );
+                                 element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "oldVersion" ) );
             Assert.assertEquals( element0.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "newVersion" ),
-                    element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "newVersion" ) );
+                                 element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "newVersion" ) );
+
+            // FIXME - looks like assertions not working
+            Assert.assertEquals( element0.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "kind" ),
+                                 element1.getAttributeNS( ChangeRecorderXML.CHANGES_NAMESPACE, "kind" ) );
         }
+    }
+
+    @Test
+    public void emptyResultShouldNotGenerateReports() throws Exception
+    {
+        Path path = Files.createTempDirectory( "ChangeRecorderTest" ).resolve( "ChangeRecorderTest.xml" );
+
+        ChangeRecorder recorder = new ChangeRecorderXML();
+        recorder.writeReport( path );
+
+        Assert.assertFalse( "File should not be created", Files.isRegularFile( path ) );
+
     }
 }

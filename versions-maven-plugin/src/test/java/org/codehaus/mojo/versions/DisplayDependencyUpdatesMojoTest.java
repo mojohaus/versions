@@ -157,12 +157,16 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
-            {{
-                put( "default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0-SNAPSHOT", "2.0.0-beta",
-                        "2.0.0-rc1"} );
-            }} ), null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+                                              null,
+                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
+                                              {{
+                                                  put( "default-dependency",
+                                                       new String[] {"1.0.0", "1.1.0", "2.0.0-SNAPSHOT", "2.0.0-beta",
+                                                           "2.0.0-rc1"} );
+                                              }} ),
+                                              null,
+                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                                              null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -200,11 +204,14 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
-            {{
-                put( "default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0"} );
-            }} ), null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+                                              null,
+                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
+                                              {{
+                                                  put( "default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0"} );
+                                              }} ),
+                                              null,
+                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                                              null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -241,11 +248,15 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
-            {{
-                put( "default-dependency", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0"} );
-            }} ), null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+                                              null,
+                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
+                                              {{
+                                                  put( "default-dependency",
+                                                       new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0"} );
+                                              }} ),
+                                              null,
+                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                                              null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -283,11 +294,15 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
-            {{
-                put( "default-dependency", new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"} );
-            }} ), null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+                                              null,
+                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
+                                              {{
+                                                  put( "default-dependency",
+                                                       new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"} );
+                                              }} ),
+                                              null,
+                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                                              null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -326,12 +341,16 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                    null, mockArtifactMetadataSource( new HashMap<String, String[]>()
-            {{
-                put( "default-dependency", new String[] {"1.0.0", "1.1.0", "1.9.0-SNAPSHOT", "1.9.0-beta",
-                        "1.9.0-rc1"} );
-            }} ), null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ) )
+                                              null,
+                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
+                                              {{
+                                                  put( "default-dependency",
+                                                       new String[] {"1.0.0", "1.1.0", "1.9.0-SNAPSHOT", "1.9.0-beta",
+                                                           "1.9.0-rc1"} );
+                                              }} ),
+                                              null,
+                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                                              null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );

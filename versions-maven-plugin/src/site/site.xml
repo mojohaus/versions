@@ -8,6 +8,7 @@
       <item name="Usage" href="usage.html"/>
       <item name="FAQ" href="faq.html"/>
       <item name="Version number rules" href="version-rules.html"/>
+      <item name="Writing an extensions" href="../versions-api/index.html"/>
     </menu>
 
     <menu name="Examples">

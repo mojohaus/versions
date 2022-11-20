@@ -6,6 +6,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -19,6 +20,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static org.apache.commons.lang3.StringUtils.isAllBlank;
@@ -68,12 +70,14 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
 
     @Inject
     public SetScmTagMojo( RepositorySystem repositorySystem,
-                                           MavenProjectBuilder projectBuilder,
-                                           ArtifactMetadataSource artifactMetadataSource,
-                                           WagonManager wagonManager,
-                                           ArtifactResolver artifactResolver )
+                          MavenProjectBuilder projectBuilder,
+                          ArtifactMetadataSource artifactMetadataSource,
+                          WagonManager wagonManager,
+                          ArtifactResolver artifactResolver,
+                          Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**

@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 import org.apache.maven.artifact.Artifact;
@@ -42,6 +43,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -69,12 +72,14 @@ public class ForceReleasesMojo
 
     @Inject
     public ForceReleasesMojo( RepositorySystem repositorySystem,
-                                MavenProjectBuilder projectBuilder,
-                                ArtifactMetadataSource artifactMetadataSource,
-                                WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                              MavenProjectBuilder projectBuilder,
+                              ArtifactMetadataSource artifactMetadataSource,
+                              WagonManager wagonManager,
+                              ArtifactResolver artifactResolver,
+                              Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**
@@ -95,16 +100,18 @@ public class ForceReleasesMojo
                         PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
-                    useReleases( pom, dependencyManagement.getDependencies() );
+                    useReleases( pom, dependencyManagement.getDependencies(),
+                                 ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
                 }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
-                useReleases( pom, getProject().getDependencies() );
+                useReleases( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
             }
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                useReleases( pom, singletonList( getParentDependency() ) );
+                useReleases( pom, singletonList( getParentDependency() ),
+                             ChangeRecord.ChangeKind.PARENT );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -113,7 +120,8 @@ public class ForceReleasesMojo
         }
     }
 
-    private void useReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
+    private void useReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
+                              ChangeRecord.ChangeKind changeKind )
         throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         for ( Dependency dep : dependencies )
@@ -144,7 +152,7 @@ public class ForceReleasesMojo
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
                 if ( versions.containsVersion( releaseVersion ) )
                 {
-                    updateDependencyVersion( pom, dep, releaseVersion, "forceReleases" );
+                    updateDependencyVersion( pom, dep, releaseVersion, changeKind );
                 }
                 else
                 {
@@ -161,7 +169,7 @@ public class ForceReleasesMojo
                     }
                     else
                     {
-                        updateDependencyVersion( pom, dep, newestRelease.toString(), "forceReleases" );
+                        updateDependencyVersion( pom, dep, newestRelease.toString(), changeKind );
                     }
                 }
             }

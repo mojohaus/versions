@@ -21,6 +21,8 @@ package org.codehaus.mojo.versions.change;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.codehaus.mojo.versions.api.change.VersionChange;
+
 /**
  * Created by IntelliJ IDEA.
  *

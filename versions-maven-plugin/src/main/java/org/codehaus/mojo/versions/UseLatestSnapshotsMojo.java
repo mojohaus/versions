@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.maven.artifact.manager.WagonManager;
@@ -42,6 +43,8 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
@@ -91,12 +94,14 @@ public class UseLatestSnapshotsMojo
 
     @Inject
     public UseLatestSnapshotsMojo( RepositorySystem repositorySystem,
-                                MavenProjectBuilder projectBuilder,
-                                ArtifactMetadataSource artifactMetadataSource,
-                                WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                                   MavenProjectBuilder projectBuilder,
+                                   ArtifactMetadataSource artifactMetadataSource,
+                                   WagonManager wagonManager,
+                                   ArtifactResolver artifactResolver,
+                                   Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**
@@ -117,16 +122,18 @@ public class UseLatestSnapshotsMojo
                         PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
-                    useLatestSnapshots( pom, dependencyManagement.getDependencies() );
+                    useLatestSnapshots( pom, dependencyManagement.getDependencies(),
+                                        ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
                 }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
-                useLatestSnapshots( pom, getProject().getDependencies() );
+                useLatestSnapshots( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
             }
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                useLatestSnapshots( pom, singletonList( getParentDependency() ) );
+                useLatestSnapshots( pom, singletonList( getParentDependency() ),
+                                    ChangeRecord.ChangeKind.PARENT );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -135,14 +142,15 @@ public class UseLatestSnapshotsMojo
         }
     }
 
-    private void useLatestSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
+    private void useLatestSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
+                                     ChangeRecord.ChangeKind changeKind )
             throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
                 allowMinorUpdates, allowIncrementalUpdates, getLog() );
 
         useLatestVersions( pom, dependencies,
-                ( dep, versions ) ->
+                           ( dep, versions ) ->
                 {
                     try
                     {
@@ -157,6 +165,6 @@ public class UseLatestSnapshotsMojo
                         return empty();
                     }
                 },
-                "useLatestSnapshots", dep -> !SNAPSHOT_REGEX.matcher( dep.getVersion() ).matches() );
+                           changeKind, dep -> !SNAPSHOT_REGEX.matcher( dep.getVersion() ).matches() );
     }
 }

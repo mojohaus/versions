@@ -11,7 +11,7 @@ import org.apache.maven.plugin.testing.ArtifactStubFactory;
 import org.apache.maven.plugin.testing.stubs.StubArtifactResolver;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.change.VersionChange;
+import org.codehaus.mojo.versions.change.DefaultVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.junit.Before;
@@ -63,11 +63,10 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase
     {
         changeRecorder = new TestChangeRecorder();
         mojo = new UseReleasesMojo( mockRepositorySystem(),
-                null, mockArtifactMetadataSource(),
-                null, new StubArtifactResolver( new ArtifactStubFactory(),
-                false, false ) );
+                                    null, mockArtifactMetadataSource(),
+                                    null, new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                                    changeRecorder.asTestMap() );
         setVariableValueToObject( mojo, "reactorProjects", emptyList() );
-        setVariableValueToObject( mojo, "changeRecorder", changeRecorder );
         mojo.project = new MavenProject()
         {{
             setModel( new Model()
@@ -102,8 +101,8 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "artifactA",
-                        "1.0.0-SNAPSHOT",  "1.0.0" ) ) );
+                hasItem( new DefaultVersionChange( "default-group", "artifactA",
+                                                   "1.0.0-SNAPSHOT", "1.0.0" ) ) );
     }
 
     @Test
@@ -126,8 +125,8 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase
             mojo.update( null );
         }
         assertThat( changeRecorder.getChanges(),
-                hasItem( new VersionChange( "default-group", "artifactA",
-                        "1.0.0-SNAPSHOT",  "1.0.0" ) ) );
+                hasItem( new DefaultVersionChange( "default-group", "artifactA",
+                                                   "1.0.0-SNAPSHOT", "1.0.0" ) ) );
     }
 
     @Test

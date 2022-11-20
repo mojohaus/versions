@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,10 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
+import org.codehaus.mojo.versions.recording.DefaultChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
@@ -137,12 +141,14 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
 
     @Inject
     public UpdateParentMojo( RepositorySystem repositorySystem,
-                                MavenProjectBuilder projectBuilder,
-                                ArtifactMetadataSource artifactMetadataSource,
-                                WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                             MavenProjectBuilder projectBuilder,
+                             ArtifactMetadataSource artifactMetadataSource,
+                             WagonManager wagonManager,
+                             ArtifactResolver artifactResolver,
+                             Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**
@@ -193,9 +199,13 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
                         getLog().debug( "Made an update from " + getProject().getParent().getVersion()
                                 + " to " + artifactVersion );
                     }
-                    getChangeRecorder().recordUpdate( "updateParent", getProject().getParent().getGroupId(),
-                            getProject().getParent().getArtifactId(), getProject().getParent().getVersion(),
-                            artifactVersion.toString() );
+                    getChangeRecorder().recordChange( DefaultChangeRecord.builder()
+                                                          .withKind( ChangeRecord.ChangeKind.PARENT )
+                                                          .withGroupId( getProject().getParent().getGroupId() )
+                                                          .withArtifactId( getProject().getParent().getArtifactId() )
+                                                          .withOldVersion( getProject().getParent().getVersion() )
+                                                          .withNewVersion( artifactVersion.toString() )
+                                                          .build() );
                 }
             }
         }

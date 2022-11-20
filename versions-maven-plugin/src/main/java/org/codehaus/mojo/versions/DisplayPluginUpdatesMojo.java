@@ -94,6 +94,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
@@ -171,9 +172,11 @@ public class DisplayPluginUpdatesMojo
                                      LifecycleExecutor lifecycleExecutor,
                                      ModelInterpolator modelInterpolator,
                                      PluginManager pluginManager,
-                                     RuntimeInformation runtimeInformation )
+                                     RuntimeInformation runtimeInformation,
+                                     Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;
         this.pluginManager = pluginManager;

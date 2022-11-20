@@ -1,0 +1,88 @@
+title: Writing a own ChangeRecorder
+author: Slawomir Jaranowski
+date: 2022-11-20
+
+Writing an own ChangeRecorder
+============================
+
+In order to create an own ChangeRecorder you must implement [ChangeRecorder](apidocs/org/codehaus/mojo/versions/api/recording/ChangeRecorder.html) interface.
+
+Write code
+----------
+
+```java
+import javax.inject.Named;
+
+import java.nio.file.Path;
+
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+
+@Named( "my-recorder" )
+public class MyChangeRecorder implements ChangeRecorder
+{
+    @Override
+    public final void recordChange( ChangeRecord changeRecord )
+    {
+        // your code
+    }
+
+    @Override
+    public final void writeReport( Path outputPath )
+    {
+        // your code
+    }
+}
+```
+
+`Changerecoder` is stateful component, so you must not add `Singleton` annotation to it.
+
+Using extension
+---------------
+
+Plugin configuration:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>your.group</groupId>
+  <artifactId>your-project</artifactId>
+  
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>${project.version}</version>
+          <configuration>
+            <!-- your component name -->
+            <changeRecorderFormat>my-recorder</changeRecorderFormat>
+            <changeRecorderOutputFile>\${project.build.directory}/my-versions-changes.txt</changeRecorderOutputFile>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <!-- add your extension as plugin dependency -->
+              <groupId>your.group</groupId>
+              <artifactId>your-extension</artifactId>
+              <version>ext.version</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+```
+
+Now execution like:
+
+```
+mvn versions:update-properties
+```
+
+will generate your custom report.

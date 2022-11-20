@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -36,6 +37,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -60,9 +63,11 @@ public class UseNextVersionsMojo
                                 MavenProjectBuilder projectBuilder,
                                 ArtifactMetadataSource artifactMetadataSource,
                                 WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                                ArtifactResolver artifactResolver,
+                                Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**
@@ -83,16 +88,18 @@ public class UseNextVersionsMojo
                         PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
-                    useNextVersions( pom, dependencyManagement.getDependencies() );
+                    useNextVersions( pom, dependencyManagement.getDependencies(),
+                                     ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
                 }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
-                useNextVersions( pom, getProject().getDependencies() );
+                useNextVersions( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
             }
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                useNextVersions( pom, singletonList( getParentDependency() ) );
+                useNextVersions( pom, singletonList( getParentDependency() ),
+                                 ChangeRecord.ChangeKind.PARENT );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -101,11 +108,12 @@ public class UseNextVersionsMojo
         }
     }
 
-    private void useNextVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
+    private void useNextVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
+                                  ChangeRecord.ChangeKind changeKind )
             throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         useLatestVersions( pom, dependencies,
-                ( dep, versions ) -> of( versions.getNewerVersions( dep.getVersion(), allowSnapshots )[0] ),
-                "useNextVersions" );
+                           ( dep, versions ) -> of( versions.getNewerVersions( dep.getVersion(), allowSnapshots )[0] ),
+                           changeKind );
     }
 }

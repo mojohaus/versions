@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +41,9 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.recording.DefaultChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -69,9 +73,11 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
                                 MavenProjectBuilder projectBuilder,
                                 ArtifactMetadataSource artifactMetadataSource,
                                 WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                                ArtifactResolver artifactResolver,
+                                Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**
@@ -92,12 +98,13 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
                     PomHelper.getRawModel( getProject() ).getDependencyManagement();
             if ( dependencyManagement != null )
             {
-                unlockSnapshots( pom, dependencyManagement.getDependencies() );
+                unlockSnapshots( pom, dependencyManagement.getDependencies(),
+                                 ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
             }
         }
         if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
-            unlockSnapshots( pom, getProject().getDependencies() );
+            unlockSnapshots( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
         }
         if ( getProject().getParent() != null && isProcessingParent() )
         {
@@ -110,7 +117,8 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
         }
     }
 
-    private void unlockSnapshots( ModifiedPomXMLEventReader pom, List<Dependency> dependencies )
+    private void unlockSnapshots( ModifiedPomXMLEventReader pom, List<Dependency> dependencies,
+                                  ChangeRecord.ChangeKind changeKind )
         throws XMLStreamException, MojoExecutionException
     {
         for ( Dependency dep : dependencies )
@@ -140,8 +148,12 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
                 if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
                                                      unlockedVersion, getProject().getModel() ) )
                 {
-                    getChangeRecorder().recordUpdate( "unlockSnapshot", dep.getGroupId(), dep.getArtifactId(),
-                                                      dep.getVersion(), unlockedVersion );
+
+                    getChangeRecorder().recordChange( DefaultChangeRecord.builder()
+                                                          .withKind( changeKind )
+                                                          .withDependency( dep )
+                                                          .withNewVersion( unlockedVersion )
+                                                          .build() );
                     getLog().info( "Unlocked " + toString( dep ) + " to version " + unlockedVersion );
                 }
             }
@@ -174,9 +186,11 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
             {
                 getLog().info( "Unlocked parent " + parentArtifact + " to version "
                                    + unlockedParentVersion );
-                getChangeRecorder().recordUpdate( "unlockParentVersion", parentArtifact.getGroupId(),
-                                                  parentArtifact.getArtifactId(), parentArtifact.getVersion(),
-                                                  unlockedParentVersion );
+                getChangeRecorder().recordChange( DefaultChangeRecord.builder()
+                                                      .withKind( ChangeRecord.ChangeKind.PARENT )
+                                                      .withArtifact( parentArtifact )
+                                                      .withNewVersion( unlockedParentVersion )
+                                                      .build() );
             }
         }
     }
