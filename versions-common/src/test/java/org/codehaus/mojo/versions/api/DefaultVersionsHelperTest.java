@@ -23,35 +23,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.model.IgnoreVersion;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.codehaus.mojo.versions.utils.VersionStub;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.version.Version;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
-import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -59,9 +61,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.when;
 
 /**
@@ -73,64 +73,68 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
     @Test
     public void testPerRuleVersionsIgnored() throws Exception
     {
-        final ArtifactMetadataSource metadataSource = mock( ArtifactMetadataSource.class );
+        final org.eclipse.aether.RepositorySystem repositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
         final Artifact artifact = mock( Artifact.class );
         when( artifact.getGroupId() ).thenReturn( "com.mycompany.maven" );
         when( artifact.getArtifactId() ).thenReturn( "artifact-one" );
+        when( artifact.getType() ).thenReturn( "jar" );
+        when( artifact.getArtifactHandler() ).thenReturn( new DefaultArtifactHandlerStub( "default" ) );
+        when( repositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
+                .then( i -> new VersionRangeResult( i.getArgument( 1 ) )
+                        .setVersions( Arrays.asList(
+                                new VersionStub( "one" ),
+                                new VersionStub( "two" ),
+                                new VersionStub( "three" ),
+                                new VersionStub( "1.200" ),
+                                new VersionStub( "illegalVersion" ) ) ) );
 
-        final List<ArtifactVersion> artifactVersions = new ArrayList<>();
-
-        artifactVersions.add( new DefaultArtifactVersion( "one" ) );
-        artifactVersions.add( new DefaultArtifactVersion( "two" ) );
-        final ArtifactVersion three = new DefaultArtifactVersion( "three" );
-        artifactVersions.add( three );
-        final ArtifactVersion oneTwoHundred = new DefaultArtifactVersion( "1.200" );
-        artifactVersions.add( oneTwoHundred );
-        final ArtifactVersion illegal = new DefaultArtifactVersion( "illegalVersion" );
-        artifactVersions.add( illegal );
-
-        when( metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) )
-            .thenReturn( artifactVersions );
-
-        VersionsHelper helper = createHelper( metadataSource );
+        VersionsHelper helper = createHelper( repositorySystem );
 
         final ArtifactVersions versions = helper.lookupArtifactVersions( artifact, true );
 
-        final List<ArtifactVersion> actual = asList( versions.getVersions( true ) );
+        final List<String> actual = Arrays.stream( versions.getVersions( true ) )
+                .map( ArtifactVersion::toString )
+                .collect( Collectors.toList() );
 
         assertEquals( 3, actual.size() );
-        assertThat( actual, hasItems( three, oneTwoHundred, illegal ) );
+        assertThat( actual, hasItems( "three", "1.200", "illegalVersion" ) );
     }
 
     @Test
     public void testGlobalRuleVersionsIgnored() throws Exception
     {
-        final ArtifactMetadataSource metadataSource = mock( ArtifactMetadataSource.class );
+        final org.eclipse.aether.RepositorySystem repositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
         final Artifact artifact = mock( Artifact.class );
         when( artifact.getGroupId() ).thenReturn( "other.company" );
         when( artifact.getArtifactId() ).thenReturn( "artifact-two" );
+        when( artifact.getType() ).thenReturn( "jar" );
+        when( artifact.getArtifactHandler() ).thenReturn( new DefaultArtifactHandlerStub( "default" ) );
 
-        final List<ArtifactVersion> artifactVersions = new ArrayList<>();
+        final List<Version> artifactVersions = new ArrayList<>();
 
-        final ArtifactVersion one = new DefaultArtifactVersion( "one" );
-        final ArtifactVersion two = new DefaultArtifactVersion( "two" );
-        final ArtifactVersion three = new DefaultArtifactVersion( "three" );
+        final Version one = new VersionStub( "one" );
+        final Version two = new VersionStub( "two" );
+        final Version three = new VersionStub( "three" );
         artifactVersions.add( one );
         artifactVersions.add( two );
-        artifactVersions.add( new DefaultArtifactVersion( "three-alpha" ) );
-        artifactVersions.add( new DefaultArtifactVersion( "three-beta" ) );
+        artifactVersions.add( new VersionStub( "three-alpha" ) );
+        artifactVersions.add( new VersionStub( "three-beta" ) );
         artifactVersions.add( three );
-        final ArtifactVersion illegal = new DefaultArtifactVersion( "illegalVersion" );
+        final Version illegal = new VersionStub( "illegalVersion" );
         artifactVersions.add( illegal );
 
-        when( metadataSource.retrieveAvailableVersions( same( artifact ), any( ArtifactRepository.class ), anyList() ) )
-            .thenReturn( artifactVersions );
+        when( repositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
+                .then( i -> new VersionRangeResult( i.getArgument( 1 ) )
+                        .setVersions( artifactVersions ) );
 
-        VersionsHelper helper = createHelper( metadataSource );
+        VersionsHelper helper = createHelper( repositorySystem );
 
         final ArtifactVersions versions = helper.lookupArtifactVersions( artifact, true );
 
-        final List<ArtifactVersion> actual = asList( versions.getVersions( true ) );
+        final List<Version> actual = Arrays.stream( versions.getVersions( true ) )
+                .map( ArtifactVersion::toString )
+                .map( VersionStub::new )
+                .collect( Collectors.toList() );
 
         assertEquals( 4, actual.size() );
         assertThat( actual, hasItems( one, two, three, illegal ) );
@@ -214,19 +218,24 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
     private DefaultVersionsHelper createHelper()
         throws Exception
     {
-        return createHelper( new MavenMetadataSource() );
+        return createHelper( null );
     }
 
-    private DefaultVersionsHelper createHelper( ArtifactMetadataSource metadataSource ) throws Exception
+    private DefaultVersionsHelper createHelper( org.eclipse.aether.RepositorySystem aetherRepositorySystem )
+            throws Exception
     {
         final String resourcePath = "/" + getClass().getPackage().getName().replace( '.', '/' ) + "/rules.xml";
-        final String rulesUri = getClass().getResource( resourcePath ).toExternalForm();
+        final String rulesUri = Objects.requireNonNull( getClass().getResource( resourcePath ) ).toExternalForm();
+        MavenSession mavenSession = mock( MavenSession.class );
+        when( mavenSession.getCurrentProject() ).thenReturn( mock( MavenProject.class ) );
+        when( mavenSession.getCurrentProject().getRemotePluginRepositories() )
+                .thenReturn( emptyList() );
+        when( mavenSession.getCurrentProject().getRemotePluginRepositories() )
+                .thenReturn( emptyList() );
         return new DefaultVersionsHelper.Builder()
                 .withRepositorySystem( lookup( RepositorySystem.class ) )
                 .withArtifactResolver( new DefaultArtifactResolver() )
-                .withArtifactMetadataSource( metadataSource )
-                .withRemoteArtifactRepositories( new ArrayList<>() )
-                .withRemotePluginRepositories( new ArrayList<>() )
+                .withAetherRepositorySystem( aetherRepositorySystem )
                 .withLocalRepository( new DefaultArtifactRepository(
                         "", "", new DefaultRepositoryLayout() ) )
                 .withWagonManager( lookup( WagonManager.class ) )
@@ -234,7 +243,7 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
                 .withServerId( "" )
                 .withRulesUri( rulesUri )
                 .withLog( mock( Log.class ) )
-                .withMavenSession( mock( MavenSession.class ) )
+                .withMavenSession( mavenSession )
                 .withMojoExecution( mock( MojoExecution.class ) ).build();
     }
 

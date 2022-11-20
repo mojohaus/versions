@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
@@ -33,7 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.TestUtils.createTempDir;
 import static org.codehaus.mojo.versions.utils.TestUtils.tearDownTempDir;
 
@@ -45,7 +44,7 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase
     @Rule
     public MojoRule mojoRule = new MojoRule( this );
     protected Path pomDir;
-    protected ArtifactMetadataSource artifactMetadataSource;
+    protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
     protected TestChangeRecorder changeRecorder;
 
     @Before
@@ -53,7 +52,7 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase
     {
         super.setUp();
         pomDir = createTempDir( "update-property" );
-        artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
+        aetherRepositorySystem = mockAetherRepositorySystem( new HashMap<String, String[]>()
         {{
             put( "default-artifact", new String[] {"1.0.0", "1.0.1-rc1", "1.1.0-alpha", "2.0.0-M1"} );
         }} );
@@ -77,7 +76,7 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase
     {
         T mojo = (T) mojoRule.lookupConfiguredMojo( pomDir.toFile(), goal );
         setVariableValueToObject( mojo, "localRepository", new StubArtifactRepository( pomDir.toString() ) );
-        setVariableValueToObject( mojo, "artifactMetadataSource", artifactMetadataSource );
+        setVariableValueToObject( mojo, "aetherRepositorySystem", aetherRepositorySystem );
         setVariableValueToObject( mojo, "generateBackupPoms", false );
         setVariableValueToObject( mojo, "changeRecorderFormat", "test" );
         changeRecorder = (TestChangeRecorder)

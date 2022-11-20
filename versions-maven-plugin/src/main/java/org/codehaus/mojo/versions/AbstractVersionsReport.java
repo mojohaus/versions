@@ -26,8 +26,6 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -45,6 +43,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
@@ -78,11 +77,9 @@ public abstract class AbstractVersionsReport<T>
     private boolean skip;
 
     /**
-     * The artifact metadata source to use.
-     *
-     * @since 1.0-alpha-1
+     * The (injected) {@link org.eclipse.aether.RepositorySystem aetherRepositorySystem} instance.
      */
-    protected ArtifactMetadataSource artifactMetadataSource;
+    protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
 
     /**
      * @since 1.0-alpha-3
@@ -197,14 +194,16 @@ public abstract class AbstractVersionsReport<T>
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
-    protected AbstractVersionsReport( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                      ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+    protected AbstractVersionsReport( I18N i18n, RepositorySystem repositorySystem,
+                                      org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+                                      ArtifactResolver artifactResolver,
+                                      WagonManager wagonManager,
                                       ReportRendererFactory rendererFactory )
     {
         this.i18n = i18n;
         this.repositorySystem = repositorySystem;
+        this.aetherRepositorySystem = aetherRepositorySystem;
         this.artifactResolver = artifactResolver;
-        this.artifactMetadataSource = artifactMetadataSource;
         this.wagonManager = wagonManager;
         this.rendererFactory = rendererFactory;
     }
@@ -219,9 +218,7 @@ public abstract class AbstractVersionsReport<T>
                 helper = new DefaultVersionsHelper.Builder()
                         .withRepositorySystem( repositorySystem )
                         .withArtifactResolver( artifactResolver )
-                        .withArtifactMetadataSource( artifactMetadataSource )
-                        .withRemoteArtifactRepositories( remoteArtifactRepositories )
-                        .withRemotePluginRepositories( remotePluginRepositories )
+                        .withAetherRepositorySystem( aetherRepositorySystem )
                         .withLocalRepository( localRepository )
                         .withWagonManager( wagonManager )
                         .withSettings( settings )
@@ -295,7 +292,7 @@ public abstract class AbstractVersionsReport<T>
                 getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
             return artifactVersions.getNewestVersion( versionRange, includeSnapshots );
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( VersionRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }

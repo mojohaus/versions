@@ -19,26 +19,29 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Objects;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
-import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.codehaus.mojo.versions.utils.TestUtils.copyDir;
+import static org.codehaus.mojo.versions.utils.TestUtils.createTempDir;
+import static org.codehaus.mojo.versions.utils.TestUtils.tearDownTempDir;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Basic tests for {@linkplain SetPropertyMojoTest}.
@@ -56,7 +59,7 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase
     public void setUp() throws Exception
     {
         super.setUp();
-        pomDir = Files.createTempDirectory( "set-property-" );
+        pomDir = createTempDir( "set-property" );
     }
 
     @After
@@ -64,26 +67,25 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase
     {
         try
         {
-            if ( pomDir != null && pomDir.toFile().exists() )
-            {
-                Arrays.stream( Objects.requireNonNull( pomDir.toFile().listFiles() ) ).forEach( File::delete );
-                pomDir.toFile().delete();
-            }
+            tearDownTempDir( pomDir );
         }
         finally
         {
             super.tearDown();
         }
     }
-       @Test
+    @Test
     public void testNullNewVersion()
             throws Exception
     {
-        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-new-version/pom.xml" ),
-                Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
+        copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-new-version" ), pomDir );
         SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
                 "set-property" );
-        mojo.localRepository = new StubArtifactRepository( pomDir.toString() );
+
+        mojo.aetherRepositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
+        when( mojo.aetherRepositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
+                .then( i -> new VersionRangeResult( i.getArgument( 1 ) ) );
+
         setVariableValueToObject( mojo, "newVersion", null );
 
         mojo.execute();
@@ -98,11 +100,14 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase
     public void testNewVersionEmpty()
             throws Exception
     {
-        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-new-version/pom.xml" ),
-                Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
+        copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-new-version" ), pomDir );
         SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
                 "set-property" );
-        mojo.localRepository = new StubArtifactRepository( pomDir.toString() );
+
+        mojo.aetherRepositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
+        when( mojo.aetherRepositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
+                .then( i -> new VersionRangeResult( i.getArgument( 1 ) ) );
+
         setVariableValueToObject( mojo, "newVersion", "" );
 
         mojo.execute();
@@ -117,8 +122,7 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase
     public void testNullProperty()
             throws Exception
     {
-        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-property/pom.xml" ),
-                Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
+        copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-property" ), pomDir );
         SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
                 "set-property" );
 

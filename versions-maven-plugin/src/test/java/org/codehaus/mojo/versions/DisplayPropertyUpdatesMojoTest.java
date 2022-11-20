@@ -25,7 +25,6 @@ import java.util.HashMap;
 
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
-import org.codehaus.mojo.versions.utils.MockUtils;
 import org.codehaus.mojo.versions.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -33,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import static org.apache.commons.codec.CharEncoding.UTF_8;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
@@ -80,7 +80,7 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext( new HashMap<>() );
-        mojo.artifactMetadataSource = MockUtils.mockArtifactMetadataSource();
+        mojo.aetherRepositorySystem = mockAetherRepositorySystem();
         mojo.includeParent = true;
         mojo.execute();
 
@@ -101,7 +101,7 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext( new HashMap<>() );
-        mojo.artifactMetadataSource = MockUtils.mockArtifactMetadataSource();
+        mojo.aetherRepositorySystem = mockAetherRepositorySystem();
         mojo.includeParent = false;
         mojo.execute();
 

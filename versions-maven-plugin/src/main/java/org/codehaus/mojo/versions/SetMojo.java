@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
@@ -248,15 +247,15 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
 
     @Inject
     public SetMojo( RepositorySystem repositorySystem,
+                    org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                     MavenProjectBuilder projectBuilder,
-                    ArtifactMetadataSource artifactMetadataSource,
                     WagonManager wagonManager,
                     ArtifactResolver artifactResolver,
                     Map<String, ChangeRecorder> changeRecorders,
                     Prompter prompter )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
         this.prompter = prompter;
     }
 
@@ -569,7 +568,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
      * @throws javax.xml.stream.XMLStreamException            when things go wrong.
      */
     protected synchronized void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         ContextualLog log = new DelegatingContextualLog( getLog() );
         try

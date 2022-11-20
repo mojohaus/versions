@@ -5,14 +5,15 @@ import javax.xml.stream.XMLStreamException;
 import java.util.HashMap;
 
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.hamcrest.Matchers;
@@ -24,14 +25,14 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings( "deprecation" )
 public class UseLatestReleasesMojoTest
 {
     private UseLatestReleasesMojo mojo;
@@ -46,10 +47,12 @@ public class UseLatestReleasesMojoTest
             Dependency dependency = invocation.getArgument( 0 );
             return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(),
                     dependency.getScope(), dependency.getType(),
-                    dependency.getClassifier() != null ? dependency.getClassifier() : "default", null );
+                    dependency.getClassifier() != null ? dependency.getClassifier() : "default",
+                    new DefaultArtifactHandlerStub( "default" ) );
         } );
 
-        ArtifactMetadataSource artifactMetadataSourceMock = mockArtifactMetadataSource( new HashMap<String, String[]>()
+        org.eclipse.aether.RepositorySystem aetherRepositorySystem = mockAetherRepositorySystem(
+                new HashMap<String, String[]>()
         {{
             put( "dependency-artifact", new String[] {"0.9.0", "1.0.0-beta"} );
         }} );
@@ -57,11 +60,11 @@ public class UseLatestReleasesMojoTest
         changeRecorder = new TestChangeRecorder();
 
         mojo = new UseLatestReleasesMojo( repositorySystemMock,
-                                          null,
-                                          artifactMetadataSourceMock,
-                                          null,
-                                          null,
-                                          changeRecorder.asTestMap() )
+                aetherRepositorySystem,
+                null,
+                null,
+                null,
+                changeRecorder.asTestMap() )
         {{
             reactorProjects = emptyList();
             MavenProject project = new MavenProject()
@@ -84,12 +87,15 @@ public class UseLatestReleasesMojoTest
                 }} );
             }};
             setProject( project );
+
+            session = mockMavenSession();
         }};
     }
 
     @Test
     public void testDontUpgradeToBeta()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         setVariableValueToObject( mojo, "processDependencies", true );
         setVariableValueToObject( mojo, "allowSnapshots", false );

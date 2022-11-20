@@ -29,8 +29,6 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -41,6 +39,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
@@ -59,14 +58,14 @@ public class UseReactorMojo
 
     @Inject
     public UseReactorMojo( RepositorySystem repositorySystem,
+                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                            MavenProjectBuilder projectBuilder,
-                           ArtifactMetadataSource artifactMetadataSource,
                            WagonManager wagonManager,
                            ArtifactResolver artifactResolver,
                            Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -77,7 +76,7 @@ public class UseReactorMojo
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
     {
         try
         {
@@ -99,14 +98,14 @@ public class UseReactorMojo
                 useReactor( pom, getProject().getDependencies() );
             }
         }
-        catch ( ArtifactMetadataRetrievalException | IOException e )
+        catch ( IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
     }
 
     private void useReactor( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+        throws XMLStreamException, MojoExecutionException, VersionRetrievalException
     {
 
         for ( Dependency dep : dependencies )
@@ -136,7 +135,7 @@ public class UseReactorMojo
     }
 
     private void useReactor( ModifiedPomXMLEventReader pom, MavenProject parent )
-        throws XMLStreamException, ArtifactMetadataRetrievalException
+        throws XMLStreamException, VersionRetrievalException
     {
         for ( MavenProject project : reactorProjects )
         {

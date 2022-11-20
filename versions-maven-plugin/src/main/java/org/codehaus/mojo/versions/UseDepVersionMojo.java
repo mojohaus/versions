@@ -28,8 +28,6 @@ import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -41,6 +39,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -76,19 +75,19 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
 
     @Inject
     public UseDepVersionMojo( RepositorySystem repositorySystem,
+                              org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                               MavenProjectBuilder projectBuilder,
-                              ArtifactMetadataSource artifactMetadataSource,
                               WagonManager wagonManager,
                               ArtifactResolver artifactResolver,
                               Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     @Override
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
     {
 
         if ( depVersion == null || depVersion.equals( "" ) )
@@ -129,7 +128,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
                                ChangeRecord.ChangeKind.PARENT );
             }
         }
-        catch ( ArtifactMetadataRetrievalException | IOException e )
+        catch ( IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
@@ -137,7 +136,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
 
     private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
                                 ChangeRecord.ChangeKind changeKind )
-        throws MojoExecutionException, XMLStreamException, ArtifactMetadataRetrievalException
+        throws MojoExecutionException, XMLStreamException, VersionRetrievalException
     {
         for ( Dependency dep : dependencies )
         {

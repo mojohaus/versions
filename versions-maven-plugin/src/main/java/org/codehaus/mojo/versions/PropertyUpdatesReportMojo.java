@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -108,12 +107,14 @@ public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUp
     protected String[] formats = new String[] {"html"};
 
     @Inject
-    protected PropertyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
+    protected PropertyUpdatesReportMojo( I18N i18n,
+                                         RepositorySystem repositorySystem,
+                                         org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                          ArtifactResolver artifactResolver,
-                                         ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+                                         WagonManager wagonManager,
                                          ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, artifactResolver, wagonManager, rendererFactory );
     }
 
     /**

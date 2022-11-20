@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
@@ -42,6 +40,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.mojo.versions.utils.PluginComparator;
@@ -85,11 +84,14 @@ public class PluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdate
     protected boolean onlyUpgradable;
 
     @Inject
-    protected PluginUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                       ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+    protected PluginUpdatesReportMojo( I18N i18n,
+                                       RepositorySystem repositorySystem,
+                                       org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+                                       ArtifactResolver artifactResolver,
+                                       WagonManager wagonManager,
                                        ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, artifactResolver, wagonManager, rendererFactory );
     }
 
     /**
@@ -194,7 +196,7 @@ public class PluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdate
                 }
             }
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( VersionRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }

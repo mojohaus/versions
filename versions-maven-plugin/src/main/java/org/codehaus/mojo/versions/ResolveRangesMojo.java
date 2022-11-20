@@ -31,8 +31,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -47,6 +45,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
@@ -129,14 +128,14 @@ public class ResolveRangesMojo
 
     @Inject
     public ResolveRangesMojo( RepositorySystem repositorySystem,
+                              org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                               MavenProjectBuilder projectBuilder,
-                              ArtifactMetadataSource artifactMetadataSource,
                               WagonManager wagonManager,
                               ArtifactResolver artifactResolver,
                               Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -147,7 +146,7 @@ public class ResolveRangesMojo
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
     {
         // Note we have to get the dependencies from the model because the dependencies in the
         // project may have already had their range resolved [MNG-4138]
@@ -190,7 +189,7 @@ public class ResolveRangesMojo
     }
 
     private void resolveRangesInParent( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, ArtifactMetadataRetrievalException, XMLStreamException
+        throws MojoExecutionException, VersionRetrievalException, XMLStreamException
     {
         Matcher versionMatcher = matchRangeRegex.matcher( getProject().getModel().getParent().getVersion() );
 
@@ -236,7 +235,7 @@ public class ResolveRangesMojo
     }
 
     private void resolveRanges( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+        throws XMLStreamException, MojoExecutionException, VersionRetrievalException
     {
 
         for ( Dependency dep : dependencies )

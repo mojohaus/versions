@@ -32,7 +32,6 @@ import java.util.TreeSet;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -74,7 +73,7 @@ public class PropertyVersions
     private final PropertyVersions.PropertyVersionComparator comparator;
 
     PropertyVersions( String profileId, String name, VersionsHelper helper, Set<ArtifactAssociation> associations )
-        throws ArtifactMetadataRetrievalException
+            throws VersionRetrievalException
     {
         this.profileId = profileId;
         this.name = name;
@@ -88,7 +87,7 @@ public class PropertyVersions
     private static SortedSet<ArtifactVersion> resolveAssociatedVersions( VersionsHelper helper,
                                                                          Set<ArtifactAssociation> associations,
                                                                          VersionComparator versionComparator )
-        throws ArtifactMetadataRetrievalException
+            throws VersionRetrievalException
     {
         SortedSet<ArtifactVersion> versions = null;
         for ( ArtifactAssociation association : associations )

@@ -29,8 +29,6 @@ import java.util.regex.Matcher;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -46,6 +44,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Collections.singletonList;
@@ -72,14 +71,14 @@ public class ForceReleasesMojo
 
     @Inject
     public ForceReleasesMojo( RepositorySystem repositorySystem,
+                              org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                               MavenProjectBuilder projectBuilder,
-                              ArtifactMetadataSource artifactMetadataSource,
                               WagonManager wagonManager,
                               ArtifactResolver artifactResolver,
                               Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -90,7 +89,7 @@ public class ForceReleasesMojo
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
     {
         try
         {
@@ -114,7 +113,7 @@ public class ForceReleasesMojo
                              ChangeRecord.ChangeKind.PARENT );
             }
         }
-        catch ( ArtifactMetadataRetrievalException | IOException e )
+        catch ( IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
@@ -122,7 +121,7 @@ public class ForceReleasesMojo
 
     private void useReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
                               ChangeRecord.ChangeKind changeKind )
-        throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+        throws XMLStreamException, MojoExecutionException, VersionRetrievalException
     {
         for ( Dependency dep : dependencies )
         {

@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Dependency;
@@ -37,7 +35,6 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
@@ -47,17 +44,16 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Basic tests for {@linkplain DependencyUpdatesReportMojo}.
@@ -72,7 +68,7 @@ public class DependencyUpdatesReportMojoTest
 
         TestDependencyUpdatesReportMojo()
         {
-            super( MOCK_I18N, mockRepositorySystem(), null, mockArtifactMetadataSource(),
+            super( MOCK_I18N, mockRepositorySystem(), mockAetherRepositorySystem(), null,
                     null, new ReportRendererFactoryImpl( MOCK_I18N ) );
             siteTool = MockUtils.mockSiteTool();
 
@@ -80,6 +76,8 @@ public class DependencyUpdatesReportMojoTest
             project.setOriginalModel( new Model() );
             project.getOriginalModel().setDependencyManagement( new DependencyManagement() );
             project.getModel().setDependencyManagement( new DependencyManagement() );
+
+            session = mockMavenSession();
         }
 
         public TestDependencyUpdatesReportMojo withDependencies( Dependency... dependencies )
@@ -88,10 +86,10 @@ public class DependencyUpdatesReportMojoTest
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withArtifactMetadataSource(
-                ArtifactMetadataSource artifactMetadataSource )
+        public TestDependencyUpdatesReportMojo withAetherRepositorySystem(
+                org.eclipse.aether.RepositorySystem repositorySystem )
         {
-            this.artifactMetadataSource = artifactMetadataSource;
+            this.aetherRepositorySystem = repositorySystem;
             return this;
         }
 
@@ -160,20 +158,6 @@ public class DependencyUpdatesReportMojoTest
             project.getOriginalModel().getProperties().put( name, value );
             return this;
         }
-
-        private static RepositorySystem mockRepositorySystem()
-        {
-            RepositorySystem repositorySystem = mock( RepositorySystem.class );
-            when( repositorySystem.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer(
-                invocation ->
-                {
-                    Dependency dependency = invocation.getArgument( 0 );
-                    return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                                dependency.getVersion(), dependency.getScope(), dependency.getType(),
-                                                dependency.getClassifier(), null );
-                } );
-            return repositorySystem;
-        }
     }
 
     private static Dependency dependencyOf( String artifactId )
@@ -189,13 +173,13 @@ public class DependencyUpdatesReportMojoTest
     }
 
     @Test
-    public void testOnlyUpgradableDependencies() throws IOException, MavenReportException
+    public void testOnlyUpgradableDependencies() throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestDependencyUpdatesReportMojo()
             .withOnlyUpgradable( true )
-                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                .withAetherRepositorySystem( mockAetherRepositorySystem( new HashMap<String, String[]>()
                 {{
                     put( "artifactA", new String[] { "1.0.0", "2.0.0" } );
                     put( "artifactB", new String[] { "1.0.0" } );
@@ -214,7 +198,8 @@ public class DependencyUpdatesReportMojoTest
     }
 
     @Test
-    public void testOnlyUpgradableWithOriginalDependencyManagement() throws IOException, MavenReportException
+    public void testOnlyUpgradableWithOriginalDependencyManagement()
+            throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
@@ -231,7 +216,8 @@ public class DependencyUpdatesReportMojoTest
     }
 
     @Test
-    public void testOnlyUpgradableWithTransitiveDependencyManagement() throws IOException, MavenReportException
+    public void testOnlyUpgradableWithTransitiveDependencyManagement()
+            throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
@@ -250,7 +236,7 @@ public class DependencyUpdatesReportMojoTest
     }
 
     @Test
-    public void testOnlyProjectDependencies() throws IOException, MavenReportException
+    public void testOnlyProjectDependencies() throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
@@ -268,7 +254,8 @@ public class DependencyUpdatesReportMojoTest
     }
 
     @Test
-    public void testOnlyProjectDependenciesWithIgnoredVersions() throws IOException, MavenReportException
+    public void testOnlyProjectDependenciesWithIgnoredVersions()
+            throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
@@ -289,12 +276,12 @@ public class DependencyUpdatesReportMojoTest
      * Dependencies should be rendered in alphabetical order
      */
     @Test
-    public void testDependenciesInAlphabeticalOrder() throws IOException, MavenReportException
+    public void testDependenciesInAlphabeticalOrder() throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestDependencyUpdatesReportMojo()
-                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                .withAetherRepositorySystem( mockAetherRepositorySystem( new HashMap<String, String[]>()
                 {{
                     put( "amstrad", new String[] {"1.0.0", "2.0.0"} );
                     put( "atari", new String[] {"1.0.0", "2.0.0"} );
@@ -313,7 +300,8 @@ public class DependencyUpdatesReportMojoTest
      * Dependency updates for dependency should override those for dependency management
      */
     @Test
-    public void testDependenciesShouldOverrideDependencyManagement() throws IOException, MavenReportException
+    public void testDependenciesShouldOverrideDependencyManagement()
+            throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
@@ -330,7 +318,7 @@ public class DependencyUpdatesReportMojoTest
     }
 
     @Test
-    public void testWrongReportBounds() throws IOException, MavenReportException
+    public void testWrongReportBounds() throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
@@ -338,7 +326,7 @@ public class DependencyUpdatesReportMojoTest
                 .withOnlyUpgradable( true )
                 .withDependencies(
                         dependencyOf( "test-artifact" ) )
-                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                .withAetherRepositorySystem( mockAetherRepositorySystem( new HashMap<String, String[]>()
                 {{
                    put( "test-artifact", new String[] { "1.0.0", "2.0.0-M1" } );
                 }} ) )
@@ -351,7 +339,7 @@ public class DependencyUpdatesReportMojoTest
     }
 
     @Test
-    public void testIt001Overview() throws IOException, MavenReportException
+    public void testIt001Overview() throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
@@ -359,7 +347,7 @@ public class DependencyUpdatesReportMojoTest
                 .withOnlyUpgradable( true )
                 .withDependencies(
                         dependencyOf( "test-artifact", "1.1" ) )
-                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                .withAetherRepositorySystem( mockAetherRepositorySystem( new HashMap<String, String[]>()
                 {{
                     put( "test-artifact", new String[] { "1.1.0-2", "1.1", "1.1.1", "1.1.1-2",
                         "1.1.2", "1.1.3", "1.2", "1.2.1", "1.2.2", "1.3", "2.0", "2.1", "3.0"} );
@@ -375,7 +363,8 @@ public class DependencyUpdatesReportMojoTest
     }
 
     @Test
-    public void testResolvedVersionsWithoutTransitiveDependencyManagement() throws IOException, MavenReportException
+    public void testResolvedVersionsWithoutTransitiveDependencyManagement()
+            throws IOException, MavenReportException, IllegalAccessException
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();

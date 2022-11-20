@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
@@ -160,14 +159,14 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
 
     @Inject
     protected AbstractVersionsDependencyUpdaterMojo( RepositorySystem repositorySystem,
+                                                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                                      MavenProjectBuilder projectBuilder,
-                                                     ArtifactMetadataSource artifactMetadataSource,
                                                      WagonManager wagonManager,
                                                      ArtifactResolver artifactResolver,
                                                      Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**

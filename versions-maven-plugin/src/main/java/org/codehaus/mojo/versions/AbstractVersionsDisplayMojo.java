@@ -31,7 +31,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectBuilder;
@@ -87,14 +86,14 @@ public abstract class AbstractVersionsDisplayMojo
 
     @Inject
     protected AbstractVersionsDisplayMojo( RepositorySystem repositorySystem,
+                                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                            MavenProjectBuilder projectBuilder,
-                                           ArtifactMetadataSource artifactMetadataSource,
                                            WagonManager wagonManager,
                                            ArtifactResolver artifactResolver,
                                            Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     @SuppressWarnings( "unchecked" )

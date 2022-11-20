@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -36,6 +34,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.ParentUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
@@ -55,11 +54,14 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
     protected List<MavenProject> reactorProjects;
 
     @Inject
-    protected ParentUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem, ArtifactResolver artifactResolver,
-                                       ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+    protected ParentUpdatesReportMojo( I18N i18n,
+                                       RepositorySystem repositorySystem,
+                                       org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+                                       ArtifactResolver artifactResolver,
+                                       WagonManager wagonManager,
                                        ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, artifactResolver, wagonManager, rendererFactory );
     }
 
     /**
@@ -115,7 +117,7 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
                                     .build(), artifactVersions ) )
                     .render();
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( VersionRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }

@@ -33,8 +33,6 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -58,6 +56,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.model.RuleSet;
@@ -87,25 +86,29 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( defaultValue = "${project}", required = true, readonly = true )
     protected MavenProject project;
 
-    protected RepositorySystem repositorySystem;
+    /**
+     * The (injected) {@link RepositorySystem} instance.
+     */
+    protected final RepositorySystem repositorySystem;
 
+    /**
+     * The (injected) {@link org.eclipse.aether.RepositorySystem} instance.
+     */
+    protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+
+    /**
+     * The (injected) {@link MavenProjectBuilder} instance.
+     */
     /**
      * @since 1.0-alpha-1
      */
-    protected MavenProjectBuilder projectBuilder;
+    protected final MavenProjectBuilder projectBuilder;
 
     /**
      * @since 1.0-alpha-1
      */
     @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
     protected List<MavenProject> reactorProjects;
-
-    /**
-     * The artifact metadata source to use.
-     *
-     * @since 1.0-alpha-1
-     */
-    protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
      * @since 1.0-alpha-3
@@ -126,9 +129,9 @@ public abstract class AbstractVersionsUpdaterMojo
     protected ArtifactRepository localRepository;
 
     /**
-     * @since 1.0-alpha-3
+     * The (injected) {@link WagonManager} instance.
      */
-    private WagonManager wagonManager;
+    private final WagonManager wagonManager;
 
     /**
      * @since 1.0-alpha-3
@@ -239,15 +242,15 @@ public abstract class AbstractVersionsUpdaterMojo
 
     @Inject
     protected AbstractVersionsUpdaterMojo( RepositorySystem repositorySystem,
+                                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                            MavenProjectBuilder projectBuilder,
-                                           ArtifactMetadataSource artifactMetadataSource,
                                            WagonManager wagonManager,
                                            ArtifactResolver artifactResolver,
                                            Map<String, ChangeRecorder> changeRecorders )
     {
         this.repositorySystem = repositorySystem;
+        this.aetherRepositorySystem = aetherRepositorySystem;
         this.projectBuilder = projectBuilder;
-        this.artifactMetadataSource = artifactMetadataSource;
         this.wagonManager = wagonManager;
         this.artifactResolver = artifactResolver;
         this.changeRecorders = changeRecorders;
@@ -260,9 +263,7 @@ public abstract class AbstractVersionsUpdaterMojo
             helper = new DefaultVersionsHelper.Builder()
                     .withRepositorySystem( repositorySystem )
                     .withArtifactResolver( artifactResolver )
-                    .withArtifactMetadataSource( artifactMetadataSource )
-                    .withRemoteArtifactRepositories( remoteArtifactRepositories )
-                    .withRemotePluginRepositories( remotePluginRepositories )
+                    .withAetherRepositorySystem( aetherRepositorySystem )
                     .withLocalRepository( localRepository )
                     .withWagonManager( wagonManager )
                     .withSettings( settings )
@@ -341,13 +342,13 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param usePluginRepositories Use plugin repositories
      * @return The latest version of the specified artifact that matches the specified version range or
      * <code>null</code> if no matching version could be found.
-     * @throws ArtifactMetadataRetrievalException If the artifact metadata could not be found.
+     * @throws VersionRetrievalException If the artifact metadata could not be found.
      * @throws MojoExecutionException             if something goes wrong.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
                                                  Boolean allowingSnapshots, boolean usePluginRepositories )
-            throws ArtifactMetadataRetrievalException, MojoExecutionException
+            throws MojoExecutionException, VersionRetrievalException
     {
         boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : this.allowSnapshots;
         final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
@@ -414,7 +415,7 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             getLog().error( e );
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( VersionRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
@@ -467,11 +468,11 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws MojoExecutionException              If things go wrong.
      * @throws MojoFailureException                If things go wrong.
      * @throws javax.xml.stream.XMLStreamException If things go wrong.
-     * @throws ArtifactMetadataRetrievalException  if something goes wrong.
+     * @throws VersionRetrievalException           if version retrieval goes wrong
      * @since 1.0-alpha-1
      */
     protected abstract void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException;
+        throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException;
 
     /**
      * @param artifact       The artifact.

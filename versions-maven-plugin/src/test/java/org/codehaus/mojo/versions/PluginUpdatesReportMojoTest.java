@@ -29,12 +29,12 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
+import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
@@ -45,8 +45,9 @@ import org.codehaus.plexus.i18n.I18N;
 import org.junit.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,15 +69,15 @@ public class PluginUpdatesReportMojoTest
         static final I18N MOCK_I18N = mockI18N();
         TestPluginUpdatesReportMojo()
         {
-            super( MOCK_I18N, mockRepositorySystem(), null, mockArtifactMetadataSource(),
-                    null, new ReportRendererFactoryImpl( MOCK_I18N ) );
+            super( MOCK_I18N, mockRepositorySystem(), mockAetherRepositorySystem(),
+                    null, null, new ReportRendererFactoryImpl( MOCK_I18N ) );
             siteTool = MockUtils.mockSiteTool();
 
             project = new MavenProject();
             project.setBuild( new Build() );
             project.getBuild().setPluginManagement( new PluginManagement() );
 
-            artifactMetadataSource = mockArtifactMetadataSource();
+            session = mockMavenSession();
         }
 
         public TestPluginUpdatesReportMojo withPlugins( Plugin... plugins )
@@ -85,10 +86,10 @@ public class PluginUpdatesReportMojoTest
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withArtifactMetadataSource(
-                ArtifactMetadataSource artifactMetadataSource )
+        public TestPluginUpdatesReportMojo withAetherRepositorySystem(
+                org.eclipse.aether.RepositorySystem repositorySystem )
         {
-            this.artifactMetadataSource = artifactMetadataSource;
+            this.aetherRepositorySystem = repositorySystem;
             return this;
         }
 
@@ -132,7 +133,8 @@ public class PluginUpdatesReportMojoTest
                 {
                     Plugin plugin = invocation.getArgument( 0 );
                     return new DefaultArtifact( plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(),
-                                                SCOPE_RUNTIME, "maven-plugin", "jar", null );
+                                                SCOPE_RUNTIME, "maven-plugin", "jar",
+                            new DefaultArtifactHandlerStub( "default" ) );
                 } );
             return repositorySystem;
         }
@@ -161,7 +163,7 @@ public class PluginUpdatesReportMojoTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReportMojo()
-                .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+                .withAetherRepositorySystem( mockAetherRepositorySystem( new HashMap<String, String[]>()
                 {{
                     put( "artifactA", new String[] { "1.0.0", "2.0.0" } );
                     put( "artifactB", new String[] { "1.0.0" } );
@@ -185,7 +187,7 @@ public class PluginUpdatesReportMojoTest
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReportMojo()
-            .withArtifactMetadataSource( mockArtifactMetadataSource( new HashMap<String, String[]>()
+            .withAetherRepositorySystem( mockAetherRepositorySystem( new HashMap<String, String[]>()
             {{
                 put( "artifactA", new String[] { "1.0.0", "2.0.0" } );
                 put( "artifactB", new String[] { "1.0.0" } );

@@ -30,7 +30,6 @@ import java.util.Map;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
@@ -72,14 +71,14 @@ public class UpdateChildModulesMojo
 
     @Inject
     public UpdateChildModulesMojo( RepositorySystem repositorySystem,
+                                   org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                    MavenProjectBuilder projectBuilder,
-                                   ArtifactMetadataSource artifactMetadataSource,
                                    WagonManager wagonManager,
                                    ArtifactResolver artifactResolver,
                                    Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -212,7 +211,7 @@ public class UpdateChildModulesMojo
      * @throws XMLStreamException     when things go wrong.
      */
     protected synchronized void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         getLog().debug( "Updating parent to " + sourceVersion );
 

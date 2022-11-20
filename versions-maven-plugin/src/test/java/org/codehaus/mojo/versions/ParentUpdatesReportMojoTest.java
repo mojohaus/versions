@@ -31,14 +31,16 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Model;
+import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
 import org.codehaus.plexus.i18n.I18N;
 import org.junit.Test;
 
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,11 +59,11 @@ public class ParentUpdatesReportMojoTest
     {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new ParentUpdatesReportMojo( MOCK_I18N, mockRepositorySystem(), null,
-                mockArtifactMetadataSource( new HashMap<String, String[]>()
+        new ParentUpdatesReportMojo( MOCK_I18N, mockRepositorySystem(),
+                mockAetherRepositorySystem( new HashMap<String, String[]>()
                 {{
                     put( "default-artifact", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT"} );
-                }} ), null, new ReportRendererFactoryImpl( MOCK_I18N ) )
+                }} ), null, null, new ReportRendererFactoryImpl( MOCK_I18N ) )
         {{
             allowSnapshots = true;
             project = new MavenProject( new Model()
@@ -79,7 +81,10 @@ public class ParentUpdatesReportMojoTest
             reactorProjects = new ArrayList<>();
             project.setParentArtifact( new DefaultArtifact( project.getParent().getGroupId(),
                     project.getParent().getArtifactId(), project.getParent().getVersion(),
-                    Artifact.SCOPE_COMPILE, "pom", "default", null ) );
+                    Artifact.SCOPE_COMPILE, "pom", "default",
+                    new DefaultArtifactHandlerStub( "default" ) ) );
+
+            session = mockMavenSession();
         }}.generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
         String output = os.toString();

@@ -50,8 +50,6 @@ import org.apache.maven.BuildFailureException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -94,6 +92,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -165,8 +164,8 @@ public class DisplayPluginUpdatesMojo
     @Inject
     @SuppressWarnings( "checkstyle:ParameterNumber" )
     public DisplayPluginUpdatesMojo( RepositorySystem repositorySystem,
+                                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                      MavenProjectBuilder projectBuilder,
-                                     ArtifactMetadataSource artifactMetadataSource,
                                      WagonManager wagonManager,
                                      ArtifactResolver artifactResolver,
                                      LifecycleExecutor lifecycleExecutor,
@@ -175,8 +174,8 @@ public class DisplayPluginUpdatesMojo
                                      RuntimeInformation runtimeInformation,
                                      Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;
         this.pluginManager = pluginManager;
@@ -538,7 +537,7 @@ public class DisplayPluginUpdatesMojo
                     }
                 }
             }
-            catch ( ArtifactMetadataRetrievalException e )
+            catch ( VersionRetrievalException e )
             {
                 throw new MojoExecutionException( e.getMessage(), e );
             }
@@ -1821,14 +1820,10 @@ public class DisplayPluginUpdatesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws MojoExecutionException when things go wrong
-     * @throws MojoFailureException   when things go wrong in a very bad way
-     * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         // do nothing
     }

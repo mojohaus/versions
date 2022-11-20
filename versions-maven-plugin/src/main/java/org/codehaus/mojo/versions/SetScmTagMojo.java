@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Scm;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -70,14 +68,14 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
 
     @Inject
     public SetScmTagMojo( RepositorySystem repositorySystem,
+                          org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                           MavenProjectBuilder projectBuilder,
-                          ArtifactMetadataSource artifactMetadataSource,
                           WagonManager wagonManager,
                           ArtifactResolver artifactResolver,
                           Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -100,7 +98,7 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
 
     @Override
     protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         try
         {

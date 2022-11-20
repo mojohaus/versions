@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -142,14 +141,14 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
 
     @Inject
     public UpdatePropertiesMojo( RepositorySystem repositorySystem,
+                                 org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                  MavenProjectBuilder projectBuilder,
-                                 ArtifactMetadataSource artifactMetadataSource,
                                  WagonManager wagonManager,
                                  ArtifactResolver artifactResolver,
                                  Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -161,7 +160,7 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
      * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         Map<Property, PropertyVersions> propertyVersions = getHelper().getVersionPropertiesMap(
                 VersionsHelper.VersionPropertiesMapRequest.builder()
