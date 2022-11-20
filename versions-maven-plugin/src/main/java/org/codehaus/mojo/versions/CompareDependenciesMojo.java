@@ -49,6 +49,8 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
@@ -130,9 +132,11 @@ public class CompareDependenciesMojo
                                     ArtifactMetadataSource artifactMetadataSource,
                                     WagonManager wagonManager,
                                     ArtifactResolver artifactResolver,
-                                    MavenProjectBuilder mavenProjectBuilder )
+                                    MavenProjectBuilder mavenProjectBuilder,
+                                    Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
         this.mavenProjectBuilder = mavenProjectBuilder;
     }
 
@@ -203,11 +207,13 @@ public class CompareDependenciesMojo
         if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
         {
             totalDiffs.addAll(
-                    compareVersions( pom, getProject().getDependencyManagement().getDependencies(), remoteDepsMap ) );
+                    compareVersions( pom, getProject().getDependencyManagement().getDependencies(), remoteDepsMap,
+                                     ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT ) );
         }
         if ( getProject().getDependencies() != null && isProcessingDependencies() )
         {
-            totalDiffs.addAll( compareVersions( pom, getProject().getDependencies(), remoteDepsMap ) );
+            totalDiffs.addAll( compareVersions( pom, getProject().getDependencies(), remoteDepsMap,
+                                                ChangeRecord.ChangeKind.DEPENDENCY ) );
         }
         if ( updatePropertyVersions )
         {
@@ -233,7 +239,8 @@ public class CompareDependenciesMojo
                 getLog().debug( "Processing parent dependency: " + parent );
             }
             remoteDepsMap.putIfAbsent( parent.getManagementKey(), parent );
-            totalDiffs.addAll( compareVersions( pom, singletonList( getParentDependency() ), remoteDepsMap ) );
+            totalDiffs.addAll( compareVersions( pom, singletonList( getParentDependency() ), remoteDepsMap,
+                                                ChangeRecord.ChangeKind.PARENT ) );
         }
 
         if ( reportMode )
@@ -277,7 +284,8 @@ public class CompareDependenciesMojo
      * @throws XMLStreamException
      */
     private List<String> compareVersions( ModifiedPomXMLEventReader pom, List<Dependency> dependencies,
-                                          Map<String, Dependency> remoteDependencies )
+                                          Map<String, Dependency> remoteDependencies,
+                                          ChangeRecord.ChangeKind changeKind )
         throws MojoExecutionException, XMLStreamException
     {
         List<String> updates = new ArrayList<>();
@@ -299,7 +307,7 @@ public class CompareDependenciesMojo
                     updates.add( buf.toString() );
                     if ( !reportMode )
                     {
-                        updateDependencyVersion( pom, dep, remoteVersion, "compareDependencies" );
+                        updateDependencyVersion( pom, dep, remoteVersion, changeKind );
                     }
 
                 }

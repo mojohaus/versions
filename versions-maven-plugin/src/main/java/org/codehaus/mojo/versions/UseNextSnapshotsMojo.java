@@ -25,6 +25,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.maven.artifact.manager.WagonManager;
@@ -41,6 +42,8 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
@@ -93,9 +96,11 @@ public class UseNextSnapshotsMojo
                                 MavenProjectBuilder projectBuilder,
                                 ArtifactMetadataSource artifactMetadataSource,
                                 WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                                ArtifactResolver artifactResolver,
+                                 Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
         // the below is necessary for UseLatestVersionsMojoBase.useLatestVersions to select snapshots
         allowSnapshots = true;
     }
@@ -116,15 +121,17 @@ public class UseNextSnapshotsMojo
                     PomHelper.getRawModel( getProject() ).getDependencyManagement();
             if ( dependencyManagement != null )
             {
-                useNextSnapshots( pom, dependencyManagement.getDependencies() );
+                useNextSnapshots( pom, dependencyManagement.getDependencies(),
+                                  ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
-                useNextSnapshots( pom, getProject().getDependencies() );
+                useNextSnapshots( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
             }
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                useNextSnapshots( pom, singletonList( getParentDependency() ) );
+                useNextSnapshots( pom, singletonList( getParentDependency() ),
+                                  ChangeRecord.ChangeKind.PARENT );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -133,7 +140,8 @@ public class UseNextSnapshotsMojo
         }
     }
 
-    private void useNextSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
+    private void useNextSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
+                                   ChangeRecord.ChangeKind changeKind )
             throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         Optional<Segment>
@@ -141,7 +149,7 @@ public class UseNextSnapshotsMojo
                 allowIncrementalUpdates, getLog() );
 
         useLatestVersions( pom, dependencies,
-                ( dep, versions ) ->
+                           ( dep, versions ) ->
                 {
                     try
                     {
@@ -155,7 +163,6 @@ public class UseNextSnapshotsMojo
                         getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
                         return empty();
                     }
-                },
-                "useNextSnapshots", dep -> !SNAPSHOT_REGEX.matcher( dep.getVersion() ).matches() );
+                }, changeKind, dep -> !SNAPSHOT_REGEX.matcher( dep.getVersion() ).matches() );
     }
 }

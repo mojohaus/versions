@@ -19,30 +19,43 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import java.io.OutputStream;
+import javax.inject.Named;
+
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import org.codehaus.mojo.versions.change.VersionChange;
-import org.codehaus.mojo.versions.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.change.VersionChange;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 
+@Named( "test" )
 public class TestChangeRecorder implements ChangeRecorder
 {
     private final List<VersionChange> changes = new LinkedList<>();
 
     @Override
-    public void recordUpdate( String kind, String groupId, String artifactId, String oldVersion, String newVersion )
+    public void recordChange( ChangeRecord changeRecord )
     {
-        changes.add( new VersionChange( groupId, artifactId, oldVersion, newVersion ) );
+        changes.add( changeRecord.getVersionChange() );
     }
 
     @Override
-    public void serialize( OutputStream outputStream )
+    public void writeReport( Path outputPath )
     {
     }
 
     public List<VersionChange> getChanges()
     {
         return changes;
+    }
+
+    public Map<String, ChangeRecorder> asTestMap()
+    {
+        HashMap<String, ChangeRecorder> map = new HashMap<>();
+        map.put( "none", this );
+        return map;
     }
 }

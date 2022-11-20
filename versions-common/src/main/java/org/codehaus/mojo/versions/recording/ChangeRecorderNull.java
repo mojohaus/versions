@@ -19,12 +19,17 @@ package org.codehaus.mojo.versions.recording;
  * under the License.
  */
 
-import java.io.OutputStream;
+import javax.inject.Named;
+
+import java.nio.file.Path;
+
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 
 /**
  * A recorder that ignores updates.
  */
-
+@Named( "none" )
 public class ChangeRecorderNull implements ChangeRecorder
 {
     /**
@@ -35,13 +40,12 @@ public class ChangeRecorderNull implements ChangeRecorder
     }
 
     @Override
-    public final void recordUpdate( final String kind, final String groupId, final String artifactId,
-                                    final String oldVersion, final String newVersion )
+    public final void recordChange( ChangeRecord changeRecord )
     {
     }
 
     @Override
-    public final void serialize( final OutputStream outputStream )
+    public final void writeReport( final Path outputPath )
     {
     }
 }

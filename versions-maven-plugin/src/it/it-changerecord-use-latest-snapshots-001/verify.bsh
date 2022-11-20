@@ -6,7 +6,7 @@ try
     File file = new File( basedir, "target/versions-changes.xml" );
     String buf = FileUtils.fileRead( file, "UTF-8" );
 
-    if ( buf.indexOf( "<update artifactId=\"dummy-api\" groupId=\"localhost\" kind=\"useLatestSnapshots\" newVersion=\"1.9.1-SNAPSHOT\" oldVersion=\"1.0\"/>" ) < 0 )
+    if ( buf.indexOf( "<update artifactId=\"dummy-api\" groupId=\"localhost\" kind=\"dependency-update\" newVersion=\"1.9.1-SNAPSHOT\" oldVersion=\"1.0\"/>" ) < 0 )
     {
         System.err.println( "Version change recorded" );
         return false;

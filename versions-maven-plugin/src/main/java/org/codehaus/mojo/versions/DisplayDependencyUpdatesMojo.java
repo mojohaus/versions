@@ -50,6 +50,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -348,12 +349,14 @@ public class DisplayDependencyUpdatesMojo
 
     @Inject
     public DisplayDependencyUpdatesMojo( RepositorySystem repositorySystem,
-                                MavenProjectBuilder projectBuilder,
-                                ArtifactMetadataSource artifactMetadataSource,
-                                WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                                         MavenProjectBuilder projectBuilder,
+                                         ArtifactMetadataSource artifactMetadataSource,
+                                         WagonManager wagonManager,
+                                         ArtifactResolver artifactResolver,
+                                         Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )

@@ -1,0 +1,15 @@
+<project xmlns="http://maven.apache.org/DECORATION/1.8.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd">
+  <body>
+
+    <menu name="Overview">
+      <item name="Writing an extensions" href="index.html"/>
+    </menu>
+
+    <menu name="API entrypoints">
+      <item name="ChangeRecorder" href="change-recorder.html"/>
+    </menu>
+
+    <menu ref="parent"/>
+  </body>
+</project>

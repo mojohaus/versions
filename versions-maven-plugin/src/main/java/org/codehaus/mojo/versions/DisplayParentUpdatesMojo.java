@@ -22,6 +22,8 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.util.Map;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -35,6 +37,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
@@ -53,12 +56,14 @@ public class DisplayParentUpdatesMojo
 
     @Inject
     public DisplayParentUpdatesMojo( RepositorySystem repositorySystem,
-                                           MavenProjectBuilder projectBuilder,
-                                           ArtifactMetadataSource artifactMetadataSource,
-                                           WagonManager wagonManager,
-                                           ArtifactResolver artifactResolver )
+                                     MavenProjectBuilder projectBuilder,
+                                     ArtifactMetadataSource artifactMetadataSource,
+                                     WagonManager wagonManager,
+                                     ArtifactResolver artifactResolver,
+                                     Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     @Override

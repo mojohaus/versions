@@ -54,11 +54,14 @@ public class UseLatestReleasesMojoTest
             put( "dependency-artifact", new String[] {"0.9.0", "1.0.0-beta"} );
         }} );
 
+        changeRecorder = new TestChangeRecorder();
+
         mojo = new UseLatestReleasesMojo( repositorySystemMock,
-                null,
-                artifactMetadataSourceMock,
-                null,
-                null )
+                                          null,
+                                          artifactMetadataSourceMock,
+                                          null,
+                                          null,
+                                          changeRecorder.asTestMap() )
         {{
             reactorProjects = emptyList();
             MavenProject project = new MavenProject()
@@ -81,9 +84,6 @@ public class UseLatestReleasesMojoTest
                 }} );
             }};
             setProject( project );
-
-            changeRecorder = new TestChangeRecorder();
-            setVariableValueToObject( this, "changeRecorder", changeRecorder );
         }};
     }
 

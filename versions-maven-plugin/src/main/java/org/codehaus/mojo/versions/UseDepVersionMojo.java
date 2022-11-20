@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -40,6 +41,8 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Collections.singletonList;
@@ -73,12 +76,14 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
 
     @Inject
     public UseDepVersionMojo( RepositorySystem repositorySystem,
-                                           MavenProjectBuilder projectBuilder,
-                                           ArtifactMetadataSource artifactMetadataSource,
-                                           WagonManager wagonManager,
-                                           ArtifactResolver artifactResolver )
+                              MavenProjectBuilder projectBuilder,
+                              ArtifactMetadataSource artifactMetadataSource,
+                              WagonManager wagonManager,
+                              ArtifactResolver artifactResolver,
+                              Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     @Override
@@ -108,18 +113,20 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
                         PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
-                    useDepVersion( pom, dependencyManagement.getDependencies() );
+                    useDepVersion( pom, dependencyManagement.getDependencies(),
+                                   ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
                 }
             }
 
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
-                useDepVersion( pom, getProject().getDependencies() );
+                useDepVersion( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
             }
 
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                useDepVersion( pom, singletonList( getParentDependency() ) );
+                useDepVersion( pom, singletonList( getParentDependency() ),
+                               ChangeRecord.ChangeKind.PARENT );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -128,7 +135,8 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
         }
     }
 
-    private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
+    private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
+                                ChangeRecord.ChangeKind changeKind )
         throws MojoExecutionException, XMLStreamException, ArtifactMetadataRetrievalException
     {
         for ( Dependency dep : dependencies )
@@ -160,7 +168,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
                                            depVersion, artifact.getGroupId(), artifact.getArtifactId() ) );
                     }
                 }
-                updateDependencyVersion( pom, dep, depVersion, "useDependencyVersion" );
+                updateDependencyVersion( pom, dep, depVersion, changeKind );
             }
         }
     }

@@ -48,7 +48,7 @@ public class SetMojoTest extends AbstractMojoTestCase
     @Test
     public void testGetIncrementedVersion() throws MojoExecutionException
     {
-        new SetMojo( null, null, null, null, null, null )
+        new SetMojo( null, null, null, null, null, null, null )
         {
             {
                 assertThat( getIncrementedVersion( "1.0.0", null ), is( "1.0.1-SNAPSHOT" ) );
@@ -63,7 +63,7 @@ public class SetMojoTest extends AbstractMojoTestCase
     @Test
     public void testNextSnapshotIndexLowerBound()
     {
-        new SetMojo( null, null, null, null, null, null )
+        new SetMojo( null, null, null, null, null, null, null )
         {
             {
                 try
@@ -83,7 +83,7 @@ public class SetMojoTest extends AbstractMojoTestCase
     @Test
     public void testNextSnapshotIndexUpperBound()
     {
-        new SetMojo( null, null, null, null, null, null )
+        new SetMojo( null, null, null, null, null, null, null )
         {
             {
                 try
@@ -105,7 +105,7 @@ public class SetMojoTest extends AbstractMojoTestCase
     {
         try
         {
-            new SetMojo( null, null, null, null, null, null )
+            new SetMojo( null, null, null, null, null, null, null )
             {
                 {
                     project = new MavenProject();

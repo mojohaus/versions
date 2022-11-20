@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.maven.artifact.manager.WagonManager;
@@ -40,6 +41,8 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
@@ -99,12 +102,14 @@ public class UseLatestVersionsMojo
 
     @Inject
     public UseLatestVersionsMojo( RepositorySystem repositorySystem,
-                                MavenProjectBuilder projectBuilder,
-                                ArtifactMetadataSource artifactMetadataSource,
-                                WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                                  MavenProjectBuilder projectBuilder,
+                                  ArtifactMetadataSource artifactMetadataSource,
+                                  WagonManager wagonManager,
+                                  ArtifactResolver artifactResolver,
+                                  Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     @Override
@@ -135,16 +140,18 @@ public class UseLatestVersionsMojo
                     PomHelper.getRawModel( getProject() ).getDependencyManagement();
                 if ( dependencyManagement != null )
                 {
-                    useLatestVersions( pom, dependencyManagement.getDependencies() );
+                    useLatestVersions( pom, dependencyManagement.getDependencies(),
+                                       ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
                 }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
             {
-                useLatestVersions( pom, getProject().getDependencies() );
+                useLatestVersions( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
             }
             if ( getProject().getParent() != null && isProcessingParent() )
             {
-                useLatestVersions( pom, singletonList( getParentDependency() ) );
+                useLatestVersions( pom, singletonList( getParentDependency() ),
+                                   ChangeRecord.ChangeKind.PARENT );
             }
         }
         catch ( ArtifactMetadataRetrievalException | IOException e )
@@ -153,14 +160,15 @@ public class UseLatestVersionsMojo
         }
     }
 
-    private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
+    private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
+                                    ChangeRecord.ChangeKind changeKind )
             throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
         Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
                 allowMinorUpdates, allowIncrementalUpdates, getLog() );
 
         useLatestVersions( pom, dependencies,
-                ( dep, versions ) ->
+                           ( dep, versions ) ->
                 {
                     try
                     {
@@ -173,6 +181,6 @@ public class UseLatestVersionsMojo
                                 dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
                     }
                     return empty();
-                }, "useLatestVersions" );
+                }, changeKind );
     }
 }

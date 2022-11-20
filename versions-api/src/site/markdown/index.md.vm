@@ -1,0 +1,108 @@
+title: Writing an extensions for Versions Plugin
+author: Slawomir Jaranowski
+date: 2022-11-20
+
+Writing an extensions for Versions Plugin
+========================================
+
+`Versions API` allow you write extension for `Versions Plugin`.
+
+Project template for extensions
+-------------------------------
+
+Your Maven project should look like:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>your.group</groupId>
+  <artifactId>your-extension</artifactId>
+  <version>ext.version</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.mojo.versions</groupId>
+      <artifactId>versions-api</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <!-- build index of JSR 330 components -->
+        <groupId>org.eclipse.sisu</groupId>
+        <artifactId>sisu-maven-plugin</artifactId>
+        <version>${sisu-maven-plugin-version}</version>
+        <executions>
+          <execution>
+            <id>generate-index</id>
+            <goals>
+              <goal>main-index</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
+```
+
+Note that the classloader is shared with the `versions-maven-plugin` [plugin classloader](https://maven.apache.org/guides/mini/guide-maven-classloading.html#plugin-classloaders)
+
+The artifacts `org.codehaus.mojo.versions:versions-api` and `javax.inject:javax.inject` are always loaded in the same version as used `versions-maven-plugin` use.
+
+Extension artifact should therefore only depend on them with `provided` scope.
+
+
+Using extensions with Version Maven Plugin
+------------------------------------------
+
+You need to add your extension as plugin dependency:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>your.group</groupId>
+  <artifactId>your-project</artifactId>
+
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>${project.version}</version>
+          <dependencies>
+            <dependency>
+              <!-- add your extension as plugin dependency -->
+              <groupId>your.group</groupId>
+              <artifactId>your-extension</artifactId>
+              <version>ext.version</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+```
+
+General information about [JSR 330](https://maven.apache.org/maven-jsr330.html) in Maven ecosystem.

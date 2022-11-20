@@ -23,6 +23,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -39,6 +40,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 /**
@@ -49,12 +52,14 @@ public abstract class UseLatestVersionsMojoBase
     extends AbstractVersionsDependencyUpdaterMojo
 {
     public UseLatestVersionsMojoBase( RepositorySystem repositorySystem,
-                                  MavenProjectBuilder projectBuilder,
-                                  ArtifactMetadataSource artifactMetadataSource,
-                                  WagonManager wagonManager,
-                                  ArtifactResolver artifactResolver )
+                                      MavenProjectBuilder projectBuilder,
+                                      ArtifactMetadataSource artifactMetadataSource,
+                                      WagonManager wagonManager,
+                                      ArtifactResolver artifactResolver,
+                                      Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**
@@ -65,7 +70,7 @@ public abstract class UseLatestVersionsMojoBase
      * @param dependencies collection of dependencies with the dependency versions before the change
      * @param newestVersionProducer function providing the newest version given a dependency and
      *                              an {@link ArtifactVersions} instance
-     * @param changeRecorderTitle title for the change recorder records
+     * @param changeKind title for the change recorder records
      * @param filters optional array of filters
      * @throws XMLStreamException thrown if the POM update doesn't succeed
      * @throws ArtifactMetadataRetrievalException thrown if an artifact cannot be retried
@@ -75,7 +80,7 @@ public abstract class UseLatestVersionsMojoBase
                                             Collection<Dependency> dependencies,
                                             BiFunction<Dependency, ArtifactVersions, Optional<ArtifactVersion>>
                                                     newestVersionProducer,
-                                            String changeRecorderTitle,
+                                            ChangeRecord.ChangeKind changeKind,
                                             Predicate<Dependency>... filters )
             throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
     {
@@ -114,7 +119,7 @@ public abstract class UseLatestVersionsMojoBase
             Optional<ArtifactVersion> newestVer = newestVersionProducer.apply( dep, versions );
             if ( newestVer.isPresent() )
             {
-                updateDependencyVersion( pom, dep, newestVer.get().toString(), changeRecorderTitle );
+                updateDependencyVersion( pom, dep, newestVer.get().toString(), changeKind );
             }
         }
     }

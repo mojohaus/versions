@@ -21,7 +21,7 @@ package org.codehaus.mojo.versions;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.codehaus.mojo.versions.change.VersionChange;
+import org.codehaus.mojo.versions.change.DefaultVersionChange;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -39,8 +39,8 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase
         Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml" ),
                 Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
         setUpMojo( "update-properties" ).execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem( new VersionChange( "default-group",
-                "default-artifact", "1.0.0", "2.0.0-M1" ) ) );
+        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
+            new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "2.0.0-M1" ) ) );
     }
 
     @Test
@@ -51,8 +51,8 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase
         UpdatePropertiesMojo mojo = setUpMojo( "update-properties" );
         mojo.allowMajorUpdates = false;
         mojo.execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem( new VersionChange( "default-group",
-                "default-artifact", "1.0.0", "1.1.0-alpha" ) ) );
+        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
+            new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "1.1.0-alpha" ) ) );
     }
 
     @Test
@@ -64,7 +64,7 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase
         mojo.allowMajorUpdates = false;
         mojo.allowMinorUpdates = false;
         mojo.execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem( new VersionChange( "default-group",
-                "default-artifact", "1.0.0", "1.0.1-rc1" ) ) );
+        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
+            new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "1.0.1-rc1" ) ) );
     }
 }

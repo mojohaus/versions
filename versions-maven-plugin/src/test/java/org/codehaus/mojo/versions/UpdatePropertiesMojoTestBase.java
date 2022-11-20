@@ -20,12 +20,14 @@ package org.codehaus.mojo.versions;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.junit.After;
 import org.junit.Before;
@@ -51,7 +53,6 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase
     {
         super.setUp();
         pomDir = createTempDir( "update-property" );
-        changeRecorder = new TestChangeRecorder();
         artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
         {{
             put( "default-artifact", new String[] {"1.0.0", "1.0.1-rc1", "1.1.0-alpha", "2.0.0-M1"} );
@@ -77,8 +78,12 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase
         T mojo = (T) mojoRule.lookupConfiguredMojo( pomDir.toFile(), goal );
         setVariableValueToObject( mojo, "localRepository", new StubArtifactRepository( pomDir.toString() ) );
         setVariableValueToObject( mojo, "artifactMetadataSource", artifactMetadataSource );
-        setVariableValueToObject( mojo, "changeRecorder", changeRecorder );
         setVariableValueToObject( mojo, "generateBackupPoms", false );
+        setVariableValueToObject( mojo, "changeRecorderFormat", "test" );
+        changeRecorder = (TestChangeRecorder)
+            ( (Map<String, ChangeRecorder>) getVariableValueFromObject( mojo, "changeRecorders" ) )
+                .get( "test" );
+
         return (T) mojo;
     }
 }

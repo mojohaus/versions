@@ -21,13 +21,15 @@ package org.codehaus.mojo.versions.change;
 
 import java.util.Objects;
 
+import org.codehaus.mojo.versions.api.change.VersionChange;
+
 /**
  * Represents a change of an artifact's version.
  *
  * @author Stephen Connolly
  * @since 15-Sep-2010 14:48:10
  */
-public final class VersionChange
+public final class DefaultVersionChange implements VersionChange
 {
     private final String groupId;
 
@@ -37,7 +39,7 @@ public final class VersionChange
 
     private final String newVersion;
 
-    public VersionChange( String groupId, String artifactId, String oldVersion, String newVersion )
+    public DefaultVersionChange( String groupId, String artifactId, String oldVersion, String newVersion )
     {
         this.groupId = groupId;
         this.artifactId = artifactId;
@@ -76,7 +78,7 @@ public final class VersionChange
             return false;
         }
 
-        VersionChange versionChange = (VersionChange) o;
+        DefaultVersionChange versionChange = (DefaultVersionChange) o;
 
         if ( !Objects.equals( artifactId, versionChange.artifactId ) )
         {
@@ -104,6 +106,6 @@ public final class VersionChange
 
     public String toString()
     {
-        return "VersionChange(" + groupId + ':' + artifactId + ":" + oldVersion + "-->" + newVersion + ')';
+        return "DefaultVersionChange(" + groupId + ':' + artifactId + ":" + oldVersion + "-->" + newVersion + ')';
     }
 }

@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.recording;
  * under the License.
  */
 
+import javax.inject.Named;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,16 +33,24 @@ import javax.xml.transform.stream.StreamResult;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Objects;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
  * A recorder of version updates.
  */
 
+@Named( "xml" )
 public class ChangeRecorderXML implements ChangeRecorder
 {
     /**
@@ -72,31 +82,40 @@ public class ChangeRecorderXML implements ChangeRecorder
     }
 
     @Override
-    public final void recordUpdate( final String kind, final String groupId, final String artifactId,
-                                    final String oldVersion, final String newVersion )
+    public final void recordChange( ChangeRecord changeRecord )
     {
-        Objects.requireNonNull( kind, "kind" );
-        Objects.requireNonNull( groupId, "groupId" );
-        Objects.requireNonNull( artifactId, "artifactId" );
-        Objects.requireNonNull( oldVersion, "oldVersion" );
-        Objects.requireNonNull( newVersion, "newVersion" );
-
         final Element update = this.document.createElementNS( CHANGES_NAMESPACE, "update" );
-        update.setAttribute( "kind", kind );
-        update.setAttribute( "groupId", groupId );
-        update.setAttribute( "artifactId", artifactId );
-        update.setAttribute( "oldVersion", oldVersion );
-        update.setAttribute( "newVersion", newVersion );
+        update.setAttribute( "kind", changeRecord.getKind().getLabel() );
+        update.setAttribute( "groupId", changeRecord.getVersionChange().getGroupId() );
+        update.setAttribute( "artifactId", changeRecord.getVersionChange().getArtifactId() );
+        update.setAttribute( "oldVersion", changeRecord.getVersionChange().getOldVersion() );
+        update.setAttribute( "newVersion", changeRecord.getVersionChange().getNewVersion() );
         this.root.appendChild( update );
     }
 
     @Override
-    public final void serialize( final OutputStream outputStream ) throws IOException
+    public final void writeReport( final Path outputPath ) throws IOException
     {
-        try
+        if ( outputPath == null )
         {
-            final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            final Source source = new DOMSource( this.document );
+            throw new IOException( "changeRecorderOutputFile not provided" );
+        }
+
+        if ( root.getChildNodes().getLength() == 0 )
+        {
+            // don't generate empty file
+            return;
+        }
+
+        Files.createDirectories( outputPath.getParent() );
+
+        try ( OutputStream outputStream = Files.newOutputStream( outputPath, CREATE, TRUNCATE_EXISTING, WRITE ) )
+        {
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setAttribute( XMLConstants.ACCESS_EXTERNAL_DTD, "" );
+            transformerFactory.setAttribute( XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "" );
+            Transformer transformer = transformerFactory.newTransformer();
+            Source source = new DOMSource( this.document );
             transformer.transform( source, new StreamResult( outputStream ) );
             outputStream.flush();
         }

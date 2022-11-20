@@ -96,10 +96,11 @@
   </contributors>
 
   <modules>
-    <module>versions-maven-plugin</module>
-    <module>model-ruleset</module>
     <module>model-report</module>
+    <module>model-ruleset</module>
+    <module>versions-api</module>
     <module>versions-common</module>
+    <module>versions-maven-plugin</module>
   </modules>
 
   <scm>
@@ -133,6 +134,7 @@
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
     <scmpublish.content>${project.build.directory}/staging</scmpublish.content><!-- mono-module doesn't require site:stage for scm-publish -->
     <project.build.outputTimestamp>2022-10-23T15:41:47Z</project.build.outputTimestamp>
+    <sisu-maven-plugin-version>0.9.0.M1</sisu-maven-plugin-version>
   </properties>
 
   <dependencyManagement>
@@ -198,6 +200,26 @@
   </dependencyManagement>
 
   <build>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.sisu</groupId>
+          <artifactId>sisu-maven-plugin</artifactId>
+          <version>${sisu-maven-plugin-version}</version>
+          <executions>
+            <execution>
+              <id>generate-index</id>
+              <goals>
+                <goal>main-index</goal>
+                <goal>test-index</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

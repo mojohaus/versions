@@ -39,6 +39,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.PropertiesVersionsFileReader;
 
@@ -92,12 +93,14 @@ public class SetPropertyMojo
 
     @Inject
     public SetPropertyMojo( RepositorySystem repositorySystem,
-                                MavenProjectBuilder projectBuilder,
-                                ArtifactMetadataSource artifactMetadataSource,
-                                WagonManager wagonManager,
-                                ArtifactResolver artifactResolver )
+                            MavenProjectBuilder projectBuilder,
+                            ArtifactMetadataSource artifactMetadataSource,
+                            WagonManager wagonManager,
+                            ArtifactResolver artifactResolver,
+                            Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
     }
 
     /**

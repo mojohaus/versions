@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.codehaus.mojo.versions.api.change.VersionChange;
+
 /**
  * Created by IntelliJ IDEA.
  *

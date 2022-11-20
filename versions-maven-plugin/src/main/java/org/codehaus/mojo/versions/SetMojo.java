@@ -54,7 +54,8 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.change.VersionChange;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.change.DefaultVersionChange;
 import org.codehaus.mojo.versions.change.VersionChanger;
 import org.codehaus.mojo.versions.change.VersionChangerFactory;
 import org.codehaus.mojo.versions.ordering.ReactorDepthComparator;
@@ -243,17 +244,19 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
     /**
      * The changes to module coordinates. Guarded by this.
      */
-    private final transient List<VersionChange> sourceChanges = new ArrayList<>();
+    private final transient List<DefaultVersionChange> sourceChanges = new ArrayList<>();
 
     @Inject
     public SetMojo( RepositorySystem repositorySystem,
-                       MavenProjectBuilder projectBuilder,
-                       ArtifactMetadataSource artifactMetadataSource,
-                       WagonManager wagonManager,
-                       ArtifactResolver artifactResolver,
-                       Prompter prompter )
+                    MavenProjectBuilder projectBuilder,
+                    ArtifactMetadataSource artifactMetadataSource,
+                    WagonManager wagonManager,
+                    ArtifactResolver artifactResolver,
+                    Map<String, ChangeRecorder> changeRecorders,
+                    Prompter prompter )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver );
+        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
+               changeRecorders );
         this.prompter = prompter;
     }
 
@@ -261,7 +264,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
     {
         if ( !newVersion.equals( oldVersion ) )
         {
-            sourceChanges.add( new VersionChange( groupId, artifactId, oldVersion, newVersion ) );
+            sourceChanges.add( new DefaultVersionChange( groupId, artifactId, oldVersion, newVersion ) );
         }
     }
 
@@ -583,7 +586,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
                 versionChangerFactory.newVersionChanger( processParent, processProject, processDependencies,
                                                          processPlugins );
 
-            for ( VersionChange versionChange : sourceChanges )
+            for ( DefaultVersionChange versionChange : sourceChanges )
             {
                 changer.apply( versionChange );
             }
