@@ -32,8 +32,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -47,6 +45,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
@@ -105,14 +104,14 @@ public class UseLatestReleasesMojo
 
     @Inject
     public UseLatestReleasesMojo( RepositorySystem repositorySystem,
+                                  org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                   MavenProjectBuilder projectBuilder,
-                                  ArtifactMetadataSource artifactMetadataSource,
                                   WagonManager wagonManager,
                                   ArtifactResolver artifactResolver,
                                   Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -123,7 +122,7 @@ public class UseLatestReleasesMojo
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
     {
         try
         {
@@ -147,7 +146,7 @@ public class UseLatestReleasesMojo
                                    ChangeRecord.ChangeKind.PARENT );
             }
         }
-        catch ( ArtifactMetadataRetrievalException | IOException e )
+        catch ( IOException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
@@ -155,7 +154,7 @@ public class UseLatestReleasesMojo
 
     private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
                                     ChangeRecord.ChangeKind changeKind )
-            throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException
     {
         Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
                 allowMinorUpdates, allowIncrementalUpdates, getLog() );

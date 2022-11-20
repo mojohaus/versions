@@ -11,6 +11,7 @@ import org.apache.maven.plugin.testing.ArtifactStubFactory;
 import org.apache.maven.plugin.testing.stubs.StubArtifactResolver;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
@@ -22,7 +23,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -63,9 +65,11 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase
     {
         changeRecorder = new TestChangeRecorder();
         mojo = new UseReleasesMojo( mockRepositorySystem(),
-                                    null, mockArtifactMetadataSource(),
-                                    null, new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
-                                    changeRecorder.asTestMap() );
+                mockAetherRepositorySystem(),
+                null,
+                null,
+                new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                changeRecorder.asTestMap() );
         setVariableValueToObject( mojo, "reactorProjects", emptyList() );
         mojo.project = new MavenProject()
         {{
@@ -76,11 +80,13 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase
                 setVersion( "1.0.0" );
             }} );
         }};
+        mojo.session = mockMavenSession();
     }
 
     @Test
     public void testProcessParent()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         setVariableValueToObject( mojo, "processParent", true );
         mojo.getProject().setParent( new MavenProject( new Model()
@@ -107,7 +113,8 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase
 
     @Test
     public void testReplaceSnapshotWithRelease()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException,
+            VersionRetrievalException
     {
         mojo.getProject().setDependencies( singletonList( DependencyBuilder.newBuilder()
                     .withGroupId( "default-group" )
@@ -131,9 +138,10 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase
 
     @Test
     public void testFailIfNotReplaced()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException,
+            VersionRetrievalException
     {
-        mojo.artifactMetadataSource = mockArtifactMetadataSource( singletonMap( "test-artifact",
+        mojo.aetherRepositorySystem = mockAetherRepositorySystem( singletonMap( "test-artifact",
                 new String[] {} ) );
         mojo.getProject().setDependencies( singletonList( DependencyBuilder.newBuilder()
                 .withGroupId( "default-group" )

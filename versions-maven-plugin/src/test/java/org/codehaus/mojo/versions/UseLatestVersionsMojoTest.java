@@ -7,15 +7,16 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
@@ -28,7 +29,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -54,10 +56,12 @@ public class UseLatestVersionsMojoTest
             Dependency dependency = invocation.getArgument( 0 );
             return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(),
                     dependency.getScope(), dependency.getType(),
-                    dependency.getClassifier() != null ? dependency.getClassifier() : "default", null );
+                    dependency.getClassifier() != null ? dependency.getClassifier() : "default",
+                    new DefaultArtifactHandlerStub( "default" ) );
         } );
 
-        ArtifactMetadataSource artifactMetadataSourceMock = mockArtifactMetadataSource( new HashMap<String, String[]>()
+        org.eclipse.aether.RepositorySystem aetherRepositorySystem = mockAetherRepositorySystem(
+                new HashMap<String, String[]>()
         {{
             put( "dependency-artifact", new String[] {"1.1.1-SNAPSHOT", "1.1.0", "1.1.0-SNAPSHOT", "1.0.0",
                     "1.0.0-SNAPSHOT", "0.9.0"} );
@@ -69,11 +73,11 @@ public class UseLatestVersionsMojoTest
         changeRecorder = new TestChangeRecorder();
 
         mojo = new UseLatestVersionsMojo( repositorySystemMock,
-                                          null,
-                                          artifactMetadataSourceMock,
-                                          null,
-                                          null,
-                                          changeRecorder.asTestMap() )
+                aetherRepositorySystem,
+                null,
+                null,
+                null,
+                changeRecorder.asTestMap() )
         {{
             reactorProjects = emptyList();
             MavenProject project = new MavenProject()
@@ -95,13 +99,16 @@ public class UseLatestVersionsMojoTest
                 }} );
             }};
             setProject( project );
+
+            session = mockMavenSession();
         }};
         setVariableValueToObject( mojo, "processDependencyManagement", false );
     }
 
     @Test
     public void testDependenciesDowngradeIncremental()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         setVariableValueToObject( mojo, "processDependencies", true );
         setVariableValueToObject( mojo, "allowSnapshots", false );
@@ -122,7 +129,8 @@ public class UseLatestVersionsMojoTest
 
     @Test
     public void testDependenciesDowngradeMinor()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         setVariableValueToObject( mojo, "processDependencies", true );
         setVariableValueToObject( mojo, "allowSnapshots", false );
@@ -148,7 +156,8 @@ public class UseLatestVersionsMojoTest
 
     @Test
     public void testDependenciesDowngradeMajor()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         setVariableValueToObject( mojo, "processDependencies", true );
         setVariableValueToObject( mojo, "allowSnapshots", false );
@@ -170,7 +179,8 @@ public class UseLatestVersionsMojoTest
 
     @Test
     public void testDependencyManagementDowngrade()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         setVariableValueToObject( mojo, "processDependencyManagement", true );
         setVariableValueToObject( mojo, "allowSnapshots", false );
@@ -193,7 +203,8 @@ public class UseLatestVersionsMojoTest
 
     @Test
     public void testParentDowngrade()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         setVariableValueToObject( mojo, "processParent", true );
         setVariableValueToObject( mojo, "allowSnapshots", false );
@@ -225,7 +236,8 @@ public class UseLatestVersionsMojoTest
 
     @Test
     public void testPoisonDependencyVersion()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         mojo.getProject().getModel().setDependencies( Arrays.asList(
                 DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
@@ -255,7 +267,8 @@ public class UseLatestVersionsMojoTest
 
     @Test
     public void testIgnoredVersions()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         setVariableValueToObject( mojo, "processDependencies", true );
         setVariableValueToObject( mojo, "ignoredVersions", singleton( "1.1.0" ) );
@@ -271,7 +284,8 @@ public class UseLatestVersionsMojoTest
 
     @Test
     public void testIncludeFilter()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         mojo.getProject().getModel().setDependencies( Arrays.asList(
                 DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "0.9.0",
@@ -296,7 +310,8 @@ public class UseLatestVersionsMojoTest
 
     @Test
     public void testExcludeFilter()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+            VersionRetrievalException
     {
         mojo.getProject().getModel().setDependencies( Arrays.asList(
                 DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "0.9.0",

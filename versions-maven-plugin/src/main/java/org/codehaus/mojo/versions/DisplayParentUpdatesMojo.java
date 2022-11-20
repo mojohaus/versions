@@ -20,14 +20,11 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
-import javax.xml.stream.XMLStreamException;
 
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -37,6 +34,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
@@ -56,14 +54,14 @@ public class DisplayParentUpdatesMojo
 
     @Inject
     public DisplayParentUpdatesMojo( RepositorySystem repositorySystem,
+                                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                      MavenProjectBuilder projectBuilder,
-                                     ArtifactMetadataSource artifactMetadataSource,
                                      WagonManager wagonManager,
                                      ArtifactResolver artifactResolver,
                                      Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     @Override
@@ -108,7 +106,7 @@ public class DisplayParentUpdatesMojo
         {
             artifactVersion = findLatestVersion( artifact, versionRange, null, false );
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( VersionRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
@@ -156,7 +154,6 @@ public class DisplayParentUpdatesMojo
 
     @Override
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException, ArtifactMetadataRetrievalException
     {
     }
 }

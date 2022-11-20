@@ -7,8 +7,6 @@ import java.util.HashMap;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -17,9 +15,11 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
@@ -31,7 +31,8 @@ import org.mockito.MockedStatic;
 import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -53,13 +54,13 @@ public class UpdateParentMojoTest
 
     private static RepositorySystem repositorySystem;
 
-    private static ArtifactMetadataSource artifactMetadataSource;
+    private static org.eclipse.aether.RepositorySystem aetherRepositorySystem;
 
     @BeforeClass
     public static void setUpStatic()
     {
         repositorySystem = mockRepositorySystem();
-        artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
+        aetherRepositorySystem = mockAetherRepositorySystem( new HashMap<String, String[]>()
         {{
             put( "parent-artifact", new String[] { "0.9.0", "1.0.0", "1.0.1-SNAPSHOT" } );
             put( "issue-670-artifact", new String[] { "0.0.1-1", "0.0.1-1-impl-SNAPSHOT" } );
@@ -75,15 +76,12 @@ public class UpdateParentMojoTest
         changeRecorder = new TestChangeRecorder();
         artifactResolver = mock( ArtifactResolver.class );
 
-        mojo = new UpdateParentMojo( repositorySystem,
-                                     null,
-                                     artifactMetadataSource,
-                                     null,
-                                     artifactResolver,
-                                     changeRecorder.asTestMap() )
+        mojo = new UpdateParentMojo( repositorySystem, aetherRepositorySystem, null, null,
+                artifactResolver, changeRecorder.asTestMap() )
         {{
             setProject( createProject() );
             reactorProjects = Collections.emptyList();
+            session = mockMavenSession();
         }};
     }
 
@@ -115,7 +113,8 @@ public class UpdateParentMojoTest
             Dependency dependency = invocation.getArgument( 0 );
             return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(),
                     dependency.getScope(), dependency.getType(), dependency.getClassifier() != null
-                    ? dependency.getClassifier() : "default", null );
+                    ? dependency.getClassifier() : "default",
+                    new DefaultArtifactHandlerStub( "default" ) );
         } );
         return repositorySystem;
     }
@@ -123,8 +122,9 @@ public class UpdateParentMojoTest
     @Test
     @SuppressWarnings( "deprecation" )
     public void testArtifactIdDoesNotExist()
-            throws ArtifactMetadataRetrievalException, MojoExecutionException,
-            XMLStreamException, MojoFailureException, InvalidVersionSpecificationException
+            throws VersionRetrievalException, MojoExecutionException,
+            XMLStreamException, MojoFailureException, InvalidVersionSpecificationException,
+            VersionRetrievalException
     {
         mojo.getProject().setParent( new MavenProject()
         {{
@@ -135,7 +135,7 @@ public class UpdateParentMojoTest
 
         Artifact artifact =
                 new DefaultArtifact( "default-group", "unknown-artifact", "1.0.1-SNAPSHOT", SCOPE_COMPILE, "pom",
-                        "default", null );
+                        "default", new DefaultArtifactHandlerStub( "default" ) );
         assertThat(
                 mojo.findLatestVersion( artifact, VersionRange.createFromVersionSpec( "1.0.1-SNAPSHOT" ), null, false ),
                 is( nullValue() ) );
@@ -149,7 +149,8 @@ public class UpdateParentMojoTest
 
     @Test
     public void testParentDowngradeAllowed()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException,
+            VersionRetrievalException
     {
         mojo.allowDowngrade = true;
         try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
@@ -165,7 +166,8 @@ public class UpdateParentMojoTest
 
     @Test
     public void testParentDowngradeForbidden()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException,
+            VersionRetrievalException
     {
         mojo.allowDowngrade = false;
         try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
@@ -179,7 +181,7 @@ public class UpdateParentMojoTest
 
     @Test
     public void testParentDowngradeAllowedWithRange()
-            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            throws MojoExecutionException, VersionRetrievalException,
             InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.allowDowngrade = true;
@@ -196,7 +198,7 @@ public class UpdateParentMojoTest
 
     @Test
     public void testParentDowngradeForbiddenWithRange()
-            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            throws MojoExecutionException, VersionRetrievalException,
             InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.allowDowngrade = false;
@@ -206,7 +208,7 @@ public class UpdateParentMojoTest
 
     @Test
     public void testAllowSnapshots()
-            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            throws MojoExecutionException, VersionRetrievalException,
             InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.allowSnapshots = true;
@@ -223,7 +225,8 @@ public class UpdateParentMojoTest
 
     @Test
     public void testAllowSnapshotsWithParentVersion()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException
+            throws MojoExecutionException, XMLStreamException, MojoFailureException,
+            VersionRetrievalException
     {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "0.0.1-1-impl-SNAPSHOT";
@@ -248,7 +251,7 @@ public class UpdateParentMojoTest
     @Test
     public void testIgnoredVersions()
             throws MojoExecutionException, IllegalAccessException,
-            ArtifactMetadataRetrievalException, InvalidVersionSpecificationException, InvalidSegmentException
+            VersionRetrievalException, InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.getProject().setParent( new MavenProject()
         {{
@@ -260,24 +263,24 @@ public class UpdateParentMojoTest
     }
 
     @Test
-    public void testSkipResolutionDowngradeUnknownVersion()
+    public void testSkipResolutionDowngradeUnknownVersion() throws VersionRetrievalException
     {
         testSkipResolution( "0.8.0" );
     }
 
     @Test
-    public void testSkipResolutionDowngrade()
+    public void testSkipResolutionDowngrade() throws VersionRetrievalException
     {
         testSkipResolution( "0.9.0" );
     }
 
     @Test
-    public void testSkipResolutionUpgradeUnknownVersion()
+    public void testSkipResolutionUpgradeUnknownVersion() throws VersionRetrievalException
     {
         testSkipResolution( "2.0.0" );
     }
 
-    private void testSkipResolution( String version )
+    private void testSkipResolution( String version ) throws VersionRetrievalException
     {
         mojo.parentVersion = version;
         mojo.skipResolution = true;
@@ -304,7 +307,8 @@ public class UpdateParentMojoTest
     }
 
     @Test
-    public void testShouldUpgradeToSnapshot() throws MojoExecutionException, XMLStreamException, MojoFailureException
+    public void testShouldUpgradeToSnapshot() throws MojoExecutionException, XMLStreamException, MojoFailureException,
+            VersionRetrievalException
     {
         mojo.getProject().setParent( new MavenProject()
         {{
@@ -326,7 +330,7 @@ public class UpdateParentMojoTest
 
     @Test
     public void testAllowMinorUpdates()
-            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            throws MojoExecutionException, VersionRetrievalException,
             InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.getProject().setParent( new MavenProject()
@@ -347,7 +351,7 @@ public class UpdateParentMojoTest
 
     @Test
     public void testAllowIncrementalUpdates()
-            throws MojoExecutionException, ArtifactMetadataRetrievalException,
+            throws MojoExecutionException, VersionRetrievalException,
             InvalidVersionSpecificationException, InvalidSegmentException
     {
         mojo.getProject().setParent( new MavenProject()
@@ -366,7 +370,8 @@ public class UpdateParentMojoTest
     }
 
     @Test
-    public void testParentVersionRange() throws MojoExecutionException, XMLStreamException, MojoFailureException
+    public void testParentVersionRange() throws MojoExecutionException, XMLStreamException, MojoFailureException,
+            VersionRetrievalException
     {
         mojo.getProject().setParent( new MavenProject()
         {{
@@ -387,7 +392,8 @@ public class UpdateParentMojoTest
     }
 
     @Test
-    public void testParentVersionRange2() throws MojoExecutionException, XMLStreamException, MojoFailureException
+    public void testParentVersionRange2() throws MojoExecutionException, XMLStreamException, MojoFailureException,
+            VersionRetrievalException
     {
         mojo.getProject().setParent( new MavenProject()
         {{

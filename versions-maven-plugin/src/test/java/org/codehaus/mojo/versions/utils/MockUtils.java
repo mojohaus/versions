@@ -26,16 +26,21 @@ import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.doxia.tools.SiteTool;
 import org.apache.maven.doxia.tools.SiteToolException;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.i18n.I18N;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResolutionException;
+import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.version.Version;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -54,42 +59,44 @@ public class MockUtils
     }};
 
     /**
-     * Creates a mocked  {@linkplain ArtifactMetadataSource}, providing the default version set
-     * @return mocked {@linkplain ArtifactMetadataSource}
+     * Creates a mocked  {@linkplain org.eclipse.aether.RepositorySystem}, providing the default version set
+     * @return mocked {@linkplain org.eclipse.aether.RepositorySystem}
      */
-    public static ArtifactMetadataSource mockArtifactMetadataSource()
+    public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem()
     {
-        return mockArtifactMetadataSource( DEFAULT_VERSION_MAP );
+        return mockAetherRepositorySystem( DEFAULT_VERSION_MAP );
     }
 
     /**
-     * Creates a mocked  {@linkplain ArtifactMetadataSource}, providing the version map given in the argument
+     * Creates a mocked  {@linkplain org.eclipse.aether.RepositorySystem}, providing the version map given in
+     * the argument.
      * @param versionMap requested version map
-     * @return mocked {@linkplain ArtifactMetadataSource}
+     * @return mocked {@linkplain org.eclipse.aether.RepositorySystem}
      */
-    public static ArtifactMetadataSource mockArtifactMetadataSource( Map<String, String[]> versionMap )
+    public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem( Map<String, String[]> versionMap )
     {
-        ArtifactMetadataSource artifactMetadataSource = mock( ArtifactMetadataSource.class );
+        org.eclipse.aether.RepositorySystem repositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
         try
         {
-            when( artifactMetadataSource.retrieveAvailableVersions( any( Artifact.class ), any(), any() ) ).then(
+            when( repositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) ).then(
                     invocation ->
                     {
-                        Artifact artifact = invocation.getArgument( 0 );
+                        VersionRangeRequest request = invocation.getArgument( 1 );
                         return versionMap.entrySet().stream()
-                                .filter( e -> e.getKey().equals( artifact.getArtifactId() ) )
+                                .filter( e -> e.getKey().equals( request.getArtifact().getArtifactId() ) )
                                 .findAny()
                                 .map( e -> Arrays.stream( e.getValue() )
-                                        .map( DefaultArtifactVersion::new )
-                                        .collect( ArrayList::new, ArrayList::add, ArrayList::add ) )
+                                        .map( VersionStub::new )
+                                        .collect( () -> new ArrayList<Version>(), ArrayList::add, ArrayList::addAll ) )
+                                .map( versions -> new VersionRangeResult( request ).setVersions( versions ) )
                                 .orElse( null ); // should tell us if we haven't populated all cases in the test
                     } );
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( VersionRangeResolutionException e )
         {
             throw new RuntimeException( e );
         }
-        return artifactMetadataSource;
+        return repositorySystem;
     }
 
     public static I18N mockI18N()
@@ -128,5 +135,23 @@ public class MockUtils
                                             dependency.getClassifier(), new DefaultArtifactHandlerStub( "default" ) );
             } );
         return repositorySystem;
+    }
+
+    /**
+     * Creates a very simple mock of {@link MavenSession}
+     * by providing only a non-{@code null} implementation of its {@link MavenSession#getRepositorySession()} method.
+     * @return mocked {@link MavenSession}
+     */
+    public static MavenSession mockMavenSession()
+    {
+        MavenSession session = mock( MavenSession.class );
+        when( session.getRepositorySession() )
+                .thenReturn( mock( RepositorySystemSession.class ) );
+        when( session.getCurrentProject() ).thenReturn( mock( MavenProject.class ) );
+        when( session.getCurrentProject().getRemotePluginRepositories() ).thenReturn( emptyList() );
+        when( session.getCurrentProject().getPluginArtifactRepositories() ).thenReturn( emptyList() );
+        when( session.getCurrentProject().getRemoteArtifactRepositories() ).thenReturn( emptyList() );
+        when( session.getCurrentProject().getRemoteProjectRepositories() ).thenReturn( emptyList() );
+        return session;
     }
 }

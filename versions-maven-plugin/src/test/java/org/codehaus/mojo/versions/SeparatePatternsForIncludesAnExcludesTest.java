@@ -1,11 +1,7 @@
 package org.codehaus.mojo.versions;
 
-import javax.xml.stream.XMLStreamException;
-
 import java.util.List;
 
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,8 +19,8 @@ public class SeparatePatternsForIncludesAnExcludesTest
     {
         mojo = new AbstractVersionsDependencyUpdaterMojo( null, null, null, null, null, null )
         {
+            @Override
             protected void update( ModifiedPomXMLEventReader pom )
-                throws MojoExecutionException, MojoFailureException, XMLStreamException
             {
             }
         };

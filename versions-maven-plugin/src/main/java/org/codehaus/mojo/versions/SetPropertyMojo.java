@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -93,14 +92,14 @@ public class SetPropertyMojo
 
     @Inject
     public SetPropertyMojo( RepositorySystem repositorySystem,
-                            MavenProjectBuilder projectBuilder,
-                            ArtifactMetadataSource artifactMetadataSource,
-                            WagonManager wagonManager,
-                            ArtifactResolver artifactResolver,
+                                org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+                                MavenProjectBuilder projectBuilder,
+                                WagonManager wagonManager,
+                                ArtifactResolver artifactResolver,
                             Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -111,7 +110,7 @@ public class SetPropertyMojo
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         Property[] propertiesConfig;
         String properties;

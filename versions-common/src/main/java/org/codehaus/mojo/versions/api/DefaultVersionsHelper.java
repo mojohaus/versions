@@ -47,11 +47,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -90,6 +89,8 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResolutionException;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -116,34 +117,15 @@ public class DefaultVersionsHelper
     private RuleSet ruleSet;
 
     /**
-     * The artifact metadata source to use.
-     *
-     * @since 1.0-alpha-3
-     */
-    private ArtifactMetadataSource artifactMetadataSource;
-
-    /**
      * The local repository to consult.
      *
      * @since 1.0-alpha-3
      */
     private ArtifactRepository localRepository;
 
-    /**
-     * The remote artifact repositories to consult.
-     *
-     * @since 1.0-alpha-3
-     */
-    private List<ArtifactRepository> remoteArtifactRepositories;
-
-    /**
-     * The remote plugin repositories to consult.
-     *
-     * @since 1.0-alpha-3
-     */
-    private List<ArtifactRepository> remotePluginRepositories;
-
     private RepositorySystem repositorySystem;
+
+    private org.eclipse.aether.RepositorySystem aetherRepositorySystem;
 
     /**
      * The {@link Log} to send log messages to.
@@ -388,61 +370,65 @@ public class DefaultVersionsHelper
 
     @Override
     public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException
+            throws VersionRetrievalException
     {
-        List<ArtifactRepository> remoteRepositories = usePluginRepositories
-                ? remotePluginRepositories : remoteArtifactRepositories;
-        final List<ArtifactVersion> versions =
-            artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
-        final List<IgnoreVersion> ignoredVersions = getIgnoredVersions( artifact );
-        if ( !ignoredVersions.isEmpty() )
+        try
         {
-            if ( getLog().isDebugEnabled() )
+            Collection<IgnoreVersion> ignoredVersions = getIgnoredVersions( artifact );
+            if ( !ignoredVersions.isEmpty() && getLog().isDebugEnabled() )
             {
-                getLog().debug( "Found ignored versions: " + showIgnoredVersions( ignoredVersions ) );
+                getLog().debug( "Found ignored versions: " + ignoredVersions.stream()
+                        .map( IgnoreVersion::toString ).collect( Collectors.joining( ", " ) ) );
             }
+            return new ArtifactVersions( artifact,
+                    aetherRepositorySystem.resolveVersionRange( mavenSession.getRepositorySession(),
+                                    new VersionRangeRequest(
+                                    RepositoryUtils.toArtifact( artifact ).setVersion( "(,)" ),
+                                    usePluginRepositories
+                                            ? mavenSession.getCurrentProject().getRemotePluginRepositories()
+                                            : mavenSession.getCurrentProject().getRemoteProjectRepositories(),
+                                    "lookupArtifactVersions" ) )
+                            .getVersions()
+                            .parallelStream()
+                            .filter( v -> ignoredVersions.stream()
+                                    .noneMatch( i ->
+                                    {
+                                        if ( TYPE_REGEX.equals( i.getType() )
+                                                && Pattern.compile( i.getVersion() ).matcher( v.toString() ).matches() )
+                                        {
+                                            if ( getLog().isDebugEnabled() )
+                                            {
+                                                getLog().debug( "Version " + v + " for artifact "
+                                                        + ArtifactUtils.versionlessKey( artifact )
+                                                        + " found on ignore list: "
+                                                        + i );
+                                            }
+                                            return true;
+                                        }
 
-            final Iterator<ArtifactVersion> i = versions.iterator();
-            while ( i.hasNext() )
-            {
-                final String version = i.next().toString();
-                for ( final IgnoreVersion ignoreVersion : ignoredVersions )
-                {
-                    if ( TYPE_REGEX.equals( ignoreVersion.getType() ) )
-                    {
-                        Pattern p = Pattern.compile( ignoreVersion.getVersion() );
-                        if ( p.matcher( version ).matches() )
-                        {
-                            if ( getLog().isDebugEnabled() )
-                            {
-                                getLog().debug( "Version " + version + " for artifact "
-                                                    + ArtifactUtils.versionlessKey( artifact )
-                                                    + " found on ignore list: "
-                                                    + ignoreVersion );
-                            }
-                            i.remove();
-                            break;
-                        }
-                    }
-                    else if ( TYPE_EXACT.equals( ignoreVersion.getType() ) )
-                    {
-                        if ( version.equals( ignoreVersion.getVersion() ) )
-                        {
-                            if ( getLog().isDebugEnabled() )
-                            {
-                                getLog().debug( "Version " + version + " for artifact "
-                                                    + ArtifactUtils.versionlessKey( artifact )
-                                                    + " found on ignore list: "
-                                                    + ignoreVersion );
-                            }
-                            i.remove();
-                            break;
-                        }
-                    }
-                }
-            }
+                                        if ( TYPE_EXACT.equals( i.getType() )
+                                                && i.getVersion().equals( v.toString() ) )
+                                        {
+                                            if ( getLog().isDebugEnabled() )
+                                            {
+                                                getLog().debug( "Version " + v + " for artifact "
+                                                        + ArtifactUtils.versionlessKey( artifact )
+                                                        + " found on ignore list: "
+                                                        + i );
+                                            }
+                                            return true;
+                                        }
+
+                                        return false;
+                                    } ) )
+                            .map( v -> new DefaultArtifactVersion( v.toString() ) )
+                            .collect( Collectors.toList() ),
+                    getVersionComparator( artifact ) );
         }
-        return new ArtifactVersions( artifact, versions, getVersionComparator( artifact ) );
+        catch ( VersionRangeResolutionException e )
+        {
+            throw new VersionRetrievalException( e.getMessage(), e );
+        }
     }
 
     /**
@@ -491,35 +477,15 @@ public class DefaultVersionsHelper
         return ret;
     }
 
-    /**
-     * Pretty print a list of ignored versions.
-     *
-     * @param ignoredVersions A list of ignored versions
-     * @return A String representation of the list
-     */
-    private String showIgnoredVersions( List<IgnoreVersion> ignoredVersions )
-    {
-        StringBuilder buf = new StringBuilder();
-        Iterator<IgnoreVersion> iterator = ignoredVersions.iterator();
-        while ( iterator.hasNext() )
-        {
-            IgnoreVersion ignoreVersion = iterator.next();
-            buf.append( ignoreVersion );
-            if ( iterator.hasNext() )
-            {
-                buf.append( ", " );
-            }
-        }
-        return buf.toString();
-    }
-
     @Override
     public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
         throws ArtifactResolutionException, ArtifactNotFoundException
     {
-        List<ArtifactRepository> remoteRepositories =
-            usePluginRepositories ? remotePluginRepositories : remoteArtifactRepositories;
-        artifactResolver.resolve( artifact, remoteRepositories, localRepository );
+        artifactResolver.resolve( artifact,
+                usePluginRepositories
+                        ? mavenSession.getCurrentProject().getPluginArtifactRepositories()
+                        : mavenSession.getCurrentProject().getRemoteArtifactRepositories(),
+                localRepository );
     }
 
     @Override
@@ -674,12 +640,11 @@ public class DefaultVersionsHelper
      * @param dependencies The set of {@link Dependency} instances to look up.
      * @param usePluginRepositories Search the plugin repositories.
      * @return map containing the ArtifactVersions object per dependency
-     * @throws ArtifactMetadataRetrievalException if the lookup does not succeed
      */
     @Override
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                         boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException
+            throws VersionRetrievalException
     {
         ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
         try
@@ -699,8 +664,8 @@ public class DefaultVersionsHelper
         }
         catch ( ExecutionException | InterruptedException ie )
         {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for dependencies " + dependencies
-                    + ": " + ie.getMessage(), ie, null );
+            throw new VersionRetrievalException( "Unable to acquire metadata for dependencies "
+                    + dependencies + ": " + ie.getMessage(), ie );
         }
         finally
         {
@@ -710,7 +675,7 @@ public class DefaultVersionsHelper
 
     @Override
     public ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException
+            throws VersionRetrievalException
     {
         ArtifactVersions allVersions = lookupArtifactVersions( createDependencyArtifact( dependency ),
                 usePluginRepositories );
@@ -720,7 +685,7 @@ public class DefaultVersionsHelper
 
     @Override
     public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException
+            throws VersionRetrievalException
     {
         ExecutorService executor = Executors.newFixedThreadPool( LOOKUP_PARALLEL_THREADS );
         try
@@ -740,8 +705,8 @@ public class DefaultVersionsHelper
         }
         catch ( ExecutionException | InterruptedException ie )
         {
-            throw new ArtifactMetadataRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
-                    + ie.getMessage(), ie, null );
+            throw new VersionRetrievalException( "Unable to acquire metadata for plugins " + plugins + ": "
+                    + ie.getMessage(), ie );
         }
         finally
         {
@@ -751,7 +716,7 @@ public class DefaultVersionsHelper
 
     @Override
     public PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException
+            throws VersionRetrievalException
     {
         String version = plugin.getVersion() != null
                 ? plugin.getVersion()
@@ -885,7 +850,7 @@ public class DefaultVersionsHelper
                         .getProperty( property.getName() ) );
                 propertyVersions.put( property, versions );
             }
-            catch ( ArtifactMetadataRetrievalException e )
+            catch ( VersionRetrievalException e )
             {
                 throw new MojoExecutionException( e.getMessage(), e );
             }
@@ -918,9 +883,6 @@ public class DefaultVersionsHelper
     {
         private RepositorySystem repositorySystem;
         private ArtifactResolver artifactResolver;
-        private ArtifactMetadataSource artifactMetadataSource;
-        private List<ArtifactRepository> remoteArtifactRepositories;
-        private List<ArtifactRepository> remotePluginRepositories;
         private ArtifactRepository localRepository;
         private Collection<String> ignoredVersions;
         private RuleSet ruleSet;
@@ -931,6 +893,7 @@ public class DefaultVersionsHelper
         private Log log;
         private MavenSession mavenSession;
         private MojoExecution mojoExecution;
+        private org.eclipse.aether.RepositorySystem aetherRepositorySystem;
 
         public Builder()
         {
@@ -945,26 +908,6 @@ public class DefaultVersionsHelper
         public Builder withArtifactResolver( ArtifactResolver artifactResolver )
         {
             this.artifactResolver = artifactResolver;
-            return this;
-        }
-
-        public Builder withArtifactMetadataSource( ArtifactMetadataSource artifactMetadataSource )
-        {
-            this.artifactMetadataSource = artifactMetadataSource;
-            return this;
-        }
-
-        public Builder withRemoteArtifactRepositories(
-                List<ArtifactRepository> remoteArtifactRepositories )
-        {
-            this.remoteArtifactRepositories = remoteArtifactRepositories;
-            return this;
-        }
-
-        public Builder withRemotePluginRepositories(
-                List<ArtifactRepository> remotePluginRepositories )
-        {
-            this.remotePluginRepositories = remotePluginRepositories;
             return this;
         }
 
@@ -1028,6 +971,12 @@ public class DefaultVersionsHelper
             return this;
         }
 
+        public Builder withAetherRepositorySystem( org.eclipse.aether.RepositorySystem aetherRepositorySystem )
+        {
+            this.aetherRepositorySystem = aetherRepositorySystem;
+            return this;
+        }
+
         /**
          * Builds the constructed {@linkplain DefaultVersionsHelper} object
          * @return constructed {@linkplain DefaultVersionsHelper}
@@ -1061,10 +1010,8 @@ public class DefaultVersionsHelper
             {
                 instance.ruleSet = enrichRuleSet( ignoredVersions, instance.ruleSet );
             }
-            instance.artifactMetadataSource = artifactMetadataSource;
+            instance.aetherRepositorySystem = aetherRepositorySystem;
             instance.localRepository = localRepository;
-            instance.remoteArtifactRepositories = remoteArtifactRepositories;
-            instance.remotePluginRepositories = remotePluginRepositories;
             instance.log = log;
             return instance;
         }

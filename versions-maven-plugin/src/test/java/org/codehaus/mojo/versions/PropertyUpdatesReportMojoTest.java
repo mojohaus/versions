@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.OutputStream;
 import java.util.Locale;
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.doxia.tools.SiteTool;
@@ -33,7 +32,7 @@ import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockSiteTool;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,7 +45,7 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase
 {
     @Rule
     public MojoRule mojoRule = new MojoRule( this );
-    private static final ArtifactMetadataSource ARTIFACT_METADATA_SOURCE = mockArtifactMetadataSource();
+    private static final org.eclipse.aether.RepositorySystem AETHER_REPOSITORY_SYSTEM = mockAetherRepositorySystem();
     private static final SiteTool SITE_TOOL = mockSiteTool();
     private static final StubArtifactRepository LOCAL_REPOSITORY = new StubArtifactRepository( "" );
 
@@ -62,7 +61,7 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase
                         "property-updates-report" );
         setVariableValueToObject( mojo, "localRepository", LOCAL_REPOSITORY );
         setVariableValueToObject( mojo, "siteTool", SITE_TOOL );
-        setVariableValueToObject( mojo, "artifactMetadataSource", ARTIFACT_METADATA_SOURCE );
+        setVariableValueToObject( mojo, "aetherRepositorySystem", AETHER_REPOSITORY_SYSTEM );
         setVariableValueToObject( mojo, "includeParent", true );
         mojo.generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 
@@ -85,7 +84,7 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase
                         "property-updates-report" );
         setVariableValueToObject( mojo, "localRepository", new StubArtifactRepository( "" ) );
         setVariableValueToObject( mojo, "siteTool", SITE_TOOL );
-        setVariableValueToObject( mojo, "artifactMetadataSource", ARTIFACT_METADATA_SOURCE );
+        setVariableValueToObject( mojo, "aetherRepositorySystem", AETHER_REPOSITORY_SYSTEM );
         setVariableValueToObject( mojo, "includeParent", false );
         mojo.generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
 

@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
-import javax.xml.stream.XMLStreamException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +32,6 @@ import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Build;
@@ -50,6 +47,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
@@ -349,14 +347,14 @@ public class DisplayDependencyUpdatesMojo
 
     @Inject
     public DisplayDependencyUpdatesMojo( RepositorySystem repositorySystem,
+                                         org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                          MavenProjectBuilder projectBuilder,
-                                         ArtifactMetadataSource artifactMetadataSource,
                                          WagonManager wagonManager,
                                          ArtifactResolver artifactResolver,
                                          Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     private static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( Build build )
@@ -595,7 +593,7 @@ public class DisplayDependencyUpdatesMojo
                 logUpdates( getHelper().lookupDependenciesUpdates( pluginDependencies, false ), "Plugin Dependencies" );
             }
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( VersionRetrievalException e )
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
@@ -791,15 +789,11 @@ public class DisplayDependencyUpdatesMojo
 
     /**
      * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
     @Override
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         // do nothing
     }

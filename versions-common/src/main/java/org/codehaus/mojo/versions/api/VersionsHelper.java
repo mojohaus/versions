@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -150,11 +149,11 @@ public interface VersionsHelper
      * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
      *            consult the repositories for normal dependencies.
      * @return The details of the available artifact versions.
-     * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-alpha-3
      */
     ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException;
+            throws VersionRetrievalException;
 
     /**
      * Looks up the updates for a set of dependencies.
@@ -162,12 +161,12 @@ public interface VersionsHelper
      * @param dependencies The set of {@link Dependency} instances to look up.
      * @param usePluginRepositories Search the plugin repositories.
      * @return A map, keyed by dependency, with values of type {@link org.codehaus.mojo.versions.api.ArtifactVersions}.
-     * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
     Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
                                                                  boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException;
+            throws VersionRetrievalException;
 
     /**
      * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency.
@@ -175,11 +174,11 @@ public interface VersionsHelper
      * @param dependency The dependency.
      * @param usePluginRepositories Search the plugin repositories.
      * @return The details of updates to the dependency.
-     * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
     ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
-        throws ArtifactMetadataRetrievalException;
+            throws VersionRetrievalException;
 
     /**
      * Looks up the updates for a set of plugins.
@@ -187,11 +186,11 @@ public interface VersionsHelper
      * @param plugins The set of {@link Plugin} instances to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.api.PluginUpdatesDetails}.
-     * @throws ArtifactMetadataRetrievalException When things go wrong.
+     * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
     Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException;
+            throws VersionRetrievalException;
 
     /**
      * Looks up the updates for a plugin.
@@ -199,11 +198,9 @@ public interface VersionsHelper
      * @param plugin The {@link Plugin} instance to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return The plugin update details.
-     * @throws ArtifactMetadataRetrievalException When things go wrong.
      * @since 1.0-beta-1
      */
-    PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots )
-        throws ArtifactMetadataRetrievalException;
+    PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots ) throws VersionRetrievalException;
 
     /**
      * Returns an {@link ExpressionEvaluator} for the specified project.

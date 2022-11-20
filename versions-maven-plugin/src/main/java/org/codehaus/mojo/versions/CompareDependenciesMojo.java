@@ -33,7 +33,6 @@ import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -128,15 +127,15 @@ public class CompareDependenciesMojo
 
     @Inject
     public CompareDependenciesMojo( RepositorySystem repositorySystem,
+                                    org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                     MavenProjectBuilder projectBuilder,
-                                    ArtifactMetadataSource artifactMetadataSource,
                                     WagonManager wagonManager,
                                     ArtifactResolver artifactResolver,
                                     MavenProjectBuilder mavenProjectBuilder,
                                     Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
         this.mavenProjectBuilder = mavenProjectBuilder;
     }
 
@@ -148,7 +147,7 @@ public class CompareDependenciesMojo
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
     protected void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException
     {
         if ( this.ignoreRemoteDependencies && this.ignoreRemoteDependencyManagement )
         {

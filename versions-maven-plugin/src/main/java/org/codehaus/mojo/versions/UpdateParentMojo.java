@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -46,6 +44,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
@@ -141,14 +140,14 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
 
     @Inject
     public UpdateParentMojo( RepositorySystem repositorySystem,
+                             org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                              MavenProjectBuilder projectBuilder,
-                             ArtifactMetadataSource artifactMetadataSource,
                              WagonManager wagonManager,
                              ArtifactResolver artifactResolver,
                              Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -160,7 +159,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      * @since 1.0-alpha-1
      */
     protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
     {
         if ( getProject().getParent() == null )
         {
@@ -213,10 +212,6 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
         {
             throw new MojoExecutionException( "Invalid version range specification: " + initialVersion, e );
         }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
         catch ( InvalidSegmentException e )
         {
             throw new MojoExecutionException( "Invalid segment specification for version " + initialVersion, e );
@@ -224,7 +219,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
     }
 
     protected ArtifactVersion resolveTargetVersion( String initialVersion )
-            throws MojoExecutionException, ArtifactMetadataRetrievalException, InvalidVersionSpecificationException,
+            throws MojoExecutionException, VersionRetrievalException, InvalidVersionSpecificationException,
             InvalidSegmentException
     {
         Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder

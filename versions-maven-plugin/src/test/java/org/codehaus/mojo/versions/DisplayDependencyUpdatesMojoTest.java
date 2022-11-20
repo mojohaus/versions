@@ -47,7 +47,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.TYPE_REGEX;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.matches;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactMetadataSource;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
@@ -112,7 +113,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = outputFile;
-            mojo.artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
+            mojo.aetherRepositorySystem = mockAetherRepositorySystem( new HashMap<String, String[]>()
             {{
                 put( "dummy-api", new String[] { "1.0.0", "1.0.1", "1.1.0-M1", "1.2.0-SNAPSHOT" } );
             }} );
@@ -157,16 +158,15 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                                              null,
-                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
-                                              {{
-                                                  put( "default-dependency",
-                                                       new String[] {"1.0.0", "1.1.0", "2.0.0-SNAPSHOT", "2.0.0-beta",
-                                                           "2.0.0-rc1"} );
-                                              }} ),
-                                              null,
-                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
-                                              null )
+                    mockAetherRepositorySystem( new HashMap<String, String[]>()
+                    {{
+                        put( "default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0-SNAPSHOT", "2.0.0-beta",
+                                "2.0.0-rc1"} );
+                    }} ),
+                    null,
+                    null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                    null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -178,6 +178,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                 this.allowSnapshots = true;
                 this.outputFile = tempFile;
                 setPluginContext( new HashMap<>() );
+
+                session = mockMavenSession();
             }}.execute();
 
             assertThat( String.join( "", Files.readAllLines( tempPath ) ),
@@ -204,14 +206,14 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                                              null,
-                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
-                                              {{
-                                                  put( "default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0"} );
-                                              }} ),
-                                              null,
-                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
-                                              null )
+                    mockAetherRepositorySystem( new HashMap<String, String[]>()
+                    {{
+                        put( "default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0"} );
+                    }} ),
+                    null,
+                    null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                    null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -222,6 +224,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                 setVariableValueToObject( this, "dependencyExcludes", emptyList() );
                 this.outputFile = tempFile;
                 setPluginContext( new HashMap<>() );
+
+                session = mockMavenSession();
             }}.execute();
 
             String output = String.join( "", Files.readAllLines( tempPath ) );
@@ -248,15 +252,14 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                                              null,
-                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
-                                              {{
-                                                  put( "default-dependency",
-                                                       new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0"} );
-                                              }} ),
-                                              null,
-                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
-                                              null )
+                    mockAetherRepositorySystem( new HashMap<String, String[]>()
+                    {{
+                        put( "default-dependency", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0"} );
+                    }} ),
+                    null,
+                    null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                    null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -267,6 +270,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                 setVariableValueToObject( this, "dependencyExcludes", emptyList() );
                 this.outputFile = tempFile;
                 setPluginContext( new HashMap<>() );
+
+                session = mockMavenSession();
             }}.execute();
 
             String output = String.join( "", Files.readAllLines( tempPath ) );
@@ -294,15 +299,14 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                                              null,
-                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
-                                              {{
-                                                  put( "default-dependency",
-                                                       new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"} );
-                                              }} ),
-                                              null,
-                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
-                                              null )
+                    mockAetherRepositorySystem( new HashMap<String, String[]>()
+                    {{
+                        put( "default-dependency", new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"} );
+                    }} ),
+                    null,
+                    null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                    null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -313,6 +317,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                 setVariableValueToObject( this, "dependencyExcludes", emptyList() );
                 this.outputFile = tempFile;
                 setPluginContext( new HashMap<>() );
+
+                session = mockMavenSession();
             }}.execute();
 
             String output = String.join( "", Files.readAllLines( tempPath ) );
@@ -341,16 +347,15 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
             tempPath = Files.createTempFile( "display-dependency-updates", "" );
             final File tempFile = tempPath.toFile();
             new DisplayDependencyUpdatesMojo( mockRepositorySystem(),
-                                              null,
-                                              mockArtifactMetadataSource( new HashMap<String, String[]>()
-                                              {{
-                                                  put( "default-dependency",
-                                                       new String[] {"1.0.0", "1.1.0", "1.9.0-SNAPSHOT", "1.9.0-beta",
-                                                           "1.9.0-rc1"} );
-                                              }} ),
-                                              null,
-                                              new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
-                                              null )
+                    mockAetherRepositorySystem( new HashMap<String, String[]>()
+                    {{
+                        put( "default-dependency", new String[] {"1.0.0", "1.1.0", "1.9.0-SNAPSHOT", "1.9.0-beta",
+                                "1.9.0-rc1"} );
+                    }} ),
+                    null,
+                    null,
+                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
+                    null )
             {{
                 setProject( createProject() );
                 setVariableValueToObject( this, "allowAnyUpdates", false );
@@ -362,6 +367,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                 this.allowSnapshots = true;
                 this.outputFile = tempFile;
                 setPluginContext( new HashMap<>() );
+
+                session = mockMavenSession();
             }}.execute();
 
             assertThat( String.join( "", Files.readAllLines( tempPath ) ),
@@ -403,7 +410,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = outputFile;
-            mojo.artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
+            mojo.aetherRepositorySystem = mockAetherRepositorySystem( new HashMap<String, String[]>()
             {{
                 put( "dummy-api", new String[] { "1.0.0", "1.0.1", "1.1.0-M1", "1.2.0-SNAPSHOT" } );
             }} );
@@ -434,7 +441,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = outputFile;
-            mojo.artifactMetadataSource = mockArtifactMetadataSource( new HashMap<String, String[]>()
+            mojo.aetherRepositorySystem = mockAetherRepositorySystem( new HashMap<String, String[]>()
             {{
                 put( "dummy-api", new String[] { "2.0.1" } );
             }} );

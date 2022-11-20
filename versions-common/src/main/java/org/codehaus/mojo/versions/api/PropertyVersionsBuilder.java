@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
@@ -91,7 +90,7 @@ class PropertyVersionsBuilder
     }
 
     public PropertyVersions newPropertyVersions()
-        throws ArtifactMetadataRetrievalException
+            throws VersionRetrievalException
     {
         return new PropertyVersions( profileId, name, helper, associations );
     }

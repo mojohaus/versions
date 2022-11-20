@@ -30,8 +30,6 @@ import java.util.function.Predicate;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -40,6 +38,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -52,14 +51,14 @@ public abstract class UseLatestVersionsMojoBase
     extends AbstractVersionsDependencyUpdaterMojo
 {
     public UseLatestVersionsMojoBase( RepositorySystem repositorySystem,
-                                      MavenProjectBuilder projectBuilder,
-                                      ArtifactMetadataSource artifactMetadataSource,
-                                      WagonManager wagonManager,
-                                      ArtifactResolver artifactResolver,
-                                      Map<String, ChangeRecorder> changeRecorders )
+                                  org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+                                  MavenProjectBuilder projectBuilder,
+                                  WagonManager wagonManager,
+                                  ArtifactResolver artifactResolver,
+                                  Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, projectBuilder, artifactMetadataSource, wagonManager, artifactResolver,
-               changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
+                changeRecorders );
     }
 
     /**
@@ -73,7 +72,7 @@ public abstract class UseLatestVersionsMojoBase
      * @param changeKind title for the change recorder records
      * @param filters optional array of filters
      * @throws XMLStreamException thrown if the POM update doesn't succeed
-     * @throws ArtifactMetadataRetrievalException thrown if an artifact cannot be retried
+     * @throws VersionRetrievalException thrown if an artifact versions cannot be retrieved
      */
     @SafeVarargs
     protected final void useLatestVersions( ModifiedPomXMLEventReader pom,
@@ -82,7 +81,7 @@ public abstract class UseLatestVersionsMojoBase
                                                     newestVersionProducer,
                                             ChangeRecord.ChangeKind changeKind,
                                             Predicate<Dependency>... filters )
-            throws XMLStreamException, MojoExecutionException, ArtifactMetadataRetrievalException
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException
     {
         for ( Dependency dep : dependencies )
         {

@@ -33,8 +33,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
@@ -45,6 +43,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
@@ -111,11 +110,12 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
 
     @Inject
     protected DependencyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
+                                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                            ArtifactResolver artifactResolver,
-                                           ArtifactMetadataSource artifactMetadataSource, WagonManager wagonManager,
+                                           WagonManager wagonManager,
                                            ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, artifactResolver, artifactMetadataSource, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, artifactResolver, wagonManager, rendererFactory );
     }
 
     /**
@@ -250,7 +250,7 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
                 }
             }
         }
-        catch ( ArtifactMetadataRetrievalException e )
+        catch ( VersionRetrievalException e )
         {
             throw new MavenReportException( e.getMessage(), e );
         }
