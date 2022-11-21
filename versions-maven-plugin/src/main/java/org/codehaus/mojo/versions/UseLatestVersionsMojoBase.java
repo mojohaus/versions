@@ -67,6 +67,7 @@ public abstract class UseLatestVersionsMojoBase
      * @param changeKind title for the change recorder records
      * @param filters optional array of filters
      * @throws XMLStreamException thrown if the POM update doesn't succeed
+     * @throws MojoExecutionException if something goes wrong.
      * @throws VersionRetrievalException thrown if an artifact versions cannot be retrieved
      */
     @SafeVarargs

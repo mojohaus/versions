@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions.reporting.model;
 
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
@@ -33,9 +32,9 @@ public class PropertyUpdatesModel
 {
     private final Map<Property, PropertyVersions> allUpdates;
 
-    public PropertyUpdatesModel( Map<Property, PropertyVersions> propertyUpdates )
+    public PropertyUpdatesModel( PropertyComparator comparator, Map<Property, PropertyVersions> propertyUpdates )
     {
-        this.allUpdates = new TreeMap<>( PropertyComparator.INSTANCE );
+        this.allUpdates = new TreeMap<>( comparator );
         this.allUpdates.putAll( propertyUpdates );
     }
 
@@ -43,4 +42,5 @@ public class PropertyUpdatesModel
     {
         return allUpdates;
     }
+
 }

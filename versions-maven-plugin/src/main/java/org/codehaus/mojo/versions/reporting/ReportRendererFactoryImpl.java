@@ -41,8 +41,11 @@ import org.codehaus.plexus.i18n.I18N;
 public class ReportRendererFactoryImpl implements ReportRendererFactory
 {
     public static final String DEPENDENCY_UPDATES_REPORT = "dependency-updates-report";
+    public static final String DEPENDENCY_UPDATES_AGGREGATE_REPORT = "dependency-updates-aggregate-report";
     public static final String PLUGIN_UPDATES_REPORT = "plugin-updates-report";
+    public static final String PLUGIN_UPDATES_AGGREGATE_REPORT = "plugin-updates-aggregate-report";
     public static final String PROPERTY_UPDATES_REPORT = "property-updates-report";
+    public static final String PROPERTY_UPDATES_AGGREGATE_REPORT = "property-updates-aggregate-report";
     public static final String PARENT_UPDATES_REPORT = "parent-updates-report";
     private final I18N i18N;
 
@@ -60,17 +63,18 @@ public class ReportRendererFactoryImpl implements ReportRendererFactory
     public <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model )
             throws IllegalArgumentException
     {
-        if ( DEPENDENCY_UPDATES_REPORT.equals( reportName ) )
+        if ( DEPENDENCY_UPDATES_REPORT.equals( reportName )
+                ||  DEPENDENCY_UPDATES_AGGREGATE_REPORT.equals( reportName ) )
         {
             return (T) new DependencyUpdatesReportRenderer<>( i18N, sink, locale, reportName,
                     (DependencyUpdatesModel) model );
         }
-        if ( PLUGIN_UPDATES_REPORT.equals( reportName ) )
+        if ( PLUGIN_UPDATES_REPORT.equals( reportName ) || PLUGIN_UPDATES_AGGREGATE_REPORT.equals( reportName ) )
         {
             return (T) new PluginUpdatesReportRenderer( i18N, sink, locale, reportName,
                     (PluginUpdatesModel) model );
         }
-        if ( PROPERTY_UPDATES_REPORT.equals( reportName ) )
+        if ( PROPERTY_UPDATES_REPORT.equals( reportName ) ||  PROPERTY_UPDATES_AGGREGATE_REPORT.equals( reportName ) )
         {
             return (T) new PropertyUpdatesReportRenderer( i18N, sink, locale, reportName,
                     (PropertyUpdatesModel) model );

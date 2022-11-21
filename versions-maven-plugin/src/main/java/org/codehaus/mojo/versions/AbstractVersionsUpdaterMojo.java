@@ -537,6 +537,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Configure and return the change recorder.
      *
      * @return The change recorder
+     * @throws MojoExecutionException if something goes wrong.
      */
     protected ChangeRecorder getChangeRecorder() throws MojoExecutionException
     {
@@ -553,6 +554,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * Save all of the changes recorded by the change recorder.
      *
      * @throws IOException On I/O errors
+     * @throws MojoExecutionException if something goes wrong.
      */
 
     protected void saveChangeRecorderResults() throws IOException, MojoExecutionException
