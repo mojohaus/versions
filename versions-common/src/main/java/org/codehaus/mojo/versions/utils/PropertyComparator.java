@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions.utils;
  */
 
 import java.util.Comparator;
-
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.mojo.versions.api.Property;
 
@@ -42,14 +41,18 @@ public enum PropertyComparator implements Comparator<Property>
      * @see java.util.Comparator#compare(Object, Object)
      * @since 1.0-beta-1
      */
+    @SuppressWarnings( "checkstyle:InnerAssignment" )
     public int compare( Property p1, Property p2 )
     {
+        int r;
         return p1 == p2
                 ? 0
                 : p1 == null
-                    ? 1
-                    : p2 == null
-                        ? -1
-                        : StringUtils.compare( p1.getName(), p2.getName() );
+                        ? 1
+                        : p2 == null
+                                ? -1
+                                : ( r = StringUtils.compare( p1.getName(), p2.getName() ) ) == 0
+                                        ? StringUtils.compare( p1.getValue(), p2.getValue() )
+                                        : r ;
     }
 }

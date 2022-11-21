@@ -47,6 +47,13 @@ public class Property
     private String version;
 
     /**
+     * Used by {@link org.codehaus.mojo.versions.utils.PropertyComparator} when comparing two same named properties
+     *
+     * @since 2.14.0
+     */
+    private String value;
+
+    /**
      * Whether to automatically link dependencies to the property.
      *
      * @parameter default-value="true"
@@ -105,6 +112,7 @@ public class Property
         this.searchReactor = true;
         this.preferReactor = true;
         this.version = null;
+        this.value = null;
     }
 
     public String getName()
@@ -175,5 +183,15 @@ public class Property
     public void setBanSnapshots( boolean banSnapshots )
     {
         this.banSnapshots = banSnapshots;
+    }
+
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue( String value )
+    {
+        this.value = value;
     }
 }

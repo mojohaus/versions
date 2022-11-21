@@ -663,8 +663,10 @@ public class DefaultVersionsHelper
                                         + builder.getVersionRange() );
                     property.setVersion( builder.getVersionRange() );
                 }
-                versions.setCurrentVersion( request.getMavenProject().getProperties()
-                        .getProperty( property.getName() ) );
+                final String currentVersion = request.getMavenProject().getProperties()
+                        .getProperty( property.getName() );
+                versions.setCurrentVersion( currentVersion );
+                property.setValue( currentVersion );
                 propertyVersions.put( property, versions );
             }
             catch ( VersionRetrievalException e )
