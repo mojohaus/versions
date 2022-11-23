@@ -20,11 +20,19 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
@@ -47,6 +55,10 @@ public abstract class AbstractVersionDetails
     implements VersionDetails
 {
 
+    private static final Pattern PREVIEW_PATTERN =
+            Pattern.compile( "(?i)(?:.*[-.](alpha|a|beta|b|milestone|m|preview|rc)"
+                    + "[-.]?(\\d{0,2}[a-z]?|\\d{6}\\.\\d{4})|\\d{8}(?:\\.?\\d{6})?)$" );
+
     /**
      * The current version. Guarded by {@link #currentVersionLock}.
      *
@@ -60,6 +72,8 @@ public abstract class AbstractVersionDetails
      * @since 1.0-beta-1
      */
     private boolean includeSnapshots = false;
+
+    protected boolean verboseDetail = true;
 
     /**
      * Not sure if we need to be thread safe, but there's no harm being careful, after all we could be invoked from an
@@ -77,6 +91,24 @@ public abstract class AbstractVersionDetails
     public Restriction restrictionFor( Optional<Segment> scope )
             throws InvalidSegmentException
     {
+        // one range spec can have multiple restrictions, and multiple 'lower bound', we want the highest one.
+        // [1.0,2.0),[3.0,4.0) -> 3.0
+        ArtifactVersion highestLowerBound = currentVersion;
+        if ( currentVersion != null )
+        {
+            try
+            {
+                highestLowerBound = VersionRange.createFromVersionSpec( currentVersion.toString() )
+                      .getRestrictions().stream().map( Restriction::getLowerBound ).filter( Objects::nonNull )
+                      .max( getVersionComparator() ).orElse( currentVersion );
+            }
+            catch ( InvalidVersionSpecificationException ignored )
+            {
+                ignored.printStackTrace( System.err );
+            }
+        }
+
+        final ArtifactVersion currentVersion = highestLowerBound;
         ArtifactVersion nextVersion = scope
                 .filter( s -> s.isMajorTo( SUBINCREMENTAL ) )
                 .map( s -> (ArtifactVersion)
@@ -480,4 +512,87 @@ public abstract class AbstractVersionDetails
         }
         return ( includeLower || lower != 0 ) && ( includeUpper || upper != 0 );
     }
+
+    /**
+     * Returns the latest version newer than the specified current version, and within the specified update scope,
+     * or <code>null</code> if no such version exists.
+     * @param updateScope the scope of updates to include.
+     * @return the newest version after currentVersion within the specified update scope,
+     *         or <code>null</code> if no version is available.
+     */
+    public final ArtifactVersion getReportNewestUpdate( Optional<Segment> updateScope )
+    {
+        return getArtifactVersionStream( updateScope )
+                    .min( Collections.reverseOrder( getVersionComparator() ) ).orElse( null );
+    }
+
+    /**
+     * Returns all versions newer than the specified current version, and within the specified update scope.
+     * @param updateScope the scope of updates to include.
+     * @return all versions after currentVersion within the specified update scope.
+     */
+    public final ArtifactVersion[] getReportUpdates( Optional<Segment> updateScope )
+    {
+        TreeSet<ArtifactVersion> versions = getArtifactVersionStream( updateScope )
+                .collect( Collectors.toCollection( () -> new TreeSet<>( getVersionComparator() ) ) );
+        // filter out intermediate minor versions.
+        if ( !verboseDetail )
+        {
+            int major = 0;
+            int minor = 0;
+            boolean needOneMore = false;
+            for ( Iterator<ArtifactVersion> it = versions.descendingIterator(); it.hasNext(); )
+            {
+                ArtifactVersion version = it.next();
+                boolean isPreview = PREVIEW_PATTERN.matcher( version.toString() ).matches();
+
+                // encountered a version in same Major.Minor version, remove it.
+                if ( version.getMajorVersion() == major && version.getMinorVersion() == minor )
+                {
+                    if ( needOneMore && !isPreview )
+                    {
+                        needOneMore = false;
+                        continue;
+                    }
+                    it.remove();
+                    continue;
+                }
+
+                // encountered a new Major.Minor version, keep it.
+                major = version.getMajorVersion();
+                minor = version.getMinorVersion();
+
+                // if version is a pre-release, also search for the last release.
+                needOneMore = isPreview;
+
+            }
+        }
+        return versions.toArray( new ArtifactVersion[0] );
+    }
+
+    /**
+     * Returns all versions newer than the specified current version, and within the specified update scope.
+     * @param updateScope the scope of updates to include.
+     * @return all versions after currentVersion within the specified update scope.
+     */
+    private Stream<ArtifactVersion> getArtifactVersionStream( Optional<Segment> updateScope )
+    {
+        if ( isCurrentVersionDefined() )
+        {
+            try
+            {
+                Restriction restriction = restrictionFor( updateScope );
+
+                return Arrays.stream( getVersions() ).filter(
+                        candidate -> ( isIncludeSnapshots() || !ArtifactUtils.isSnapshot( candidate.toString() ) )
+                                && isVersionInRestriction( restriction, candidate ) );
+            }
+            catch ( InvalidSegmentException ignored )
+            {
+                ignored.printStackTrace( System.err );
+            }
+        }
+        return Stream.empty();
+    }
+
 }

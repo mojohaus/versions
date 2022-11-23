@@ -145,18 +145,22 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         boolean upToDate = !details.isUpdateAvailable();
 
         sink.tableRow();
-        sink.tableCell();
 
+        sink.tableCell();
         renderIcon( upToDate );
+        sink.tableCell_();
+
         renderCells( artifact.getGroupId(), artifact.getArtifactId() );
         renderBoldCell( upToDate, artifact.getVersion() );
         renderNewestVersions( details );
+
+        sink.tableCell();
         renderIcon( !details.isDependencyUpdateAvailable() );
+        sink.tableCell_();
 
         sink.tableRow_();
     }
 
-    @SuppressWarnings( "checkstyle:MethodLength" )
     private void renderPluginDetail( Dependency artifact, PluginUpdatesDetails details )
     {
         sink.section2();
