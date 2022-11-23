@@ -62,11 +62,11 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected T model;
 
-    protected ArtifactVersionsCache newestUpdateCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
+    protected final ArtifactVersionsCache newestUpdateCache
+            = new ArtifactVersionsCache( AbstractVersionDetails::getReportNewestUpdate );
 
-    protected ArtifactVersionsCache allUpdatesCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getAllUpdates );
+    protected final ArtifactVersionsCache allUpdatesCache
+            = new ArtifactVersionsCache( AbstractVersionDetails::getReportUpdates );
 
     protected final SinkEventAttributes headerAttributes
             = new SinkEventAttributeSet( SinkEventAttributes.WIDTH, "30%" );
@@ -231,6 +231,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
 
     protected void renderSummaryTableRow( Dependency artifact, ArtifactVersions details, boolean includeScope )
     {
+        details.setCurrentVersion( artifact.getVersion() );
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
@@ -263,7 +264,6 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         renderBoldCell( newestUpdateCache.get( details, of( MAJOR ) ) );
     }
 
-    @SuppressWarnings( "checkstyle:MethodLength" )
     protected void renderDependencyDetailTable( Dependency artifact, ArtifactVersions details, boolean includeScope )
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
@@ -363,6 +363,12 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         }
     }
 
+    /**
+     * Builds the list of restrictions for the given artifact or property, based on its version range.
+     * used to determine if a candidate version is outside the range, and if it should be displayed with a star.
+     * @param details the artifact or property for which to render the versions.
+     * @return the list of restrictions for the spec versions range.
+     */
     private List<Restriction> getArtifactVersionRange( AbstractVersionDetails details )
     {
         try
@@ -381,7 +387,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     /**
      * Renders the list of versions that are available for the given artifact or property.
      * @param allUpdates the list of all updates available.
-     * @param details TODO.
+     * @param details the versions details for the given artifact or property.
      */
     protected void renderVersions( ArtifactVersion[] allUpdates, AbstractVersionDetails details )
     {

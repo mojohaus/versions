@@ -119,7 +119,6 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.tableRow_();
     }
 
-    @SuppressWarnings( "checkstyle:MethodLength" )
     protected void renderPropertyDetailTable( Property property, PropertyVersions details )
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
