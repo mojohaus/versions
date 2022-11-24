@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -143,11 +142,9 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
                              org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                              MavenProjectBuilder projectBuilder,
                              WagonManager wagonManager,
-                             ArtifactResolver artifactResolver,
                              Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
     }
 
     /**

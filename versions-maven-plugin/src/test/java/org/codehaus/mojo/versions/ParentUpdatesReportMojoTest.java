@@ -63,7 +63,7 @@ public class ParentUpdatesReportMojoTest
                 mockAetherRepositorySystem( new HashMap<String, String[]>()
                 {{
                     put( "default-artifact", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT"} );
-                }} ), null, null, new ReportRendererFactoryImpl( MOCK_I18N ) )
+                }} ), null, new ReportRendererFactoryImpl( MOCK_I18N ) )
         {{
             allowSnapshots = true;
             project = new MavenProject( new Model()

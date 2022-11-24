@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
@@ -408,10 +407,9 @@ public interface VersionsHelper
      *
      * @param artifact The artifact to resolve.
      * @param usePluginRepositories whether to resolve from the plugin repositories or the regular repositories.
-     * @throws ArtifactResolutionException if something goes wrong.
-     * @throws ArtifactNotFoundException if something goes wrong.
+     * @throws ArtifactResolutionException if resolution is unsuccessful
      * @since 1.3
      */
     void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactResolutionException, ArtifactNotFoundException;
+        throws ArtifactResolutionException;
 }

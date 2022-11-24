@@ -33,7 +33,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
@@ -112,11 +111,10 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
     @Inject
     protected DependencyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
                                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           ArtifactResolver artifactResolver,
                                            WagonManager wagonManager,
                                            ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, aetherRepositorySystem, artifactResolver, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, wagonManager, rendererFactory );
     }
 
     /**

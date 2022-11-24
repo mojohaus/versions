@@ -31,9 +31,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.ArtifactStubFactory;
 import org.apache.maven.plugin.testing.MojoRule;
-import org.apache.maven.plugin.testing.stubs.StubArtifactResolver;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.model.TestIgnoreVersions;
@@ -165,7 +163,6 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     }} ),
                     null,
                     null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
                     null )
             {{
                 setProject( createProject() );
@@ -212,7 +209,6 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     }} ),
                     null,
                     null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
                     null )
             {{
                 setProject( createProject() );
@@ -258,7 +254,6 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     }} ),
                     null,
                     null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
                     null )
             {{
                 setProject( createProject() );
@@ -305,7 +300,6 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     }} ),
                     null,
                     null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
                     null )
             {{
                 setProject( createProject() );
@@ -354,7 +348,6 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase
                     }} ),
                     null,
                     null,
-                    new StubArtifactResolver( new ArtifactStubFactory(), false, false ),
                     null )
             {{
                 setProject( createProject() );

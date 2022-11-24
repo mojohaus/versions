@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -92,14 +91,12 @@ public class SetPropertyMojo
 
     @Inject
     public SetPropertyMojo( RepositorySystem repositorySystem,
-                                org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                MavenProjectBuilder projectBuilder,
-                                WagonManager wagonManager,
-                                ArtifactResolver artifactResolver,
+                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+                            MavenProjectBuilder projectBuilder,
+                            WagonManager wagonManager,
                             Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
     }
 
     /**

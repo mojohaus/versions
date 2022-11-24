@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -144,11 +143,9 @@ public class UpdatePropertiesMojo extends AbstractVersionsDependencyUpdaterMojo
                                  org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                  MavenProjectBuilder projectBuilder,
                                  WagonManager wagonManager,
-                                 ArtifactResolver artifactResolver,
                                  Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
     }
 
     /**

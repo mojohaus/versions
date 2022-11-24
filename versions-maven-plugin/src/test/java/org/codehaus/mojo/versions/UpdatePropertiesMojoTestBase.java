@@ -25,7 +25,6 @@ import java.util.Map;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
-import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.junit.After;
@@ -75,7 +74,6 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase
     protected  <T extends Mojo> T setUpMojo( String goal ) throws Exception
     {
         T mojo = (T) mojoRule.lookupConfiguredMojo( pomDir.toFile(), goal );
-        setVariableValueToObject( mojo, "localRepository", new StubArtifactRepository( pomDir.toString() ) );
         setVariableValueToObject( mojo, "aetherRepositorySystem", aetherRepositorySystem );
         setVariableValueToObject( mojo, "generateBackupPoms", false );
         setVariableValueToObject( mojo, "changeRecorderFormat", "test" );

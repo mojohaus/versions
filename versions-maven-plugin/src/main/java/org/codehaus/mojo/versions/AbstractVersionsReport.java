@@ -27,7 +27,6 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
@@ -40,7 +39,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -99,12 +97,6 @@ public abstract class AbstractVersionsReport<T>
     private final WagonManager wagonManager;
 
     /**
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${settings}", readonly = true )
-    private Settings settings;
-
-    /**
      * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
      *
      * @since 1.0-alpha-3
@@ -156,8 +148,6 @@ public abstract class AbstractVersionsReport<T>
     @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
     private MojoExecution mojoExecution;
 
-    protected ArtifactResolver artifactResolver;
-
     /**
      * <p>Allows specifying the {@linkplain RuleSet} object describing rules
      * on artifact versions to ignore when considering updates.</p>
@@ -196,14 +186,12 @@ public abstract class AbstractVersionsReport<T>
 
     protected AbstractVersionsReport( I18N i18n, RepositorySystem repositorySystem,
                                       org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                      ArtifactResolver artifactResolver,
                                       WagonManager wagonManager,
                                       ReportRendererFactory rendererFactory )
     {
         this.i18n = i18n;
         this.repositorySystem = repositorySystem;
         this.aetherRepositorySystem = aetherRepositorySystem;
-        this.artifactResolver = artifactResolver;
         this.wagonManager = wagonManager;
         this.rendererFactory = rendererFactory;
     }
@@ -217,11 +205,8 @@ public abstract class AbstractVersionsReport<T>
             {
                 helper = new DefaultVersionsHelper.Builder()
                         .withRepositorySystem( repositorySystem )
-                        .withArtifactResolver( artifactResolver )
                         .withAetherRepositorySystem( aetherRepositorySystem )
-                        .withLocalRepository( localRepository )
                         .withWagonManager( wagonManager )
-                        .withSettings( settings )
                         .withServerId( serverId )
                         .withRulesUri( rulesUri )
                         .withRuleSet( ruleSet )

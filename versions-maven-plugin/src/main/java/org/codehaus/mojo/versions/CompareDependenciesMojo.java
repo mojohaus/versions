@@ -33,7 +33,6 @@ import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -130,12 +129,10 @@ public class CompareDependenciesMojo
                                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                     MavenProjectBuilder projectBuilder,
                                     WagonManager wagonManager,
-                                    ArtifactResolver artifactResolver,
                                     MavenProjectBuilder mavenProjectBuilder,
                                     Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
         this.mavenProjectBuilder = mavenProjectBuilder;
     }
 
@@ -177,7 +174,9 @@ public class CompareDependenciesMojo
         try
         {
             remoteMavenProject =
-                mavenProjectBuilder.buildFromRepository( remoteArtifact, remoteArtifactRepositories, localRepository );
+                mavenProjectBuilder.buildFromRepository( remoteArtifact,
+                        session.getCurrentProject().getRemoteArtifactRepositories(),
+                        session.getLocalRepository() );
         }
         catch ( ProjectBuildingException e )
         {

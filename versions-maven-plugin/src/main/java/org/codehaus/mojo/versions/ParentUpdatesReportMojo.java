@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -57,11 +56,10 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
     protected ParentUpdatesReportMojo( I18N i18n,
                                        RepositorySystem repositorySystem,
                                        org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                       ArtifactResolver artifactResolver,
                                        WagonManager wagonManager,
                                        ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, aetherRepositorySystem, artifactResolver, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, wagonManager, rendererFactory );
     }
 
     /**

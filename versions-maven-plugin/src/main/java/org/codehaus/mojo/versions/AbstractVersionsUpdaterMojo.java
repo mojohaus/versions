@@ -33,10 +33,7 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -49,7 +46,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -111,33 +107,9 @@ public abstract class AbstractVersionsUpdaterMojo
     protected List<MavenProject> reactorProjects;
 
     /**
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
-    protected List<ArtifactRepository> remoteArtifactRepositories;
-
-    /**
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
-    protected List<ArtifactRepository> remotePluginRepositories;
-
-    /**
-     * @since 1.0-alpha-1
-     */
-    @Parameter( defaultValue = "${localRepository}", readonly = true )
-    protected ArtifactRepository localRepository;
-
-    /**
      * The (injected) {@link WagonManager} instance.
      */
     private final WagonManager wagonManager;
-
-    /**
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${settings}", readonly = true )
-    protected Settings settings;
 
     /**
      * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
@@ -189,7 +161,6 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
     private MojoExecution mojoExecution;
 
-    protected ArtifactResolver artifactResolver;
     /**
      * The format used to record changes. If "none" is specified, no changes are recorded.
      *
@@ -245,14 +216,12 @@ public abstract class AbstractVersionsUpdaterMojo
                                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                            MavenProjectBuilder projectBuilder,
                                            WagonManager wagonManager,
-                                           ArtifactResolver artifactResolver,
                                            Map<String, ChangeRecorder> changeRecorders )
     {
         this.repositorySystem = repositorySystem;
         this.aetherRepositorySystem = aetherRepositorySystem;
         this.projectBuilder = projectBuilder;
         this.wagonManager = wagonManager;
-        this.artifactResolver = artifactResolver;
         this.changeRecorders = changeRecorders;
     }
 
@@ -262,11 +231,8 @@ public abstract class AbstractVersionsUpdaterMojo
         {
             helper = new DefaultVersionsHelper.Builder()
                     .withRepositorySystem( repositorySystem )
-                    .withArtifactResolver( artifactResolver )
                     .withAetherRepositorySystem( aetherRepositorySystem )
-                    .withLocalRepository( localRepository )
                     .withWagonManager( wagonManager )
-                    .withSettings( settings )
                     .withServerId( serverId )
                     .withRulesUri( rulesUri )
                     .withRuleSet( ruleSet )
@@ -522,16 +488,11 @@ public abstract class AbstractVersionsUpdaterMojo
         artifact.setVersion( updateVersion.toString() );
         try
         {
-            artifactResolver.resolveAlways( artifact, remoteArtifactRepositories, localRepository );
+            getHelper().resolveArtifact( artifact, false );
         }
-        catch ( ArtifactResolutionException e )
+        catch ( ArtifactResolutionException | MojoExecutionException e )
         {
             getLog().warn( "Not updating version: could not resolve " + artifact, e );
-            return false;
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            getLog().warn( "Not updating version: could not find " + artifact, e );
             return false;
         }
 

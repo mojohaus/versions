@@ -47,14 +47,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.execution.MavenSession;
@@ -89,8 +85,12 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
+
+import static org.apache.maven.RepositoryUtils.toArtifact;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -116,13 +116,6 @@ public class DefaultVersionsHelper
      */
     private RuleSet ruleSet;
 
-    /**
-     * The local repository to consult.
-     *
-     * @since 1.0-alpha-3
-     */
-    private ArtifactRepository localRepository;
-
     private RepositorySystem repositorySystem;
 
     private org.eclipse.aether.RepositorySystem aetherRepositorySystem;
@@ -140,13 +133,6 @@ public class DefaultVersionsHelper
      * @since 1.0-beta-1
      */
     private MavenSession mavenSession;
-
-    /**
-     * The artifact resolver.
-     *
-     * @since 1.3
-     */
-    private ArtifactResolver artifactResolver;
 
     private MojoExecution mojoExecution;
 
@@ -383,7 +369,7 @@ public class DefaultVersionsHelper
             return new ArtifactVersions( artifact,
                     aetherRepositorySystem.resolveVersionRange( mavenSession.getRepositorySession(),
                                     new VersionRangeRequest(
-                                    RepositoryUtils.toArtifact( artifact ).setVersion( "(,)" ),
+                                    toArtifact( artifact ).setVersion( "(,)" ),
                                     usePluginRepositories
                                             ? mavenSession.getCurrentProject().getRemotePluginRepositories()
                                             : mavenSession.getCurrentProject().getRemoteProjectRepositories(),
@@ -479,13 +465,24 @@ public class DefaultVersionsHelper
 
     @Override
     public void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactResolutionException, ArtifactNotFoundException
+        throws ArtifactResolutionException
     {
-        artifactResolver.resolve( artifact,
-                usePluginRepositories
-                        ? mavenSession.getCurrentProject().getPluginArtifactRepositories()
-                        : mavenSession.getCurrentProject().getRemoteArtifactRepositories(),
-                localRepository );
+        try
+        {
+            ArtifactResult artifactResult = aetherRepositorySystem.resolveArtifact( mavenSession.getRepositorySession(),
+                    new ArtifactRequest( toArtifact( artifact ),
+                            usePluginRepositories
+                                    ? mavenSession.getCurrentProject().getRemotePluginRepositories()
+                                    : mavenSession.getCurrentProject().getRemoteProjectRepositories(),
+                            getClass().getName() ) );
+            artifact.setFile( artifactResult.getArtifact().getFile() );
+            artifact.setVersion( artifactResult.getArtifact().getVersion() );
+            artifact.setResolved( artifactResult.isResolved() );
+        }
+        catch ( org.eclipse.aether.resolution.ArtifactResolutionException e )
+        {
+            throw new ArtifactResolutionException( e.getMessage(), artifact );
+        }
     }
 
     @Override
@@ -864,12 +861,9 @@ public class DefaultVersionsHelper
     public static class Builder
     {
         private RepositorySystem repositorySystem;
-        private ArtifactResolver artifactResolver;
-        private ArtifactRepository localRepository;
         private Collection<String> ignoredVersions;
         private RuleSet ruleSet;
         private WagonManager wagonManager;
-        private Settings settings;
         private String serverId;
         private String rulesUri;
         private Log log;
@@ -884,18 +878,6 @@ public class DefaultVersionsHelper
         public Builder withRepositorySystem( RepositorySystem repositorySystem )
         {
             this.repositorySystem = repositorySystem;
-            return this;
-        }
-
-        public Builder withArtifactResolver( ArtifactResolver artifactResolver )
-        {
-            this.artifactResolver = artifactResolver;
-            return this;
-        }
-
-        public Builder withLocalRepository( ArtifactRepository localRepository )
-        {
-            this.localRepository = localRepository;
             return this;
         }
 
@@ -914,12 +896,6 @@ public class DefaultVersionsHelper
         public Builder withWagonManager( WagonManager wagonManager )
         {
             this.wagonManager = wagonManager;
-            return this;
-        }
-
-        public Builder withSettings( Settings settings )
-        {
-            this.settings = settings;
             return this;
         }
 
@@ -968,7 +944,6 @@ public class DefaultVersionsHelper
         {
             DefaultVersionsHelper instance = new DefaultVersionsHelper();
             instance.repositorySystem = repositorySystem;
-            instance.artifactResolver = artifactResolver;
             instance.mavenSession = mavenSession;
             instance.mojoExecution = mojoExecution;
             if ( ruleSet != null )
@@ -984,16 +959,15 @@ public class DefaultVersionsHelper
                 instance.ruleSet = isBlank( rulesUri )
                         ? new RuleSet()
                         : isClasspathUri( rulesUri )
-                        ? getRulesFromClasspath( rulesUri, log )
-                        : getRulesViaWagon( rulesUri, log, serverId, serverId, wagonManager,
-                        settings );
+                            ? getRulesFromClasspath( rulesUri, log )
+                            : getRulesViaWagon( rulesUri, log, serverId, serverId, wagonManager,
+                                mavenSession.getSettings() );
             }
             if ( ignoredVersions != null && !ignoredVersions.isEmpty() )
             {
                 instance.ruleSet = enrichRuleSet( ignoredVersions, instance.ruleSet );
             }
             instance.aetherRepositorySystem = aetherRepositorySystem;
-            instance.localRepository = localRepository;
             instance.log = log;
             return instance;
         }

@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -72,11 +71,9 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
                                 org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                 MavenProjectBuilder projectBuilder,
                                 WagonManager wagonManager,
-                                ArtifactResolver artifactResolver,
                                 Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
     }
 
     /**
