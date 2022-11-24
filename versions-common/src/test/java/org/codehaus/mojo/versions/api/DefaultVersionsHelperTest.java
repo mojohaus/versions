@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
@@ -41,7 +38,6 @@ import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.model.IgnoreVersion;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
@@ -234,12 +230,8 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
                 .thenReturn( emptyList() );
         return new DefaultVersionsHelper.Builder()
                 .withRepositorySystem( lookup( RepositorySystem.class ) )
-                .withArtifactResolver( new DefaultArtifactResolver() )
                 .withAetherRepositorySystem( aetherRepositorySystem )
-                .withLocalRepository( new DefaultArtifactRepository(
-                        "", "", new DefaultRepositoryLayout() ) )
                 .withWagonManager( lookup( WagonManager.class ) )
-                .withSettings( new Settings() )
                 .withServerId( "" )
                 .withRulesUri( rulesUri )
                 .withLog( mock( Log.class ) )

@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -42,6 +42,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.eclipse.aether.resolution.ArtifactRequest;
 
 /**
  * Attempts to resolve unlocked snapshot dependency versions to the locked timestamp versions used in the build. For
@@ -71,11 +72,9 @@ public class LockSnapshotsMojo
                               org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                               MavenProjectBuilder projectBuilder,
                               WagonManager wagonManager,
-                              ArtifactResolver artifactResolver,
                               Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
     }
 
     /**
@@ -200,7 +199,9 @@ public class LockSnapshotsMojo
 
         try
         {
-            artifactResolver.resolve( artifact, getProject().getRemoteArtifactRepositories(), localRepository );
+            aetherRepositorySystem.resolveArtifact( session.getRepositorySession(),
+                    new ArtifactRequest( RepositoryUtils.toArtifact( artifact ),
+                    getProject().getRemoteProjectRepositories(), getClass().getName() ) );
 
             lockedVersion = artifact.getVersion();
         }
@@ -226,7 +227,10 @@ public class LockSnapshotsMojo
         try
         {
             Artifact depArtifact = getHelper().createDependencyArtifact( dep );
-            artifactResolver.resolve( depArtifact, getProject().getRemoteArtifactRepositories(), localRepository );
+            aetherRepositorySystem.resolveArtifact( session.getRepositorySession(),
+                    new ArtifactRequest( RepositoryUtils.toArtifact( depArtifact ),
+                            getProject().getRemoteProjectRepositories(),
+                            getClass().getName() ) );
 
             lockedVersion = depArtifact.getVersion();
         }

@@ -1,5 +1,3 @@
-package org.codehaus.mojo.versions.utils;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +17,9 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
+package org.codehaus.mojo.versions.utils;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,6 +36,9 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 import org.eclipse.aether.resolution.VersionRangeResult;
@@ -78,8 +82,8 @@ public class MockUtils
         org.eclipse.aether.RepositorySystem repositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
         try
         {
-            when( repositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) ).then(
-                    invocation ->
+            when( repositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
+                    .then( invocation ->
                     {
                         VersionRangeRequest request = invocation.getArgument( 1 );
                         return versionMap.entrySet().stream()
@@ -91,11 +95,28 @@ public class MockUtils
                                 .map( versions -> new VersionRangeResult( request ).setVersions( versions ) )
                                 .orElse( null ); // should tell us if we haven't populated all cases in the test
                     } );
+            when( repositorySystem.resolveArtifact( any( RepositorySystemSession.class ),
+                    any( ArtifactRequest.class ) ) )
+                    .then( invocation ->
+                    {
+                        ArtifactRequest request = invocation.getArgument( 1 );
+                        org.eclipse.aether.artifact.Artifact copiedArtifact =
+                                new org.eclipse.aether.artifact.DefaultArtifact(
+                                        request.getArtifact().getGroupId(),
+                                        request.getArtifact().getArtifactId(),
+                                        request.getArtifact().getClassifier(),
+                                        request.getArtifact().getExtension(),
+                                        request.getArtifact().getVersion() );
+                        copiedArtifact.setFile( mock( File.class ) );
+                        return new ArtifactResult( request )
+                                .setArtifact( copiedArtifact );
+                    } );
         }
-        catch ( VersionRangeResolutionException e )
+        catch ( VersionRangeResolutionException | ArtifactResolutionException e )
         {
             throw new RuntimeException( e );
         }
+
         return repositorySystem;
     }
 
@@ -149,8 +170,6 @@ public class MockUtils
                 .thenReturn( mock( RepositorySystemSession.class ) );
         when( session.getCurrentProject() ).thenReturn( mock( MavenProject.class ) );
         when( session.getCurrentProject().getRemotePluginRepositories() ).thenReturn( emptyList() );
-        when( session.getCurrentProject().getPluginArtifactRepositories() ).thenReturn( emptyList() );
-        when( session.getCurrentProject().getRemoteArtifactRepositories() ).thenReturn( emptyList() );
         when( session.getCurrentProject().getRemoteProjectRepositories() ).thenReturn( emptyList() );
         return session;
     }

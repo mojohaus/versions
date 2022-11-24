@@ -174,8 +174,7 @@ public class DisplayPluginUpdatesMojo
                                      RuntimeInformation runtimeInformation,
                                      Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;
         this.pluginManager = pluginManager;
@@ -460,7 +459,8 @@ public class DisplayPluginUpdatesMojo
                     {
                         getHelper().resolveArtifact( probe, true );
                         MavenProject pluginMavenProject =
-                            projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
+                            projectBuilder.buildFromRepository( probe, session.getCurrentProject()
+                                    .getRemoteArtifactRepositories(), session.getLocalRepository() );
                         ArtifactVersion pluginRequires = getPrerequisitesMavenVersion( pluginMavenProject );
                         if ( artifactVersion == null && compare( specMavenVersion, pluginRequires ) >= 0 )
                         {
@@ -506,7 +506,7 @@ public class DisplayPluginUpdatesMojo
                             minRequires = pluginRequires;
                         }
                     }
-                    catch ( ArtifactResolutionException | ArtifactNotFoundException | ProjectBuildingException e )
+                    catch ( ArtifactResolutionException | ProjectBuildingException e )
                     {
                         // ignore bad version
                     }
@@ -524,14 +524,15 @@ public class DisplayPluginUpdatesMojo
                     {
                         getHelper().resolveArtifact( probe, true );
                         MavenProject mavenProject =
-                            projectBuilder.buildFromRepository( probe, remotePluginRepositories, localRepository );
+                            projectBuilder.buildFromRepository( probe, getProject().getRemoteArtifactRepositories(),
+                                    session.getLocalRepository() );
                         ArtifactVersion requires = getPrerequisitesMavenVersion( mavenProject );
                         if ( minMavenVersion == null || compare( minMavenVersion, requires ) < 0 )
                         {
                             minMavenVersion = requires;
                         }
                     }
-                    catch ( ArtifactResolutionException | ArtifactNotFoundException | ProjectBuildingException e )
+                    catch ( ArtifactResolutionException | ProjectBuildingException e )
                     {
                         // ignore bad version
                     }

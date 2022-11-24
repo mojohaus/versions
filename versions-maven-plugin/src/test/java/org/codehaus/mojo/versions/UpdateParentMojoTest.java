@@ -74,10 +74,9 @@ public class UpdateParentMojoTest
     public void setUp() throws IllegalAccessException
     {
         changeRecorder = new TestChangeRecorder();
-        artifactResolver = mock( ArtifactResolver.class );
 
         mojo = new UpdateParentMojo( repositorySystem, aetherRepositorySystem, null, null,
-                artifactResolver, changeRecorder.asTestMap() )
+                changeRecorder.asTestMap() )
         {{
             setProject( createProject() );
             reactorProjects = Collections.emptyList();

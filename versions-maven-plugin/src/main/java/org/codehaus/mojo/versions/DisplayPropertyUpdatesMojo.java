@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.TreeSet;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -145,11 +144,9 @@ public class DisplayPropertyUpdatesMojo
                                        org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                        MavenProjectBuilder projectBuilder,
                                        WagonManager wagonManager,
-                                       ArtifactResolver artifactResolver,
                                        Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
     }
 
     public void execute()

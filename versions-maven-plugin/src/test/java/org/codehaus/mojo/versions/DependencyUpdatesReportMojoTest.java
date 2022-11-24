@@ -69,7 +69,7 @@ public class DependencyUpdatesReportMojoTest
         TestDependencyUpdatesReportMojo()
         {
             super( MOCK_I18N, mockRepositorySystem(), mockAetherRepositorySystem(), null,
-                    null, new ReportRendererFactoryImpl( MOCK_I18N ) );
+                    new ReportRendererFactoryImpl( MOCK_I18N ) );
             siteTool = MockUtils.mockSiteTool();
 
             project = new MavenProject();

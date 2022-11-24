@@ -26,8 +26,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.enforcer.rule.api.EnforcerLevel;
 import org.apache.maven.enforcer.rule.api.EnforcerRule;
@@ -40,7 +38,6 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.Segment;
@@ -278,11 +275,8 @@ public class MaxDependencyUpdates implements EnforcerRule2
         {
             return new DefaultVersionsHelper.Builder()
                     .withRepositorySystem( ruleHelper.getComponent( RepositorySystem.class ) )
-                    .withArtifactResolver( ruleHelper.getComponent( ArtifactResolver.class ) )
                     .withAetherRepositorySystem( ruleHelper.getComponent( org.eclipse.aether.RepositorySystem.class ) )
-                    .withLocalRepository( (ArtifactRepository) ruleHelper.evaluate( "${localRepository}" ) )
                     .withWagonManager( ruleHelper.getComponent( WagonManager.class ) )
-                    .withSettings( (Settings) ruleHelper.evaluate( "${settings}" ) )
                     .withServerId( serverId )
                     .withRulesUri( rulesUri )
                     .withRuleSet( ruleSet )

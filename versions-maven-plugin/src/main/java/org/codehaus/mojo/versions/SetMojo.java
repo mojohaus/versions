@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -250,12 +249,10 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                     MavenProjectBuilder projectBuilder,
                     WagonManager wagonManager,
-                    ArtifactResolver artifactResolver,
                     Map<String, ChangeRecorder> changeRecorders,
                     Prompter prompter )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
         this.prompter = prompter;
     }
 
@@ -310,7 +307,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
                 getLog().info( "removeSnapshot enabled whilst the version is not a snapshot: nothing to do." );
                 return;
             }
-            if ( settings.isInteractiveMode() )
+            if ( session.getSettings().isInteractiveMode() )
             {
                 try
                 {
@@ -340,7 +337,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
         try
         {
             final MavenProject project = processFromLocalAggregationRoot
-                    ? PomHelper.getLocalRoot( projectBuilder, getProject(), localRepository, null, getLog() )
+                    ? PomHelper.getLocalRoot( projectBuilder, getProject(), session.getLocalRepository(),
+                    null, getLog() )
                     : getProject();
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );

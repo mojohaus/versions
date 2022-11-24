@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -36,10 +35,10 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
-import org.codehaus.mojo.versions.api.recording.ChangeRecord;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
+import org.codehaus.mojo.versions.api.recording.ChangeRecord;
+import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Collections.singletonList;
@@ -70,11 +69,9 @@ public class UseNextReleasesMojo
                                 org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                 MavenProjectBuilder projectBuilder,
                                 WagonManager wagonManager,
-                                ArtifactResolver artifactResolver,
                                 Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
     }
 
     /**

@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -87,11 +86,10 @@ public class PluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdate
     protected PluginUpdatesReportMojo( I18N i18n,
                                        RepositorySystem repositorySystem,
                                        org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                       ArtifactResolver artifactResolver,
                                        WagonManager wagonManager,
                                        ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, aetherRepositorySystem, artifactResolver, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, wagonManager, rendererFactory );
     }
 
     /**

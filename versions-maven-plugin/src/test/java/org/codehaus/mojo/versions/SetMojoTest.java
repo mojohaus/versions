@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -48,7 +47,7 @@ public class SetMojoTest extends AbstractMojoTestCase
     @Test
     public void testGetIncrementedVersion() throws MojoExecutionException
     {
-        new SetMojo( null, null, null, null, null, null, null )
+        new SetMojo( null, null, null, null, null, null )
         {
             {
                 assertThat( getIncrementedVersion( "1.0.0", null ), is( "1.0.1-SNAPSHOT" ) );
@@ -63,7 +62,7 @@ public class SetMojoTest extends AbstractMojoTestCase
     @Test
     public void testNextSnapshotIndexLowerBound()
     {
-        new SetMojo( null, null, null, null, null, null, null )
+        new SetMojo( null, null, null, null, null, null )
         {
             {
                 try
@@ -83,7 +82,7 @@ public class SetMojoTest extends AbstractMojoTestCase
     @Test
     public void testNextSnapshotIndexUpperBound()
     {
-        new SetMojo( null, null, null, null, null, null, null )
+        new SetMojo( null, null, null, null, null, null )
         {
             {
                 try
@@ -105,7 +104,7 @@ public class SetMojoTest extends AbstractMojoTestCase
     {
         try
         {
-            new SetMojo( null, null, null, null, null, null, null )
+            new SetMojo( null, null, null, null, null, null )
             {
                 {
                     project = new MavenProject();
@@ -146,9 +145,7 @@ public class SetMojoTest extends AbstractMojoTestCase
 
         // no exception should be thrown, the file should stay with version "1.0"
         SetMojo secondRun = (SetMojo) mojoRule.lookupConfiguredMojo( tempDir.toFile(), "set" );
-        MavenExecutionRequest request =
-                (MavenExecutionRequest) getVariableValueFromObject( secondRun.settings, "request" );
-        setVariableValueToObject( request, "interactiveMode", false );
+        secondRun.session.getSettings().setInteractiveMode( false );
         secondRun.execute();
         assertThat( String.join( "", Files.readAllLines( tempDir.resolve( "pom.xml" ) ) ),
                 containsString( "<version>1.0</version>" ) );

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Scm;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -71,11 +70,9 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                           MavenProjectBuilder projectBuilder,
                           WagonManager wagonManager,
-                          ArtifactResolver artifactResolver,
                           Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, artifactResolver,
-                changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
     }
 
     /**

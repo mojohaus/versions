@@ -17,7 +17,7 @@ public class SeparatePatternsForIncludesAnExcludesTest
     public void setUp()
         throws Exception
     {
-        mojo = new AbstractVersionsDependencyUpdaterMojo( null, null, null, null, null, null )
+        mojo = new AbstractVersionsDependencyUpdaterMojo( null, null, null, null, null )
         {
             @Override
             protected void update( ModifiedPomXMLEventReader pom )
