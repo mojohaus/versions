@@ -106,6 +106,10 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
+        if ( upToDate && !verboseSummary )
+        {
+            return;
+        }
 
         sink.tableRow();
 
@@ -123,6 +127,10 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
+        if ( upToDate && !verboseDetail )
+        {
+            return;
+        }
 
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );

@@ -140,6 +140,12 @@ public abstract class AbstractVersionsReport<T>
     @Parameter( property = "allowSnapshots", defaultValue = "false" )
     protected boolean allowSnapshots;
 
+    @Parameter( property = "verboseSummary", defaultValue = "true" )
+    protected boolean verboseSummary = true;
+
+    @Parameter( property = "verboseDetail", defaultValue = "true" )
+    protected boolean verboseDetail = true;
+
     /**
      * Our versions helper.
      */
@@ -290,6 +296,7 @@ public abstract class AbstractVersionsReport<T>
         {
             final ArtifactVersions artifactVersions =
                 getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
+            artifactVersions.setVerbose( verboseDetail );
             return artifactVersions.getNewestVersion( versionRange, includeSnapshots );
         }
         catch ( VersionRetrievalException e )

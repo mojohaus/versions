@@ -114,7 +114,7 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
                                     .withScope( artifactVersions.getArtifact().getScope() )
                                     .withType( artifactVersions.getArtifact().getType() )
                                     .withClassifier( artifactVersions.getArtifact().getClassifier() )
-                                    .build(), artifactVersions ) )
+                                    .build(), artifactVersions ), verboseSummary, verboseDetail )
                     .render();
         }
         catch ( VersionRetrievalException e )

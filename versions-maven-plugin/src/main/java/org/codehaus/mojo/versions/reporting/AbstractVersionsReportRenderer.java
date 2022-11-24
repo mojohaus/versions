@@ -71,6 +71,20 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     protected final SinkEventAttributes headerAttributes
             = new SinkEventAttributeSet( SinkEventAttributes.WIDTH, "30%" );
 
+    protected boolean verboseSummary = true;
+
+    protected boolean verboseDetail = true;
+
+    public void setVerboseSummary( boolean verboseSummary )
+    {
+        this.verboseSummary = verboseSummary;
+    }
+
+    public void setVerboseDetail( boolean verboseDetail )
+    {
+        this.verboseDetail = verboseDetail;
+    }
+
     protected AbstractVersionsReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName, T model )
     {
         super( sink, i18n, locale, bundleName );
@@ -234,6 +248,10 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         details.setCurrentVersion( artifact.getVersion() );
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
+        if ( upToDate && !verboseSummary )
+        {
+            return;
+        }
 
         sink.tableRow();
 
@@ -268,6 +286,10 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
+        if ( upToDate && !verboseDetail )
+        {
+            return;
+        }
 
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );

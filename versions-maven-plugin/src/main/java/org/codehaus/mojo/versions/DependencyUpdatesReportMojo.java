@@ -230,7 +230,8 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
             {
                 if ( "html".equals( format ) )
                 {
-                    rendererFactory.createReportRenderer( getOutputName(), sink, locale, model ).render();
+                    rendererFactory.createReportRenderer( getOutputName(), sink, locale, model,
+                                                            verboseSummary, verboseDetail ).render();
                 }
                 else if ( "xml".equals( format ) )
                 {
