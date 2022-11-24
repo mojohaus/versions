@@ -19,31 +19,19 @@ package org.codehaus.mojo.versions.reporting;
  * under the License.
  */
 
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.doxia.sink.SinkEventAttributes;
-import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
-import org.codehaus.plexus.util.StringUtils;
 
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
-import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
  * @since 1.0-beta-1
@@ -120,58 +108,13 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.tableRow();
-        sink.tableCell();
-        if ( upToDate )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( "${" + property.getName() + "}" );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( details.getCurrentVersion().toString() );
-        sink.tableCell_();
 
         sink.tableCell();
-        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
-            safeBold_();
-        }
+        renderIcon( upToDate );
         sink.tableCell_();
 
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
+        renderCells( "${" + property.getName() + "}", details.getCurrentVersion() );
+        renderNewestVersions( details );
 
         sink.tableRow_();
     }
@@ -182,63 +125,39 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
-        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "70%" );
-        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "30%" );
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.status" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-        {
-            renderWarningIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.otherUpdatesAvailable" ) );
-        }
-        else if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-        {
-            renderWarningIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.incrementalUpdatesAvailable" ) );
-        }
-        else if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-        {
-            renderWarningIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.minorUpdatesAvailable" ) );
-        }
-        else if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-        {
-            renderWarningIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.majorUpdatesAvailable" ) );
-        }
-        else
-        {
-            renderSuccessIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.noUpdatesAvailable" ) );
-        }
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.property" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( "${" + property.getName() + "}" );
-        sink.tableCell_();
-        sink.tableRow_();
 
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.associations" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
+        renderTwoCellsRow( "report.status", () -> renderStatus( details ) );
+        renderTwoCellsRow( "report.property", "${" + property.getName() + "}" );
+        renderTwoCellsRow( "report.associations", () -> renderAssociations( details ) );
+        renderTwoCellsRow( "report.currentVersion", details.getCurrentVersion().toString() );
+        if ( !upToDate )
+        {
+            renderTwoCellsRow( "report.updateVersions", () -> renderVersions( allUpdates, details ) );
+        }
+        renderTwoCellsRow( "report.versionRange", details.getCurrentVersion().toString() );
+        renderTwoCellsRow( "report.autoLinkDependencies", property.isAutoLinkDependencies() );
+        renderTwoCellsRow( "report.banSnapshots", property.isBanSnapshots() );
+        renderTwoCellsRow( "report.searchReactor", property.isSearchReactor() );
+        renderTwoCellsRow( "report.preferReactor", property.isPreferReactor() );
+
+        sink.tableRows_();
+        sink.table_();
+    }
+
+    /**
+     * Renders a row of two cells, the first cell being an header and the second cell being a non-header cell.
+     * @param textKey the key of the text to be rendered in the header cell.
+     * @param b a yes/no value to be rendered in the non-header cell.
+     */
+    private void renderTwoCellsRow( String textKey, boolean b )
+    {
+        renderTwoCellsRow( textKey, getText( b ? "report.yes" : "report.no" ) );
+    }
+
+    private void renderAssociations( PropertyVersions details )
+    {
         ArtifactAssociation[] associations = details.getAssociations();
         for ( int i = 0; i < associations.length; i++ )
         {
@@ -248,141 +167,6 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
             }
             sink.text( ArtifactUtils.versionlessKey( associations[i].getArtifact() ) );
         }
-        sink.tableCell_();
-        sink.tableRow_();
-
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.currentVersion" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( details.getCurrentVersion().toString() );
-        sink.tableCell_();
-        sink.tableRow_();
-        if ( !upToDate )
-        {
-            Set<String> rangeVersions = getVersionsInRange( property, details, allUpdates );
-            sink.tableRow();
-            sink.tableHeaderCell( headerAttributes );
-            sink.text( getText( "report.updateVersions" ) );
-            sink.tableHeaderCell_();
-            sink.tableCell( cellAttributes );
-            boolean someNotAllowed = false;
-            for ( int i = 0; i < allUpdates.length; i++ )
-            {
-                if ( i > 0 )
-                {
-                    sink.lineBreak();
-                }
-                boolean allowed = ( rangeVersions.contains( allUpdates[i].toString() ) );
-                String label = getLabel( allUpdates[i], details );
-                if ( !allowed )
-                {
-                    sink.text( "* " );
-                    someNotAllowed = true;
-                }
-                if ( allowed && label != null )
-                {
-                    safeBold();
-                }
-                sink.text( allUpdates[i].toString() );
-                if ( label != null )
-                {
-                    if ( allowed )
-                    {
-                        safeBold_();
-                    }
-                    sink.nonBreakingSpace();
-                    safeItalic();
-                    sink.text( label );
-                    safeItalic_();
-                }
-            }
-            if ( someNotAllowed )
-            {
-                sink.lineBreak();
-                sink.lineBreak();
-                sink.text( "* " );
-                safeItalic();
-                sink.text( getText( "report.excludedVersion" ) );
-                safeItalic_();
-            }
-            sink.tableCell_();
-            sink.tableRow_();
-        }
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.versionRange" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( StringUtils.isEmpty( property.getVersion() ) ? "[,)" : property.getVersion() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.autoLinkDependencies" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( property.isAutoLinkDependencies() ? getText( "report.yes" ) : getText( "report.no" ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.banSnapshots" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( property.isBanSnapshots() ? getText( "report.yes" ) : getText( "report.no" ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.searchReactor" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( property.isSearchReactor() ? getText( "report.yes" ) : getText( "report.no" ) );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.preferReactor" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( property.isPreferReactor() ? getText( "report.yes" ) : getText( "report.no" ) );
-        sink.tableCell_();
-        sink.tableRow_();
-
-        sink.tableRows_();
-        sink.table_();
-    }
-
-    @SuppressWarnings( "checkstyle:MethodLength" )
-    protected Set<String> getVersionsInRange( Property property, PropertyVersions versions,
-                                              ArtifactVersion[] artifactVersions )
-    {
-        VersionRange range;
-        Set<String> rangeVersions = new HashSet<>();
-        ArtifactVersion[] tmp;
-        if ( property.getVersion() != null )
-        {
-            try
-            {
-                range = VersionRange.createFromVersionSpec( property.getVersion() );
-                tmp = versions.getAllUpdates( range );
-            }
-            catch ( InvalidVersionSpecificationException e )
-            {
-                tmp = artifactVersions;
-            }
-        }
-        else
-        {
-            tmp = artifactVersions;
-        }
-        for ( ArtifactVersion artifactVersion : tmp )
-        {
-            rangeVersions.add( artifactVersion.toString() );
-        }
-        return rangeVersions;
     }
 
     @Override

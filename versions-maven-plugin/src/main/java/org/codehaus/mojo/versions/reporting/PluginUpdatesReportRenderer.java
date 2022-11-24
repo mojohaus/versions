@@ -26,8 +26,6 @@ import java.util.Map;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.doxia.sink.SinkEventAttributes;
-import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
@@ -35,11 +33,6 @@ import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
 
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
-import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
  * @since 1.0-beta-1
@@ -153,79 +146,12 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
 
         sink.tableRow();
         sink.tableCell();
-        if ( upToDate )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getGroupId() );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getArtifactId() );
-        sink.tableCell_();
-        sink.tableCell();
-        if ( !details.isArtifactUpdateAvailable() )
-        {
-            safeBold();
-        }
-        sink.text( artifact.getVersion() );
-        if ( !details.isArtifactUpdateAvailable() )
-        {
-            safeBold_();
-        }
-        sink.tableCell_();
 
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( details.isDependencyUpdateAvailable() )
-        {
-            renderWarningIcon();
-        }
-        else
-        {
-            renderSuccessIcon();
-        }
-        sink.tableCell_();
+        renderIcon( upToDate );
+        renderCells( artifact.getGroupId(), artifact.getArtifactId() );
+        renderBoldCell( upToDate, artifact.getVersion() );
+        renderNewestVersions( details );
+        renderIcon( !details.isDependencyUpdateAvailable() );
 
         sink.tableRow_();
     }
@@ -260,110 +186,24 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
 
     private void renderPluginDetailTable( PluginUpdatesDetails details )
     {
-        // warning: using caches here may break plugin report
+        // warning: using caches here might break plugin report
         ArtifactVersion[] allUpdates = details.getAllUpdates( empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
-        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "70%" );
-        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "30%" );
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.status" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        if ( details.getNewestUpdate( of( SUBINCREMENTAL ) ) != null )
-        {
-            renderWarningIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.otherUpdatesAvailable" ) );
-        }
-        else if ( details.getNewestUpdate( of( INCREMENTAL ) ) != null )
-        {
-            renderWarningIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.incrementalUpdatesAvailable" ) );
-        }
-        else if ( details.getNewestUpdate( of( MINOR ) ) != null )
-        {
-            renderWarningIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.minorUpdatesAvailable" ) );
-        }
-        else if ( details.getNewestUpdate( of( MAJOR ) ) != null )
-        {
-            renderWarningIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.majorUpdatesAvailable" ) );
-        }
-        else
-        {
-            renderSuccessIcon();
-            sink.nonBreakingSpace();
-            sink.text( getText( "report.noUpdatesAvailable" ) );
-        }
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.groupId" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( details.getGroupId() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.artifactId" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( details.getArtifactId() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.currentVersion" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( details.getVersion() );
-        sink.tableCell_();
-        sink.tableRow_();
+
+        renderTwoCellsRow( "report.status", () -> renderStatus( details ) );
+        renderTwoCellsRow( "report.groupId", details.getGroupId() );
+        renderTwoCellsRow( "report.artifactId", details.getArtifactId() );
+        renderTwoCellsRow( "report.currentVersion", details.getVersion() );
         if ( !upToDate )
         {
-            sink.tableRow();
-            sink.tableHeaderCell( headerAttributes );
-            sink.text( getText( "report.updateVersions" ) );
-            sink.tableHeaderCell_();
-            sink.tableCell( cellAttributes );
-            for ( int i = 0; i < allUpdates.length; i++ )
-            {
-                if ( i > 0 )
-                {
-                    sink.lineBreak();
-                }
-                String label = getLabel( allUpdates[i], details );
-                if ( label != null )
-                {
-                    safeBold();
-                }
-                sink.text( allUpdates[i].toString() );
-                if ( label != null )
-                {
-                    safeBold_();
-                    sink.nonBreakingSpace();
-                    safeItalic();
-                    sink.text( label );
-                    safeItalic_();
-                }
-            }
-            sink.tableCell_();
-            sink.tableRow_();
+            renderTwoCellsRow( "report.updateVersions", () -> renderVersions( allUpdates, details ) );
         }
+
         sink.tableRows_();
         sink.table_();
     }
-}
 
+}

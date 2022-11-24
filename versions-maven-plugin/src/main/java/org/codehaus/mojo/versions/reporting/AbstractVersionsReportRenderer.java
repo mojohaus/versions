@@ -19,11 +19,15 @@ package org.codehaus.mojo.versions.reporting;
  * under the License.
  */
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.Restriction;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.sink.SinkEventAttributes;
 import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
@@ -63,6 +67,9 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
 
     protected ArtifactVersionsCache allUpdatesCache
             = new ArtifactVersionsCache( AbstractVersionDetails::getAllUpdates );
+
+    protected final SinkEventAttributes headerAttributes
+            = new SinkEventAttributeSet( SinkEventAttributes.WIDTH, "30%" );
 
     protected AbstractVersionsReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName, T model )
     {
@@ -139,18 +146,17 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         renderStatRow( "report.overview.numNewerMajorAvailable", stats.getMajor(), false );
     }
 
+    /**
+     * Renders one table row for the given statistics.
+     * @param textKey the key of the text to be rendered.
+     * @param statCount the number of artifacts with the given stat.
+     * @param forceSuccessIcon if true, the success icon will be rendered regardless.
+     */
     protected void renderStatRow( String textKey, int statCount, boolean forceSuccessIcon )
     {
         sink.tableRow();
         sink.tableCell();
-        if ( statCount == 0 || forceSuccessIcon )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
+        renderIcon( statCount == 0 || forceSuccessIcon );
         sink.tableCell_();
         sink.tableCell();
         sink.text( getText( textKey ) );
@@ -159,6 +165,22 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         sink.text( Integer.toString( statCount ) );
         sink.tableCell_();
         sink.tableRow_();
+    }
+
+    /**
+     * Renders the success or warning icon.
+     * @param success if true, the success icon will be rendered, otherwise the warning icon will be rendered.
+     */
+    protected void renderIcon( boolean success )
+    {
+        if ( success )
+        {
+            renderSuccessIcon();
+        }
+        else
+        {
+            renderWarningIcon();
+        }
     }
 
     /**
@@ -207,82 +229,38 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
                 "report.latestIncremental", "report.latestMinor", "report.latestMajor" );
     }
 
-    protected void renderSummaryTableRow( Dependency artifact, ArtifactVersions details,
-                                          boolean includeScope )
+    protected void renderSummaryTableRow( Dependency artifact, ArtifactVersions details, boolean includeScope )
     {
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.tableRow();
+
         sink.tableCell();
-        if ( upToDate )
-        {
-            renderSuccessIcon();
-        }
-        else
-        {
-            renderWarningIcon();
-        }
+        renderIcon( upToDate );
         sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getGroupId() );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getArtifactId() );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getVersion() );
-        sink.tableCell_();
+
+        renderCells( artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion() );
         if ( includeScope )
         {
-            sink.tableCell();
-            sink.text( artifact.getScope() );
-            sink.tableCell_();
+            renderCell( artifact.getScope() );
         }
-        sink.tableCell();
-        sink.text( artifact.getClassifier() );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( artifact.getType() );
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( INCREMENTAL ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MINOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
-
-        sink.tableCell();
-        if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-        {
-            safeBold();
-            sink.text( newestUpdateCache.get( details, of( MAJOR ) ).toString() );
-            safeBold_();
-        }
-        sink.tableCell_();
+        renderCells( artifact.getClassifier(), artifact.getType() );
+        renderNewestVersions( details );
 
         sink.tableRow_();
+    }
+
+    /**
+     * Renders the newest versions for the given artifact.
+     * @param details the artifact for which to render the newest versions.
+     */
+    protected void renderNewestVersions( AbstractVersionDetails details )
+    {
+        renderBoldCell( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) );
+        renderBoldCell( newestUpdateCache.get( details, of( INCREMENTAL ) ) );
+        renderBoldCell( newestUpdateCache.get( details, of( MINOR ) ) );
+        renderBoldCell( newestUpdateCache.get( details, of( MAJOR ) ) );
     }
 
     @SuppressWarnings( "checkstyle:MethodLength" )
@@ -291,17 +269,68 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
-        final SinkEventAttributes headerAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "70%" );
-        final SinkEventAttributes cellAttributes = new SinkEventAttributeSet();
-        headerAttributes.addAttribute( SinkEventAttributes.WIDTH, "30%" );
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
+
+        renderTwoCellsRow( "report.status", () -> renderStatus( details ) );
+        renderTwoCellsRow( "report.groupId", artifact.getGroupId() );
+        renderTwoCellsRow( "report.artifactId", artifact.getArtifactId() );
+        renderTwoCellsRow( "report.currentVersion", artifact.getVersion() );
+        if ( includeScope )
+        {
+            renderTwoCellsRow( "report.scope", artifact.getScope() );
+        }
+        renderTwoCellsRow( "report.classifier", artifact.getClassifier() );
+        renderTwoCellsRow( "report.type", artifact.getType() );
+        if ( !upToDate )
+        {
+            renderTwoCellsRow( "report.updateVersions", () -> renderVersions( allUpdates, details ) );
+        }
+
+        sink.tableRows_();
+        sink.table_();
+    }
+
+    /**
+     * Renders a row of two cells, the first cell being an header and the second cell being a non-header cell.
+     * @param textKey the key of the text to be rendered.
+     * @param textValue the value of the text to be rendered.
+     */
+    protected void renderTwoCellsRow( String textKey, String textValue )
+    {
         sink.tableRow();
         sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.status" ) );
+        sink.text( getText( textKey ) );
         sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
+        sink.tableCell();
+        sink.text( textValue );
+        sink.tableCell_();
+        sink.tableRow_();
+    }
+
+    /**
+     * Renders a row of two cells, the first cell being an header and the second cell being a non-header cell.
+     * @param textKey the key of the text to be rendered.
+     * @param runnable the runnable to be executed to render the second cell content.
+     */
+    protected void renderTwoCellsRow( String textKey, Runnable runnable )
+    {
+        sink.tableRow();
+        sink.tableHeaderCell( headerAttributes );
+        sink.text( getText( textKey ) );
+        sink.tableHeaderCell_();
+        sink.tableCell();
+        runnable.run();
+        sink.tableCell_();
+        sink.tableRow_();
+    }
+
+    /**
+     * Renders the status of the given artifact.
+     * @param details the artifact for which to render the status.
+     */
+    protected void renderStatus( AbstractVersionDetails details )
+    {
         if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
         {
             renderWarningIcon();
@@ -332,111 +361,82 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
             sink.nonBreakingSpace();
             sink.text( getText( "report.noUpdatesAvailable" ) );
         }
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.groupId" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getGroupId() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.artifactId" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getArtifactId() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.currentVersion" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getVersion() );
-        sink.tableCell_();
-        sink.tableRow_();
-        if ( includeScope )
+    }
+
+    private List<Restriction> getArtifactVersionRange( AbstractVersionDetails details )
+    {
+        try
         {
-            sink.tableRow();
-            sink.tableHeaderCell( headerAttributes );
-            sink.text( getText( "report.scope" ) );
-            sink.tableHeaderCell_();
-            sink.tableCell( cellAttributes );
-            sink.text( artifact.getScope() );
-            sink.tableCell_();
-            sink.tableRow_();
+            String spec = details.getCurrentVersion().toString();
+            VersionRange range = VersionRange.createFromVersionSpec( spec );
+            return range.getRestrictions();
         }
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.classifier" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getClassifier() );
-        sink.tableCell_();
-        sink.tableRow_();
-        sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( "report.type" ) );
-        sink.tableHeaderCell_();
-        sink.tableCell( cellAttributes );
-        sink.text( artifact.getType() );
-        sink.tableCell_();
-        sink.tableRow_();
-        if ( !upToDate )
+        catch ( InvalidVersionSpecificationException ignored )
         {
-            sink.tableRow();
-            sink.tableHeaderCell( headerAttributes );
-            sink.text( getText( "report.updateVersions" ) );
-            sink.tableHeaderCell_();
-            sink.tableCell( cellAttributes );
-            for ( int i = 0; i < allUpdates.length; i++ )
-            {
-                if ( i > 0 )
-                {
-                    sink.lineBreak();
-                }
-                String label = getLabel( allUpdates[i], details );
-                if ( label != null )
-                {
-                    safeBold();
-                }
-                sink.text( allUpdates[i].toString() );
-                if ( label != null )
-                {
-                    safeBold_();
-                    sink.nonBreakingSpace();
-                    safeItalic();
-                    sink.text( label );
-                    safeItalic_();
-                }
-            }
-            sink.tableCell_();
-            sink.tableRow_();
+            ignored.printStackTrace( System.err );
         }
-        sink.tableRows_();
-        sink.table_();
+        return Collections.EMPTY_LIST;
     }
 
     /**
-     * Renders a table header containing elements denoted by the given keys
-     * @param keys variable argument list containing keys of the property file to retrieve the
-     *             headers from
+     * Renders the list of versions that are available for the given artifact or property.
+     * @param allUpdates the list of all updates available.
+     * @param details TODO.
      */
-    protected void renderTableHeaderCells( String... keys )
+    protected void renderVersions( ArtifactVersion[] allUpdates, AbstractVersionDetails details )
     {
-        Arrays.stream( keys )
-                .map( this::getText )
-                .forEachOrdered( str ->
+        List<Restriction> versionRange = getArtifactVersionRange( details );
+        boolean someNotAllowed = false;
+        for ( int i = 0; i < allUpdates.length; i++ )
+        {
+            if ( i > 0 )
+            {
+                sink.lineBreak();
+            }
+            // if candidate version in range, display no star.
+            ArtifactVersion candidate = allUpdates[i];
+            boolean allowed = versionRange.stream().anyMatch( restriction ->
+                    details.isVersionInRestriction( restriction, candidate ) );
+            String label = getLabel( allUpdates[i], details );
+            if ( !allowed )
+            {
+                sink.text( "* " );
+                someNotAllowed = true;
+            }
+            if ( allowed && label != null )
+            {
+                safeBold();
+            }
+            sink.text( allUpdates[i].toString() );
+            if ( label != null )
+            {
+                if ( allowed )
                 {
-                    sink.tableHeaderCell();
-                    sink.text( str );
-                    sink.tableHeaderCell_();
-                } );
+                    safeBold_();
+                }
+                sink.nonBreakingSpace();
+                safeItalic();
+                sink.text( label );
+                safeItalic_();
+            }
+        }
+        if ( someNotAllowed )
+        {
+            sink.lineBreak();
+            sink.lineBreak();
+            sink.text( "* " );
+            safeItalic();
+            sink.text( getText( "report.excludedVersion" ) );
+            safeItalic_();
+        }
     }
 
+    /**
+     * Returns a text label to describe if the given version is a major, minor, incremental or subincremental update.
+     * @param version the version to describe.
+     * @param details the artifact for which to render the versions.
+     * @return a text label to describe if the given version is a major, minor, incremental or subincremental update.
+     */
     protected String getLabel( ArtifactVersion version, AbstractVersionDetails details )
     {
 
@@ -462,4 +462,5 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
 
         return null;
     }
+
 }

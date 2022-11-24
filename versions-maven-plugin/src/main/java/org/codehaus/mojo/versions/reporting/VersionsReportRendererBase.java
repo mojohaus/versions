@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.reporting;
  * under the License.
  */
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -139,6 +140,88 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
         catch ( NoSuchMethodError e )
         {
             // ignore Maven 2.1.0
+        }
+    }
+
+    /**
+     * Renders a table header containing elements denoted by the given keys
+     * @param keys variable argument list containing keys of the property file to retrieve the
+     *             headers from
+     */
+    protected void renderTableHeaderCells( String... keys )
+    {
+        Arrays.stream( keys )
+                .map( this::getText )
+                .forEachOrdered( str ->
+                {
+                    sink.tableHeaderCell();
+                    sink.text( str );
+                    sink.tableHeaderCell_();
+                } );
+    }
+
+    /**
+     * Renders a bold table cell containing the given text.
+     * @param object the text to be rendered, or null for an empty cell.
+     */
+    protected void renderBoldCell( Object object )
+    {
+        renderBoldCell( true, object );
+    }
+    /**
+     * Renders a table cell containing the given text.
+     * @param object the text to be rendered, or null for an empty cell.
+     */
+    protected void renderCell( Object object )
+    {
+        renderBoldCell( false, object );
+    }
+    /**
+     * Renders multiple cells containing the given texts.
+     * @param objects the texts to be rendered, null for empty cells.
+     */
+    protected void renderCells( Object... objects )
+    {
+        for ( Object object : objects )
+        {
+            renderBoldCell( false, object );
+        }
+    }
+
+    /**
+     * Renders a bold table cell containing the given text.
+     * @param bold true to render the cell in bold, false otherwise.
+     * @param object the text to be rendered, or null for an empty cell.
+     */
+    protected void renderBoldCell( boolean bold, Object object )
+    {
+        sink.tableCell();
+        renderBoldText( bold, object );
+        sink.tableCell_();
+    }
+
+    /**
+     * Renders a bold text.
+     * @param bold true to render the text in bold, false otherwise.
+     * @param object the text to be rendered, or null for an empty cell.
+     */
+    protected void renderBoldText( boolean bold, Object object )
+    {
+        if ( object != null )
+        {
+            String text = object.toString();
+            if ( !text.isEmpty() )
+            {
+                if ( bold )
+                {
+                    safeBold();
+                }
+                sink.text( text );
+                if ( bold )
+                {
+                    safeBold_();
+                }
+            }
         }
     }
 
