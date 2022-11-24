@@ -465,7 +465,7 @@ public abstract class AbstractVersionDetails
      * @param candidate the version to check.
      * @return true if the candidate version is within the range of the restriction parameter.
      */
-    private boolean isVersionInRestriction( Restriction restriction, ArtifactVersion candidate )
+    public boolean isVersionInRestriction( Restriction restriction, ArtifactVersion candidate )
     {
         ArtifactVersion lowerBound = restriction.getLowerBound();
         ArtifactVersion upperBound = restriction.getUpperBound();

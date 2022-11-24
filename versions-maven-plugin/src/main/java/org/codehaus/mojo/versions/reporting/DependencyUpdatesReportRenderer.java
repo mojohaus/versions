@@ -98,4 +98,5 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel> e
         renderDependencyDetailTable( artifact, details, true );
         sink.section2_();
     }
+
 }
