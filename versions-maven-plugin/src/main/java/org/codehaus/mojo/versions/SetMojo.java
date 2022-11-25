@@ -49,7 +49,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
@@ -244,15 +244,23 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
      */
     private final transient List<DefaultVersionChange> sourceChanges = new ArrayList<>();
 
+    /**
+     * The (injected) instance of {@link ProjectBuilder}
+     *
+     * @since 2.14.0
+     */
+    protected final ProjectBuilder projectBuilder;
+
     @Inject
     public SetMojo( RepositorySystem repositorySystem,
                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                    MavenProjectBuilder projectBuilder,
+                    ProjectBuilder projectBuilder,
                     WagonManager wagonManager,
                     Map<String, ChangeRecorder> changeRecorders,
                     Prompter prompter )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        this.projectBuilder = projectBuilder;
         this.prompter = prompter;
     }
 
@@ -337,8 +345,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
         try
         {
             final MavenProject project = processFromLocalAggregationRoot
-                    ? PomHelper.getLocalRoot( projectBuilder, getProject(), session.getLocalRepository(),
-                    null, getLog() )
+                    ? PomHelper.getLocalRoot( projectBuilder, session, getLog() )
                     : getProject();
 
             getLog().info( "Local aggregation root: " + project.getBasedir() );

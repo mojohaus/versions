@@ -34,7 +34,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -75,11 +74,10 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
     @Inject
     public UseDepVersionMojo( RepositorySystem repositorySystem,
                               org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                              MavenProjectBuilder projectBuilder,
                               WagonManager wagonManager,
                               Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
     }
 
     @Override

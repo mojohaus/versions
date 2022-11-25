@@ -53,7 +53,6 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -84,10 +83,10 @@ import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.version.PluginVersionNotFoundException;
 import org.apache.maven.plugin.version.PluginVersionResolutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.project.DefaultProjectBuilderConfiguration;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
@@ -159,22 +158,29 @@ public class DisplayPluginUpdatesMojo
      */
     private RuntimeInformation runtimeInformation;
 
+    /**
+     * The (injected) instance of {@link ProjectBuilder}
+     *
+     * @since 2.14.0
+     */
+    protected final ProjectBuilder projectBuilder;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     @Inject
     @SuppressWarnings( "checkstyle:ParameterNumber" )
     public DisplayPluginUpdatesMojo( RepositorySystem repositorySystem,
                                      org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                     MavenProjectBuilder projectBuilder,
+                                     ProjectBuilder projectBuilder,
                                      WagonManager wagonManager,
-                                     ArtifactResolver artifactResolver,
                                      LifecycleExecutor lifecycleExecutor,
                                      ModelInterpolator modelInterpolator,
                                      PluginManager pluginManager,
                                      RuntimeInformation runtimeInformation,
                                      Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        this.projectBuilder = projectBuilder;
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;
         this.pluginManager = pluginManager;
@@ -297,9 +303,8 @@ public class DisplayPluginUpdatesMojo
         Map<String, String> superPomPluginManagement;
         try
         {
-            MavenProject superProject =
-                projectBuilder.buildStandaloneSuperProject( new DefaultProjectBuilderConfiguration() );
-            superPomPluginManagement = new HashMap<>( getPluginManagement( superProject.getOriginalModel() ) );
+            superPomPluginManagement = new HashMap<>( getPluginManagement(
+                    PomHelper.getStandaloneSuperProject( projectBuilder, session, getLog() ).getOriginalModel() ) );
         }
         catch ( ProjectBuildingException e )
         {
@@ -448,20 +453,10 @@ public class DisplayPluginUpdatesMojo
                 ArtifactVersion minRequires = null;
                 for ( int j = newerVersions.length - 1; j >= 0; j-- )
                 {
-                    Artifact probe = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
-                        .withGroupId( groupId )
-                        .withArtifactId( artifactId )
-                        .withVersion( newerVersions[j].toString() )
-                        .withType( "pom" )
-                        .withScope( Artifact.SCOPE_RUNTIME )
-                        .build() );
                     try
                     {
-                        getHelper().resolveArtifact( probe, true );
-                        MavenProject pluginMavenProject =
-                            projectBuilder.buildFromRepository( probe, session.getCurrentProject()
-                                    .getRemoteArtifactRepositories(), session.getLocalRepository() );
-                        ArtifactVersion pluginRequires = getPrerequisitesMavenVersion( pluginMavenProject );
+                        ArtifactVersion pluginRequires = getPrerequisitesMavenVersion(
+                                getPluginProject( groupId, artifactId, newerVersions[j].toString() ) );
                         if ( artifactVersion == null && compare( specMavenVersion, pluginRequires ) >= 0 )
                         {
                             // ok, newer version compatible with current specMavenVersion
@@ -513,20 +508,10 @@ public class DisplayPluginUpdatesMojo
                 }
                 if ( effectiveVersion != null )
                 {
-                    Artifact probe = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
-                            .withGroupId( groupId )
-                            .withArtifactId( artifactId )
-                            .withVersion( effectiveVersion )
-                            .withType( "pom" )
-                            .withScope( Artifact.SCOPE_RUNTIME )
-                            .build() );
                     try
                     {
-                        getHelper().resolveArtifact( probe, true );
-                        MavenProject mavenProject =
-                            projectBuilder.buildFromRepository( probe, getProject().getRemoteArtifactRepositories(),
-                                    session.getLocalRepository() );
-                        ArtifactVersion requires = getPrerequisitesMavenVersion( mavenProject );
+                        ArtifactVersion requires = getPrerequisitesMavenVersion(
+                                getPluginProject( groupId, artifactId, effectiveVersion ) );
                         if ( minMavenVersion == null || compare( minMavenVersion, requires ) < 0 )
                         {
                             minMavenVersion = requires;
@@ -714,6 +699,43 @@ public class DisplayPluginUpdatesMojo
             }
         }
         logLine( false, "" );
+    }
+
+    /**
+     * Builds a {@link MavenProject} instance for the plugin with a given {@code groupId},
+     * {@code artifactId}, and {@code version}.
+     * @param groupId {@code groupId} of the plugin
+     * @param artifactId {@code artifactId} of the plugin
+     * @param version {@code version} of the plugin
+     * @return retrieved {@link MavenProject} instance for the given plugin
+     * @throws MojoExecutionException thrown if the artifact for the plugin could not be constructed
+     * @throws ProjectBuildingException thrown if the {@link MavenProject} instance could not be constructed
+     */
+    private MavenProject getPluginProject( String groupId, String artifactId, String version )
+            throws MojoExecutionException, ProjectBuildingException, ArtifactResolutionException
+    {
+        Artifact probe = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
+                .withGroupId( groupId )
+                .withArtifactId( artifactId )
+                .withVersion( version )
+                .withType( "pom" )
+                .withScope( Artifact.SCOPE_RUNTIME )
+                .build() );
+        getHelper().resolveArtifact( probe, true );
+        ProjectBuildingResult result =
+                projectBuilder.build( probe, true,
+                        PomHelper.createProjectBuilderRequest( session,
+                                r -> r.setProcessPlugins( false ),
+                                r -> r.setRemoteRepositories( session.getCurrentProject()
+                                        .getPluginArtifactRepositories() ) ) );
+        if ( !result.getProblems().isEmpty() )
+        {
+            getLog().warn( "Problems encountered during construction of the plugin POM for "
+                + probe.toString() );
+            result.getProblems().forEach( p ->
+                    getLog().warn( "\t" + p.getMessage() ) );
+        }
+        return result.getProject();
     }
 
     private static String pad( String start, int len, String... ends )

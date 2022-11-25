@@ -65,7 +65,6 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase
         mojo = new UseReleasesMojo( mockRepositorySystem(),
                 mockAetherRepositorySystem(),
                 null,
-                null,
                 changeRecorder.asTestMap() );
         setVariableValueToObject( mojo, "reactorProjects", emptyList() );
         mojo.project = new MavenProject()

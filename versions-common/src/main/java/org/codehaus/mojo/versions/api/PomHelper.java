@@ -37,29 +37,35 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.model.building.UrlModelSource;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.profiles.ProfileManager;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
@@ -1462,37 +1468,43 @@ public class PomHelper
     }
 
     /**
-     * Finds the local root of the specified project.
+     * Finds the local root of the current project of the {@link MavenSession} instance.
      *
-     * @param project              The project to find the local root for.
-     * @param builder              {@linkplain MavenProjectBuilder} object
-     * @param localRepository      the local repo.
-     * @param globalProfileManager the global profile manager.
+     * @param projectBuilder       {@link ProjectBuilder} instance
+     * @param mavenSession         {@link MavenSession} instance
      * @param logger               The logger to log tog
      * @return The local root (note this may be the project passed as an argument).
      */
-    public static MavenProject getLocalRoot( MavenProjectBuilder builder, MavenProject project,
-                                             ArtifactRepository localRepository, ProfileManager globalProfileManager,
+    public static MavenProject getLocalRoot( ProjectBuilder projectBuilder,
+                                             MavenSession mavenSession,
                                              Log logger )
     {
         logger.info( "Searching for local aggregator root..." );
+        MavenProject project = mavenSession.getCurrentProject();
         while ( true )
         {
             final File parentDir = project.getBasedir().getParentFile();
             if ( parentDir != null && parentDir.isDirectory() )
             {
                 logger.debug( "Checking to see if " + parentDir + " is an aggregator parent" );
-                File parent = new File( parentDir, "pom.xml" );
-                if ( parent.isFile() )
+                File parentFile = new File( parentDir, "pom.xml" );
+                if ( parentFile.isFile() )
                 {
                     try
                     {
-                        final MavenProject parentProject =
-                            builder.build( parent, localRepository, globalProfileManager );
-                        if ( getAllChildModules( parentProject, logger ).contains( project.getBasedir().getName() ) )
+                        ProjectBuildingResult result = projectBuilder.build( parentFile,
+                                createProjectBuilderRequest( mavenSession ) );
+                        if ( !result.getProblems().isEmpty() )
+                        {
+                            logger.warn( "Problems encountered during the computation of the local aggregation root." );
+                            result.getProblems().forEach( p ->
+                                    logger.warn( "\t" + p.getMessage() ) );
+                        }
+                        if ( getAllChildModules( result.getProject(), logger )
+                                .contains( project.getBasedir().getName() ) )
                         {
                             logger.debug( parentDir + " is an aggregator parent" );
-                            project = parentProject;
+                            project = result.getProject();
                             continue;
                         }
                         else
@@ -1509,6 +1521,60 @@ public class PomHelper
             logger.debug( "Local aggregation root is " + project.getBasedir() );
             return project;
         }
+    }
+
+    /**
+     * Retrieves the standalone superproject
+     *
+     * @param projectBuilder       {@link ProjectBuilder} instance
+     * @param mavenSession         {@link MavenSession} instance
+     * @param logger               The logger to log tog
+     *
+     * @return superproject retrieved
+     * @throws ProjectBuildingException if the retrieval fails
+     */
+    public static MavenProject getStandaloneSuperProject( ProjectBuilder projectBuilder,
+                                                          MavenSession mavenSession,
+                                                          Log logger ) throws ProjectBuildingException
+    {
+        ProjectBuildingResult result = projectBuilder.build( new UrlModelSource(
+                        Objects.requireNonNull( PomHelper.class.getResource( "standalone.xml" ) ) ),
+                createProjectBuilderRequest( mavenSession, r -> r.setProcessPlugins( false ) ) );
+        if ( !result.getProblems().isEmpty()  )
+        {
+            logger.warn( "Problems encountered during building of the superproject." );
+            result.getProblems().forEach( p ->
+                    logger.warn( "\t" + p.getMessage() ) );
+        }
+        return result.getProject();
+    }
+
+    /**
+     * <p>Convenience method for creating a {@link ProjectBuildingRequest} instance based on maven session.</p>
+     * <p><u>Note:</u> The method initializes the remote repositories with the remote artifact repositories.
+     * Please use the initializers if you need to override this.</p>
+     * @param mavenSession {@link MavenSession} instance
+     * @param initializers optional additional initializers, which will be executed after the object is initialized
+     * @return constructed builder request
+     */
+    @SafeVarargs
+    public static ProjectBuildingRequest createProjectBuilderRequest( MavenSession mavenSession,
+                                                                      Consumer<ProjectBuildingRequest>... initializers )
+    {
+        return new DefaultProjectBuildingRequest()
+        {{
+            setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL );
+            setResolveDependencies( false );
+            setLocalRepository( mavenSession.getLocalRepository() );
+            setRemoteRepositories( mavenSession.getCurrentProject().getRemoteArtifactRepositories() );
+            setBuildStartTime( mavenSession.getStartTime() );
+            setUserProperties( mavenSession.getUserProperties() );
+            setSystemProperties( mavenSession.getSystemProperties() );
+            setActiveProfileIds( mavenSession.getRequest().getActiveProfiles() );
+            setInactiveProfileIds( mavenSession.getRequest().getInactiveProfiles() );
+            setRepositorySession( mavenSession.getRepositorySession() );
+            Arrays.stream( initializers ).forEach( i -> i.accept( this ) );
+        }};
     }
 
     /**

@@ -62,7 +62,9 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase
     public void setUp() throws IllegalAccessException
     {
         changeRecorder = new TestChangeRecorder();
-        mojo = new ForceReleasesMojo( mockRepositorySystem(), mockAetherRepositorySystem(), null, null,
+        mojo = new ForceReleasesMojo( mockRepositorySystem(),
+                mockAetherRepositorySystem(),
+                null,
                 changeRecorder.asTestMap() );
         setVariableValueToObject( mojo, "reactorProjects", emptyList() );
         mojo.project = new MavenProject()
