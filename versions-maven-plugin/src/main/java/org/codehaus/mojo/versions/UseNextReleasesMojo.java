@@ -33,7 +33,6 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -67,11 +66,10 @@ public class UseNextReleasesMojo
     @Inject
     public UseNextReleasesMojo( RepositorySystem repositorySystem,
                                 org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                MavenProjectBuilder projectBuilder,
                                 WagonManager wagonManager,
                                 Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
     }
 
     /**

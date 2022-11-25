@@ -34,7 +34,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -51,11 +50,10 @@ public abstract class UseLatestVersionsMojoBase
 {
     public UseLatestVersionsMojoBase( RepositorySystem repositorySystem,
                                   org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                  MavenProjectBuilder projectBuilder,
                                   WagonManager wagonManager,
                                   Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
     }
 
     /**

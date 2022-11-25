@@ -38,7 +38,6 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
@@ -159,11 +158,10 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
     @Inject
     protected AbstractVersionsDependencyUpdaterMojo( RepositorySystem repositorySystem,
                                                      org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                                     MavenProjectBuilder projectBuilder,
                                                      WagonManager wagonManager,
                                                      Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
     }
 
     /**

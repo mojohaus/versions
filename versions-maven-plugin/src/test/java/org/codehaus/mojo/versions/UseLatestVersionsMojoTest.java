@@ -75,7 +75,6 @@ public class UseLatestVersionsMojoTest
         mojo = new UseLatestVersionsMojo( repositorySystemMock,
                 aetherRepositorySystem,
                 null,
-                null,
                 changeRecorder.asTestMap() )
         {{
             reactorProjects = emptyList();

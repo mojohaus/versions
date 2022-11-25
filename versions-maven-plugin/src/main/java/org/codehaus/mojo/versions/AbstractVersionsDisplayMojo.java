@@ -32,7 +32,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 
@@ -86,11 +85,10 @@ public abstract class AbstractVersionsDisplayMojo
     @Inject
     protected AbstractVersionsDisplayMojo( RepositorySystem repositorySystem,
                                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           MavenProjectBuilder projectBuilder,
                                            WagonManager wagonManager,
                                            Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
     }
 
     @SuppressWarnings( "unchecked" )

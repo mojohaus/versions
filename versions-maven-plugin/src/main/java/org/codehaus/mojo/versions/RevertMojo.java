@@ -28,13 +28,14 @@ import java.nio.file.Paths;
 import java.util.Set;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.codehaus.mojo.versions.api.PomHelper;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -49,12 +50,12 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class RevertMojo extends AbstractMojo
 {
     /**
-     * The Maven Project.
+     * The {@link MavenSession} instance
      *
-     * @since 1.0-alpha-1
+     * @since 2.14.0
      */
-    @Parameter( defaultValue = "${project}", required = true, readonly = true )
-    private MavenProject project;
+    @Parameter( defaultValue = "${session}", required = true, readonly = true )
+    private MavenSession session;
 
     /**
      * Whether to start processing at the local aggregation root (which might be a parent module
@@ -66,13 +67,18 @@ public class RevertMojo extends AbstractMojo
     @Parameter( property = "processFromLocalAggregationRoot", defaultValue = "true" )
     private boolean processFromLocalAggregationRoot;
 
-    protected MavenProjectBuilder projectBuilder;
+    /**
+     * The (injected) {@link ProjectBuilder} instance
+     *
+     * @since 2.14.0
+     */
+    protected final ProjectBuilder projectBuilder;
 
     @Parameter( defaultValue = "${localRepository}", readonly = true )
     protected ArtifactRepository localRepository;
 
     @Inject
-    protected RevertMojo( MavenProjectBuilder projectBuilder )
+    protected RevertMojo( ProjectBuilder projectBuilder )
     {
         this.projectBuilder = projectBuilder;
     }
@@ -80,8 +86,8 @@ public class RevertMojo extends AbstractMojo
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         final MavenProject projectToProcess = !processFromLocalAggregationRoot
-                ? PomHelper.getLocalRoot( projectBuilder, this.project, localRepository, null, getLog() )
-                : this.project;
+                ? PomHelper.getLocalRoot( projectBuilder, session, getLog() )
+                : session.getCurrentProject();
 
         getLog().info( "Local aggregation root: " + projectToProcess.getBasedir() );
         Set<String> reactor = PomHelper.getAllChildModules( projectToProcess, getLog() );

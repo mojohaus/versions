@@ -33,14 +33,16 @@ import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -118,22 +120,23 @@ public class CompareDependenciesMojo
     protected File reportOutputFile;
 
     /**
-     * The project builder used to initialize the remote project.
+     * The (injected) instance of {@link ProjectBuilder}
+     *
+     * @since 2.14.0
      */
-    protected MavenProjectBuilder mavenProjectBuilder;
+    protected final ProjectBuilder projectBuilder;
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
     public CompareDependenciesMojo( RepositorySystem repositorySystem,
                                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                    MavenProjectBuilder projectBuilder,
                                     WagonManager wagonManager,
-                                    MavenProjectBuilder mavenProjectBuilder,
+                                    ProjectBuilder projectBuilder,
                                     Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, projectBuilder, wagonManager, changeRecorders );
-        this.mavenProjectBuilder = mavenProjectBuilder;
+        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        this.projectBuilder = projectBuilder;
     }
 
     /**
@@ -157,30 +160,21 @@ public class CompareDependenciesMojo
             reportMode = false;
         }
 
-        String[] remotePomParts = this.remotePom.split( ":" );
-        if ( remotePomParts.length != 3 )
+        String[] remoteGAV = this.remotePom.split( ":" );
+        if ( remoteGAV.length != 3 )
         {
             throw new MojoFailureException( " Invalid format for remotePom: " + remotePom );
         }
-        String rGroupId = remotePomParts[0];
-        String rArtifactId = remotePomParts[1];
-        String rVersion = remotePomParts[2];
 
-        Artifact remoteArtifact = this.toArtifact( DependencyBuilder.newBuilder()
-                .withGroupId( rGroupId )
-                .withArtifactId( rArtifactId )
-                .withVersion( rVersion ).build() );
         MavenProject remoteMavenProject = null;
         try
         {
-            remoteMavenProject =
-                mavenProjectBuilder.buildFromRepository( remoteArtifact,
-                        session.getCurrentProject().getRemoteArtifactRepositories(),
-                        session.getLocalRepository() );
+            remoteMavenProject = getRemoteMavenProject( remoteGAV[0], remoteGAV[1],
+                    remoteGAV[2] );
         }
-        catch ( ProjectBuildingException e )
+        catch ( ArtifactResolutionException | ProjectBuildingException e )
         {
-            throw new MojoExecutionException( "Unable to build remote project " + remoteArtifact, e );
+            throw new MojoFailureException( e.getMessage() );
         }
 
         Map<String, Dependency> remoteDepsMap = new HashMap<>();
@@ -274,6 +268,40 @@ public class CompareDependenciesMojo
             writeReportFile( totalDiffs, propertyDiffs );
         }
 
+    }
+
+    /**
+     * Builds a {@link MavenProject} instance for the dependency with a given {@code groupId},
+     * {@code artifactId}, and {@code version}.
+     * @param groupId {@code groupId} of the dependency
+     * @param artifactId {@code artifactId} of the dependency
+     * @param version {@code version} of the dependency
+     * @return retrieved {@link MavenProject} instance for the given dependency
+     * @throws MojoExecutionException thrown if the artifact for the dependency could not be constructed
+     * @throws ProjectBuildingException thrown if the {@link MavenProject} instance could not be constructed
+     */
+    private MavenProject getRemoteMavenProject( String groupId, String artifactId, String version )
+            throws MojoExecutionException, ArtifactResolutionException, ProjectBuildingException
+    {
+        Artifact remoteArtifact = toArtifact( DependencyBuilder.newBuilder()
+                .withGroupId( groupId )
+                .withArtifactId( artifactId )
+                .withVersion( version )
+                .build() );
+        ProjectBuildingResult result =
+                projectBuilder.build( remoteArtifact, true,
+                        PomHelper.createProjectBuilderRequest( session,
+                                r -> r.setProcessPlugins( false ),
+                                r -> r.setRemoteRepositories( session.getCurrentProject()
+                                        .getPluginArtifactRepositories() ) ) );
+        if ( !result.getProblems().isEmpty() )
+        {
+            getLog().warn( "Problems encountered during construction of the POM for "
+                    + remoteArtifact.toString() );
+            result.getProblems().forEach( p ->
+                    getLog().warn( "\t" + p.getMessage() ) );
+        }
+        return result.getProject();
     }
 
     /**

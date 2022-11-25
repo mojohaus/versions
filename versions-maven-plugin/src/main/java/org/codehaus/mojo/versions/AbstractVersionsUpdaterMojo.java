@@ -44,7 +44,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
@@ -91,14 +90,6 @@ public abstract class AbstractVersionsUpdaterMojo
      * The (injected) {@link org.eclipse.aether.RepositorySystem} instance.
      */
     protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
-
-    /**
-     * The (injected) {@link MavenProjectBuilder} instance.
-     */
-    /**
-     * @since 1.0-alpha-1
-     */
-    protected final MavenProjectBuilder projectBuilder;
 
     /**
      * @since 1.0-alpha-1
@@ -214,13 +205,11 @@ public abstract class AbstractVersionsUpdaterMojo
     @Inject
     protected AbstractVersionsUpdaterMojo( RepositorySystem repositorySystem,
                                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           MavenProjectBuilder projectBuilder,
                                            WagonManager wagonManager,
                                            Map<String, ChangeRecorder> changeRecorders )
     {
         this.repositorySystem = repositorySystem;
         this.aetherRepositorySystem = aetherRepositorySystem;
-        this.projectBuilder = projectBuilder;
         this.wagonManager = wagonManager;
         this.changeRecorders = changeRecorders;
     }
