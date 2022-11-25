@@ -49,7 +49,6 @@ import java.util.regex.Pattern;
 import org.apache.maven.BuildFailureException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -89,6 +88,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -172,14 +172,14 @@ public class DisplayPluginUpdatesMojo
     public DisplayPluginUpdatesMojo( RepositorySystem repositorySystem,
                                      org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                                      ProjectBuilder projectBuilder,
-                                     WagonManager wagonManager,
+                                     Map<String, Wagon> wagonMap,
                                      LifecycleExecutor lifecycleExecutor,
                                      ModelInterpolator modelInterpolator,
                                      PluginManager pluginManager,
                                      RuntimeInformation runtimeInformation,
                                      Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
         this.projectBuilder = projectBuilder;
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;

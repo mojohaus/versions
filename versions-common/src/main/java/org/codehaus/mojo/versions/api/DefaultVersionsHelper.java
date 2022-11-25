@@ -20,11 +20,11 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -49,7 +50,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -61,14 +61,10 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.settings.Settings;
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.observers.Debug;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.mojo.versions.model.IgnoreVersion;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
@@ -80,16 +76,21 @@ import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
-import org.codehaus.mojo.versions.utils.WagonUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.eclipse.aether.repository.AuthenticationContext;
+import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 
+import static java.util.Collections.singletonList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 import static org.apache.maven.RepositoryUtils.toArtifact;
 
 /**
@@ -143,49 +144,11 @@ public class DefaultVersionsHelper
      * @since 2.12
      */
     private final Map<String, Rule> artifactBestFitRule = new HashMap<>();
-
     /**
      * Private constructor used by the builder
      */
     private DefaultVersionsHelper()
     {
-    }
-
-    @Deprecated
-    private static RuleSet getRuleSet( Wagon wagon, String remoteURI )
-        throws IOException, AuthorizationException, TransferFailedException, ResourceDoesNotExistException
-    {
-        File tempFile = File.createTempFile( "ruleset", ".xml" );
-        try
-        {
-            wagon.get( remoteURI, tempFile );
-            try ( InputStream is = Files.newInputStream( tempFile.toPath() ) )
-            {
-                return readRulesFromStream( is );
-            }
-        }
-        finally
-        {
-            if ( !tempFile.delete() )
-            {
-                // maybe we can delete this later
-                tempFile.deleteOnExit();
-            }
-        }
-    }
-
-    private static RuleSet readRulesFromStream( InputStream stream )
-        throws IOException
-    {
-        RuleXpp3Reader reader = new RuleXpp3Reader();
-        try ( BufferedInputStream bis = new BufferedInputStream( stream ) )
-        {
-            return reader.read( bis );
-        }
-        catch ( XmlPullParserException e )
-        {
-            throw new IOException( e );
-        }
     }
 
     static boolean exactMatch( String wildcardRule, String value )
@@ -198,149 +161,6 @@ public class DefaultVersionsHelper
     {
         Pattern p = Pattern.compile( RegexUtils.convertWildcardsToRegex( wildcardRule, false ) );
         return p.matcher( value ).matches();
-    }
-
-    /**
-     * <p>Creates the enriched version of the ruleSet given as parameter; the ruleSet will contain the
-     * set of ignored versions passed on top of its own (if defined).</p>
-     *
-     * <p>If the {@code originalRuleSet} is {@code null}, a new {@linkplain RuleSet} will be created as
-     * a result.</p>
-     *
-     * <p><em>The method does not change the {@code originalRuleSet} object.</em></p>
-     *
-     * @param ignoredVersions collection of ignored version to enrich the clone of the original rule set
-     * @param originalRuleSet original rule set
-     * @return new RuleSet object containing the (if passed) cloned version of the rule set, enriched with
-     *         the given set of ignored versions
-     */
-    @SuppressWarnings( "checkstyle:AvoidNestedBlocks" )
-    private static RuleSet enrichRuleSet( Collection<String> ignoredVersions, RuleSet originalRuleSet )
-    {
-        RuleSet ruleSet = new RuleSet();
-        if ( originalRuleSet != null )
-        {
-            ruleSet.setComparisonMethod( originalRuleSet.getComparisonMethod() );
-            if ( originalRuleSet.getRules() != null )
-            {
-                ruleSet.setRules( new ArrayList<>( originalRuleSet.getRules() ) );
-            }
-            if ( originalRuleSet.getIgnoreVersions() != null )
-            {
-                ruleSet.setIgnoreVersions( new ArrayList<>( originalRuleSet.getIgnoreVersions() ) );
-            }
-        }
-
-        if ( ruleSet.getIgnoreVersions() == null )
-        {
-            ruleSet.setIgnoreVersions( new ArrayList<>() );
-        }
-        ruleSet.getIgnoreVersions().addAll( ignoredVersions.stream().map( v ->
-        {
-            IgnoreVersion ignoreVersion = new IgnoreVersion();
-            ignoreVersion.setType( TYPE_REGEX );
-            ignoreVersion.setVersion( v );
-            return ignoreVersion;
-        } ).collect( Collectors.toList() ) );
-
-        return ruleSet;
-    }
-
-    private static RuleSet getRulesFromClasspath( String uri, Log logger )
-        throws MojoExecutionException
-    {
-        logger.debug( "Going to load rules from \"" + uri + "\"" );
-
-        String choppedUrl = uri.substring( CLASSPATH_PROTOCOL.length() + 3 );
-
-        URL url = DefaultVersionsHelper.class.getResource( choppedUrl );
-
-        if ( null == url )
-        {
-            String message = "Resource \"" + uri + "\" not found in classpath.";
-
-            throw new MojoExecutionException( message );
-        }
-
-        try
-        {
-            RuleSet rules = readRulesFromStream( url.openStream() );
-            logger.debug( "Loaded rules from \"" + uri + "\" successfully" );
-            return rules;
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "Could not load specified rules from " + uri, e );
-        }
-    }
-
-    private static RuleSet getRulesViaWagon( String rulesUri, Log logger, String serverId, String id,
-                                             WagonManager wagonManager, Settings settings )
-        throws MojoExecutionException
-    {
-        RuleSet loadedRules;
-
-        int split = rulesUri.lastIndexOf( '/' );
-        String baseUri = rulesUri;
-        String fileUri = "";
-
-        if ( split != -1 )
-        {
-            baseUri = rulesUri.substring( 0, split ) + '/';
-            fileUri = split + 1 < rulesUri.length() ? rulesUri.substring( split + 1 ) : "";
-        }
-
-        try
-        {
-            Wagon wagon = WagonUtils.createWagon( serverId, baseUri, wagonManager, settings, logger );
-            try
-            {
-                logger.debug( "Trying to load ruleset from file \"" + fileUri + "\" in " + baseUri );
-                loadedRules = getRuleSet( wagon, fileUri );
-            }
-            finally
-            {
-                logger.debug( "Rule set loaded" );
-
-                if ( wagon != null )
-                {
-                    try
-                    {
-                        wagon.disconnect();
-                    }
-                    catch ( ConnectionException e )
-                    {
-                        logger.warn( "Could not disconnect wagon!", e );
-                    }
-                }
-            }
-        }
-        catch ( TransferFailedException e )
-        {
-            throw new MojoExecutionException( "Could not transfer rules from " + rulesUri, e );
-        }
-        catch ( AuthorizationException e )
-        {
-            throw new MojoExecutionException( "Authorization failure trying to load rules from " + rulesUri, e );
-        }
-        catch ( ResourceDoesNotExistException | IOException e )
-        {
-            throw new MojoExecutionException( "Could not load specified rules from " + rulesUri, e );
-        }
-        catch ( AuthenticationException e )
-        {
-            throw new MojoExecutionException( "Authentication failure trying to load rules from " + rulesUri, e );
-        }
-        catch ( UnsupportedProtocolException e )
-        {
-            throw new MojoExecutionException( "Unsupported protocol for " + rulesUri, e );
-        }
-        catch ( ConnectionException e )
-        {
-            throw new MojoExecutionException( "Could not establish connection to " + rulesUri, e );
-        }
-
-        return loadedRules;
     }
 
     static boolean isClasspathUri( String uri )
@@ -863,16 +683,248 @@ public class DefaultVersionsHelper
         private RepositorySystem repositorySystem;
         private Collection<String> ignoredVersions;
         private RuleSet ruleSet;
-        private WagonManager wagonManager;
         private String serverId;
         private String rulesUri;
         private Log log;
         private MavenSession mavenSession;
         private MojoExecution mojoExecution;
         private org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+        private Map<String, Wagon> wagonMap;
 
         public Builder()
         {
+        }
+
+        private static RuleSet getRulesFromClasspath( String uri, Log logger )
+            throws MojoExecutionException
+        {
+            logger.debug( "Going to load rules from \"" + uri + "\"" );
+            String choppedUrl = uri.substring( CLASSPATH_PROTOCOL.length() + 3 );
+            URL url = DefaultVersionsHelper.class.getResource( choppedUrl );
+            if ( url == null )
+            {
+                throw new MojoExecutionException( "Resource \"" + uri + "\" not found in classpath." );
+            }
+
+            try ( BufferedInputStream bis = new BufferedInputStream( url.openStream() ) )
+            {
+                RuleSet result = new RuleXpp3Reader().read( bis );
+                logger.debug( "Loaded rules from \"" + uri + "\" successfully" );
+                return result;
+            }
+            catch ( IOException | XmlPullParserException e )
+            {
+                throw new MojoExecutionException( "Could not load specified rules from " + uri, e );
+            }
+        }
+
+        /**
+         * <p>Creates the enriched version of the ruleSet given as parameter; the ruleSet will contain the
+         * set of ignored versions passed on top of its own (if defined).</p>
+         *
+         * <p>If the {@code originalRuleSet} is {@code null}, a new {@linkplain RuleSet} will be created as
+         * a result.</p>
+         *
+         * <p><em>The method does not change the {@code originalRuleSet} object.</em></p>
+         *
+         * @param ignoredVersions collection of ignored version to enrich the clone of the original rule set
+         * @param originalRuleSet original rule set
+         * @return new RuleSet object containing the (if passed) cloned version of the rule set, enriched with
+         *         the given set of ignored versions
+         */
+        @SuppressWarnings( "checkstyle:AvoidNestedBlocks" )
+        private static RuleSet enrichRuleSet( Collection<String> ignoredVersions, RuleSet originalRuleSet )
+        {
+            RuleSet ruleSet = new RuleSet();
+            if ( originalRuleSet != null )
+            {
+                ruleSet.setComparisonMethod( originalRuleSet.getComparisonMethod() );
+                if ( originalRuleSet.getRules() != null )
+                {
+                    ruleSet.setRules( new ArrayList<>( originalRuleSet.getRules() ) );
+                }
+                if ( originalRuleSet.getIgnoreVersions() != null )
+                {
+                    ruleSet.setIgnoreVersions( new ArrayList<>( originalRuleSet.getIgnoreVersions() ) );
+                }
+            }
+
+            if ( ruleSet.getIgnoreVersions() == null )
+            {
+                ruleSet.setIgnoreVersions( new ArrayList<>() );
+            }
+            ruleSet.getIgnoreVersions().addAll( ignoredVersions.stream().map( v ->
+            {
+                IgnoreVersion ignoreVersion = new IgnoreVersion();
+                ignoreVersion.setType( TYPE_REGEX );
+                ignoreVersion.setVersion( v );
+                return ignoreVersion;
+            } ).collect( Collectors.toList() ) );
+
+            return ruleSet;
+        }
+
+        private static class RulesUri
+        {
+            String basePath;
+            String resource;
+
+            private RulesUri( String basePath, String resource )
+            {
+                this.basePath = basePath;
+                this.resource = resource;
+            }
+
+            static RulesUri build( String rulesUri ) throws URISyntaxException
+            {
+                int split = rulesUri.lastIndexOf( '/' );
+                return split == -1
+                        ? new RulesUri( rulesUri, "" )
+                        : new RulesUri( rulesUri.substring( 0, split ) + '/',
+                         split + 1 < rulesUri.length()
+                                ? rulesUri.substring( split + 1 )
+                                : "" ) ;
+            }
+        }
+
+        private RemoteRepository remoteRepository( RulesUri uri )
+        {
+            RemoteRepository prototype = new RemoteRepository.Builder( serverId, null, uri.basePath ).build();
+            RemoteRepository.Builder builder = new RemoteRepository.Builder( prototype );
+            ofNullable( mavenSession.getRepositorySession().getProxySelector().getProxy( prototype ) )
+                    .ifPresent( builder::setProxy );
+            ofNullable( mavenSession.getRepositorySession().getAuthenticationSelector().getAuthentication( prototype ) )
+                    .ifPresent( builder::setAuthentication );
+            ofNullable( mavenSession.getRepositorySession().getMirrorSelector().getMirror( prototype ) )
+                    .ifPresent( mirror -> builder.setMirroredRepositories( singletonList( mirror ) ) );
+            return builder.build();
+        }
+
+        private Optional<ProxyInfo> getProxyInfo( RemoteRepository repository )
+        {
+            return ofNullable( repository.getProxy() )
+                    .map( proxy -> new ProxyInfo()
+                    {{
+                        setHost( proxy.getHost() );
+                        setPort( proxy.getPort() );
+                        setType( proxy.getType() );
+                        ofNullable( proxy.getAuthentication() )
+                                .ifPresent( auth ->
+                                {
+                                    try ( AuthenticationContext authCtx = AuthenticationContext
+                                            .forProxy( mavenSession.getRepositorySession(), repository ) )
+                                    {
+                                        ofNullable( authCtx.get( AuthenticationContext.USERNAME ) )
+                                                .ifPresent( this::setUserName );
+                                        ofNullable( authCtx.get( AuthenticationContext.PASSWORD ) )
+                                                .ifPresent( this::setPassword );
+                                        ofNullable( authCtx.get( AuthenticationContext.NTLM_DOMAIN ) )
+                                                .ifPresent( this::setNtlmDomain );
+                                        ofNullable( authCtx.get( AuthenticationContext
+                                                .NTLM_WORKSTATION ) ).ifPresent( this::setNtlmHost );
+                                    }
+                                } );
+                    }} );
+        }
+
+        private Optional<AuthenticationInfo> getAuthenticationInfo( RemoteRepository repository )
+        {
+            return ofNullable( repository.getAuthentication() )
+                    .map( authentication -> new AuthenticationInfo()
+                        {{
+                            try ( AuthenticationContext authCtx = AuthenticationContext
+                                    .forProxy( mavenSession.getRepositorySession(), repository ) )
+                            {
+                                ofNullable( authCtx.get( AuthenticationContext.USERNAME ) )
+                                        .ifPresent( this::setUserName );
+                                ofNullable( authCtx.get( AuthenticationContext.PASSWORD ) )
+                                        .ifPresent( this::setPassword );
+                                ofNullable( authCtx.get( AuthenticationContext.PRIVATE_KEY_PASSPHRASE ) )
+                                        .ifPresent( this::setPassphrase );
+                                ofNullable( authCtx.get( AuthenticationContext.PRIVATE_KEY_PATH ) )
+                                        .ifPresent( this::setPrivateKey );
+                            }
+                        }} );
+        }
+
+        private org.apache.maven.wagon.repository.Repository wagonRepository( RemoteRepository repository )
+        {
+            return new org.apache.maven.wagon.repository.Repository( repository.getId(), repository.getUrl() );
+        }
+
+        private RuleSet getRulesUsingWagon() throws MojoExecutionException
+        {
+            RulesUri uri;
+            try
+            {
+                uri = RulesUri.build( rulesUri );
+            }
+            catch ( URISyntaxException e )
+            {
+                log.warn( "Invalid rulesUri protocol: " + e.getMessage() );
+                return null;
+            }
+
+            RemoteRepository repository = remoteRepository( uri );
+            return ofNullable( wagonMap.get( repository.getProtocol() ) )
+                    .map( wagon ->
+                    {
+                        if ( log.isDebugEnabled() )
+                        {
+                            Debug debug = new Debug();
+                            wagon.addSessionListener( debug );
+                            wagon.addTransferListener( debug );
+                        }
+
+                        try
+                        {
+                            Optional<ProxyInfo> proxyInfo = getProxyInfo( repository );
+                            Optional<AuthenticationInfo> authenticationInfo = getAuthenticationInfo( repository );
+                            if ( log.isDebugEnabled() )
+                            {
+                                log.debug( "Connecting to remote repository \"" + repository.getId() + "\""
+                                        + proxyInfo.map( pi -> " using proxy " + pi.getHost() + ":"
+                                        + pi.getPort() ).orElse( "" )
+                                        + authenticationInfo.map( ai -> " as " + ai.getUserName() ).orElse( "" ) );
+                            }
+                            wagon.connect( wagonRepository( repository ), getAuthenticationInfo( repository )
+                                    .orElse( null ), getProxyInfo( repository ).orElse( null ) );
+                            try
+                            {
+                                Path tempFile = Files.createTempFile( "rules-", ".xml" );
+                                wagon.get( uri.resource, tempFile.toFile() );
+                                try ( BufferedInputStream is = new BufferedInputStream(
+                                        Files.newInputStream( tempFile ) ) )
+                                {
+                                    return new RuleXpp3Reader().read( is );
+                                }
+                                finally
+                                {
+                                    Files.deleteIfExists( tempFile );
+                                }
+
+                            }
+                            finally
+                            {
+                                wagon.disconnect();
+                            }
+                        }
+                        catch ( Exception e )
+                        {
+                            log.warn( e.getMessage() );
+                            return null;
+                        }
+                    } )
+                    .orElseThrow( () -> new MojoExecutionException( "Could not load specified rules from "
+                            + rulesUri ) );
+        }
+
+        public static Optional<String> protocol( final String url )
+        {
+            int pos = url.indexOf( ":" );
+            return pos == -1
+                    ? empty()
+                    : of( url.substring( 0, pos ).trim() );
         }
 
         public Builder withRepositorySystem( RepositorySystem repositorySystem )
@@ -890,12 +942,6 @@ public class DefaultVersionsHelper
         public Builder withRuleSet( RuleSet ruleSet )
         {
             this.ruleSet = ruleSet;
-            return this;
-        }
-
-        public Builder withWagonManager( WagonManager wagonManager )
-        {
-            this.wagonManager = wagonManager;
             return this;
         }
 
@@ -935,10 +981,16 @@ public class DefaultVersionsHelper
             return this;
         }
 
+        public Builder withWagonMap( Map<String, Wagon> wagonMap )
+        {
+            this.wagonMap = wagonMap;
+            return this;
+        }
+
         /**
          * Builds the constructed {@linkplain DefaultVersionsHelper} object
          * @return constructed {@linkplain DefaultVersionsHelper}
-         * @throws MojoExecutionException should the constructor with the Wagon go wrong
+         * @throws MojoExecutionException should the constructor with the RuleSet retrieval doesn't succeed
          */
         public DefaultVersionsHelper build() throws MojoExecutionException
         {
@@ -960,8 +1012,7 @@ public class DefaultVersionsHelper
                         ? new RuleSet()
                         : isClasspathUri( rulesUri )
                             ? getRulesFromClasspath( rulesUri, log )
-                            : getRulesViaWagon( rulesUri, log, serverId, serverId, wagonManager,
-                                mavenSession.getSettings() );
+                            : getRulesUsingWagon();
             }
             if ( ignoredVersions != null && !ignoredVersions.isEmpty() )
             {

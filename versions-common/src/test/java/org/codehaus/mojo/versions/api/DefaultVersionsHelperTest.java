@@ -19,6 +19,10 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +31,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
@@ -38,25 +41,39 @@ import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.mojo.versions.model.IgnoreVersion;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.utils.VersionStub;
+import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.version.Version;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +82,6 @@ import static org.mockito.Mockito.when;
  */
 public class DefaultVersionsHelperTest extends AbstractMojoTestCase
 {
-
     @Test
     public void testPerRuleVersionsIgnored() throws Exception
     {
@@ -217,6 +233,22 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
         return createHelper( null );
     }
 
+    private static Wagon mockFileWagon( URI rulesUri )
+            throws AuthenticationException, ConnectionException, AuthorizationException, TransferFailedException,
+            ResourceDoesNotExistException
+    {
+        Wagon fileWagon = mock( Wagon.class );
+        doNothing().when( fileWagon ).connect( any( org.apache.maven.wagon.repository.Repository.class ),
+                any( AuthenticationInfo.class ), any( ProxyInfo.class ) );
+        doAnswer( i ->
+        {
+            File tempFile = i.getArgument( 1 );
+            Files.copy( Paths.get( rulesUri ), tempFile.toPath(), REPLACE_EXISTING );
+            return null;
+        } ).when( fileWagon ).get( anyString(), any( File.class ) );
+        return fileWagon;
+    }
+
     private DefaultVersionsHelper createHelper( org.eclipse.aether.RepositorySystem aetherRepositorySystem )
             throws Exception
     {
@@ -228,10 +260,12 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase
                 .thenReturn( emptyList() );
         when( mavenSession.getCurrentProject().getRemotePluginRepositories() )
                 .thenReturn( emptyList() );
+        when( mavenSession.getRepositorySession() ).thenReturn( new DefaultRepositorySystemSession() );
+
         return new DefaultVersionsHelper.Builder()
                 .withRepositorySystem( lookup( RepositorySystem.class ) )
                 .withAetherRepositorySystem( aetherRepositorySystem )
-                .withWagonManager( lookup( WagonManager.class ) )
+                .withWagonMap( singletonMap( "file", mockFileWagon( new URI( rulesUri ) ) ) )
                 .withServerId( "" )
                 .withRulesUri( rulesUri )
                 .withLog( mock( Log.class ) )

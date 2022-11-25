@@ -30,9 +30,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 
 /**
@@ -85,10 +85,10 @@ public abstract class AbstractVersionsDisplayMojo
     @Inject
     protected AbstractVersionsDisplayMojo( RepositorySystem repositorySystem,
                                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           WagonManager wagonManager,
+                                           Map<String, Wagon> wagonMap,
                                            Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
     }
 
     @SuppressWarnings( "unchecked" )

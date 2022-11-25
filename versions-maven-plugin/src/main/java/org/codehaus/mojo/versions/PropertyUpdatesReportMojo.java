@@ -29,7 +29,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -37,6 +36,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
@@ -109,10 +109,10 @@ public class PropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUp
     protected PropertyUpdatesReportMojo( I18N i18n,
                                          RepositorySystem repositorySystem,
                                          org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                         WagonManager wagonManager,
+                                         Map<String, Wagon> wagonMap,
                                          ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
     }
 
     /**

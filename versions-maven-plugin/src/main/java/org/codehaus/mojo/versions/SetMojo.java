@@ -41,7 +41,6 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -51,6 +50,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.change.DefaultVersionChange;
@@ -255,11 +255,11 @@ public class SetMojo extends AbstractVersionsUpdaterMojo
     public SetMojo( RepositorySystem repositorySystem,
                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
                     ProjectBuilder projectBuilder,
-                    WagonManager wagonManager,
+                    Map<String, Wagon> wagonMap,
                     Map<String, ChangeRecorder> changeRecorders,
                     Prompter prompter )
     {
-        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
         this.projectBuilder = projectBuilder;
         this.prompter = prompter;
     }

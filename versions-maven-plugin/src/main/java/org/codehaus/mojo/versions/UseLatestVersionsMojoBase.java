@@ -29,12 +29,12 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
@@ -50,10 +50,10 @@ public abstract class UseLatestVersionsMojoBase
 {
     public UseLatestVersionsMojoBase( RepositorySystem repositorySystem,
                                   org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                  WagonManager wagonManager,
+                                  Map<String, Wagon> wagonMap,
                                   Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
     }
 
     /**

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -44,6 +43,7 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Property;
@@ -131,11 +131,11 @@ public class CompareDependenciesMojo
     @Inject
     public CompareDependenciesMojo( RepositorySystem repositorySystem,
                                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                    WagonManager wagonManager,
+                                    Map<String, Wagon> wagonMap,
                                     ProjectBuilder projectBuilder,
                                     Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
         this.projectBuilder = projectBuilder;
     }
 
@@ -308,6 +308,7 @@ public class CompareDependenciesMojo
      * Compare the dependency versions of the current project with the dependency versions of a remote project
      *
      * @throws XMLStreamException
+     * @throws MojoExecutionException
      */
     private List<String> compareVersions( ModifiedPomXMLEventReader pom, List<Dependency> dependencies,
                                           Map<String, Dependency> remoteDependencies,

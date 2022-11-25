@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
@@ -41,6 +40,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
@@ -111,10 +111,10 @@ public class DependencyUpdatesReportMojo extends AbstractVersionsReport<Dependen
     @Inject
     protected DependencyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
                                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           WagonManager wagonManager,
+                                           Map<String, Wagon> wagonMap,
                                            ReportRendererFactory rendererFactory )
     {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonManager, rendererFactory );
+        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
     }
 
     /**
