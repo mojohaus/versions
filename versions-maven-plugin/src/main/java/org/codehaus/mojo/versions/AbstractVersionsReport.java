@@ -20,13 +20,11 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.File;
-import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
@@ -39,6 +37,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -78,23 +77,6 @@ public abstract class AbstractVersionsReport<T>
      * The (injected) {@link org.eclipse.aether.RepositorySystem aetherRepositorySystem} instance.
      */
     protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
-
-    /**
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true )
-    protected List<ArtifactRepository> remoteArtifactRepositories;
-
-    /**
-     * @since 1.0-alpha-3
-     */
-    @Parameter( defaultValue = "${project.pluginArtifactRepositories}", readonly = true )
-    protected List<ArtifactRepository> remotePluginRepositories;
-
-    /**
-     * @since 1.0-alpha-3
-     */
-    private final WagonManager wagonManager;
 
     /**
      * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
@@ -182,17 +164,24 @@ public abstract class AbstractVersionsReport<T>
      */
     protected ReportRendererFactory rendererFactory;
 
+    /**
+     * (injected) map of {@link Wagon} instances
+     *
+     * @since 2.14.0
+     */
+    protected Map<String, Wagon> wagonMap;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     protected AbstractVersionsReport( I18N i18n, RepositorySystem repositorySystem,
                                       org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                      WagonManager wagonManager,
+                                      Map<String, Wagon> wagonMap,
                                       ReportRendererFactory rendererFactory )
     {
         this.i18n = i18n;
         this.repositorySystem = repositorySystem;
         this.aetherRepositorySystem = aetherRepositorySystem;
-        this.wagonManager = wagonManager;
+        this.wagonMap = wagonMap;
         this.rendererFactory = rendererFactory;
     }
 
@@ -206,7 +195,7 @@ public abstract class AbstractVersionsReport<T>
                 helper = new DefaultVersionsHelper.Builder()
                         .withRepositorySystem( repositorySystem )
                         .withAetherRepositorySystem( aetherRepositorySystem )
-                        .withWagonManager( wagonManager )
+                        .withWagonMap( wagonMap )
                         .withServerId( serverId )
                         .withRulesUri( rulesUri )
                         .withRuleSet( ruleSet )

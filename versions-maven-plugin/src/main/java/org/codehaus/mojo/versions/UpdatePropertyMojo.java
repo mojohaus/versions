@@ -25,7 +25,6 @@ import javax.xml.stream.XMLStreamException;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -33,6 +32,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
@@ -139,10 +139,10 @@ public class UpdatePropertyMojo
     @Inject
     public UpdatePropertyMojo( RepositorySystem repositorySystem,
                                org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                               WagonManager wagonManager,
+                               Map<String, Wagon> wagonMap,
                                Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
     }
 
     /**

@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -35,6 +34,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -74,10 +74,10 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
     @Inject
     public UseDepVersionMojo( RepositorySystem repositorySystem,
                               org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                              WagonManager wagonManager,
+                              Map<String, Wagon> wagonMap,
                               Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
     }
 
     @Override

@@ -32,7 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -45,6 +44,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -96,11 +96,6 @@ public abstract class AbstractVersionsUpdaterMojo
      */
     @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
     protected List<MavenProject> reactorProjects;
-
-    /**
-     * The (injected) {@link WagonManager} instance.
-     */
-    private final WagonManager wagonManager;
 
     /**
      * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
@@ -200,17 +195,24 @@ public abstract class AbstractVersionsUpdaterMojo
     @Parameter( property = "maven.version.ignore" )
     protected Set<String> ignoredVersions;
 
+    /**
+     * (injected) map of {@link Wagon} instances
+     *
+     * @since 2.14.0
+     */
+    protected final Map<String, Wagon> wagonMap;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     @Inject
     protected AbstractVersionsUpdaterMojo( RepositorySystem repositorySystem,
                                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           WagonManager wagonManager,
+                                           Map<String, Wagon> wagonMap,
                                            Map<String, ChangeRecorder> changeRecorders )
     {
         this.repositorySystem = repositorySystem;
         this.aetherRepositorySystem = aetherRepositorySystem;
-        this.wagonManager = wagonManager;
+        this.wagonMap = wagonMap;
         this.changeRecorders = changeRecorders;
     }
 
@@ -221,7 +223,7 @@ public abstract class AbstractVersionsUpdaterMojo
             helper = new DefaultVersionsHelper.Builder()
                     .withRepositorySystem( repositorySystem )
                     .withAetherRepositorySystem( aetherRepositorySystem )
-                    .withWagonManager( wagonManager )
+                    .withWagonMap( wagonMap )
                     .withServerId( serverId )
                     .withRulesUri( rulesUri )
                     .withRuleSet( ruleSet )

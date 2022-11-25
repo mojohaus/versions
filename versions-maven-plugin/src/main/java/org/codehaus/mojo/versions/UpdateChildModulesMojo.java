@@ -29,13 +29,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -70,10 +70,10 @@ public class UpdateChildModulesMojo
     @Inject
     public UpdateChildModulesMojo( RepositorySystem repositorySystem,
                                    org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                   WagonManager wagonManager,
+                                   Map<String, Wagon> wagonMap,
                                    Map<String, ChangeRecorder> changeRecorders )
     {
-        super( repositorySystem, aetherRepositorySystem, wagonManager, changeRecorders );
+        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
     }
 
     /**
