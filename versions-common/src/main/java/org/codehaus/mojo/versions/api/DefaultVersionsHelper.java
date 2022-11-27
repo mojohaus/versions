@@ -53,6 +53,7 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
@@ -175,7 +176,8 @@ public class DefaultVersionsHelper
     }
 
     @Override
-    public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
+    public ArtifactVersions lookupArtifactVersions( Artifact artifact, VersionRange versionRange,
+                                                    boolean usePluginRepositories )
             throws VersionRetrievalException
     {
         try
@@ -189,11 +191,14 @@ public class DefaultVersionsHelper
             return new ArtifactVersions( artifact,
                     aetherRepositorySystem.resolveVersionRange( mavenSession.getRepositorySession(),
                                     new VersionRangeRequest(
-                                    toArtifact( artifact ).setVersion( "(,)" ),
-                                    usePluginRepositories
-                                            ? mavenSession.getCurrentProject().getRemotePluginRepositories()
-                                            : mavenSession.getCurrentProject().getRemoteProjectRepositories(),
-                                    "lookupArtifactVersions" ) )
+                                            toArtifact( artifact ).setVersion(
+                                                    versionRange != null
+                                                            ? versionRange.toString()
+                                                            : "(,)" ),
+                                            usePluginRepositories
+                                                    ? mavenSession.getCurrentProject().getRemotePluginRepositories()
+                                                    : mavenSession.getCurrentProject().getRemoteProjectRepositories(),
+                                            "lookupArtifactVersions" ) )
                             .getVersions()
                             .parallelStream()
                             .filter( v -> ignoredVersions.stream()
@@ -235,6 +240,13 @@ public class DefaultVersionsHelper
         {
             throw new VersionRetrievalException( e.getMessage(), e );
         }
+    }
+
+    @Override
+    public ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
+            throws VersionRetrievalException
+    {
+        return lookupArtifactVersions( artifact, null, usePluginRepositories );
     }
 
     /**

@@ -308,7 +308,8 @@ public abstract class AbstractVersionsUpdaterMojo
             throws MojoExecutionException, VersionRetrievalException
     {
         boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : this.allowSnapshots;
-        final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
+        final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, versionRange,
+                usePluginRepositories );
         return artifactVersions.getNewestVersion( versionRange, null, includeSnapshots, false );
     }
 

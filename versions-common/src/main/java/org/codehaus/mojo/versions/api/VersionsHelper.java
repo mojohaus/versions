@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -152,6 +153,22 @@ public interface VersionsHelper
      * @since 1.0-alpha-3
      */
     ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
+            throws VersionRetrievalException;
+
+    /**
+     * Looks up the versions of the specified artifact that are available in either the local repository, or the
+     * appropriate remote repositories.
+     *
+     * @param artifact The artifact to look for versions of.
+     * @param versionRange versionRange to restrict the search
+     * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
+     *            consult the repositories for normal dependencies.
+     * @return The details of the available artifact versions.
+     * @throws VersionRetrievalException thrown if version resolution fails
+     * @since 1.0-alpha-3
+     */
+    ArtifactVersions lookupArtifactVersions( Artifact artifact, VersionRange versionRange,
+                                             boolean usePluginRepositories )
             throws VersionRetrievalException;
 
     /**

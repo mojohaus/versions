@@ -24,9 +24,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.execution.MavenSession;
@@ -38,9 +35,7 @@ import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
-import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
@@ -242,35 +237,6 @@ public abstract class AbstractVersionsReport<T>
      */
     protected abstract void doGenerateReport( Locale locale, Sink sink )
         throws MavenReportException, MojoExecutionException;
-
-    /**
-     * Finds the latest version of the specified artifact that matches the version range.
-     *
-     * @param artifact The artifact.
-     * @param versionRange The version range.
-     * @param allowingSnapshots <code>null</code> for no override, otherwise the local override to apply.
-     * @param usePluginRepositories Use plugin repositories
-     * @return The latest version of the specified artifact that matches the specified version range or
-     *         <code>null</code> if no matching version could be found.
-     * @throws MavenReportException If the artifact metadata could not be found.
-     * @since 1.0-alpha-1
-     */
-    protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
-                                                 Boolean allowingSnapshots, boolean usePluginRepositories )
-        throws MavenReportException
-    {
-        boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : this.allowSnapshots;
-        try
-        {
-            final ArtifactVersions artifactVersions =
-                getHelper().lookupArtifactVersions( artifact, usePluginRepositories );
-            return artifactVersions.getNewestVersion( versionRange, includeSnapshots );
-        }
-        catch ( VersionRetrievalException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
-    }
 
     @Override
     protected MavenProject getProject()
