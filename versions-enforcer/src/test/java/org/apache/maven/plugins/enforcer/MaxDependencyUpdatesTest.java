@@ -20,14 +20,11 @@ package org.apache.maven.plugins.enforcer;
 
 import java.util.HashMap;
 
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.plugin.MojoExecution;
-import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.junit.Test;
@@ -57,23 +54,17 @@ public class MaxDependencyUpdatesTest
         when( ruleHelper.evaluate( anyString() ) )
                 .then( ( a ) -> "${project}".equals( a.getArgument( 0 ) )
                         ? mavenProject
-                        : "${localRepository}".equals( a.getArgument( 0 ) )
-                            ? new StubArtifactRepository( "" )
-                            : "${settings}".equals( a.getArgument( 0 ) )
-                                ? new Settings()
-                                : "${session}".equals( a.getArgument( 0 ) )
-                                    ? mockMavenSession()
-                                    : "${mojoExecution}".equals( a.getArgument( 0 ) )
-                                        ? mock( MojoExecution.class )
-                                        : null );
+                        : "${session}".equals( a.getArgument( 0 ) )
+                            ? mockMavenSession()
+                            : "${mojoExecution}".equals( a.getArgument( 0 ) )
+                                ? mock( MojoExecution.class )
+                                : null );
         when( ruleHelper.getComponent( ArgumentMatchers.<Class<?>>any() ) )
                 .then( ( a ) -> a.getArgument( 0 ) == RepositorySystem.class
                         ? mockRepositorySystem()
-                        : a.getArgument( 0 ) == ArtifactResolver.class
-                            ? mock( ArtifactResolver.class )
-                            : a.getArgument( 0 ) == org.eclipse.aether.RepositorySystem.class
-                                ? aetherRepositorySystem
-                                : null );
+                        : a.getArgument( 0 ) == org.eclipse.aether.RepositorySystem.class
+                            ? aetherRepositorySystem
+                            : null );
         return ruleHelper;
     }
 

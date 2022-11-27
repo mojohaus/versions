@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -49,8 +48,6 @@ public class UpdateParentMojoTest
     private TestChangeRecorder changeRecorder;
 
     private UpdateParentMojo mojo;
-
-    private ArtifactResolver artifactResolver;
 
     private static RepositorySystem repositorySystem;
 

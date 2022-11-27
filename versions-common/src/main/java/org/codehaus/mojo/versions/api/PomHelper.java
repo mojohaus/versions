@@ -37,7 +37,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
@@ -57,7 +56,6 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.model.building.UrlModelSource;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
@@ -1521,32 +1519,6 @@ public class PomHelper
             logger.debug( "Local aggregation root is " + project.getBasedir() );
             return project;
         }
-    }
-
-    /**
-     * Retrieves the standalone superproject
-     *
-     * @param projectBuilder       {@link ProjectBuilder} instance
-     * @param mavenSession         {@link MavenSession} instance
-     * @param logger               The logger to log tog
-     *
-     * @return superproject retrieved
-     * @throws ProjectBuildingException if the retrieval fails
-     */
-    public static MavenProject getStandaloneSuperProject( ProjectBuilder projectBuilder,
-                                                          MavenSession mavenSession,
-                                                          Log logger ) throws ProjectBuildingException
-    {
-        ProjectBuildingResult result = projectBuilder.build( new UrlModelSource(
-                        Objects.requireNonNull( PomHelper.class.getResource( "standalone.xml" ) ) ),
-                createProjectBuilderRequest( mavenSession, r -> r.setProcessPlugins( false ) ) );
-        if ( !result.getProblems().isEmpty()  )
-        {
-            logger.warn( "Problems encountered during building of the superproject." );
-            result.getProblems().forEach( p ->
-                    logger.warn( "\t" + p.getMessage() ) );
-        }
-        return result.getProject();
     }
 
     /**

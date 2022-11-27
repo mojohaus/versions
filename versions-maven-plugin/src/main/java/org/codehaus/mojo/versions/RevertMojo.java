@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -73,9 +72,6 @@ public class RevertMojo extends AbstractMojo
      * @since 2.14.0
      */
     protected final ProjectBuilder projectBuilder;
-
-    @Parameter( defaultValue = "${localRepository}", readonly = true )
-    protected ArtifactRepository localRepository;
 
     @Inject
     protected RevertMojo( ProjectBuilder projectBuilder )

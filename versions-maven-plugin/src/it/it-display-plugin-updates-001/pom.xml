@@ -9,7 +9,7 @@
   <name>display-plugin-updates</name>
 
   <prerequisites>
-    <maven>2.0.6</maven>
+    <maven>3.2.5</maven>
   </prerequisites>
 
   <build>

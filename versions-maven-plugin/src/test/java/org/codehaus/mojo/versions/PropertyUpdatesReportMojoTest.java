@@ -28,7 +28,6 @@ import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.doxia.tools.SiteTool;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
-import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -47,7 +46,6 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase
     public MojoRule mojoRule = new MojoRule( this );
     private static final org.eclipse.aether.RepositorySystem AETHER_REPOSITORY_SYSTEM = mockAetherRepositorySystem();
     private static final SiteTool SITE_TOOL = mockSiteTool();
-    private static final StubArtifactRepository LOCAL_REPOSITORY = new StubArtifactRepository( "" );
 
     @Test
     public void testIncludeParentTrueShouldContainProperty() throws Exception
@@ -59,7 +57,6 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase
                 (PropertyUpdatesReportMojo) mojoRule.lookupConfiguredMojo(
                         new File( "src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child" ),
                         "property-updates-report" );
-        setVariableValueToObject( mojo, "localRepository", LOCAL_REPOSITORY );
         setVariableValueToObject( mojo, "siteTool", SITE_TOOL );
         setVariableValueToObject( mojo, "aetherRepositorySystem", AETHER_REPOSITORY_SYSTEM );
         setVariableValueToObject( mojo, "includeParent", true );
@@ -82,7 +79,6 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase
                 (PropertyUpdatesReportMojo) mojoRule.lookupConfiguredMojo(
                         new File( "src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child" ),
                         "property-updates-report" );
-        setVariableValueToObject( mojo, "localRepository", new StubArtifactRepository( "" ) );
         setVariableValueToObject( mojo, "siteTool", SITE_TOOL );
         setVariableValueToObject( mojo, "aetherRepositorySystem", AETHER_REPOSITORY_SYSTEM );
         setVariableValueToObject( mojo, "includeParent", false );
