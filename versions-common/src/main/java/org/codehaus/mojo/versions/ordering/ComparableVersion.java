@@ -9,7 +9,7 @@ package org.codehaus.mojo.versions.ordering;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -22,18 +22,19 @@ package org.codehaus.mojo.versions.ordering;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Stack;
 
 /**
  * Generic implementation of version comparison.
  *
  * @author <a href="mailto:kenney@apache.org">Kenney Westerhof</a>
- * @author <a href="mailto:hboutemy@apache.org">Herve Boutemy</a>
+ * @author <a href="mailto:hboutemy@apache.org">Hervé Boutemy</a>
  * Note: The implementation of the maven core should be used.
  */
 public class ComparableVersion implements Comparable<ComparableVersion> {
@@ -112,25 +113,22 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
      * Represents a string in the version item list, usually a qualifier.
      */
     private static class StringItem implements Item {
-        private static final String[] QUALIFIERS = {"snapshot", "alpha", "beta", "milestone", "preview", "rc", "", "sp"
-        };
+        private static final List<String> QUALIFIERS = Arrays.asList("snapshot", "", "sp");
 
-        private static final List<String> QUALIFIERS_LIST = Arrays.asList(QUALIFIERS);
-
-        private static final Properties ALIASES = new Properties();
+        private static final Map<String, String> ALIASES = new HashMap<>(4);
 
         static {
-            ALIASES.put("mr", "milestone");
             ALIASES.put("cr", "rc");
             ALIASES.put("final", "");
             ALIASES.put("ga", "");
+            ALIASES.put("release", "");
         }
 
         /**
-         * A comparable for the empty-string qualifier. This one is used to determine if a given qualifier makes the
-         * version older than one without a qualifier, or more recent.
+         * An index value for the empty-string qualifier. This one is used to determine if a given qualifier makes
+         * the version older than one without a qualifier, or more recent.
          */
-        private static final Comparable<String> RELEASE_VERSION_INDEX = String.valueOf(QUALIFIERS_LIST.indexOf(""));
+        private static final int RELEASE_VERSION_INDEX = QUALIFIERS.indexOf("");
 
         private final String value;
 
@@ -152,7 +150,7 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
                         break;
                 }
             }
-            this.value = ALIASES.getProperty(value, value);
+            this.value = ALIASES.getOrDefault(value, value);
         }
 
         public int getType() {
@@ -160,39 +158,56 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
         }
 
         public boolean isNull() {
-            return (comparableQualifier(value).compareTo(RELEASE_VERSION_INDEX) == 0);
+            return QUALIFIERS.indexOf(value) == RELEASE_VERSION_INDEX;
         }
 
         /**
-         * Returns a comparable for a qualifier.
-         * <p/>
-         * This method both takes into account the ordering of known qualifiers as well as lexical ordering for unknown
-         * qualifiers.
-         * <p/>
-         * just returning an Integer with the index here is faster, but requires a lot of if/then/else to check for -1
-         * or QUALIFIERS.size and then resort to lexical ordering. Most comparisons are decided by the first character,
-         * so this is still fast. If more characters are needed then it requires a lexical sort anyway.
+         * Returns a comparable value for a qualifier.
          *
          * @param qualifier
-         * @return
+         * @return an equivalent value that can be used with lexical comparison
+         * @deprecated Use {@link #compareQualifiers(String, String)} instead
          */
-        public static Comparable comparableQualifier(String qualifier) {
-            int i = QUALIFIERS_LIST.indexOf(qualifier);
+        @Deprecated
+        public static String comparableQualifier(String qualifier) {
+            int index = QUALIFIERS.indexOf(qualifier) + 1;
 
-            return i == -1 ? QUALIFIERS_LIST.size() + "-" + qualifier : String.valueOf(i);
+            return index == 0 ? ("0-" + qualifier) : String.valueOf(index);
+        }
+
+        /**
+         * Compare the qualifiers of two artifact versions.
+         *
+         * @param qualifier1 qualifier of first artifact
+         * @param qualifier2 qualifier of second artifact
+         * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or
+         * greater than the second
+         */
+        public static int compareQualifiers(String qualifier1, String qualifier2) {
+            int i1 = QUALIFIERS.indexOf(qualifier1);
+            int i2 = QUALIFIERS.indexOf(qualifier2);
+
+            // if both pre-release, then use natural lexical ordering
+            if (i1 == -1 && i2 == -1) {
+                // alpha < beta < ea < milestone < preview < rc
+                return qualifier1.compareTo(qualifier2);
+            }
+
+            // 'other qualifier' < 'snapshot' < '' < 'sp'
+            return Integer.compare(i1, i2);
         }
 
         public int compareTo(Item item) {
             if (item == null) {
                 // 1-rc < 1, 1-ga > 1
-                return comparableQualifier(value).compareTo(RELEASE_VERSION_INDEX);
+                return Integer.compare(QUALIFIERS.indexOf(value), RELEASE_VERSION_INDEX);
             }
             switch (item.getType()) {
                 case INTEGER_ITEM:
                     return -1; // 1.any < 1.1 ?
 
                 case STRING_ITEM:
-                    return comparableQualifier(value).compareTo(comparableQualifier(((StringItem) item).value));
+                    return compareQualifiers(value, ((StringItem) item).value);
 
                 case LIST_ITEM:
                     return -1; // 1.any < 1-1
@@ -336,6 +351,15 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
                 }
             } else if (Character.isDigit(c)) {
                 if (!isDigit && i > startIndex) {
+                    // 1.0.0.RC1 < 1.0.0-RC2
+                    // treat .RC as -RC
+                    if (!list.isEmpty()) {
+                        // CHECKSTYLE_OFF: InnerAssignment
+                        list.add(list = new ListItem());
+                        // CHECKSTYLE_ON: InnerAssignment
+                        stack.push(list);
+                    }
+
                     list.add(new StringItem(version.substring(startIndex, i), true));
                     startIndex = i;
                 }
@@ -352,6 +376,15 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
         }
 
         if (version.length() > startIndex) {
+            // 1.0.0.RC1 < 1.0.0-RC2
+            // treat .RC as -RC
+            if (!isDigit && !list.isEmpty()) {
+                // CHECKSTYLE_OFF: InnerAssignment
+                list.add(list = new ListItem());
+                // CHECKSTYLE_ON: InnerAssignment
+                stack.push(list);
+            }
+
             list.add(parseItem(isDigit, version.substring(startIndex)));
         }
 

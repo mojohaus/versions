@@ -204,6 +204,7 @@ public class UpdateParentMojoTest {
         assertThat(newVersion, nullValue());
     }
 
+    /*
     @Test
     public void testAllowSnapshots()
             throws MojoExecutionException, VersionRetrievalException, InvalidVersionSpecificationException,
@@ -220,6 +221,7 @@ public class UpdateParentMojoTest {
         assertThat(newVersion, notNullValue());
         assertThat(newVersion.toString(), is("0.0.1-1-impl-SNAPSHOT"));
     }
+    //*/
 
     @Test
     public void testAllowSnapshotsWithParentVersion()
