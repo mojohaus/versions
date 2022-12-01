@@ -22,11 +22,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.codehaus.mojo.versions.change.DefaultVersionChange;
-import org.hamcrest.Matchers;
+import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.mojo.versions.utils.TestUtils;
 import org.junit.Test;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 
 /**
  * Unit tests for {@link UpdatePropertiesMojo}
@@ -39,7 +43,7 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase
         Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml" ),
                 Paths.get( pomDir.toString(),  "pom.xml" ), REPLACE_EXISTING );
         setUpMojo( "update-properties" ).execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
+        assertThat( changeRecorder.getChanges(), hasItem(
             new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "2.0.0-M1" ) ) );
     }
 
@@ -51,7 +55,7 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase
         UpdatePropertiesMojo mojo = setUpMojo( "update-properties" );
         mojo.allowMajorUpdates = false;
         mojo.execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
+        assertThat( changeRecorder.getChanges(), hasItem(
             new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "1.1.0-alpha" ) ) );
     }
 
@@ -64,7 +68,23 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase
         mojo.allowMajorUpdates = false;
         mojo.allowMinorUpdates = false;
         mojo.execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
+        assertThat( changeRecorder.getChanges(), hasItem(
             new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "1.0.1-rc1" ) ) );
+    }
+
+    @Test
+    public void testChangesNotRegisteredIfNoUpdatesInPom()
+            throws Exception
+    {
+        TestUtils.copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/update-properties/issue-837" ),
+            pomDir );
+        UpdatePropertiesMojo mojo = setUpMojo( "update-properties" );
+        TestChangeRecorder changeRecorder = new TestChangeRecorder();
+        setVariableValueToObject( mojo, "changeRecorders", changeRecorder.asTestMap() );
+        setVariableValueToObject( mojo, "changeRecorderFormat", "none" );
+//            pomHelperClass.when( () -> PomHelper.setPropertyVersion( any(), anyString(), anyString(), anyString() ) )
+//                            .thenReturn( false );
+        mojo.execute( );
+        assertThat( changeRecorder.getChanges(), is( empty() ) );
     }
 }
