@@ -143,6 +143,10 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     protected void renderSummaryTableRow( Dependency artifact, PluginUpdatesDetails details )
     {
         boolean upToDate = !details.isUpdateAvailable();
+        if ( upToDate && !verboseSummary )
+        {
+            return;
+        }
 
         sink.tableRow();
 
@@ -193,6 +197,10 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         // warning: using caches here might break plugin report
         ArtifactVersion[] allUpdates = details.getAllUpdates( empty() );
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
+        if ( upToDate && !verboseDetail )
+        {
+            return;
+        }
 
         sink.table();
         sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );

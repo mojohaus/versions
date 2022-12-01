@@ -176,6 +176,14 @@ public abstract class AbstractVersionDetails
         }
     }
 
+    public void setVerbose( boolean verbose )
+    {
+        synchronized ( currentVersionLock )
+        {
+            this.verboseDetail = verbose;
+        }
+    }
+
     @Override
     public final ArtifactVersion[] getVersions()
     {
