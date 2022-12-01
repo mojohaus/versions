@@ -495,6 +495,20 @@ public abstract class AbstractVersionsUpdaterMojo
         return true;
     }
 
+    /**
+     * Attempts to update the property to a newer version, if that exists
+     * @param pom               pom to update
+     * @param property          property to update
+     * @param version           {@link PropertyVersions} object
+     * @param currentVersion    current version
+     * @param allowDowngrade    if downgrades should be allowed if snapshots are not allowed
+     * @param unchangedSegment  most major segment not to be changed
+     * @return new version of the artifact, if the property was updated; {@code null} if there was no update
+     * @throws XMLStreamException thrown from {@link ModifiedPomXMLEventReader} if the update doesn't succeed
+     * @throws InvalidVersionSpecificationException thrown if {@code unchangedSegment} doesn't match the version
+     * @throws InvalidSegmentException thrown if {@code unchangedSegment} is invalid
+     * @throws MojoExecutionException thrown if any other error occurs
+     */
     protected ArtifactVersion updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
                                                              PropertyVersions version, String currentVersion,
                                                              boolean allowDowngrade,
@@ -513,9 +527,10 @@ public abstract class AbstractVersionsUpdaterMojo
         else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
         {
             getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
+            return winner;
         }
 
-        return winner;
+        return null;
     }
 
     /**
