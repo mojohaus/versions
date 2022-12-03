@@ -9,10 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>model-report</artifactId>
+    <artifactId>versions-model</artifactId>
 
-    <name>Versions reports model</name>
-    <description>Modello model for reports</description>
+    <name>Versions Model</name>
+    <description>Modello models used in plugin</description>
 
     <dependencies>
         <dependency>
@@ -34,8 +34,6 @@
                         <goals>
                             <!-- Generate the xpp3 reader code -->
                             <goal>xpp3-reader</goal>
-                            <!-- Generate the xpp3 writer code -->
-                            <goal>xpp3-writer</goal>
                             <!-- Generate the Java sources for the model itself -->
                             <goal>java</goal>
                         </goals>
@@ -60,11 +58,9 @@
                 </executions>
                 <configuration>
                     <models>
-                        <model>src/main/mdo/dependency-updates-report.mdo</model>
-                        <model>src/main/mdo/plugin-updates-report.mdo</model>
-                        <model>src/main/mdo/property-updates-report.mdo</model>
+                        <model>src/main/mdo/rule.mdo</model>
                     </models>
-                    <version>${modelloNamespaceReportVersion}</version>
+                    <version>${modelloNamespaceRuleVersion}</version>
                 </configuration>
             </plugin>
 
@@ -75,9 +71,7 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-
         </plugins>
-
     </build>
 
 </project>

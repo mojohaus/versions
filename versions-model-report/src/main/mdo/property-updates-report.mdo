@@ -22,7 +22,7 @@ under the License.
 <model xmlns="http://codehaus-plexus.github.io/MODELLO/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://codehaus-plexus.github.io/MODELLO/2.0.0 https://codehaus-plexus.github.io/modello/xsd/modello-2.0.0.xsd"
        xml.namespace="https://www.mojohaus.org/VERSIONS/PROPERTY-UPDATES-REPORT/${version}"
-       xml.schemaLocation="https://www.mojohaus.org/versions/model-report/xsd/property-updates-report-${version}.xsd">
+       xml.schemaLocation="https://www.mojohaus.org/versions/versions-model-report/xsd/property-updates-report-${version}.xsd">
     <id>property-updates-report</id>
     <name>PropertyUpdatesReport</name>
     <description>
