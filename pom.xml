@@ -96,13 +96,13 @@
   </contributors>
 
   <modules>
-    <module>model-report</module>
-    <module>model-ruleset</module>
     <module>versions-api</module>
     <module>versions-common</module>
     <module>versions-enforcer</module>
-    <module>versions-test</module>
     <module>versions-maven-plugin</module>
+    <module>versions-model-report</module>
+    <module>versions-model</module>
+    <module>versions-test</module>
   </modules>
 
   <scm>

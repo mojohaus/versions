@@ -29,8 +29,8 @@
     </menu>
 
     <menu name="Reference">
-      <item name="Version number comparison rule-sets" href="../model-ruleset/rule.html"/>
-      <item name="XML schemas" href="../model-ruleset/xsd/index.html"/>
+      <item name="Version number comparison rule-sets" href="../versions-model/rule.html"/>
+      <item name="XML schemas" href="../versions-model/xsd/index.html"/>
     </menu>
 
     <menu ref="parent"/>

@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo.versions</groupId>
-            <artifactId>model-ruleset</artifactId>
+            <artifactId>versions-model</artifactId>
             <version>${project.version}</version>
         </dependency>
 
