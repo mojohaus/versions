@@ -79,10 +79,17 @@ The Versions Plugin has the following goals.
 The Versions Plugin has the following reporting goals.
 * [versions:dependency-updates-report](./dependency-updates-report-mojo.html) produces a report of those
   project dependencies which have newer versions available.
+* [versions:dependency-updates-aggregate-report](./dependency-updates-aggregate-report-mojo.html) produces an aggregated 
+  report(project + its submodules) of those dependencies which have newer versions available.
 * [versions:plugin-updates-report](./plugin-updates-report-mojo.html) produces a report of those plugins which have
   newer versions available.
+* [versions:plugin-updates-aggregate-report](./plugin-updates-aggregate-report-mojo.html) produces an aggregated report
+  (project + its submodules) of those plugins which have newer versions available.
 * [versions:property-updates-report](./property-updates-report-mojo.html) produces a report of
   those properties which are used to control artifact versions and which properties have newer versions available.
+* [versions:property-updates-aggregate-report](./property-updates-aggregate-report-mojo.html) produces an aggregated
+  report(project + its submodules) of those properties which are used to control artifact versions and 
+  which properties have newer versions available.
 * [versions:parent-updates-report](./parent-updates-report-mojo.html) produces a report on possible parent artifact
   upgrades.
 
