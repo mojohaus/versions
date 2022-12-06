@@ -847,7 +847,7 @@ public class DefaultVersionsHelper
                     .map( authentication -> new AuthenticationInfo()
                         {{
                             try ( AuthenticationContext authCtx = AuthenticationContext
-                                    .forProxy( mavenSession.getRepositorySession(), repository ) )
+                                    .forRepository( mavenSession.getRepositorySession(), repository ) )
                             {
                                 ofNullable( authCtx.get( AuthenticationContext.USERNAME ) )
                                         .ifPresent( this::setUserName );
