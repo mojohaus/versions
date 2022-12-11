@@ -52,8 +52,7 @@ import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRendererBase implements ReportRenderer
-{
+public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRendererBase implements ReportRenderer {
 
     /**
      * Model of the object being rendered
@@ -62,32 +61,29 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected T model;
 
-    protected final ArtifactVersionsCache newestUpdateCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getReportNewestUpdate );
+    protected final ArtifactVersionsCache newestUpdateCache =
+            new ArtifactVersionsCache(AbstractVersionDetails::getReportNewestUpdate);
 
-    protected final ArtifactVersionsCache allUpdatesCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getReportUpdates );
+    protected final ArtifactVersionsCache allUpdatesCache =
+            new ArtifactVersionsCache(AbstractVersionDetails::getReportUpdates);
 
-    protected final SinkEventAttributes headerAttributes
-            = new SinkEventAttributeSet( SinkEventAttributes.WIDTH, "30%" );
+    protected final SinkEventAttributes headerAttributes = new SinkEventAttributeSet(SinkEventAttributes.WIDTH, "30%");
 
-    protected AbstractVersionsReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName, T model )
-    {
-        super( sink, i18n, locale, bundleName );
+    protected AbstractVersionsReportRenderer(I18N i18n, Sink sink, Locale locale, String bundleName, T model) {
+        super(sink, i18n, locale, bundleName);
         this.model = model;
     }
 
     /**
      * {@inheritDoc}
      */
-    protected void renderBody()
-    {
+    protected void renderBody() {
         sink.section1();
         sink.sectionTitle1();
-        sink.text( getText( "report.overview.title" ) );
+        sink.text(getText("report.overview.title"));
         sink.sectionTitle1_();
         sink.paragraph();
-        sink.text( getText( "report.overview.text" ) );
+        sink.text(getText("report.overview.text"));
         sink.paragraph_();
 
         renderOverview();
@@ -99,10 +95,10 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
 
         sink.section1();
         sink.sectionTitle1();
-        sink.text( getText( "report.detail.title" ) );
+        sink.text(getText("report.detail.title"));
         sink.sectionTitle1_();
         sink.paragraph();
-        sink.text( getText( "report.detail.text" ) );
+        sink.text(getText("report.detail.text"));
         sink.paragraph_();
 
         renderDetails();
@@ -113,11 +109,10 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     /**
      * Renders the "Overview" table
      */
-    protected void renderOverview()
-    {
+    protected void renderOverview() {
         sink.table();
         sink.tableRow();
-        renderOverviewTableRow( computeOverviewStats() );
+        renderOverviewTableRow(computeOverviewStats());
         sink.tableRow_();
         sink.table_();
     }
@@ -137,13 +132,12 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param stats summary statistics object to render
      * @param <Q> concrete {@linkplain OverviewStats} class
      */
-    protected <Q extends OverviewStats> void renderOverviewTableRow( Q stats )
-    {
-        renderStatRow( "report.overview.numUpToDate", stats.getUpToDate(), true );
-        renderStatRow( "report.overview.numNewerVersionAvailable", stats.getAny(), false );
-        renderStatRow( "report.overview.numNewerIncrementalAvailable", stats.getIncremental(), false );
-        renderStatRow( "report.overview.numNewerMinorAvailable", stats.getMinor(), false );
-        renderStatRow( "report.overview.numNewerMajorAvailable", stats.getMajor(), false );
+    protected <Q extends OverviewStats> void renderOverviewTableRow(Q stats) {
+        renderStatRow("report.overview.numUpToDate", stats.getUpToDate(), true);
+        renderStatRow("report.overview.numNewerVersionAvailable", stats.getAny(), false);
+        renderStatRow("report.overview.numNewerIncrementalAvailable", stats.getIncremental(), false);
+        renderStatRow("report.overview.numNewerMinorAvailable", stats.getMinor(), false);
+        renderStatRow("report.overview.numNewerMajorAvailable", stats.getMajor(), false);
     }
 
     /**
@@ -152,17 +146,16 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param statCount the number of artifacts with the given stat.
      * @param forceSuccessIcon if true, the success icon will be rendered regardless.
      */
-    protected void renderStatRow( String textKey, int statCount, boolean forceSuccessIcon )
-    {
+    protected void renderStatRow(String textKey, int statCount, boolean forceSuccessIcon) {
         sink.tableRow();
         sink.tableCell();
-        renderIcon( statCount == 0 || forceSuccessIcon );
+        renderIcon(statCount == 0 || forceSuccessIcon);
         sink.tableCell_();
         sink.tableCell();
-        sink.text( getText( textKey ) );
+        sink.text(getText(textKey));
         sink.tableCell_();
         sink.tableCell();
-        sink.text( Integer.toString( statCount ) );
+        sink.text(Integer.toString(statCount));
         sink.tableCell_();
         sink.tableRow_();
     }
@@ -171,14 +164,10 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * Renders the success or warning icon.
      * @param success if true, the success icon will be rendered, otherwise the warning icon will be rendered.
      */
-    protected void renderIcon( boolean success )
-    {
-        if ( success )
-        {
+    protected void renderIcon(boolean success) {
+        if (success) {
             renderSuccessIcon();
-        }
-        else
-        {
+        } else {
             renderWarningIcon();
         }
     }
@@ -195,59 +184,51 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected abstract void renderDetails();
 
-    protected void renderSummaryTable( Map<Dependency, ArtifactVersions> contents, boolean hasScope )
-    {
+    protected void renderSummaryTable(Map<Dependency, ArtifactVersions> contents, boolean hasScope) {
         sink.table();
 
         sink.tableRow();
-        renderSummaryTableHeader( hasScope, true );
+        renderSummaryTableHeader(hasScope, true);
         sink.tableRow_();
 
-        contents.forEach( ( artifact, artifactVersions ) ->
-                renderSummaryTableRow( artifact, artifactVersions, hasScope ) );
+        contents.forEach((artifact, artifactVersions) -> renderSummaryTableRow(artifact, artifactVersions, hasScope));
 
         sink.tableRow();
-        renderSummaryTableHeader( hasScope, true );
+        renderSummaryTableHeader(hasScope, true);
         sink.tableRow_();
 
         sink.table_();
     }
 
-    protected void renderSummaryTableHeader( boolean hasScope, boolean hasType )
-    {
-        renderTableHeaderCells( "report.status", "report.groupId", "report.artifactId",
-                "report.currentVersion" );
-        if ( hasScope )
-        {
-            renderTableHeaderCells( "report.scope" );
+    protected void renderSummaryTableHeader(boolean hasScope, boolean hasType) {
+        renderTableHeaderCells("report.status", "report.groupId", "report.artifactId", "report.currentVersion");
+        if (hasScope) {
+            renderTableHeaderCells("report.scope");
         }
-        if ( hasType )
-        {
-            renderTableHeaderCells( "report.classifier", "report.type" );
+        if (hasType) {
+            renderTableHeaderCells("report.classifier", "report.type");
         }
-        renderTableHeaderCells( "report.latestSubIncremental",
-                "report.latestIncremental", "report.latestMinor", "report.latestMajor" );
+        renderTableHeaderCells(
+                "report.latestSubIncremental", "report.latestIncremental", "report.latestMinor", "report.latestMajor");
     }
 
-    protected void renderSummaryTableRow( Dependency artifact, ArtifactVersions details, boolean includeScope )
-    {
-        details.setCurrentVersion( artifact.getVersion() );
-        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+    protected void renderSummaryTableRow(Dependency artifact, ArtifactVersions details, boolean includeScope) {
+        details.setCurrentVersion(artifact.getVersion());
+        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.tableRow();
 
         sink.tableCell();
-        renderIcon( upToDate );
+        renderIcon(upToDate);
         sink.tableCell_();
 
-        renderCells( artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion() );
-        if ( includeScope )
-        {
-            renderCell( artifact.getScope() );
+        renderCells(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+        if (includeScope) {
+            renderCell(artifact.getScope());
         }
-        renderCells( artifact.getClassifier(), artifact.getType() );
-        renderNewestVersions( details );
+        renderCells(artifact.getClassifier(), artifact.getType());
+        renderNewestVersions(details);
 
         sink.tableRow_();
     }
@@ -256,35 +237,31 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * Renders the newest versions for the given artifact.
      * @param details the artifact for which to render the newest versions.
      */
-    protected void renderNewestVersions( AbstractVersionDetails details )
-    {
-        renderBoldCell( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) );
-        renderBoldCell( newestUpdateCache.get( details, of( INCREMENTAL ) ) );
-        renderBoldCell( newestUpdateCache.get( details, of( MINOR ) ) );
-        renderBoldCell( newestUpdateCache.get( details, of( MAJOR ) ) );
+    protected void renderNewestVersions(AbstractVersionDetails details) {
+        renderBoldCell(newestUpdateCache.get(details, of(SUBINCREMENTAL)));
+        renderBoldCell(newestUpdateCache.get(details, of(INCREMENTAL)));
+        renderBoldCell(newestUpdateCache.get(details, of(MINOR)));
+        renderBoldCell(newestUpdateCache.get(details, of(MAJOR)));
     }
 
-    protected void renderDependencyDetailTable( Dependency artifact, ArtifactVersions details, boolean includeScope )
-    {
-        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+    protected void renderDependencyDetailTable(Dependency artifact, ArtifactVersions details, boolean includeScope) {
+        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.table();
-        sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
+        sink.tableRows(new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false);
 
-        renderTwoCellsRow( "report.status", () -> renderStatus( details ) );
-        renderTwoCellsRow( "report.groupId", artifact.getGroupId() );
-        renderTwoCellsRow( "report.artifactId", artifact.getArtifactId() );
-        renderTwoCellsRow( "report.currentVersion", artifact.getVersion() );
-        if ( includeScope )
-        {
-            renderTwoCellsRow( "report.scope", artifact.getScope() );
+        renderTwoCellsRow("report.status", () -> renderStatus(details));
+        renderTwoCellsRow("report.groupId", artifact.getGroupId());
+        renderTwoCellsRow("report.artifactId", artifact.getArtifactId());
+        renderTwoCellsRow("report.currentVersion", artifact.getVersion());
+        if (includeScope) {
+            renderTwoCellsRow("report.scope", artifact.getScope());
         }
-        renderTwoCellsRow( "report.classifier", artifact.getClassifier() );
-        renderTwoCellsRow( "report.type", artifact.getType() );
-        if ( !upToDate )
-        {
-            renderTwoCellsRow( "report.updateVersions", () -> renderVersions( allUpdates, details ) );
+        renderTwoCellsRow("report.classifier", artifact.getClassifier());
+        renderTwoCellsRow("report.type", artifact.getType());
+        if (!upToDate) {
+            renderTwoCellsRow("report.updateVersions", () -> renderVersions(allUpdates, details));
         }
 
         sink.tableRows_();
@@ -296,14 +273,13 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param textKey the key of the text to be rendered.
      * @param textValue the value of the text to be rendered.
      */
-    protected void renderTwoCellsRow( String textKey, String textValue )
-    {
+    protected void renderTwoCellsRow(String textKey, String textValue) {
         sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( textKey ) );
+        sink.tableHeaderCell(headerAttributes);
+        sink.text(getText(textKey));
         sink.tableHeaderCell_();
         sink.tableCell();
-        sink.text( textValue );
+        sink.text(textValue);
         sink.tableCell_();
         sink.tableRow_();
     }
@@ -313,11 +289,10 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param textKey the key of the text to be rendered.
      * @param runnable the runnable to be executed to render the second cell content.
      */
-    protected void renderTwoCellsRow( String textKey, Runnable runnable )
-    {
+    protected void renderTwoCellsRow(String textKey, Runnable runnable) {
         sink.tableRow();
-        sink.tableHeaderCell( headerAttributes );
-        sink.text( getText( textKey ) );
+        sink.tableHeaderCell(headerAttributes);
+        sink.text(getText(textKey));
         sink.tableHeaderCell_();
         sink.tableCell();
         runnable.run();
@@ -329,37 +304,27 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * Renders the status of the given artifact.
      * @param details the artifact for which to render the status.
      */
-    protected void renderStatus( AbstractVersionDetails details )
-    {
-        if ( newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) != null )
-        {
+    protected void renderStatus(AbstractVersionDetails details) {
+        if (newestUpdateCache.get(details, of(SUBINCREMENTAL)) != null) {
             renderWarningIcon();
             sink.nonBreakingSpace();
-            sink.text( getText( "report.otherUpdatesAvailable" ) );
-        }
-        else if ( newestUpdateCache.get( details, of( INCREMENTAL ) ) != null )
-        {
+            sink.text(getText("report.otherUpdatesAvailable"));
+        } else if (newestUpdateCache.get(details, of(INCREMENTAL)) != null) {
             renderWarningIcon();
             sink.nonBreakingSpace();
-            sink.text( getText( "report.incrementalUpdatesAvailable" ) );
-        }
-        else if ( newestUpdateCache.get( details, of( MINOR ) ) != null )
-        {
+            sink.text(getText("report.incrementalUpdatesAvailable"));
+        } else if (newestUpdateCache.get(details, of(MINOR)) != null) {
             renderWarningIcon();
             sink.nonBreakingSpace();
-            sink.text( getText( "report.minorUpdatesAvailable" ) );
-        }
-        else if ( newestUpdateCache.get( details, of( MAJOR ) ) != null )
-        {
+            sink.text(getText("report.minorUpdatesAvailable"));
+        } else if (newestUpdateCache.get(details, of(MAJOR)) != null) {
             renderWarningIcon();
             sink.nonBreakingSpace();
-            sink.text( getText( "report.majorUpdatesAvailable" ) );
-        }
-        else
-        {
+            sink.text(getText("report.majorUpdatesAvailable"));
+        } else {
             renderSuccessIcon();
             sink.nonBreakingSpace();
-            sink.text( getText( "report.noUpdatesAvailable" ) );
+            sink.text(getText("report.noUpdatesAvailable"));
         }
     }
 
@@ -369,17 +334,13 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param details the artifact or property for which to render the versions.
      * @return the list of restrictions for the spec versions range.
      */
-    private List<Restriction> getArtifactVersionRange( AbstractVersionDetails details )
-    {
-        try
-        {
+    private List<Restriction> getArtifactVersionRange(AbstractVersionDetails details) {
+        try {
             String spec = details.getCurrentVersion().toString();
-            VersionRange range = VersionRange.createFromVersionSpec( spec );
+            VersionRange range = VersionRange.createFromVersionSpec(spec);
             return range.getRestrictions();
-        }
-        catch ( InvalidVersionSpecificationException ignored )
-        {
-            ignored.printStackTrace( System.err );
+        } catch (InvalidVersionSpecificationException ignored) {
+            ignored.printStackTrace(System.err);
         }
         return Collections.EMPTY_LIST;
     }
@@ -389,50 +350,42 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param allUpdates the list of all updates available.
      * @param details the versions details for the given artifact or property.
      */
-    protected void renderVersions( ArtifactVersion[] allUpdates, AbstractVersionDetails details )
-    {
-        List<Restriction> versionRange = getArtifactVersionRange( details );
+    protected void renderVersions(ArtifactVersion[] allUpdates, AbstractVersionDetails details) {
+        List<Restriction> versionRange = getArtifactVersionRange(details);
         boolean someNotAllowed = false;
-        for ( int i = 0; i < allUpdates.length; i++ )
-        {
-            if ( i > 0 )
-            {
+        for (int i = 0; i < allUpdates.length; i++) {
+            if (i > 0) {
                 sink.lineBreak();
             }
             // if candidate version in range, display no star.
             ArtifactVersion candidate = allUpdates[i];
-            boolean allowed = versionRange.stream().anyMatch( restriction ->
-                    details.isVersionInRestriction( restriction, candidate ) );
-            String label = getLabel( allUpdates[i], details );
-            if ( !allowed )
-            {
-                sink.text( "* " );
+            boolean allowed = versionRange.stream()
+                    .anyMatch(restriction -> details.isVersionInRestriction(restriction, candidate));
+            String label = getLabel(allUpdates[i], details);
+            if (!allowed) {
+                sink.text("* ");
                 someNotAllowed = true;
             }
-            if ( allowed && label != null )
-            {
+            if (allowed && label != null) {
                 safeBold();
             }
-            sink.text( allUpdates[i].toString() );
-            if ( label != null )
-            {
-                if ( allowed )
-                {
+            sink.text(allUpdates[i].toString());
+            if (label != null) {
+                if (allowed) {
                     safeBold_();
                 }
                 sink.nonBreakingSpace();
                 safeItalic();
-                sink.text( label );
+                sink.text(label);
                 safeItalic_();
             }
         }
-        if ( someNotAllowed )
-        {
+        if (someNotAllowed) {
             sink.lineBreak();
             sink.lineBreak();
-            sink.text( "* " );
+            sink.text("* ");
             safeItalic();
-            sink.text( getText( "report.excludedVersion" ) );
+            sink.text(getText("report.excludedVersion"));
             safeItalic_();
         }
     }
@@ -443,30 +396,24 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param details the artifact for which to render the versions.
      * @return a text label to describe if the given version is a major, minor, incremental or subincremental update.
      */
-    protected String getLabel( ArtifactVersion version, AbstractVersionDetails details )
-    {
+    protected String getLabel(ArtifactVersion version, AbstractVersionDetails details) {
 
-        if ( equals( version, newestUpdateCache.get( details, of( SUBINCREMENTAL ) ) ) )
-        {
-            return getText( "report.latestSubIncremental" );
+        if (equals(version, newestUpdateCache.get(details, of(SUBINCREMENTAL)))) {
+            return getText("report.latestSubIncremental");
         }
 
-        if ( equals( version, newestUpdateCache.get( details, of( INCREMENTAL ) ) ) )
-        {
-            return getText( "report.latestIncremental" );
+        if (equals(version, newestUpdateCache.get(details, of(INCREMENTAL)))) {
+            return getText("report.latestIncremental");
         }
 
-        if ( equals( version, newestUpdateCache.get( details, of( MINOR ) ) ) )
-        {
-            return getText( "report.latestMinor" );
+        if (equals(version, newestUpdateCache.get(details, of(MINOR)))) {
+            return getText("report.latestMinor");
         }
 
-        if ( equals( version, newestUpdateCache.get( details, of( MAJOR ) ) ) )
-        {
-            return getText( "report.latestMajor" );
+        if (equals(version, newestUpdateCache.get(details, of(MAJOR)))) {
+            return getText("report.latestMajor");
         }
 
         return null;
     }
-
 }

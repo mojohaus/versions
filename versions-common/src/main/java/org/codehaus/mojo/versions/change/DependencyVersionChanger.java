@@ -33,24 +33,22 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 15-Sep-2010 16:00:32
  */
-public class DependencyVersionChanger
-    extends AbstractVersionChanger
-{
+public class DependencyVersionChanger extends AbstractVersionChanger {
 
-    public DependencyVersionChanger( Model model, ModifiedPomXMLEventReader pom, Log reporter )
-    {
-        super( model, pom, reporter );
+    public DependencyVersionChanger(Model model, ModifiedPomXMLEventReader pom, Log reporter) {
+        super(model, pom, reporter);
     }
 
-    public void apply( VersionChange versionChange )
-        throws XMLStreamException
-    {
-        if ( PomHelper.setDependencyVersion( getPom(), versionChange.getGroupId(), versionChange.getArtifactId(),
-                                             versionChange.getOldVersion(), versionChange.getNewVersion(),
-                                             getModel() ) )
-        {
-            info( "    Updating dependency " + versionChange.getGroupId() + ":" + versionChange.getArtifactId() );
-            info( "        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion() );
+    public void apply(VersionChange versionChange) throws XMLStreamException {
+        if (PomHelper.setDependencyVersion(
+                getPom(),
+                versionChange.getGroupId(),
+                versionChange.getArtifactId(),
+                versionChange.getOldVersion(),
+                versionChange.getNewVersion(),
+                getModel())) {
+            info("    Updating dependency " + versionChange.getGroupId() + ":" + versionChange.getArtifactId());
+            info("        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion());
         }
     }
 }

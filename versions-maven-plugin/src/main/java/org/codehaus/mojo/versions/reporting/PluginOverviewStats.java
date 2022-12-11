@@ -33,20 +33,17 @@ import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
-public class PluginOverviewStats extends OverviewStats
-{
+public class PluginOverviewStats extends OverviewStats {
     /**
      * Extension of the {@linkplain OverviewStats} adding dependency stats
      */
     private int dependencies;
 
-    public int getDependencies()
-    {
+    public int getDependencies() {
         return dependencies;
     }
 
-    public void incrementDependencies()
-    {
+    public void incrementDependencies() {
         dependencies++;
     }
 
@@ -61,37 +58,25 @@ public class PluginOverviewStats extends OverviewStats
      * @param <V> always equal to {@linkplain PluginUpdatesDetails}
      * @return instance of the {@linkplain PluginOverviewStats}, initialised with the update information
      */
-    public static <T extends OverviewStats, V extends AbstractVersionDetails>
-    T fromUpdates( Collection<V> updates, ArtifactVersionsCache cache )
-    {
+    public static <T extends OverviewStats, V extends AbstractVersionDetails> T fromUpdates(
+            Collection<V> updates, ArtifactVersionsCache cache) {
         PluginOverviewStats stats = new PluginOverviewStats();
-        updates.forEach( details ->
-        {
-            if ( getNewestUpdate( cache, details, of( SUBINCREMENTAL ) ) != null )
-            {
+        updates.forEach(details -> {
+            if (getNewestUpdate(cache, details, of(SUBINCREMENTAL)) != null) {
                 stats.incrementAny();
-            }
-            else if ( getNewestUpdate( cache, details, of( INCREMENTAL ) ) != null )
-            {
+            } else if (getNewestUpdate(cache, details, of(INCREMENTAL)) != null) {
                 stats.incrementIncremental();
-            }
-            else if ( getNewestUpdate( cache, details, of( MINOR ) ) != null )
-            {
+            } else if (getNewestUpdate(cache, details, of(MINOR)) != null) {
                 stats.incrementMinor();
-            }
-            else if ( getNewestUpdate( cache, details, of( MAJOR ) ) != null )
-            {
+            } else if (getNewestUpdate(cache, details, of(MAJOR)) != null) {
                 stats.incrementMajor();
-            }
-            else
-            {
+            } else {
                 stats.incrementUpToDate();
             }
-            if ( ( ( PluginUpdatesDetails ) details ).isDependencyUpdateAvailable() )
-            {
+            if (((PluginUpdatesDetails) details).isDependencyUpdateAvailable()) {
                 stats.incrementDependencies();
             }
-        } );
+        });
         return (T) stats;
     }
 }

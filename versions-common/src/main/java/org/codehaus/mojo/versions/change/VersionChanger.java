@@ -29,8 +29,6 @@ import org.codehaus.mojo.versions.api.change.VersionChange;
  * @author Stephen Connolly
  * @since 15-Sep-2010 15:59:00
  */
-public interface VersionChanger
-{
-    void apply( VersionChange versionChange )
-        throws XMLStreamException;
+public interface VersionChanger {
+    void apply(VersionChange versionChange) throws XMLStreamException;
 }

@@ -28,10 +28,8 @@ import static java.util.Collections.singletonMap;
 /**
  * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
  */
-public class ParentUpdatesModel extends DependencyUpdatesModel
-{
-    public ParentUpdatesModel( Dependency parent, ArtifactVersions dependencyUpdates )
-    {
-        super( singletonMap( parent, dependencyUpdates ), emptyMap() );
+public class ParentUpdatesModel extends DependencyUpdatesModel {
+    public ParentUpdatesModel(Dependency parent, ArtifactVersions dependencyUpdates) {
+        super(singletonMap(parent, dependencyUpdates), emptyMap());
     }
 }

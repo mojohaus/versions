@@ -40,10 +40,8 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
  *
  * @author Stephen Connolly
  */
-public abstract class AbstractVersionsDisplayMojo
-    extends AbstractVersionsUpdaterMojo
-{
-    static final String NL = System.getProperty( "line.separator" );
+public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdaterMojo {
+    static final String NL = System.getProperty("line.separator");
 
     private static final int DEFAULT_OUTPUT_LINE_WIDTH = 80;
 
@@ -52,7 +50,7 @@ public abstract class AbstractVersionsDisplayMojo
      *
      * @since 2.2
      */
-    @Parameter( property = "versions.outputFile" )
+    @Parameter(property = "versions.outputFile")
     protected File outputFile;
 
     /**
@@ -60,7 +58,7 @@ public abstract class AbstractVersionsDisplayMojo
      *
      * @since 2.2
      */
-    @Parameter( property = "versions.logOutput", defaultValue = "true" )
+    @Parameter(property = "versions.logOutput", defaultValue = "true")
     protected boolean logOutput;
 
     /**
@@ -68,7 +66,7 @@ public abstract class AbstractVersionsDisplayMojo
      *
      * @since 2.2
      */
-    @Parameter( property = "outputEncoding", defaultValue = "${project.reporting.outputEncoding}" )
+    @Parameter(property = "outputEncoding", defaultValue = "${project.reporting.outputEncoding}")
     protected String outputEncoding;
 
     /**
@@ -76,105 +74,81 @@ public abstract class AbstractVersionsDisplayMojo
      *
      * @since 2.10.0
      */
-    @Parameter( property = "versions.outputLineWidth",
-                defaultValue = AbstractVersionsDisplayMojo.DEFAULT_OUTPUT_LINE_WIDTH + "" )
+    @Parameter(
+            property = "versions.outputLineWidth",
+            defaultValue = AbstractVersionsDisplayMojo.DEFAULT_OUTPUT_LINE_WIDTH + "")
     protected int outputLineWidth;
 
     private boolean outputFileError = false;
 
     @Inject
-    protected AbstractVersionsDisplayMojo( RepositorySystem repositorySystem,
-                                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           Map<String, Wagon> wagonMap,
-                                           Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    protected AbstractVersionsDisplayMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
-    @SuppressWarnings( "unchecked" )
-    protected void logInit()
-    {
-        if ( outputFile != null && !outputFileError )
-        {
-            if ( outputFile.isFile() )
-            {
+    @SuppressWarnings("unchecked")
+    protected void logInit() {
+        if (outputFile != null && !outputFileError) {
+            if (outputFile.isFile()) {
                 final String key = AbstractVersionsDisplayMojo.class.getName() + ".outputFile";
                 String outputFileName;
-                try
-                {
+                try {
                     outputFileName = outputFile.getCanonicalPath();
-                }
-                catch ( IOException e )
-                {
+                } catch (IOException e) {
                     outputFileName = outputFile.getAbsolutePath();
                 }
-                Set<String> files = (Set<String>) getPluginContext().get( key );
-                if ( files == null )
-                {
+                Set<String> files = (Set<String>) getPluginContext().get(key);
+                if (files == null) {
                     files = new LinkedHashSet<>();
+                } else {
+                    files = new LinkedHashSet<>(files);
                 }
-                else
-                {
-                    files = new LinkedHashSet<>( files );
-                }
-                if ( !files.contains( outputFileName ) )
-                {
-                    if ( !outputFile.delete() )
-                    {
-                        getLog().error( "Cannot delete " + outputFile + " will append instead" );
+                if (!files.contains(outputFileName)) {
+                    if (!outputFile.delete()) {
+                        getLog().error("Cannot delete " + outputFile + " will append instead");
                     }
                 }
-                files.add( outputFileName );
-                getPluginContext().put( key, files );
-            }
-            else
-            {
-                if ( outputFile.exists() )
-                {
-                    getLog().error( "Cannot send output to " + outputFile + " as it exists but is not a file" );
+                files.add(outputFileName);
+                getPluginContext().put(key, files);
+            } else {
+                if (outputFile.exists()) {
+                    getLog().error("Cannot send output to " + outputFile + " as it exists but is not a file");
                     outputFileError = true;
-                }
-                else if ( !outputFile.getParentFile().isDirectory() )
-                {
-                    if ( !outputFile.getParentFile().mkdirs() )
-                    {
+                } else if (!outputFile.getParentFile().isDirectory()) {
+                    if (!outputFile.getParentFile().mkdirs()) {
                         outputFileError = true;
                     }
                 }
             }
-            if ( !outputFileError && StringUtils.isBlank( outputEncoding ) )
-            {
-                outputEncoding = System.getProperty( "file.encoding" );
-                getLog().warn( "File encoding has not been set, using platform encoding " + outputEncoding
-                                   + ", i.e. build is platform dependent!" );
+            if (!outputFileError && StringUtils.isBlank(outputEncoding)) {
+                outputEncoding = System.getProperty("file.encoding");
+                getLog().warn("File encoding has not been set, using platform encoding " + outputEncoding
+                        + ", i.e. build is platform dependent!");
             }
         }
     }
 
-    protected void logLine( boolean error, String line )
-    {
-        if ( logOutput )
-        {
-            if ( error )
-            {
-                getLog().error( line );
-            }
-            else
-            {
-                getLog().info( line );
+    protected void logLine(boolean error, String line) {
+        if (logOutput) {
+            if (error) {
+                getLog().error(line);
+            } else {
+                getLog().info(line);
             }
         }
-        if ( outputFile != null && !outputFileError )
-        {
-            try
-            {
-                Files.write( outputFile.toPath(),
-                             ( error ? "> " + line + NL : line + NL ).getBytes( outputEncoding ),
-                             StandardOpenOption.APPEND, StandardOpenOption.CREATE );
-            }
-            catch ( IOException e )
-            {
-                getLog().error( "Cannot send output to " + outputFile, e );
+        if (outputFile != null && !outputFileError) {
+            try {
+                Files.write(
+                        outputFile.toPath(),
+                        (error ? "> " + line + NL : line + NL).getBytes(outputEncoding),
+                        StandardOpenOption.APPEND,
+                        StandardOpenOption.CREATE);
+            } catch (IOException e) {
+                getLog().error("Cannot send output to " + outputFile, e);
                 outputFileError = true;
             }
         }
@@ -183,9 +157,7 @@ public abstract class AbstractVersionsDisplayMojo
     /**
      * @return Offset of the configured output line width compared to the default with of 80.
      */
-    protected int getOutputLineWidthOffset()
-    {
+    protected int getOutputLineWidthOffset() {
         return this.outputLineWidth - DEFAULT_OUTPUT_LINE_WIDTH;
     }
-
 }

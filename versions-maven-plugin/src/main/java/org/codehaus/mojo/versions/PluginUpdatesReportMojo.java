@@ -19,9 +19,11 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
+
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -36,30 +38,27 @@ import org.codehaus.plexus.i18n.I18N;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "plugin-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME,
-       threadSafe = true )
-public class PluginUpdatesReportMojo extends AbstractPluginUpdatesReportMojo
-{
+@Mojo(name = "plugin-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+public class PluginUpdatesReportMojo extends AbstractPluginUpdatesReportMojo {
 
     @Inject
-    protected PluginUpdatesReportMojo( I18N i18n,
-                                       RepositorySystem repositorySystem,
-                                       org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                       Map<String, Wagon> wagonMap,
-                                       ReportRendererFactory rendererFactory )
-    {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
+    protected PluginUpdatesReportMojo(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
+        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
     }
 
     /**
      * {@inheritDoc}
      * */
     @Override
-    protected void populatePluginManagement( Set<Plugin> pluginManagementCollector )
-    {
-        if ( haveBuildPluginManagementPlugins( getProject() ) )
-        {
-            pluginManagementCollector.addAll( getProject().getBuild().getPluginManagement().getPlugins() );
+    protected void populatePluginManagement(Set<Plugin> pluginManagementCollector) {
+        if (haveBuildPluginManagementPlugins(getProject())) {
+            pluginManagementCollector.addAll(
+                    getProject().getBuild().getPluginManagement().getPlugins());
         }
     }
 
@@ -67,19 +66,16 @@ public class PluginUpdatesReportMojo extends AbstractPluginUpdatesReportMojo
      * {@inheritDoc}
      * */
     @Override
-    protected void populatePlugins( Set<Plugin> pluginsCollector )
-    {
-        if ( haveBuildPlugins( getProject() ) )
-        {
-            pluginsCollector.addAll( getProject().getBuild().getPlugins() );
+    protected void populatePlugins(Set<Plugin> pluginsCollector) {
+        if (haveBuildPlugins(getProject())) {
+            pluginsCollector.addAll(getProject().getBuild().getPlugins());
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getOutputName()
-    {
+    public String getOutputName() {
         return "plugin-updates-report";
     }
 }

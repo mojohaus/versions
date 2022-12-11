@@ -40,9 +40,7 @@ import static org.apache.commons.lang3.StringUtils.compare;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public class ArtifactVersions
-    extends AbstractVersionDetails implements Comparable<ArtifactVersions>
-{
+public class ArtifactVersions extends AbstractVersionDetails implements Comparable<ArtifactVersions> {
     /**
      * The artifact that who's versions we hold details of.
      *
@@ -72,15 +70,13 @@ public class ArtifactVersions
      * @param versionComparator The version comparison rule.
      * @since 1.0-alpha-3
      */
-    public ArtifactVersions( Artifact artifact, List<ArtifactVersion> versions, VersionComparator versionComparator )
-    {
+    public ArtifactVersions(Artifact artifact, List<ArtifactVersion> versions, VersionComparator versionComparator) {
         this.artifact = artifact;
         this.versionComparator = versionComparator;
-        this.versions = new TreeSet<>( versionComparator );
-        this.versions.addAll( versions );
-        if ( artifact.getVersion() != null )
-        {
-            setCurrentVersion( artifact.getVersion() );
+        this.versions = new TreeSet<>(versionComparator);
+        this.versions.addAll(versions);
+        if (artifact.getVersion() != null) {
+            setCurrentVersion(artifact.getVersion());
         }
     }
 
@@ -90,59 +86,53 @@ public class ArtifactVersions
      * @param other other object to be linked to
      * @since 2.13.0
      */
-    public ArtifactVersions( ArtifactVersions other )
-    {
+    public ArtifactVersions(ArtifactVersions other) {
         artifact = other.artifact;
         versionComparator = other.versionComparator;
         versions = other.versions;
-        setCurrentVersion( other.getCurrentVersion() );
-        setIncludeSnapshots( other.isIncludeSnapshots() );
+        setCurrentVersion(other.getCurrentVersion());
+        setIncludeSnapshots(other.isIncludeSnapshots());
     }
 
-    @SuppressWarnings( "checkstyle:InnerAssignment" )
-    public int compareTo( ArtifactVersions that )
-    {
+    @SuppressWarnings("checkstyle:InnerAssignment")
+    public int compareTo(ArtifactVersions that) {
         int rv;
         return this == that
                 ? 0
                 : that == null || getClass() != that.getClass()
-                    ? 1
-                    : ( rv = compare( getGroupId(), that.getGroupId() ) ) != 0
-                        ? rv
-                        : ( rv = compare( getArtifactId(), that.getArtifactId() ) ) != 0
-                            ? rv
-                            : compare( getVersion(), that.getVersion() );
+                        ? 1
+                        : (rv = compare(getGroupId(), that.getGroupId())) != 0
+                                ? rv
+                                : (rv = compare(getArtifactId(), that.getArtifactId())) != 0
+                                        ? rv
+                                        : compare(getVersion(), that.getVersion());
     }
 
     @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
 
-        if ( !( o instanceof ArtifactVersions ) )
-        {
+        if (!(o instanceof ArtifactVersions)) {
             return false;
         }
 
         ArtifactVersions that = (ArtifactVersions) o;
 
         return new EqualsBuilder()
-                .append( getArtifact(), that.getArtifact() )
-                .append( getVersions(), that.getVersions() )
-                .append( getVersionComparator(), that.getVersionComparator() )
+                .append(getArtifact(), that.getArtifact())
+                .append(getVersions(), that.getVersions())
+                .append(getVersionComparator(), that.getVersionComparator())
                 .isEquals();
     }
 
     @Override
-    public int hashCode()
-    {
-        return new HashCodeBuilder( 17, 37 )
-                .append( getArtifact() )
-                .append( getVersions() )
-                .append( getVersionComparator() )
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(getArtifact())
+                .append(getVersions())
+                .append(getVersionComparator())
                 .toHashCode();
     }
 
@@ -155,31 +145,23 @@ public class ArtifactVersions
      * @return <code>true</code> if and only if the version is in the range.
      * @since 1.3
      */
-    public static boolean isVersionInRange( ArtifactVersion version, VersionRange range )
-    {
-        if ( !range.containsVersion( version ) )
-        {
+    public static boolean isVersionInRange(ArtifactVersion version, VersionRange range) {
+        if (!range.containsVersion(version)) {
             return false;
         }
 
-        for ( Restriction r : range.getRestrictions() )
-        {
-            if ( r.containsVersion( version ) )
-            {
+        for (Restriction r : range.getRestrictions()) {
+            if (r.containsVersion(version)) {
                 // check for the -! syntax
-                if ( !r.isLowerBoundInclusive() && r.getLowerBound() != null )
-                {
+                if (!r.isLowerBoundInclusive() && r.getLowerBound() != null) {
                     String s = r.getLowerBound().toString();
-                    if ( s.endsWith( "-!" ) && version.toString().startsWith( s.substring( 0, s.length() - 2 ) ) )
-                    {
+                    if (s.endsWith("-!") && version.toString().startsWith(s.substring(0, s.length() - 2))) {
                         return false;
                     }
                 }
-                if ( !r.isUpperBoundInclusive() && r.getUpperBound() != null )
-                {
+                if (!r.isUpperBoundInclusive() && r.getUpperBound() != null) {
                     String s = r.getUpperBound().toString();
-                    if ( s.endsWith( "-!" ) && version.toString().startsWith( s.substring( 0, s.length() - 2 ) ) )
-                    {
+                    if (s.endsWith("-!") && version.toString().startsWith(s.substring(0, s.length() - 2))) {
                         return false;
                     }
                 }
@@ -194,8 +176,7 @@ public class ArtifactVersions
      * @return the artifact who's version information we are holding.
      * @since 1.0-alpha-3
      */
-    public Artifact getArtifact()
-    {
+    public Artifact getArtifact() {
         return artifact;
     }
 
@@ -205,8 +186,7 @@ public class ArtifactVersions
      * @return the groupId.
      * @since 1.0-alpha-3
      */
-    public String getGroupId()
-    {
+    public String getGroupId() {
         return getArtifact().getGroupId();
     }
 
@@ -216,8 +196,7 @@ public class ArtifactVersions
      * @return the artifactId.
      * @since 1.0-alpha-3
      */
-    public String getArtifactId()
-    {
+    public String getArtifactId() {
         return getArtifact().getArtifactId();
     }
 
@@ -227,31 +206,27 @@ public class ArtifactVersions
      * @return current version
      * @since 2.13.0
      */
-    public String getVersion()
-    {
+    public String getVersion() {
         return getArtifact().getVersion();
     }
 
-    public ArtifactVersion[] getVersions( boolean includeSnapshots )
-    {
+    public ArtifactVersion[] getVersions(boolean includeSnapshots) {
         return includeSnapshots
-                ? versions.toArray( new ArtifactVersion[0] )
-                : versions.stream().filter( v -> !ArtifactUtils.isSnapshot( v.toString() ) )
-                .toArray( ArtifactVersion[]::new );
+                ? versions.toArray(new ArtifactVersion[0])
+                : versions.stream()
+                        .filter(v -> !ArtifactUtils.isSnapshot(v.toString()))
+                        .toArray(ArtifactVersion[]::new);
     }
 
-    public VersionComparator getVersionComparator()
-    {
+    public VersionComparator getVersionComparator() {
         return versionComparator;
     }
 
     /**
      * {@inheritDoc}
      */
-    public String toString()
-    {
+    public String toString() {
         return "ArtifactVersions" + "{artifact=" + artifact + ", versions=" + versions + ", versionComparator="
-            + versionComparator + '}';
+                + versionComparator + '}';
     }
-
 }

@@ -33,82 +33,86 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-public class UseLatestReleasesMojoTest
-{
+public class UseLatestReleasesMojoTest {
     private UseLatestReleasesMojo mojo;
     private TestChangeRecorder changeRecorder;
 
     @Before
-    public void setUp() throws Exception
-    {
-        RepositorySystem repositorySystemMock = mock( RepositorySystem.class );
-        when( repositorySystemMock.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer( invocation ->
-        {
-            Dependency dependency = invocation.getArgument( 0 );
-            return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(),
-                    dependency.getScope(), dependency.getType(),
-                    dependency.getClassifier() != null ? dependency.getClassifier() : "default",
-                    new DefaultArtifactHandlerStub( "default" ) );
-        } );
+    public void setUp() throws Exception {
+        RepositorySystem repositorySystemMock = mock(RepositorySystem.class);
+        when(repositorySystemMock.createDependencyArtifact(any(Dependency.class)))
+                .thenAnswer(invocation -> {
+                    Dependency dependency = invocation.getArgument(0);
+                    return new DefaultArtifact(
+                            dependency.getGroupId(),
+                            dependency.getArtifactId(),
+                            dependency.getVersion(),
+                            dependency.getScope(),
+                            dependency.getType(),
+                            dependency.getClassifier() != null ? dependency.getClassifier() : "default",
+                            new DefaultArtifactHandlerStub("default"));
+                });
 
-        org.eclipse.aether.RepositorySystem aetherRepositorySystem = mockAetherRepositorySystem(
-                new HashMap<String, String[]>()
-        {{
-            put( "dependency-artifact", new String[] {"0.9.0", "1.0.0-beta"} );
-        }} );
+        org.eclipse.aether.RepositorySystem aetherRepositorySystem =
+                mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                    {
+                        put("dependency-artifact", new String[] {"0.9.0", "1.0.0-beta"});
+                    }
+                });
 
         changeRecorder = new TestChangeRecorder();
 
-        mojo = new UseLatestReleasesMojo( repositorySystemMock,
-                aetherRepositorySystem,
-                null,
-                changeRecorder.asTestMap() )
-        {{
-            reactorProjects = emptyList();
-            MavenProject project = new MavenProject()
-            {{
-                setModel( new Model()
-                {{
-                    setGroupId( "default-group" );
-                    setArtifactId( "project-artifact" );
-                    setVersion( "1.0.0-SNAPSHOT" );
+        mojo =
+                new UseLatestReleasesMojo(
+                        repositorySystemMock, aetherRepositorySystem, null, changeRecorder.asTestMap()) {
+                    {
+                        reactorProjects = emptyList();
+                        MavenProject project = new MavenProject() {
+                            {
+                                setModel(new Model() {
+                                    {
+                                        setGroupId("default-group");
+                                        setArtifactId("project-artifact");
+                                        setVersion("1.0.0-SNAPSHOT");
 
-                    setDependencies( singletonList(
-                            DependencyBuilder.newBuilder()
-                                    .withGroupId( "default-group" )
-                                    .withArtifactId( "dependency-artifact" )
-                                    .withVersion( "0.9.0" )
-                                    .withScope( SCOPE_COMPILE )
-                                    .withType( "jar" )
-                                    .withClassifier( "default" )
-                                    .build() ) );
-                }} );
-            }};
-            setProject( project );
+                                        setDependencies(singletonList(DependencyBuilder.newBuilder()
+                                                .withGroupId("default-group")
+                                                .withArtifactId("dependency-artifact")
+                                                .withVersion("0.9.0")
+                                                .withScope(SCOPE_COMPILE)
+                                                .withType("jar")
+                                                .withClassifier("default")
+                                                .build()));
+                                    }
+                                });
+                            }
+                        };
+                        setProject(project);
 
-            session = mockMavenSession();
-        }};
+                        session = mockMavenSession();
+                    }
+                };
     }
 
     @Test
     public void testDontUpgradeToBeta()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "allowSnapshots", false );
-        setVariableValueToObject( mojo, "allowMajorUpdates", false );
-        setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", false );
+                    VersionRetrievalException {
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "allowSnapshots", false);
+        setVariableValueToObject(mojo, "allowMajorUpdates", false);
+        setVariableValueToObject(mojo, "allowMinorUpdates", true);
+        setVariableValueToObject(mojo, "allowIncrementalUpdates", false);
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            pomHelper.when( () -> PomHelper.getRawModel( any( MavenProject.class ) ) )
-                    .thenReturn(  mojo.getProject().getModel() );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            pomHelper
+                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
+                    .thenReturn(mojo.getProject().getModel());
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(), Matchers.empty() );
+        assertThat(changeRecorder.getChanges(), Matchers.empty());
     }
 }

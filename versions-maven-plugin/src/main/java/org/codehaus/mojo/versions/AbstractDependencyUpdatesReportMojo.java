@@ -17,11 +17,6 @@ package org.codehaus.mojo.versions;
  *
  */
 
-
-import static java.util.Collections.emptyMap;
-import static org.codehaus.mojo.versions.utils.MavenProjectUtils.interpolateVersion;
-import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
@@ -49,11 +45,14 @@ import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
+import static java.util.Collections.emptyMap;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.interpolateVersion;
+import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
+
 /**
  * Generates a report of available updates for the dependencies of a project.
  */
-public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersionsReport<DependencyUpdatesModel>
-{
+public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersionsReport<DependencyUpdatesModel> {
 
     private static final DependencyComparator DEPENDENCY_COMPARATOR = DependencyComparator.INSTANCE;
 
@@ -62,7 +61,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      *
      * @since 2.5
      */
-    @Parameter( property = "processDependencyManagement", defaultValue = "true" )
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
     protected boolean processDependencyManagement;
 
     /**
@@ -75,13 +74,13 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      *
      * @since 2.5 Note: Currently in experimental state.
      */
-    @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
+    @Parameter(property = "processDependencyManagementTransitive", defaultValue = "true")
     protected boolean processDependencyManagementTransitive;
 
     /**
      * Report formats (html and/or xml). HTML by default.
      */
-    @Parameter( property = "dependencyUpdatesReportFormats", defaultValue = "html" )
+    @Parameter(property = "dependencyUpdatesReportFormats", defaultValue = "html")
     protected String[] formats = new String[] {"html"};
 
     /**
@@ -90,7 +89,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      *
      * @since 2.12
      */
-    @Parameter( property = "onlyProjectDependencies", defaultValue = "false" )
+    @Parameter(property = "onlyProjectDependencies", defaultValue = "false")
     protected boolean onlyProjectDependencies;
 
     /**
@@ -98,31 +97,29 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      *
      * @since 2.12
      */
-    @Parameter( property = "onlyUpgradable", defaultValue = "false" )
+    @Parameter(property = "onlyUpgradable", defaultValue = "false")
     protected boolean onlyUpgradable;
 
-    public AbstractDependencyUpdatesReportMojo( I18N i18n,
-                                                RepositorySystem repositorySystem,
-                                                org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                                Map<String, Wagon> wagonMap,
-                                                ReportRendererFactory rendererFactory )
-    {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
+    public AbstractDependencyUpdatesReportMojo(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
+        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isExternalReport()
-    {
+    public boolean isExternalReport() {
         return false;
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean canGenerateReport()
-    {
+    public boolean canGenerateReport() {
         return true;
     }
 
@@ -132,115 +129,93 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      * @param locale the locale to generate the report for.
      * @param sink   the report formatting tool
      */
-    @SuppressWarnings( "deprecation" )
-    protected void doGenerateReport( Locale locale, Sink sink ) throws MavenReportException
-    {
+    @SuppressWarnings("deprecation")
+    protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
 
         Set<Dependency> dependencies = getDependencies();
 
         Set<Dependency> dependencyManagement;
 
-        if ( processDependencyManagement )
-        {
-            dependencyManagement = getDependencyManagement( dependencies );
-            handleOnlyProjectDependencies( dependencyManagement, dependencies );
-        }
-        else
-        {
+        if (processDependencyManagement) {
+            dependencyManagement = getDependencyManagement(dependencies);
+            handleOnlyProjectDependencies(dependencyManagement, dependencies);
+        } else {
             dependencyManagement = Collections.emptySet();
         }
 
-        try
-        {
+        try {
 
             Map<Dependency, ArtifactVersions> dependencyUpdates =
-                    getHelper().lookupDependenciesUpdates( dependencies, false );
+                    getHelper().lookupDependenciesUpdates(dependencies, false);
 
-            Map<Dependency, ArtifactVersions> dependencyManagementUpdates =
-                    processDependencyManagement ? getHelper().lookupDependenciesUpdates( dependencyManagement, false )
-                            : emptyMap();
+            Map<Dependency, ArtifactVersions> dependencyManagementUpdates = processDependencyManagement
+                    ? getHelper().lookupDependenciesUpdates(dependencyManagement, false)
+                    : emptyMap();
 
-            if ( onlyUpgradable )
-            {
-                dependencyUpdates = filter( dependencyUpdates, e -> e.getVersions().length > 0 );
-                dependencyManagementUpdates = filter( dependencyManagementUpdates, e -> e.getVersions().length > 0 );
+            if (onlyUpgradable) {
+                dependencyUpdates = filter(dependencyUpdates, e -> e.getVersions().length > 0);
+                dependencyManagementUpdates = filter(dependencyManagementUpdates, e -> e.getVersions().length > 0);
             }
 
-            if ( getLog().isDebugEnabled() )
-            {
-                getLog().debug( "Dependency versions:" );
-                dependencyUpdates.forEach( ( key, value ) -> getLog().debug(
-                        key.toString() + ": " + Arrays.stream( value.getVersions() )
-                                .map( ArtifactVersion::toString )
-                                .collect( Collectors.joining( ", " ) ) ) );
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Dependency versions:");
+                dependencyUpdates.forEach((key, value) -> getLog().debug(key.toString() + ": "
+                        + Arrays.stream(value.getVersions())
+                                .map(ArtifactVersion::toString)
+                                .collect(Collectors.joining(", "))));
 
-                getLog().debug( "Dependency management versions:" );
-                dependencyManagementUpdates.forEach( ( key, value ) -> getLog().debug(
-                        key.toString() + ": " + Arrays.stream( value.getVersions() )
-                                .map( ArtifactVersion::toString )
-                                .collect( Collectors.joining( ", " ) ) ) );
+                getLog().debug("Dependency management versions:");
+                dependencyManagementUpdates.forEach((key, value) -> getLog().debug(key.toString() + ": "
+                        + Arrays.stream(value.getVersions())
+                                .map(ArtifactVersion::toString)
+                                .collect(Collectors.joining(", "))));
             }
 
-            DependencyUpdatesModel model = new DependencyUpdatesModel( dependencyUpdates, dependencyManagementUpdates );
+            DependencyUpdatesModel model = new DependencyUpdatesModel(dependencyUpdates, dependencyManagementUpdates);
 
-            renderReport( locale, sink, model );
-        }
-        catch ( VersionRetrievalException e )
-        {
-            throw new RuntimeException( e );
+            renderReport(locale, sink, model);
+        } catch (VersionRetrievalException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    protected void handleDependencyManagementTransitive( MavenProject project,
-                                                         Set<Dependency> dependencyManagementCollector )
-            throws MavenReportException
-    {
-        if ( processDependencyManagementTransitive )
-        {
-            if ( hasDependencyManagement( project ) )
-            {
-                for ( Dependency dep : project.getDependencyManagement().getDependencies() )
-                {
-                    getLog().debug(
-                            "Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion() + ":"
-                                    + dep.getType() + ":" + dep.getScope() );
+    protected void handleDependencyManagementTransitive(
+            MavenProject project, Set<Dependency> dependencyManagementCollector) throws MavenReportException {
+        if (processDependencyManagementTransitive) {
+            if (hasDependencyManagement(project)) {
+                for (Dependency dep : project.getDependencyManagement().getDependencies()) {
+                    getLog().debug("Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion()
+                            + ":" + dep.getType() + ":" + dep.getScope());
                 }
-                dependencyManagementCollector.addAll( project.getDependencyManagement().getDependencies() );
+                dependencyManagementCollector.addAll(
+                        project.getDependencyManagement().getDependencies());
             }
-        }
-        else
-        {
-            if ( project.getOriginalModel().getDependencyManagement() != null
-                    && project.getOriginalModel().getDependencyManagement().getDependencies() != null )
-            {
+        } else {
+            if (project.getOriginalModel().getDependencyManagement() != null
+                    && project.getOriginalModel().getDependencyManagement().getDependencies() != null) {
                 // Using the original model to get the original dependencyManagement entries and
                 // not the interpolated model.
                 // TODO: I'm not 100% sure if this will work correctly in all cases.
-                for ( Dependency dep : project.getOriginalModel().getDependencyManagement().getDependencies() )
-                {
-                    dep = interpolateVersion( dep, project );
+                for (Dependency dep :
+                        project.getOriginalModel().getDependencyManagement().getDependencies()) {
+                    dep = interpolateVersion(dep, project);
 
-                    getLog().debug( "Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
-                                            + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope() );
+                    getLog().debug("Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
+                            + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope());
                 }
                 dependencyManagementCollector.addAll(
-                        project.getOriginalModel().getDependencyManagement().getDependencies() );
+                        project.getOriginalModel().getDependencyManagement().getDependencies());
             }
         }
     }
 
-    private void handleOnlyProjectDependencies( Set<Dependency> dependencyManagement,
-                                                Set<Dependency> dependencies )
-    {
-        if ( !onlyProjectDependencies )
-        {
+    private void handleOnlyProjectDependencies(Set<Dependency> dependencyManagement, Set<Dependency> dependencies) {
+        if (!onlyProjectDependencies) {
             // Retains only dependencies not present in dependencyManagement
-            dependencies.removeIf( dep -> dependencyManagement.stream().anyMatch( dmDep -> match( dep, dmDep ) ) );
-        }
-        else
-        {
+            dependencies.removeIf(dep -> dependencyManagement.stream().anyMatch(dmDep -> match(dep, dmDep)));
+        } else {
             // Retain only dependencies in dependencyManagement that are also present in dependencies
-            dependencyManagement.removeIf( dep -> dependencies.stream().noneMatch( dmDep -> match( dep, dmDep ) ) );
+            dependencyManagement.removeIf(dep -> dependencies.stream().noneMatch(dmDep -> match(dep, dmDep)));
         }
     }
 
@@ -252,10 +227,9 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      * @return a {@link Set<Dependency>} that can be additionally populated by {@link #populateDependencies(Set)}.
      * If not, an empty set is returned
      * */
-    private Set<Dependency> getDependencies()
-    {
-        final Set<Dependency> dependenciesCollector = new TreeSet<>( DEPENDENCY_COMPARATOR );
-        populateDependencies( dependenciesCollector );
+    private Set<Dependency> getDependencies() {
+        final Set<Dependency> dependenciesCollector = new TreeSet<>(DEPENDENCY_COMPARATOR);
+        populateDependencies(dependenciesCollector);
         return dependenciesCollector;
     }
 
@@ -267,7 +241,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      * @param dependenciesCollector, a Set, initialized with a DependencyComparator
      * comparator.
      * */
-    protected abstract void populateDependencies( Set<Dependency> dependenciesCollector );
+    protected abstract void populateDependencies(Set<Dependency> dependenciesCollector);
 
     /**
      * Constructs a final instance of a {@link Set<Dependency>} with a {@link DependencyComparator} comparator.
@@ -277,10 +251,9 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      * @return a {@link Set<Dependency>} that can be additionally populated by
      * {@link #populateDependencyManagement(Set, Set)}. If not, an empty set is returned
      * */
-    private Set<Dependency> getDependencyManagement( Set<Dependency> dependencies ) throws MavenReportException
-    {
-        final Set<Dependency> dependencyManagementCollector = new TreeSet<>( DEPENDENCY_COMPARATOR );
-        populateDependencyManagement ( dependencyManagementCollector, dependencies );
+    private Set<Dependency> getDependencyManagement(Set<Dependency> dependencies) throws MavenReportException {
+        final Set<Dependency> dependencyManagementCollector = new TreeSet<>(DEPENDENCY_COMPARATOR);
+        populateDependencyManagement(dependencyManagementCollector, dependencies);
         return dependencyManagementCollector;
     }
 
@@ -295,37 +268,26 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      *
      * @throws MavenReportException when things go wrong.
      * */
-    protected abstract void populateDependencyManagement( Set<Dependency> dependencyManagementCollector,
-                                                          Set<Dependency> dependencies )
-            throws MavenReportException;
+    protected abstract void populateDependencyManagement(
+            Set<Dependency> dependencyManagementCollector, Set<Dependency> dependencies) throws MavenReportException;
 
-    private void renderReport( Locale locale,
-                               Sink sink,
-                               DependencyUpdatesModel model )
-            throws MavenReportException
-    {
-        for ( String format : formats )
-        {
-            if ( "html".equals( format ) )
-            {
-                rendererFactory.createReportRenderer( getOutputName(), sink, locale, model ).render();
-            }
-            else if ( "xml".equals( format ) )
-            {
-                Path outputDir = Paths.get( getProject().getBuild().getDirectory() );
-                if ( !Files.exists( outputDir ) )
-                {
-                    try
-                    {
-                        Files.createDirectories( outputDir );
-                    }
-                    catch ( IOException e )
-                    {
-                        throw new MavenReportException( "Could not create the output directory" );
+    private void renderReport(Locale locale, Sink sink, DependencyUpdatesModel model) throws MavenReportException {
+        for (String format : formats) {
+            if ("html".equals(format)) {
+                rendererFactory
+                        .createReportRenderer(getOutputName(), sink, locale, model)
+                        .render();
+            } else if ("xml".equals(format)) {
+                Path outputDir = Paths.get(getProject().getBuild().getDirectory());
+                if (!Files.exists(outputDir)) {
+                    try {
+                        Files.createDirectories(outputDir);
+                    } catch (IOException e) {
+                        throw new MavenReportException("Could not create the output directory");
                     }
                 }
-                Path outputFile = outputDir.resolve( getOutputName() + ".xml" );
-                new DependencyUpdatesXmlReportRenderer( model, outputFile ).render();
+                Path outputFile = outputDir.resolve(getOutputName() + ".xml");
+                new DependencyUpdatesXmlReportRenderer(model, outputFile).render();
             }
         }
     }
@@ -335,20 +297,18 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      *
      * @return true if the two dependencies match
      */
-    private boolean match( Dependency dep, Dependency dmDep )
-    {
-        return dmDep.getGroupId().equals( dep.getGroupId() )
-            && dmDep.getArtifactId().equals( dep.getArtifactId() )
-            && ( dmDep.getScope() == null || dmDep.getScope().equals( dep.getScope() ) )
-            && ( dmDep.getClassifier() == null || dmDep.getClassifier().equals( dep.getClassifier() ) )
-            && ( dep.getVersion() == null || dmDep.getVersion() == null || dmDep.getVersion()
-            .equals( dep.getVersion() ) );
+    private boolean match(Dependency dep, Dependency dmDep) {
+        return dmDep.getGroupId().equals(dep.getGroupId())
+                && dmDep.getArtifactId().equals(dep.getArtifactId())
+                && (dmDep.getScope() == null || dmDep.getScope().equals(dep.getScope()))
+                && (dmDep.getClassifier() == null || dmDep.getClassifier().equals(dep.getClassifier()))
+                && (dep.getVersion() == null
+                        || dmDep.getVersion() == null
+                        || dmDep.getVersion().equals(dep.getVersion()));
     }
 
-    protected boolean hasDependencyManagement( MavenProject project )
-    {
-        if ( project == null )
-        {
+    protected boolean hasDependencyManagement(MavenProject project) {
+        if (project == null) {
             return false;
         }
         return project.getDependencyManagement() != null
@@ -358,8 +318,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
     /**
      * {@inheritDoc}
      */
-    public String getOutputName()
-    {
+    public String getOutputName() {
         return "dependency-updates-report";
     }
 }

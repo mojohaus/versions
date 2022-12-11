@@ -66,10 +66,8 @@ import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDe
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "display-dependency-updates", threadSafe = true )
-public class DisplayDependencyUpdatesMojo
-    extends AbstractVersionsDisplayMojo
-{
+@Mojo(name = "display-dependency-updates", threadSafe = true)
+public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -85,7 +83,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 1.2
      */
-    @Parameter( property = "processDependencyManagement", defaultValue = "true" )
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
     private boolean processDependencyManagement;
 
     /**
@@ -98,7 +96,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.11
      */
-    @Parameter( property = "processDependencyManagementTransitive", defaultValue = "true" )
+    @Parameter(property = "processDependencyManagementTransitive", defaultValue = "true")
     private boolean processDependencyManagementTransitive;
 
     /**
@@ -120,7 +118,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "dependencyManagementIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    @Parameter(property = "dependencyManagementIncludes", defaultValue = WildcardMatcher.WILDCARD)
     private List<String> dependencyManagementIncludes;
 
     /**
@@ -142,7 +140,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "dependencyManagementExcludes" )
+    @Parameter(property = "dependencyManagementExcludes")
     private List<String> dependencyManagementExcludes;
 
     /**
@@ -150,7 +148,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 1.2
      */
-    @Parameter( property = "processDependencies", defaultValue = "true" )
+    @Parameter(property = "processDependencies", defaultValue = "true")
     private boolean processDependencies;
 
     /**
@@ -172,7 +170,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "dependencyIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    @Parameter(property = "dependencyIncludes", defaultValue = WildcardMatcher.WILDCARD)
     private List<String> dependencyIncludes;
 
     /**
@@ -194,7 +192,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "dependencyExcludes" )
+    @Parameter(property = "dependencyExcludes")
     private List<String> dependencyExcludes;
 
     /**
@@ -202,7 +200,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "processPluginDependencies", defaultValue = "true" )
+    @Parameter(property = "processPluginDependencies", defaultValue = "true")
     private boolean processPluginDependencies;
 
     /**
@@ -210,7 +208,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "processPluginDependenciesInPluginManagement", defaultValue = "true" )
+    @Parameter(property = "processPluginDependenciesInPluginManagement", defaultValue = "true")
     private boolean processPluginDependenciesInPluginManagement;
 
     /**
@@ -221,7 +219,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
     private boolean allowMajorUpdates = true;
 
     /**
@@ -232,7 +230,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
     private boolean allowMinorUpdates = true;
 
     /**
@@ -244,7 +242,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     private boolean allowIncrementalUpdates = true;
 
     /**
@@ -258,7 +256,7 @@ public class DisplayDependencyUpdatesMojo
      * @deprecated This will be removed with version 3.0.0
      */
     @Deprecated
-    @Parameter( property = "allowAnyUpdates", defaultValue = "true" )
+    @Parameter(property = "allowAnyUpdates", defaultValue = "true")
     private boolean allowAnyUpdates = true;
 
     /**
@@ -266,7 +264,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.1
      */
-    @Parameter( property = "verbose", defaultValue = "false" )
+    @Parameter(property = "verbose", defaultValue = "false")
     private boolean verbose;
 
     /**
@@ -284,7 +282,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "pluginDependencyIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    @Parameter(property = "pluginDependencyIncludes", defaultValue = WildcardMatcher.WILDCARD)
     private List<String> pluginDependencyIncludes;
 
     /**
@@ -302,13 +300,13 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "pluginDependencyExcludes" )
+    @Parameter(property = "pluginDependencyExcludes")
     private List<String> pluginDependencyExcludes;
 
     /**
      * <p>Only take these artifacts into consideration:<br/>
      * Comma-separated list of {@code groupId:[artifactId[:version]]} patterns</p>
-
+     *
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
@@ -319,7 +317,7 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "pluginManagementDependencyIncludes", defaultValue = WildcardMatcher.WILDCARD )
+    @Parameter(property = "pluginManagementDependencyIncludes", defaultValue = WildcardMatcher.WILDCARD)
     private List<String> pluginManagementDependencyIncludes;
 
     /**
@@ -337,72 +335,62 @@ public class DisplayDependencyUpdatesMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "pluginManagementDependencyExcludes" )
+    @Parameter(property = "pluginManagementDependencyExcludes")
     private List<String> pluginManagementDependencyExcludes;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     @Inject
-    public DisplayDependencyUpdatesMojo( RepositorySystem repositorySystem,
-                                         org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                         Map<String, Wagon> wagonMap,
-                                         Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public DisplayDependencyUpdatesMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     // open for tests
-    protected static boolean dependenciesMatch( Dependency dependency, Dependency managedDependency )
-    {
-        if ( !managedDependency.getGroupId().equals( dependency.getGroupId() ) )
-        {
+    protected static boolean dependenciesMatch(Dependency dependency, Dependency managedDependency) {
+        if (!managedDependency.getGroupId().equals(dependency.getGroupId())) {
             return false;
         }
 
-        if ( !managedDependency.getArtifactId().equals( dependency.getArtifactId() ) )
-        {
+        if (!managedDependency.getArtifactId().equals(dependency.getArtifactId())) {
             return false;
         }
 
-        if ( managedDependency.getScope() == null
-            || Objects.equals( managedDependency.getScope(), dependency.getScope() ) )
-        {
+        if (managedDependency.getScope() == null
+                || Objects.equals(managedDependency.getScope(), dependency.getScope())) {
             return false;
         }
 
-        if ( managedDependency.getClassifier() == null
-            || Objects.equals( managedDependency.getClassifier(), dependency.getClassifier() ) )
-        {
+        if (managedDependency.getClassifier() == null
+                || Objects.equals(managedDependency.getClassifier(), dependency.getClassifier())) {
             return false;
         }
 
         return dependency.getVersion() == null
-            || managedDependency.getVersion() == null
-            || Objects.equals( managedDependency.getVersion(), dependency.getVersion() );
+                || managedDependency.getVersion() == null
+                || Objects.equals(managedDependency.getVersion(), dependency.getVersion());
     }
 
-    public boolean isProcessingDependencyManagement()
-    {
+    public boolean isProcessingDependencyManagement() {
         return processDependencyManagement;
     }
 
-    public boolean isProcessingDependencies()
-    {
+    public boolean isProcessingDependencies() {
         return processDependencies;
     }
 
-    public boolean isProcessingPluginDependencies()
-    {
+    public boolean isProcessingPluginDependencies() {
         return processPluginDependencies;
     }
 
-    public boolean isProcessPluginDependenciesInDependencyManagement()
-    {
+    public boolean isProcessPluginDependenciesInDependencyManagement() {
         return processPluginDependenciesInPluginManagement;
     }
 
-    public boolean isVerbose()
-    {
+    public boolean isVerbose() {
         return verbose;
     }
 
@@ -417,73 +405,85 @@ public class DisplayDependencyUpdatesMojo
      * @since 1.0-alpha-1
      */
     @Override
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
+    public void execute() throws MojoExecutionException, MojoFailureException {
         logInit();
         validateInput();
 
         Set<Dependency> dependencyManagement = emptySet();
 
-        try
-        {
-            if ( isProcessingDependencyManagement() )
-            {
-                dependencyManagement = filterDependencies( extractDependenciesFromDependencyManagement( getProject(),
-                                processDependencyManagementTransitive, getLog() ),
-                        dependencyManagementIncludes, dependencyManagementExcludes, "Dependecy Management",
-                        getLog() );
+        try {
+            if (isProcessingDependencyManagement()) {
+                dependencyManagement = filterDependencies(
+                        extractDependenciesFromDependencyManagement(
+                                getProject(), processDependencyManagementTransitive, getLog()),
+                        dependencyManagementIncludes,
+                        dependencyManagementExcludes,
+                        "Dependecy Management",
+                        getLog());
 
-                logUpdates( getHelper().lookupDependenciesUpdates( dependencyManagement,
-                                false ), "Dependency Management" );
+                logUpdates(getHelper().lookupDependenciesUpdates(dependencyManagement, false), "Dependency Management");
             }
-            if ( isProcessingDependencies() )
-            {
+            if (isProcessingDependencies()) {
                 Set<Dependency> finalDependencyManagement = dependencyManagement;
-                logUpdates( getHelper().lookupDependenciesUpdates(
-                        filterDependencies( getProject().getDependencies()
-                            .parallelStream()
-                            .filter( dep -> finalDependencyManagement.parallelStream()
-                                    .noneMatch( depMan -> dependenciesMatch( dep, depMan ) ) )
-                            .collect( () -> new TreeSet<>( DependencyComparator.INSTANCE ), Set::add, Set::addAll ),
-                            dependencyIncludes, dependencyExcludes, "Dependencies", getLog() ),
-                                false ),
-                        "Dependencies" );
+                logUpdates(
+                        getHelper()
+                                .lookupDependenciesUpdates(
+                                        filterDependencies(
+                                                getProject().getDependencies().parallelStream()
+                                                        .filter(dep -> finalDependencyManagement.parallelStream()
+                                                                .noneMatch(depMan -> dependenciesMatch(dep, depMan)))
+                                                        .collect(
+                                                                () -> new TreeSet<>(DependencyComparator.INSTANCE),
+                                                                Set::add,
+                                                                Set::addAll),
+                                                dependencyIncludes,
+                                                dependencyExcludes,
+                                                "Dependencies",
+                                                getLog()),
+                                        false),
+                        "Dependencies");
             }
-            if ( isProcessPluginDependenciesInDependencyManagement() )
-            {
-                logUpdates( getHelper().lookupDependenciesUpdates( filterDependencies(
-                                extractPluginDependenciesFromPluginsInPluginManagement( getProject() ),
-                                pluginManagementDependencyIncludes, pluginManagementDependencyExcludes,
-                                "Plugin Management Dependencies", getLog() ), false ),
-                        "pluginManagement of plugins" );
+            if (isProcessPluginDependenciesInDependencyManagement()) {
+                logUpdates(
+                        getHelper()
+                                .lookupDependenciesUpdates(
+                                        filterDependencies(
+                                                extractPluginDependenciesFromPluginsInPluginManagement(getProject()),
+                                                pluginManagementDependencyIncludes,
+                                                pluginManagementDependencyExcludes,
+                                                "Plugin Management Dependencies",
+                                                getLog()),
+                                        false),
+                        "pluginManagement of plugins");
             }
-            if ( isProcessingPluginDependencies() )
-            {
-                logUpdates( getHelper().lookupDependenciesUpdates( filterDependencies(
-                                extractDependenciesFromPlugins( getProject() ),
-                                pluginDependencyIncludes, pluginDependencyExcludes, "Plugin Dependencies",
-                                getLog() ), false ),
-                        "Plugin Dependencies" );
+            if (isProcessingPluginDependencies()) {
+                logUpdates(
+                        getHelper()
+                                .lookupDependenciesUpdates(
+                                        filterDependencies(
+                                                extractDependenciesFromPlugins(getProject()),
+                                                pluginDependencyIncludes,
+                                                pluginDependencyExcludes,
+                                                "Plugin Dependencies",
+                                                getLog()),
+                                        false),
+                        "Plugin Dependencies");
             }
-        }
-        catch ( VersionRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (VersionRetrievalException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
     @Override
-    protected void validateInput() throws MojoExecutionException
-    {
-        validateGAVList( dependencyIncludes, 6, "dependencyIncludes" );
-        validateGAVList( dependencyExcludes, 6, "dependencyExcludes" );
-        validateGAVList( dependencyManagementIncludes, 6, "dependencyManagementIncludes" );
-        validateGAVList( dependencyManagementIncludes, 6, "dependencyManagementExcludes" );
-        validateGAVList( pluginDependencyIncludes, 3, "pluginDependencyIncludes" );
-        validateGAVList( pluginDependencyExcludes, 3, "pluginDependencyExcludes" );
-        validateGAVList( pluginManagementDependencyIncludes, 3, "pluginManagementDependencyIncludes" );
-        validateGAVList( pluginManagementDependencyExcludes, 3, "pluginManagementDependencyExcludes" );
+    protected void validateInput() throws MojoExecutionException {
+        validateGAVList(dependencyIncludes, 6, "dependencyIncludes");
+        validateGAVList(dependencyExcludes, 6, "dependencyExcludes");
+        validateGAVList(dependencyManagementIncludes, 6, "dependencyManagementIncludes");
+        validateGAVList(dependencyManagementIncludes, 6, "dependencyManagementExcludes");
+        validateGAVList(pluginDependencyIncludes, 3, "pluginDependencyIncludes");
+        validateGAVList(pluginDependencyExcludes, 3, "pluginDependencyExcludes");
+        validateGAVList(pluginManagementDependencyIncludes, 3, "pluginManagementDependencyIncludes");
+        validateGAVList(pluginManagementDependencyExcludes, 3, "pluginManagementDependencyExcludes");
     }
 
     /**
@@ -493,105 +493,83 @@ public class DisplayDependencyUpdatesMojo
      * @param argumentName argument name to indicate in the exception
      * @throws MojoExecutionException if the argument is invalid
      */
-    static void validateGAVList( List<String> gavList, int numSections, String argumentName )
-            throws MojoExecutionException
-    {
-        if ( gavList != null && gavList.stream().anyMatch( gav -> countMatches( gav, ":" ) >= numSections ) )
-        {
-            throw new MojoExecutionException( argumentName + " should not contain more than 6 segments" );
+    static void validateGAVList(List<String> gavList, int numSections, String argumentName)
+            throws MojoExecutionException {
+        if (gavList != null && gavList.stream().anyMatch(gav -> countMatches(gav, ":") >= numSections)) {
+            throw new MojoExecutionException(argumentName + " should not contain more than 6 segments");
         }
     }
 
-    private Optional<Segment> calculateUpdateScope()
-    {
+    private Optional<Segment> calculateUpdateScope() {
         return allowAnyUpdates
-        ? empty()
-        : of( SegmentUtils.determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates, getLog() )
-                .map( s -> Segment.of( s.value() + 1 ) )
-                .orElse( MAJOR ) );
+                ? empty()
+                : of(SegmentUtils.determineUnchangedSegment(
+                                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog())
+                        .map(s -> Segment.of(s.value() + 1))
+                        .orElse(MAJOR));
     }
 
-    private void logUpdates( Map<Dependency, ArtifactVersions> updates, String section )
-    {
+    private void logUpdates(Map<Dependency, ArtifactVersions> updates, String section) {
         List<String> withUpdates = new ArrayList<>();
         List<String> usingCurrent = new ArrayList<>();
-        for ( ArtifactVersions versions : updates.values() )
-        {
-            String left = "  " + ArtifactUtils.versionlessKey( versions.getArtifact() ) + " ";
+        for (ArtifactVersions versions : updates.values()) {
+            String left = "  " + ArtifactUtils.versionlessKey(versions.getArtifact()) + " ";
             final String current;
             ArtifactVersion latest;
-            if ( versions.isCurrentVersionDefined() )
-            {
+            if (versions.isCurrentVersionDefined()) {
                 current = versions.getCurrentVersion().toString();
-                latest = versions.getNewestUpdate( calculateUpdateScope(), allowSnapshots );
-            }
-            else
-            {
+                latest = versions.getNewestUpdate(calculateUpdateScope(), allowSnapshots);
+            } else {
                 ArtifactVersion newestVersion =
-                        versions.getNewestVersion( versions.getArtifact().getVersionRange(), allowSnapshots );
+                        versions.getNewestVersion(versions.getArtifact().getVersionRange(), allowSnapshots);
                 current = versions.getArtifact().getVersionRange().toString();
-                latest = newestVersion == null ? null
-                        : versions.getNewestUpdate( newestVersion, calculateUpdateScope(), allowSnapshots );
-                if ( latest != null
-                        && ArtifactVersions.isVersionInRange( latest, versions.getArtifact().getVersionRange() ) )
-                {
+                latest = newestVersion == null
+                        ? null
+                        : versions.getNewestUpdate(newestVersion, calculateUpdateScope(), allowSnapshots);
+                if (latest != null
+                        && ArtifactVersions.isVersionInRange(
+                                latest, versions.getArtifact().getVersionRange())) {
                     latest = null;
                 }
             }
-            String right = " " + ( latest == null ? current : current + " -> " + latest );
+            String right = " " + (latest == null ? current : current + " -> " + latest);
             List<String> t = latest == null ? usingCurrent : withUpdates;
-            if ( right.length() + left.length() + 3 > INFO_PAD_SIZE + getOutputLineWidthOffset() )
-            {
-                t.add( left + "..." );
-                t.add( StringUtils.leftPad( right, INFO_PAD_SIZE + getOutputLineWidthOffset() ) );
+            if (right.length() + left.length() + 3 > INFO_PAD_SIZE + getOutputLineWidthOffset()) {
+                t.add(left + "...");
+                t.add(StringUtils.leftPad(right, INFO_PAD_SIZE + getOutputLineWidthOffset()));
 
-            }
-            else
-            {
-                t.add( StringUtils.rightPad( left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), "." )
-                        + right );
+            } else {
+                t.add(StringUtils.rightPad(left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), ".")
+                        + right);
             }
         }
 
-        if ( isVerbose() )
-        {
-            if ( usingCurrent.isEmpty() )
-            {
-                if ( !withUpdates.isEmpty() )
-                {
-                    logLine( false, "No dependencies in " + section + " are using the newest version." );
-                    logLine( false, "" );
+        if (isVerbose()) {
+            if (usingCurrent.isEmpty()) {
+                if (!withUpdates.isEmpty()) {
+                    logLine(false, "No dependencies in " + section + " are using the newest version.");
+                    logLine(false, "");
                 }
-            }
-            else
-            {
-                logLine( false, "The following dependencies in " + section + " are using the newest version:" );
-                for ( String s : usingCurrent )
-                {
-                    logLine( false, s );
+            } else {
+                logLine(false, "The following dependencies in " + section + " are using the newest version:");
+                for (String s : usingCurrent) {
+                    logLine(false, s);
                 }
-                logLine( false, "" );
+                logLine(false, "");
             }
         }
 
-
-        if ( withUpdates.isEmpty() )
-        {
-            if ( !usingCurrent.isEmpty() )
-            {
-                logLine( false, "No dependencies in " + section + " have newer versions." );
-                logLine( false, "" );
+        if (withUpdates.isEmpty()) {
+            if (!usingCurrent.isEmpty()) {
+                logLine(false, "No dependencies in " + section + " have newer versions.");
+                logLine(false, "");
             }
-        }
-        else
-        {
-            logLine( false, "The following dependencies in " + section + " have newer versions:" );
-            for ( String withUpdate : withUpdates )
-            {
-                logLine( false, withUpdate );
+        } else {
+            logLine(false, "The following dependencies in " + section + " have newer versions:");
+            for (String withUpdate : withUpdates) {
+                logLine(false, withUpdate);
             }
-            logLine( false, "" );
+            logLine(false, "");
         }
     }
 
@@ -601,9 +579,7 @@ public class DisplayDependencyUpdatesMojo
      * @since 1.0-alpha-1
      */
     @Override
-    protected void update( ModifiedPomXMLEventReader pom )
-    {
+    protected void update(ModifiedPomXMLEventReader pom) {
         // do nothing
     }
-
 }

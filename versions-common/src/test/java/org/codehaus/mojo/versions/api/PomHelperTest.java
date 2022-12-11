@@ -49,17 +49,15 @@ import static org.hamcrest.core.Is.is;
 /**
  * Tests the methods of {@link PomHelper}.
  */
-public class PomHelperTest extends AbstractMojoTestCase
-{
+public class PomHelperTest extends AbstractMojoTestCase {
     @Rule
-    public MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule(this);
 
     private static final XMLInputFactory INPUT_FACTORY = XMLInputFactory2.newInstance();
 
     @BeforeClass
-    public static void setUpClass()
-    {
-        INPUT_FACTORY.setProperty( P_PRESERVE_LOCATION, Boolean.TRUE );
+    public static void setUpClass() {
+        INPUT_FACTORY.setProperty(P_PRESERVE_LOCATION, Boolean.TRUE);
     }
 
     /**
@@ -69,199 +67,158 @@ public class PomHelperTest extends AbstractMojoTestCase
      * @throws Exception if the test fails.
      */
     @Test
-    public void testLongProperties()
-        throws Exception
-    {
-        URL url = getClass().getResource( "PomHelperTest.testLongProperties.pom.xml" );
+    public void testLongProperties() throws Exception {
+        URL url = getClass().getResource("PomHelperTest.testLongProperties.pom.xml");
         assert url != null;
-        File file = new File( url.getPath() );
-        StringBuilder input = PomHelper.readXmlFile( file );
+        File file = new File(url.getPath());
+        StringBuilder input = PomHelper.readXmlFile(file);
 
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-        inputFactory.setProperty( P_PRESERVE_LOCATION, Boolean.TRUE );
+        inputFactory.setProperty(P_PRESERVE_LOCATION, Boolean.TRUE);
 
-        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader( input, inputFactory, file.getAbsolutePath() );
+        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader(input, inputFactory, file.getAbsolutePath());
 
-        String oldVersion = PomHelper.getProjectVersion( pom );
+        String oldVersion = PomHelper.getProjectVersion(pom);
 
         String newVersion = "1";
 
-        assertTrue( "The pom has been modified", PomHelper.setProjectVersion( pom, newVersion ) );
+        assertTrue("The pom has been modified", PomHelper.setProjectVersion(pom, newVersion));
 
-        assertEquals( newVersion, PomHelper.getProjectVersion( pom ) );
+        assertEquals(newVersion, PomHelper.getProjectVersion(pom));
 
-        assertNotSame( oldVersion, newVersion );
+        assertNotSame(oldVersion, newVersion);
     }
 
     @Test
-    public void testGroupIdNotOnChildPom()
-        throws Exception
-    {
-        URL url = getClass().getResource( "PomHelperTest.noGroupIdOnChild.pom.xml" );
+    public void testGroupIdNotOnChildPom() throws Exception {
+        URL url = getClass().getResource("PomHelperTest.noGroupIdOnChild.pom.xml");
         assert url != null;
-        StringBuilder input = PomHelper.readXmlFile( new File( url.getPath() ) );
+        StringBuilder input = PomHelper.readXmlFile(new File(url.getPath()));
         MavenXpp3Reader reader = new MavenXpp3Reader();
-        Model model = reader.read( new StringReader( input.toString() ) );
+        Model model = reader.read(new StringReader(input.toString()));
 
-        assertEquals( "org.myorg", PomHelper.getGroupId( model ) );
+        assertEquals("org.myorg", PomHelper.getGroupId(model));
     }
 
     @Test
-    public void testVersionVersionEqual()
-        throws Exception
-    {
-        assertTrue( PomHelper.isVersionOverlap( "1.0.8", "1.0.8" ) );
+    public void testVersionVersionEqual() throws Exception {
+        assertTrue(PomHelper.isVersionOverlap("1.0.8", "1.0.8"));
     }
 
     @Test
-    public void testVersionVersionDiffer()
-        throws Exception
-    {
-        assertFalse( PomHelper.isVersionOverlap( "1.0.8", "1.0.0" ) );
+    public void testVersionVersionDiffer() throws Exception {
+        assertFalse(PomHelper.isVersionOverlap("1.0.8", "1.0.0"));
     }
 
     @Test
-    public void testVersionRangeIntersect()
-        throws Exception
-    {
-        assertTrue( PomHelper.isVersionOverlap( "1.0.8", "[1.0.3,1.1.0]" ) );
+    public void testVersionRangeIntersect() throws Exception {
+        assertTrue(PomHelper.isVersionOverlap("1.0.8", "[1.0.3,1.1.0]"));
     }
 
     @Test
-    public void testVersionRangeDisjoint()
-        throws Exception
-    {
-        assertFalse( PomHelper.isVersionOverlap( "1.0.8", "[0.0.1,1.0.0]" ) );
+    public void testVersionRangeDisjoint() throws Exception {
+        assertFalse(PomHelper.isVersionOverlap("1.0.8", "[0.0.1,1.0.0]"));
     }
 
     @Test
-    public void testVersionLeftOpenRangeDisjoint()
-        throws Exception
-    {
-        assertFalse( PomHelper.isVersionOverlap( "1.0.8", "[,1.0.0]" ) );
+    public void testVersionLeftOpenRangeDisjoint() throws Exception {
+        assertFalse(PomHelper.isVersionOverlap("1.0.8", "[,1.0.0]"));
     }
 
     @Test
-    public void testVersionRightOpenRangeDisjoint()
-        throws Exception
-    {
-        assertFalse( PomHelper.isVersionOverlap( "1.0.8", "[1.1.0,)" ) );
+    public void testVersionRightOpenRangeDisjoint() throws Exception {
+        assertFalse(PomHelper.isVersionOverlap("1.0.8", "[1.1.0,)"));
     }
 
     @Test
-    public void testEmptyRange()
-        throws Exception
-    {
-        assertTrue( PomHelper.isVersionOverlap( "1.0.8", "" ) );
+    public void testEmptyRange() throws Exception {
+        assertTrue(PomHelper.isVersionOverlap("1.0.8", ""));
     }
 
     @Test
-    public void testRangeEmpty()
-        throws Exception
-    {
-        assertTrue( PomHelper.isVersionOverlap( "[1.0.5,1.0.8]", "" ) );
+    public void testRangeEmpty() throws Exception {
+        assertTrue(PomHelper.isVersionOverlap("[1.0.5,1.0.8]", ""));
     }
 
     @Test
-    public void testRangeRangeIntersect()
-        throws Exception
-    {
-        assertTrue( PomHelper.isVersionOverlap( "[1.0.5,1.0.8]", "[1.0.7,1.1.0]" ) );
-
+    public void testRangeRangeIntersect() throws Exception {
+        assertTrue(PomHelper.isVersionOverlap("[1.0.5,1.0.8]", "[1.0.7,1.1.0]"));
     }
 
     @Test
-    public void testRangeRangeDisjoint()
-        throws Exception
-    {
-        assertFalse( PomHelper.isVersionOverlap( "[1.0.5,1.0.6]", "[1.0.7,1.1.0]" ) );
-
+    public void testRangeRangeDisjoint() throws Exception {
+        assertFalse(PomHelper.isVersionOverlap("[1.0.5,1.0.6]", "[1.0.7,1.1.0]"));
     }
 
     @Test
-    public void testRangeVersionDisjoint()
-        throws Exception
-    {
-        assertFalse( PomHelper.isVersionOverlap( "[1.0.5,1.0.6]", "1.0.8" ) );
-
+    public void testRangeVersionDisjoint() throws Exception {
+        assertFalse(PomHelper.isVersionOverlap("[1.0.5,1.0.6]", "1.0.8"));
     }
 
     @Test
-    public void testRangeVersionIntersect()
-        throws Exception
-    {
-        assertTrue( PomHelper.isVersionOverlap( "[1.0.0,2.0.0]", "1.0.8" ) );
-
+    public void testRangeVersionIntersect() throws Exception {
+        assertTrue(PomHelper.isVersionOverlap("[1.0.0,2.0.0]", "1.0.8"));
     }
 
     @Test
-    public void testSetElementValueExistingValue() throws XMLStreamException
-    {
+    public void testSetElementValueExistingValue() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder( "<super-parent><parent><child>test</child></parent></super-parent>" ),
-                INPUT_FACTORY, null );
+                new StringBuilder("<super-parent><parent><child>test</child></parent></super-parent>"),
+                INPUT_FACTORY,
+                null);
 
-        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
-                "child", "value" ), is( true ) );
-        MatcherAssert.assertThat( xmlEventReader,
-                matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+        assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
+        MatcherAssert.assertThat(
+                xmlEventReader, matches("<super-parent><parent><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    public void testSetElementValueEmptyChild() throws XMLStreamException
-    {
+    public void testSetElementValueEmptyChild() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder( "<super-parent><parent><child/></parent></super-parent>" ), INPUT_FACTORY, null );
+                new StringBuilder("<super-parent><parent><child/></parent></super-parent>"), INPUT_FACTORY, null);
 
-        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
-                "child", "value" ), is( true ) );
-        MatcherAssert.assertThat( xmlEventReader,
-                matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+        assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
+        MatcherAssert.assertThat(
+                xmlEventReader, matches("<super-parent><parent><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    public void testSetElementValueNewValueEmptyParent() throws XMLStreamException
-    {
+    public void testSetElementValueNewValueEmptyParent() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder( "<super-parent><parent/></super-parent>" ), INPUT_FACTORY, null );
+                new StringBuilder("<super-parent><parent/></super-parent>"), INPUT_FACTORY, null);
 
-        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
-                "child", "value" ), is( true ) );
-        MatcherAssert.assertThat( xmlEventReader,
-                matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+        assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
+        MatcherAssert.assertThat(
+                xmlEventReader, matches("<super-parent><parent><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    public void testSetElementValueNewValueNoChild() throws XMLStreamException
-    {
+    public void testSetElementValueNewValueNoChild() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder( "<super-parent><parent><child2/></parent></super-parent>" ), INPUT_FACTORY, null );
+                new StringBuilder("<super-parent><parent><child2/></parent></super-parent>"), INPUT_FACTORY, null);
 
-        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
-                "child", "value" ), is( true ) );
-        MatcherAssert.assertThat( xmlEventReader,
-                matches( "<super-parent><parent><child2/><child>value</child></parent></super-parent>" ) );
+        assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
+        MatcherAssert.assertThat(
+                xmlEventReader, matches("<super-parent><parent><child2/><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    public void testSetProjectValueNewValueNonEmptyParent() throws XMLStreamException
-    {
+    public void testSetProjectValueNewValueNonEmptyParent() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder( "<super-parent><parent><child>test</child></parent></super-parent>" ), INPUT_FACTORY,
-                null );
+                new StringBuilder("<super-parent><parent><child>test</child></parent></super-parent>"),
+                INPUT_FACTORY,
+                null);
 
-        assertThat( PomHelper.setElementValue( xmlEventReader, "/super-parent/parent",
-                "child", "value" ), is( true ) );
-        MatcherAssert.assertThat( xmlEventReader,
-                matches( "<super-parent><parent><child>value</child></parent></super-parent>" ) );
+        assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
+        MatcherAssert.assertThat(
+                xmlEventReader, matches("<super-parent><parent><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    public void testIssue505ChildModules() throws Exception
-    {
-        MavenProject project = mojoRule.readMavenProject(
-                new File( "src/test/resources/org/codehaus/mojo/versions/api/issue-505" ) );
-        Map<String, Model> reactorModels = PomHelper.getReactorModels( project, new SystemStreamLog() );
-        assertThat( reactorModels.keySet(), hasSize( 3 ) );
+    public void testIssue505ChildModules() throws Exception {
+        MavenProject project =
+                mojoRule.readMavenProject(new File("src/test/resources/org/codehaus/mojo/versions/api/issue-505"));
+        Map<String, Model> reactorModels = PomHelper.getReactorModels(project, new SystemStreamLog());
+        assertThat(reactorModels.keySet(), hasSize(3));
     }
 }

@@ -62,183 +62,169 @@ import static org.mockito.Mockito.when;
  *
  * @author Andrzej Jarmoniuk
  */
-public class PluginUpdatesReportMojoTest
-{
-    private static class TestPluginUpdatesReportMojo extends PluginUpdatesReportMojo
-    {
+public class PluginUpdatesReportMojoTest {
+    private static class TestPluginUpdatesReportMojo extends PluginUpdatesReportMojo {
         static final I18N MOCK_I18N = mockI18N();
-        TestPluginUpdatesReportMojo()
-        {
-            super( MOCK_I18N, mockRepositorySystem(), mockAetherRepositorySystem(),
-                    null, new ReportRendererFactoryImpl( MOCK_I18N ) );
+
+        TestPluginUpdatesReportMojo() {
+            super(
+                    MOCK_I18N,
+                    mockRepositorySystem(),
+                    mockAetherRepositorySystem(),
+                    null,
+                    new ReportRendererFactoryImpl(MOCK_I18N));
             siteTool = MockUtils.mockSiteTool();
 
             project = new MavenProject();
-            project.setBuild( new Build() );
-            project.getBuild().setPluginManagement( new PluginManagement() );
+            project.setBuild(new Build());
+            project.getBuild().setPluginManagement(new PluginManagement());
 
             session = mockMavenSession();
         }
 
-        public TestPluginUpdatesReportMojo withPlugins( Plugin... plugins )
-        {
-            project.getBuild().setPlugins( Arrays.asList( plugins ) );
+        public TestPluginUpdatesReportMojo withPlugins(Plugin... plugins) {
+            project.getBuild().setPlugins(Arrays.asList(plugins));
             return this;
         }
 
         public TestPluginUpdatesReportMojo withAetherRepositorySystem(
-                org.eclipse.aether.RepositorySystem repositorySystem )
-        {
+                org.eclipse.aether.RepositorySystem repositorySystem) {
             this.aetherRepositorySystem = repositorySystem;
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withPluginManagement( Plugin... pluginManagement )
-        {
-            project.getBuild().getPluginManagement().setPlugins( Arrays.asList( pluginManagement ) );
+        public TestPluginUpdatesReportMojo withPluginManagement(Plugin... pluginManagement) {
+            project.getBuild().getPluginManagement().setPlugins(Arrays.asList(pluginManagement));
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withOnlyUpgradable( boolean onlyUpgradable )
-        {
+        public TestPluginUpdatesReportMojo withOnlyUpgradable(boolean onlyUpgradable) {
             this.onlyUpgradable = onlyUpgradable;
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withOnlyProjectPlugins( boolean onlyProjectPlugins )
-        {
+        public TestPluginUpdatesReportMojo withOnlyProjectPlugins(boolean onlyProjectPlugins) {
             this.onlyProjectPlugins = onlyProjectPlugins;
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withRuleSet(
-                RuleSet ruleSet )
-        {
+        public TestPluginUpdatesReportMojo withRuleSet(RuleSet ruleSet) {
             this.ruleSet = ruleSet;
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withIgnoredVersions(
-                Set<String> ignoredVersions )
-        {
+        public TestPluginUpdatesReportMojo withIgnoredVersions(Set<String> ignoredVersions) {
             this.ignoredVersions = ignoredVersions;
             return this;
         }
 
-        private static RepositorySystem mockRepositorySystem()
-        {
-            RepositorySystem repositorySystem = mock( RepositorySystem.class );
-            when( repositorySystem.createPluginArtifact( any( Plugin.class ) ) ).thenAnswer(
-                invocation ->
-                {
-                    Plugin plugin = invocation.getArgument( 0 );
-                    return new DefaultArtifact( plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(),
-                                                SCOPE_RUNTIME, "maven-plugin", "jar",
-                            new DefaultArtifactHandlerStub( "default" ) );
-                } );
+        private static RepositorySystem mockRepositorySystem() {
+            RepositorySystem repositorySystem = mock(RepositorySystem.class);
+            when(repositorySystem.createPluginArtifact(any(Plugin.class))).thenAnswer(invocation -> {
+                Plugin plugin = invocation.getArgument(0);
+                return new DefaultArtifact(
+                        plugin.getGroupId(),
+                        plugin.getArtifactId(),
+                        plugin.getVersion(),
+                        SCOPE_RUNTIME,
+                        "maven-plugin",
+                        "jar",
+                        new DefaultArtifactHandlerStub("default"));
+            });
             return repositorySystem;
         }
     }
 
-    private static Plugin pluginOf( String artifactId )
-    {
-        return pluginOf( artifactId, "1.0.0" );
+    private static Plugin pluginOf(String artifactId) {
+        return pluginOf(artifactId, "1.0.0");
     }
 
-    private static Plugin pluginOf( String artifactId, String version )
-    {
-        return new Plugin()
-        {
+    private static Plugin pluginOf(String artifactId, String version) {
+        return new Plugin() {
             {
-                setGroupId( "defaultGroup" );
-                setArtifactId( artifactId );
-                setVersion( version );
+                setGroupId("defaultGroup");
+                setArtifactId(artifactId);
+                setVersion(version);
             }
         };
     }
 
     @Test
-    public void testOnlyUpgradablePlugins() throws IOException, MavenReportException
-    {
+    public void testOnlyUpgradablePlugins() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReportMojo()
-                .withAetherRepositorySystem( mockAetherRepositorySystem( new HashMap<String, String[]>()
-                {{
-                    put( "artifactA", new String[] { "1.0.0", "2.0.0" } );
-                    put( "artifactB", new String[] { "1.0.0" } );
-                    put( "artifactC", new String[] { "1.0.0", "2.0.0" } );
-                }} ) )
-                .withPlugins( pluginOf( "artifactA", "1.0.0" ),
-                        pluginOf( "artifactB", "1.0.0" ),
-                        pluginOf( "artifactC", "2.0.0" ) )
-                .withOnlyUpgradable( true )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+                .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                    {
+                        put("artifactA", new String[] {"1.0.0", "2.0.0"});
+                        put("artifactB", new String[] {"1.0.0"});
+                        put("artifactC", new String[] {"1.0.0", "2.0.0"});
+                    }
+                }))
+                .withPlugins(
+                        pluginOf("artifactA", "1.0.0"), pluginOf("artifactB", "1.0.0"), pluginOf("artifactC", "2.0.0"))
+                .withOnlyUpgradable(true)
+                .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertThat( output, containsString( "artifactA" ) );
-        assertThat( output, not( containsString( "artifactB" ) ) );
-        assertThat( output, not( containsString( "artifactC" ) ) );
+        assertThat(output, containsString("artifactA"));
+        assertThat(output, not(containsString("artifactB")));
+        assertThat(output, not(containsString("artifactC")));
     }
 
     @Test
-    public void testOnlyUpgradableWithPluginManagement() throws IOException, MavenReportException
-    {
+    public void testOnlyUpgradableWithPluginManagement() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReportMojo()
-            .withAetherRepositorySystem( mockAetherRepositorySystem( new HashMap<String, String[]>()
-            {{
-                put( "artifactA", new String[] { "1.0.0", "2.0.0" } );
-                put( "artifactB", new String[] { "1.0.0" } );
-                put( "artifactC", new String[] { "1.0.0", "2.0.0" } );
-            }} ) )
-            .withPluginManagement( pluginOf( "artifactA", "1.0.0" ),
-                    pluginOf( "artifactB", "1.0.0" ),
-                    pluginOf( "artifactC", "2.0.0" ) )
-            .withOnlyUpgradable( true )
-            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+                .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                    {
+                        put("artifactA", new String[] {"1.0.0", "2.0.0"});
+                        put("artifactB", new String[] {"1.0.0"});
+                        put("artifactC", new String[] {"1.0.0", "2.0.0"});
+                    }
+                }))
+                .withPluginManagement(
+                        pluginOf("artifactA", "1.0.0"), pluginOf("artifactB", "1.0.0"), pluginOf("artifactC", "2.0.0"))
+                .withOnlyUpgradable(true)
+                .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertThat( output, containsString( "artifactA" ) );
-        assertThat( output, not( containsString( "artifactB" ) ) );
-        assertThat( output, not( containsString( "artifactC" ) ) );
+        assertThat(output, containsString("artifactA"));
+        assertThat(output, not(containsString("artifactB")));
+        assertThat(output, not(containsString("artifactC")));
     }
 
     @Test
-    public void testOnlyProjectPlugins() throws IOException, MavenReportException
-    {
+    public void testOnlyProjectPlugins() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReportMojo()
-            .withPlugins( pluginOf( "artifactA" ) )
-            .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
-                                   pluginOf( "artifactC" ) )
-            .withOnlyUpgradable( true )
-            .withOnlyProjectPlugins( true )
-            .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+                .withPlugins(pluginOf("artifactA"))
+                .withPluginManagement(pluginOf("artifactA"), pluginOf("artifactB"), pluginOf("artifactC"))
+                .withOnlyUpgradable(true)
+                .withOnlyProjectPlugins(true)
+                .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertThat( output, containsString( "artifactA" ) );
-        assertThat( output, not( anyOf( containsString( "artifactB" ), containsString( "artifactC" ) ) ) );
+        assertThat(output, containsString("artifactA"));
+        assertThat(output, not(anyOf(containsString("artifactB"), containsString("artifactC"))));
     }
 
     @Test
-    public void testOnlyProjectPluginsWithIgnoredVersions() throws IOException, MavenReportException
-    {
+    public void testOnlyProjectPluginsWithIgnoredVersions() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestPluginUpdatesReportMojo()
-                .withPlugins( pluginOf( "artifactA" ) )
-                .withPluginManagement( pluginOf( "artifactA" ), pluginOf( "artifactB" ),
-                        pluginOf( "artifactC" ) )
-                .withOnlyUpgradable( true )
-                .withOnlyProjectPlugins( true )
-                .withIgnoredVersions( Collections.singleton( "2.0.0" ) )
-                .generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+                .withPlugins(pluginOf("artifactA"))
+                .withPluginManagement(pluginOf("artifactA"), pluginOf("artifactB"), pluginOf("artifactC"))
+                .withOnlyUpgradable(true)
+                .withOnlyProjectPlugins(true)
+                .withIgnoredVersions(Collections.singleton("2.0.0"))
+                .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
-        String output = os.toString().replaceAll( "\\s", " " )
-                .replaceAll( "<[^>]+>", " " ).replaceAll( "&[^;]+;", " " );
-        assertThat( output, matchesPattern( ".*\\breport.overview.numNewerVersionAvailable\\s+0\\b.*" ) );
+        String output =
+                os.toString().replaceAll("\\s", " ").replaceAll("<[^>]+>", " ").replaceAll("&[^;]+;", " ");
+        assertThat(output, matchesPattern(".*\\breport.overview.numNewerVersionAvailable\\s+0\\b.*"));
     }
 }

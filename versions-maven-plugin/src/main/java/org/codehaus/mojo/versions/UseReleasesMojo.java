@@ -54,10 +54,8 @@ import static java.util.Collections.singletonList;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-releases", threadSafe = true )
-public class UseReleasesMojo
-    extends AbstractVersionsDependencyUpdaterMojo
-{
+@Mojo(name = "use-releases", threadSafe = true)
+public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     /**
      * <p>When set to {@code true}, will use the highest found release version matching a string
@@ -68,7 +66,7 @@ public class UseReleasesMojo
      *
      * @since 2.3
      */
-    @Parameter( property = "allowRangeMatching", defaultValue = "false" )
+    @Parameter(property = "allowRangeMatching", defaultValue = "false")
     private boolean allowRangeMatching;
 
     /**
@@ -76,18 +74,18 @@ public class UseReleasesMojo
      *
      * @since 2.3
      */
-    @Parameter( property = "failIfNotReplaced", defaultValue = "false" )
+    @Parameter(property = "failIfNotReplaced", defaultValue = "false")
     protected boolean failIfNotReplaced;
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
-    public UseReleasesMojo( RepositorySystem repositorySystem,
-                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                            Map<String, Wagon> wagonMap,
-                            Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UseReleasesMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -97,105 +95,86 @@ public class UseReleasesMojo
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
-    {
-        try
-        {
-            if ( isProcessingDependencyManagement() )
-            {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
+        try {
+            if (isProcessingDependencyManagement()) {
                 DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
-                if ( dependencyManagement != null )
-                {
-                    useReleases( pom, dependencyManagement.getDependencies(),
-                                 ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    useReleases(
+                            pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
                 }
             }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useReleases( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                useReleases(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
             }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                useReleases( pom, singletonList( getParentDependency() ),
-                             ChangeRecord.ChangeKind.PARENT );
+            if (getProject().getParent() != null && isProcessingParent()) {
+                useReleases(pom, singletonList(getParentDependency()), ChangeRecord.ChangeKind.PARENT);
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void useReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
-                              ChangeRecord.ChangeKind changeKind )
-        throws XMLStreamException, MojoExecutionException, VersionRetrievalException
-    {
-        for ( Dependency dep : dependencies )
-        {
-            if ( isExcludeReactor() && isProducedByReactor( dep ) )
-            {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+    private void useReleases(
+            ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
+        for (Dependency dep : dependencies) {
+            if (isExcludeReactor() && isProducedByReactor(dep)) {
+                getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
             }
 
-            if ( isHandledByProperty( dep ) )
-            {
-                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+            if (isHandledByProperty(dep)) {
+                getLog().debug("Ignoring dependency with property as version: " + toString(dep));
                 continue;
             }
 
             String version = dep.getVersion();
-            if ( version == null )
-            {
-                getLog().info( "Ignoring dependency with no version: " + toString( dep ) );
+            if (version == null) {
+                getLog().info("Ignoring dependency with no version: " + toString(dep));
                 continue;
             }
-            Matcher versionMatcher = SNAPSHOT_REGEX.matcher( version );
-            if ( versionMatcher.matches() )
-            {
-                String releaseVersion = versionMatcher.group( 1 );
-                Artifact artifact = this.toArtifact( dep );
-                if ( !isIncluded( artifact ) )
-                {
+            Matcher versionMatcher = SNAPSHOT_REGEX.matcher(version);
+            if (versionMatcher.matches()) {
+                String releaseVersion = versionMatcher.group(1);
+                Artifact artifact = this.toArtifact(dep);
+                if (!isIncluded(artifact)) {
                     continue;
                 }
 
-                getLog().debug( "Looking for a release of " + toString( dep ) );
+                getLog().debug("Looking for a release of " + toString(dep));
                 // Force releaseVersion version because org.apache.maven.artifact.metadata.MavenMetadataSource does not
                 // retrieve release version if provided snapshot version.
-                artifact.setVersion( releaseVersion );
-                Optional<String> targetVersion = findReleaseVersion( pom, dep, version, releaseVersion,
-                        getHelper().lookupArtifactVersions( artifact, false ) );
-                if ( targetVersion.isPresent() )
-                {
-                    updateDependencyVersion( pom, dep, targetVersion.get(), changeKind );
-                }
-                else
-                {
-                    getLog().info( "No matching release of " + toString( dep ) + " to update." );
-                    if ( failIfNotReplaced )
-                    {
-                        throw new MojoExecutionException( "No matching release of " + toString( dep )
-                                + " found for update" );
+                artifact.setVersion(releaseVersion);
+                Optional<String> targetVersion = findReleaseVersion(
+                        pom, dep, version, releaseVersion, getHelper().lookupArtifactVersions(artifact, false));
+                if (targetVersion.isPresent()) {
+                    updateDependencyVersion(pom, dep, targetVersion.get(), changeKind);
+                } else {
+                    getLog().info("No matching release of " + toString(dep) + " to update.");
+                    if (failIfNotReplaced) {
+                        throw new MojoExecutionException(
+                                "No matching release of " + toString(dep) + " found for update");
                     }
                 }
             }
         }
     }
 
-    private Optional<String> findReleaseVersion( ModifiedPomXMLEventReader pom, Dependency dep, String version,
-                                                 String releaseVersion, ArtifactVersions versions )
-    {
+    private Optional<String> findReleaseVersion(
+            ModifiedPomXMLEventReader pom,
+            Dependency dep,
+            String version,
+            String releaseVersion,
+            ArtifactVersions versions) {
         return !allowRangeMatching
-                ? versions.containsVersion( releaseVersion )
-                    ? Optional.of( releaseVersion )
-                    : Optional.empty()
-                : Arrays.stream( versions.getVersions( false ) )
-                    .sorted( ( v1, v2 ) -> -( v1.compareTo( v2 ) ) )
-                    .filter( v -> v.toString().startsWith( releaseVersion ) )
-                    .findFirst()
-                    .map( ArtifactVersion::toString );
+                ? versions.containsVersion(releaseVersion) ? Optional.of(releaseVersion) : Optional.empty()
+                : Arrays.stream(versions.getVersions(false))
+                        .sorted((v1, v2) -> -(v1.compareTo(v2)))
+                        .filter(v -> v.toString().startsWith(releaseVersion))
+                        .findFirst()
+                        .map(ArtifactVersion::toString);
     }
 }

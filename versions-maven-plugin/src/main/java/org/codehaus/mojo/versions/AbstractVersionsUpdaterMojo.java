@@ -67,9 +67,7 @@ import org.codehaus.stax2.XMLInputFactory2;
  *
  * @author Stephen Connolly
  */
-public abstract class AbstractVersionsUpdaterMojo
-    extends AbstractMojo
-{
+public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -78,7 +76,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( defaultValue = "${project}", required = true, readonly = true )
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
     protected MavenProject project;
 
     /**
@@ -94,7 +92,7 @@ public abstract class AbstractVersionsUpdaterMojo
     /**
      * @since 1.0-alpha-1
      */
-    @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
+    @Parameter(defaultValue = "${reactorProjects}", required = true, readonly = true)
     protected List<MavenProject> reactorProjects;
 
     /**
@@ -102,7 +100,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "maven.version.rules.serverId", defaultValue = "serverId" )
+    @Parameter(property = "maven.version.rules.serverId", defaultValue = "serverId")
     private String serverId;
 
     /**
@@ -112,7 +110,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "maven.version.rules" )
+    @Parameter(property = "maven.version.rules")
     private String rulesUri;
 
     /**
@@ -120,7 +118,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "generateBackupPoms", defaultValue = "true" )
+    @Parameter(property = "generateBackupPoms", defaultValue = "true")
     private boolean generateBackupPoms;
 
     /**
@@ -128,7 +126,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "allowSnapshots", defaultValue = "false" )
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
     /**
@@ -141,10 +139,10 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( defaultValue = "${session}", required = true, readonly = true )
+    @Parameter(defaultValue = "${session}", required = true, readonly = true)
     protected MavenSession session;
 
-    @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
+    @Parameter(defaultValue = "${mojoExecution}", required = true, readonly = true)
     private MojoExecution mojoExecution;
 
     /**
@@ -152,15 +150,14 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 2.11
      */
-    @Parameter( property = "changeRecorderFormat", defaultValue = "none" )
+    @Parameter(property = "changeRecorderFormat", defaultValue = "none")
     private String changeRecorderFormat = "none";
     /**
      * The output file used to record changes.
      *
      * @since 2.11
      */
-    @Parameter( property = "changeRecorderOutputFile",
-                defaultValue = "${project.build.directory}/versions-changes.xml" )
+    @Parameter(property = "changeRecorderOutputFile", defaultValue = "${project.build.directory}/versions-changes.xml")
     private File changeRecorderOutputFile;
 
     /**
@@ -192,7 +189,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * <p><em>Currently, this parameter will override the defined {@link #ruleSet}</em></p>
      * @since 2.13.0
      */
-    @Parameter( property = "maven.version.ignore" )
+    @Parameter(property = "maven.version.ignore")
     protected Set<String> ignoredVersions;
 
     /**
@@ -205,32 +202,30 @@ public abstract class AbstractVersionsUpdaterMojo
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     @Inject
-    protected AbstractVersionsUpdaterMojo( RepositorySystem repositorySystem,
-                                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           Map<String, Wagon> wagonMap,
-                                           Map<String, ChangeRecorder> changeRecorders )
-    {
+    protected AbstractVersionsUpdaterMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
         this.repositorySystem = repositorySystem;
         this.aetherRepositorySystem = aetherRepositorySystem;
         this.wagonMap = wagonMap;
         this.changeRecorders = changeRecorders;
     }
 
-    public VersionsHelper getHelper() throws MojoExecutionException
-    {
-        if ( helper == null )
-        {
+    public VersionsHelper getHelper() throws MojoExecutionException {
+        if (helper == null) {
             helper = new DefaultVersionsHelper.Builder()
-                    .withRepositorySystem( repositorySystem )
-                    .withAetherRepositorySystem( aetherRepositorySystem )
-                    .withWagonMap( wagonMap )
-                    .withServerId( serverId )
-                    .withRulesUri( rulesUri )
-                    .withRuleSet( ruleSet )
-                    .withIgnoredVersions( ignoredVersions )
-                    .withLog( getLog() )
-                    .withMavenSession( session )
-                    .withMojoExecution( mojoExecution )
+                    .withRepositorySystem(repositorySystem)
+                    .withAetherRepositorySystem(aetherRepositorySystem)
+                    .withWagonMap(wagonMap)
+                    .withServerId(serverId)
+                    .withRulesUri(rulesUri)
+                    .withRuleSet(ruleSet)
+                    .withIgnoredVersions(ignoredVersions)
+                    .withLog(getLog())
+                    .withMavenSession(session)
+                    .withMojoExecution(mojoExecution)
                     .build();
         }
         return helper;
@@ -242,8 +237,7 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return Value for property 'project'.
      * @since 1.0-alpha-1
      */
-    public MavenProject getProject()
-    {
+    public MavenProject getProject() {
         return project;
     }
 
@@ -253,13 +247,11 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param project Value to set for property 'project'.
      * @since 1.0-alpha-1
      */
-    public void setProject( MavenProject project )
-    {
+    public void setProject(MavenProject project) {
         this.project = project;
     }
 
-    public String getVersion()
-    {
+    public String getVersion() {
         return getProject() == null ? null : getProject().getVersion();
     }
 
@@ -272,12 +264,10 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @since 1.0-alpha-1
      */
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
+    public void execute() throws MojoExecutionException, MojoFailureException {
         validateInput();
         File outFile = project.getFile();
-        process( outFile );
+        process(outFile);
     }
 
     // -------------------------- OTHER METHODS --------------------------
@@ -287,9 +277,7 @@ public abstract class AbstractVersionsUpdaterMojo
      *
      * @throws MojoExecutionException thrown if any of input parameters is invalid
      */
-    protected void validateInput() throws MojoExecutionException
-    {
-    }
+    protected void validateInput() throws MojoExecutionException {}
     /**
      * Finds the latest version of the specified artifact that matches the version range.
      *
@@ -303,14 +291,13 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws MojoExecutionException             if something goes wrong.
      * @since 1.0-alpha-1
      */
-    protected ArtifactVersion findLatestVersion( Artifact artifact, VersionRange versionRange,
-                                                 Boolean allowingSnapshots, boolean usePluginRepositories )
-            throws MojoExecutionException, VersionRetrievalException
-    {
+    protected ArtifactVersion findLatestVersion(
+            Artifact artifact, VersionRange versionRange, Boolean allowingSnapshots, boolean usePluginRepositories)
+            throws MojoExecutionException, VersionRetrievalException {
         boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : this.allowSnapshots;
-        final ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( artifact, versionRange,
-                usePluginRepositories );
-        return artifactVersions.getNewestVersion( versionRange, null, includeSnapshots, false );
+        final ArtifactVersions artifactVersions =
+                getHelper().lookupArtifactVersions(artifact, versionRange, usePluginRepositories);
+        return artifactVersions.getNewestVersion(versionRange, null, includeSnapshots, false);
     }
 
     /**
@@ -322,9 +309,8 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return The value as defined in the pom or <code>null</code> if not defined.
      * @since 1.0-alpha-1
      */
-    protected String getPropertyValue( StringBuilder pom, String property )
-    {
-        return project.getProperties().getProperty( property );
+    protected String getPropertyValue(StringBuilder pom, String property) {
+        return project.getProperties().getProperty(property);
     }
 
     /**
@@ -335,49 +321,34 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws MojoFailureException   If things go wrong.
      * @since 1.0-alpha-1
      */
-    protected void process( File outFile )
-        throws MojoExecutionException, MojoFailureException
-    {
-        try
-        {
-            StringBuilder input = PomHelper.readXmlFile( outFile );
-            ModifiedPomXMLEventReader newPom = newModifiedPomXER( input, outFile.getAbsolutePath() );
+    protected void process(File outFile) throws MojoExecutionException, MojoFailureException {
+        try {
+            StringBuilder input = PomHelper.readXmlFile(outFile);
+            ModifiedPomXMLEventReader newPom = newModifiedPomXER(input, outFile.getAbsolutePath());
 
-            update( newPom );
+            update(newPom);
 
-            if ( newPom.isModified() )
-            {
-                if ( generateBackupPoms )
-                {
-                    File backupFile = new File( outFile.getParentFile(), outFile.getName() + ".versionsBackup" );
-                    if ( !backupFile.exists() )
-                    {
-                        getLog().debug( "Backing up " + outFile + " to " + backupFile );
-                        FileUtils.copyFile( outFile, backupFile );
+            if (newPom.isModified()) {
+                if (generateBackupPoms) {
+                    File backupFile = new File(outFile.getParentFile(), outFile.getName() + ".versionsBackup");
+                    if (!backupFile.exists()) {
+                        getLog().debug("Backing up " + outFile + " to " + backupFile);
+                        FileUtils.copyFile(outFile, backupFile);
+                    } else {
+                        getLog().debug("Leaving existing backup " + backupFile + " unmodified");
                     }
-                    else
-                    {
-                        getLog().debug( "Leaving existing backup " + backupFile + " unmodified" );
-                    }
+                } else {
+                    getLog().debug("Skipping generation of backup file");
                 }
-                else
-                {
-                    getLog().debug( "Skipping generation of backup file" );
-                }
-                writeFile( outFile, input );
+                writeFile(outFile, input);
             }
 
             saveChangeRecorderResults();
+        } catch (IOException | XMLStreamException e) {
+            getLog().error(e);
+        } catch (VersionRetrievalException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
-        catch ( IOException | XMLStreamException e )
-        {
-            getLog().error( e );
-        }
-        catch ( VersionRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-
     }
 
     /**
@@ -387,18 +358,14 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param path  Path pointing to the source of the XML
      * @return The {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader}.
      */
-    protected final ModifiedPomXMLEventReader newModifiedPomXER( StringBuilder input, String path )
-    {
+    protected final ModifiedPomXMLEventReader newModifiedPomXER(StringBuilder input, String path) {
         ModifiedPomXMLEventReader newPom = null;
-        try
-        {
+        try {
             XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-            inputFactory.setProperty( XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE );
-            newPom = new ModifiedPomXMLEventReader( input, inputFactory, path );
-        }
-        catch ( XMLStreamException e )
-        {
-            getLog().error( e );
+            inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
+            newPom = new ModifiedPomXMLEventReader(input, inputFactory, path);
+        } catch (XMLStreamException e) {
+            getLog().error(e);
         }
         return newPom;
     }
@@ -410,12 +377,9 @@ public abstract class AbstractVersionsUpdaterMojo
      * @param input   The contents of the file.
      * @throws IOException when things go wrong.
      */
-    protected final void writeFile( File outFile, StringBuilder input )
-        throws IOException
-    {
-        try ( Writer writer = WriterFactory.newXmlWriter( outFile ) )
-        {
-            IOUtil.copy( input.toString(), writer );
+    protected final void writeFile(File outFile, StringBuilder input) throws IOException {
+        try (Writer writer = WriterFactory.newXmlWriter(outFile)) {
+            IOUtil.copy(input.toString(), writer);
         }
     }
 
@@ -429,8 +393,8 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws VersionRetrievalException           if version retrieval goes wrong
      * @since 1.0-alpha-1
      */
-    protected abstract void update( ModifiedPomXMLEventReader pom )
-        throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException;
+    protected abstract void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException;
 
     /**
      * @param artifact       The artifact.
@@ -445,9 +409,8 @@ public abstract class AbstractVersionsUpdaterMojo
      * Returns <code>true</code> if the update should be applied.
      */
     @Deprecated
-    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion )
-    {
-        return shouldApplyUpdate( artifact, currentVersion, updateVersion, false );
+    protected boolean shouldApplyUpdate(Artifact artifact, String currentVersion, ArtifactVersion updateVersion) {
+        return shouldApplyUpdate(artifact, currentVersion, updateVersion, false);
     }
 
     /**
@@ -460,37 +423,30 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return <code>true</code> if the update should be applied to the pom.
      * @since 2.9
      */
-    protected boolean shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion,
-                                         boolean forceUpdate )
-    {
-        getLog().debug( "Proposal is to update from " + currentVersion + " to " + updateVersion );
+    protected boolean shouldApplyUpdate(
+            Artifact artifact, String currentVersion, ArtifactVersion updateVersion, boolean forceUpdate) {
+        getLog().debug("Proposal is to update from " + currentVersion + " to " + updateVersion);
 
-        if ( updateVersion == null )
-        {
-            getLog().warn( "Not updating version: could not resolve any versions" );
+        if (updateVersion == null) {
+            getLog().warn("Not updating version: could not resolve any versions");
             return false;
         }
 
-        if ( forceUpdate )
-        {
-            getLog().info( "Force update enabled. LATEST or RELEASE versions will be overwritten with real version" );
+        if (forceUpdate) {
+            getLog().info("Force update enabled. LATEST or RELEASE versions will be overwritten with real version");
             return true;
         }
 
-        artifact.setVersion( updateVersion.toString() );
-        try
-        {
-            getHelper().resolveArtifact( artifact, false );
-        }
-        catch ( ArtifactResolutionException | MojoExecutionException e )
-        {
-            getLog().warn( "Not updating version: could not resolve " + artifact, e );
+        artifact.setVersion(updateVersion.toString());
+        try {
+            getHelper().resolveArtifact(artifact, false);
+        } catch (ArtifactResolutionException | MojoExecutionException e) {
+            getLog().warn("Not updating version: could not resolve " + artifact, e);
             return false;
         }
 
-        if ( currentVersion.equals( updateVersion.toString() ) )
-        {
-            getLog().info( "Current version of " + artifact + " is the latest." );
+        if (currentVersion.equals(updateVersion.toString())) {
+            getLog().info("Current version of " + artifact + " is the latest.");
             return false;
         }
         return true;
@@ -510,24 +466,28 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws InvalidSegmentException thrown if {@code unchangedSegment} is invalid
      * @throws MojoExecutionException thrown if any other error occurs
      */
-    protected ArtifactVersion updatePropertyToNewestVersion( ModifiedPomXMLEventReader pom, Property property,
-                                                             PropertyVersions version, String currentVersion,
-                                                             boolean allowDowngrade,
-                                                             Optional<Segment> unchangedSegment )
-            throws XMLStreamException, InvalidVersionSpecificationException,
-            InvalidSegmentException, MojoExecutionException
-    {
-        ArtifactVersion winner =
-            version.getNewestVersion( currentVersion, property, this.allowSnapshots, this.reactorProjects,
-                                      this.getHelper(), allowDowngrade, unchangedSegment );
+    protected ArtifactVersion updatePropertyToNewestVersion(
+            ModifiedPomXMLEventReader pom,
+            Property property,
+            PropertyVersions version,
+            String currentVersion,
+            boolean allowDowngrade,
+            Optional<Segment> unchangedSegment)
+            throws XMLStreamException, InvalidVersionSpecificationException, InvalidSegmentException,
+                    MojoExecutionException {
+        ArtifactVersion winner = version.getNewestVersion(
+                currentVersion,
+                property,
+                this.allowSnapshots,
+                this.reactorProjects,
+                this.getHelper(),
+                allowDowngrade,
+                unchangedSegment);
 
-        if ( winner == null || currentVersion.equals( winner.toString() ) )
-        {
-            getLog().info( "Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion );
-        }
-        else if ( PomHelper.setPropertyVersion( pom, version.getProfileId(), property.getName(), winner.toString() ) )
-        {
-            getLog().info( "Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner );
+        if (winner == null || currentVersion.equals(winner.toString())) {
+            getLog().info("Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion);
+        } else if (PomHelper.setPropertyVersion(pom, version.getProfileId(), property.getName(), winner.toString())) {
+            getLog().info("Updated ${" + property.getName() + "} from " + currentVersion + " to " + winner);
             return winner;
         }
 
@@ -540,13 +500,11 @@ public abstract class AbstractVersionsUpdaterMojo
      * @return The change recorder
      * @throws MojoExecutionException if something goes wrong.
      */
-    protected ChangeRecorder getChangeRecorder() throws MojoExecutionException
-    {
-        ChangeRecorder changeRecorder = changeRecorders.get( changeRecorderFormat );
-        if ( changeRecorder == null )
-        {
-            throw new MojoExecutionException( "Only " + changeRecorders.keySet()
-                                                  + " formats are supported for change recordings" );
+    protected ChangeRecorder getChangeRecorder() throws MojoExecutionException {
+        ChangeRecorder changeRecorder = changeRecorders.get(changeRecorderFormat);
+        if (changeRecorder == null) {
+            throw new MojoExecutionException(
+                    "Only " + changeRecorders.keySet() + " formats are supported for change recordings");
         }
         return changeRecorder;
     }
@@ -557,13 +515,12 @@ public abstract class AbstractVersionsUpdaterMojo
      * @throws IOException On I/O errors
      * @throws MojoExecutionException if something goes wrong.
      */
+    protected void saveChangeRecorderResults() throws IOException, MojoExecutionException {
 
-    protected void saveChangeRecorderResults() throws IOException, MojoExecutionException
-    {
-
-        this.getLog().debug( "writing change record to " + this.changeRecorderOutputFile );
-        getChangeRecorder().writeReport( Optional.ofNullable( changeRecorderOutputFile )
-                                           .map( File::toPath )
-                                           .orElse( null ) );
+        this.getLog().debug("writing change record to " + this.changeRecorderOutputFile);
+        getChangeRecorder()
+                .writeReport(Optional.ofNullable(changeRecorderOutputFile)
+                        .map(File::toPath)
+                        .orElse(null));
     }
 }

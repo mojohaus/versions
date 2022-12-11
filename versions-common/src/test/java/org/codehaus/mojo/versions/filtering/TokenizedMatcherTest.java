@@ -10,155 +10,116 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class TokenizedMatcherTest
-{
+class TokenizedMatcherTest {
 
     @Nested
-    class ExactMatchPattern
-    {
+    class ExactMatchPattern {
 
-        private final TokenizedMatcher matcher = TokenizedMatcher
-            .parse( "group:artifact:1.0:jar:tests:compile" );
-
+        private final TokenizedMatcher matcher = TokenizedMatcher.parse("group:artifact:1.0:jar:tests:compile");
 
         @Test
-        void acceptsExactMatch()
-        {
-            Dependency input = DependencyBuilder.dependencyWith(
-                "group",
-                "artifact",
-                "1.0",
-                "jar",
-                "tests",
-                "compile" );
+        void acceptsExactMatch() {
+            Dependency input = DependencyBuilder.dependencyWith("group", "artifact", "1.0", "jar", "tests", "compile");
 
-            boolean actual = matcher.test( input );
+            boolean actual = matcher.test(input);
 
-            assertTrue( actual );
+            assertTrue(actual);
         }
 
-
         @ParameterizedTest
-        @CsvSource( {
+        @CsvSource({
             "xxxxx, artifact, 1.0, jar, tests, compile",
             "group, xxxxxxxx, 1.0, jar, tests, compile",
             "group, artifact, xxx, jar, tests, compile",
             "group, artifact, 1.0, xxx, tests, compile",
             "group, artifact, 1.0, jar, xxxxx, compile",
             "group, artifact, 1.0, jar, tests, xxxxxxx",
-        } )
+        })
         void rejectsDifferingFields(
-            String group, String artifact, String version, String type, String classifier, String scope
-        )
-        {
+                String group, String artifact, String version, String type, String classifier, String scope) {
 
-            Dependency input = DependencyBuilder.dependencyWith(
-                group,
-                artifact,
-                version,
-                type,
-                classifier,
-                scope );
+            Dependency input = DependencyBuilder.dependencyWith(group, artifact, version, type, classifier, scope);
 
-            boolean actual = matcher.test( input );
+            boolean actual = matcher.test(input);
 
-            assertFalse( actual );
+            assertFalse(actual);
         }
     }
 
     @Nested
-    class WildcardPattern
-    {
+    class WildcardPattern {
 
         @Test
-        void acceptsWildcards()
-        {
-            Dependency input = DependencyBuilder.dependencyWith(
-                "foo",
-                "my-api",
-                "foo",
-                "foo",
-                "foo",
-                "foo" );
+        void acceptsWildcards() {
+            Dependency input = DependencyBuilder.dependencyWith("foo", "my-api", "foo", "foo", "foo", "foo");
 
-            TokenizedMatcher matcher = TokenizedMatcher
-                .parse( "*:my-api" );
+            TokenizedMatcher matcher = TokenizedMatcher.parse("*:my-api");
 
-            boolean actual = matcher.test( input );
+            boolean actual = matcher.test(input);
 
-            assertTrue( actual );
+            assertTrue(actual);
         }
 
         @Nested
-        class NullClassifier
-        {
+        class NullClassifier {
             private final DependencyBuilder depBuilder = DependencyBuilder.newBuilder()
-                    .withGroupId( "foo" )
-                    .withArtifactId( "foo" )
-                    .withVersion( "foo" )
-                    .withType( "foo" )
-                    .withClassifier( "foo" )
-                    .withScope( "foo" );
+                    .withGroupId("foo")
+                    .withArtifactId("foo")
+                    .withVersion("foo")
+                    .withType("foo")
+                    .withClassifier("foo")
+                    .withScope("foo");
 
-            private final TokenizedMatcher matcher = TokenizedMatcher
-                .parse( "*:*:*:*:null:*" );
+            private final TokenizedMatcher matcher = TokenizedMatcher.parse("*:*:*:*:null:*");
 
             @Test
-            void acceptsNullScope()
-            {
-                Dependency input = depBuilder.withClassifier( null ).build();
+            void acceptsNullScope() {
+                Dependency input = depBuilder.withClassifier(null).build();
 
-                boolean actual = matcher.test( input );
+                boolean actual = matcher.test(input);
 
-                assertTrue( actual );
+                assertTrue(actual);
             }
 
             @Test
-            void rejectsNonnullScope()
-            {
-                Dependency input = depBuilder.withClassifier( "tests" ).build();
+            void rejectsNonnullScope() {
+                Dependency input = depBuilder.withClassifier("tests").build();
 
-                boolean actual = matcher.test( input );
+                boolean actual = matcher.test(input);
 
-                assertFalse( actual );
+                assertFalse(actual);
             }
         }
 
         @Nested
-        class NullScope
-        {
+        class NullScope {
             private final DependencyBuilder depBuilder = DependencyBuilder.newBuilder()
-                    .withGroupId( "foo" )
-                    .withArtifactId( "foo" )
-                    .withVersion( "foo" )
-                    .withType( "foo" )
-                    .withClassifier( "foo" )
-                    .withScope( "foo" );
+                    .withGroupId("foo")
+                    .withArtifactId("foo")
+                    .withVersion("foo")
+                    .withType("foo")
+                    .withClassifier("foo")
+                    .withScope("foo");
 
-            private final TokenizedMatcher matcher = TokenizedMatcher
-                .parse( "*:*:*:*:*:null" );
+            private final TokenizedMatcher matcher = TokenizedMatcher.parse("*:*:*:*:*:null");
 
             @Test
-            void acceptsNullScope()
-            {
-                Dependency input = depBuilder.withScope( null ).build();
+            void acceptsNullScope() {
+                Dependency input = depBuilder.withScope(null).build();
 
-                boolean actual = matcher.test( input );
+                boolean actual = matcher.test(input);
 
-                assertTrue( actual );
+                assertTrue(actual);
             }
 
             @Test
-            void rejectsNonnullScope()
-            {
-                Dependency input = depBuilder.withScope( "compile" ).build();
+            void rejectsNonnullScope() {
+                Dependency input = depBuilder.withScope("compile").build();
 
-                boolean actual = matcher.test( input );
+                boolean actual = matcher.test(input);
 
-                assertFalse( actual );
+                assertFalse(actual);
             }
         }
-
     }
-
 }

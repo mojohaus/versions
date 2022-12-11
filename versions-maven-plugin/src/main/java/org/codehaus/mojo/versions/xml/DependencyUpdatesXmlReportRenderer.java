@@ -56,19 +56,17 @@ import static org.codehaus.mojo.versions.xml.CommonXmlReportRendererUtils.status
  * @author Illia Dubinin
  * @since 2.4
  */
-public class DependencyUpdatesXmlReportRenderer implements ReportRenderer
-{
+public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
     private final DependencyUpdatesModel model;
     private final Path outputFile;
-    private final ArtifactVersionsCache newestUpdateCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
+    private final ArtifactVersionsCache newestUpdateCache =
+            new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdate);
     /**
      * Creates a new instance
      * @param model object containing the updates model
      * @param outputFile output file for the report
      */
-    public DependencyUpdatesXmlReportRenderer( DependencyUpdatesModel model, Path outputFile )
-    {
+    public DependencyUpdatesXmlReportRenderer(DependencyUpdatesModel model, Path outputFile) {
         this.model = model;
         this.outputFile = outputFile;
     }
@@ -77,53 +75,52 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer
      * Creates an XML report
      */
     @Override
-    public void render()
-    {
-        try ( BufferedWriter writer = Files.newBufferedWriter( outputFile,
-                StandardCharsets.UTF_8 ) )
-        {
-            new DependencyUpdatesReportXpp3Writer().write( writer, new DependencyUpdatesReport()
-            {{
-                setSummary( new DependencyReportSummary()
-                {{
-                    OverviewStats overviewStats = OverviewStats.fromUpdates( model.getAllUpdates().values(),
-                            newestUpdateCache );
-                    setUsingLastVersion( String.valueOf( overviewStats.getUpToDate() ) );
-                    setNextVersionAvailable( String.valueOf( overviewStats.getAny() ) );
-                    setNextIncrementalAvailable( String.valueOf( overviewStats.getIncremental() ) );
-                    setNextMinorAvailable( String.valueOf( overviewStats.getMinor() ) );
-                    setNextMajorAvailable( String.valueOf( overviewStats.getMajor() ) );
-                }} );
-                setDependencyManagements( createDependencyInfo( model.getArtifactManagementUpdates() ) );
-                setDependencies( createDependencyInfo( model.getArtifactUpdates() ) );
-            }} );
-        }
-        catch ( IOException e )
-        {
-            throw new RuntimeException( e );
+    public void render() {
+        try (BufferedWriter writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8)) {
+            new DependencyUpdatesReportXpp3Writer().write(writer, new DependencyUpdatesReport() {
+                {
+                    setSummary(new DependencyReportSummary() {
+                        {
+                            OverviewStats overviewStats = OverviewStats.fromUpdates(
+                                    model.getAllUpdates().values(), newestUpdateCache);
+                            setUsingLastVersion(String.valueOf(overviewStats.getUpToDate()));
+                            setNextVersionAvailable(String.valueOf(overviewStats.getAny()));
+                            setNextIncrementalAvailable(String.valueOf(overviewStats.getIncremental()));
+                            setNextMinorAvailable(String.valueOf(overviewStats.getMinor()));
+                            setNextMajorAvailable(String.valueOf(overviewStats.getMajor()));
+                        }
+                    });
+                    setDependencyManagements(createDependencyInfo(model.getArtifactManagementUpdates()));
+                    setDependencies(createDependencyInfo(model.getArtifactUpdates()));
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private static List<DependencyInfo> createDependencyInfo( Map<Dependency, ArtifactVersions> versions )
-    {
-        return versions.entrySet().stream().map( e ->
-                new DependencyInfo()
-        {{
-            setGroupId( e.getKey().getGroupId() );
-            setArtifactId( e.getKey().getArtifactId() );
-            setCurrentVersion( e.getKey().getVersion() );
-            setScope( e.getKey().getScope() );
-            setType( e.getKey().getType() );
-            setClassifier( e.getKey().getClassifier() );
+    private static List<DependencyInfo> createDependencyInfo(Map<Dependency, ArtifactVersions> versions) {
+        return versions.entrySet().stream()
+                .map(e -> new DependencyInfo() {
+                    {
+                        setGroupId(e.getKey().getGroupId());
+                        setArtifactId(e.getKey().getArtifactId());
+                        setCurrentVersion(e.getKey().getVersion());
+                        setScope(e.getKey().getScope());
+                        setType(e.getKey().getType());
+                        setClassifier(e.getKey().getClassifier());
 
-            ofNullable( e.getValue().getNewestUpdate( empty() ) )
-                    .map( ArtifactVersion::toString ).ifPresent( this::setLastVersion );
+                        ofNullable(e.getValue().getNewestUpdate(empty()))
+                                .map(ArtifactVersion::toString)
+                                .ifPresent(this::setLastVersion);
 
-            setSection( e.getValue(), INCREMENTAL, this::setIncrementals );
-            setSection( e.getValue(), MINOR, this::setMinors );
-            setSection( e.getValue(), MAJOR, this::setMajors );
+                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals);
+                        setSection(e.getValue(), MINOR, this::setMinors);
+                        setSection(e.getValue(), MAJOR, this::setMajors);
 
-            setStatus( statusFor( getLastVersion(), getIncrementals(), getMinors() ) );
-        }} ).collect( Collectors.toList() );
+                        setStatus(statusFor(getLastVersion(), getIncrementals(), getMinors()));
+                    }
+                })
+                .collect(Collectors.toList());
     }
 }

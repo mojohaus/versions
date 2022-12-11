@@ -24,25 +24,24 @@ package org.codehaus.mojo.versions.api;
  *
  * @author Andrzej Jarmoniuk
  */
-public enum Segment implements Comparable<Segment>
-{
-    MAJOR, MINOR, INCREMENTAL, SUBINCREMENTAL;
+public enum Segment implements Comparable<Segment> {
+    MAJOR,
+    MINOR,
+    INCREMENTAL,
+    SUBINCREMENTAL;
 
     /**
      * Returns the 0-based sendex index
      *
      * @return 0-based sendex index
      */
-    public int value()
-    {
+    public int value() {
         return ordinal();
     }
 
-    public static Segment of( int index )
-    {
-        if ( index < 0 || index > 3 )
-        {
-            throw new IllegalArgumentException( "Wrong segment index: " + index );
+    public static Segment of(int index) {
+        if (index < 0 || index > 3) {
+            throw new IllegalArgumentException("Wrong segment index: " + index);
         }
         return values()[index];
     }
@@ -52,14 +51,12 @@ public enum Segment implements Comparable<Segment>
      * @param other other segment to compare
      * @return true if the given segment is more major
      */
-    public boolean isMajorTo( Segment other )
-    {
+    public boolean isMajorTo(Segment other) {
         return value() < other.value();
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return name();
     }
 }

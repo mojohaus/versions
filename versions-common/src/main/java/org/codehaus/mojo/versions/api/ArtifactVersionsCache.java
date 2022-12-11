@@ -1,6 +1,5 @@
 package org.codehaus.mojo.versions.api;
 
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,8 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * Utility providing a cached {@link ArtifactVersions#getNewestUpdate(Optional)} API
  */
-public class ArtifactVersionsCache
-{
+public class ArtifactVersionsCache {
     private BiFunction<AbstractVersionDetails, Optional<Segment>, ?> cachedFunction;
 
     private Map<Pair<? extends AbstractVersionDetails, Optional<Segment>>, Object> updateCache = new HashMap<>();
@@ -41,9 +39,7 @@ public class ArtifactVersionsCache
      *
      * @param cachedFunction reference to the function computing the required information
      */
-    public ArtifactVersionsCache( BiFunction<AbstractVersionDetails, Optional<Segment>, ?>
-                                          cachedFunction )
-    {
+    public ArtifactVersionsCache(BiFunction<AbstractVersionDetails, Optional<Segment>, ?> cachedFunction) {
         this.cachedFunction = cachedFunction;
     }
 
@@ -58,11 +54,9 @@ public class ArtifactVersionsCache
      * @param updateScope      update scope
      * @return last retrieved update information
      */
-    @SuppressWarnings( "unchecked" )
-    public <V extends AbstractVersionDetails, R> R get( V artifactVersions,
-                                                        Optional<Segment> updateScope )
-    {
-        return (R) updateCache.computeIfAbsent( Pair.of( artifactVersions, updateScope ),
-                pair -> cachedFunction.apply( pair.getLeft(), pair.getRight() ) );
+    @SuppressWarnings("unchecked")
+    public <V extends AbstractVersionDetails, R> R get(V artifactVersions, Optional<Segment> updateScope) {
+        return (R) updateCache.computeIfAbsent(
+                Pair.of(artifactVersions, updateScope), pair -> cachedFunction.apply(pair.getLeft(), pair.getRight()));
     }
 }

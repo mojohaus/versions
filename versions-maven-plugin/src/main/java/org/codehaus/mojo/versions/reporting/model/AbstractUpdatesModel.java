@@ -31,42 +31,38 @@ import org.codehaus.mojo.versions.utils.DependencyComparator;
  * Base class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
  * @param <V> class extending ArtifactVersion in the constructor
  */
-public abstract class AbstractUpdatesModel<V extends ArtifactVersions>
-{
+public abstract class AbstractUpdatesModel<V extends ArtifactVersions> {
     private final Map<Dependency, V> artifactUpdates;
     private final Map<Dependency, V> artifactManagementUpdates;
     private final Map<Dependency, V> allUpdates;
 
-    public <K> AbstractUpdatesModel( Map<K, V> artifactUpdates,
-                                     Map<K, V> artifactManagementUpdates,
-                                     Function<K, Dependency> supplier )
-    {
-        this.artifactUpdates = artifactUpdates.entrySet().stream().collect(
-                () -> new TreeMap<>( DependencyComparator.INSTANCE ),
-                ( map, entry ) -> map.put( supplier.apply( entry.getKey() ), entry.getValue() ),
-                Map::putAll );
-        this.artifactManagementUpdates = artifactManagementUpdates.entrySet().stream().collect(
-                () -> new TreeMap<>( DependencyComparator.INSTANCE ),
-                ( map, entry ) -> map.put( supplier.apply( entry.getKey() ), entry.getValue() ),
-                Map::putAll );
-        allUpdates = new TreeMap<>( DependencyComparator.INSTANCE );
+    public <K> AbstractUpdatesModel(
+            Map<K, V> artifactUpdates, Map<K, V> artifactManagementUpdates, Function<K, Dependency> supplier) {
+        this.artifactUpdates = artifactUpdates.entrySet().stream()
+                .collect(
+                        () -> new TreeMap<>(DependencyComparator.INSTANCE),
+                        (map, entry) -> map.put(supplier.apply(entry.getKey()), entry.getValue()),
+                        Map::putAll);
+        this.artifactManagementUpdates = artifactManagementUpdates.entrySet().stream()
+                .collect(
+                        () -> new TreeMap<>(DependencyComparator.INSTANCE),
+                        (map, entry) -> map.put(supplier.apply(entry.getKey()), entry.getValue()),
+                        Map::putAll);
+        allUpdates = new TreeMap<>(DependencyComparator.INSTANCE);
         // overriding entries from dependencyManagementUpdates with dependencyUpdates
-        allUpdates.putAll( this.artifactManagementUpdates );
-        allUpdates.putAll( this.artifactUpdates );
+        allUpdates.putAll(this.artifactManagementUpdates);
+        allUpdates.putAll(this.artifactUpdates);
     }
 
-    public Map<Dependency, V> getArtifactUpdates()
-    {
+    public Map<Dependency, V> getArtifactUpdates() {
         return artifactUpdates;
     }
 
-    public Map<Dependency, V> getArtifactManagementUpdates()
-    {
+    public Map<Dependency, V> getArtifactManagementUpdates() {
         return artifactManagementUpdates;
     }
 
-    public Map<Dependency, V> getAllUpdates()
-    {
+    public Map<Dependency, V> getAllUpdates() {
         return allUpdates;
     }
 }

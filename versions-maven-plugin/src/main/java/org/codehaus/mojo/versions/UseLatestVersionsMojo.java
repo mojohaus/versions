@@ -53,16 +53,14 @@ import static java.util.Optional.empty;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-latest-versions", threadSafe = true )
-public class UseLatestVersionsMojo
-    extends UseLatestVersionsMojoBase
-{
+@Mojo(name = "use-latest-versions", threadSafe = true)
+public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
     /**
      * Whether to allow the major version number to be changed.
      *
      * @since 1.2
      */
-    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
     private boolean allowMajorUpdates = true;
 
     /**
@@ -71,7 +69,7 @@ public class UseLatestVersionsMojo
      * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      * @since 1.2
      */
-    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
     private boolean allowMinorUpdates = true;
 
     /**
@@ -81,7 +79,7 @@ public class UseLatestVersionsMojo
      * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      * @since 1.2
      */
-    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     private boolean allowIncrementalUpdates = true;
 
     /**
@@ -91,27 +89,24 @@ public class UseLatestVersionsMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "allowDowngrade",
-                defaultValue = "false" )
+    @Parameter(property = "allowDowngrade", defaultValue = "false")
     private boolean allowDowngrade;
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
-    public UseLatestVersionsMojo( RepositorySystem repositorySystem,
-                                  org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                  Map<String, Wagon> wagonMap,
-                                  Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UseLatestVersionsMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
-        if ( allowDowngrade && allowSnapshots )
-        {
-            throw new MojoExecutionException( "allowDowngrade is only valid with allowSnapshots equal to false" );
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        if (allowDowngrade && allowSnapshots) {
+            throw new MojoExecutionException("allowDowngrade is only valid with allowSnapshots equal to false");
         }
         super.execute();
     }
@@ -123,58 +118,48 @@ public class UseLatestVersionsMojo
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
-    {
-        try
-        {
-            if ( isProcessingDependencyManagement() )
-            {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
+        try {
+            if (isProcessingDependencyManagement()) {
                 DependencyManagement dependencyManagement =
-                    PomHelper.getRawModel( getProject() ).getDependencyManagement();
-                if ( dependencyManagement != null )
-                {
-                    useLatestVersions( pom, dependencyManagement.getDependencies(),
-                                       ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    useLatestVersions(
+                            pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
                 }
             }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useLatestVersions( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                useLatestVersions(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
             }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                useLatestVersions( pom, singletonList( getParentDependency() ),
-                                   ChangeRecord.ChangeKind.PARENT );
+            if (getProject().getParent() != null && isProcessingParent()) {
+                useLatestVersions(pom, singletonList(getParentDependency()), ChangeRecord.ChangeKind.PARENT);
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void useLatestVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
-                                    ChangeRecord.ChangeKind changeKind )
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException
-    {
-        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
-                allowMinorUpdates, allowIncrementalUpdates, getLog() );
+    private void useLatestVersions(
+            ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
 
-        useLatestVersions( pom, dependencies,
-                           ( dep, versions ) ->
-                {
-                    try
-                    {
-                        return versions.getNewestVersion( dep.getVersion(), unchangedSegment, allowSnapshots,
-                                allowDowngrade );
-                    }
-                    catch ( InvalidSegmentException e )
-                    {
-                        getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s",
-                                dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
+        useLatestVersions(
+                pom,
+                dependencies,
+                (dep, versions) -> {
+                    try {
+                        return versions.getNewestVersion(
+                                dep.getVersion(), unchangedSegment, allowSnapshots, allowDowngrade);
+                    } catch (InvalidSegmentException e) {
+                        getLog().warn(String.format(
+                                "Skipping the processing of %s:%s:%s due to: %s",
+                                dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), e.getMessage()));
                     }
                     return empty();
-                }, changeKind );
+                },
+                changeKind);
     }
 }

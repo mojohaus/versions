@@ -8,9 +8,9 @@ package org.codehaus.mojo.versions.utils;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *         
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *         
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,8 +33,7 @@ import org.codehaus.mojo.versions.api.Property;
 /**
  * Reader class for reading property files
  */
-public class PropertiesVersionsFileReader
-{
+public class PropertiesVersionsFileReader {
 
     /**
      * Commas-separated list of properties
@@ -49,8 +48,7 @@ public class PropertiesVersionsFileReader
      * Creates an instance of the object with the given path to the property file
      * @param filePath path to the property file
      */
-    public PropertiesVersionsFileReader( String filePath )
-    {
+    public PropertiesVersionsFileReader(String filePath) {
         propertyFilePath = filePath;
     }
 
@@ -58,30 +56,26 @@ public class PropertiesVersionsFileReader
      * Reads the property file
      * @throws IOException thrown if an I/O exception occurs during the read operation
      */
-    public void read() throws IOException
-    {
-        try ( InputStream input = Files.newInputStream( Paths.get( propertyFilePath ) ) )
-        {
+    public void read() throws IOException {
+        try (InputStream input = Files.newInputStream(Paths.get(propertyFilePath))) {
 
             Properties prop = new Properties();
 
             // load a properties file
-            prop.load( input );
+            prop.load(input);
 
             prop.propertyNames();
 
-            propertiesCsv = prop.keySet().stream().map( Object::toString ).collect( Collectors.joining( "," ) );
+            propertiesCsv = prop.keySet().stream().map(Object::toString).collect(Collectors.joining(","));
 
             List<Property> propertiesConfigList = new ArrayList<>();
-            prop.forEach(
-                ( name, version ) ->
-                {
-                    Property propertyConfig = new Property( (String) name );
-                    propertyConfig.setVersion( (String) version );
-                    propertiesConfigList.add( propertyConfig );
-                } );
+            prop.forEach((name, version) -> {
+                Property propertyConfig = new Property((String) name);
+                propertyConfig.setVersion((String) version);
+                propertiesConfigList.add(propertyConfig);
+            });
 
-            propertiesConfig = propertiesConfigList.toArray( new Property[0] );
+            propertiesConfig = propertiesConfigList.toArray(new Property[0]);
         }
     }
 
@@ -89,8 +83,7 @@ public class PropertiesVersionsFileReader
      * Returns the string contents of the property file
      * @return contents of the property file
      */
-    public String getProperties()
-    {
+    public String getProperties() {
         return propertiesCsv;
     }
 
@@ -98,8 +91,7 @@ public class PropertiesVersionsFileReader
      * Returns the array of {@link Property} objects
      * @return array of properties
      */
-    public Property[] getPropertiesConfig()
-    {
+    public Property[] getPropertiesConfig() {
         return propertiesConfig;
     }
 }

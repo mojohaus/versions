@@ -31,31 +31,25 @@ import org.codehaus.mojo.versions.api.change.VersionChange;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 
-@Named( "test" )
-public class TestChangeRecorder implements ChangeRecorder
-{
+@Named("test")
+public class TestChangeRecorder implements ChangeRecorder {
     private final List<VersionChange> changes = new LinkedList<>();
 
     @Override
-    public void recordChange( ChangeRecord changeRecord )
-    {
-        changes.add( changeRecord.getVersionChange() );
+    public void recordChange(ChangeRecord changeRecord) {
+        changes.add(changeRecord.getVersionChange());
     }
 
     @Override
-    public void writeReport( Path outputPath )
-    {
-    }
+    public void writeReport(Path outputPath) {}
 
-    public List<VersionChange> getChanges()
-    {
+    public List<VersionChange> getChanges() {
         return changes;
     }
 
-    public Map<String, ChangeRecorder> asTestMap()
-    {
+    public Map<String, ChangeRecorder> asTestMap() {
         HashMap<String, ChangeRecorder> map = new HashMap<>();
-        map.put( "none", this );
+        map.put("none", this);
         return map;
     }
 }

@@ -17,10 +17,11 @@ package org.codehaus.mojo.versions;
  *
  */
 
+import javax.inject.Inject;
 
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
+
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -36,28 +37,29 @@ import org.codehaus.plexus.i18n.I18N;
  *
  * @since 2.14.0
  */
-@Mojo( name = "plugin-updates-aggregate-report", requiresDependencyResolution = ResolutionScope.RUNTIME,
-       threadSafe = true, aggregator = true )
-public class PluginUpdatesAggregateReportMojo extends AbstractPluginUpdatesReportMojo
-{
+@Mojo(
+        name = "plugin-updates-aggregate-report",
+        requiresDependencyResolution = ResolutionScope.RUNTIME,
+        threadSafe = true,
+        aggregator = true)
+public class PluginUpdatesAggregateReportMojo extends AbstractPluginUpdatesReportMojo {
 
     @Inject
-    protected PluginUpdatesAggregateReportMojo( I18N i18n, RepositorySystem repositorySystem,
-                                                org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                                Map<String, Wagon> wagonMap,
-                                                ReportRendererFactory rendererFactory )
-    {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
+    protected PluginUpdatesAggregateReportMojo(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
+        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
     }
 
     @Override
-    protected void populatePluginManagement( Set<Plugin> pluginManagementCollector )
-    {
-        for ( MavenProject project : AggregateReportUtils.getProjectsToProcess( getProject() ) )
-        {
-            if ( haveBuildPluginManagementPlugins( project ) )
-            {
-                pluginManagementCollector.addAll( project.getBuild().getPluginManagement().getPlugins() );
+    protected void populatePluginManagement(Set<Plugin> pluginManagementCollector) {
+        for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
+            if (haveBuildPluginManagementPlugins(project)) {
+                pluginManagementCollector.addAll(
+                        project.getBuild().getPluginManagement().getPlugins());
             }
         }
     }
@@ -66,13 +68,10 @@ public class PluginUpdatesAggregateReportMojo extends AbstractPluginUpdatesRepor
      * {@inheritDoc}
      * */
     @Override
-    protected void populatePlugins( Set<Plugin> pluginsCollector )
-    {
-        for ( MavenProject project : AggregateReportUtils.getProjectsToProcess( getProject() ) )
-        {
-            if ( haveBuildPluginManagementPlugins( project ) )
-            {
-                pluginsCollector.addAll( project.getBuild().getPlugins() );
+    protected void populatePlugins(Set<Plugin> pluginsCollector) {
+        for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
+            if (haveBuildPluginManagementPlugins(project)) {
+                pluginsCollector.addAll(project.getBuild().getPlugins());
             }
         }
     }
@@ -80,9 +79,7 @@ public class PluginUpdatesAggregateReportMojo extends AbstractPluginUpdatesRepor
     /**
      * {@inheritDoc}
      */
-    public String getOutputName()
-    {
+    public String getOutputName() {
         return "plugin-updates-aggregate-report";
     }
-
 }

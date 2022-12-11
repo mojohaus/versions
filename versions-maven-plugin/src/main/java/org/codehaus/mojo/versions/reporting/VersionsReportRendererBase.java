@@ -1,6 +1,5 @@
 package org.codehaus.mojo.versions.reporting;
 
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -32,8 +31,7 @@ import org.codehaus.plexus.i18n.I18N;
  * Base class over AbstractVersionsReportRenderer providing base
  * utility methods
  */
-public abstract class VersionsReportRendererBase extends AbstractMavenReportRenderer
-{
+public abstract class VersionsReportRendererBase extends AbstractMavenReportRenderer {
     /**
      * Internationalization component.
      *
@@ -53,17 +51,15 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      */
     protected String bundleName;
 
-    public VersionsReportRendererBase( Sink sink, I18N i18n, Locale locale, String bundleName )
-    {
-        super( sink );
+    public VersionsReportRendererBase(Sink sink, I18N i18n, Locale locale, String bundleName) {
+        super(sink);
         this.i18n = i18n;
         this.locale = locale;
         this.bundleName = bundleName;
     }
 
-    public String getTitle()
-    {
-        return getText( "report.title" );
+    public String getTitle() {
+        return getText("report.title");
     }
 
     /**
@@ -72,73 +68,54 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      * @param key the message key.
      * @return the message.
      */
-    public String getText( String key )
-    {
-        return i18n.getString( bundleName, locale, key );
+    public String getText(String key) {
+        return i18n.getString(bundleName, locale, key);
     }
 
-    protected void renderWarningIcon()
-    {
-        sink.figureGraphics( "images/icon_warning_sml.gif" );
+    protected void renderWarningIcon() {
+        sink.figureGraphics("images/icon_warning_sml.gif");
     }
 
-    protected void renderSuccessIcon()
-    {
-        sink.figureGraphics( "images/icon_success_sml.gif" );
+    protected void renderSuccessIcon() {
+        sink.figureGraphics("images/icon_success_sml.gif");
     }
 
-    protected boolean equals( ArtifactVersion v1, ArtifactVersion v2 )
-    {
-        return v1 == v2 || ( v1 != null && v1.equals( v2 ) )
-                || ( v1 != null && v2 != null && v1.toString().equals( v2.toString() ) );
+    protected boolean equals(ArtifactVersion v1, ArtifactVersion v2) {
+        return v1 == v2
+                || (v1 != null && v1.equals(v2))
+                || (v1 != null && v2 != null && v1.toString().equals(v2.toString()));
     }
 
-    protected void safeBold()
-    {
-        try
-        {
+    protected void safeBold() {
+        try {
             sink.bold();
-        }
-        catch ( NoSuchMethodError e )
-        {
+        } catch (NoSuchMethodError e) {
             // ignore Maven 2.1.0
         }
     }
 
-    @SuppressWarnings( "checkstyle:MethodName" )
-    protected void safeBold_()
-    {
-        try
-        {
+    @SuppressWarnings("checkstyle:MethodName")
+    protected void safeBold_() {
+        try {
             sink.bold_();
-        }
-        catch ( NoSuchMethodError e )
-        {
+        } catch (NoSuchMethodError e) {
             // ignore Maven 2.1.0
         }
     }
 
-    protected void safeItalic()
-    {
-        try
-        {
+    protected void safeItalic() {
+        try {
             sink.italic();
-        }
-        catch ( NoSuchMethodError e )
-        {
+        } catch (NoSuchMethodError e) {
             // ignore Maven 2.1.0
         }
     }
 
-    @SuppressWarnings( "checkstyle:MethodName" )
-    protected void safeItalic_()
-    {
-        try
-        {
+    @SuppressWarnings("checkstyle:MethodName")
+    protected void safeItalic_() {
+        try {
             sink.italic_();
-        }
-        catch ( NoSuchMethodError e )
-        {
+        } catch (NoSuchMethodError e) {
             // ignore Maven 2.1.0
         }
     }
@@ -148,43 +125,35 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      * @param keys variable argument list containing keys of the property file to retrieve the
      *             headers from
      */
-    protected void renderTableHeaderCells( String... keys )
-    {
-        Arrays.stream( keys )
-                .map( this::getText )
-                .forEachOrdered( str ->
-                {
-                    sink.tableHeaderCell();
-                    sink.text( str );
-                    sink.tableHeaderCell_();
-                } );
+    protected void renderTableHeaderCells(String... keys) {
+        Arrays.stream(keys).map(this::getText).forEachOrdered(str -> {
+            sink.tableHeaderCell();
+            sink.text(str);
+            sink.tableHeaderCell_();
+        });
     }
 
     /**
      * Renders a bold table cell containing the given text.
      * @param object the text to be rendered, or null for an empty cell.
      */
-    protected void renderBoldCell( Object object )
-    {
-        renderBoldCell( true, object );
+    protected void renderBoldCell(Object object) {
+        renderBoldCell(true, object);
     }
     /**
      * Renders a table cell containing the given text.
      * @param object the text to be rendered, or null for an empty cell.
      */
-    protected void renderCell( Object object )
-    {
-        renderBoldCell( false, object );
+    protected void renderCell(Object object) {
+        renderBoldCell(false, object);
     }
     /**
      * Renders multiple cells containing the given texts.
      * @param objects the texts to be rendered, null for empty cells.
      */
-    protected void renderCells( Object... objects )
-    {
-        for ( Object object : objects )
-        {
-            renderBoldCell( false, object );
+    protected void renderCells(Object... objects) {
+        for (Object object : objects) {
+            renderBoldCell(false, object);
         }
     }
 
@@ -193,10 +162,9 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      * @param bold true to render the cell in bold, false otherwise.
      * @param object the text to be rendered, or null for an empty cell.
      */
-    protected void renderBoldCell( boolean bold, Object object )
-    {
+    protected void renderBoldCell(boolean bold, Object object) {
         sink.tableCell();
-        renderBoldText( bold, object );
+        renderBoldText(bold, object);
         sink.tableCell_();
     }
 
@@ -205,24 +173,18 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      * @param bold true to render the text in bold, false otherwise.
      * @param object the text to be rendered, or null for an empty cell.
      */
-    protected void renderBoldText( boolean bold, Object object )
-    {
-        if ( object != null )
-        {
+    protected void renderBoldText(boolean bold, Object object) {
+        if (object != null) {
             String text = object.toString();
-            if ( !text.isEmpty() )
-            {
-                if ( bold )
-                {
+            if (!text.isEmpty()) {
+                if (bold) {
                     safeBold();
                 }
-                sink.text( text );
-                if ( bold )
-                {
+                sink.text(text);
+                if (bold) {
                     safeBold_();
                 }
             }
         }
     }
-
 }

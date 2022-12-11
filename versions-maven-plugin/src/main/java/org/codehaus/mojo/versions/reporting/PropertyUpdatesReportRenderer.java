@@ -25,8 +25,8 @@ import java.util.Map;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
-import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
+import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
@@ -36,110 +36,95 @@ import static java.util.Optional.empty;
 /**
  * @since 1.0-beta-1
  */
-public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRenderer<PropertyUpdatesModel>
-{
-    public PropertyUpdatesReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName,
-                                          PropertyUpdatesModel model )
-    {
-        super( i18n, sink, locale, bundleName, model );
+public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRenderer<PropertyUpdatesModel> {
+    public PropertyUpdatesReportRenderer(
+            I18N i18n, Sink sink, Locale locale, String bundleName, PropertyUpdatesModel model) {
+        super(i18n, sink, locale, bundleName, model);
     }
 
     @Override
-    protected void renderManagementSummaryTable()
-    {
-    }
+    protected void renderManagementSummaryTable() {}
 
     @Override
-    protected void renderSummaryTable()
-    {
-        renderTable( "report.overview.property", model.getAllUpdates(),
-                "report.overview.noProperty" );
+    protected void renderSummaryTable() {
+        renderTable("report.overview.property", model.getAllUpdates(), "report.overview.noProperty");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void renderDetails()
-    {
-        model.getAllUpdates().forEach( this::renderPropertyDetail );
+    protected void renderDetails() {
+        model.getAllUpdates().forEach(this::renderPropertyDetail);
     }
 
-    protected void renderTable( String titleKey, Map<Property, PropertyVersions> contents, String emptyKey )
-    {
+    protected void renderTable(String titleKey, Map<Property, PropertyVersions> contents, String emptyKey) {
         sink.section2();
         sink.sectionTitle2();
-        sink.text( getText( titleKey ) );
+        sink.text(getText(titleKey));
         sink.sectionTitle2_();
 
-        if ( contents.isEmpty() )
-        {
+        if (contents.isEmpty()) {
             sink.paragraph();
-            sink.text( getText( emptyKey ) );
+            sink.text(getText(emptyKey));
             sink.paragraph_();
-        }
-        else
-        {
-            renderSummaryTable( contents );
+        } else {
+            renderSummaryTable(contents);
         }
         sink.section2_();
     }
 
-    protected void renderSummaryTable( Map<Property, PropertyVersions> contents )
-    {
+    protected void renderSummaryTable(Map<Property, PropertyVersions> contents) {
         sink.table();
 
         sink.tableRow();
-        renderSummaryTableHeader( false, false );
+        renderSummaryTableHeader(false, false);
         sink.tableRow_();
 
-        contents.forEach( this::renderPropertySummaryTableRow );
+        contents.forEach(this::renderPropertySummaryTableRow);
 
         sink.tableRow();
-        renderSummaryTableHeader( false, false );
+        renderSummaryTableHeader(false, false);
         sink.tableRow_();
 
         sink.table_();
     }
 
-    private void renderPropertySummaryTableRow( Property property, PropertyVersions details )
-    {
-        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+    private void renderPropertySummaryTableRow(Property property, PropertyVersions details) {
+        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.tableRow();
 
         sink.tableCell();
-        renderIcon( upToDate );
+        renderIcon(upToDate);
         sink.tableCell_();
 
-        renderCells( "${" + property.getName() + "}", details.getCurrentVersion() );
-        renderNewestVersions( details );
+        renderCells("${" + property.getName() + "}", details.getCurrentVersion());
+        renderNewestVersions(details);
 
         sink.tableRow_();
     }
 
-    protected void renderPropertyDetailTable( Property property, PropertyVersions details )
-    {
-        ArtifactVersion[] allUpdates = allUpdatesCache.get( details, empty() );
+    protected void renderPropertyDetailTable(Property property, PropertyVersions details) {
+        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.table();
-        sink.tableRows( new int[] { Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT }, false );
+        sink.tableRows(new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false);
 
-        renderTwoCellsRow( "report.status", () -> renderStatus( details ) );
-        renderTwoCellsRow( "report.property", "${" + property.getName() + "}" );
-        renderTwoCellsRow( "report.associations", () -> renderAssociations( details ) );
-        renderTwoCellsRow( "report.currentVersion", details.getCurrentVersion().toString() );
-        if ( !upToDate )
-        {
-            renderTwoCellsRow( "report.updateVersions", () -> renderVersions( allUpdates, details ) );
+        renderTwoCellsRow("report.status", () -> renderStatus(details));
+        renderTwoCellsRow("report.property", "${" + property.getName() + "}");
+        renderTwoCellsRow("report.associations", () -> renderAssociations(details));
+        renderTwoCellsRow("report.currentVersion", details.getCurrentVersion().toString());
+        if (!upToDate) {
+            renderTwoCellsRow("report.updateVersions", () -> renderVersions(allUpdates, details));
         }
-        renderTwoCellsRow( "report.versionRange", details.getCurrentVersion().toString() );
-        renderTwoCellsRow( "report.autoLinkDependencies", property.isAutoLinkDependencies() );
-        renderTwoCellsRow( "report.banSnapshots", property.isBanSnapshots() );
-        renderTwoCellsRow( "report.searchReactor", property.isSearchReactor() );
-        renderTwoCellsRow( "report.preferReactor", property.isPreferReactor() );
+        renderTwoCellsRow("report.versionRange", details.getCurrentVersion().toString());
+        renderTwoCellsRow("report.autoLinkDependencies", property.isAutoLinkDependencies());
+        renderTwoCellsRow("report.banSnapshots", property.isBanSnapshots());
+        renderTwoCellsRow("report.searchReactor", property.isSearchReactor());
+        renderTwoCellsRow("report.preferReactor", property.isPreferReactor());
 
         sink.tableRows_();
         sink.table_();
@@ -150,46 +135,43 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
      * @param textKey the key of the text to be rendered in the header cell.
      * @param b a yes/no value to be rendered in the non-header cell.
      */
-    private void renderTwoCellsRow( String textKey, boolean b )
-    {
-        renderTwoCellsRow( textKey, getText( b ? "report.yes" : "report.no" ) );
+    private void renderTwoCellsRow(String textKey, boolean b) {
+        renderTwoCellsRow(textKey, getText(b ? "report.yes" : "report.no"));
     }
 
-    private void renderAssociations( PropertyVersions details )
-    {
+    private void renderAssociations(PropertyVersions details) {
         ArtifactAssociation[] associations = details.getAssociations();
-        for ( int i = 0; i < associations.length; i++ )
-        {
-            if ( i > 0 )
-            {
+        for (int i = 0; i < associations.length; i++) {
+            if (i > 0) {
                 sink.lineBreak();
             }
-            sink.text( ArtifactUtils.versionlessKey( associations[i].getArtifact() ) );
+            sink.text(ArtifactUtils.versionlessKey(associations[i].getArtifact()));
         }
     }
 
     @Override
-    protected void renderSummaryTableHeader( boolean hasScope, boolean hasType )
-    {
-        renderTableHeaderCells( "report.status", "report.property", "report.currentVersion",
-                "report.latestSubIncremental", "report.latestIncremental", "report.latestMinor",
-                "report.latestMajor" );
+    protected void renderSummaryTableHeader(boolean hasScope, boolean hasType) {
+        renderTableHeaderCells(
+                "report.status",
+                "report.property",
+                "report.currentVersion",
+                "report.latestSubIncremental",
+                "report.latestIncremental",
+                "report.latestMinor",
+                "report.latestMajor");
     }
 
     @Override
-    protected OverviewStats computeOverviewStats()
-    {
-        return OverviewStats.fromUpdates( model.getAllUpdates().values(), newestUpdateCache );
+    protected OverviewStats computeOverviewStats() {
+        return OverviewStats.fromUpdates(model.getAllUpdates().values(), newestUpdateCache);
     }
 
-    private void renderPropertyDetail( Property property, PropertyVersions details )
-    {
+    private void renderPropertyDetail(Property property, PropertyVersions details) {
         sink.section2();
         sink.sectionTitle2();
-        sink.text( "${" + property.getName() + "}" );
+        sink.text("${" + property.getName() + "}");
         sink.sectionTitle2_();
-        renderPropertyDetailTable( property, details );
+        renderPropertyDetailTable(property, details);
         sink.section2_();
     }
-
 }

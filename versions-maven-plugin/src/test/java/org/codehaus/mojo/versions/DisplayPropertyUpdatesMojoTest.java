@@ -40,72 +40,64 @@ import static org.hamcrest.Matchers.not;
 /**
  * Unit tests for {@link DisplayPropertyUpdatesMojo}
  */
-public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase
-{
+public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
     @Rule
-    public MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule(this);
 
     private Path tempDir;
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
-        tempDir = TestUtils.createTempDir( "display-property-updates" );
+        tempDir = TestUtils.createTempDir("display-property-updates");
     }
 
     @After
-    public void tearDown() throws Exception
-    {
-        try
-        {
-            TestUtils.tearDownTempDir( tempDir );
-        }
-        finally
-        {
+    public void tearDown() throws Exception {
+        try {
+            TestUtils.tearDownTempDir(tempDir);
+        } finally {
             super.tearDown();
         }
     }
 
     @Test
-    public void testPropertiesFromParent() throws Exception
-    {
-        Path tempFile = Files.createTempFile( tempDir, "output", "" );
+    public void testPropertiesFromParent() throws Exception {
+        Path tempFile = Files.createTempFile(tempDir, "output", "");
 
-        TestUtils.copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/display-property-updates/issue-367" ),
-                tempDir );
-        DisplayPropertyUpdatesMojo mojo =
-                (DisplayPropertyUpdatesMojo) mojoRule.lookupConfiguredMojo( tempDir.resolve( "child" ).toFile(),
-                        "display-property-updates" );
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367"), tempDir);
+        DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
+                mojoRule.lookupConfiguredMojo(tempDir.resolve("child").toFile(), "display-property-updates");
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
-        mojo.setPluginContext( new HashMap<>() );
+        mojo.setPluginContext(new HashMap<>());
         mojo.aetherRepositorySystem = mockAetherRepositorySystem();
         mojo.includeParent = true;
         mojo.execute();
 
-        assertThat( String.join( "", Files.readAllLines( tempFile ) ),
-                matchesPattern( ".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*" ) );
+        assertThat(
+                String.join("", Files.readAllLines(tempFile)),
+                matchesPattern(".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*"));
     }
 
     @Test
-    public void testDisablePropertiesFromParent() throws Exception
-    {
-        Path tempFile = Files.createTempFile( tempDir, "output", "" );
+    public void testDisablePropertiesFromParent() throws Exception {
+        Path tempFile = Files.createTempFile(tempDir, "output", "");
 
-        TestUtils.copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/display-property-updates/issue-367" ),
-                tempDir );
-        DisplayPropertyUpdatesMojo mojo =
-                (DisplayPropertyUpdatesMojo) mojoRule.lookupConfiguredMojo( tempDir.resolve( "child" ).toFile(),
-                        "display-property-updates" );
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367"), tempDir);
+        DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
+                mojoRule.lookupConfiguredMojo(tempDir.resolve("child").toFile(), "display-property-updates");
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
-        mojo.setPluginContext( new HashMap<>() );
+        mojo.setPluginContext(new HashMap<>());
         mojo.aetherRepositorySystem = mockAetherRepositorySystem();
         mojo.includeParent = false;
         mojo.execute();
 
-        assertThat( String.join( "", Files.readAllLines( tempFile ) ),
-                not( matchesPattern( ".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*" ) ) );
+        assertThat(
+                String.join("", Files.readAllLines(tempFile)),
+                not(matchesPattern(".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*")));
     }
 }

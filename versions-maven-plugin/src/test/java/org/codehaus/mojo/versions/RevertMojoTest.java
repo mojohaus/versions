@@ -42,52 +42,43 @@ import static org.hamcrest.core.Is.is;
  *
  * @author Andrzej Jarmoniuk
  */
-public class RevertMojoTest extends AbstractMojoTestCase
-{
+public class RevertMojoTest extends AbstractMojoTestCase {
     @Rule
-    public MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule(this);
+
     private Path pomDir;
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
-        pomDir = Files.createTempDirectory( "revert-" );
+        pomDir = Files.createTempDirectory("revert-");
     }
 
     @After
-    public void tearDown() throws Exception
-    {
-        try
-        {
-            if ( pomDir != null && pomDir.toFile().exists() )
-            {
-                Arrays.stream( Objects.requireNonNull( pomDir.toFile().listFiles() ) ).forEach( File::delete );
+    public void tearDown() throws Exception {
+        try {
+            if (pomDir != null && pomDir.toFile().exists()) {
+                Arrays.stream(Objects.requireNonNull(pomDir.toFile().listFiles()))
+                        .forEach(File::delete);
                 pomDir.toFile().delete();
             }
-        }
-        finally
-        {
+        } finally {
             super.tearDown();
         }
     }
 
-    public void testRevert() throws Exception
-    {
-        copyDirectory( new File( getBasedir(),
-                "target/test-classes/org/codehaus/mojo/revert/issue-265" ), pomDir.toFile() );
-        RevertMojo myMojo = (RevertMojo) mojoRule.lookupConfiguredMojo(
-                new File( pomDir.toString(), "aggregate" ), "revert" );
+    public void testRevert() throws Exception {
+        copyDirectory(
+                new File(getBasedir(), "target/test-classes/org/codehaus/mojo/revert/issue-265"), pomDir.toFile());
+        RevertMojo myMojo =
+                (RevertMojo) mojoRule.lookupConfiguredMojo(new File(pomDir.toString(), "aggregate"), "revert");
         myMojo.execute();
 
-        assertThat( join( "\n", Files.readAllLines( pomDir.resolve( "aggregate/pom.xml" ) ) ),
-                containsString( "OLD" ) );
-        assertThat( Files.exists( pomDir.resolve( "aggregate/pom.xml.versionsBackup" ) ), is( false ) );
-        assertThat( join( "\n", Files.readAllLines( pomDir.resolve( "module-a/pom.xml" ) ) ),
-                containsString( "OLD" ) );
-        assertThat( Files.exists( pomDir.resolve( "module-a/pom.xml.versionsBackup" ) ), is( false ) );
-        assertThat( join( "\n", Files.readAllLines( pomDir.resolve( "module-b/pom.xml" ) ) ),
-                containsString( "OLD" ) );
-        assertThat( Files.exists( pomDir.resolve( "module-b/pom.xml.versionsBackup" ) ), is( false ) );
+        assertThat(join("\n", Files.readAllLines(pomDir.resolve("aggregate/pom.xml"))), containsString("OLD"));
+        assertThat(Files.exists(pomDir.resolve("aggregate/pom.xml.versionsBackup")), is(false));
+        assertThat(join("\n", Files.readAllLines(pomDir.resolve("module-a/pom.xml"))), containsString("OLD"));
+        assertThat(Files.exists(pomDir.resolve("module-a/pom.xml.versionsBackup")), is(false));
+        assertThat(join("\n", Files.readAllLines(pomDir.resolve("module-b/pom.xml"))), containsString("OLD"));
+        assertThat(Files.exists(pomDir.resolve("module-b/pom.xml.versionsBackup")), is(false));
     }
 }

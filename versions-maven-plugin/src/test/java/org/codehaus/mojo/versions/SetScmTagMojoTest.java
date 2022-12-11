@@ -37,26 +37,23 @@ import static org.hamcrest.Matchers.matchesPattern;
  *
  * @author Andrzej Jarmoniuk
  */
-public class SetScmTagMojoTest extends AbstractMojoTestCase
-{
+public class SetScmTagMojoTest extends AbstractMojoTestCase {
     @Rule
-    public MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule(this);
 
     @Test
-    public void testNewScmValues() throws Exception
-    {
-        Path pomFile = Paths.get( "target/test-classes/org/codehaus/mojo/set-scm-tag/pom.xml" );
-        mojoRule.lookupConfiguredMojo( pomFile.toFile().getParentFile(), "set-scm-tag" )
+    public void testNewScmValues() throws Exception {
+        Path pomFile = Paths.get("target/test-classes/org/codehaus/mojo/set-scm-tag/pom.xml");
+        mojoRule.lookupConfiguredMojo(pomFile.toFile().getParentFile(), "set-scm-tag")
                 .execute();
-        String output = String.join( "", Files.readAllLines( pomFile ) )
-                .replaceAll( "\\s*", "" );
-        assertThat( output, allOf(
-                        matchesPattern( ".*<scm>.*<tag>\\s*newTag\\s*</tag>.*</scm>.*" ),
-                        matchesPattern( ".*<scm>.*<url>\\s*url\\s*</url>.*</scm>.*" ),
-                        matchesPattern( ".*<scm>.*<connection>\\s*connection\\s*</connection>.*</scm>.*" ),
-                        matchesPattern( ".*<scm>.*<developerConnection>\\s*"
-                                + "developerConnection\\s*</developerConnection>.*</scm>.*" )
-                )
-        );
+        String output = String.join("", Files.readAllLines(pomFile)).replaceAll("\\s*", "");
+        assertThat(
+                output,
+                allOf(
+                        matchesPattern(".*<scm>.*<tag>\\s*newTag\\s*</tag>.*</scm>.*"),
+                        matchesPattern(".*<scm>.*<url>\\s*url\\s*</url>.*</scm>.*"),
+                        matchesPattern(".*<scm>.*<connection>\\s*connection\\s*</connection>.*</scm>.*"),
+                        matchesPattern(".*<scm>.*<developerConnection>\\s*"
+                                + "developerConnection\\s*</developerConnection>.*</scm>.*")));
     }
 }

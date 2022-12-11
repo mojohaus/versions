@@ -35,25 +35,18 @@ import static java.util.Optional.ofNullable;
 /**
  * Common utils for Xml report renderers
  */
-class CommonXmlReportRendererUtils
-{
-    static void setSection( AbstractVersionDetails versions, Segment segment, Consumer<List<String>> setterFunction )
-    {
-        ofNullable( versions.getAllUpdates( of( segment ) ) )
-                .map( v -> Arrays.stream( v )
-                        .map( ArtifactVersion::toString )
-                        .collect( Collectors.toList() ) )
-                .ifPresent( setterFunction );
+class CommonXmlReportRendererUtils {
+    static void setSection(AbstractVersionDetails versions, Segment segment, Consumer<List<String>> setterFunction) {
+        ofNullable(versions.getAllUpdates(of(segment)))
+                .map(v -> Arrays.stream(v).map(ArtifactVersion::toString).collect(Collectors.toList()))
+                .ifPresent(setterFunction);
     }
 
-    static String statusFor( String lastVersion, Collection<?> incrementals, Collection<?> minors )
-    {
+    static String statusFor(String lastVersion, Collection<?> incrementals, Collection<?> minors) {
         return lastVersion == null
                 ? "no new available"
                 : incrementals != null && !incrementals.isEmpty()
-                    ? "incremental available"
-                    : minors != null && !minors.isEmpty()
-                        ? "minor available"
-                        : "major available";
+                        ? "incremental available"
+                        : minors != null && !minors.isEmpty() ? "minor available" : "major available";
     }
 }

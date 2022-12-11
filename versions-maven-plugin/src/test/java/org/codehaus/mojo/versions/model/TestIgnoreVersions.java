@@ -28,8 +28,7 @@ import org.hamcrest.TypeSafeMatcher;
 /**
  * Convenience class for quickly creating {@link IgnoreVersion} instances.
  */
-public class TestIgnoreVersions extends IgnoreVersion
-{
+public class TestIgnoreVersions extends IgnoreVersion {
     public static final String TYPE_REGEX = "regex";
 
     public static final String TYPE_EXACT = "exact";
@@ -40,9 +39,8 @@ public class TestIgnoreVersions extends IgnoreVersion
      * @param type required type
      * @return modified instance
      */
-    public TestIgnoreVersions withType( String type )
-    {
-        setType( type );
+    public TestIgnoreVersions withType(String type) {
+        setType(type);
         return this;
     }
 
@@ -52,9 +50,8 @@ public class TestIgnoreVersions extends IgnoreVersion
      * @param version required version
      * @return modified instance
      */
-    public TestIgnoreVersions withVersion( String version )
-    {
-        setVersion( version );
+    public TestIgnoreVersions withVersion(String version) {
+        setVersion(version);
         return this;
     }
 
@@ -65,29 +62,23 @@ public class TestIgnoreVersions extends IgnoreVersion
      * @return Matcher returning true if another object matches the given instance
      * @param <P> class of the ignoreVersion instance
      */
-    public static <P extends IgnoreVersion> Matcher<P> matches( P ignoreVersion )
-    {
-        return new TypeSafeMatcher<P>()
-        {
+    public static <P extends IgnoreVersion> Matcher<P> matches(P ignoreVersion) {
+        return new TypeSafeMatcher<P>() {
             @Override
-            public void describeTo( Description description )
-            {
-                description.appendText( Objects.toString( ignoreVersion ) );
+            public void describeTo(Description description) {
+                description.appendText(Objects.toString(ignoreVersion));
             }
 
             @Override
-            protected void describeMismatchSafely( P other, Description description )
-            {
-                description.appendText( Objects.toString( other ) );
+            protected void describeMismatchSafely(P other, Description description) {
+                description.appendText(Objects.toString(other));
             }
 
             @Override
-            protected boolean matchesSafely( P other )
-            {
-                return Objects.equals( ignoreVersion.getType(), other.getType() )
-                        && Objects.equals( ignoreVersion.getVersion(), other.getVersion() );
+            protected boolean matchesSafely(P other) {
+                return Objects.equals(ignoreVersion.getType(), other.getType())
+                        && Objects.equals(ignoreVersion.getVersion(), other.getVersion());
             }
         };
     }
-
 }

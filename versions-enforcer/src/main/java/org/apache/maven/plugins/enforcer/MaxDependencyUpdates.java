@@ -62,8 +62,7 @@ import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependen
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDependenciesFromPluginsInPluginManagement;
 
-public class MaxDependencyUpdates implements EnforcerRule2
-{
+public class MaxDependencyUpdates implements EnforcerRule2 {
     /**
      * Maximum allowed number of updates.
      *
@@ -145,7 +144,7 @@ public class MaxDependencyUpdates implements EnforcerRule2
      *
      * @since 2.14.0
      */
-    protected List<String> dependencyIncludes = singletonList( WILDCARD );
+    protected List<String> dependencyIncludes = singletonList(WILDCARD);
 
     /**
      * List of dependency exclusion patterns.
@@ -165,7 +164,7 @@ public class MaxDependencyUpdates implements EnforcerRule2
      *
      * @since 2.14.0
      */
-    protected List<String> dependencyManagementIncludes = singletonList( WILDCARD );
+    protected List<String> dependencyManagementIncludes = singletonList(WILDCARD);
 
     /**
      * List of dependency management exclusion patterns.
@@ -185,7 +184,7 @@ public class MaxDependencyUpdates implements EnforcerRule2
      *
      * @since 2.14.0
      */
-    protected List<String> pluginDependencyIncludes = singletonList( WILDCARD );
+    protected List<String> pluginDependencyIncludes = singletonList(WILDCARD);
 
     /**
      * List of plugin dependency exclusion patterns.
@@ -205,7 +204,7 @@ public class MaxDependencyUpdates implements EnforcerRule2
      *
      * @since 2.14.0
      */
-    protected List<String> pluginManagementDependencyIncludes = singletonList( WILDCARD );
+    protected List<String> pluginManagementDependencyIncludes = singletonList(WILDCARD);
 
     /**
      * List of plugin dependency management exclusion patterns.
@@ -249,15 +248,11 @@ public class MaxDependencyUpdates implements EnforcerRule2
      * @param ruleHelper EnforcerRuleHelper object
      * @return maven project
      */
-    private static MavenProject getMavenProject( EnforcerRuleHelper ruleHelper )
-    {
-        try
-        {
-            return (MavenProject) ruleHelper.evaluate( "${project}" );
-        }
-        catch ( ExpressionEvaluationException e )
-        {
-            throw new RuntimeException( "Cannot evaluate project metadata", e );
+    private static MavenProject getMavenProject(EnforcerRuleHelper ruleHelper) {
+        try {
+            return (MavenProject) ruleHelper.evaluate("${project}");
+        } catch (ExpressionEvaluationException e) {
+            throw new RuntimeException("Cannot evaluate project metadata", e);
         }
     }
 
@@ -266,136 +261,114 @@ public class MaxDependencyUpdates implements EnforcerRule2
      * @param ruleHelper EnforcerRuleHelper object
      * @return VersionsHelper object
      */
-    @SuppressWarnings( "unchecked" )
-    private static VersionsHelper createVersionsHelper( EnforcerRuleHelper ruleHelper,
-                                                        String serverId,
-                                                        String rulesUri,
-                                                        RuleSet ruleSet )
-    {
-        try
-        {
+    @SuppressWarnings("unchecked")
+    private static VersionsHelper createVersionsHelper(
+            EnforcerRuleHelper ruleHelper, String serverId, String rulesUri, RuleSet ruleSet) {
+        try {
             return new DefaultVersionsHelper.Builder()
-                    .withRepositorySystem( ruleHelper.getComponent( RepositorySystem.class ) )
-                    .withAetherRepositorySystem( ruleHelper.getComponent( org.eclipse.aether.RepositorySystem.class ) )
-                    .withWagonMap( ruleHelper.getComponentMap( Wagon.class.getName() )
-                            .entrySet()
-                            .parallelStream()
-                            .filter( e -> e.getValue() instanceof Wagon )
-                            .collect( HashMap::new,
-                                    ( m, e ) -> m.put( e.getKey(), (Wagon) e.getValue() ),
-                                    HashMap::putAll ) )
-                    .withServerId( serverId )
-                    .withRulesUri( rulesUri )
-                    .withRuleSet( ruleSet )
-                    .withIgnoredVersions( null )
-                    .withLog( ruleHelper.getLog() )
-                    .withMavenSession( (MavenSession) ruleHelper.evaluate( "${session}" ) )
-                    .withMojoExecution( (MojoExecution) ruleHelper.evaluate( "${mojoExecution}" ) )
+                    .withRepositorySystem(ruleHelper.getComponent(RepositorySystem.class))
+                    .withAetherRepositorySystem(ruleHelper.getComponent(org.eclipse.aether.RepositorySystem.class))
+                    .withWagonMap(ruleHelper.getComponentMap(Wagon.class.getName()).entrySet().parallelStream()
+                            .filter(e -> e.getValue() instanceof Wagon)
+                            .collect(HashMap::new, (m, e) -> m.put(e.getKey(), (Wagon) e.getValue()), HashMap::putAll))
+                    .withServerId(serverId)
+                    .withRulesUri(rulesUri)
+                    .withRuleSet(ruleSet)
+                    .withIgnoredVersions(null)
+                    .withLog(ruleHelper.getLog())
+                    .withMavenSession((MavenSession) ruleHelper.evaluate("${session}"))
+                    .withMojoExecution((MojoExecution) ruleHelper.evaluate("${mojoExecution}"))
                     .build();
-        }
-        catch ( ExpressionEvaluationException e )
-        {
-            throw new RuntimeException( "Cannot evaluate project metadata", e );
-        }
-        catch ( ComponentLookupException | MojoExecutionException e )
-        {
-            throw new RuntimeException( "Cannot resolve dependency", e );
+        } catch (ExpressionEvaluationException e) {
+            throw new RuntimeException("Cannot evaluate project metadata", e);
+        } catch (ComponentLookupException | MojoExecutionException e) {
+            throw new RuntimeException("Cannot resolve dependency", e);
         }
     }
+
     @Override
-    public boolean isCacheable()
-    {
+    public boolean isCacheable() {
         return false;
     }
 
     @Override
-    public boolean isResultValid( EnforcerRule enforcerRule )
-    {
+    public boolean isResultValid(EnforcerRule enforcerRule) {
         return false;
     }
 
     @Override
-    public String getCacheId()
-    {
+    public String getCacheId() {
         return "Does not matter as not cacheable";
     }
 
     @Override
-    public void execute( EnforcerRuleHelper ruleHelper ) throws EnforcerRuleException
-    {
-        VersionsHelper versionsHelper = createVersionsHelper( ruleHelper, serverId != null ? serverId : "serverId",
-                rulesUri, ruleSet );
-        MavenProject project = getMavenProject( ruleHelper );
-        Set<Dependency> dependencies = new TreeSet<>( DependencyComparator.INSTANCE );
-        if ( processDependencyManagement )
-        {
-            try
-            {
-                dependencies.addAll( filterDependencies( extractDependenciesFromDependencyManagement( project,
-                                processDependencyManagementTransitive, ruleHelper.getLog() ),
-                        dependencyManagementIncludes, dependencyManagementExcludes, "Dependency Management",
-                        ruleHelper.getLog() ) );
-            }
-            catch ( VersionRetrievalException e )
-            {
-                throw new EnforcerRuleException( e.getMessage() );
+    public void execute(EnforcerRuleHelper ruleHelper) throws EnforcerRuleException {
+        VersionsHelper versionsHelper =
+                createVersionsHelper(ruleHelper, serverId != null ? serverId : "serverId", rulesUri, ruleSet);
+        MavenProject project = getMavenProject(ruleHelper);
+        Set<Dependency> dependencies = new TreeSet<>(DependencyComparator.INSTANCE);
+        if (processDependencyManagement) {
+            try {
+                dependencies.addAll(filterDependencies(
+                        extractDependenciesFromDependencyManagement(
+                                project, processDependencyManagementTransitive, ruleHelper.getLog()),
+                        dependencyManagementIncludes,
+                        dependencyManagementExcludes,
+                        "Dependency Management",
+                        ruleHelper.getLog()));
+            } catch (VersionRetrievalException e) {
+                throw new EnforcerRuleException(e.getMessage());
             }
         }
-        if ( processPluginDependencies )
-        {
-            dependencies.addAll( filterDependencies( extractDependenciesFromPlugins( project ),
-                    pluginDependencyIncludes, pluginDependencyExcludes,
-                    "Plugin Dependencies", ruleHelper.getLog() ) );
+        if (processPluginDependencies) {
+            dependencies.addAll(filterDependencies(
+                    extractDependenciesFromPlugins(project),
+                    pluginDependencyIncludes,
+                    pluginDependencyExcludes,
+                    "Plugin Dependencies",
+                    ruleHelper.getLog()));
         }
-        if ( processPluginDependenciesInPluginManagement )
-        {
-            dependencies.addAll( filterDependencies(
-                    extractPluginDependenciesFromPluginsInPluginManagement( project ),
-                    pluginManagementDependencyIncludes, pluginManagementDependencyExcludes,
-                    "Plugin Management Dependencies", ruleHelper.getLog() ) );
+        if (processPluginDependenciesInPluginManagement) {
+            dependencies.addAll(filterDependencies(
+                    extractPluginDependenciesFromPluginsInPluginManagement(project),
+                    pluginManagementDependencyIncludes,
+                    pluginManagementDependencyExcludes,
+                    "Plugin Management Dependencies",
+                    ruleHelper.getLog()));
         }
-        if ( processDependencies )
-        {
-            dependencies.addAll( filterDependencies( project.getDependencies(),
-                    dependencyIncludes, dependencyExcludes, "Dependencies", ruleHelper.getLog() ) );
+        if (processDependencies) {
+            dependencies.addAll(filterDependencies(
+                    project.getDependencies(),
+                    dependencyIncludes,
+                    dependencyExcludes,
+                    "Dependencies",
+                    ruleHelper.getLog()));
         }
-        try
-        {
+        try {
             Optional<Segment> ignoredSegment = ignoreSubIncrementalUpdates
-                    ? of( SUBINCREMENTAL )
-                    : ignoreIncrementalUpdates
-                        ? of( INCREMENTAL )
-                        : ignoreMinorUpdates
-                            ? of( MINOR )
-                            : empty();
-            List<ArtifactVersions> upgradable = versionsHelper
-                    .lookupDependenciesUpdates( dependencies, false )
-                    .values()
-                    .parallelStream()
-                    .filter( v ->
-                        v.getVersions( v.restrictionForIgnoreScope( ignoredSegment ), true ).length > 0
-                    )
-                    .collect( Collectors.toList() );
-            if ( upgradable.size() > maxUpdates )
-            {
-                throw new EnforcerRuleException( "More than " + maxUpdates + " upgradable artifacts detected: "
-                        + upgradable.stream().map( av -> av.getArtifact() + " -> ["
-                                + Arrays.stream( av.getVersions() )
-                                .map( ArtifactVersion::toString )
-                                .collect( Collectors.joining( ", " ) )
-                                + "]" )
-                        .collect( Collectors.joining( ", " ) ) );
+                    ? of(SUBINCREMENTAL)
+                    : ignoreIncrementalUpdates ? of(INCREMENTAL) : ignoreMinorUpdates ? of(MINOR) : empty();
+            List<ArtifactVersions> upgradable =
+                    versionsHelper.lookupDependenciesUpdates(dependencies, false).values().parallelStream()
+                            .filter(v -> v.getVersions(v.restrictionForIgnoreScope(ignoredSegment), true).length > 0)
+                            .collect(Collectors.toList());
+            if (upgradable.size() > maxUpdates) {
+                throw new EnforcerRuleException("More than " + maxUpdates + " upgradable artifacts detected: "
+                        + upgradable.stream()
+                                .map(av -> av.getArtifact() + " -> ["
+                                        + Arrays.stream(av.getVersions())
+                                                .map(ArtifactVersion::toString)
+                                                .collect(Collectors.joining(", "))
+                                        + "]")
+                                .collect(Collectors.joining(", ")));
             }
-        }
-        catch ( VersionRetrievalException e )
-        {
-            throw new RuntimeException( e.getMessage(), e );
+        } catch (VersionRetrievalException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     @Override
-    public EnforcerLevel getLevel()
-    {
+    public EnforcerLevel getLevel() {
         // all reported items should be treated as errors
         return EnforcerLevel.ERROR;
     }

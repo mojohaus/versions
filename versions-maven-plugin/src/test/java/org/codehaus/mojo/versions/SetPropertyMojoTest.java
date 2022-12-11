@@ -48,93 +48,77 @@ import static org.mockito.Mockito.when;
  *
  * @author Andrzej Jarmoniuk
  */
-public class SetPropertyMojoTest extends AbstractMojoTestCase
-{
+public class SetPropertyMojoTest extends AbstractMojoTestCase {
     @Rule
-    public MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule(this);
 
     private Path pomDir;
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
-        pomDir = createTempDir( "set-property" );
+        pomDir = createTempDir("set-property");
     }
 
     @After
-    public void tearDown() throws Exception
-    {
-        try
-        {
-            tearDownTempDir( pomDir );
-        }
-        finally
-        {
+    public void tearDown() throws Exception {
+        try {
+            tearDownTempDir(pomDir);
+        } finally {
             super.tearDown();
         }
     }
+
     @Test
-    public void testNullNewVersion()
-            throws Exception
-    {
-        copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-new-version" ), pomDir );
-        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
-                "set-property" );
+    public void testNullNewVersion() throws Exception {
+        copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/null-new-version"), pomDir);
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(pomDir.toFile(), "set-property");
 
-        mojo.aetherRepositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
-        when( mojo.aetherRepositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
-                .then( i -> new VersionRangeResult( i.getArgument( 1 ) ) );
+        mojo.aetherRepositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        when(mojo.aetherRepositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> new VersionRangeResult(i.getArgument(1)));
 
-        setVariableValueToObject( mojo, "newVersion", null );
+        setVariableValueToObject(mojo, "newVersion", null);
 
         mojo.execute();
 
-        String output = String.join( "", Files.readAllLines( mojo.getProject().getFile().toPath() ) )
-                .replaceAll( "\\s*", "" );
-        assertThat( output,
-                matchesPattern( ".*<properties>.*<dummy-api-version></dummy-api-version>.*</properties>.*" ) );
+        String output = String.join(
+                        "", Files.readAllLines(mojo.getProject().getFile().toPath()))
+                .replaceAll("\\s*", "");
+        assertThat(output, matchesPattern(".*<properties>.*<dummy-api-version></dummy-api-version>.*</properties>.*"));
     }
 
     @Test
-    public void testNewVersionEmpty()
-            throws Exception
-    {
-        copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-new-version" ), pomDir );
-        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
-                "set-property" );
+    public void testNewVersionEmpty() throws Exception {
+        copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/null-new-version"), pomDir);
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(pomDir.toFile(), "set-property");
 
-        mojo.aetherRepositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
-        when( mojo.aetherRepositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
-                .then( i -> new VersionRangeResult( i.getArgument( 1 ) ) );
+        mojo.aetherRepositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        when(mojo.aetherRepositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> new VersionRangeResult(i.getArgument(1)));
 
-        setVariableValueToObject( mojo, "newVersion", "" );
+        setVariableValueToObject(mojo, "newVersion", "");
 
         mojo.execute();
 
-        String output = String.join( "", Files.readAllLines( mojo.getProject().getFile().toPath() ) )
-                .replaceAll( "\\s*", "" );
-        assertThat( output,
-                matchesPattern( ".*<properties>.*<dummy-api-version></dummy-api-version>.*</properties>.*" ) );
+        String output = String.join(
+                        "", Files.readAllLines(mojo.getProject().getFile().toPath()))
+                .replaceAll("\\s*", "");
+        assertThat(output, matchesPattern(".*<properties>.*<dummy-api-version></dummy-api-version>.*</properties>.*"));
     }
 
     @Test
-    public void testNullProperty()
-            throws Exception
-    {
-        copyDir( Paths.get( "src/test/resources/org/codehaus/mojo/set-property/null-property" ), pomDir );
-        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo( pomDir.toFile(),
-                "set-property" );
+    public void testNullProperty() throws Exception {
+        copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/null-property"), pomDir);
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(pomDir.toFile(), "set-property");
 
-        try
-        {
-            mojo.update( null );
+        try {
+            mojo.update(null);
             fail();
-        }
-        catch ( MojoExecutionException e )
-        {
-            assertThat( e.getMessage(),
-                    containsString( "Please provide either 'property' or 'propertiesVersionsFile' parameter." ) );
+        } catch (MojoExecutionException e) {
+            assertThat(
+                    e.getMessage(),
+                    containsString("Please provide either 'property' or 'propertiesVersionsFile' parameter."));
         }
     }
 }

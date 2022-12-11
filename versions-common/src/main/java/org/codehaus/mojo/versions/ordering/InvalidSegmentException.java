@@ -25,8 +25,7 @@ import org.codehaus.mojo.versions.api.Segment;
 /**
  * Represents an invalid segment being identified within a version.
  */
-public class InvalidSegmentException extends Exception
-{
+public class InvalidSegmentException extends Exception {
     private final Segment segment;
 
     private final int segmentCount;
@@ -40,10 +39,10 @@ public class InvalidSegmentException extends Exception
      * @param segmentCount the number of segments.
      * @param version the version object.
      */
-    public InvalidSegmentException( Segment segment, int segmentCount, ArtifactVersion version )
-    {
-        super( String.format( "Invalid segment %s for the %d segment version: '%s'", segment.toString(), segmentCount,
-                version.toString() ) );
+    public InvalidSegmentException(Segment segment, int segmentCount, ArtifactVersion version) {
+        super(String.format(
+                "Invalid segment %s for the %d segment version: '%s'",
+                segment.toString(), segmentCount, version.toString()));
         this.segment = segment;
         this.segmentCount = segmentCount;
         this.version = version;
@@ -52,24 +51,21 @@ public class InvalidSegmentException extends Exception
     /**
      * @return segment
      */
-    public Segment getSegment()
-    {
+    public Segment getSegment() {
         return segment;
     }
 
     /**
      * @return segment count
      */
-    public int getSegmentCount()
-    {
+    public int getSegmentCount() {
         return segmentCount;
     }
 
     /**
      * @return version object
      */
-    public ArtifactVersion getVersion()
-    {
+    public ArtifactVersion getVersion() {
         return version;
     }
 }

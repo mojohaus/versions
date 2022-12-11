@@ -33,8 +33,7 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
  * @author connollys
  * @since 1.0-beta-1
  */
-public interface VersionDetails
-{
+public interface VersionDetails {
     /**
      * Returns <code>true</code> if the specific version is in the list of versions.
      *
@@ -42,7 +41,7 @@ public interface VersionDetails
      * @return <code>true</code> if the specific version is in the list of versions.
      * @since 1.0-beta-1
      */
-    boolean containsVersion( String version );
+    boolean containsVersion(String version);
 
     /**
      * Returns <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
@@ -58,7 +57,7 @@ public interface VersionDetails
      * @param currentVersion The new current version.
      * @since 1.0-beta-1
      */
-    void setCurrentVersion( ArtifactVersion currentVersion );
+    void setCurrentVersion(ArtifactVersion currentVersion);
 
     /**
      * Sets the current version.
@@ -66,11 +65,11 @@ public interface VersionDetails
      * @param currentVersion The new current version.
      * @since 1.0-beta-1
      */
-    void setCurrentVersion( String currentVersion );
+    void setCurrentVersion(String currentVersion);
 
     boolean isIncludeSnapshots();
 
-    void setIncludeSnapshots( boolean includeSnapshots );
+    void setIncludeSnapshots(boolean includeSnapshots);
 
     /**
      * Retrieves the current version.
@@ -103,7 +102,7 @@ public interface VersionDetails
      * @return all available versions in increasing order.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion[] getVersions( boolean includeSnapshots );
+    ArtifactVersion[] getVersions(boolean includeSnapshots);
 
     /**
      * Returns all available versions within the specified version range.
@@ -113,7 +112,7 @@ public interface VersionDetails
      * @return all available versions within the specified version range.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion[] getVersions( VersionRange versionRange, boolean includeSnapshots );
+    ArtifactVersion[] getVersions(VersionRange versionRange, boolean includeSnapshots);
 
     /**
      * Returns all available versions within the specified bounds.
@@ -123,7 +122,7 @@ public interface VersionDetails
      * @return all available versions within the specified version range.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound );
+    ArtifactVersion[] getVersions(ArtifactVersion lowerBound, ArtifactVersion upperBound);
 
     /**
      * Returns all available versions within the specified bounds.
@@ -134,7 +133,7 @@ public interface VersionDetails
      * @return all available versions within the specified version range.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getVersions( ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots );
+    ArtifactVersion[] getVersions(ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots);
 
     /**
      * Returns all available versions within the specified bounds.
@@ -144,7 +143,7 @@ public interface VersionDetails
      * @return all available versions within the specified version range.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getVersions( Restriction restriction, boolean includeSnapshots );
+    ArtifactVersion[] getVersions(Restriction restriction, boolean includeSnapshots);
 
     /**
      * Returns all available versions within the specified bounds.
@@ -156,7 +155,7 @@ public interface VersionDetails
      * @return all available versions within the specified version range.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getVersions( VersionRange versionRange, Restriction restriction, boolean includeSnapshots );
+    ArtifactVersion[] getVersions(VersionRange versionRange, Restriction restriction, boolean includeSnapshots);
 
     /**
      * Returns the latest version given the version range, restricition, whether to include snapshots and/or
@@ -168,8 +167,8 @@ public interface VersionDetails
      * @param allowDowngrade whether downgrades are allowed
      * @return the latest version satisfying the conditions or <code>null</code> if no version is available.
      */
-    ArtifactVersion getNewestVersion( VersionRange versionRange, Restriction restriction,
-                                      boolean includeSnapshots, boolean allowDowngrade );
+    ArtifactVersion getNewestVersion(
+            VersionRange versionRange, Restriction restriction, boolean includeSnapshots, boolean allowDowngrade);
 
     /**
      * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
@@ -180,7 +179,7 @@ public interface VersionDetails
      * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound );
+    ArtifactVersion getNewestVersion(ArtifactVersion lowerBound, ArtifactVersion upperBound);
 
     /**
      * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
@@ -192,8 +191,7 @@ public interface VersionDetails
      * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getNewestVersion( ArtifactVersion lowerBound, ArtifactVersion upperBound,
-                                      boolean includeSnapshots );
+    ArtifactVersion getNewestVersion(ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots);
 
     /**
      * Returns the latest version newer than the specified current version, but less than the specified upper bound or
@@ -204,7 +202,7 @@ public interface VersionDetails
      * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getNewestVersion( Restriction restriction, boolean includeSnapshots );
+    ArtifactVersion getNewestVersion(Restriction restriction, boolean includeSnapshots);
 
     /**
      * Returns the latest version newer than the specified current version, but less than the specified upper bound or
@@ -217,7 +215,7 @@ public interface VersionDetails
      * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getNewestVersion( VersionRange versionRange, Restriction restriction, boolean includeSnapshots );
+    ArtifactVersion getNewestVersion(VersionRange versionRange, Restriction restriction, boolean includeSnapshots);
 
     /**
      * Returns the latest version within the specified version range or <code>null</code> if no such version exists.
@@ -227,7 +225,7 @@ public interface VersionDetails
      * @return the latest version within the version range or <code>null</code> if no version is available.
      * @since 1.0-alpha-3
      */
-    ArtifactVersion getNewestVersion( VersionRange versionRange, boolean includeSnapshots );
+    ArtifactVersion getNewestVersion(VersionRange versionRange, boolean includeSnapshots);
 
     /**
      * Returns the latest version, newer than the given version, given the upper bound segment and whether snapshots
@@ -242,8 +240,8 @@ public interface VersionDetails
      * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
      * the segment count)
      */
-    Optional<ArtifactVersion> getNewestVersion( String versionString, Optional<Segment> upperBoundSegment,
-                                                boolean includeSnapshots, boolean allowDowngrade )
+    Optional<ArtifactVersion> getNewestVersion(
+            String versionString, Optional<Segment> upperBoundSegment, boolean includeSnapshots, boolean allowDowngrade)
             throws InvalidSegmentException;
 
     /**
@@ -258,8 +256,9 @@ public interface VersionDetails
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( ArtifactVersion currentVersion, Optional<Segment> updateScope,
-                                     boolean includeSnapshots ) throws InvalidSegmentException;
+    ArtifactVersion getNewestUpdate(
+            ArtifactVersion currentVersion, Optional<Segment> updateScope, boolean includeSnapshots)
+            throws InvalidSegmentException;
 
     /**
      * Returns an array of newer versions than the given version, given whether snapshots
@@ -269,7 +268,7 @@ public interface VersionDetails
      * @param includeSnapshots  whether snapshot versions should be included
      * @return array of newer versions fulfilling the criteria
      */
-    ArtifactVersion[] getNewerVersions( String version, boolean includeSnapshots );
+    ArtifactVersion[] getNewerVersions(String version, boolean includeSnapshots);
 
     /**
      * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
@@ -284,8 +283,8 @@ public interface VersionDetails
      * @deprecated please use {@link AbstractVersionDetails#getNewerVersions(String, Optional, boolean, boolean)},
      * boolean, boolean)} instead
      */
-    ArtifactVersion[] getNewerVersions( String version, Optional<Segment> upperBoundSegment,
-                                                     boolean includeSnapshots ) throws InvalidSegmentException;
+    ArtifactVersion[] getNewerVersions(String version, Optional<Segment> upperBoundSegment, boolean includeSnapshots)
+            throws InvalidSegmentException;
 
     /**
      * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
@@ -300,8 +299,8 @@ public interface VersionDetails
      * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
      * the segment count)
      */
-    ArtifactVersion[] getNewerVersions( String versionString, Optional<Segment> upperBoundSegment,
-                                                     boolean includeSnapshots, boolean allowDowngrade )
+    ArtifactVersion[] getNewerVersions(
+            String versionString, Optional<Segment> upperBoundSegment, boolean includeSnapshots, boolean allowDowngrade)
             throws InvalidSegmentException;
 
     /**
@@ -314,8 +313,9 @@ public interface VersionDetails
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getAllUpdates( ArtifactVersion currentVersion, Optional<Segment> updateScope,
-                                     boolean includeSnapshots ) throws InvalidSegmentException;
+    ArtifactVersion[] getAllUpdates(
+            ArtifactVersion currentVersion, Optional<Segment> updateScope, boolean includeSnapshots)
+            throws InvalidSegmentException;
 
     /**
      * Returns the newest version newer than the specified current version, but within the specified update scope or
@@ -327,7 +327,7 @@ public interface VersionDetails
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( Optional<Segment> updateScope ) throws InvalidSegmentException;
+    ArtifactVersion getNewestUpdate(Optional<Segment> updateScope) throws InvalidSegmentException;
 
     /**
      * Returns the all versions newer than the specified current version, but within the specified update scope.
@@ -337,7 +337,7 @@ public interface VersionDetails
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope ) throws InvalidSegmentException;
+    ArtifactVersion[] getAllUpdates(Optional<Segment> updateScope) throws InvalidSegmentException;
 
     /**
      * Returns the newest version newer than the specified current version, but within the specified update scope or
@@ -350,7 +350,7 @@ public interface VersionDetails
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate( Optional<Segment> updateScope, boolean includeSnapshots )
+    ArtifactVersion getNewestUpdate(Optional<Segment> updateScope, boolean includeSnapshots)
             throws InvalidSegmentException;
 
     /**
@@ -362,7 +362,7 @@ public interface VersionDetails
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getAllUpdates( Optional<Segment> updateScope, boolean includeSnapshots )
+    ArtifactVersion[] getAllUpdates(Optional<Segment> updateScope, boolean includeSnapshots)
             throws InvalidSegmentException;
 
     /**
@@ -380,7 +380,7 @@ public interface VersionDetails
      * @return the all versions after currentVersion within the specified update scope.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getAllUpdates( VersionRange versionRange );
+    ArtifactVersion[] getAllUpdates(VersionRange versionRange);
 
     /**
      * Returns the all versions newer than the specified current version, but within the specified update scope.
@@ -390,7 +390,7 @@ public interface VersionDetails
      * @return the all versions after currentVersion within the specified update scope.
      * @since 1.0-beta-1
      */
-    ArtifactVersion[] getAllUpdates( VersionRange versionRange, boolean includeSnapshots );
+    ArtifactVersion[] getAllUpdates(VersionRange versionRange, boolean includeSnapshots);
 
     /**
      * <p>Returns a {@linkplain Restriction} object for computing version <em>upgrades</em>
@@ -406,8 +406,7 @@ public interface VersionDetails
      * @param scope most major segment where updates are allowed Optional.empty() for no restriction
      * @return {@linkplain Restriction} object based on the arguments
      */
-    Restriction restrictionFor( Optional<Segment> scope ) throws InvalidSegmentException;
-
+    Restriction restrictionFor(Optional<Segment> scope) throws InvalidSegmentException;
 
     /**
      * Returns the {@link Restriction} objects for a segemnt scope which is to be <b>ignored</b>.
@@ -415,5 +414,5 @@ public interface VersionDetails
      * @param ignored most major segment where updates are to be ignored; Optional.empty() for no ignored segments
      * @return {@linkplain Restriction} object based on the arguments
      */
-    Restriction restrictionForIgnoreScope( Optional<Segment> ignored );
+    Restriction restrictionForIgnoreScope(Optional<Segment> ignored);
 }

@@ -28,21 +28,15 @@ import org.codehaus.plexus.i18n.I18N;
 /**
  * @since 1.0-beta-1
  */
-public class ParentUpdatesReportRenderer extends DependencyUpdatesReportRenderer<ParentUpdatesModel>
-{
-    public ParentUpdatesReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName,
-                                        ParentUpdatesModel model )
-    {
-        super( i18n, sink, locale, bundleName, model );
+public class ParentUpdatesReportRenderer extends DependencyUpdatesReportRenderer<ParentUpdatesModel> {
+    public ParentUpdatesReportRenderer(
+            I18N i18n, Sink sink, Locale locale, String bundleName, ParentUpdatesModel model) {
+        super(i18n, sink, locale, bundleName, model);
     }
 
     @Override
-    protected void renderOverview()
-    {
-    }
+    protected void renderOverview() {}
 
     @Override
-    protected void renderManagementSummaryTable()
-    {
-    }
+    protected void renderManagementSummaryTable() {}
 }

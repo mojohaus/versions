@@ -59,9 +59,8 @@ import static org.apache.maven.shared.utils.StringUtils.isBlank;
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "update-parent", threadSafe = true )
-public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
-{
+@Mojo(name = "update-parent", threadSafe = true)
+public class UpdateParentMojo extends AbstractVersionsUpdaterMojo {
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -74,7 +73,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      * the parent artifact will be updated.</p>
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "parentVersion" )
+    @Parameter(property = "parentVersion")
     protected String parentVersion = null;
 
     /**
@@ -82,7 +81,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.9
      */
-    @Parameter( property = "forceUpdate", defaultValue = "false" )
+    @Parameter(property = "forceUpdate", defaultValue = "false")
     protected boolean forceUpdate = false;
 
     /**
@@ -91,7 +90,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.13.0
      */
-    @Parameter( property = "skipResolution", defaultValue = "false" )
+    @Parameter(property = "skipResolution", defaultValue = "false")
     protected boolean skipResolution = false;
 
     /**
@@ -101,8 +100,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "allowDowngrade",
-                defaultValue = "false" )
+    @Parameter(property = "allowDowngrade", defaultValue = "false")
     protected boolean allowDowngrade;
 
     /**
@@ -110,7 +108,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.13.0
      */
-    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
     protected boolean allowMajorUpdates = true;
 
     /**
@@ -120,7 +118,7 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.13.0
      */
-    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
     protected boolean allowMinorUpdates = true;
 
     /**
@@ -131,18 +129,18 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.13.0
      */
-    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     protected boolean allowIncrementalUpdates = true;
 
     // -------------------------- OTHER METHODS --------------------------
 
     @Inject
-    public UpdateParentMojo( RepositorySystem repositorySystem,
-                             org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                             Map<String, Wagon> wagonMap,
-                             Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UpdateParentMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -153,116 +151,94 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
-    {
-        if ( getProject().getParent() == null )
-        {
-            getLog().info( "Project does not have a parent" );
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
+        if (getProject().getParent() == null) {
+            getLog().info("Project does not have a parent");
             return;
         }
 
-        if ( reactorProjects.contains( getProject().getParent() ) )
-        {
-            getLog().info( "Project's parent is part of the reactor" );
+        if (reactorProjects.contains(getProject().getParent())) {
+            getLog().info("Project's parent is part of the reactor");
             return;
         }
 
-        if ( skipResolution && isBlank( parentVersion ) )
-        {
-            throw new MojoExecutionException( "skipResolution is only valid if parentVersion is set" );
+        if (skipResolution && isBlank(parentVersion)) {
+            throw new MojoExecutionException("skipResolution is only valid if parentVersion is set");
         }
 
-        String initialVersion = parentVersion == null
-                ? getProject().getParent().getVersion()
-                : parentVersion;
-        try
-        {
-            ArtifactVersion artifactVersion = skipResolution
-                    ? new DefaultArtifactVersion( parentVersion )
-                    : resolveTargetVersion( initialVersion );
-            if ( artifactVersion != null )
-            {
-                getLog().info( "Updating parent from " + getProject().getParent().getVersion()
-                        + " to " + artifactVersion );
+        String initialVersion = parentVersion == null ? getProject().getParent().getVersion() : parentVersion;
+        try {
+            ArtifactVersion artifactVersion =
+                    skipResolution ? new DefaultArtifactVersion(parentVersion) : resolveTargetVersion(initialVersion);
+            if (artifactVersion != null) {
+                getLog().info("Updating parent from " + getProject().getParent().getVersion() + " to "
+                        + artifactVersion);
 
-                if ( PomHelper.setProjectParentVersion( pom, artifactVersion.toString() ) )
-                {
-                    if ( getLog().isDebugEnabled() )
-                    {
-                        getLog().debug( "Made an update from " + getProject().getParent().getVersion()
-                                + " to " + artifactVersion );
+                if (PomHelper.setProjectParentVersion(pom, artifactVersion.toString())) {
+                    if (getLog().isDebugEnabled()) {
+                        getLog().debug("Made an update from "
+                                + getProject().getParent().getVersion() + " to " + artifactVersion);
                     }
-                    getChangeRecorder().recordChange( DefaultChangeRecord.builder()
-                                                          .withKind( ChangeRecord.ChangeKind.PARENT )
-                                                          .withGroupId( getProject().getParent().getGroupId() )
-                                                          .withArtifactId( getProject().getParent().getArtifactId() )
-                                                          .withOldVersion( getProject().getParent().getVersion() )
-                                                          .withNewVersion( artifactVersion.toString() )
-                                                          .build() );
+                    getChangeRecorder()
+                            .recordChange(DefaultChangeRecord.builder()
+                                    .withKind(ChangeRecord.ChangeKind.PARENT)
+                                    .withGroupId(getProject().getParent().getGroupId())
+                                    .withArtifactId(getProject().getParent().getArtifactId())
+                                    .withOldVersion(getProject().getParent().getVersion())
+                                    .withNewVersion(artifactVersion.toString())
+                                    .build());
                 }
             }
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( "Invalid version range specification: " + initialVersion, e );
-        }
-        catch ( InvalidSegmentException e )
-        {
-            throw new MojoExecutionException( "Invalid segment specification for version " + initialVersion, e );
+        } catch (InvalidVersionSpecificationException e) {
+            throw new MojoExecutionException("Invalid version range specification: " + initialVersion, e);
+        } catch (InvalidSegmentException e) {
+            throw new MojoExecutionException("Invalid segment specification for version " + initialVersion, e);
         }
     }
 
-    protected ArtifactVersion resolveTargetVersion( String initialVersion )
+    protected ArtifactVersion resolveTargetVersion(String initialVersion)
             throws MojoExecutionException, VersionRetrievalException, InvalidVersionSpecificationException,
-            InvalidSegmentException
-    {
-        Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder
-                .newBuilder()
-                .withGroupId( getProject().getParent().getGroupId() )
-                .withArtifactId( getProject().getParent().getArtifactId() )
-                .withVersion( initialVersion )
-                .withType( "pom" )
-                .build() );
+                    InvalidSegmentException {
+        Artifact artifact = getHelper()
+                .createDependencyArtifact(DependencyBuilder.newBuilder()
+                        .withGroupId(getProject().getParent().getGroupId())
+                        .withArtifactId(getProject().getParent().getArtifactId())
+                        .withVersion(initialVersion)
+                        .withType("pom")
+                        .build());
 
-        VersionRange targetVersionRange = VersionRange.createFromVersionSpec( initialVersion );
-        if ( targetVersionRange.getRecommendedVersion() != null )
-        {
+        VersionRange targetVersionRange = VersionRange.createFromVersionSpec(initialVersion);
+        if (targetVersionRange.getRecommendedVersion() != null) {
             targetVersionRange = targetVersionRange.restrict(
-                    VersionRange.createFromVersionSpec( "[" + targetVersionRange.getRecommendedVersion() + ",)" ) );
+                    VersionRange.createFromVersionSpec("[" + targetVersionRange.getRecommendedVersion() + ",)"));
         }
 
-        final ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
-                allowMinorUpdates, allowIncrementalUpdates, getLog() );
+        final ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
 
         // currentVersion (set to parentVersion here) is not included in the version range for searching upgrades
         // unless we set allowDowngrade to true
-        for ( ArtifactVersion candidate : reverse( versions.getNewerVersions( initialVersion, unchangedSegment,
-                allowSnapshots, !isBlank( parentVersion ) || allowDowngrade ) ) )
-        {
-            if ( allowDowngrade
+        for (ArtifactVersion candidate : reverse(versions.getNewerVersions(
+                initialVersion, unchangedSegment, allowSnapshots, !isBlank(parentVersion) || allowDowngrade))) {
+            if (allowDowngrade
                     || targetVersionRange == null
-                    || ArtifactVersions.isVersionInRange( candidate, targetVersionRange ) )
-            {
-                if ( shouldApplyUpdate( artifact, getProject().getParent().getVersion(), candidate, forceUpdate ) )
-                {
+                    || ArtifactVersions.isVersionInRange(candidate, targetVersionRange)) {
+                if (shouldApplyUpdate(artifact, getProject().getParent().getVersion(), candidate, forceUpdate)) {
                     return candidate;
-                }
-                else
-                {
-                    getLog().debug( "Update not applied. Exiting." );
+                } else {
+                    getLog().debug("Update not applied. Exiting.");
                     return null;
                 }
             }
         }
 
-        getLog().info( "No versions found" );
+        getLog().info("No versions found");
         return null;
     }
 
-    private static <T> Iterable<T> reverse( T[] array )
-    {
-        return Arrays.stream( array ).sorted( Collections.reverseOrder() ).collect( Collectors.toList() );
+    private static <T> Iterable<T> reverse(T[] array) {
+        return Arrays.stream(array).sorted(Collections.reverseOrder()).collect(Collectors.toList());
     }
 }

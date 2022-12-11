@@ -30,25 +30,24 @@ import static java.util.Optional.empty;
 /**
  * Details of a plugin's updates.
  */
-public class PluginUpdatesDetails extends ArtifactVersions
-{
+public class PluginUpdatesDetails extends ArtifactVersions {
     private final Map<Dependency, ArtifactVersions> dependencyVersions;
 
     private final boolean includeSnapshots;
 
-    public PluginUpdatesDetails( ArtifactVersions artifactVersions,
-                                 Map<Dependency, ArtifactVersions> dependencyVersions, boolean includeSnapshots )
-    {
-        super( artifactVersions );
-        Objects.requireNonNull( artifactVersions );
-        Objects.requireNonNull( dependencyVersions );
+    public PluginUpdatesDetails(
+            ArtifactVersions artifactVersions,
+            Map<Dependency, ArtifactVersions> dependencyVersions,
+            boolean includeSnapshots) {
+        super(artifactVersions);
+        Objects.requireNonNull(artifactVersions);
+        Objects.requireNonNull(dependencyVersions);
 
         this.dependencyVersions = dependencyVersions;
         this.includeSnapshots = includeSnapshots;
     }
 
-    public Map<Dependency, ArtifactVersions> getDependencyVersions()
-    {
+    public Map<Dependency, ArtifactVersions> getDependencyVersions() {
         return dependencyVersions;
     }
 
@@ -57,9 +56,8 @@ public class PluginUpdatesDetails extends ArtifactVersions
      *
      * @return true if a new version can be found
      */
-    public boolean isArtifactUpdateAvailable()
-    {
-        ArtifactVersion[] updates = getAllUpdates( empty(), includeSnapshots );
+    public boolean isArtifactUpdateAvailable() {
+        ArtifactVersion[] updates = getAllUpdates(empty(), includeSnapshots);
         return updates != null && updates.length > 0;
     }
 
@@ -68,13 +66,11 @@ public class PluginUpdatesDetails extends ArtifactVersions
      *
      * @return true if a new version can be found
      */
-    public boolean isDependencyUpdateAvailable()
-    {
-        return dependencyVersions.values().stream().anyMatch( versions ->
-        {
-            ArtifactVersion[] dependencyUpdates = versions.getAllUpdates( empty(), includeSnapshots );
+    public boolean isDependencyUpdateAvailable() {
+        return dependencyVersions.values().stream().anyMatch(versions -> {
+            ArtifactVersion[] dependencyUpdates = versions.getAllUpdates(empty(), includeSnapshots);
             return dependencyUpdates != null && dependencyUpdates.length > 0;
-        } );
+        });
     }
 
     /**
@@ -82,8 +78,7 @@ public class PluginUpdatesDetails extends ArtifactVersions
      *
      * @return true if a new version can be found
      */
-    public boolean isUpdateAvailable()
-    {
+    public boolean isUpdateAvailable() {
         return isArtifactUpdateAvailable() || isDependencyUpdateAvailable();
     }
 }

@@ -48,20 +48,18 @@ import static java.util.Optional.of;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-next-versions", threadSafe = true )
-public class UseNextVersionsMojo
-    extends UseLatestVersionsMojoBase
-{
+@Mojo(name = "use-next-versions", threadSafe = true)
+public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
-    public UseNextVersionsMojo( RepositorySystem repositorySystem,
-                                org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                Map<String, Wagon> wagonMap,
-                                Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UseNextVersionsMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -71,43 +69,35 @@ public class UseNextVersionsMojo
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
-    {
-        try
-        {
-            if ( isProcessingDependencyManagement() )
-            {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
+        try {
+            if (isProcessingDependencyManagement()) {
                 DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
-                if ( dependencyManagement != null )
-                {
-                    useNextVersions( pom, dependencyManagement.getDependencies(),
-                                     ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    useNextVersions(
+                            pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
                 }
             }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useNextVersions( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                useNextVersions(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
             }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                useNextVersions( pom, singletonList( getParentDependency() ),
-                                 ChangeRecord.ChangeKind.PARENT );
+            if (getProject().getParent() != null && isProcessingParent()) {
+                useNextVersions(pom, singletonList(getParentDependency()), ChangeRecord.ChangeKind.PARENT);
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void useNextVersions( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
-                                  ChangeRecord.ChangeKind changeKind )
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException
-    {
-        useLatestVersions( pom, dependencies,
-                           ( dep, versions ) -> of( versions.getNewerVersions( dep.getVersion(), allowSnapshots )[0] ),
-                           changeKind );
+    private void useNextVersions(
+            ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
+        useLatestVersions(
+                pom,
+                dependencies,
+                (dep, versions) -> of(versions.getNewerVersions(dep.getVersion(), allowSnapshots)[0]),
+                changeKind);
     }
 }

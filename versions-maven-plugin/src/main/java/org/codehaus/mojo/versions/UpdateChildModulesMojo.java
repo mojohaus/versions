@@ -47,11 +47,8 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 1.0-alpha-2
  */
-@Mojo( name = "update-child-modules", aggregator = true,
-       threadSafe = true )
-public class UpdateChildModulesMojo
-    extends AbstractVersionsUpdaterMojo
-{
+@Mojo(name = "update-child-modules", aggregator = true, threadSafe = true)
+public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
     /**
      * The groupId that we are updating. Guarded by this.
      */
@@ -68,12 +65,12 @@ public class UpdateChildModulesMojo
     private transient String sourceVersion = null;
 
     @Inject
-    public UpdateChildModulesMojo( RepositorySystem repositorySystem,
-                                   org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                   Map<String, Wagon> wagonMap,
-                                   Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UpdateChildModulesMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -82,81 +79,67 @@ public class UpdateChildModulesMojo
      * @throws MojoExecutionException when things go wrong.
      * @throws MojoFailureException   when things go wrong.
      */
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
+    public void execute() throws MojoExecutionException, MojoFailureException {
 
         boolean didSomething = false;
 
-        try
-        {
-            final Map<String, Model> reactor = PomHelper.getReactorModels( getProject(), getLog() );
-            List<String> order = new ArrayList<>( reactor.keySet() );
-            order.sort(
-                ( o1, o2 ) ->
-                {
-                    Model m1 = reactor.get( o1 );
-                    Model m2 = reactor.get( o2 );
-                    int d1 = PomHelper.getReactorParentCount( reactor, m1 );
-                    int d2 = PomHelper.getReactorParentCount( reactor, m2 );
-                    if ( d1 < d2 )
-                    {
-                        return -1;
-                    }
-                    else if ( d1 > d2 )
-                    {
-                        return 1;
-                    }
-                    return 0;
-                } );
+        try {
+            final Map<String, Model> reactor = PomHelper.getReactorModels(getProject(), getLog());
+            List<String> order = new ArrayList<>(reactor.keySet());
+            order.sort((o1, o2) -> {
+                Model m1 = reactor.get(o1);
+                Model m2 = reactor.get(o2);
+                int d1 = PomHelper.getReactorParentCount(reactor, m1);
+                int d2 = PomHelper.getReactorParentCount(reactor, m2);
+                if (d1 < d2) {
+                    return -1;
+                } else if (d1 > d2) {
+                    return 1;
+                }
+                return 0;
+            });
 
-            for ( String sourcePath : order )
-            {
-                Model sourceModel = reactor.get( sourcePath );
+            for (String sourcePath : order) {
+                Model sourceModel = reactor.get(sourcePath);
 
-                getLog().debug( sourcePath.length() == 0 ? "Processing root module as parent"
-                                    : "Processing " + sourcePath + " as a parent." );
+                getLog().debug(
+                                sourcePath.length() == 0
+                                        ? "Processing root module as parent"
+                                        : "Processing " + sourcePath + " as a parent.");
 
-                synchronized ( this )
-                {
-                    sourceGroupId = PomHelper.getGroupId( sourceModel );
-                    if ( sourceGroupId == null )
-                    {
-                        getLog().warn( "Module " + sourcePath + " is missing a groupId." );
+                synchronized (this) {
+                    sourceGroupId = PomHelper.getGroupId(sourceModel);
+                    if (sourceGroupId == null) {
+                        getLog().warn("Module " + sourcePath + " is missing a groupId.");
                         continue;
                     }
-                    sourceArtifactId = PomHelper.getArtifactId( sourceModel );
-                    if ( sourceArtifactId == null )
-                    {
-                        getLog().warn( "Module " + sourcePath + " is missing an artifactId." );
+                    sourceArtifactId = PomHelper.getArtifactId(sourceModel);
+                    if (sourceArtifactId == null) {
+                        getLog().warn("Module " + sourcePath + " is missing an artifactId.");
                         continue;
                     }
-                    sourceVersion = PomHelper.getVersion( sourceModel );
-                    if ( sourceVersion == null )
-                    {
-                        getLog().warn( "Module " + sourcePath + " is missing a version." );
+                    sourceVersion = PomHelper.getVersion(sourceModel);
+                    if (sourceVersion == null) {
+                        getLog().warn("Module " + sourcePath + " is missing a version.");
                         continue;
                     }
 
-                    getLog().debug( "Looking for modules which use "
-                                        + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId )
-                                        + " as their parent to update it to " + sourceVersion );
+                    getLog().debug("Looking for modules which use "
+                            + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId)
+                            + " as their parent to update it to " + sourceVersion);
 
-                    for ( Map.Entry<String, Model> target : PomHelper.getChildModels( reactor, sourceGroupId,
-                                                                                      sourceArtifactId ).entrySet() )
-                    {
+                    for (Map.Entry<String, Model> target : PomHelper.getChildModels(
+                                    reactor, sourceGroupId, sourceArtifactId)
+                            .entrySet()) {
                         String targetPath = target.getKey();
 
-                        File moduleDir = new File( getProject().getBasedir(), targetPath );
+                        File moduleDir = new File(getProject().getBasedir(), targetPath);
 
                         File moduleProjectFile;
 
-                        if ( moduleDir.isDirectory() )
-                        {
-                            moduleProjectFile = new File( moduleDir, "pom.xml" );
-                        }
-                        else
-                        {
+                        if (moduleDir.isDirectory()) {
+                            moduleProjectFile = new File(moduleDir, "pom.xml");
+                        } else {
                             // i don't think this should ever happen... but just in case
                             // the module references the file-name
                             moduleProjectFile = moduleDir;
@@ -164,36 +147,30 @@ public class UpdateChildModulesMojo
 
                         Model targetModel = target.getValue();
                         final Parent parent = targetModel.getParent();
-                        if ( sourceVersion.equals( parent.getVersion() ) )
-                        {
-                            getLog().debug( "Module: " + targetPath + " parent is "
-                                                + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                                + sourceVersion );
-                        }
-                        else
-                        {
-                            getLog().info( "Module: " + targetPath );
-                            getLog().info( "    parent was "
-                                               + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                               + parent.getVersion() );
-                            getLog().info( "    updated to "
-                                               + ArtifactUtils.versionlessKey( sourceGroupId, sourceArtifactId ) + ":"
-                                               + sourceVersion );
-                            process( moduleProjectFile );
+                        if (sourceVersion.equals(parent.getVersion())) {
+                            getLog().debug("Module: " + targetPath + " parent is "
+                                    + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId) + ":"
+                                    + sourceVersion);
+                        } else {
+                            getLog().info("Module: " + targetPath);
+                            getLog().info("    parent was "
+                                    + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId) + ":"
+                                    + parent.getVersion());
+                            getLog().info("    updated to "
+                                    + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId) + ":"
+                                    + sourceVersion);
+                            process(moduleProjectFile);
                             didSomething = true;
                         }
                     }
                 }
             }
 
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-        if ( !didSomething )
-        {
-            getLog().info( "All child modules are up to date." );
+        if (!didSomething) {
+            getLog().info("All child modules are up to date.");
         }
     }
 
@@ -205,15 +182,12 @@ public class UpdateChildModulesMojo
      * @throws MojoFailureException   when things go wrong.
      * @throws XMLStreamException     when things go wrong.
      */
-    protected synchronized void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
-        getLog().debug( "Updating parent to " + sourceVersion );
+    protected synchronized void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException {
+        getLog().debug("Updating parent to " + sourceVersion);
 
-        if ( PomHelper.setProjectParentVersion( pom, sourceVersion ) )
-        {
-            getLog().debug( "Made an update to " + sourceVersion );
+        if (PomHelper.setProjectParentVersion(pom, sourceVersion)) {
+            getLog().debug("Made an update to " + sourceVersion);
         }
     }
-
 }

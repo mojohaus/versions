@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -44,9 +45,7 @@ import org.codehaus.plexus.i18n.I18N;
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
  * plugins of a project.
  */
-public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUpdatesModel>
-{
-
+public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUpdatesModel> {
 
     private static final PropertyComparator PROPERTIES_COMPARATOR = PropertyComparator.INSTANCE;
 
@@ -63,7 +62,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
      *
      * @since 1.0-beta-1
      */
-    @Parameter( property = "includeProperties" )
+    @Parameter(property = "includeProperties")
     private String includeProperties = null;
 
     /**
@@ -71,7 +70,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
      *
      * @since 1.0-beta-1
      */
-    @Parameter( property = "excludeProperties" )
+    @Parameter(property = "excludeProperties")
     private String excludeProperties = null;
 
     /**
@@ -79,7 +78,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
      *
      * @since 1.0-beta-1
      */
-    @Parameter( property = "autoLinkItems", defaultValue = "true" )
+    @Parameter(property = "autoLinkItems", defaultValue = "true")
     private boolean autoLinkItems;
 
     /**
@@ -87,7 +86,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
      *
      * @since 2.14.0
      */
-    @Parameter( property = "includeParent", defaultValue = "true" )
+    @Parameter(property = "includeParent", defaultValue = "true")
     private boolean includeParent = true;
 
     /**
@@ -95,56 +94,46 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
      *
      * @since 2.14.0
      */
-    @Parameter( property = "propertyUpdatesReportFormats", defaultValue = "html" )
+    @Parameter(property = "propertyUpdatesReportFormats", defaultValue = "html")
     protected String[] formats = new String[] {"html"};
 
-    public AbstractPropertyUpdatesReportMojo( I18N i18n,
-                                              RepositorySystem repositorySystem,
-                                              org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                              Map<String, Wagon> wagonMap,
-                                              ReportRendererFactory rendererFactory )
-    {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
+    public AbstractPropertyUpdatesReportMojo(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
+        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isExternalReport()
-    {
+    public boolean isExternalReport() {
         return false;
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean canGenerateReport()
-    {
+    public boolean canGenerateReport() {
         return haveBuildProperties();
     }
 
-    protected boolean haveBuildProperties()
-    {
-        return getProject().getProperties() != null && !getProject().getProperties().isEmpty();
+    protected boolean haveBuildProperties() {
+        return getProject().getProperties() != null
+                && !getProject().getProperties().isEmpty();
     }
 
-    protected void doGenerateReport( Locale locale, Sink sink )
-        throws MavenReportException
-    {
-        try
-        {
-            final Map updateSet = new TreeMap<>( PROPERTIES_COMPARATOR );
-            populateUpdateSet( updateSet );
+    protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
+        try {
+            final Map updateSet = new TreeMap<>(PROPERTIES_COMPARATOR);
+            populateUpdateSet(updateSet);
 
-            renderReport( locale,
-                          sink,
-                          getPropertyUpdatesModel( updateSet ) );
+            renderReport(locale, sink, getPropertyUpdatesModel(updateSet));
+        } catch (MojoExecutionException e) {
+            throw new MavenReportException(e.getMessage(), e);
         }
-        catch ( MojoExecutionException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
-        }
-
     }
 
     /**
@@ -155,64 +144,51 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
      * @throws MavenReportException when things go wrong.
      * @throws MojoExecutionException if something goes wrong.
      * */
-    protected abstract void populateUpdateSet(
-            Map<Property, PropertyVersions> propertyCollector )
+    protected abstract void populateUpdateSet(Map<Property, PropertyVersions> propertyCollector)
             throws MojoExecutionException, MavenReportException;
 
+    private void renderReport(Locale locale, Sink sink, PropertyUpdatesModel propertyUpdatesModel)
+            throws MavenReportException {
 
-    private void renderReport( Locale locale, Sink sink, PropertyUpdatesModel propertyUpdatesModel )
-            throws MavenReportException
-    {
-
-        for ( String format : this.formats )
-        {
-            if ( "html".equals( format ) )
-            {
-                this.rendererFactory.createReportRenderer( getOutputName(), sink, locale, propertyUpdatesModel )
+        for (String format : this.formats) {
+            if ("html".equals(format)) {
+                this.rendererFactory
+                        .createReportRenderer(getOutputName(), sink, locale, propertyUpdatesModel)
                         .render();
-            }
-            else if ( "xml".equals( format ) )
-            {
-                Path outputDir = Paths.get( getProject().getBuild().getDirectory() );
-                if ( !Files.exists( outputDir ) )
-                {
-                    try
-                    {
-                        Files.createDirectories( outputDir );
-                    }
-                    catch ( IOException e )
-                    {
-                        throw new MavenReportException( "Could not create the output directory" );
+            } else if ("xml".equals(format)) {
+                Path outputDir = Paths.get(getProject().getBuild().getDirectory());
+                if (!Files.exists(outputDir)) {
+                    try {
+                        Files.createDirectories(outputDir);
+                    } catch (IOException e) {
+                        throw new MavenReportException("Could not create the output directory");
                     }
                 }
-                Path outputFile = outputDir.resolve( getOutputName() + ".xml" );
-                new PropertyUpdatesXmlReportRenderer( propertyUpdatesModel, outputFile ).render();
+                Path outputFile = outputDir.resolve(getOutputName() + ".xml");
+                new PropertyUpdatesXmlReportRenderer(propertyUpdatesModel, outputFile).render();
             }
         }
     }
 
-    private PropertyUpdatesModel getPropertyUpdatesModel( Map<Property, PropertyVersions> updateSet )
-    {
-        return new PropertyUpdatesModel( PROPERTIES_COMPARATOR, updateSet );
+    private PropertyUpdatesModel getPropertyUpdatesModel(Map<Property, PropertyVersions> updateSet) {
+        return new PropertyUpdatesModel(PROPERTIES_COMPARATOR, updateSet);
     }
 
-    protected VersionPropertiesMapRequest getRequest( MavenProject project )
-    {
+    protected VersionPropertiesMapRequest getRequest(MavenProject project) {
         return VersionPropertiesMapRequest.builder()
-                .withMavenProject( project )
-                .withPropertyDefinitions( this.properties )
-                .withIncludeProperties( this.includeProperties )
-                .withExcludeProperties( this.excludeProperties )
-                .withIncludeParent( this.includeParent )
-                .withAutoLinkItems( this.autoLinkItems )
+                .withMavenProject(project)
+                .withPropertyDefinitions(this.properties)
+                .withIncludeProperties(this.includeProperties)
+                .withExcludeProperties(this.excludeProperties)
+                .withIncludeParent(this.includeParent)
+                .withAutoLinkItems(this.autoLinkItems)
                 .build();
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getOutputName()
-    {
+    public String getOutputName() {
         return "property-updates-report";
     }
 }

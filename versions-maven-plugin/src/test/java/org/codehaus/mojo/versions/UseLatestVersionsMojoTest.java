@@ -41,295 +41,325 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings( "deprecation" )
-public class UseLatestVersionsMojoTest
-{
+@SuppressWarnings("deprecation")
+public class UseLatestVersionsMojoTest {
     private UseLatestVersionsMojo mojo;
     private TestChangeRecorder changeRecorder;
 
     @Before
-    public void setUp() throws Exception
-    {
-        RepositorySystem repositorySystemMock = mock( RepositorySystem.class );
-        when( repositorySystemMock.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer( invocation ->
-        {
-            Dependency dependency = invocation.getArgument( 0 );
-            return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(),
-                    dependency.getScope(), dependency.getType(),
-                    dependency.getClassifier() != null ? dependency.getClassifier() : "default",
-                    new DefaultArtifactHandlerStub( "default" ) );
-        } );
+    public void setUp() throws Exception {
+        RepositorySystem repositorySystemMock = mock(RepositorySystem.class);
+        when(repositorySystemMock.createDependencyArtifact(any(Dependency.class)))
+                .thenAnswer(invocation -> {
+                    Dependency dependency = invocation.getArgument(0);
+                    return new DefaultArtifact(
+                            dependency.getGroupId(),
+                            dependency.getArtifactId(),
+                            dependency.getVersion(),
+                            dependency.getScope(),
+                            dependency.getType(),
+                            dependency.getClassifier() != null ? dependency.getClassifier() : "default",
+                            new DefaultArtifactHandlerStub("default"));
+                });
 
-        org.eclipse.aether.RepositorySystem aetherRepositorySystem = mockAetherRepositorySystem(
-                new HashMap<String, String[]>()
-        {{
-            put( "dependency-artifact", new String[] {"1.1.1-SNAPSHOT", "1.1.0", "1.1.0-SNAPSHOT", "1.0.0",
-                    "1.0.0-SNAPSHOT", "0.9.0"} );
-            put( "poison-artifact", new String[] {"1.1.1.1-SNAPSHOT", "1.1.1.0", "1.1.1.0-SNAPSHOT", "1.0.0.0",
-                    "1.0.0.0-SNAPSHOT", "0.9.0.0"} );
-            put( "other-artifact", new String[] {"1.0", "2.0"} );
-        }} );
+        org.eclipse.aether.RepositorySystem aetherRepositorySystem =
+                mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                    {
+                        put("dependency-artifact", new String[] {
+                            "1.1.1-SNAPSHOT", "1.1.0", "1.1.0-SNAPSHOT", "1.0.0", "1.0.0-SNAPSHOT", "0.9.0"
+                        });
+                        put("poison-artifact", new String[] {
+                            "1.1.1.1-SNAPSHOT", "1.1.1.0", "1.1.1.0-SNAPSHOT", "1.0.0.0", "1.0.0.0-SNAPSHOT", "0.9.0.0"
+                        });
+                        put("other-artifact", new String[] {"1.0", "2.0"});
+                    }
+                });
 
         changeRecorder = new TestChangeRecorder();
 
-        mojo = new UseLatestVersionsMojo( repositorySystemMock,
-                aetherRepositorySystem,
-                null,
-                changeRecorder.asTestMap() )
-        {{
-            reactorProjects = emptyList();
-            MavenProject project = new MavenProject()
-            {{
-                setModel( new Model()
-                {{
-                    setGroupId( "default-group" );
-                    setArtifactId( "project-artifact" );
-                    setVersion( "1.0.0-SNAPSHOT" );
+        mojo =
+                new UseLatestVersionsMojo(
+                        repositorySystemMock, aetherRepositorySystem, null, changeRecorder.asTestMap()) {
+                    {
+                        reactorProjects = emptyList();
+                        MavenProject project = new MavenProject() {
+                            {
+                                setModel(new Model() {
+                                    {
+                                        setGroupId("default-group");
+                                        setArtifactId("project-artifact");
+                                        setVersion("1.0.0-SNAPSHOT");
 
-                    setDependencies( Collections.singletonList(
-                            DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                                    "default", "pom", SCOPE_COMPILE ) ) );
+                                        setDependencies(Collections.singletonList(DependencyBuilder.dependencyWith(
+                                                "default-group",
+                                                "dependency-artifact",
+                                                "1.1.1-SNAPSHOT",
+                                                "default",
+                                                "pom",
+                                                SCOPE_COMPILE)));
 
-                    setDependencyManagement( new DependencyManagement() );
-                    getDependencyManagement().setDependencies( Collections.singletonList(
-                            DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                                    "default", "pom", SCOPE_COMPILE ) ) );
-                }} );
-            }};
-            setProject( project );
+                                        setDependencyManagement(new DependencyManagement());
+                                        getDependencyManagement()
+                                                .setDependencies(
+                                                        Collections.singletonList(DependencyBuilder.dependencyWith(
+                                                                "default-group",
+                                                                "dependency-artifact",
+                                                                "1.1.1-SNAPSHOT",
+                                                                "default",
+                                                                "pom",
+                                                                SCOPE_COMPILE)));
+                                    }
+                                });
+                            }
+                        };
+                        setProject(project);
 
-            session = mockMavenSession();
-        }};
-        setVariableValueToObject( mojo, "processDependencyManagement", false );
+                        session = mockMavenSession();
+                    }
+                };
+        setVariableValueToObject(mojo, "processDependencyManagement", false);
     }
 
     @Test
     public void testDependenciesDowngradeIncremental()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "allowSnapshots", false );
-        setVariableValueToObject( mojo, "allowMajorUpdates", false );
-        setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
-        setVariableValueToObject( mojo, "allowDowngrade", true );
+                    VersionRetrievalException {
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "allowSnapshots", false);
+        setVariableValueToObject(mojo, "allowMajorUpdates", false);
+        setVariableValueToObject(mojo, "allowMinorUpdates", true);
+        setVariableValueToObject(mojo, "allowIncrementalUpdates", true);
+        setVariableValueToObject(mojo, "allowDowngrade", true);
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(), hasItem(
-            new DefaultVersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultVersionChange("default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
     public void testDependenciesDowngradeMinor()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "allowSnapshots", false );
-        setVariableValueToObject( mojo, "allowMajorUpdates", false );
-        setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
-        setVariableValueToObject( mojo, "allowDowngrade", true );
+                    VersionRetrievalException {
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "allowSnapshots", false);
+        setVariableValueToObject(mojo, "allowMajorUpdates", false);
+        setVariableValueToObject(mojo, "allowMinorUpdates", true);
+        setVariableValueToObject(mojo, "allowIncrementalUpdates", true);
+        setVariableValueToObject(mojo, "allowDowngrade", true);
 
-        mojo.getProject().getModel().setDependencies( Collections.singletonList(
-                DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.0-SNAPSHOT",
-                        "default", "pom", SCOPE_COMPILE ) ) );
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Collections.singletonList(DependencyBuilder.dependencyWith(
+                        "default-group", "dependency-artifact", "1.1.0-SNAPSHOT", "default", "pom", SCOPE_COMPILE)));
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(),
-                hasItem( new DefaultVersionChange( "default-group", "dependency-artifact",
-                                                   "1.1.0-SNAPSHOT", "1.1.0" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultVersionChange(
+                        "default-group", "dependency-artifact",
+                        "1.1.0-SNAPSHOT", "1.1.0")));
     }
 
     @Test
     public void testDependenciesDowngradeMajor()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "allowSnapshots", false );
-        setVariableValueToObject( mojo, "allowMajorUpdates", true );
-        setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
-        setVariableValueToObject( mojo, "allowDowngrade", true );
+                    VersionRetrievalException {
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "allowSnapshots", false);
+        setVariableValueToObject(mojo, "allowMajorUpdates", true);
+        setVariableValueToObject(mojo, "allowMinorUpdates", true);
+        setVariableValueToObject(mojo, "allowIncrementalUpdates", true);
+        setVariableValueToObject(mojo, "allowDowngrade", true);
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(),
-                hasItem( new DefaultVersionChange( "default-group", "dependency-artifact",
-                                                   "1.1.1-SNAPSHOT", "1.1.0" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultVersionChange(
+                        "default-group", "dependency-artifact",
+                        "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
     public void testDependencyManagementDowngrade()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        setVariableValueToObject( mojo, "processDependencyManagement", true );
-        setVariableValueToObject( mojo, "allowSnapshots", false );
-        setVariableValueToObject( mojo, "allowMajorUpdates", false );
-        setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
-        setVariableValueToObject( mojo, "allowDowngrade", true );
+                    VersionRetrievalException {
+        setVariableValueToObject(mojo, "processDependencyManagement", true);
+        setVariableValueToObject(mojo, "allowSnapshots", false);
+        setVariableValueToObject(mojo, "allowMajorUpdates", false);
+        setVariableValueToObject(mojo, "allowMinorUpdates", true);
+        setVariableValueToObject(mojo, "allowIncrementalUpdates", true);
+        setVariableValueToObject(mojo, "allowDowngrade", true);
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.getRawModel( any( MavenProject.class ) ) )
-                    .thenReturn( mojo.getProject().getModel() );
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
+                    .thenReturn(mojo.getProject().getModel());
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(), hasItem(
-            new DefaultVersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultVersionChange("default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
     public void testParentDowngrade()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        setVariableValueToObject( mojo, "processParent", true );
-        setVariableValueToObject( mojo, "allowSnapshots", false );
-        setVariableValueToObject( mojo, "allowMajorUpdates", false );
-        setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
-        setVariableValueToObject( mojo, "allowDowngrade", true );
+                    VersionRetrievalException {
+        setVariableValueToObject(mojo, "processParent", true);
+        setVariableValueToObject(mojo, "allowSnapshots", false);
+        setVariableValueToObject(mojo, "allowMajorUpdates", false);
+        setVariableValueToObject(mojo, "allowMinorUpdates", true);
+        setVariableValueToObject(mojo, "allowIncrementalUpdates", true);
+        setVariableValueToObject(mojo, "allowDowngrade", true);
 
-        mojo.getProject().setParentArtifact(
-                new DefaultArtifact( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "compile", "pom",
-                        "default", null ) );
-        mojo.getProject().setParent( new MavenProject()
-        {{
-            setGroupId( mojo.getProject().getParentArtifact().getGroupId() );
-            setArtifactId( mojo.getProject().getParentArtifact().getArtifactId() );
-            setVersion( mojo.getProject().getParentArtifact().getVersion() );
-        }} );
+        mojo.getProject()
+                .setParentArtifact(new DefaultArtifact(
+                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "compile", "pom", "default", null));
+        mojo.getProject().setParent(new MavenProject() {
+            {
+                setGroupId(mojo.getProject().getParentArtifact().getGroupId());
+                setArtifactId(mojo.getProject().getParentArtifact().getArtifactId());
+                setVersion(mojo.getProject().getParentArtifact().getVersion());
+            }
+        });
 
-
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(), hasItem(
-            new DefaultVersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultVersionChange("default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
     public void testPoisonDependencyVersion()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        mojo.getProject().getModel().setDependencies( Arrays.asList(
-                DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT",
-                        "default", "pom", SCOPE_COMPILE ),
-                DependencyBuilder.dependencyWith( "default-group", "poison-artifact", "1.1.1.1-SNAPSHOT",
-                        "default", "pom", SCOPE_COMPILE )
-        ) );
+                    VersionRetrievalException {
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Arrays.asList(
+                        DependencyBuilder.dependencyWith(
+                                "default-group",
+                                "dependency-artifact",
+                                "1.1.1-SNAPSHOT",
+                                "default",
+                                "pom",
+                                SCOPE_COMPILE),
+                        DependencyBuilder.dependencyWith(
+                                "default-group",
+                                "poison-artifact",
+                                "1.1.1.1-SNAPSHOT",
+                                "default",
+                                "pom",
+                                SCOPE_COMPILE)));
 
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "allowSnapshots", false );
-        setVariableValueToObject( mojo, "allowMajorUpdates", false );
-        setVariableValueToObject( mojo, "allowMinorUpdates", true );
-        setVariableValueToObject( mojo, "allowIncrementalUpdates", true );
-        setVariableValueToObject( mojo, "allowDowngrade", true );
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "allowSnapshots", false);
+        setVariableValueToObject(mojo, "allowMajorUpdates", false);
+        setVariableValueToObject(mojo, "allowMinorUpdates", true);
+        setVariableValueToObject(mojo, "allowIncrementalUpdates", true);
+        setVariableValueToObject(mojo, "allowDowngrade", true);
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
         // So, the regular update should take place despite an irregular, or — if I may — "poison", dependency
         // being present in the dependency list
-        assertThat( changeRecorder.getChanges(), hasItem(
-            new DefaultVersionChange( "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultVersionChange("default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
     public void testIgnoredVersions()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "ignoredVersions", singleton( "1.1.0" ) );
+                    VersionRetrievalException {
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "ignoredVersions", singleton("1.1.0"));
 
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(), Is.is( empty() ) );
+        assertThat(changeRecorder.getChanges(), Is.is(empty()));
     }
 
     @Test
     public void testIncludeFilter()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        mojo.getProject().getModel().setDependencies( Arrays.asList(
-                DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "0.9.0",
-                        "default", "pom", SCOPE_COMPILE ),
-                DependencyBuilder.dependencyWith( "default-group", "other-artifact", "1.0",
-                        "default", "pom", SCOPE_COMPILE )
-        ) );
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "includes", new String[] {"default-group:other-artifact"} );
+                    VersionRetrievalException {
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Arrays.asList(
+                        DependencyBuilder.dependencyWith(
+                                "default-group", "dependency-artifact", "0.9.0", "default", "pom", SCOPE_COMPILE),
+                        DependencyBuilder.dependencyWith(
+                                "default-group", "other-artifact", "1.0", "default", "pom", SCOPE_COMPILE)));
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "includes", new String[] {"default-group:other-artifact"});
 
-
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(), hasSize( 1 ) );
-        assertThat( changeRecorder.getChanges(),
-                hasItem( new DefaultVersionChange( "default-group", "other-artifact", "1.0", "2.0" ) ) );
+        assertThat(changeRecorder.getChanges(), hasSize(1));
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultVersionChange("default-group", "other-artifact", "1.0", "2.0")));
     }
 
     @Test
     public void testExcludeFilter()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-            VersionRetrievalException
-    {
-        mojo.getProject().getModel().setDependencies( Arrays.asList(
-                DependencyBuilder.dependencyWith( "default-group", "dependency-artifact", "0.9.0",
-                        "default", "pom", SCOPE_COMPILE ),
-                DependencyBuilder.dependencyWith( "default-group", "other-artifact", "1.0",
-                        "default", "pom", SCOPE_COMPILE )
-        ) );
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "excludes", new String[] {"default-group:other-artifact"} );
+                    VersionRetrievalException {
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Arrays.asList(
+                        DependencyBuilder.dependencyWith(
+                                "default-group", "dependency-artifact", "0.9.0", "default", "pom", SCOPE_COMPILE),
+                        DependencyBuilder.dependencyWith(
+                                "default-group", "other-artifact", "1.0", "default", "pom", SCOPE_COMPILE)));
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "excludes", new String[] {"default-group:other-artifact"});
 
-
-        try ( MockedStatic<PomHelper> pomHelper = mockStatic( PomHelper.class ) )
-        {
-            pomHelper.when( () -> PomHelper.setDependencyVersion( any(), any(), any(), any(), any(), any() ) )
-                    .thenReturn( true );
-            mojo.update( null );
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
         }
-        assertThat( changeRecorder.getChanges(), hasSize( 1 ) );
-        assertThat( changeRecorder.getChanges(),
-                not( hasItem( new DefaultVersionChange( "default-group", "other-artifact", "1.0",
-                                                        "2.0" ) ) ) );
+        assertThat(changeRecorder.getChanges(), hasSize(1));
+        assertThat(
+                changeRecorder.getChanges(),
+                not(hasItem(new DefaultVersionChange("default-group", "other-artifact", "1.0", "2.0"))));
     }
 }

@@ -50,10 +50,8 @@ import org.codehaus.mojo.versions.utils.SegmentUtils;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "display-property-updates", threadSafe = true )
-public class DisplayPropertyUpdatesMojo
-    extends AbstractVersionsDisplayMojo
-{
+@Mojo(name = "display-property-updates", threadSafe = true)
+public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * The width to pad info messages.
@@ -77,7 +75,7 @@ public class DisplayPropertyUpdatesMojo
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "includeProperties" )
+    @Parameter(property = "includeProperties")
     private String includeProperties = null;
 
     /**
@@ -86,7 +84,7 @@ public class DisplayPropertyUpdatesMojo
      * @parameter property="excludeProperties"
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "excludeProperties" )
+    @Parameter(property = "excludeProperties")
     private String excludeProperties = null;
 
     /**
@@ -94,7 +92,7 @@ public class DisplayPropertyUpdatesMojo
      *
      * @since 1.0-alpha-2
      */
-    @Parameter( property = "autoLinkItems", defaultValue = "true" )
+    @Parameter(property = "autoLinkItems", defaultValue = "true")
     private boolean autoLinkItems;
 
     /**
@@ -102,7 +100,7 @@ public class DisplayPropertyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
     private boolean allowMajorUpdates;
 
     /**
@@ -112,7 +110,7 @@ public class DisplayPropertyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
     private boolean allowMinorUpdates;
 
     /**
@@ -123,7 +121,7 @@ public class DisplayPropertyUpdatesMojo
      *
      * @since 2.5
      */
-    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     private boolean allowIncrementalUpdates;
 
     /**
@@ -131,7 +129,7 @@ public class DisplayPropertyUpdatesMojo
      *
      * @since 2.14.0
      */
-    @Parameter( property = "includeParent", defaultValue = "false" )
+    @Parameter(property = "includeParent", defaultValue = "false")
     protected boolean includeParent = true;
 
     // -------------------------- STATIC METHODS --------------------------
@@ -139,122 +137,109 @@ public class DisplayPropertyUpdatesMojo
     // -------------------------- OTHER METHODS --------------------------
 
     @Inject
-    public DisplayPropertyUpdatesMojo( RepositorySystem repositorySystem,
-                                       org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                       Map<String, Wagon> wagonMap,
-                                       Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public DisplayPropertyUpdatesMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
+    public void execute() throws MojoExecutionException, MojoFailureException {
         logInit();
         List<String> current = new ArrayList<>();
         List<String> updates = new ArrayList<>();
 
-        Map<Property, PropertyVersions> propertyVersions =
-                this.getHelper().getVersionPropertiesMap( VersionsHelper.VersionPropertiesMapRequest.builder()
-                        .withMavenProject( getProject() )
-                        .withPropertyDefinitions( properties )
-                        .withIncludeProperties( includeProperties )
-                        .withExcludeProperties( excludeProperties )
-                        .withIncludeParent( includeParent )
-                        .withAutoLinkItems( autoLinkItems )
-                        .build() );
-        for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
-        {
+        Map<Property, PropertyVersions> propertyVersions = this.getHelper()
+                .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
+                        .withMavenProject(getProject())
+                        .withPropertyDefinitions(properties)
+                        .withIncludeProperties(includeProperties)
+                        .withExcludeProperties(excludeProperties)
+                        .withIncludeParent(includeParent)
+                        .withAutoLinkItems(autoLinkItems)
+                        .build());
+        for (Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet()) {
             Property property = entry.getKey();
             PropertyVersions version = entry.getValue();
 
-            final String currentVersion = getProject().getProperties().getProperty( property.getName() );
-            if ( currentVersion == null )
-            {
+            final String currentVersion = getProject().getProperties().getProperty(property.getName());
+            if (currentVersion == null) {
                 continue;
             }
 
-            Optional<Segment> unchangedSegment =
-                    SegmentUtils.determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                            allowIncrementalUpdates, getLog() );
-            try
-            {
-                ArtifactVersion winner = version.getNewestVersion( currentVersion, property, this.allowSnapshots,
-                        this.reactorProjects, this.getHelper(), false, unchangedSegment );
-                if ( winner != null && !currentVersion.equals( winner.toString() ) )
-                {
+            Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                    allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
+            try {
+                ArtifactVersion winner = version.getNewestVersion(
+                        currentVersion,
+                        property,
+                        this.allowSnapshots,
+                        this.reactorProjects,
+                        this.getHelper(),
+                        false,
+                        unchangedSegment);
+                if (winner != null && !currentVersion.equals(winner.toString())) {
                     StringBuilder buf = new StringBuilder();
-                    buf.append( "${" );
-                    buf.append( property.getName() );
-                    buf.append( "} " );
+                    buf.append("${");
+                    buf.append(property.getName());
+                    buf.append("} ");
                     final String newVersion = winner.toString();
-                    int padding =
-                            INFO_PAD_SIZE - currentVersion.length() - newVersion.length() - 4
-                                    + getOutputLineWidthOffset();
-                    while ( buf.length() < padding )
-                    {
-                        buf.append( '.' );
+                    int padding = INFO_PAD_SIZE
+                            - currentVersion.length()
+                            - newVersion.length()
+                            - 4
+                            + getOutputLineWidthOffset();
+                    while (buf.length() < padding) {
+                        buf.append('.');
                     }
-                    buf.append( ' ' );
-                    buf.append( currentVersion );
-                    buf.append( " -> " );
-                    buf.append( newVersion );
-                    updates.add( buf.toString() );
-                }
-                else
-                {
+                    buf.append(' ');
+                    buf.append(currentVersion);
+                    buf.append(" -> ");
+                    buf.append(newVersion);
+                    updates.add(buf.toString());
+                } else {
                     StringBuilder buf = new StringBuilder();
-                    buf.append( "${" );
-                    buf.append( property.getName() );
-                    buf.append( "} " );
+                    buf.append("${");
+                    buf.append(property.getName());
+                    buf.append("} ");
                     int padding = INFO_PAD_SIZE - currentVersion.length() + getOutputLineWidthOffset();
-                    while ( buf.length() < padding )
-                    {
-                        buf.append( '.' );
+                    while (buf.length() < padding) {
+                        buf.append('.');
                     }
-                    buf.append( ' ' );
-                    buf.append( currentVersion );
-                    current.add( buf.toString() );
+                    buf.append(' ');
+                    buf.append(currentVersion);
+                    current.add(buf.toString());
                 }
-            }
-            catch ( InvalidSegmentException | InvalidVersionSpecificationException e )
-            {
-                getLog().warn( String.format( "Skipping the processing of %s:%s due to: %s", property.getName(),
-                        property.getVersion(), e.getMessage() ) );
+            } catch (InvalidSegmentException | InvalidVersionSpecificationException e) {
+                getLog().warn(String.format(
+                        "Skipping the processing of %s:%s due to: %s",
+                        property.getName(), property.getVersion(), e.getMessage()));
             }
         }
 
-        logLine( false, "" );
-        if ( !current.isEmpty() )
-        {
-            logLine( false, "The following version properties are referencing the newest available version:" );
-            for ( String s : new TreeSet<>( current ) )
-            {
-                logLine( false, "  " + s );
+        logLine(false, "");
+        if (!current.isEmpty()) {
+            logLine(false, "The following version properties are referencing the newest available version:");
+            for (String s : new TreeSet<>(current)) {
+                logLine(false, "  " + s);
             }
         }
-        if ( updates.isEmpty() && current.isEmpty() )
-        {
-            logLine( false, "This project does not have any properties associated with versions." );
-        }
-        else if ( updates.isEmpty() )
-        {
-            logLine( false, "All version properties are referencing the newest version available." );
+        if (updates.isEmpty() && current.isEmpty()) {
+            logLine(false, "This project does not have any properties associated with versions.");
+        } else if (updates.isEmpty()) {
+            logLine(false, "All version properties are referencing the newest version available.");
         }
 
-        if ( !updates.isEmpty() )
-        {
-            logLine( false, "The following version property updates are available:" );
-            for ( String update : new TreeSet<>( updates ) )
-            {
-                logLine( false, "  " + update );
+        if (!updates.isEmpty()) {
+            logLine(false, "The following version property updates are available:");
+            for (String update : new TreeSet<>(updates)) {
+                logLine(false, "  " + update);
             }
         }
-        logLine( false, "" );
+        logLine(false, "");
     }
 
     @Override
-    protected void update( ModifiedPomXMLEventReader pom )
-    {
-    }
+    protected void update(ModifiedPomXMLEventReader pom) {}
 }

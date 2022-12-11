@@ -42,8 +42,7 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public interface VersionsHelper
-{
+public interface VersionsHelper {
     /**
      * Gets the logger used by this helper.
      *
@@ -58,7 +57,7 @@ public interface VersionsHelper
      * @return the version comparator to use.
      * @since 1.0-alpha-3
      */
-    VersionComparator getVersionComparator( Artifact artifact );
+    VersionComparator getVersionComparator(Artifact artifact);
 
     /**
      * Returns the version comparator to use for the specified groupId and artifactId.
@@ -68,7 +67,7 @@ public interface VersionsHelper
      * @return the version comparator to use.
      * @since 1.0-alpha-3
      */
-    VersionComparator getVersionComparator( String groupId, String artifactId );
+    VersionComparator getVersionComparator(String groupId, String artifactId);
 
     /**
      * Shorthand method for <code>repositorySystem.createPluginArtifact(...)</code>.
@@ -79,7 +78,7 @@ public interface VersionsHelper
      * @return the corresponding plugin artifact.
      * @since 1.0-alpha-3
      */
-    Artifact createPluginArtifact( String groupId, String artifactId, String version );
+    Artifact createPluginArtifact(String groupId, String artifactId, String version);
 
     /**
      * Shorthand method for <code>repositorySystem.createDependencyArtifact(...)</code>.
@@ -94,8 +93,14 @@ public interface VersionsHelper
      * @return The corresponding dependency artifact.
      * @since 1.0-alpha-3
      */
-    Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
-                                       String classifier, String scope, boolean optional );
+    Artifact createDependencyArtifact(
+            String groupId,
+            String artifactId,
+            String version,
+            String type,
+            String classifier,
+            String scope,
+            boolean optional);
 
     /**
      * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code>.
@@ -109,8 +114,8 @@ public interface VersionsHelper
      * @return The corresponding dependency artifact.
      * @since 1.0-beta-1
      */
-    Artifact createDependencyArtifact( String groupId, String artifactId, String version, String type,
-                                       String classifier, String scope );
+    Artifact createDependencyArtifact(
+            String groupId, String artifactId, String version, String type, String classifier, String scope);
 
     /**
      * Shorthand method for <code>repositorySystem.createDependencyArtifact(...)</code> which extracts the
@@ -120,7 +125,7 @@ public interface VersionsHelper
      * @return The corresponding dependency artifact.
      * @since 1.0-alpha-3
      */
-    Artifact createDependencyArtifact( Dependency dependency );
+    Artifact createDependencyArtifact(Dependency dependency);
 
     /**
      * Takes a {@link List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a
@@ -130,7 +135,7 @@ public interface VersionsHelper
      * @return a {@link Set} of {@link Artifact} instances.
      * @since 1.0-alpha-3
      */
-    Set<Artifact> extractArtifacts( Collection<MavenProject> mavenProjects );
+    Set<Artifact> extractArtifacts(Collection<MavenProject> mavenProjects);
 
     /**
      * Creates an {@link ArtifactVersion} instance from a string.
@@ -139,7 +144,7 @@ public interface VersionsHelper
      * @return The artifact version.
      * @since 1.0-beta-1
      */
-    ArtifactVersion createArtifactVersion( String version );
+    ArtifactVersion createArtifactVersion(String version);
 
     /**
      * Looks up the versions of the specified artifact that are available in either the local repository, or the
@@ -152,7 +157,7 @@ public interface VersionsHelper
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-alpha-3
      */
-    ArtifactVersions lookupArtifactVersions( Artifact artifact, boolean usePluginRepositories )
+    ArtifactVersions lookupArtifactVersions(Artifact artifact, boolean usePluginRepositories)
             throws VersionRetrievalException;
 
     /**
@@ -167,8 +172,7 @@ public interface VersionsHelper
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-alpha-3
      */
-    ArtifactVersions lookupArtifactVersions( Artifact artifact, VersionRange versionRange,
-                                             boolean usePluginRepositories )
+    ArtifactVersions lookupArtifactVersions(Artifact artifact, VersionRange versionRange, boolean usePluginRepositories)
             throws VersionRetrievalException;
 
     /**
@@ -180,9 +184,8 @@ public interface VersionsHelper
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
-    Map<Dependency, ArtifactVersions> lookupDependenciesUpdates( Set<Dependency> dependencies,
-                                                                 boolean usePluginRepositories )
-            throws VersionRetrievalException;
+    Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
+            Set<Dependency> dependencies, boolean usePluginRepositories) throws VersionRetrievalException;
 
     /**
      * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency.
@@ -193,7 +196,7 @@ public interface VersionsHelper
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
-    ArtifactVersions lookupDependencyUpdates( Dependency dependency, boolean usePluginRepositories )
+    ArtifactVersions lookupDependencyUpdates(Dependency dependency, boolean usePluginRepositories)
             throws VersionRetrievalException;
 
     /**
@@ -205,7 +208,7 @@ public interface VersionsHelper
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
-    Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates( Set<Plugin> plugins, boolean allowSnapshots )
+    Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates(Set<Plugin> plugins, boolean allowSnapshots)
             throws VersionRetrievalException;
 
     /**
@@ -216,7 +219,7 @@ public interface VersionsHelper
      * @return The plugin update details.
      * @since 1.0-beta-1
      */
-    PluginUpdatesDetails lookupPluginUpdates( Plugin plugin, boolean allowSnapshots ) throws VersionRetrievalException;
+    PluginUpdatesDetails lookupPluginUpdates(Plugin plugin, boolean allowSnapshots) throws VersionRetrievalException;
 
     /**
      * Returns an {@link ExpressionEvaluator} for the specified project.
@@ -225,7 +228,7 @@ public interface VersionsHelper
      * @return an {@link ExpressionEvaluator} for the specified project.
      * @since 1.0-beta-1
      */
-    ExpressionEvaluator getExpressionEvaluator( MavenProject project );
+    ExpressionEvaluator getExpressionEvaluator(MavenProject project);
 
     /**
      * Returns a map of {@link org.codehaus.mojo.versions.api.PropertyVersions} values keyed by
@@ -237,15 +240,14 @@ public interface VersionsHelper
      *         {@link Property} instances.
      * @throws MojoExecutionException if something goes wrong.
      */
-    Map<Property, PropertyVersions> getVersionPropertiesMap( VersionPropertiesMapRequest request )
-        throws MojoExecutionException;
+    Map<Property, PropertyVersions> getVersionPropertiesMap(VersionPropertiesMapRequest request)
+            throws MojoExecutionException;
 
     /**
      * Argument builder class for
      * {@link VersionsHelper#getVersionPropertiesMap(VersionPropertiesMapRequest)}.
      */
-    class VersionPropertiesMapRequest
-    {
+    class VersionPropertiesMapRequest {
         private MavenProject mavenProject;
         private Property[] propertyDefinitions;
         private String includeProperties;
@@ -257,8 +259,7 @@ public interface VersionsHelper
          * Returns the {@link MavenProject} object
          * @return {@link MavenProject} object
          */
-        protected MavenProject getMavenProject()
-        {
+        protected MavenProject getMavenProject() {
             return mavenProject;
         }
 
@@ -266,8 +267,7 @@ public interface VersionsHelper
          * Returns the {@link Property} array
          * @return {@link Property} array
          */
-        protected Property[] getPropertyDefinitions()
-        {
+        protected Property[] getPropertyDefinitions() {
             return propertyDefinitions;
         }
 
@@ -275,8 +275,7 @@ public interface VersionsHelper
          * Returns the value of {@link #includeProperties}
          * @return value of {@link #includeProperties}
          */
-        protected String getIncludeProperties()
-        {
+        protected String getIncludeProperties() {
             return includeProperties;
         }
 
@@ -284,8 +283,7 @@ public interface VersionsHelper
          * Returns the value of {@link #excludeProperties}
          * @return value of {@link #excludeProperties}
          */
-        protected String getExcludeProperties()
-        {
+        protected String getExcludeProperties() {
             return excludeProperties;
         }
 
@@ -295,8 +293,7 @@ public interface VersionsHelper
          *
          * @return value of {@link #includeParent}
          */
-        protected boolean isIncludeParent()
-        {
+        protected boolean isIncludeParent() {
             return includeParent;
         }
 
@@ -305,8 +302,7 @@ public interface VersionsHelper
          * If not set, it is assumed to be {@code true}
          * @return value of {@link #autoLinkItems}
          */
-        protected boolean isAutoLinkItems()
-        {
+        protected boolean isAutoLinkItems() {
             return autoLinkItems;
         }
 
@@ -314,16 +310,14 @@ public interface VersionsHelper
          * Returns a new {@link Builder} instance
          * @return new {@link Builder} instance
          */
-        public static Builder builder()
-        {
+        public static Builder builder() {
             return new Builder();
         }
 
         /**
          * Builder class for {@link VersionPropertiesMapRequest}
          */
-        public static class Builder
-        {
+        public static class Builder {
             private MavenProject mavenProject;
             private Property[] propertyDefinitions;
             private String includeProperties;
@@ -331,17 +325,14 @@ public interface VersionsHelper
             private Boolean includeParent;
             private Boolean autoLinkItems;
 
-            private Builder()
-            {
-            }
+            private Builder() {}
 
             /**
              * Supplies the {@link MavenProject} instance
              * @param mavenProject {@link MavenProject} instance
              * @return {@link Builder} instance
              */
-            public Builder withMavenProject( MavenProject mavenProject )
-            {
+            public Builder withMavenProject(MavenProject mavenProject) {
                 this.mavenProject = mavenProject;
                 return this;
             }
@@ -351,8 +342,7 @@ public interface VersionsHelper
              * @param propertyDefinitions array of property definitions
              * @return {@link Builder} instance
              */
-            public Builder withPropertyDefinitions( Property[] propertyDefinitions )
-            {
+            public Builder withPropertyDefinitions(Property[] propertyDefinitions) {
                 this.propertyDefinitions = propertyDefinitions;
                 return this;
             }
@@ -362,8 +352,7 @@ public interface VersionsHelper
              * @param includeProperties comma-delimited properties to include
              * @return {@link Builder} instance
              */
-            public Builder withIncludeProperties( String includeProperties )
-            {
+            public Builder withIncludeProperties(String includeProperties) {
                 this.includeProperties = includeProperties;
                 return this;
             }
@@ -373,8 +362,7 @@ public interface VersionsHelper
              * @param excludeProperties comma-delimited properties to exclude
              * @return {@link Builder} instance
              */
-            public Builder withExcludeProperties( String excludeProperties )
-            {
+            public Builder withExcludeProperties(String excludeProperties) {
                 this.excludeProperties = excludeProperties;
                 return this;
             }
@@ -384,8 +372,7 @@ public interface VersionsHelper
              * @param includeParent whether parent POMs should be included
              * @return {@link Builder} instance
              */
-            public Builder withIncludeParent( boolean includeParent )
-            {
+            public Builder withIncludeParent(boolean includeParent) {
                 this.includeParent = includeParent;
                 return this;
             }
@@ -395,8 +382,7 @@ public interface VersionsHelper
              * @param autoLinkItems whether to automatically infer associations
              * @return {@link Builder} instance
              */
-            public Builder withAutoLinkItems( boolean autoLinkItems )
-            {
+            public Builder withAutoLinkItems(boolean autoLinkItems) {
                 this.autoLinkItems = autoLinkItems;
                 return this;
             }
@@ -405,8 +391,7 @@ public interface VersionsHelper
              * Returns the {@link VersionPropertiesMapRequest} instance
              * @return {@link VersionPropertiesMapRequest} instance
              */
-            public VersionPropertiesMapRequest build()
-            {
+            public VersionPropertiesMapRequest build() {
                 VersionPropertiesMapRequest instance = new VersionPropertiesMapRequest();
                 instance.mavenProject = this.mavenProject;
                 instance.propertyDefinitions = propertyDefinitions;
@@ -427,6 +412,5 @@ public interface VersionsHelper
      * @throws ArtifactResolutionException if resolution is unsuccessful
      * @since 1.3
      */
-    void resolveArtifact( Artifact artifact, boolean usePluginRepositories )
-        throws ArtifactResolutionException;
+    void resolveArtifact(Artifact artifact, boolean usePluginRepositories) throws ArtifactResolutionException;
 }

@@ -54,17 +54,15 @@ import static java.util.Optional.empty;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "use-next-snapshots", threadSafe = true )
-public class UseNextSnapshotsMojo
-    extends UseLatestVersionsMojoBase
-{
+@Mojo(name = "use-next-snapshots", threadSafe = true)
+public class UseNextSnapshotsMojo extends UseLatestVersionsMojoBase {
 
     /**
      * Whether to allow the major version number to be changed.
      *
      * @since 1.0-beta-1
      */
-    @Parameter( property = "allowMajorUpdates", defaultValue = "false" )
+    @Parameter(property = "allowMajorUpdates", defaultValue = "false")
     private boolean allowMajorUpdates;
 
     /**
@@ -73,7 +71,7 @@ public class UseNextSnapshotsMojo
      * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      * @since 1.0-beta-1
      */
-    @Parameter( property = "allowMinorUpdates", defaultValue = "false" )
+    @Parameter(property = "allowMinorUpdates", defaultValue = "false")
     private boolean allowMinorUpdates;
 
     /**
@@ -83,18 +81,18 @@ public class UseNextSnapshotsMojo
      * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      * @since 1.0-beta-1
      */
-    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     private boolean allowIncrementalUpdates;
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
-    public UseNextSnapshotsMojo( RepositorySystem repositorySystem,
-                                 org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                 Map<String, Wagon> wagonMap,
-                                 Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UseNextSnapshotsMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
         // the below is necessary for UseLatestVersionsMojoBase.useLatestVersions to select snapshots
         allowSnapshots = true;
     }
@@ -106,57 +104,47 @@ public class UseNextSnapshotsMojo
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
-    {
-        try
-        {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
+        try {
             DependencyManagement dependencyManagement =
-                    PomHelper.getRawModel( getProject() ).getDependencyManagement();
-            if ( dependencyManagement != null )
-            {
-                useNextSnapshots( pom, dependencyManagement.getDependencies(),
-                                  ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
+                    PomHelper.getRawModel(getProject()).getDependencyManagement();
+            if (dependencyManagement != null) {
+                useNextSnapshots(
+                        pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
             }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useNextSnapshots( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                useNextSnapshots(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
             }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                useNextSnapshots( pom, singletonList( getParentDependency() ),
-                                  ChangeRecord.ChangeKind.PARENT );
+            if (getProject().getParent() != null && isProcessingParent()) {
+                useNextSnapshots(pom, singletonList(getParentDependency()), ChangeRecord.ChangeKind.PARENT);
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void useNextSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
-                                   ChangeRecord.ChangeKind changeKind )
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException
-    {
-        Optional<Segment>
-                unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates, allowMinorUpdates,
-                allowIncrementalUpdates, getLog() );
+    private void useNextSnapshots(
+            ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
 
-        useLatestVersions( pom, dependencies,
-                           ( dep, versions ) ->
-                {
-                    try
-                    {
-                        return Arrays.stream( versions.getNewerVersions( dep.getVersion(), unchangedSegment,
-                                        true, false ) )
-                                .filter( v -> SNAPSHOT_REGEX.matcher( v.toString() ).matches() )
+        useLatestVersions(
+                pom,
+                dependencies,
+                (dep, versions) -> {
+                    try {
+                        return Arrays.stream(versions.getNewerVersions(dep.getVersion(), unchangedSegment, true, false))
+                                .filter(v ->
+                                        SNAPSHOT_REGEX.matcher(v.toString()).matches())
                                 .findFirst();
-                    }
-                    catch ( InvalidSegmentException e )
-                    {
-                        getLog().info( "Ignoring " + toString( dep ) + " as the version number is too short" );
+                    } catch (InvalidSegmentException e) {
+                        getLog().info("Ignoring " + toString(dep) + " as the version number is too short");
                         return empty();
                     }
-                }, changeKind, dep -> !SNAPSHOT_REGEX.matcher( dep.getVersion() ).matches() );
+                },
+                changeKind,
+                dep -> !SNAPSHOT_REGEX.matcher(dep.getVersion()).matches());
     }
 }

@@ -28,20 +28,19 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 /**
  * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
  */
-public class PluginUpdatesModel extends AbstractUpdatesModel<PluginUpdatesDetails>
-{
+public class PluginUpdatesModel extends AbstractUpdatesModel<PluginUpdatesDetails> {
     /**
      * Creates a new instance
      * @param pluginUpdates map of plugin updates per plugin
      * @param pluginManagementUpdates map of plugin management updates per plugin
      */
-    public PluginUpdatesModel( Map<Plugin, PluginUpdatesDetails> pluginUpdates,
-                               Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates )
-    {
-        super( pluginUpdates, pluginManagementUpdates, p -> DependencyBuilder.newBuilder()
-                .withGroupId( p.getGroupId() )
-                .withArtifactId( p.getArtifactId() )
-                .withVersion( p.getVersion() )
-                .build() );
+    public PluginUpdatesModel(
+            Map<Plugin, PluginUpdatesDetails> pluginUpdates,
+            Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates) {
+        super(pluginUpdates, pluginManagementUpdates, p -> DependencyBuilder.newBuilder()
+                .withGroupId(p.getGroupId())
+                .withArtifactId(p.getArtifactId())
+                .withVersion(p.getVersion())
+                .build());
     }
 }

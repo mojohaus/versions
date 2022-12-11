@@ -32,39 +32,27 @@ import static org.hamcrest.Matchers.is;
 /**
  * Unit tests for {@link SegmentUtils}
  */
-public class SegmentUtilsTest
-{
+public class SegmentUtilsTest {
     @Test
-    public void testIncremental()
-    {
-        assertThat( determineUnchangedSegment( false, false, false, null ),
-                is( of( INCREMENTAL ) ) );
-        assertThat( determineUnchangedSegment( true, false, false, null ),
-                is( of( INCREMENTAL ) ) );
-        assertThat( determineUnchangedSegment( true, true, false, null ),
-                is( of( INCREMENTAL ) ) );
+    public void testIncremental() {
+        assertThat(determineUnchangedSegment(false, false, false, null), is(of(INCREMENTAL)));
+        assertThat(determineUnchangedSegment(true, false, false, null), is(of(INCREMENTAL)));
+        assertThat(determineUnchangedSegment(true, true, false, null), is(of(INCREMENTAL)));
     }
 
     @Test
-    public void testMinor()
-    {
-        assertThat( determineUnchangedSegment( false, false, true, null ),
-                is( of( MINOR ) ) );
-        assertThat( determineUnchangedSegment( true, false, true, null ),
-                is( of( MINOR ) ) );
+    public void testMinor() {
+        assertThat(determineUnchangedSegment(false, false, true, null), is(of(MINOR)));
+        assertThat(determineUnchangedSegment(true, false, true, null), is(of(MINOR)));
     }
 
     @Test
-    public void testMajor()
-    {
-        assertThat( determineUnchangedSegment( false, true, true, null ),
-                is( of( MAJOR ) ) );
+    public void testMajor() {
+        assertThat(determineUnchangedSegment(false, true, true, null), is(of(MAJOR)));
     }
 
     @Test
-    public void testEmpty()
-    {
-        assertThat( determineUnchangedSegment( true, true, true, null ),
-                is( empty() ) );
+    public void testEmpty() {
+        assertThat(determineUnchangedSegment(true, true, true, null), is(empty()));
     }
 }
