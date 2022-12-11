@@ -1,6 +1,5 @@
 package org.codehaus.mojo.versions.utils;
 
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -34,8 +33,7 @@ import static org.codehaus.mojo.versions.api.Segment.MINOR;
 /**
  * Utility class for manipulating with {@link Segment} objects
  */
-public class SegmentUtils
-{
+public class SegmentUtils {
     /**
      * <p>Based on the passed flags, determines which segment which is not to be changed.</p>
      *
@@ -64,31 +62,25 @@ public class SegmentUtils
      * @param log                     If not null, the {@linkplain Log} object to log the selected scope
      * @return Returns the segment (0-based) that is unchangeable. If any segment can change, returns -1.
      */
-    public static Optional<Segment> determineUnchangedSegment( boolean allowMajorUpdates, boolean allowMinorUpdates,
-                                                               boolean allowIncrementalUpdates, Log log )
-    {
-        if ( log != null && !allowIncrementalUpdates )
-        {
-            log.info( "Assuming allowMinorUpdates false because allowIncrementalUpdates is false." );
+    public static Optional<Segment> determineUnchangedSegment(
+            boolean allowMajorUpdates, boolean allowMinorUpdates, boolean allowIncrementalUpdates, Log log) {
+        if (log != null && !allowIncrementalUpdates) {
+            log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
         }
 
-        if ( log != null && !allowMinorUpdates )
-        {
-            log.info( "Assuming allowMajorUpdates false because allowMinorUpdates is false." );
+        if (log != null && !allowMinorUpdates) {
+            log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
         }
 
         Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
                 ? empty()
                 : allowMinorUpdates && allowIncrementalUpdates
-                    ? of( MAJOR )
-                    : allowIncrementalUpdates
-                        ? of( MINOR )
-                        : of( INCREMENTAL );
-        if ( log != null && log.isDebugEnabled() )
-        {
-            log.debug(
-                    unchangedSegment.map( s -> Segment.of( s.value() + 1 ).toString() )
-                            .orElse( "ALL" ) + " version changes allowed" );
+                        ? of(MAJOR)
+                        : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
+        if (log != null && log.isDebugEnabled()) {
+            log.debug(unchangedSegment
+                            .map(s -> Segment.of(s.value() + 1).toString())
+                            .orElse("ALL") + " version changes allowed");
         }
         return unchangedSegment;
     }

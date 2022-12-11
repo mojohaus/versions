@@ -36,24 +36,22 @@ import static java.util.Optional.ofNullable;
 /**
  * Utility methods for extracting dependencies from a {@link org.apache.maven.project.MavenProject}
  */
-public class MavenProjectUtils
-{
+public class MavenProjectUtils {
     /**
      * Retrieves dependencies from the plugins section
      * @param project {@link MavenProject} instance
      * @return set of {@link Dependency} objects
      * or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
      */
-    public static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement( MavenProject project )
-    {
-        return ofNullable( project.getBuild() )
-                .map( Build::getPluginManagement )
-                .map( PluginManagement::getPlugins )
-                .orElse( emptyList() )
+    public static Set<Dependency> extractPluginDependenciesFromPluginsInPluginManagement(MavenProject project) {
+        return ofNullable(project.getBuild())
+                .map(Build::getPluginManagement)
+                .map(PluginManagement::getPlugins)
+                .orElse(emptyList())
                 .stream()
-                .filter( plugin -> plugin.getDependencies() != null )
-                .flatMap( plugin -> plugin.getDependencies().stream() )
-                .collect( () -> new TreeSet<>( DependencyComparator.INSTANCE ), Set::add, Set::addAll );
+                .filter(plugin -> plugin.getDependencies() != null)
+                .flatMap(plugin -> plugin.getDependencies().stream())
+                .collect(() -> new TreeSet<>(DependencyComparator.INSTANCE), Set::add, Set::addAll);
     }
 
     /**
@@ -62,12 +60,11 @@ public class MavenProjectUtils
      * @return set of {@link Dependency} objects
      * or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
      */
-    public static Set<Dependency> extractDependenciesFromPlugins( MavenProject project )
-    {
+    public static Set<Dependency> extractDependenciesFromPlugins(MavenProject project) {
         return project.getBuildPlugins().parallelStream()
-                .filter( plugin -> plugin.getDependencies() != null )
-                .flatMap( plugin -> plugin.getDependencies().stream() )
-                .collect( () -> new TreeSet<>( DependencyComparator.INSTANCE ), Set::add, Set::addAll );
+                .filter(plugin -> plugin.getDependencies() != null)
+                .flatMap(plugin -> plugin.getDependencies().stream())
+                .collect(() -> new TreeSet<>(DependencyComparator.INSTANCE), Set::add, Set::addAll);
     }
 
     /**
@@ -81,60 +78,47 @@ public class MavenProjectUtils
      * @return set of {@link Dependency} objects
      * or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
      */
-    public static Set<Dependency> extractDependenciesFromDependencyManagement( MavenProject project,
-            boolean processDependencyManagementTransitive, Log log )
-            throws VersionRetrievalException
-    {
-        Set<Dependency> dependencyManagement = new TreeSet<>( DependencyComparator.INSTANCE );
+    public static Set<Dependency> extractDependenciesFromDependencyManagement(
+            MavenProject project, boolean processDependencyManagementTransitive, Log log)
+            throws VersionRetrievalException {
+        Set<Dependency> dependencyManagement = new TreeSet<>(DependencyComparator.INSTANCE);
         DependencyManagement projectDependencyManagement = processDependencyManagementTransitive
                 ? project.getDependencyManagement()
                 : project.getOriginalModel().getDependencyManagement();
-        if ( projectDependencyManagement != null )
-        {
+        if (projectDependencyManagement != null) {
 
             List<Dependency> dependenciesFromPom = projectDependencyManagement.getDependencies();
-            for ( Dependency dependency : dependenciesFromPom )
-            {
-                log.debug( "dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId()
-                                    + ":" + dependency.getVersion() + ":" + dependency.getScope() );
-                if ( dependency.getVersion() == null )
-                {
+            for (Dependency dependency : dependenciesFromPom) {
+                log.debug("dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":"
+                        + dependency.getVersion() + ":" + dependency.getScope());
+                if (dependency.getVersion() == null) {
                     // get parent and get the information from there.
-                    if ( project.hasParent() )
-                    {
-                        log.debug( "Reading parent dependencyManagement information" );
-                        DependencyManagement parentProjectDependencyManagement =
-                                processDependencyManagementTransitive
-                                        ? project.getParent().getDependencyManagement()
-                                        : project.getParent().getOriginalModel().getDependencyManagement();
-                        if ( parentProjectDependencyManagement != null )
-                        {
+                    if (project.hasParent()) {
+                        log.debug("Reading parent dependencyManagement information");
+                        DependencyManagement parentProjectDependencyManagement = processDependencyManagementTransitive
+                                ? project.getParent().getDependencyManagement()
+                                : project.getParent().getOriginalModel().getDependencyManagement();
+                        if (parentProjectDependencyManagement != null) {
                             List<Dependency> parentDeps = parentProjectDependencyManagement.getDependencies();
-                            for ( Dependency parentDep : parentDeps )
-                            {
+                            for (Dependency parentDep : parentDeps) {
                                 // only groupId && artifactId needed cause version is null
-                                if ( dependency.getGroupId().equals( parentDep.getGroupId() )
-                                    && dependency.getArtifactId().equals( parentDep.getArtifactId() )
-                                    && dependency.getType().equals( parentDep.getType() ) )
-                                {
-                                    dependencyManagement.add( parentDep );
+                                if (dependency.getGroupId().equals(parentDep.getGroupId())
+                                        && dependency.getArtifactId().equals(parentDep.getArtifactId())
+                                        && dependency.getType().equals(parentDep.getType())) {
+                                    dependencyManagement.add(parentDep);
                                 }
                             }
                         }
-                    }
-                    else
-                    {
+                    } else {
                         String message = "We can't get the version for the dependency " + dependency.getGroupId() + ":"
-                            + dependency.getArtifactId() + " because there does not exist a parent.";
-                        log.error( message );
+                                + dependency.getArtifactId() + " because there does not exist a parent.";
+                        log.error(message);
                         // Throw error because we will not able to get a version for a dependency.
-                        throw new VersionRetrievalException( message );
+                        throw new VersionRetrievalException(message);
                     }
-                }
-                else
-                {
-                    dependency = interpolateVersion( dependency, project );
-                    dependencyManagement.add( dependency );
+                } else {
+                    dependency = interpolateVersion(dependency, project);
+                    dependencyManagement.add(dependency);
                 }
             }
         }
@@ -149,18 +133,17 @@ public class MavenProjectUtils
      * @return the dependency with interpolated property (as far as possible)
      * @since 2.14.0
      */
-    public static Dependency interpolateVersion( final Dependency dependency, final MavenProject project )
-    {
+    public static Dependency interpolateVersion(final Dependency dependency, final MavenProject project) {
 
         // resolve version from model properties if necessary (e.g. "${mycomponent.myversion}"
-        if ( dependency.getVersion().startsWith( "${" ) )
-        {
+        if (dependency.getVersion().startsWith("${")) {
             final String resolvedVersion = project.getOriginalModel()
-                    .getProperties().getProperty(
-                            dependency.getVersion().substring( 2, dependency.getVersion().length() - 1 ) );
-            if ( resolvedVersion != null && !resolvedVersion.isEmpty() )
-            {
-                dependency.setVersion( resolvedVersion );
+                    .getProperties()
+                    .getProperty(dependency
+                            .getVersion()
+                            .substring(2, dependency.getVersion().length() - 1));
+            if (resolvedVersion != null && !resolvedVersion.isEmpty()) {
+                dependency.setVersion(resolvedVersion);
             }
         }
         return dependency;

@@ -25,29 +25,25 @@ import org.codehaus.mojo.versions.api.change.VersionChange;
  * @author Slawomir Jaranowski
  * @since 2.14.0
  */
-public interface ChangeRecord
-{
+public interface ChangeRecord {
     /**
      * Describe where version item is updated.
      */
-    enum ChangeKind
-    {
-        DEPENDENCY( "dependency-update" ),
-        DEPENDENCY_MANAGEMENT( "dependency-management-update" ),
-        PARENT( "parent-update" ),
-        PLUGIN( "plugin-update" ),
-        PLUGIN_MANAGEMENT( "plugin-management-update" ),
-        PROPERTY( "property-update" );
+    enum ChangeKind {
+        DEPENDENCY("dependency-update"),
+        DEPENDENCY_MANAGEMENT("dependency-management-update"),
+        PARENT("parent-update"),
+        PLUGIN("plugin-update"),
+        PLUGIN_MANAGEMENT("plugin-management-update"),
+        PROPERTY("property-update");
 
         private final String label;
 
-        ChangeKind( String label )
-        {
+        ChangeKind(String label) {
             this.label = label;
         }
 
-        public String getLabel()
-        {
+        public String getLabel() {
             return label;
         }
     }

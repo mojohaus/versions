@@ -30,9 +30,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
+import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.ReportRenderer;
 import org.codehaus.mojo.versions.reporting.OverviewStats;
@@ -55,19 +55,17 @@ import static org.codehaus.mojo.versions.xml.CommonXmlReportRendererUtils.status
  * XML renderer for PropertyUpdatesReport creates an xml file in target directory and writes report about available
  * dependency/dependency management updates.
  */
-public class PropertyUpdatesXmlReportRenderer implements ReportRenderer
-{
+public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
     private final PropertyUpdatesModel model;
     private final Path outputFile;
-    private final ArtifactVersionsCache newestUpdateCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
+    private final ArtifactVersionsCache newestUpdateCache =
+            new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdate);
     /**
      * Creates a new instance
      * @param model object containing the updates model
      * @param outputFile output file for the report
      */
-    public PropertyUpdatesXmlReportRenderer( PropertyUpdatesModel model, Path outputFile )
-    {
+    public PropertyUpdatesXmlReportRenderer(PropertyUpdatesModel model, Path outputFile) {
         this.model = model;
         this.outputFile = outputFile;
     }
@@ -76,59 +74,57 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer
      * Creates an XML report
      */
     @Override
-    public void render()
-    {
-        try ( BufferedWriter writer = Files.newBufferedWriter( outputFile,
-                StandardCharsets.UTF_8 ) )
-        {
-            new PropertyUpdatesReportXpp3Writer().write( writer, new PropertyUpdatesReport()
-            {{
-                setSummary( new PropertyReportSummary()
-                {{
-                    OverviewStats overviewStats = OverviewStats.fromUpdates( model.getAllUpdates().values(),
-                            newestUpdateCache );
-                    setUsingLastVersion( String.valueOf( overviewStats.getUpToDate() ) );
-                    setNextVersionAvailable( String.valueOf( overviewStats.getAny() ) );
-                    setNextIncrementalAvailable( String.valueOf( overviewStats.getIncremental() ) );
-                    setNextMinorAvailable( String.valueOf( overviewStats.getMinor() ) );
-                    setNextMajorAvailable( String.valueOf( overviewStats.getMajor() ) );
-                }} );
-                setProperties( createPropertyInfo( model.getAllUpdates() ) );
-            }} );
-        }
-        catch ( IOException e )
-        {
-            throw new RuntimeException( e );
+    public void render() {
+        try (BufferedWriter writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8)) {
+            new PropertyUpdatesReportXpp3Writer().write(writer, new PropertyUpdatesReport() {
+                {
+                    setSummary(new PropertyReportSummary() {
+                        {
+                            OverviewStats overviewStats = OverviewStats.fromUpdates(
+                                    model.getAllUpdates().values(), newestUpdateCache);
+                            setUsingLastVersion(String.valueOf(overviewStats.getUpToDate()));
+                            setNextVersionAvailable(String.valueOf(overviewStats.getAny()));
+                            setNextIncrementalAvailable(String.valueOf(overviewStats.getIncremental()));
+                            setNextMinorAvailable(String.valueOf(overviewStats.getMinor()));
+                            setNextMajorAvailable(String.valueOf(overviewStats.getMajor()));
+                        }
+                    });
+                    setProperties(createPropertyInfo(model.getAllUpdates()));
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private static List<PropertyInfo> createPropertyInfo( Map<Property, PropertyVersions> versions )
-    {
-        return versions.entrySet().stream().map( e ->
-                new PropertyInfo()
-                {{
-                    setPropertyName( e.getKey().getName() );
-                    if ( e.getValue().getAssociations() != null
-                            && e.getValue().getAssociations().length != 0 )
+    private static List<PropertyInfo> createPropertyInfo(Map<Property, PropertyVersions> versions) {
+        return versions.entrySet().stream()
+                .map(e -> new PropertyInfo() {
                     {
-                        setPropertyAssociations( Arrays.stream( e.getValue().getAssociations() )
-                                .map( a ->
-                                {
-                                    PropertyAssociation pa = new PropertyAssociation();
-                                    pa.setGroupId( a.getGroupId() );
-                                    pa.setArtifactId( a.getArtifactId() );
-                                    return pa;
-                                } ).collect( Collectors.toList() ) );
+                        setPropertyName(e.getKey().getName());
+                        if (e.getValue().getAssociations() != null
+                                && e.getValue().getAssociations().length != 0) {
+                            setPropertyAssociations(Arrays.stream(e.getValue().getAssociations())
+                                    .map(a -> {
+                                        PropertyAssociation pa = new PropertyAssociation();
+                                        pa.setGroupId(a.getGroupId());
+                                        pa.setArtifactId(a.getArtifactId());
+                                        return pa;
+                                    })
+                                    .collect(Collectors.toList()));
+                        }
+                        setCurrentVersion(e.getKey().getVersion());
+                        ofNullable(e.getValue().getNewestUpdate(empty()))
+                                .map(ArtifactVersion::toString)
+                                .ifPresent(this::setLastVersion);
+
+                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals);
+                        setSection(e.getValue(), MINOR, this::setMinors);
+                        setSection(e.getValue(), MAJOR, this::setMajors);
+
+                        setStatus(statusFor(getLastVersion(), getIncrementals(), getMinors()));
                     }
-                    setCurrentVersion( e.getKey().getVersion() );
-                    ofNullable( e.getValue().getNewestUpdate( empty() ) )
-                            .map( ArtifactVersion::toString ).ifPresent( this::setLastVersion );
-
-                    setSection( e.getValue(), INCREMENTAL, this::setIncrementals );
-                    setSection( e.getValue(), MINOR, this::setMinors );
-                    setSection( e.getValue(), MAJOR, this::setMajors );
-
-                    setStatus( statusFor( getLastVersion(), getIncrementals(), getMinors() ) );
-                }} ).collect( Collectors.toList() );
+                })
+                .collect(Collectors.toList());
     }
 }

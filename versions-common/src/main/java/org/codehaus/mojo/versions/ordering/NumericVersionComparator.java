@@ -34,113 +34,86 @@ import org.codehaus.mojo.versions.api.Segment;
  * @since 1.0-alpha-3
  * @deprecated
  */
-public class NumericVersionComparator
-    extends AbstractVersionComparator
-{
-    private static final BigInteger BIG_INTEGER_ZERO = new BigInteger( "0" );
+public class NumericVersionComparator extends AbstractVersionComparator {
+    private static final BigInteger BIG_INTEGER_ZERO = new BigInteger("0");
 
-    private static final BigInteger BIG_INTEGER_ONE = new BigInteger( "1" );
+    private static final BigInteger BIG_INTEGER_ONE = new BigInteger("1");
 
     /**
      * {@inheritDoc}
      */
-    public int compare( ArtifactVersion o1, ArtifactVersion o2 )
-    {
+    public int compare(ArtifactVersion o1, ArtifactVersion o2) {
         String v1 = o1.toString();
         String v2 = o2.toString();
-        StringTokenizer tok1 = new StringTokenizer( v1, "." );
-        StringTokenizer tok2 = new StringTokenizer( v2, "." );
-        while ( tok1.hasMoreTokens() && tok2.hasMoreTokens() )
-        {
+        StringTokenizer tok1 = new StringTokenizer(v1, ".");
+        StringTokenizer tok2 = new StringTokenizer(v2, ".");
+        while (tok1.hasMoreTokens() && tok2.hasMoreTokens()) {
             String p1 = tok1.nextToken();
             String p2 = tok2.nextToken();
             String q1 = null;
             String q2 = null;
-            if ( p1.indexOf( '-' ) >= 0 )
-            {
-                int index = p1.indexOf( '-' );
-                q1 = p1.substring( index );
-                p1 = p1.substring( 0, index );
+            if (p1.indexOf('-') >= 0) {
+                int index = p1.indexOf('-');
+                q1 = p1.substring(index);
+                p1 = p1.substring(0, index);
             }
-            if ( p2.indexOf( '-' ) >= 0 )
-            {
-                int index = p2.indexOf( '-' );
-                q2 = p2.substring( index );
-                p2 = p2.substring( 0, index );
+            if (p2.indexOf('-') >= 0) {
+                int index = p2.indexOf('-');
+                q2 = p2.substring(index);
+                p2 = p2.substring(0, index);
             }
-            try
-            {
-                BigInteger n1 = new BigInteger( p1 );
-                BigInteger n2 = new BigInteger( p2 );
-                int result = n1.compareTo( n2 );
-                if ( result != 0 )
-                {
+            try {
+                BigInteger n1 = new BigInteger(p1);
+                BigInteger n2 = new BigInteger(p2);
+                int result = n1.compareTo(n2);
+                if (result != 0) {
+                    return result;
+                }
+            } catch (NumberFormatException e) {
+                int result = p1.compareTo(p2);
+                if (result != 0) {
                     return result;
                 }
             }
-            catch ( NumberFormatException e )
-            {
-                int result = p1.compareTo( p2 );
-                if ( result != 0 )
-                {
+            if (q1 != null && q2 != null) {
+                final int result = q1.compareTo(q2);
+                if (result != 0) {
                     return result;
                 }
             }
-            if ( q1 != null && q2 != null )
-            {
-                final int result = q1.compareTo( q2 );
-                if ( result != 0 )
-                {
-                    return result;
-                }
-            }
-            if ( q1 != null )
-            {
+            if (q1 != null) {
                 return -1;
             }
-            if ( q2 != null )
-            {
+            if (q2 != null) {
                 return +1;
             }
         }
-        if ( tok1.hasMoreTokens() )
-        {
+        if (tok1.hasMoreTokens()) {
             BigInteger n2 = BIG_INTEGER_ZERO;
-            while ( tok1.hasMoreTokens() )
-            {
-                try
-                {
-                    BigInteger n1 = new BigInteger( tok1.nextToken() );
-                    int result = n1.compareTo( n2 );
-                    if ( result != 0 )
-                    {
+            while (tok1.hasMoreTokens()) {
+                try {
+                    BigInteger n1 = new BigInteger(tok1.nextToken());
+                    int result = n1.compareTo(n2);
+                    if (result != 0) {
                         return result;
                     }
-                }
-                catch ( NumberFormatException e )
-                {
+                } catch (NumberFormatException e) {
                     // any token is better than zero
                     return +1;
                 }
             }
             return -1;
         }
-        if ( tok2.hasMoreTokens() )
-        {
+        if (tok2.hasMoreTokens()) {
             BigInteger n1 = BIG_INTEGER_ZERO;
-            while ( tok2.hasMoreTokens() )
-            {
-                try
-                {
-                    BigInteger n2 = new BigInteger( tok2.nextToken() );
-                    int result = n1.compareTo( n2 );
-                    if ( result != 0 )
-                    {
+            while (tok2.hasMoreTokens()) {
+                try {
+                    BigInteger n2 = new BigInteger(tok2.nextToken());
+                    int result = n1.compareTo(n2);
+                    if (result != 0) {
                         return result;
                     }
-                }
-                catch ( NumberFormatException e )
-                {
+                } catch (NumberFormatException e) {
                     // any token is better than zero
                     return -1;
                 }
@@ -153,180 +126,123 @@ public class NumericVersionComparator
     /**
      * {@inheritDoc}
      */
-    protected int innerGetSegmentCount( ArtifactVersion v )
-    {
+    protected int innerGetSegmentCount(ArtifactVersion v) {
         final String version = v.toString();
-        StringTokenizer tok = new StringTokenizer( version, "." );
+        StringTokenizer tok = new StringTokenizer(version, ".");
         return tok.countTokens();
     }
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings( "checkstyle:MethodLength" )
-    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, Segment segment ) throws InvalidSegmentException
-    {
+    @SuppressWarnings("checkstyle:MethodLength")
+    protected ArtifactVersion innerIncrementSegment(ArtifactVersion v, Segment segment) throws InvalidSegmentException {
         final String version = v.toString();
         StringBuilder buf = new StringBuilder();
-        StringTokenizer tok = new StringTokenizer( version, "." );
+        StringTokenizer tok = new StringTokenizer(version, ".");
         boolean first = true;
-        for ( int segmentIdx = segment.value(); segmentIdx >= 0 && tok.hasMoreTokens(); --segmentIdx )
-        {
-            if ( first )
-            {
+        for (int segmentIdx = segment.value(); segmentIdx >= 0 && tok.hasMoreTokens(); --segmentIdx) {
+            if (first) {
                 first = false;
-            }
-            else
-            {
-                buf.append( '.' );
+            } else {
+                buf.append('.');
             }
             String p = tok.nextToken();
             String q = null;
-            if ( p.indexOf( '-' ) >= 0 )
-            {
-                int index = p.indexOf( '-' );
-                q = p.substring( index + 1 );
-                p = p.substring( 0, index );
+            if (p.indexOf('-') >= 0) {
+                int index = p.indexOf('-');
+                q = p.substring(index + 1);
+                p = p.substring(0, index);
             }
 
-            if ( segmentIdx == 0 )
-            {
-                try
-                {
-                    BigInteger n = new BigInteger( p );
-                    p = n.add( BIG_INTEGER_ONE ).toString();
+            if (segmentIdx == 0) {
+                try {
+                    BigInteger n = new BigInteger(p);
+                    p = n.add(BIG_INTEGER_ONE).toString();
                     q = null;
-                }
-                catch ( NumberFormatException e )
-                {
+                } catch (NumberFormatException e) {
                     // ok, let's try some common tricks
-                    if ( "alpha".equalsIgnoreCase( p ) )
-                    {
-                        if ( q == null )
-                        {
+                    if ("alpha".equalsIgnoreCase(p)) {
+                        if (q == null) {
                             p = "beta";
-                        }
-                        else
-                        {
-                            try
-                            {
-                                BigInteger n = new BigInteger( q );
-                                q = n.add( BIG_INTEGER_ONE ).toString();
-                            }
-                            catch ( NumberFormatException e1 )
-                            {
+                        } else {
+                            try {
+                                BigInteger n = new BigInteger(q);
+                                q = n.add(BIG_INTEGER_ONE).toString();
+                            } catch (NumberFormatException e1) {
                                 p = "beta";
                                 q = null;
                             }
                         }
-                    }
-                    else if ( "beta".equalsIgnoreCase( p ) )
-                    {
-                        if ( q == null )
-                        {
+                    } else if ("beta".equalsIgnoreCase(p)) {
+                        if (q == null) {
                             p = "milestone";
-                        }
-                        else
-                        {
-                            try
-                            {
-                                BigInteger n = new BigInteger( q );
-                                q = n.add( BIG_INTEGER_ONE ).toString();
-                            }
-                            catch ( NumberFormatException e1 )
-                            {
+                        } else {
+                            try {
+                                BigInteger n = new BigInteger(q);
+                                q = n.add(BIG_INTEGER_ONE).toString();
+                            } catch (NumberFormatException e1) {
                                 p = "milestone";
                                 q = null;
                             }
                         }
-                    }
-                    else if ( "milestone".equalsIgnoreCase( p ) )
-                    {
-                        if ( q == null )
-                        {
+                    } else if ("milestone".equalsIgnoreCase(p)) {
+                        if (q == null) {
                             p = "rc";
-                        }
-                        else
-                        {
-                            try
-                            {
-                                BigInteger n = new BigInteger( q );
-                                q = n.add( BIG_INTEGER_ONE ).toString();
-                            }
-                            catch ( NumberFormatException e1 )
-                            {
+                        } else {
+                            try {
+                                BigInteger n = new BigInteger(q);
+                                q = n.add(BIG_INTEGER_ONE).toString();
+                            } catch (NumberFormatException e1) {
                                 p = "rc";
                                 q = null;
                             }
                         }
-                    }
-                    else if ( "cr".equalsIgnoreCase( p ) || "rc".equalsIgnoreCase( p ) )
-                    {
-                        if ( q == null )
-                        {
+                    } else if ("cr".equalsIgnoreCase(p) || "rc".equalsIgnoreCase(p)) {
+                        if (q == null) {
                             p = "ga";
-                        }
-                        else
-                        {
-                            try
-                            {
-                                BigInteger n = new BigInteger( q );
-                                q = n.add( BIG_INTEGER_ONE ).toString();
-                            }
-                            catch ( NumberFormatException e1 )
-                            {
+                        } else {
+                            try {
+                                BigInteger n = new BigInteger(q);
+                                q = n.add(BIG_INTEGER_ONE).toString();
+                            } catch (NumberFormatException e1) {
                                 p = "ga";
                                 q = null;
                             }
                         }
-                    }
-                    else if ( "ga".equalsIgnoreCase( p ) || "final".equalsIgnoreCase( p ) )
-                    {
-                        if ( q == null )
-                        {
+                    } else if ("ga".equalsIgnoreCase(p) || "final".equalsIgnoreCase(p)) {
+                        if (q == null) {
                             p = "sp";
                             q = "1";
-                        }
-                        else
-                        {
-                            try
-                            {
-                                BigInteger n = new BigInteger( q );
-                                q = n.add( BIG_INTEGER_ONE ).toString();
-                            }
-                            catch ( NumberFormatException e1 )
-                            {
+                        } else {
+                            try {
+                                BigInteger n = new BigInteger(q);
+                                q = n.add(BIG_INTEGER_ONE).toString();
+                            } catch (NumberFormatException e1) {
                                 p = "sp";
                                 q = "1";
                             }
                         }
-                    }
-                    else
-                    {
-                        p = VersionComparators.alphaNumIncrement( p );
+                    } else {
+                        p = VersionComparators.alphaNumIncrement(p);
                     }
                 }
             }
-            buf.append( p );
-            if ( q != null )
-            {
-                buf.append( '-' );
-                buf.append( q );
+            buf.append(p);
+            if (q != null) {
+                buf.append('-');
+                buf.append(q);
             }
         }
-        while ( tok.hasMoreTokens() )
-        {
-            if ( first )
-            {
+        while (tok.hasMoreTokens()) {
+            if (first) {
                 first = false;
-            }
-            else
-            {
-                buf.append( '.' );
+            } else {
+                buf.append('.');
             }
             tok.nextToken();
-            buf.append( "0" );
+            buf.append("0");
         }
-        return new DefaultArtifactVersion( buf.toString() );
+        return new DefaultArtifactVersion(buf.toString());
     }
 }

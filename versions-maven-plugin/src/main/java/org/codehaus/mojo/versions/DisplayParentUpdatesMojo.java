@@ -43,36 +43,30 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
  * @author Stephen Connolly
  * @since 2.2
  */
-@Mojo( name = "display-parent-updates", threadSafe = true )
-public class DisplayParentUpdatesMojo
-    extends AbstractVersionsDisplayMojo
-{
+@Mojo(name = "display-parent-updates", threadSafe = true)
+public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     public static final int MESSAGE_LENGTH = 68;
 
     @Inject
-    public DisplayParentUpdatesMojo( RepositorySystem repositorySystem,
-                                     org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                     Map<String, Wagon> wagonMap,
-                                     Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public DisplayParentUpdatesMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     @Override
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
+    public void execute() throws MojoExecutionException, MojoFailureException {
         logInit();
-        if ( getProject().getParent() == null )
-        {
-            logLine( false, "Project does not have a parent." );
+        if (getProject().getParent() == null) {
+            logLine(false, "Project does not have a parent.");
             return;
         }
 
-        if ( reactorProjects.contains( getProject().getParent() ) )
-        {
-            logLine( false, "Parent project is part of the reactor." );
+        if (reactorProjects.contains(getProject().getParent())) {
+            logLine(false, "Parent project is part of the reactor.");
             return;
         }
 
@@ -80,75 +74,65 @@ public class DisplayParentUpdatesMojo
         String version = currentVersion;
 
         VersionRange versionRange;
-        try
-        {
-            versionRange = VersionRange.createFromVersionSpec( version );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoExecutionException( "Invalid version range specification: " + version, e );
+        try {
+            versionRange = VersionRange.createFromVersionSpec(version);
+        } catch (InvalidVersionSpecificationException e) {
+            throw new MojoExecutionException("Invalid version range specification: " + version, e);
         }
 
-        Artifact artifact = getHelper().createDependencyArtifact( DependencyBuilder.newBuilder()
-                .withGroupId( getProject().getParent().getGroupId() )
-                .withArtifactId( getProject().getParent().getArtifactId() )
-                .withVersion( version )
-                .withType( "pom" )
-                .build() );
+        Artifact artifact = getHelper()
+                .createDependencyArtifact(DependencyBuilder.newBuilder()
+                        .withGroupId(getProject().getParent().getGroupId())
+                        .withArtifactId(getProject().getParent().getArtifactId())
+                        .withVersion(version)
+                        .withType("pom")
+                        .build());
 
         ArtifactVersion artifactVersion;
-        try
-        {
-            artifactVersion = findLatestVersion( artifact, versionRange, null, false );
-        }
-        catch ( VersionRetrievalException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        try {
+            artifactVersion = findLatestVersion(artifact, versionRange, null, false);
+        } catch (VersionRetrievalException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
 
-        if ( artifactVersion == null || currentVersion.equals( artifactVersion.toString() ) )
-        {
-            logLine( false, "The parent project is the latest version:" );
-            StringBuilder buf = new StringBuilder( MESSAGE_LENGTH );
-            buf.append( "  " );
-            buf.append( getProject().getParent().getGroupId() );
-            buf.append( ':' );
-            buf.append( getProject().getParent().getArtifactId() );
-            buf.append( ' ' );
+        if (artifactVersion == null || currentVersion.equals(artifactVersion.toString())) {
+            logLine(false, "The parent project is the latest version:");
+            StringBuilder buf = new StringBuilder(MESSAGE_LENGTH);
+            buf.append("  ");
+            buf.append(getProject().getParent().getGroupId());
+            buf.append(':');
+            buf.append(getProject().getParent().getArtifactId());
+            buf.append(' ');
             int padding = MESSAGE_LENGTH - currentVersion.length();
-            while ( buf.length() < padding )
-            {
-                buf.append( '.' );
+            while (buf.length() < padding) {
+                buf.append('.');
             }
-            buf.append( ' ' );
-            buf.append( currentVersion );
-            logLine( false, buf.toString() );
-        }
-        else
-        {
-            logLine( false, "The parent project has a newer version:" );
-            StringBuilder buf = new StringBuilder( MESSAGE_LENGTH );
-            buf.append( "  " );
-            buf.append( getProject().getParent().getGroupId() );
-            buf.append( ':' );
-            buf.append( getProject().getParent().getArtifactId() );
-            buf.append( ' ' );
-            int padding = MESSAGE_LENGTH - currentVersion.length()
-                - artifactVersion.toString().length() - " -> ".length();
-            while ( buf.length() < padding )
-            {
-                buf.append( '.' );
+            buf.append(' ');
+            buf.append(currentVersion);
+            logLine(false, buf.toString());
+        } else {
+            logLine(false, "The parent project has a newer version:");
+            StringBuilder buf = new StringBuilder(MESSAGE_LENGTH);
+            buf.append("  ");
+            buf.append(getProject().getParent().getGroupId());
+            buf.append(':');
+            buf.append(getProject().getParent().getArtifactId());
+            buf.append(' ');
+            int padding = MESSAGE_LENGTH
+                    - currentVersion.length()
+                    - artifactVersion.toString().length()
+                    - " -> ".length();
+            while (buf.length() < padding) {
+                buf.append('.');
             }
-            buf.append( ' ' );
-            buf.append( currentVersion );
-            buf.append( " -> " );
-            buf.append( artifactVersion );
-            logLine( false, buf.toString() );
+            buf.append(' ');
+            buf.append(currentVersion);
+            buf.append(" -> ");
+            buf.append(artifactVersion);
+            logLine(false, buf.toString());
         }
     }
 
     @Override
-    protected void update( ModifiedPomXMLEventReader pom )
-    {
-    }
+    protected void update(ModifiedPomXMLEventReader pom) {}
 }

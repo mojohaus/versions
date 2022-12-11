@@ -33,27 +33,20 @@ import org.codehaus.mojo.versions.api.change.VersionChange;
  * @author Stephen Connolly
  * @since 15-Sep-2010 16:01:35
  */
-public class CompositeVersionChanger
-    implements VersionChanger
-{
+public class CompositeVersionChanger implements VersionChanger {
     private final List<VersionChanger> composites;
 
-    public CompositeVersionChanger( VersionChanger[] composites )
-    {
-        this.composites = new ArrayList<>( Arrays.asList( composites ) );
+    public CompositeVersionChanger(VersionChanger[] composites) {
+        this.composites = new ArrayList<>(Arrays.asList(composites));
     }
 
-    public CompositeVersionChanger( List<VersionChanger> composites )
-    {
-        this.composites = new ArrayList<>( composites );
+    public CompositeVersionChanger(List<VersionChanger> composites) {
+        this.composites = new ArrayList<>(composites);
     }
 
-    public void apply( VersionChange versionChange )
-        throws XMLStreamException
-    {
-        for ( VersionChanger delegate : composites )
-        {
-            delegate.apply( versionChange );
+    public void apply(VersionChange versionChange) throws XMLStreamException {
+        for (VersionChanger delegate : composites) {
+            delegate.apply(versionChange);
         }
     }
 }

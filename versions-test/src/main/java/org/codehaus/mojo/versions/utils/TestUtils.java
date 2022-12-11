@@ -32,8 +32,7 @@ import static org.apache.commons.text.CaseUtils.toCamelCase;
 /**
  * Auxiliary test utilities
  */
-public class TestUtils
-{
+public class TestUtils {
     /**
      * Creates a temporary directory with the given name
      *
@@ -41,9 +40,8 @@ public class TestUtils
      * @return {@linkplain Path} object pointing to the directory
      * @throws IOException should the I/O operation fail
      */
-    public static Path createTempDir( String name ) throws IOException
-    {
-        return Files.createTempDirectory( toCamelCase( name, false ) );
+    public static Path createTempDir(String name) throws IOException {
+        return Files.createTempDirectory(toCamelCase(name, false));
     }
 
     /**
@@ -52,26 +50,21 @@ public class TestUtils
      * @param dir directory to delete
      * @throws IOException should an I/O operation fail
      */
-    public static void tearDownTempDir( Path dir ) throws IOException
-    {
-        if ( dir != null && Files.exists( dir ) )
-        {
-            Files.walkFileTree( dir, new SimpleFileVisitor<Path>()
-            {
+    public static void tearDownTempDir(Path dir) throws IOException {
+        if (dir != null && Files.exists(dir)) {
+            Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
                 @Override
-                public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException
-                {
-                    Files.delete( file );
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
                     return CONTINUE;
                 }
 
                 @Override
-                public FileVisitResult postVisitDirectory( Path dir, IOException exc ) throws IOException
-                {
-                    Files.delete( dir );
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
                     return CONTINUE;
                 }
-            } );
+            });
         }
     }
 
@@ -83,25 +76,19 @@ public class TestUtils
      * @param dst destination directory path
      * @throws IOException should an I/O error occur
      */
-    public static void copyDir( Path src, Path dst ) throws IOException
-    {
-        Files.walkFileTree( src, new SimpleFileVisitor<Path>()
-        {
+    public static void copyDir(Path src, Path dst) throws IOException {
+        Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
             @Override
-            public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs )
-                    throws IOException
-            {
-                Files.createDirectories( dst.resolve( src.relativize( dir ) ) );
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Files.createDirectories(dst.resolve(src.relativize(dir)));
                 return CONTINUE;
             }
 
             @Override
-            public FileVisitResult visitFile( Path file, BasicFileAttributes attrs )
-                    throws IOException
-            {
-                Files.copy( file, dst.resolve( src.relativize( file ) ), REPLACE_EXISTING );
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.copy(file, dst.resolve(src.relativize(file)), REPLACE_EXISTING);
                 return CONTINUE;
             }
-        } );
+        });
     }
 }

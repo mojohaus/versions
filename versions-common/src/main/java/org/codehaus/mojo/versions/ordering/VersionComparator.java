@@ -26,9 +26,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 /**
  * A rule for comparing and manipulating versions.
  */
-public interface VersionComparator
-    extends Comparator<ArtifactVersion>
-{
+public interface VersionComparator extends Comparator<ArtifactVersion> {
     /**
      * Returns the number of segments specified or specifiable in the supplied artifact version.
      *
@@ -36,5 +34,5 @@ public interface VersionComparator
      * @return The number of segments.
      * @since 1.0-beta-1
      */
-    int getSegmentCount( ArtifactVersion artifactVersion );
+    int getSegmentCount(ArtifactVersion artifactVersion);
 }

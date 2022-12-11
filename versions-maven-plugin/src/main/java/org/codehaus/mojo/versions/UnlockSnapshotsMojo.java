@@ -52,26 +52,25 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Paul Gier
  * @since 1.0-alpha-3
  */
-@Mojo( name = "unlock-snapshots", threadSafe = true )
-public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
-{
+@Mojo(name = "unlock-snapshots", threadSafe = true)
+public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     // ------------------------------ FIELDS ------------------------------
 
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
      */
-    private static final Pattern TIMESTAMPED_SNAPSHOT_REGEX = Pattern.compile( "-(\\d{8}\\.\\d{6})-(\\d+)$" );
+    private static final Pattern TIMESTAMPED_SNAPSHOT_REGEX = Pattern.compile("-(\\d{8}\\.\\d{6})-(\\d+)$");
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
-    public UnlockSnapshotsMojo( RepositorySystem repositorySystem,
-                                org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                Map<String, Wagon> wagonMap,
-                                Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UnlockSnapshotsMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -81,112 +80,97 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo
      * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
-        try
-        {
-        if ( isProcessingDependencyManagement() )
-        {
-            DependencyManagement dependencyManagement =
-                    PomHelper.getRawModel( getProject() ).getDependencyManagement();
-            if ( dependencyManagement != null )
-            {
-                unlockSnapshots( pom, dependencyManagement.getDependencies(),
-                                 ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException {
+        try {
+            if (isProcessingDependencyManagement()) {
+                DependencyManagement dependencyManagement =
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    unlockSnapshots(
+                            pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
+                }
             }
-        }
-        if ( getProject().getDependencies() != null && isProcessingDependencies() )
-        {
-            unlockSnapshots( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
-        }
-        if ( getProject().getParent() != null && isProcessingParent() )
-        {
-            unlockParentSnapshot( pom, getProject().getParent() );
-        }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                unlockSnapshots(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
+            }
+            if (getProject().getParent() != null && isProcessingParent()) {
+                unlockParentSnapshot(pom, getProject().getParent());
+            }
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void unlockSnapshots( ModifiedPomXMLEventReader pom, List<Dependency> dependencies,
-                                  ChangeRecord.ChangeKind changeKind )
-        throws XMLStreamException, MojoExecutionException
-    {
-        for ( Dependency dep : dependencies )
-        {
-            if ( isExcludeReactor() && isProducedByReactor( dep ) )
-            {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+    private void unlockSnapshots(
+            ModifiedPomXMLEventReader pom, List<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            throws XMLStreamException, MojoExecutionException {
+        for (Dependency dep : dependencies) {
+            if (isExcludeReactor() && isProducedByReactor(dep)) {
+                getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
             }
 
-            if ( isHandledByProperty( dep ) )
-            {
-                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+            if (isHandledByProperty(dep)) {
+                getLog().debug("Ignoring dependency with property as version: " + toString(dep));
                 continue;
             }
 
-            if ( !isIncluded( this.toArtifact( dep ) ) )
-            {
+            if (!isIncluded(this.toArtifact(dep))) {
                 continue;
             }
 
             String version = dep.getVersion();
-            Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher( version );
-            if ( versionMatcher.find() && versionMatcher.end() == version.length() )
-            {
-                String unlockedVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
-                if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                                                     unlockedVersion, getProject().getModel() ) )
-                {
+            Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher(version);
+            if (versionMatcher.find() && versionMatcher.end() == version.length()) {
+                String unlockedVersion = versionMatcher.replaceFirst("-SNAPSHOT");
+                if (PomHelper.setDependencyVersion(
+                        pom,
+                        dep.getGroupId(),
+                        dep.getArtifactId(),
+                        dep.getVersion(),
+                        unlockedVersion,
+                        getProject().getModel())) {
 
-                    getChangeRecorder().recordChange( DefaultChangeRecord.builder()
-                                                          .withKind( changeKind )
-                                                          .withDependency( dep )
-                                                          .withNewVersion( unlockedVersion )
-                                                          .build() );
-                    getLog().info( "Unlocked " + toString( dep ) + " to version " + unlockedVersion );
+                    getChangeRecorder()
+                            .recordChange(DefaultChangeRecord.builder()
+                                    .withKind(changeKind)
+                                    .withDependency(dep)
+                                    .withNewVersion(unlockedVersion)
+                                    .build());
+                    getLog().info("Unlocked " + toString(dep) + " to version " + unlockedVersion);
                 }
             }
         }
     }
 
-    private void unlockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent )
-        throws XMLStreamException, MojoExecutionException
-    {
-        if ( parent == null )
-        {
-            getLog().info( "Project does not have a parent" );
+    private void unlockParentSnapshot(ModifiedPomXMLEventReader pom, MavenProject parent)
+            throws XMLStreamException, MojoExecutionException {
+        if (parent == null) {
+            getLog().info("Project does not have a parent");
             return;
         }
 
-        if ( reactorProjects.contains( parent ) )
-        {
-            getLog().info( "Project's parent is part of the reactor" );
+        if (reactorProjects.contains(parent)) {
+            getLog().info("Project's parent is part of the reactor");
             return;
         }
 
         Artifact parentArtifact = parent.getArtifact();
         String parentVersion = parentArtifact.getVersion();
 
-        Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher( parentVersion );
-        if ( versionMatcher.find() && versionMatcher.end() == parentVersion.length() )
-        {
-            String unlockedParentVersion = versionMatcher.replaceFirst( "-SNAPSHOT" );
-            if ( PomHelper.setProjectParentVersion( pom, unlockedParentVersion ) )
-            {
-                getLog().info( "Unlocked parent " + parentArtifact + " to version "
-                                   + unlockedParentVersion );
-                getChangeRecorder().recordChange( DefaultChangeRecord.builder()
-                                                      .withKind( ChangeRecord.ChangeKind.PARENT )
-                                                      .withArtifact( parentArtifact )
-                                                      .withNewVersion( unlockedParentVersion )
-                                                      .build() );
+        Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher(parentVersion);
+        if (versionMatcher.find() && versionMatcher.end() == parentVersion.length()) {
+            String unlockedParentVersion = versionMatcher.replaceFirst("-SNAPSHOT");
+            if (PomHelper.setProjectParentVersion(pom, unlockedParentVersion)) {
+                getLog().info("Unlocked parent " + parentArtifact + " to version " + unlockedParentVersion);
+                getChangeRecorder()
+                        .recordChange(DefaultChangeRecord.builder()
+                                .withKind(ChangeRecord.ChangeKind.PARENT)
+                                .withArtifact(parentArtifact)
+                                .withNewVersion(unlockedParentVersion)
+                                .build());
             }
         }
     }
-
 }

@@ -29,23 +29,16 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 /**
  * A recorder that ignores updates.
  */
-@Named( "none" )
-public class ChangeRecorderNull implements ChangeRecorder
-{
+@Named("none")
+public class ChangeRecorderNull implements ChangeRecorder {
     /**
      * Creates a new instance
      */
-    public ChangeRecorderNull()
-    {
-    }
+    public ChangeRecorderNull() {}
 
     @Override
-    public final void recordChange( ChangeRecord changeRecord )
-    {
-    }
+    public final void recordChange(ChangeRecord changeRecord) {}
 
     @Override
-    public final void writeReport( final Path outputPath )
-    {
-    }
+    public final void writeReport(final Path outputPath) {}
 }

@@ -46,45 +46,39 @@ import org.codehaus.plexus.i18n.I18N;
  * @author Andrzej Jarmoniuk
  * @since 2.13.0
  */
-@Mojo( name = "parent-updates-report",
-       requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true )
-public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdatesModel>
-{
-    @Parameter( defaultValue = "${reactorProjects}", required = true, readonly = true )
+@Mojo(name = "parent-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdatesModel> {
+    @Parameter(defaultValue = "${reactorProjects}", required = true, readonly = true)
     protected List<MavenProject> reactorProjects;
 
     @Inject
-    protected ParentUpdatesReportMojo( I18N i18n,
-                                       RepositorySystem repositorySystem,
-                                       org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                       Map<String, Wagon> wagonMap,
-                                       ReportRendererFactory rendererFactory )
-    {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
+    protected ParentUpdatesReportMojo(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
+        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isExternalReport()
-    {
+    public boolean isExternalReport() {
         return false;
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean canGenerateReport()
-    {
-        if ( getProject().getParent() == null )
-        {
-            getLog().warn( "Project does not have a parent." );
+    public boolean canGenerateReport() {
+        if (getProject().getParent() == null) {
+            getLog().warn("Project does not have a parent.");
             return false;
         }
 
-        if ( reactorProjects.contains( getProject().getParent() ) )
-        {
-            getLog().warn( "Parent project is part of the reactor." );
+        if (reactorProjects.contains(getProject().getParent())) {
+            getLog().warn("Parent project is part of the reactor.");
             return false;
         }
 
@@ -97,36 +91,44 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
      * @param locale the locale to generate the report for.
      * @param sink   the report formatting tool
      */
-    @SuppressWarnings( "deprecation" )
-    protected void doGenerateReport( Locale locale, Sink sink ) throws MavenReportException
-    {
-        try
-        {
-            ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions( project.getParentArtifact(),
-                    false );
-            artifactVersions.setIncludeSnapshots( allowSnapshots );
-            rendererFactory.createReportRenderer( getOutputName(), sink, locale,
-                            new ParentUpdatesModel( DependencyBuilder.newBuilder()
-                                    .withGroupId( artifactVersions.getGroupId() )
-                                    .withArtifactId( artifactVersions.getArtifactId() )
-                                    .withVersion( artifactVersions.getArtifact().getVersion() )
-                                    .withScope( artifactVersions.getArtifact().getScope() )
-                                    .withType( artifactVersions.getArtifact().getType() )
-                                    .withClassifier( artifactVersions.getArtifact().getClassifier() )
-                                    .build(), artifactVersions ) )
+    @SuppressWarnings("deprecation")
+    protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
+        try {
+            ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions(project.getParentArtifact(), false);
+            artifactVersions.setIncludeSnapshots(allowSnapshots);
+            rendererFactory
+                    .createReportRenderer(
+                            getOutputName(),
+                            sink,
+                            locale,
+                            new ParentUpdatesModel(
+                                    DependencyBuilder.newBuilder()
+                                            .withGroupId(artifactVersions.getGroupId())
+                                            .withArtifactId(artifactVersions.getArtifactId())
+                                            .withVersion(artifactVersions
+                                                    .getArtifact()
+                                                    .getVersion())
+                                            .withScope(artifactVersions
+                                                    .getArtifact()
+                                                    .getScope())
+                                            .withType(artifactVersions
+                                                    .getArtifact()
+                                                    .getType())
+                                            .withClassifier(artifactVersions
+                                                    .getArtifact()
+                                                    .getClassifier())
+                                            .build(),
+                                    artifactVersions))
                     .render();
-        }
-        catch ( VersionRetrievalException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
+        } catch (VersionRetrievalException e) {
+            throw new MavenReportException(e.getMessage(), e);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getOutputName()
-    {
+    public String getOutputName() {
         return "parent-updates-report";
     }
 }

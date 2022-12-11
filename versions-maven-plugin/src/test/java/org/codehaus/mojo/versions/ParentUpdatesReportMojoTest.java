@@ -51,45 +51,61 @@ import static org.hamcrest.Matchers.allOf;
  *
  * @author Andrzej Jarmoniuk
  */
-public class ParentUpdatesReportMojoTest
-{
+public class ParentUpdatesReportMojoTest {
     private static final I18N MOCK_I18N = mockI18N();
+
     @Test
-    public void testAllowSnapshots() throws IOException, MavenReportException
-    {
+    public void testAllowSnapshots() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new ParentUpdatesReportMojo( MOCK_I18N, mockRepositorySystem(),
-                mockAetherRepositorySystem( new HashMap<String, String[]>()
-                {{
-                    put( "default-artifact", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT"} );
-                }} ), null, new ReportRendererFactoryImpl( MOCK_I18N ) )
-        {{
-            allowSnapshots = true;
-            project = new MavenProject( new Model()
-            {{
-                setGroupId( "default-group" );
-                setArtifactId( "child-artifact" );
-                setVersion( "1.0.0" );
-            }} );
-            project.setParent( new MavenProject( new Model()
-            {{
-                setGroupId( "default-group" );
-                setArtifactId( "default-artifact" );
-                setVersion( "1.0.0" );
-            }} ) );
-            reactorProjects = new ArrayList<>();
-            project.setParentArtifact( new DefaultArtifact( project.getParent().getGroupId(),
-                    project.getParent().getArtifactId(), project.getParent().getVersion(),
-                    Artifact.SCOPE_COMPILE, "pom", "default",
-                    new DefaultArtifactHandlerStub( "default" ) ) );
+        new ParentUpdatesReportMojo(
+                MOCK_I18N,
+                mockRepositorySystem(),
+                mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                    {
+                        put("default-artifact", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT"});
+                    }
+                }),
+                null,
+                new ReportRendererFactoryImpl(MOCK_I18N)) {
+            {
+                allowSnapshots = true;
+                project = new MavenProject(new Model() {
+                    {
+                        setGroupId("default-group");
+                        setArtifactId("child-artifact");
+                        setVersion("1.0.0");
+                    }
+                });
+                project.setParent(new MavenProject(new Model() {
+                    {
+                        setGroupId("default-group");
+                        setArtifactId("default-artifact");
+                        setVersion("1.0.0");
+                    }
+                }));
+                reactorProjects = new ArrayList<>();
+                project.setParentArtifact(new DefaultArtifact(
+                        project.getParent().getGroupId(),
+                        project.getParent().getArtifactId(),
+                        project.getParent().getVersion(),
+                        Artifact.SCOPE_COMPILE,
+                        "pom",
+                        "default",
+                        new DefaultArtifactHandlerStub("default")));
 
-            session = mockMavenSession();
-        }}.generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+                session = mockMavenSession();
+            }
+        }.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertThat( output, allOf( containsString( "1.0.0" ),
-                containsString( "1.0.1" ), containsString( "1.1.0" ),
-                containsString( "2.0.0" ), containsString( "2.0.1-SNAPSHOT" ) ) );
+        assertThat(
+                output,
+                allOf(
+                        containsString("1.0.0"),
+                        containsString("1.0.1"),
+                        containsString("1.1.0"),
+                        containsString("2.0.0"),
+                        containsString("2.0.1-SNAPSHOT")));
     }
 }

@@ -29,34 +29,28 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 15-Sep-2010 15:59:46
  */
-public abstract class AbstractVersionChanger
-    implements VersionChanger
-{
+public abstract class AbstractVersionChanger implements VersionChanger {
     private final Model model;
 
     private final ModifiedPomXMLEventReader pom;
 
     private final Log log;
 
-    public AbstractVersionChanger( Model model, ModifiedPomXMLEventReader pom, Log log )
-    {
+    public AbstractVersionChanger(Model model, ModifiedPomXMLEventReader pom, Log log) {
         this.model = model;
         this.pom = pom;
         this.log = log;
     }
 
-    public Model getModel()
-    {
+    public Model getModel() {
         return model;
     }
 
-    public ModifiedPomXMLEventReader getPom()
-    {
+    public ModifiedPomXMLEventReader getPom() {
         return pom;
     }
 
-    public void info( CharSequence charSequence )
-    {
-        log.info( charSequence );
+    public void info(CharSequence charSequence) {
+        log.info(charSequence);
     }
 }

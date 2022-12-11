@@ -26,15 +26,14 @@ import java.nio.file.Path;
  * @author Slawomir Jaranowski
  * @since 2.14.0
  */
-public interface ChangeRecorder
-{
+public interface ChangeRecorder {
     /**
      * Record that a dependency was updated.
      *
      * @param changeRecord a record described change
      * @since 2.14.0
      */
-    void recordChange( ChangeRecord changeRecord );
+    void recordChange(ChangeRecord changeRecord);
 
     /**
      * Write the current set of changes to the given output path.
@@ -48,5 +47,5 @@ public interface ChangeRecorder
      * @throws IOException On write and/or I/O errors
      * @since 2.14.0
      */
-    void writeReport( Path outputPath ) throws IOException;
+    void writeReport(Path outputPath) throws IOException;
 }

@@ -29,33 +29,26 @@ import org.hamcrest.TypeSafeMatcher;
  *
  * @author Andrzej Jarmoniuk
  */
-public class ModifiedPomXMLEventReaderUtils
-{
-    public static <P extends ModifiedPomXMLEventReader> Matcher<P> matches( String pattern )
-    {
-        return new TypeSafeMatcher<P>()
-        {
+public class ModifiedPomXMLEventReaderUtils {
+    public static <P extends ModifiedPomXMLEventReader> Matcher<P> matches(String pattern) {
+        return new TypeSafeMatcher<P>() {
             @Override
-            public void describeTo( Description description )
-            {
-                description.appendText( pattern );
+            public void describeTo(Description description) {
+                description.appendText(pattern);
             }
 
             @Override
-            protected void describeMismatchSafely( P pom, Description description )
-            {
-                description.appendText( asString( pom ) );
+            protected void describeMismatchSafely(P pom, Description description) {
+                description.appendText(asString(pom));
             }
 
             @Override
-            protected boolean matchesSafely( P pom )
-            {
-                return pattern.matches( asString( pom ) );
+            protected boolean matchesSafely(P pom) {
+                return pattern.matches(asString(pom));
             }
 
-            private String asString( P pom )
-            {
-                return pom.asStringBuilder().toString().replaceAll( "\\s", "" );
+            private String asString(P pom) {
+                return pom.asStringBuilder().toString().replaceAll("\\s", "");
             }
         };
     }

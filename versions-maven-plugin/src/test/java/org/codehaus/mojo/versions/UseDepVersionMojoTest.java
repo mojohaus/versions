@@ -32,22 +32,19 @@ import org.junit.Test;
  *
  * @author Andrzej Jarmoniuk
  */
-public class UseDepVersionMojoTest extends AbstractMojoTestCase
-{
+public class UseDepVersionMojoTest extends AbstractMojoTestCase {
     @Rule
-    public MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule(this);
 
     @Test
-    public void testIssue673() throws Exception
-    {
+    public void testIssue673() throws Exception {
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(
-                new File( "target/test-classes/org/codehaus/mojo/use-dep-version/issue-637" ),
-                "use-dep-version" );
-        setVariableValueToObject( mojo, "processDependencies", true );
-        setVariableValueToObject( mojo, "processDependencyManagement", true );
-        setVariableValueToObject( mojo, "excludeReactor", true );
-        setVariableValueToObject( mojo, "serverId", "serverId" );
-        setVariableValueToObject( mojo, "reactorProjects", Collections.singletonList( mojo.getProject() ) );
+                new File("target/test-classes/org/codehaus/mojo/use-dep-version/issue-637"), "use-dep-version");
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "processDependencyManagement", true);
+        setVariableValueToObject(mojo, "excludeReactor", true);
+        setVariableValueToObject(mojo, "serverId", "serverId");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
 
         mojo.execute();
     }

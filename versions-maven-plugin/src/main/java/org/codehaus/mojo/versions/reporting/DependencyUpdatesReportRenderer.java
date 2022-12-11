@@ -33,70 +33,60 @@ import org.codehaus.plexus.i18n.I18N;
  * @param <K> type of the model
  * @since 1.0-beta-1
  */
-public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel> extends AbstractVersionsReportRenderer<K>
-{
-    public DependencyUpdatesReportRenderer( I18N i18n, Sink sink, Locale locale, String bundleName, K model )
-    {
-        super( i18n, sink, locale, bundleName, model );
+public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel>
+        extends AbstractVersionsReportRenderer<K> {
+    public DependencyUpdatesReportRenderer(I18N i18n, Sink sink, Locale locale, String bundleName, K model) {
+        super(i18n, sink, locale, bundleName, model);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void renderDetails()
-    {
-        model.getAllUpdates().forEach( this::renderDependencyDetail );
+    protected void renderDetails() {
+        model.getAllUpdates().forEach(this::renderDependencyDetail);
     }
 
     @Override
-    protected void renderSummaryTable()
-    {
-        renderTable( "report.overview.dependency", model.getArtifactUpdates(),
-                "report.overview.noDependency" );
+    protected void renderSummaryTable() {
+        renderTable("report.overview.dependency", model.getArtifactUpdates(), "report.overview.noDependency");
     }
 
     @Override
-    protected void renderManagementSummaryTable()
-    {
-        renderTable( "report.overview.dependencyManagement",
-                model.getArtifactManagementUpdates(), "report.overview.noDependencyManagement" );
+    protected void renderManagementSummaryTable() {
+        renderTable(
+                "report.overview.dependencyManagement",
+                model.getArtifactManagementUpdates(),
+                "report.overview.noDependencyManagement");
     }
 
-    protected void renderTable( String titleKey, Map<Dependency, ArtifactVersions> contents, String emptyKey )
-    {
+    protected void renderTable(String titleKey, Map<Dependency, ArtifactVersions> contents, String emptyKey) {
         sink.section2();
         sink.sectionTitle2();
-        sink.text( getText( titleKey ) );
+        sink.text(getText(titleKey));
         sink.sectionTitle2_();
 
-        if ( contents.isEmpty() )
-        {
+        if (contents.isEmpty()) {
             sink.paragraph();
-            sink.text( getText( emptyKey ) );
+            sink.text(getText(emptyKey));
             sink.paragraph_();
-        }
-        else
-        {
-            renderSummaryTable( contents, true );
+        } else {
+            renderSummaryTable(contents, true);
         }
         sink.section2_();
     }
 
     @Override
-    protected OverviewStats computeOverviewStats()
-    {
-        return OverviewStats.fromUpdates( model.getAllUpdates().values(), newestUpdateCache );
+    protected OverviewStats computeOverviewStats() {
+        return OverviewStats.fromUpdates(model.getAllUpdates().values(), newestUpdateCache);
     }
 
-    protected void renderDependencyDetail( Dependency artifact, ArtifactVersions details )
-    {
+    protected void renderDependencyDetail(Dependency artifact, ArtifactVersions details) {
         sink.section2();
         sink.sectionTitle2();
-        sink.text( ArtifactUtils.versionlessKey( artifact.getGroupId(), artifact.getArtifactId() ) );
+        sink.text(ArtifactUtils.versionlessKey(artifact.getGroupId(), artifact.getArtifactId()));
         sink.sectionTitle2_();
-        renderDependencyDetailTable( artifact, details, true );
+        renderDependencyDetailTable(artifact, details, true);
         sink.section2_();
     }
-
 }

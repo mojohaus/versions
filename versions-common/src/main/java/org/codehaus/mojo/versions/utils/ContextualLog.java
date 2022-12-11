@@ -28,11 +28,9 @@ import org.apache.maven.plugin.logging.Log;
  * @author Stephen Connolly
  * @since 15-Sep-2010 15:51:06
  */
-public interface ContextualLog
-    extends Log
-{
+public interface ContextualLog extends Log {
 
-    void setContext( String context );
+    void setContext(String context);
 
     void clearContext();
 }

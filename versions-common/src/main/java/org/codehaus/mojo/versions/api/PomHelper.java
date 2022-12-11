@@ -82,8 +82,7 @@ import static java.util.stream.IntStream.range;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public class PomHelper
-{
+public class PomHelper {
     public static final String APACHE_MAVEN_PLUGINS_GROUPID = "org.apache.maven.plugins";
 
     /**
@@ -93,10 +92,8 @@ public class PomHelper
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
-    public static Model getRawModel( MavenProject project )
-        throws IOException
-    {
-        return getRawModel( project.getFile() );
+    public static Model getRawModel(MavenProject project) throws IOException {
+        return getRawModel(project.getFile());
     }
 
     /**
@@ -106,13 +103,10 @@ public class PomHelper
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
-    public static Model getRawModel( File moduleProjectFile )
-            throws IOException
-    {
-        try ( Reader reader = new BufferedReader( new InputStreamReader( Files.newInputStream( moduleProjectFile
-                .toPath() ) ) ) )
-        {
-            return getRawModel( reader );
+    public static Model getRawModel(File moduleProjectFile) throws IOException {
+        try (Reader reader =
+                new BufferedReader(new InputStreamReader(Files.newInputStream(moduleProjectFile.toPath())))) {
+            return getRawModel(reader);
         }
     }
 
@@ -123,12 +117,10 @@ public class PomHelper
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
-    public static Model getRawModel( ModifiedPomXMLEventReader modifiedPomXMLEventReader )
-            throws IOException
-    {
-        try ( Reader reader = new StringReader( modifiedPomXMLEventReader.asStringBuilder().toString() ) )
-        {
-            return getRawModel( reader );
+    public static Model getRawModel(ModifiedPomXMLEventReader modifiedPomXMLEventReader) throws IOException {
+        try (Reader reader =
+                new StringReader(modifiedPomXMLEventReader.asStringBuilder().toString())) {
+            return getRawModel(reader);
         }
     }
 
@@ -139,16 +131,11 @@ public class PomHelper
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
-    public static Model getRawModel( Reader reader )
-            throws IOException
-    {
-        try
-        {
-            return new MavenXpp3Reader().read( reader );
-        }
-        catch ( XmlPullParserException e )
-        {
-            throw new IOException( e.getMessage(), e );
+    public static Model getRawModel(Reader reader) throws IOException {
+        try {
+            return new MavenXpp3Reader().read(reader);
+        } catch (XmlPullParserException e) {
+            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -162,10 +149,9 @@ public class PomHelper
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
-    public static boolean setPropertyVersion( final ModifiedPomXMLEventReader pom, final String profileId,
-                                              final String property, final String value )
-        throws XMLStreamException
-    {
+    public static boolean setPropertyVersion(
+            final ModifiedPomXMLEventReader pom, final String profileId, final String property, final String value)
+            throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern propertyRegex;
@@ -173,64 +159,49 @@ public class PomHelper
         final Pattern projectProfileId;
         boolean inMatchScope = false;
         boolean madeReplacement = false;
-        if ( profileId == null )
-        {
-            propertyRegex = Pattern.compile( "/project/properties/" + RegexUtils.quote( property ) );
-            matchScopeRegex = Pattern.compile( "/project/properties" );
+        if (profileId == null) {
+            propertyRegex = Pattern.compile("/project/properties/" + RegexUtils.quote(property));
+            matchScopeRegex = Pattern.compile("/project/properties");
             projectProfileId = null;
-        }
-        else
-        {
-            propertyRegex = Pattern.compile( "/project/profiles/profile/properties/" + RegexUtils.quote( property ) );
-            matchScopeRegex = Pattern.compile( "/project/profiles/profile" );
-            projectProfileId = Pattern.compile( "/project/profiles/profile/id" );
+        } else {
+            propertyRegex = Pattern.compile("/project/profiles/profile/properties/" + RegexUtils.quote(property));
+            matchScopeRegex = Pattern.compile("/project/profiles/profile");
+            projectProfileId = Pattern.compile("/project/profiles/profile/id");
         }
 
         pom.rewind();
 
-        while ( pom.hasNext() )
-        {
+        while (pom.hasNext()) {
             XMLEvent event = pom.nextEvent();
-            if ( event.isStartElement() )
-            {
-                stack.push( path );
+            if (event.isStartElement()) {
+                stack.push(path);
                 path = path + "/" + event.asStartElement().getName().getLocalPart();
 
-                if ( propertyRegex.matcher( path ).matches() )
-                {
-                    pom.mark( 0 );
-                }
-                else if ( matchScopeRegex.matcher( path ).matches() )
-                {
+                if (propertyRegex.matcher(path).matches()) {
+                    pom.mark(0);
+                } else if (matchScopeRegex.matcher(path).matches()) {
                     // we're in a new match scope
                     // reset any previous partial matches
                     inMatchScope = profileId == null;
-                    pom.clearMark( 0 );
-                    pom.clearMark( 1 );
-                }
-                else if ( profileId != null && projectProfileId.matcher( path ).matches() )
-                {
+                    pom.clearMark(0);
+                    pom.clearMark(1);
+                } else if (profileId != null && projectProfileId.matcher(path).matches()) {
                     String candidateId = pom.getElementText();
                     path = stack.pop(); // since getElementText will be after the end element
 
-                    inMatchScope = profileId.trim().equals( candidateId.trim() );
+                    inMatchScope = profileId.trim().equals(candidateId.trim());
                 }
             }
-            if ( event.isEndElement() )
-            {
-                if ( propertyRegex.matcher( path ).matches() )
-                {
-                    pom.mark( 1 );
-                }
-                else if ( matchScopeRegex.matcher( path ).matches() )
-                {
-                    if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) )
-                    {
-                        pom.replaceBetween( 0, 1, value );
+            if (event.isEndElement()) {
+                if (propertyRegex.matcher(path).matches()) {
+                    pom.mark(1);
+                } else if (matchScopeRegex.matcher(path).matches()) {
+                    if (inMatchScope && pom.hasMark(0) && pom.hasMark(1)) {
+                        pom.replaceBetween(0, 1, value);
                         madeReplacement = true;
                     }
-                    pom.clearMark( 0 );
-                    pom.clearMark( 1 );
+                    pom.clearMark(0);
+                    pom.clearMark(1);
                     inMatchScope = false;
                 }
                 path = stack.pop();
@@ -247,10 +218,9 @@ public class PomHelper
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
-    public static boolean setProjectVersion( final ModifiedPomXMLEventReader pom, final String value )
-        throws XMLStreamException
-    {
-        return setElementValue( pom, "/project", "version", value, false );
+    public static boolean setProjectVersion(final ModifiedPomXMLEventReader pom, final String value)
+            throws XMLStreamException {
+        return setElementValue(pom, "/project", "version", value, false);
     }
 
     /**
@@ -265,12 +235,11 @@ public class PomHelper
      * @return              {@code true} if the element was created or replaced
      * @throws XMLStreamException if something went wrong
      */
-    public static boolean setElementValue( ModifiedPomXMLEventReader pom, String parentPath,
-                                                   String elementName, String value )
-            throws XMLStreamException
-    {
+    public static boolean setElementValue(
+            ModifiedPomXMLEventReader pom, String parentPath, String elementName, String value)
+            throws XMLStreamException {
         pom.rewind();
-        return setElementValue( pom, parentPath, elementName, value, true );
+        return setElementValue(pom, parentPath, elementName, value, true);
     }
 
     /**
@@ -288,12 +257,10 @@ public class PomHelper
      * @return              {@code true} if the element was created or replaced
      * @throws XMLStreamException if something went wrong
      */
-    public static boolean setElementValue( ModifiedPomXMLEventReader pom, String parentPath,
-                                           String elementName, String value, boolean shouldCreate )
-            throws XMLStreamException
-    {
-        class ElementValueInternal
-        {
+    public static boolean setElementValue(
+            ModifiedPomXMLEventReader pom, String parentPath, String elementName, String value, boolean shouldCreate)
+            throws XMLStreamException {
+        class ElementValueInternal {
             private final String parentName;
             private final String superParentPath;
 
@@ -301,52 +268,39 @@ public class PomHelper
             private static final int MARK_OPTION = 1;
             private static final int PARENT_BEGIN = 2;
 
-            ElementValueInternal()
-            {
-                int lastDelimeterIndex = parentPath.lastIndexOf( '/' );
-                parentName = parentPath.substring( lastDelimeterIndex + 1 );
-                superParentPath = parentPath.substring( 0, lastDelimeterIndex );
+            ElementValueInternal() {
+                int lastDelimeterIndex = parentPath.lastIndexOf('/');
+                parentName = parentPath.substring(lastDelimeterIndex + 1);
+                superParentPath = parentPath.substring(0, lastDelimeterIndex);
             }
 
-            boolean process( String currentPath ) throws XMLStreamException
-            {
+            boolean process(String currentPath) throws XMLStreamException {
                 boolean replacementMade = false;
-                while ( !replacementMade && pom.hasNext() )
-                {
+                while (!replacementMade && pom.hasNext()) {
                     XMLEvent event = pom.nextEvent();
-                    if ( event.isStartElement() )
-                    {
-                        String currentElementName = event.asStartElement().getName().getLocalPart();
+                    if (event.isStartElement()) {
+                        String currentElementName =
+                                event.asStartElement().getName().getLocalPart();
 
                         // here, we will only mark the beginning of the child or the parent element
-                        if ( currentPath.equals( parentPath ) && elementName.equals( currentElementName ) )
-                        {
-                            pom.mark( MARK_CHILD_BEGIN );
-                        }
-                        else if ( currentPath.equals( superParentPath ) && currentElementName.equals( parentName ) )
-                        {
-                              pom.mark( PARENT_BEGIN );
+                        if (currentPath.equals(parentPath) && elementName.equals(currentElementName)) {
+                            pom.mark(MARK_CHILD_BEGIN);
+                        } else if (currentPath.equals(superParentPath) && currentElementName.equals(parentName)) {
+                            pom.mark(PARENT_BEGIN);
                         }
                         // process child element
-                        replacementMade = process( currentPath + "/" + currentElementName );
-                    }
-                    else if ( event.isEndElement() )
-                    {
+                        replacementMade = process(currentPath + "/" + currentElementName);
+                    } else if (event.isEndElement()) {
                         // here we're doing the replacement
-                        if ( currentPath.equals( parentPath + "/" + elementName ) )
-                        {
+                        if (currentPath.equals(parentPath + "/" + elementName)) {
                             // end of the child
                             replaceValueInChild();
                             replacementMade = true;
-                        }
-                        else if ( shouldCreate && currentPath.equals( parentPath ) )
-                        {
+                        } else if (shouldCreate && currentPath.equals(parentPath)) {
                             // end of the parent
                             replaceValueInParent();
                             replacementMade = true;
-                        }
-                        else
-                        {
+                        } else {
                             return false;
                         }
                     }
@@ -354,51 +308,34 @@ public class PomHelper
                 return replacementMade;
             }
 
-            private void replaceValueInChild()
-            {
-                pom.mark( MARK_OPTION );
-                if ( pom.getBetween( MARK_CHILD_BEGIN, MARK_OPTION ).length() > 0 )
-                {
-                    pom.replaceBetween( 0, 1, value );
-                }
-                else
-                {
-                    pom.replace( String.format( "<%1$s>%2$s</%1$s>", elementName, value ) );
+            private void replaceValueInChild() {
+                pom.mark(MARK_OPTION);
+                if (pom.getBetween(MARK_CHILD_BEGIN, MARK_OPTION).length() > 0) {
+                    pom.replaceBetween(0, 1, value);
+                } else {
+                    pom.replace(String.format("<%1$s>%2$s</%1$s>", elementName, value));
                 }
             }
 
-            private void replaceValueInParent()
-            {
-                pom.mark( MARK_OPTION );
-                if ( pom.hasMark( PARENT_BEGIN ) )
-                {
-                    if ( pom.getBetween( PARENT_BEGIN, MARK_OPTION ).length() > 0 )
-                    {
-                        pom.replace( String.format( "<%2$s>%3$s</%2$s></%1$s>",
-                                parentName, elementName, value ) );
+            private void replaceValueInParent() {
+                pom.mark(MARK_OPTION);
+                if (pom.hasMark(PARENT_BEGIN)) {
+                    if (pom.getBetween(PARENT_BEGIN, MARK_OPTION).length() > 0) {
+                        pom.replace(String.format("<%2$s>%3$s</%2$s></%1$s>", parentName, elementName, value));
+                    } else {
+                        pom.replace(String.format("<%1$s><%2$s>%3$s</%2$s></%1$s>", parentName, elementName, value));
                     }
-                    else
-                    {
-                        pom.replace( String.format( "<%1$s><%2$s>%3$s</%2$s></%1$s>",
-                                parentName, elementName, value ) );
-                    }
-                }
-                else
-                {
-                    pom.replace( String.format( "<%1$s><%2$s>%3$s</%2$s></%1$s>",
-                            parentName, elementName, value ) );
+                } else {
+                    pom.replace(String.format("<%1$s><%2$s>%3$s</%2$s></%1$s>", parentName, elementName, value));
                 }
             }
         }
 
-        try
-        {
+        try {
             pom.rewind();
-            return new ElementValueInternal().process( "" );
-        }
-        finally
-        {
-            range( 0, 3 ).forEach( pom::clearMark );
+            return new ElementValueInternal().process("");
+        } finally {
+            range(0, 3).forEach(pom::clearMark);
         }
     }
 
@@ -410,39 +347,31 @@ public class PomHelper
      * parent version).
      * @throws XMLStreamException if something went wrong.
      */
-    public static String getProjectVersion( final ModifiedPomXMLEventReader pom )
-        throws XMLStreamException
-    {
+    public static String getProjectVersion(final ModifiedPomXMLEventReader pom) throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
-        final Pattern matchScopeRegex = Pattern.compile( "/project/version" );
+        final Pattern matchScopeRegex = Pattern.compile("/project/version");
 
         pom.rewind();
 
-        while ( pom.hasNext() )
-        {
+        while (pom.hasNext()) {
             XMLEvent event = pom.nextEvent();
-            if ( event.isStartElement() )
-            {
-                stack.push( path );
+            if (event.isStartElement()) {
+                stack.push(path);
                 path = path + "/" + event.asStartElement().getName().getLocalPart();
 
-                if ( matchScopeRegex.matcher( path ).matches() )
-                {
-                    pom.mark( 0 );
+                if (matchScopeRegex.matcher(path).matches()) {
+                    pom.mark(0);
                 }
             }
-            if ( event.isEndElement() )
-            {
-                if ( matchScopeRegex.matcher( path ).matches() )
-                {
-                    pom.mark( 1 );
-                    if ( pom.hasMark( 0 ) && pom.hasMark( 1 ) )
-                    {
-                        return pom.getBetween( 0, 1 ).trim();
+            if (event.isEndElement()) {
+                if (matchScopeRegex.matcher(path).matches()) {
+                    pom.mark(1);
+                    if (pom.hasMark(0) && pom.hasMark(1)) {
+                        return pom.getBetween(0, 1).trim();
                     }
-                    pom.clearMark( 0 );
-                    pom.clearMark( 1 );
+                    pom.clearMark(0);
+                    pom.clearMark(1);
                 }
                 path = stack.pop();
             }
@@ -458,42 +387,35 @@ public class PomHelper
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
-    public static boolean setProjectParentVersion( final ModifiedPomXMLEventReader pom, final String value )
-        throws XMLStreamException
-    {
+    public static boolean setProjectParentVersion(final ModifiedPomXMLEventReader pom, final String value)
+            throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern matchScopeRegex;
         boolean madeReplacement = false;
-        matchScopeRegex = Pattern.compile( "/project/parent/version" );
+        matchScopeRegex = Pattern.compile("/project/parent/version");
 
         pom.rewind();
 
-        while ( pom.hasNext() )
-        {
+        while (pom.hasNext()) {
             XMLEvent event = pom.nextEvent();
-            if ( event.isStartElement() )
-            {
-                stack.push( path );
+            if (event.isStartElement()) {
+                stack.push(path);
                 path = path + "/" + event.asStartElement().getName().getLocalPart();
 
-                if ( matchScopeRegex.matcher( path ).matches() )
-                {
-                    pom.mark( 0 );
+                if (matchScopeRegex.matcher(path).matches()) {
+                    pom.mark(0);
                 }
             }
-            if ( event.isEndElement() )
-            {
-                if ( matchScopeRegex.matcher( path ).matches() )
-                {
-                    pom.mark( 1 );
-                    if ( pom.hasMark( 0 ) && pom.hasMark( 1 ) )
-                    {
-                        pom.replaceBetween( 0, 1, value );
+            if (event.isEndElement()) {
+                if (matchScopeRegex.matcher(path).matches()) {
+                    pom.mark(1);
+                    if (pom.hasMark(0) && pom.hasMark(1)) {
+                        pom.replaceBetween(0, 1, value);
                         madeReplacement = true;
                     }
-                    pom.clearMark( 0 );
-                    pom.clearMark( 1 );
+                    pom.clearMark(0);
+                    pom.clearMark(1);
                 }
                 path = stack.pop();
             }
@@ -513,65 +435,58 @@ public class PomHelper
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if something went wrong.
      */
-    @SuppressWarnings( "checkstyle:MethodLength" )
-    public static boolean setDependencyVersion( final ModifiedPomXMLEventReader pom, final String groupId,
-                                                final String artifactId, final String oldVersion,
-                                                final String newVersion, final Model model )
-        throws XMLStreamException
-    {
+    @SuppressWarnings("checkstyle:MethodLength")
+    public static boolean setDependencyVersion(
+            final ModifiedPomXMLEventReader pom,
+            final String groupId,
+            final String artifactId,
+            final String oldVersion,
+            final String newVersion,
+            final Model model)
+            throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
 
-        Set<String> implicitPaths =
-            new HashSet<>( Arrays.asList( "/project/parent/groupId", "/project/parent/artifactId",
-                                          "/project/parent/version", "/project/groupId",
-                                          "/project/artifactId", "/project/version" ) );
+        Set<String> implicitPaths = new HashSet<>(Arrays.asList(
+                "/project/parent/groupId", "/project/parent/artifactId",
+                "/project/parent/version", "/project/groupId",
+                "/project/artifactId", "/project/version"));
         Map<String, String> implicitProperties = new HashMap<>();
 
-        for ( Map.Entry<Object, Object> entry : model.getProperties().entrySet() )
-        {
-            implicitProperties.put( (String) entry.getKey(), (String) entry.getValue() );
+        for (Map.Entry<Object, Object> entry : model.getProperties().entrySet()) {
+            implicitProperties.put((String) entry.getKey(), (String) entry.getValue());
         }
 
         pom.rewind();
 
-        while ( pom.hasNext() )
-        {
-            while ( pom.hasNext() )
-            {
+        while (pom.hasNext()) {
+            while (pom.hasNext()) {
                 XMLEvent event = pom.nextEvent();
-                if ( event.isStartElement() )
-                {
-                    stack.push( path );
+                if (event.isStartElement()) {
+                    stack.push(path);
                     final String elementName = event.asStartElement().getName().getLocalPart();
                     path = path + "/" + elementName;
 
-                    if ( implicitPaths.contains( path ) )
-                    {
+                    if (implicitPaths.contains(path)) {
                         final String elementText = pom.getElementText().trim();
-                        implicitProperties.put( path.substring( 1 ).replace( '/', '.' ), elementText );
+                        implicitProperties.put(path.substring(1).replace('/', '.'), elementText);
                         path = stack.pop();
                     }
                 }
-                if ( event.isEndElement() )
-                {
+                if (event.isEndElement()) {
                     path = stack.pop();
                 }
             }
         }
 
         boolean modified = true;
-        while ( modified )
-        {
+        while (modified) {
             modified = false;
-            for ( Map.Entry<String, String> entry : implicitProperties.entrySet() )
-            {
-                if ( entry.getKey().contains( ".parent" ) )
-                {
-                    String child = entry.getKey().replace( ".parent", "" );
-                    if ( !implicitProperties.containsKey( child ) )
-                    {
-                        implicitProperties.put( child, entry.getValue() );
+            for (Map.Entry<String, String> entry : implicitProperties.entrySet()) {
+                if (entry.getKey().contains(".parent")) {
+                    String child = entry.getKey().replace(".parent", "");
+                    if (!implicitProperties.containsKey(child)) {
+                        implicitProperties.put(child, entry.getValue());
                         modified = true;
                         break;
                     }
@@ -587,88 +502,74 @@ public class PomHelper
         boolean haveArtifactId = false;
         boolean haveOldVersion = false;
 
-        final Pattern matchScopeRegex = Pattern.compile(
-            "/project" + "(/profiles/profile)?"
+        final Pattern matchScopeRegex = Pattern.compile("/project" + "(/profiles/profile)?"
                 + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
-                + "/dependencies/dependency" );
+                + "/dependencies/dependency");
 
-        final Pattern matchTargetRegex = Pattern.compile(
-            "/project" + "(/profiles/profile)?"
+        final Pattern matchTargetRegex = Pattern.compile("/project" + "(/profiles/profile)?"
                 + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
                 + "/dependencies/dependency"
-                + "((/groupId)|(/artifactId)|(/version))" );
+                + "((/groupId)|(/artifactId)|(/version))");
 
         pom.rewind();
 
-        while ( pom.hasNext() )
-        {
+        while (pom.hasNext()) {
             XMLEvent event = pom.nextEvent();
-            if ( event.isStartElement() )
-            {
-                stack.push( path );
+            if (event.isStartElement()) {
+                stack.push(path);
                 final String elementName = event.asStartElement().getName().getLocalPart();
                 path = path + "/" + elementName;
 
-                if ( matchScopeRegex.matcher( path ).matches() )
-                {
+                if (matchScopeRegex.matcher(path).matches()) {
                     // we're in a new match scope
                     // reset any previous partial matches
                     inMatchScope = true;
-                    pom.clearMark( 0 );
-                    pom.clearMark( 1 );
+                    pom.clearMark(0);
+                    pom.clearMark(1);
 
                     haveGroupId = false;
                     haveArtifactId = false;
                     haveOldVersion = false;
-                }
-                else if ( inMatchScope && matchTargetRegex.matcher( path ).matches() )
-                {
-                    if ( "groupId".equals( elementName ) )
-                    {
-                        haveGroupId = groupId.equals( evaluate( pom.getElementText().trim(), implicitProperties ) );
+                } else if (inMatchScope && matchTargetRegex.matcher(path).matches()) {
+                    if ("groupId".equals(elementName)) {
+                        haveGroupId =
+                                groupId.equals(evaluate(pom.getElementText().trim(), implicitProperties));
                         path = stack.pop();
-                    }
-                    else if ( "artifactId".equals( elementName ) )
-                    {
+                    } else if ("artifactId".equals(elementName)) {
                         haveArtifactId =
-                            artifactId.equals( evaluate( pom.getElementText().trim(), implicitProperties ) );
+                                artifactId.equals(evaluate(pom.getElementText().trim(), implicitProperties));
                         path = stack.pop();
-                    }
-                    else if ( "version".equals( elementName ) )
-                    {
-                        pom.mark( 0 );
+                    } else if ("version".equals(elementName)) {
+                        pom.mark(0);
                     }
                 }
             }
-            if ( event.isEndElement() )
-            {
-                if ( matchTargetRegex.matcher( path ).matches()
-                    && "version".equals( event.asEndElement().getName().getLocalPart() ) )
-                {
-                    pom.mark( 1 );
-                    String compressedPomVersion = StringUtils.deleteWhitespace( pom.getBetween( 0, 1 ).trim() );
-                    String compressedOldVersion = StringUtils.deleteWhitespace( oldVersion );
+            if (event.isEndElement()) {
+                if (matchTargetRegex.matcher(path).matches()
+                        && "version".equals(event.asEndElement().getName().getLocalPart())) {
+                    pom.mark(1);
+                    String compressedPomVersion =
+                            StringUtils.deleteWhitespace(pom.getBetween(0, 1).trim());
+                    String compressedOldVersion = StringUtils.deleteWhitespace(oldVersion);
 
-                    try
-                    {
-                        haveOldVersion = isVersionOverlap( compressedOldVersion, compressedPomVersion );
-                    }
-                    catch ( InvalidVersionSpecificationException e )
-                    {
+                    try {
+                        haveOldVersion = isVersionOverlap(compressedOldVersion, compressedPomVersion);
+                    } catch (InvalidVersionSpecificationException e) {
                         // fall back to string comparison
-                        haveOldVersion = compressedOldVersion.equals( compressedPomVersion );
+                        haveOldVersion = compressedOldVersion.equals(compressedPomVersion);
                     }
-                }
-                else if ( matchScopeRegex.matcher( path ).matches() )
-                {
-                    if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) && haveGroupId && haveArtifactId
-                        && haveOldVersion )
-                    {
-                        pom.replaceBetween( 0, 1, newVersion );
+                } else if (matchScopeRegex.matcher(path).matches()) {
+                    if (inMatchScope
+                            && pom.hasMark(0)
+                            && pom.hasMark(1)
+                            && haveGroupId
+                            && haveArtifactId
+                            && haveOldVersion) {
+                        pom.replaceBetween(0, 1, newVersion);
                         madeReplacement = true;
                     }
-                    pom.clearMark( 0 );
-                    pom.clearMark( 1 );
+                    pom.clearMark(0);
+                    pom.clearMark(1);
                     haveArtifactId = false;
                     haveGroupId = false;
                     haveOldVersion = false;
@@ -687,73 +588,55 @@ public class PomHelper
      * @param properties The properties to substitute.
      * @return The evaluated expression.
      */
-    public static String evaluate( String expr, Map<String, String> properties )
-    {
-        if ( expr == null )
-        {
+    public static String evaluate(String expr, Map<String, String> properties) {
+        if (expr == null) {
             return null;
         }
 
-        String expression = stripTokens( expr );
-        if ( expression.equals( expr ) )
-        {
-            int index = expr.indexOf( "${" );
-            if ( index >= 0 )
-            {
-                int lastIndex = expr.indexOf( "}", index );
-                if ( lastIndex >= 0 )
-                {
-                    String retVal = expr.substring( 0, index );
+        String expression = stripTokens(expr);
+        if (expression.equals(expr)) {
+            int index = expr.indexOf("${");
+            if (index >= 0) {
+                int lastIndex = expr.indexOf("}", index);
+                if (lastIndex >= 0) {
+                    String retVal = expr.substring(0, index);
 
-                    if ( index > 0 && expr.charAt( index - 1 ) == '$' )
-                    {
-                        retVal += expr.substring( index + 1, lastIndex + 1 );
-                    }
-                    else
-                    {
-                        retVal += evaluate( expr.substring( index, lastIndex + 1 ), properties );
+                    if (index > 0 && expr.charAt(index - 1) == '$') {
+                        retVal += expr.substring(index + 1, lastIndex + 1);
+                    } else {
+                        retVal += evaluate(expr.substring(index, lastIndex + 1), properties);
                     }
 
-                    retVal += evaluate( expr.substring( lastIndex + 1 ), properties );
+                    retVal += evaluate(expr.substring(lastIndex + 1), properties);
                     return retVal;
                 }
             }
 
             // Was not an expression
-            if ( expression.contains( "$$" ) )
-            {
-                return expression.replaceAll( "\\$\\$", "\\$" );
-            }
-            else
-            {
+            if (expression.contains("$$")) {
+                return expression.replaceAll("\\$\\$", "\\$");
+            } else {
                 return expression;
             }
         }
 
-        String value = properties.get( expression );
+        String value = properties.get(expression);
 
-        if ( value != null )
-        {
-            int exprStartDelimiter = value.indexOf( "${" );
+        if (value != null) {
+            int exprStartDelimiter = value.indexOf("${");
 
-            if ( exprStartDelimiter >= 0 )
-            {
-                if ( exprStartDelimiter > 0 )
-                {
-                    value = value.substring( 0, exprStartDelimiter )
-                        + evaluate( value.substring( exprStartDelimiter ), properties );
-                }
-                else
-                {
-                    value = evaluate( value.substring( exprStartDelimiter ), properties );
+            if (exprStartDelimiter >= 0) {
+                if (exprStartDelimiter > 0) {
+                    value = value.substring(0, exprStartDelimiter)
+                            + evaluate(value.substring(exprStartDelimiter), properties);
+                } else {
+                    value = evaluate(value.substring(exprStartDelimiter), properties);
                 }
             }
-        }
-        else
-        {
+        } else {
             // TODO find a way to log that and not use this System.out!!
             // this class could be a component with logger injected !!
-            System.out.println( "expression: " + expression + " no value " );
+            System.out.println("expression: " + expression + " no value ");
         }
         return value == null ? expr : value;
     }
@@ -764,11 +647,9 @@ public class PomHelper
      * @param expr the string (perhaps with token markers)
      * @return the string (definately without token markers)
      */
-    private static String stripTokens( String expr )
-    {
-        if ( expr.startsWith( "${" ) && expr.indexOf( "}" ) == expr.length() - 1 )
-        {
-            expr = expr.substring( 2, expr.length() - 1 );
+    private static String stripTokens(String expr) {
+        if (expr.startsWith("${") && expr.indexOf("}") == expr.length() - 1) {
+            expr = expr.substring(2, expr.length() - 1);
         }
         return expr;
     }
@@ -781,32 +662,26 @@ public class PomHelper
      * @return true if both versions have an overlap
      * @throws InvalidVersionSpecificationException if the versions can't be parsed to a range
      */
-    public static boolean isVersionOverlap( String leftVersionOrRange, String rightVersionOrRange )
-        throws InvalidVersionSpecificationException
-    {
-        VersionRange pomVersionRange = createVersionRange( leftVersionOrRange );
-        if ( !pomVersionRange.hasRestrictions() )
-        {
+    public static boolean isVersionOverlap(String leftVersionOrRange, String rightVersionOrRange)
+            throws InvalidVersionSpecificationException {
+        VersionRange pomVersionRange = createVersionRange(leftVersionOrRange);
+        if (!pomVersionRange.hasRestrictions()) {
             return true;
         }
 
-        VersionRange oldVersionRange = createVersionRange( rightVersionOrRange );
-        if ( !oldVersionRange.hasRestrictions() )
-        {
+        VersionRange oldVersionRange = createVersionRange(rightVersionOrRange);
+        if (!oldVersionRange.hasRestrictions()) {
             return true;
         }
 
-        VersionRange result = oldVersionRange.restrict( pomVersionRange );
+        VersionRange result = oldVersionRange.restrict(pomVersionRange);
         return result.hasRestrictions();
     }
 
-    private static VersionRange createVersionRange( String versionOrRange )
-        throws InvalidVersionSpecificationException
-    {
-        VersionRange versionRange = VersionRange.createFromVersionSpec( versionOrRange );
-        if ( versionRange.getRecommendedVersion() != null )
-        {
-            versionRange = VersionRange.createFromVersionSpec( "[" + versionOrRange + "]" );
+    private static VersionRange createVersionRange(String versionOrRange) throws InvalidVersionSpecificationException {
+        VersionRange versionRange = VersionRange.createFromVersionSpec(versionOrRange);
+        if (versionRange.getRecommendedVersion() != null) {
+            versionRange = VersionRange.createFromVersionSpec("[" + versionOrRange + "]");
         }
         return versionRange;
     }
@@ -822,10 +697,13 @@ public class PomHelper
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
-    public static boolean setPluginVersion( final ModifiedPomXMLEventReader pom, final String groupId,
-                                            final String artifactId, final String oldVersion, final String newVersion )
-        throws XMLStreamException
-    {
+    public static boolean setPluginVersion(
+            final ModifiedPomXMLEventReader pom,
+            final String groupId,
+            final String artifactId,
+            final String oldVersion,
+            final String newVersion)
+            throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
         final Pattern matchScopeRegex;
@@ -833,84 +711,71 @@ public class PomHelper
         boolean inMatchScope = false;
         boolean madeReplacement = false;
         boolean haveGroupId = false;
-        boolean needGroupId = groupId != null && !APACHE_MAVEN_PLUGINS_GROUPID.equals( groupId );
+        boolean needGroupId = groupId != null && !APACHE_MAVEN_PLUGINS_GROUPID.equals(groupId);
         boolean haveArtifactId = false;
         boolean haveOldVersion = false;
 
-        matchScopeRegex = Pattern.compile( "/project" + "(/profiles/profile)?"
-                                               + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin" );
+        matchScopeRegex = Pattern.compile(
+                "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin");
 
-        matchTargetRegex = Pattern.compile( "/project" + "(/profiles/profile)?"
-                                                + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin"
-                                                + "((/groupId)|(/artifactId)|(/version))" );
+        matchTargetRegex = Pattern.compile("/project" + "(/profiles/profile)?"
+                + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin"
+                + "((/groupId)|(/artifactId)|(/version))");
 
         pom.rewind();
 
-        while ( pom.hasNext() )
-        {
+        while (pom.hasNext()) {
             XMLEvent event = pom.nextEvent();
-            if ( event.isStartElement() )
-            {
-                stack.push( path );
+            if (event.isStartElement()) {
+                stack.push(path);
                 final String elementName = event.asStartElement().getName().getLocalPart();
                 path = path + "/" + elementName;
 
-                if ( matchScopeRegex.matcher( path ).matches() )
-                {
+                if (matchScopeRegex.matcher(path).matches()) {
                     // we're in a new match scope
                     // reset any previous partial matches
                     inMatchScope = true;
-                    pom.clearMark( 0 );
-                    pom.clearMark( 1 );
+                    pom.clearMark(0);
+                    pom.clearMark(1);
 
                     haveGroupId = false;
                     haveArtifactId = false;
                     haveOldVersion = false;
-                }
-                else if ( inMatchScope && matchTargetRegex.matcher( path ).matches() )
-                {
-                    if ( "groupId".equals( elementName ) )
-                    {
-                        haveGroupId =  pom.getElementText().trim().equals( groupId );
+                } else if (inMatchScope && matchTargetRegex.matcher(path).matches()) {
+                    if ("groupId".equals(elementName)) {
+                        haveGroupId = pom.getElementText().trim().equals(groupId);
                         path = stack.pop();
-                    }
-                    else if ( "artifactId".equals( elementName ) )
-                    {
-                        haveArtifactId = artifactId.equals( pom.getElementText().trim() );
+                    } else if ("artifactId".equals(elementName)) {
+                        haveArtifactId = artifactId.equals(pom.getElementText().trim());
                         path = stack.pop();
-                    }
-                    else if ( "version".equals( elementName ) )
-                    {
-                        pom.mark( 0 );
+                    } else if ("version".equals(elementName)) {
+                        pom.mark(0);
                     }
                 }
             }
-            if ( event.isEndElement() )
-            {
-                if ( matchTargetRegex.matcher( path ).matches()
-                    && "version".equals( event.asEndElement().getName().getLocalPart() ) )
-                {
-                    pom.mark( 1 );
+            if (event.isEndElement()) {
+                if (matchTargetRegex.matcher(path).matches()
+                        && "version".equals(event.asEndElement().getName().getLocalPart())) {
+                    pom.mark(1);
 
-                    try
-                    {
-                        haveOldVersion = isVersionOverlap( oldVersion, pom.getBetween( 0, 1 ).trim() );
-                    }
-                    catch ( InvalidVersionSpecificationException e )
-                    {
+                    try {
+                        haveOldVersion = isVersionOverlap(
+                                oldVersion, pom.getBetween(0, 1).trim());
+                    } catch (InvalidVersionSpecificationException e) {
                         // fall back to string comparison
-                        haveOldVersion = oldVersion.equals( pom.getBetween( 0, 1 ).trim() );
+                        haveOldVersion = oldVersion.equals(pom.getBetween(0, 1).trim());
                     }
-                }
-                else if ( matchScopeRegex.matcher( path ).matches() )
-                {
-                    if ( inMatchScope && pom.hasMark( 0 ) && pom.hasMark( 1 ) && ( haveGroupId || !needGroupId )
-                        && haveArtifactId && haveOldVersion )
-                    {
-                        pom.replaceBetween( 0, 1, newVersion );
+                } else if (matchScopeRegex.matcher(path).matches()) {
+                    if (inMatchScope
+                            && pom.hasMark(0)
+                            && pom.hasMark(1)
+                            && (haveGroupId || !needGroupId)
+                            && haveArtifactId
+                            && haveOldVersion) {
+                        pom.replaceBetween(0, 1, newVersion);
                         madeReplacement = true;
-                        pom.clearMark( 0 );
-                        pom.clearMark( 1 );
+                        pom.clearMark(0);
+                        pom.clearMark(1);
                         haveArtifactId = false;
                         haveGroupId = false;
                         haveOldVersion = false;
@@ -929,27 +794,19 @@ public class PomHelper
      * @param project maven project of the child for which the models need to be gathered
      * @return gathered map of raw models per project
      */
-    private static Map<MavenProject, Model> getRawModelWithParents( MavenProject project ) throws IOException
-    {
+    private static Map<MavenProject, Model> getRawModelWithParents(MavenProject project) throws IOException {
         // constructs a tree sorted from children to parents
-        Map<MavenProject, Model> models = new TreeMap<>( ( p1, p2 ) ->
-        {
-            for ( MavenProject p = p1; p != null; p = p.getParent() )
-            {
-                if ( p == p2 ) // meaning p2 is an ancestor to p1 or p1 == p2
+        Map<MavenProject, Model> models = new TreeMap<>((p1, p2) -> {
+            for (MavenProject p = p1; p != null; p = p.getParent()) {
+                if (p == p2) // meaning p2 is an ancestor to p1 or p1 == p2
                 {
-                    return p == p1
-                            ? 0
-                            : -1; // p1 is the child
+                    return p == p1 ? 0 : -1; // p1 is the child
                 }
             }
             return 1;
-        } );
-        for ( MavenProject p = project; p != null; p = p.getParent() )
-        {
-            models.put( p, p.getFile() != null
-                    ? getRawModel( p )
-                    : p.getOriginalModel() );
+        });
+        for (MavenProject p = project; p != null; p = p.getParent()) {
+            models.put(p, p.getFile() != null ? getRawModel(p) : p.getOriginalModel());
         }
         return models;
     }
@@ -965,130 +822,145 @@ public class PomHelper
      * @throws IOException                   if the project's pom file cannot be parsed.
      * @since 1.0-alpha-3
      */
-    public static PropertyVersionsBuilder[] getPropertyVersionsBuilders( VersionsHelper helper, MavenProject project,
-                                                                         boolean includeParent )
-            throws ExpressionEvaluationException, IOException
-    {
-        ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator( project );
-        Map<MavenProject, Model> reactorModels = includeParent
-                ? getRawModelWithParents( project )
-                : singletonMap( project, getRawModel( project ) );
+    public static PropertyVersionsBuilder[] getPropertyVersionsBuilders(
+            VersionsHelper helper, MavenProject project, boolean includeParent)
+            throws ExpressionEvaluationException, IOException {
+        ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator(project);
+        Map<MavenProject, Model> reactorModels =
+                includeParent ? getRawModelWithParents(project) : singletonMap(project, getRawModel(project));
 
         Map<String, PropertyVersionsBuilder> propertiesMap = new TreeMap<>();
 
         Set<String> activeProfiles = new TreeSet<>();
-        for ( Profile profile : project.getActiveProfiles() )
-        {
-            activeProfiles.add( profile.getId() );
+        for (Profile profile : project.getActiveProfiles()) {
+            activeProfiles.add(profile.getId());
         }
 
         // add any properties from profiles first (as they override properties from the project
-        for ( Iterator<Profile> it = reactorModels.values().stream()
-                .flatMap( model -> model.getProfiles().stream() )
-                .filter( profile -> activeProfiles.contains( profile.getId() ) )
-                .iterator(); it.hasNext(); )
-        {
+        for (Iterator<Profile> it = reactorModels.values().stream()
+                        .flatMap(model -> model.getProfiles().stream())
+                        .filter(profile -> activeProfiles.contains(profile.getId()))
+                        .iterator();
+                it.hasNext(); ) {
             Profile profile = it.next();
-            try
-            {
-                addProperties( helper, propertiesMap, profile.getId(), profile.getProperties() );
-                if ( profile.getDependencyManagement() != null )
-                {
-                    addDependencyAssocations( helper, expressionEvaluator, propertiesMap,
-                            profile.getDependencyManagement().getDependencies(), false );
+            try {
+                addProperties(helper, propertiesMap, profile.getId(), profile.getProperties());
+                if (profile.getDependencyManagement() != null) {
+                    addDependencyAssocations(
+                            helper,
+                            expressionEvaluator,
+                            propertiesMap,
+                            profile.getDependencyManagement().getDependencies(),
+                            false);
                 }
-                addDependencyAssocations( helper, expressionEvaluator, propertiesMap,
-                        profile.getDependencies(),
-                        false );
-                if ( profile.getBuild() != null )
-                {
-                    if ( profile.getBuild().getPluginManagement() != null )
-                    {
-                        addPluginAssociations( helper, expressionEvaluator, propertiesMap,
-                                profile.getBuild().getPluginManagement().getPlugins() );
+                addDependencyAssocations(helper, expressionEvaluator, propertiesMap, profile.getDependencies(), false);
+                if (profile.getBuild() != null) {
+                    if (profile.getBuild().getPluginManagement() != null) {
+                        addPluginAssociations(
+                                helper,
+                                expressionEvaluator,
+                                propertiesMap,
+                                profile.getBuild().getPluginManagement().getPlugins());
                     }
-                    addPluginAssociations( helper, expressionEvaluator, propertiesMap,
-                            profile.getBuild().getPlugins() );
+                    addPluginAssociations(
+                            helper,
+                            expressionEvaluator,
+                            propertiesMap,
+                            profile.getBuild().getPlugins());
                 }
-                if ( profile.getReporting() != null )
-                {
-                    addReportPluginAssociations( helper, expressionEvaluator, propertiesMap,
-                            profile.getReporting().getPlugins() );
+                if (profile.getReporting() != null) {
+                    addReportPluginAssociations(
+                            helper,
+                            expressionEvaluator,
+                            propertiesMap,
+                            profile.getReporting().getPlugins());
                 }
-            }
-            catch ( ExpressionEvaluationException e )
-            {
-                throw new RuntimeException( e );
+            } catch (ExpressionEvaluationException e) {
+                throw new RuntimeException(e);
             }
         }
 
         // second, we add all the properties in the pom
-        reactorModels.values().forEach( model -> addProperties( helper, propertiesMap, null, model.getProperties() ) );
+        reactorModels.values().forEach(model -> addProperties(helper, propertiesMap, null, model.getProperties()));
 
+        for (MavenProject currentPrj = project;
+                currentPrj != null;
+                currentPrj = includeParent ? currentPrj.getParent() : null) {
+            Model model = reactorModels.get(currentPrj);
 
-        for ( MavenProject currentPrj = project; currentPrj != null; currentPrj = includeParent
-                        ? currentPrj.getParent()
-                        : null )
-        {
-            Model model = reactorModels.get( currentPrj );
-
-            if ( model.getDependencyManagement() != null )
-            {
-                addDependencyAssocations( helper, expressionEvaluator, propertiesMap,
-                        model.getDependencyManagement().getDependencies(), false );
+            if (model.getDependencyManagement() != null) {
+                addDependencyAssocations(
+                        helper,
+                        expressionEvaluator,
+                        propertiesMap,
+                        model.getDependencyManagement().getDependencies(),
+                        false);
             }
-            addDependencyAssocations( helper, expressionEvaluator, propertiesMap, model.getDependencies(), false );
-            if ( model.getBuild() != null )
-            {
-                if ( model.getBuild().getPluginManagement() != null )
-                {
-                    addPluginAssociations( helper, expressionEvaluator, propertiesMap,
-                            model.getBuild().getPluginManagement().getPlugins() );
+            addDependencyAssocations(helper, expressionEvaluator, propertiesMap, model.getDependencies(), false);
+            if (model.getBuild() != null) {
+                if (model.getBuild().getPluginManagement() != null) {
+                    addPluginAssociations(
+                            helper,
+                            expressionEvaluator,
+                            propertiesMap,
+                            model.getBuild().getPluginManagement().getPlugins());
                 }
-                addPluginAssociations( helper, expressionEvaluator, propertiesMap, model.getBuild().getPlugins() );
+                addPluginAssociations(
+                        helper,
+                        expressionEvaluator,
+                        propertiesMap,
+                        model.getBuild().getPlugins());
             }
-            if ( model.getReporting() != null )
-            {
-                addReportPluginAssociations( helper, expressionEvaluator, propertiesMap,
-                        model.getReporting().getPlugins() );
+            if (model.getReporting() != null) {
+                addReportPluginAssociations(
+                        helper,
+                        expressionEvaluator,
+                        propertiesMap,
+                        model.getReporting().getPlugins());
             }
 
             // third, we add any associations from the active profiles
-            for ( Profile profile : model.getProfiles() )
-            {
-                if ( !activeProfiles.contains( profile.getId() ) )
-                {
+            for (Profile profile : model.getProfiles()) {
+                if (!activeProfiles.contains(profile.getId())) {
                     continue;
                 }
-                if ( profile.getDependencyManagement() != null )
-                {
-                    addDependencyAssocations( helper, expressionEvaluator, propertiesMap,
-                            profile.getDependencyManagement().getDependencies(), false );
+                if (profile.getDependencyManagement() != null) {
+                    addDependencyAssocations(
+                            helper,
+                            expressionEvaluator,
+                            propertiesMap,
+                            profile.getDependencyManagement().getDependencies(),
+                            false);
                 }
-                addDependencyAssocations( helper, expressionEvaluator, propertiesMap, profile.getDependencies(),
-                        false );
-                if ( profile.getBuild() != null )
-                {
-                    if ( profile.getBuild().getPluginManagement() != null )
-                    {
-                        addPluginAssociations( helper, expressionEvaluator, propertiesMap,
-                                profile.getBuild().getPluginManagement().getPlugins() );
+                addDependencyAssocations(helper, expressionEvaluator, propertiesMap, profile.getDependencies(), false);
+                if (profile.getBuild() != null) {
+                    if (profile.getBuild().getPluginManagement() != null) {
+                        addPluginAssociations(
+                                helper,
+                                expressionEvaluator,
+                                propertiesMap,
+                                profile.getBuild().getPluginManagement().getPlugins());
                     }
-                    addPluginAssociations( helper, expressionEvaluator, propertiesMap,
-                            profile.getBuild().getPlugins() );
+                    addPluginAssociations(
+                            helper,
+                            expressionEvaluator,
+                            propertiesMap,
+                            profile.getBuild().getPlugins());
                 }
-                if ( profile.getReporting() != null )
-                {
-                    addReportPluginAssociations( helper, expressionEvaluator, propertiesMap,
-                            profile.getReporting().getPlugins() );
+                if (profile.getReporting() != null) {
+                    addReportPluginAssociations(
+                            helper,
+                            expressionEvaluator,
+                            propertiesMap,
+                            profile.getReporting().getPlugins());
                 }
             }
         }
 
         // finally, remove any properties without associations
-        purgeProperties( propertiesMap );
+        purgeProperties(propertiesMap);
 
-        return propertiesMap.values().toArray( new PropertyVersionsBuilder[0] );
+        return propertiesMap.values().toArray(new PropertyVersionsBuilder[0]);
     }
 
     /**
@@ -1102,109 +974,88 @@ public class PomHelper
      * @param plugins             The list of {@link org.apache.maven.model.Plugin}.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      */
-    private static void addPluginAssociations( VersionsHelper helper, ExpressionEvaluator expressionEvaluator,
-                                               Map<String, PropertyVersionsBuilder> result, List<Plugin> plugins )
-        throws ExpressionEvaluationException
-    {
-        if ( plugins == null )
-        {
+    private static void addPluginAssociations(
+            VersionsHelper helper,
+            ExpressionEvaluator expressionEvaluator,
+            Map<String, PropertyVersionsBuilder> result,
+            List<Plugin> plugins)
+            throws ExpressionEvaluationException {
+        if (plugins == null) {
             return;
         }
-        for ( Plugin plugin : plugins )
-        {
+        for (Plugin plugin : plugins) {
             String version = plugin.getVersion();
-            if ( version != null && version.contains( "${" ) && version.indexOf( '}' ) != -1 )
-            {
-                version = StringUtils.deleteWhitespace( version );
-                for ( PropertyVersionsBuilder property : result.values() )
-                {
+            if (version != null && version.contains("${") && version.indexOf('}') != -1) {
+                version = StringUtils.deleteWhitespace(version);
+                for (PropertyVersionsBuilder property : result.values()) {
                     // any of these could be defined by a property
                     final String propertyRef = "${" + property.getName() + "}";
-                    if ( version.contains( propertyRef ) )
-                    {
+                    if (version.contains(propertyRef)) {
                         String groupId = plugin.getGroupId();
-                        if ( groupId == null || groupId.trim().length() == 0 )
-                        {
+                        if (groupId == null || groupId.trim().length() == 0) {
                             // group Id has a special default
                             groupId = APACHE_MAVEN_PLUGINS_GROUPID;
-                        }
-                        else
-                        {
-                            groupId = (String) expressionEvaluator.evaluate( groupId );
+                        } else {
+                            groupId = (String) expressionEvaluator.evaluate(groupId);
                         }
                         String artifactId = plugin.getArtifactId();
-                        if ( artifactId == null || artifactId.trim().length() == 0 )
-                        {
+                        if (artifactId == null || artifactId.trim().length() == 0) {
                             // malformed pom
                             continue;
-                        }
-                        else
-                        {
-                            artifactId = (String) expressionEvaluator.evaluate( artifactId );
+                        } else {
+                            artifactId = (String) expressionEvaluator.evaluate(artifactId);
                         }
                         // might as well capture the current value
-                        String evaluatedVersion = (String) expressionEvaluator.evaluate( plugin.getVersion() );
-                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, evaluatedVersion ),
-                                                 true );
-                        if ( !propertyRef.equals( version ) )
-                        {
-                            addBounds( property, version, propertyRef );
+                        String evaluatedVersion = (String) expressionEvaluator.evaluate(plugin.getVersion());
+                        property.addAssociation(
+                                helper.createPluginArtifact(groupId, artifactId, evaluatedVersion), true);
+                        if (!propertyRef.equals(version)) {
+                            addBounds(property, version, propertyRef);
                         }
                     }
                 }
             }
-            addDependencyAssocations( helper, expressionEvaluator, result, plugin.getDependencies(), true );
+            addDependencyAssocations(helper, expressionEvaluator, result, plugin.getDependencies(), true);
         }
     }
 
-    private static void addReportPluginAssociations( VersionsHelper helper, ExpressionEvaluator expressionEvaluator,
-                                                     Map<String, PropertyVersionsBuilder> result,
-                                                     List<ReportPlugin> reportPlugins )
-        throws ExpressionEvaluationException
-    {
-        if ( reportPlugins == null )
-        {
+    private static void addReportPluginAssociations(
+            VersionsHelper helper,
+            ExpressionEvaluator expressionEvaluator,
+            Map<String, PropertyVersionsBuilder> result,
+            List<ReportPlugin> reportPlugins)
+            throws ExpressionEvaluationException {
+        if (reportPlugins == null) {
             return;
         }
-        for ( ReportPlugin plugin : reportPlugins )
-        {
+        for (ReportPlugin plugin : reportPlugins) {
             String version = plugin.getVersion();
-            if ( version != null && version.contains( "${" ) && version.indexOf( '}' ) != -1 )
-            {
-                version = StringUtils.deleteWhitespace( version );
-                for ( PropertyVersionsBuilder property : result.values() )
-                {
+            if (version != null && version.contains("${") && version.indexOf('}') != -1) {
+                version = StringUtils.deleteWhitespace(version);
+                for (PropertyVersionsBuilder property : result.values()) {
                     final String propertyRef = "${" + property.getName() + "}";
-                    if ( version.contains( propertyRef ) )
-                    {
+                    if (version.contains(propertyRef)) {
                         // any of these could be defined by a property
                         String groupId = plugin.getGroupId();
-                        if ( groupId == null || groupId.trim().length() == 0 )
-                        {
+                        if (groupId == null || groupId.trim().length() == 0) {
                             // group Id has a special default
                             groupId = APACHE_MAVEN_PLUGINS_GROUPID;
-                        }
-                        else
-                        {
-                            groupId = (String) expressionEvaluator.evaluate( groupId );
+                        } else {
+                            groupId = (String) expressionEvaluator.evaluate(groupId);
                         }
                         String artifactId = plugin.getArtifactId();
-                        if ( artifactId == null || artifactId.trim().length() == 0 )
-                        {
+                        if (artifactId == null || artifactId.trim().length() == 0) {
                             // malformed pom
                             continue;
-                        }
-                        else
-                        {
-                            artifactId = (String) expressionEvaluator.evaluate( artifactId );
+                        } else {
+                            artifactId = (String) expressionEvaluator.evaluate(artifactId);
                         }
                         // might as well capture the current value
-                        String versionEvaluated = (String) expressionEvaluator.evaluate( plugin.getVersion() );
-                        property.addAssociation( helper.createPluginArtifact( groupId, artifactId, versionEvaluated ),
-                                                 true );
-                        if ( !propertyRef.equals( version ) )
-                        {
-                            addBounds( property, version, propertyRef );
+                        String versionEvaluated = (String) expressionEvaluator.evaluate(plugin.getVersion());
+                        property.addAssociation(
+                                helper.createPluginArtifact(groupId, artifactId, versionEvaluated), true);
+                        if (!propertyRef.equals(version)) {
+                            addBounds(property, version, propertyRef);
                         }
                     }
                 }
@@ -1212,58 +1063,52 @@ public class PomHelper
         }
     }
 
-    private static void addDependencyAssocations( VersionsHelper helper, ExpressionEvaluator expressionEvaluator,
-                                                  Map<String, PropertyVersionsBuilder> result,
-                                                  List<Dependency> dependencies, boolean usePluginRepositories )
-        throws ExpressionEvaluationException
-    {
-        if ( dependencies == null )
-        {
+    private static void addDependencyAssocations(
+            VersionsHelper helper,
+            ExpressionEvaluator expressionEvaluator,
+            Map<String, PropertyVersionsBuilder> result,
+            List<Dependency> dependencies,
+            boolean usePluginRepositories)
+            throws ExpressionEvaluationException {
+        if (dependencies == null) {
             return;
         }
-        for ( Dependency dependency : dependencies )
-        {
+        for (Dependency dependency : dependencies) {
             String version = dependency.getVersion();
-            if ( version != null && version.contains( "${" ) && version.indexOf( '}' ) != -1 )
-            {
-                version = StringUtils.deleteWhitespace( version );
-                for ( PropertyVersionsBuilder property : result.values() )
-                {
+            if (version != null && version.contains("${") && version.indexOf('}') != -1) {
+                version = StringUtils.deleteWhitespace(version);
+                for (PropertyVersionsBuilder property : result.values()) {
                     final String propertyRef = "${" + property.getName() + "}";
-                    if ( version.contains( propertyRef ) )
-                    {
+                    if (version.contains(propertyRef)) {
                         // Any of these could be defined by a property
                         String groupId = dependency.getGroupId();
-                        if ( groupId == null || groupId.trim().length() == 0 )
-                        {
+                        if (groupId == null || groupId.trim().length() == 0) {
                             // malformed pom
                             continue;
-                        }
-                        else
-                        {
-                            groupId = (String) expressionEvaluator.evaluate( groupId );
+                        } else {
+                            groupId = (String) expressionEvaluator.evaluate(groupId);
                         }
                         String artifactId = dependency.getArtifactId();
-                        if ( artifactId == null || artifactId.trim().length() == 0 )
-                        {
+                        if (artifactId == null || artifactId.trim().length() == 0) {
                             // malformed pom
                             continue;
-                        }
-                        else
-                        {
-                            artifactId = (String) expressionEvaluator.evaluate( artifactId );
+                        } else {
+                            artifactId = (String) expressionEvaluator.evaluate(artifactId);
                         }
                         // might as well capture the current value
-                        String versionEvaluated = (String) expressionEvaluator.evaluate( dependency.getVersion() );
-                        property.addAssociation( helper.createDependencyArtifact( groupId, artifactId, versionEvaluated,
-                                                                                  dependency.getType(),
-                                                                                  dependency.getClassifier(),
-                                                                                  dependency.getScope(),
-                                                                                  dependency.isOptional() ),
-                                                 usePluginRepositories );
-                        if ( !propertyRef.equals( version ) )
-                        {
-                            addBounds( property, version, propertyRef );
+                        String versionEvaluated = (String) expressionEvaluator.evaluate(dependency.getVersion());
+                        property.addAssociation(
+                                helper.createDependencyArtifact(
+                                        groupId,
+                                        artifactId,
+                                        versionEvaluated,
+                                        dependency.getType(),
+                                        dependency.getClassifier(),
+                                        dependency.getScope(),
+                                        dependency.isOptional()),
+                                usePluginRepositories);
+                        if (!propertyRef.equals(version)) {
+                            addBounds(property, version, propertyRef);
                         }
                     }
                 }
@@ -1271,51 +1116,44 @@ public class PomHelper
         }
     }
 
-    private static void addBounds( PropertyVersionsBuilder builder, String rawVersionRange, String propertyRef )
-    {
-        Pattern lowerBound = Pattern.compile( "([(\\[])([^,]*)," + RegexUtils.quote( propertyRef ) + "([)\\]])" );
-        Pattern upperBound = Pattern.compile( "([(\\[])" + RegexUtils.quote( propertyRef ) + ",([^,]*)([)\\]])" );
-        Matcher m = lowerBound.matcher( rawVersionRange );
-        if ( m.find() )
-        {
-            boolean includeLower = "[".equals( m.group( 1 ) );
-            String lowerLimit = m.group( 2 );
-            if ( StringUtils.isNotEmpty( lowerLimit ) )
-            {
-                builder.addLowerBound( lowerLimit, includeLower );
+    private static void addBounds(PropertyVersionsBuilder builder, String rawVersionRange, String propertyRef) {
+        Pattern lowerBound = Pattern.compile("([(\\[])([^,]*)," + RegexUtils.quote(propertyRef) + "([)\\]])");
+        Pattern upperBound = Pattern.compile("([(\\[])" + RegexUtils.quote(propertyRef) + ",([^,]*)([)\\]])");
+        Matcher m = lowerBound.matcher(rawVersionRange);
+        if (m.find()) {
+            boolean includeLower = "[".equals(m.group(1));
+            String lowerLimit = m.group(2);
+            if (StringUtils.isNotEmpty(lowerLimit)) {
+                builder.addLowerBound(lowerLimit, includeLower);
             }
         }
-        m = upperBound.matcher( rawVersionRange );
-        if ( m.find() )
-        {
-            boolean includeUpper = "[".equals( m.group( 3 ) );
-            String upperLimit = m.group( 2 );
-            if ( StringUtils.isNotEmpty( upperLimit ) )
-            {
-                builder.addUpperBound( upperLimit, includeUpper );
+        m = upperBound.matcher(rawVersionRange);
+        if (m.find()) {
+            boolean includeUpper = "[".equals(m.group(3));
+            String upperLimit = m.group(2);
+            if (StringUtils.isNotEmpty(upperLimit)) {
+                builder.addUpperBound(upperLimit, includeUpper);
             }
         }
     }
 
-    private static void addProperties( VersionsHelper helper, Map<String, PropertyVersionsBuilder> result,
-                                       String profileId, Properties properties )
-    {
-        if ( properties == null )
-        {
+    private static void addProperties(
+            VersionsHelper helper,
+            Map<String, PropertyVersionsBuilder> result,
+            String profileId,
+            Properties properties) {
+        if (properties == null) {
             return;
         }
-        for ( String propertyName :  properties.stringPropertyNames() )
-        {
-            if ( !result.containsKey( propertyName ) )
-            {
-                result.put( propertyName, new PropertyVersionsBuilder( profileId, propertyName, helper ) );
+        for (String propertyName : properties.stringPropertyNames()) {
+            if (!result.containsKey(propertyName)) {
+                result.put(propertyName, new PropertyVersionsBuilder(profileId, propertyName, helper));
             }
         }
     }
 
-    private static void purgeProperties( Map<String, PropertyVersionsBuilder> result )
-    {
-        result.values().removeIf( versions -> versions.getAssociations().length == 0 );
+    private static void purgeProperties(Map<String, PropertyVersionsBuilder> result) {
+        result.values().removeIf(versions -> versions.getAssociations().length == 0);
     }
 
     /**
@@ -1326,9 +1164,8 @@ public class PomHelper
      * @param logger  The logger to use.
      * @return the set of all child modules of the project.
      */
-    public static Set<String> getAllChildModules( MavenProject project, Log logger )
-    {
-        return getAllChildModules( project.getOriginalModel(), logger );
+    public static Set<String> getAllChildModules(MavenProject project, Log logger) {
+        return getAllChildModules(project.getOriginalModel(), logger);
     }
 
     /**
@@ -1339,12 +1176,11 @@ public class PomHelper
      * @param logger The logger to use.
      * @return the set of all child modules of the project.
      */
-    public static Set<String> getAllChildModules( Model model, Log logger )
-    {
-        logger.debug( "Finding child modules..." );
-        Set<String> childModules = new TreeSet<>( model.getModules() );
-        model.getProfiles().forEach( profile -> childModules.addAll( profile.getModules() ) );
-        debugModules( logger, "Child modules:", childModules );
+    public static Set<String> getAllChildModules(Model model, Log logger) {
+        logger.debug("Finding child modules...");
+        Set<String> childModules = new TreeSet<>(model.getModules());
+        model.getProfiles().forEach(profile -> childModules.addAll(profile.getModules()));
+        debugModules(logger, "Child modules:", childModules);
         return childModules;
     }
 
@@ -1355,20 +1191,14 @@ public class PomHelper
      * @param message The message to display.
      * @param modules The modules to append to the message.
      */
-    public static void debugModules( Log logger, String message, Collection<String> modules )
-    {
-        if ( logger.isDebugEnabled() )
-        {
-            logger.debug( message );
-            if ( modules.isEmpty() )
-            {
-                logger.debug( "None." );
+    public static void debugModules(Log logger, String message, Collection<String> modules) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(message);
+            if (modules.isEmpty()) {
+                logger.debug("None.");
+            } else {
+                modules.forEach(module -> logger.debug("  " + module));
             }
-            else
-            {
-                modules.forEach( module -> logger.debug( "  " + module ) );
-            }
-
         }
     }
 
@@ -1379,31 +1209,27 @@ public class PomHelper
      * @param basedir      the project basedir.
      * @param childModules the child modules.
      */
-    public static void removeMissingChildModules( Log logger, File basedir, Collection<String> childModules )
-    {
-        logger.debug( "Removing child modules which are missing..." );
+    public static void removeMissingChildModules(Log logger, File basedir, Collection<String> childModules) {
+        logger.debug("Removing child modules which are missing...");
         Iterator<String> i = childModules.iterator();
-        while ( i.hasNext() )
-        {
+        while (i.hasNext()) {
             String modulePath = i.next();
-            File moduleFile = new File( basedir, modulePath );
+            File moduleFile = new File(basedir, modulePath);
 
-            if ( moduleFile.isDirectory() && new File( moduleFile, "pom.xml" ).isFile() )
-            {
+            if (moduleFile.isDirectory() && new File(moduleFile, "pom.xml").isFile()) {
                 // it's a directory that exists
                 continue;
             }
 
-            if ( moduleFile.isFile() )
-            {
+            if (moduleFile.isFile()) {
                 // it's the pom.xml file directly referenced and it exists.
                 continue;
             }
 
-            logger.debug( "Removing missing child module " + modulePath );
+            logger.debug("Removing missing child module " + modulePath);
             i.remove();
         }
-        debugModules( logger, "After removing missing", childModules );
+        debugModules(logger, "After removing missing", childModules);
     }
 
     /**
@@ -1412,11 +1238,9 @@ public class PomHelper
      * @param model The model.
      * @return The version.
      */
-    public static String getVersion( Model model )
-    {
+    public static String getVersion(Model model) {
         String targetVersion = model.getVersion();
-        if ( targetVersion == null && model.getParent() != null )
-        {
+        if (targetVersion == null && model.getParent() != null) {
             targetVersion = model.getParent().getVersion();
         }
         return targetVersion;
@@ -1428,8 +1252,7 @@ public class PomHelper
      * @param model The model.
      * @return {@code true} if the model explicitly specifies the project version, i.e. /project/version
      */
-    public static boolean isExplicitVersion( Model model )
-    {
+    public static boolean isExplicitVersion(Model model) {
         return model.getVersion() != null;
     }
 
@@ -1439,11 +1262,9 @@ public class PomHelper
      * @param model The model.
      * @return The artifactId.
      */
-    public static String getArtifactId( Model model )
-    {
+    public static String getArtifactId(Model model) {
         String sourceArtifactId = model.getArtifactId();
-        if ( sourceArtifactId == null && model.getParent() != null )
-        {
+        if (sourceArtifactId == null && model.getParent() != null) {
             sourceArtifactId = model.getParent().getArtifactId();
         }
         return sourceArtifactId;
@@ -1455,11 +1276,9 @@ public class PomHelper
      * @param model The model.
      * @return The groupId.
      */
-    public static String getGroupId( Model model )
-    {
+    public static String getGroupId(Model model) {
         String targetGroupId = model.getGroupId();
-        if ( targetGroupId == null && model.getParent() != null )
-        {
+        if (targetGroupId == null && model.getParent() != null) {
             targetGroupId = model.getParent().getGroupId();
         }
         return targetGroupId;
@@ -1473,50 +1292,36 @@ public class PomHelper
      * @param logger               The logger to log tog
      * @return The local root (note this may be the project passed as an argument).
      */
-    public static MavenProject getLocalRoot( ProjectBuilder projectBuilder,
-                                             MavenSession mavenSession,
-                                             Log logger )
-    {
-        logger.info( "Searching for local aggregator root..." );
+    public static MavenProject getLocalRoot(ProjectBuilder projectBuilder, MavenSession mavenSession, Log logger) {
+        logger.info("Searching for local aggregator root...");
         MavenProject project = mavenSession.getCurrentProject();
-        while ( true )
-        {
+        while (true) {
             final File parentDir = project.getBasedir().getParentFile();
-            if ( parentDir != null && parentDir.isDirectory() )
-            {
-                logger.debug( "Checking to see if " + parentDir + " is an aggregator parent" );
-                File parentFile = new File( parentDir, "pom.xml" );
-                if ( parentFile.isFile() )
-                {
-                    try
-                    {
-                        ProjectBuildingResult result = projectBuilder.build( parentFile,
-                                createProjectBuilderRequest( mavenSession ) );
-                        if ( !result.getProblems().isEmpty() )
-                        {
-                            logger.warn( "Problems encountered during the computation of the local aggregation root." );
-                            result.getProblems().forEach( p ->
-                                    logger.warn( "\t" + p.getMessage() ) );
+            if (parentDir != null && parentDir.isDirectory()) {
+                logger.debug("Checking to see if " + parentDir + " is an aggregator parent");
+                File parentFile = new File(parentDir, "pom.xml");
+                if (parentFile.isFile()) {
+                    try {
+                        ProjectBuildingResult result =
+                                projectBuilder.build(parentFile, createProjectBuilderRequest(mavenSession));
+                        if (!result.getProblems().isEmpty()) {
+                            logger.warn("Problems encountered during the computation of the local aggregation root.");
+                            result.getProblems().forEach(p -> logger.warn("\t" + p.getMessage()));
                         }
-                        if ( getAllChildModules( result.getProject(), logger )
-                                .contains( project.getBasedir().getName() ) )
-                        {
-                            logger.debug( parentDir + " is an aggregator parent" );
+                        if (getAllChildModules(result.getProject(), logger)
+                                .contains(project.getBasedir().getName())) {
+                            logger.debug(parentDir + " is an aggregator parent");
                             project = result.getProject();
                             continue;
+                        } else {
+                            logger.debug(parentDir + " is not an aggregator parent");
                         }
-                        else
-                        {
-                            logger.debug( parentDir + " is not an aggregator parent" );
-                        }
-                    }
-                    catch ( ProjectBuildingException e )
-                    {
-                        logger.warn( e );
+                    } catch (ProjectBuildingException e) {
+                        logger.warn(e);
                     }
                 }
             }
-            logger.debug( "Local aggregation root is " + project.getBasedir() );
+            logger.debug("Local aggregation root is " + project.getBasedir());
             return project;
         }
     }
@@ -1530,23 +1335,23 @@ public class PomHelper
      * @return constructed builder request
      */
     @SafeVarargs
-    public static ProjectBuildingRequest createProjectBuilderRequest( MavenSession mavenSession,
-                                                                      Consumer<ProjectBuildingRequest>... initializers )
-    {
-        return new DefaultProjectBuildingRequest()
-        {{
-            setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL );
-            setResolveDependencies( false );
-            setLocalRepository( mavenSession.getLocalRepository() );
-            setRemoteRepositories( mavenSession.getCurrentProject().getRemoteArtifactRepositories() );
-            setBuildStartTime( mavenSession.getStartTime() );
-            setUserProperties( mavenSession.getUserProperties() );
-            setSystemProperties( mavenSession.getSystemProperties() );
-            setActiveProfileIds( mavenSession.getRequest().getActiveProfiles() );
-            setInactiveProfileIds( mavenSession.getRequest().getInactiveProfiles() );
-            setRepositorySession( mavenSession.getRepositorySession() );
-            Arrays.stream( initializers ).forEach( i -> i.accept( this ) );
-        }};
+    public static ProjectBuildingRequest createProjectBuilderRequest(
+            MavenSession mavenSession, Consumer<ProjectBuildingRequest>... initializers) {
+        return new DefaultProjectBuildingRequest() {
+            {
+                setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
+                setResolveDependencies(false);
+                setLocalRepository(mavenSession.getLocalRepository());
+                setRemoteRepositories(mavenSession.getCurrentProject().getRemoteArtifactRepositories());
+                setBuildStartTime(mavenSession.getStartTime());
+                setUserProperties(mavenSession.getUserProperties());
+                setSystemProperties(mavenSession.getSystemProperties());
+                setActiveProfileIds(mavenSession.getRequest().getActiveProfiles());
+                setInactiveProfileIds(mavenSession.getRequest().getInactiveProfiles());
+                setRepositorySession(mavenSession.getRepositorySession());
+                Arrays.stream(initializers).forEach(i -> i.accept(this));
+            }
+        };
     }
 
     /**
@@ -1557,14 +1362,12 @@ public class PomHelper
      * @return A map of raw models keyed by path relative to the project's basedir.
      * @throws IOException if things go wrong.
      */
-    public static Map<String, Model> getReactorModels( MavenProject project, Log logger )
-        throws IOException
-    {
+    public static Map<String, Model> getReactorModels(MavenProject project, Log logger) throws IOException {
         Map<String, Model> result = new LinkedHashMap<>();
-        final Model model = getRawModel( project );
+        final Model model = getRawModel(project);
         final String path = "";
-        result.put( path, model );
-        result.putAll( getReactorModels( path, model, project, logger ) );
+        result.put(path, model);
+        result.putAll(getReactorModels(path, model, project, logger));
         return result;
     }
 
@@ -1578,46 +1381,35 @@ public class PomHelper
      * @return A map of raw models keyed by path relative to the project's basedir.
      * @throws IOException if things go wrong.
      */
-    private static Map<String, Model> getReactorModels( String path, Model model, MavenProject project, Log logger )
-        throws IOException
-    {
+    private static Map<String, Model> getReactorModels(String path, Model model, MavenProject project, Log logger)
+            throws IOException {
         Map<String, Model> result = new LinkedHashMap<>();
         Map<String, Model> childResults = new LinkedHashMap<>();
-        Set<String> childModules = getAllChildModules( model, logger );
+        Set<String> childModules = getAllChildModules(model, logger);
 
-        File baseDir = path.length() > 0
-                ? new File( project.getBasedir(), path )
-                : project.getBasedir();
-        removeMissingChildModules( logger, baseDir, childModules );
+        File baseDir = path.length() > 0 ? new File(project.getBasedir(), path) : project.getBasedir();
+        removeMissingChildModules(logger, baseDir, childModules);
 
         childModules.stream()
-                .map( moduleName -> new File( baseDir, moduleName ) )
-                .filter( File::exists )
-                .forEach( moduleFile ->
-                {
-                    File pomFile = moduleFile.isDirectory()
-                            ? new File( moduleFile, "/pom.xml" )
-                            : moduleFile;
-                    String modulePath = ( !path.isEmpty() && !path.endsWith( "/" )
-                            ?  path + "/"
-                            : path )
+                .map(moduleName -> new File(baseDir, moduleName))
+                .filter(File::exists)
+                .forEach(moduleFile -> {
+                    File pomFile = moduleFile.isDirectory() ? new File(moduleFile, "/pom.xml") : moduleFile;
+                    String modulePath = (!path.isEmpty() && !path.endsWith("/") ? path + "/" : path)
                             + pomFile.getParentFile().getName();
 
-                    try
-                    {
+                    try {
                         // the aim of this goal is to fix problems when the project cannot be parsed by Maven,
                         // so we have to work with the raw model and not the interpolated parsed model from maven
-                        Model moduleModel = getRawModel( pomFile );
-                        result.put( modulePath, moduleModel );
-                        childResults.putAll( getReactorModels( modulePath, moduleModel, project, logger ) );
+                        Model moduleModel = getRawModel(pomFile);
+                        result.put(modulePath, moduleModel);
+                        childResults.putAll(getReactorModels(modulePath, moduleModel, project, logger));
+                    } catch (IOException e) {
+                        logger.debug("Could not parse " + pomFile.getPath(), e);
                     }
-                    catch ( IOException e )
-                    {
-                        logger.debug( "Could not parse " + pomFile.getPath(), e );
-                    }
-                } );
+                });
 
-        result.putAll( childResults ); // more efficient update order if all children are added after siblings
+        result.putAll(childResults); // more efficient update order if all children are added after siblings
         return result;
     }
 
@@ -1629,18 +1421,14 @@ public class PomHelper
      * @param artifactId The artifactId of the parent.
      * @return a map of models that have a specified groupId and artifactId as parent keyed by path.
      */
-    public static Map<String, Model> getChildModels( Map<String, Model> reactor, String groupId, String artifactId )
-    {
+    public static Map<String, Model> getChildModels(Map<String, Model> reactor, String groupId, String artifactId) {
         final Map<String, Model> result = new LinkedHashMap<>();
-        for ( Map.Entry<String, Model> entry : reactor.entrySet() )
-        {
+        for (Map.Entry<String, Model> entry : reactor.entrySet()) {
             final String path = entry.getKey();
             final Model model = entry.getValue();
             final Parent parent = model.getParent();
-            if ( parent != null && groupId.equals( parent.getGroupId() )
-                && artifactId.equals( parent.getArtifactId() ) )
-            {
-                result.put( path, model );
+            if (parent != null && groupId.equals(parent.getGroupId()) && artifactId.equals(parent.getArtifactId())) {
+                result.put(path, model);
             }
         }
         return result;
@@ -1654,11 +1442,12 @@ public class PomHelper
      * @param artifactId The artifactId to match.
      * @return The model or <code>null</code> if the model was not in the reactor.
      */
-    public static Model getModel( Map<String, Model> reactor, String groupId, String artifactId )
-    {
-        return reactor.values().stream().filter(
-                model -> ( groupId == null || groupId.equals( getGroupId( model ) ) ) && artifactId.equals(
-                        getArtifactId( model ) ) ).findAny().orElse( null );
+    public static Model getModel(Map<String, Model> reactor, String groupId, String artifactId) {
+        return reactor.values().stream()
+                .filter(model -> (groupId == null || groupId.equals(getGroupId(model)))
+                        && artifactId.equals(getArtifactId(model)))
+                .findAny()
+                .orElse(null);
     }
 
     /**
@@ -1670,12 +1459,13 @@ public class PomHelper
      * @param artifactId The artifactId to match.
      * @return The model entry or <code>null</code> if the model was not in the reactor.
      */
-    public static Map.Entry<String, Model> getModelEntry( Map<String, Model> reactor, String groupId,
-                                                          String artifactId )
-    {
-        return reactor.entrySet().stream().filter(
-                e -> ( groupId == null || groupId.equals( PomHelper.getGroupId( e.getValue() ) ) ) && artifactId.equals(
-                        PomHelper.getArtifactId( e.getValue() ) ) ).findAny().orElse( null );
+    public static Map.Entry<String, Model> getModelEntry(
+            Map<String, Model> reactor, String groupId, String artifactId) {
+        return reactor.entrySet().stream()
+                .filter(e -> (groupId == null || groupId.equals(PomHelper.getGroupId(e.getValue())))
+                        && artifactId.equals(PomHelper.getArtifactId(e.getValue())))
+                .findAny()
+                .orElse(null);
     }
 
     /**
@@ -1685,18 +1475,16 @@ public class PomHelper
      * @param model   The model.
      * @return The number of parents of this model in the reactor.
      */
-    public static int getReactorParentCount( Map<String, Model> reactor, Model model )
-    {
-        if ( model.getParent() == null )
-        {
+    public static int getReactorParentCount(Map<String, Model> reactor, Model model) {
+        if (model.getParent() == null) {
             return 0;
         }
-        Model parentModel = getModel( reactor, model.getParent().getGroupId(), model.getParent().getArtifactId() );
-        if ( parentModel == null )
-        {
+        Model parentModel = getModel(
+                reactor, model.getParent().getGroupId(), model.getParent().getArtifactId());
+        if (parentModel == null) {
             return 0;
         }
-        return getReactorParentCount( reactor, parentModel ) + 1;
+        return getReactorParentCount(reactor, parentModel) + 1;
     }
 
     /**
@@ -1706,12 +1494,9 @@ public class PomHelper
      * @return String The content of the file.
      * @throws java.io.IOException when things go wrong.
      */
-    public static StringBuilder readXmlFile( File outFile )
-        throws IOException
-    {
-        try ( Reader reader = ReaderFactory.newXmlReader( outFile ) )
-        {
-            return new StringBuilder( IOUtil.toString( reader ) );
+    public static StringBuilder readXmlFile(File outFile) throws IOException {
+        try (Reader reader = ReaderFactory.newXmlReader(outFile)) {
+            return new StringBuilder(IOUtil.toString(reader));
         }
     }
 
@@ -1721,8 +1506,7 @@ public class PomHelper
      * @param model the model.
      * @return the GAV coordinates of a model.
      */
-    public static String getGAV( Model model )
-    {
-        return getGroupId( model ) + ":" + getArtifactId( model ) + ":" + getVersion( model );
+    public static String getGAV(Model model) {
+        return getGroupId(model) + ":" + getArtifactId(model) + ":" + getVersion(model);
     }
 }

@@ -45,15 +45,13 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * Common base class for {@link UseLatestVersionsMojo}
  * and {@link UseLatestReleasesMojo}
  */
-public abstract class UseLatestVersionsMojoBase
-    extends AbstractVersionsDependencyUpdaterMojo
-{
-    public UseLatestVersionsMojoBase( RepositorySystem repositorySystem,
-                                  org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                  Map<String, Wagon> wagonMap,
-                                  Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependencyUpdaterMojo {
+    public UseLatestVersionsMojoBase(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -71,50 +69,43 @@ public abstract class UseLatestVersionsMojoBase
      * @throws VersionRetrievalException thrown if an artifact versions cannot be retrieved
      */
     @SafeVarargs
-    protected final void useLatestVersions( ModifiedPomXMLEventReader pom,
-                                            Collection<Dependency> dependencies,
-                                            BiFunction<Dependency, ArtifactVersions, Optional<ArtifactVersion>>
-                                                    newestVersionProducer,
-                                            ChangeRecord.ChangeKind changeKind,
-                                            Predicate<Dependency>... filters )
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException
-    {
-        for ( Dependency dep : dependencies )
-        {
-            if ( !Arrays.stream( filters )
-                    .map( f -> f.test( dep ) )
-                    .reduce( Boolean::logicalAnd )
-                    .orElse( true ) )
-            {
+    protected final void useLatestVersions(
+            ModifiedPomXMLEventReader pom,
+            Collection<Dependency> dependencies,
+            BiFunction<Dependency, ArtifactVersions, Optional<ArtifactVersion>> newestVersionProducer,
+            ChangeRecord.ChangeKind changeKind,
+            Predicate<Dependency>... filters)
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
+        for (Dependency dep : dependencies) {
+            if (!Arrays.stream(filters)
+                    .map(f -> f.test(dep))
+                    .reduce(Boolean::logicalAnd)
+                    .orElse(true)) {
                 continue;
             }
 
-            if ( isExcludeReactor() && isProducedByReactor( dep ) )
-            {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+            if (isExcludeReactor() && isProducedByReactor(dep)) {
+                getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
             }
 
-            if ( isHandledByProperty( dep ) )
-            {
-                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+            if (isHandledByProperty(dep)) {
+                getLog().debug("Ignoring dependency with property as version: " + toString(dep));
                 continue;
             }
 
-            Artifact artifact = toArtifact( dep );
-            if ( !isIncluded( artifact ) )
-            {
+            Artifact artifact = toArtifact(dep);
+            if (!isIncluded(artifact)) {
                 continue;
             }
 
-            ArtifactVersion selectedVersion = new DefaultArtifactVersion( dep.getVersion() );
-            getLog().debug( "Selected version:" + selectedVersion );
-            getLog().debug( "Looking for newer versions of " + toString( dep ) );
-            ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-            Optional<ArtifactVersion> newestVer = newestVersionProducer.apply( dep, versions );
-            if ( newestVer.isPresent() )
-            {
-                updateDependencyVersion( pom, dep, newestVer.get().toString(), changeKind );
+            ArtifactVersion selectedVersion = new DefaultArtifactVersion(dep.getVersion());
+            getLog().debug("Selected version:" + selectedVersion);
+            getLog().debug("Looking for newer versions of " + toString(dep));
+            ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
+            Optional<ArtifactVersion> newestVer = newestVersionProducer.apply(dep, versions);
+            if (newestVer.isPresent()) {
+                updateDependencyVersion(pom, dep, newestVer.get().toString(), changeKind);
             }
         }
     }

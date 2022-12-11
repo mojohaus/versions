@@ -29,8 +29,7 @@ import org.codehaus.mojo.versions.api.change.VersionChange;
  * @author Stephen Connolly
  * @since 15-Sep-2010 14:48:10
  */
-public final class DefaultVersionChange implements VersionChange
-{
+public final class DefaultVersionChange implements VersionChange {
     private final String groupId;
 
     private final String artifactId;
@@ -39,73 +38,60 @@ public final class DefaultVersionChange implements VersionChange
 
     private final String newVersion;
 
-    public DefaultVersionChange( String groupId, String artifactId, String oldVersion, String newVersion )
-    {
+    public DefaultVersionChange(String groupId, String artifactId, String oldVersion, String newVersion) {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.oldVersion = oldVersion;
         this.newVersion = newVersion;
     }
 
-    public String getGroupId()
-    {
+    public String getGroupId() {
         return groupId;
     }
 
-    public String getArtifactId()
-    {
+    public String getArtifactId() {
         return artifactId;
     }
 
-    public String getOldVersion()
-    {
+    public String getOldVersion() {
         return oldVersion;
     }
 
-    public String getNewVersion()
-    {
+    public String getNewVersion() {
         return newVersion;
     }
 
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if ( o == null || getClass() != o.getClass() )
-        {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         DefaultVersionChange versionChange = (DefaultVersionChange) o;
 
-        if ( !Objects.equals( artifactId, versionChange.artifactId ) )
-        {
+        if (!Objects.equals(artifactId, versionChange.artifactId)) {
             return false;
         }
-        if ( !Objects.equals( groupId, versionChange.groupId ) )
-        {
+        if (!Objects.equals(groupId, versionChange.groupId)) {
             return false;
         }
-        if ( !Objects.equals( newVersion, versionChange.newVersion ) )
-        {
+        if (!Objects.equals(newVersion, versionChange.newVersion)) {
             return false;
         }
-        return Objects.equals( oldVersion, versionChange.oldVersion );
+        return Objects.equals(oldVersion, versionChange.oldVersion);
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = groupId != null ? groupId.hashCode() : 0;
-        result = 31 * result + ( artifactId != null ? artifactId.hashCode() : 0 );
-        result = 31 * result + ( oldVersion != null ? oldVersion.hashCode() : 0 );
-        result = 31 * result + ( newVersion != null ? newVersion.hashCode() : 0 );
+        result = 31 * result + (artifactId != null ? artifactId.hashCode() : 0);
+        result = 31 * result + (oldVersion != null ? oldVersion.hashCode() : 0);
+        result = 31 * result + (newVersion != null ? newVersion.hashCode() : 0);
         return result;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "DefaultVersionChange(" + groupId + ':' + artifactId + ":" + oldVersion + "-->" + newVersion + ')';
     }
 }

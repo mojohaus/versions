@@ -22,15 +22,13 @@ package org.codehaus.mojo.versions.api;
 /**
  * Exception thrown if version information cannot be retrieved
  */
-public class VersionRetrievalException extends Exception
-{
+public class VersionRetrievalException extends Exception {
     /**
      * Constructs a new exception with {@code null} as its detail message.
      * The cause is not initialized, and may subsequently be initialized by a
      * call to {@link #initCause}.
      */
-    public VersionRetrievalException()
-    {
+    public VersionRetrievalException() {
         super();
     }
 
@@ -42,9 +40,8 @@ public class VersionRetrievalException extends Exception
      * @param   message   the detail message. The detail message is saved for
      *          later retrieval by the {@link #getMessage()} method.
      */
-    public VersionRetrievalException( String message )
-    {
-        super( message );
+    public VersionRetrievalException(String message) {
+        super(message);
     }
 
     /**
@@ -60,9 +57,8 @@ public class VersionRetrievalException extends Exception
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public VersionRetrievalException( Throwable cause )
-    {
-        super( cause );
+    public VersionRetrievalException(Throwable cause) {
+        super(cause);
     }
 
     /**
@@ -78,8 +74,7 @@ public class VersionRetrievalException extends Exception
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public VersionRetrievalException( String message, Throwable cause )
-    {
-        super( message, cause );
+    public VersionRetrievalException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

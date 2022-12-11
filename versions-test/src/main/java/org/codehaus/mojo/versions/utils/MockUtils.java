@@ -53,22 +53,21 @@ import static org.mockito.Mockito.when;
 /**
  * Various mock creating utilities
  */
-public class MockUtils
-{
-    private static final Map<String, String[]> DEFAULT_VERSION_MAP = new HashMap<String, String[]>()
-    {{
-        put( "artifactA", new String[] {"1.0.0", "2.0.0"} );
-        put( "artifactB", new String[] {"1.0.0", "1.1.0"} );
-        put( "artifactC", new String[] {"1.0.0"} );
-    }};
+public class MockUtils {
+    private static final Map<String, String[]> DEFAULT_VERSION_MAP = new HashMap<String, String[]>() {
+        {
+            put("artifactA", new String[] {"1.0.0", "2.0.0"});
+            put("artifactB", new String[] {"1.0.0", "1.1.0"});
+            put("artifactC", new String[] {"1.0.0"});
+        }
+    };
 
     /**
      * Creates a mocked  {@linkplain org.eclipse.aether.RepositorySystem}, providing the default version set
      * @return mocked {@linkplain org.eclipse.aether.RepositorySystem}
      */
-    public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem()
-    {
-        return mockAetherRepositorySystem( DEFAULT_VERSION_MAP );
+    public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem() {
+        return mockAetherRepositorySystem(DEFAULT_VERSION_MAP);
     }
 
     /**
@@ -77,84 +76,73 @@ public class MockUtils
      * @param versionMap requested version map
      * @return mocked {@linkplain org.eclipse.aether.RepositorySystem}
      */
-    public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem( Map<String, String[]> versionMap )
-    {
-        org.eclipse.aether.RepositorySystem repositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
-        try
-        {
-            when( repositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
-                    .then( invocation ->
-                    {
-                        VersionRangeRequest request = invocation.getArgument( 1 );
+    public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem(Map<String, String[]> versionMap) {
+        org.eclipse.aether.RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        try {
+            when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                    .then(invocation -> {
+                        VersionRangeRequest request = invocation.getArgument(1);
                         return versionMap.entrySet().stream()
-                                .filter( e -> e.getKey().equals( request.getArtifact().getArtifactId() ) )
+                                .filter(e ->
+                                        e.getKey().equals(request.getArtifact().getArtifactId()))
                                 .findAny()
-                                .map( e -> Arrays.stream( e.getValue() )
-                                        .map( VersionStub::new )
-                                        .collect( () -> new ArrayList<Version>(), ArrayList::add, ArrayList::addAll ) )
-                                .map( versions -> new VersionRangeResult( request ).setVersions( versions ) )
-                                .orElse( null ); // should tell us if we haven't populated all cases in the test
-                    } );
-            when( repositorySystem.resolveArtifact( any( RepositorySystemSession.class ),
-                    any( ArtifactRequest.class ) ) )
-                    .then( invocation ->
-                    {
-                        ArtifactRequest request = invocation.getArgument( 1 );
+                                .map(e -> Arrays.stream(e.getValue())
+                                        .map(VersionStub::new)
+                                        .collect(() -> new ArrayList<Version>(), ArrayList::add, ArrayList::addAll))
+                                .map(versions -> new VersionRangeResult(request).setVersions(versions))
+                                .orElse(null); // should tell us if we haven't populated all cases in the test
+                    });
+            when(repositorySystem.resolveArtifact(any(RepositorySystemSession.class), any(ArtifactRequest.class)))
+                    .then(invocation -> {
+                        ArtifactRequest request = invocation.getArgument(1);
                         org.eclipse.aether.artifact.Artifact copiedArtifact =
                                 new org.eclipse.aether.artifact.DefaultArtifact(
                                         request.getArtifact().getGroupId(),
                                         request.getArtifact().getArtifactId(),
                                         request.getArtifact().getClassifier(),
                                         request.getArtifact().getExtension(),
-                                        request.getArtifact().getVersion() );
-                        copiedArtifact.setFile( mock( File.class ) );
-                        return new ArtifactResult( request )
-                                .setArtifact( copiedArtifact );
-                    } );
-        }
-        catch ( VersionRangeResolutionException | ArtifactResolutionException e )
-        {
-            throw new RuntimeException( e );
+                                        request.getArtifact().getVersion());
+                        copiedArtifact.setFile(mock(File.class));
+                        return new ArtifactResult(request).setArtifact(copiedArtifact);
+                    });
+        } catch (VersionRangeResolutionException | ArtifactResolutionException e) {
+            throw new RuntimeException(e);
         }
 
         return repositorySystem;
     }
 
-    public static I18N mockI18N()
-    {
-        I18N i18n = mock( I18N.class );
-        when( i18n.getString( anyString(), any(), anyString() ) ).thenAnswer(
-            invocation -> invocation.getArgument( 2 ) );
+    public static I18N mockI18N() {
+        I18N i18n = mock(I18N.class);
+        when(i18n.getString(anyString(), any(), anyString())).thenAnswer(invocation -> invocation.getArgument(2));
         return i18n;
     }
 
-    public static SiteTool mockSiteTool()
-    {
-        Artifact skinArtifact = mock( Artifact.class );
-        when( skinArtifact.getId() ).thenReturn( "" );
-        SiteTool siteTool = mock( SiteTool.class );
-        try
-        {
-            when( siteTool.getSkinArtifactFromRepository( any(), any(), any() ) ).thenReturn( skinArtifact );
-        }
-        catch ( SiteToolException e )
-        {
-            throw new RuntimeException( e );
+    public static SiteTool mockSiteTool() {
+        Artifact skinArtifact = mock(Artifact.class);
+        when(skinArtifact.getId()).thenReturn("");
+        SiteTool siteTool = mock(SiteTool.class);
+        try {
+            when(siteTool.getSkinArtifactFromRepository(any(), any(), any())).thenReturn(skinArtifact);
+        } catch (SiteToolException e) {
+            throw new RuntimeException(e);
         }
         return siteTool;
     }
 
-    public static RepositorySystem mockRepositorySystem()
-    {
-        RepositorySystem repositorySystem = mock( RepositorySystem.class );
-        when( repositorySystem.createDependencyArtifact( any( Dependency.class ) ) ).thenAnswer(
-            invocation ->
-            {
-                Dependency dependency = invocation.getArgument( 0 );
-                return new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                            dependency.getVersion(), dependency.getScope(), dependency.getType(),
-                                            dependency.getClassifier(), new DefaultArtifactHandlerStub( "default" ) );
-            } );
+    public static RepositorySystem mockRepositorySystem() {
+        RepositorySystem repositorySystem = mock(RepositorySystem.class);
+        when(repositorySystem.createDependencyArtifact(any(Dependency.class))).thenAnswer(invocation -> {
+            Dependency dependency = invocation.getArgument(0);
+            return new DefaultArtifact(
+                    dependency.getGroupId(),
+                    dependency.getArtifactId(),
+                    dependency.getVersion(),
+                    dependency.getScope(),
+                    dependency.getType(),
+                    dependency.getClassifier(),
+                    new DefaultArtifactHandlerStub("default"));
+        });
         return repositorySystem;
     }
 
@@ -163,14 +151,12 @@ public class MockUtils
      * by providing only a non-{@code null} implementation of its {@link MavenSession#getRepositorySession()} method.
      * @return mocked {@link MavenSession}
      */
-    public static MavenSession mockMavenSession()
-    {
-        MavenSession session = mock( MavenSession.class );
-        when( session.getRepositorySession() )
-                .thenReturn( mock( RepositorySystemSession.class ) );
-        when( session.getCurrentProject() ).thenReturn( mock( MavenProject.class ) );
-        when( session.getCurrentProject().getRemotePluginRepositories() ).thenReturn( emptyList() );
-        when( session.getCurrentProject().getRemoteProjectRepositories() ).thenReturn( emptyList() );
+    public static MavenSession mockMavenSession() {
+        MavenSession session = mock(MavenSession.class);
+        when(session.getRepositorySession()).thenReturn(mock(RepositorySystemSession.class));
+        when(session.getCurrentProject()).thenReturn(mock(MavenProject.class));
+        when(session.getCurrentProject().getRemotePluginRepositories()).thenReturn(emptyList());
+        when(session.getCurrentProject().getRemoteProjectRepositories()).thenReturn(emptyList());
         return session;
     }
 }

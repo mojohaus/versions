@@ -29,8 +29,7 @@ import org.apache.maven.model.Dependency;
  *
  * @since 1.0-alpha-1
  */
-public enum DependencyComparator implements Comparator<Dependency>
-{
+public enum DependencyComparator implements Comparator<Dependency> {
     INSTANCE;
 
     /**
@@ -40,21 +39,19 @@ public enum DependencyComparator implements Comparator<Dependency>
      * @see java.util.Comparator#compare(Object, Object)
      * @since 1.0-alpha-1
      */
-    @SuppressWarnings( "checkstyle:InnerAssignment" )
-    public int compare( Dependency d1, Dependency d2 )
-    {
+    @SuppressWarnings("checkstyle:InnerAssignment")
+    public int compare(Dependency d1, Dependency d2) {
         int r;
         return d1 == d2
                 ? 0
                 : d1 == null
-                    ? 1
-                    : d2 == null
-                        ? -1
-                        : ( r = StringUtils.compare( d1.getGroupId(), d2.getGroupId() ) ) != 0
-                            ? r
-                            : ( r = StringUtils.compare( d1.getArtifactId(), d2.getArtifactId() ) ) != 0
-                                ? r
-                                : StringUtils.compare( d1.getVersion(), d2.getVersion() );
+                        ? 1
+                        : d2 == null
+                                ? -1
+                                : (r = StringUtils.compare(d1.getGroupId(), d2.getGroupId())) != 0
+                                        ? r
+                                        : (r = StringUtils.compare(d1.getArtifactId(), d2.getArtifactId())) != 0
+                                                ? r
+                                                : StringUtils.compare(d1.getVersion(), d2.getVersion());
     }
-
 }

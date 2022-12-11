@@ -30,60 +30,50 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 
-public class DependencyFilter
-{
+public class DependencyFilter {
 
     private final String pattern;
     private final List<TokenizedMatcher> matchers;
 
-    DependencyFilter( String pattern, List<TokenizedMatcher> matchers )
-    {
+    DependencyFilter(String pattern, List<TokenizedMatcher> matchers) {
         this.pattern = pattern;
         this.matchers = matchers;
     }
 
-    public static DependencyFilter parseFrom( List<String> dependencies )
-    {
-        List<TokenizedMatcher> matchers = dependencies.stream()
-                .map( TokenizedMatcher::parse )
-                .collect( Collectors.toList() );
+    public static DependencyFilter parseFrom(List<String> dependencies) {
+        List<TokenizedMatcher> matchers =
+                dependencies.stream().map(TokenizedMatcher::parse).collect(Collectors.toList());
 
-        String debugPattern = String.join( ",", dependencies );
+        String debugPattern = String.join(",", dependencies);
 
-        return new DependencyFilter( debugPattern, matchers );
+        return new DependencyFilter(debugPattern, matchers);
     }
 
-    private static <T> Predicate<T> not( Predicate<T> predicate )
-    {
-        return x -> !predicate.test( x );
+    private static <T> Predicate<T> not(Predicate<T> predicate) {
+        return x -> !predicate.test(x);
     }
 
     @Override
-    public String toString()
-    {
-        return String.format( "%s{%s}", getClass().getSimpleName(), pattern );
+    public String toString() {
+        return String.format("%s{%s}", getClass().getSimpleName(), pattern);
     }
 
-    public Set<Dependency> retainingIn( Collection<Dependency> dependencies )
-    {
-        return filterBy( dependencies, this::matchersMatch );
+    public Set<Dependency> retainingIn(Collection<Dependency> dependencies) {
+        return filterBy(dependencies, this::matchersMatch);
     }
 
-    public Set<Dependency> removingFrom( Collection<Dependency> dependencies )
-    {
-        return filterBy( dependencies, not( this::matchersMatch ) );
+    public Set<Dependency> removingFrom(Collection<Dependency> dependencies) {
+        return filterBy(dependencies, not(this::matchersMatch));
     }
 
-    private boolean matchersMatch( Dependency dependency )
-    {
-        return matchers.stream().anyMatch( m -> m.test( dependency ) );
+    private boolean matchersMatch(Dependency dependency) {
+        return matchers.stream().anyMatch(m -> m.test(dependency));
     }
 
-    private TreeSet<Dependency> filterBy( Collection<Dependency> dependencies, Predicate<Dependency> predicate )
-    {
+    private TreeSet<Dependency> filterBy(Collection<Dependency> dependencies, Predicate<Dependency> predicate) {
         return dependencies.stream()
-                .filter( predicate )
-                .collect( Collectors.toCollection( () -> new TreeSet<>( DependencyComparator.INSTANCE ) ) );
+                .filter(predicate)
+                .collect(Collectors.toCollection(() -> new TreeSet<>(DependencyComparator.INSTANCE)));
     }
 
     /**
@@ -100,30 +90,26 @@ public class DependencyFilter
             List<String> includes,
             List<String> excludes,
             String section,
-            Log log
-    )
-    {
-        DependencyFilter includeDeps = DependencyFilter.parseFrom( includes );
-        DependencyFilter excludeDeps = DependencyFilter.parseFrom( excludes );
+            Log log) {
+        DependencyFilter includeDeps = DependencyFilter.parseFrom(includes);
+        DependencyFilter excludeDeps = DependencyFilter.parseFrom(excludes);
 
-        Set<Dependency> filtered = includeDeps.retainingIn( dependencies );
-        filtered = excludeDeps.removingFrom( filtered );
+        Set<Dependency> filtered = includeDeps.retainingIn(dependencies);
+        filtered = excludeDeps.removingFrom(filtered);
 
-        if ( log != null && log.isDebugEnabled() )
-        {
-            log.debug( String.format( "parsed includes in %s: %s -> %s", section, includes, includeDeps ) );
-            log.debug( String.format( "parsed excludes in %s: %s -> %s", section, excludes, excludeDeps ) );
-            log.debug( String.format( "Unfiltered %s: ", section ) + output( dependencies ) );
-            log.debug( String.format( "Filtered %s: ", section ) + output( filtered ) );
+        if (log != null && log.isDebugEnabled()) {
+            log.debug(String.format("parsed includes in %s: %s -> %s", section, includes, includeDeps));
+            log.debug(String.format("parsed excludes in %s: %s -> %s", section, excludes, excludeDeps));
+            log.debug(String.format("Unfiltered %s: ", section) + output(dependencies));
+            log.debug(String.format("Filtered %s: ", section) + output(filtered));
         }
 
         return filtered;
     }
 
-    private static String output( Collection<Dependency> dependencies )
-    {
+    private static String output(Collection<Dependency> dependencies) {
         return dependencies.stream()
-                .map( d -> String.format( "%s:%s:%s", d.getGroupId(), d.getArtifactId(), d.getVersion() ) )
-                .collect( Collectors.joining( ", " ) );
+                .map(d -> String.format("%s:%s:%s", d.getGroupId(), d.getArtifactId(), d.getVersion()))
+                .collect(Collectors.joining(", "));
     }
 }

@@ -19,6 +19,11 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+import javax.xml.stream.XMLStreamException;
+
+import java.util.Map;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -30,19 +35,14 @@ import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import javax.inject.Inject;
-import javax.xml.stream.XMLStreamException;
-import java.util.Map;
-
 /**
  * Sets properties to the latest versions of specific artifacts.
  *
  * @author Stephen Connolly
  * @since 1.0-alpha-1
  */
-@Mojo( name = "update-properties", threadSafe = true )
-public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase
-{
+@Mojo(name = "update-properties", threadSafe = true)
+public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase {
     /**
      * Any restrictions that apply to specific properties.
      *
@@ -56,7 +56,7 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "includeProperties" )
+    @Parameter(property = "includeProperties")
     private String includeProperties = null;
 
     /**
@@ -64,16 +64,16 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "excludeProperties" )
+    @Parameter(property = "excludeProperties")
     private String excludeProperties = null;
 
     @Inject
-    public UpdatePropertiesMojo( RepositorySystem repositorySystem,
-                                 org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                 Map<String, Wagon> wagonMap,
-                                 Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UpdatePropertiesMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -84,18 +84,18 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
-        update( pom, getHelper().getVersionPropertiesMap(
-                VersionsHelper.VersionPropertiesMapRequest.builder()
-                        .withMavenProject( getProject() )
-                        .withPropertyDefinitions( properties )
-                        .withIncludeProperties( includeProperties )
-                        .withExcludeProperties( excludeProperties )
-                        .withAutoLinkItems( autoLinkItems )
-                        .withIncludeParent( includeParent )
-                        .build() ) );
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException {
+        update(
+                pom,
+                getHelper()
+                        .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
+                                .withMavenProject(getProject())
+                                .withPropertyDefinitions(properties)
+                                .withIncludeProperties(includeProperties)
+                                .withExcludeProperties(excludeProperties)
+                                .withAutoLinkItems(autoLinkItems)
+                                .withIncludeParent(includeParent)
+                                .build()));
     }
-
 }

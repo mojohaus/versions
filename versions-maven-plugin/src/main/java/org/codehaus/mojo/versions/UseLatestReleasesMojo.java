@@ -62,10 +62,8 @@ import static java.util.Optional.empty;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "use-latest-releases", threadSafe = true )
-public class UseLatestReleasesMojo
-    extends UseLatestVersionsMojoBase
-{
+@Mojo(name = "use-latest-releases", threadSafe = true)
+public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -74,7 +72,7 @@ public class UseLatestReleasesMojo
      *
      * @since 1.2
      */
-    @Parameter( property = "allowMajorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMajorUpdates", defaultValue = "true")
     protected boolean allowMajorUpdates = true;
 
     /**
@@ -84,7 +82,7 @@ public class UseLatestReleasesMojo
      *
      * @since 1.2
      */
-    @Parameter( property = "allowMinorUpdates", defaultValue = "true" )
+    @Parameter(property = "allowMinorUpdates", defaultValue = "true")
     protected boolean allowMinorUpdates = true;
 
     /**
@@ -95,18 +93,18 @@ public class UseLatestReleasesMojo
      *
      * @since 1.2
      */
-    @Parameter( property = "allowIncrementalUpdates", defaultValue = "true" )
+    @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     protected boolean allowIncrementalUpdates = true;
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
-    public UseLatestReleasesMojo( RepositorySystem repositorySystem,
-                                  org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                  Map<String, Wagon> wagonMap,
-                                  Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UseLatestReleasesMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -116,60 +114,50 @@ public class UseLatestReleasesMojo
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
-    {
-        try
-        {
-            if ( isProcessingDependencyManagement() )
-            {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
+        try {
+            if (isProcessingDependencyManagement()) {
                 DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
-                if ( dependencyManagement != null )
-                {
-                    useLatestReleases( pom, dependencyManagement.getDependencies(),
-                                       ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    useLatestReleases(
+                            pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
                 }
             }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useLatestReleases( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                useLatestReleases(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
             }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                useLatestReleases( pom, singletonList( getParentDependency() ),
-                                   ChangeRecord.ChangeKind.PARENT );
+            if (getProject().getParent() != null && isProcessingParent()) {
+                useLatestReleases(pom, singletonList(getParentDependency()), ChangeRecord.ChangeKind.PARENT);
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void useLatestReleases( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
-                                    ChangeRecord.ChangeKind changeKind )
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException
-    {
-        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment( allowMajorUpdates,
-                allowMinorUpdates, allowIncrementalUpdates, getLog() );
+    private void useLatestReleases(
+            ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
 
-        useLatestVersions( pom, dependencies,
-                           ( dep, versions ) ->
-                {
-                    try
-                    {
-                        return getLastFiltered( versions.getNewerVersions( dep.getVersion(), unchangedSegment,
-                                false, false ), dep );
-                    }
-                    catch ( InvalidSegmentException e )
-                    {
-                        getLog().warn( String.format( "Skipping the processing of %s:%s:%s due to: %s",
-                                dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), e.getMessage() ) );
+        useLatestVersions(
+                pom,
+                dependencies,
+                (dep, versions) -> {
+                    try {
+                        return getLastFiltered(
+                                versions.getNewerVersions(dep.getVersion(), unchangedSegment, false, false), dep);
+                    } catch (InvalidSegmentException e) {
+                        getLog().warn(String.format(
+                                "Skipping the processing of %s:%s:%s due to: %s",
+                                dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), e.getMessage()));
                     }
                     return empty();
                 },
-                           changeKind, dep -> !SNAPSHOT_REGEX.matcher( dep.getVersion() ).matches() );
+                changeKind,
+                dep -> !SNAPSHOT_REGEX.matcher(dep.getVersion()).matches());
     }
 
     /**
@@ -180,18 +168,20 @@ public class UseLatestReleasesMojo
      * @param dependency dependency prototype to create the artifacts from
      * @return the newest version fulfilling the criteria
      */
-    private Optional<ArtifactVersion> getLastFiltered( ArtifactVersion[] newer, Dependency dependency )
-    {
-        return Arrays.stream( newer )
-                .filter( version ->
-                {
-                    Artifact artefactWithNewVersion =
-                            new DefaultArtifact( dependency.getGroupId(), dependency.getArtifactId(),
-                                    VersionRange.createFromVersion( version.toString() ), dependency.getScope(),
-                                    dependency.getType(), null, new DefaultArtifactHandler(), false );
-                    return isIncluded( artefactWithNewVersion );
-                } )
-                .reduce( ( v1, v2 ) -> v2 );
+    private Optional<ArtifactVersion> getLastFiltered(ArtifactVersion[] newer, Dependency dependency) {
+        return Arrays.stream(newer)
+                .filter(version -> {
+                    Artifact artefactWithNewVersion = new DefaultArtifact(
+                            dependency.getGroupId(),
+                            dependency.getArtifactId(),
+                            VersionRange.createFromVersion(version.toString()),
+                            dependency.getScope(),
+                            dependency.getType(),
+                            null,
+                            new DefaultArtifactHandler(),
+                            false);
+                    return isIncluded(artefactWithNewVersion);
+                })
+                .reduce((v1, v2) -> v2);
     }
-
 }

@@ -19,6 +19,11 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+import javax.xml.stream.XMLStreamException;
+
+import java.util.Map;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -30,25 +35,20 @@ import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import javax.inject.Inject;
-import javax.xml.stream.XMLStreamException;
-import java.util.Map;
-
 /**
  * Sets a property to the latest version in a given range of associated artifacts.
  *
  * @author Eric Pabst
  * @since 1.3
  */
-@Mojo( name = "update-property", threadSafe = true )
-public class UpdatePropertyMojo extends UpdatePropertiesMojoBase
-{
+@Mojo(name = "update-property", threadSafe = true)
+public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
     /**
      * A property to update.
      *
      * @since 1.3
      */
-    @Parameter( property = "property" )
+    @Parameter(property = "property")
     protected String property = null;
 
     /**
@@ -67,16 +67,16 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase
      *
      * @since 1.3
      */
-    @Parameter( property = "newVersion" )
+    @Parameter(property = "newVersion")
     private String newVersion = null;
 
     @Inject
-    public UpdatePropertyMojo( RepositorySystem repositorySystem,
-                               org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                               Map<String, Wagon> wagonMap,
-                               Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UpdatePropertyMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -87,20 +87,23 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      * @since 1.0-alpha-1
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
-        update( pom, getHelper().getVersionPropertiesMap(
-                VersionsHelper.VersionPropertiesMapRequest.builder()
-                        .withMavenProject( getProject() )
-                        .withPropertyDefinitions( new Property[] { new Property( property )
-                        {{
-                            setVersion( newVersion );
-                        }} } )
-                        .withIncludeProperties( property )
-                        .withAutoLinkItems( autoLinkItems )
-                        .withIncludeParent( includeParent )
-                        .build() ) );
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException {
+        update(
+                pom,
+                getHelper()
+                        .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
+                                .withMavenProject(getProject())
+                                .withPropertyDefinitions(new Property[] {
+                                    new Property(property) {
+                                        {
+                                            setVersion(newVersion);
+                                        }
+                                    }
+                                })
+                                .withIncludeProperties(property)
+                                .withAutoLinkItems(autoLinkItems)
+                                .withIncludeParent(includeParent)
+                                .build()));
     }
-
 }

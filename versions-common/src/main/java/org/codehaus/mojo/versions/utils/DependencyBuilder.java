@@ -30,9 +30,8 @@ import static java.util.Optional.ofNullable;
 /**
  * Builder class for {@linkplain Dependency}
  */
-@SuppressWarnings( "OptionalUsedAsFieldOrParameterType" )
-public class DependencyBuilder
-{
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+public class DependencyBuilder {
     private Optional<String> groupId = empty();
     private Optional<String> artifactId = empty();
     private Optional<String> version = empty();
@@ -41,18 +40,15 @@ public class DependencyBuilder
     private Optional<String> scope = empty();
     private Optional<String> optional = empty();
 
-    private DependencyBuilder()
-    {
-    }
+    private DependencyBuilder() {}
 
     /**
      * Passes groupId to the builder
      * @param groupId given groupId
      * @return builder instance
      */
-    public DependencyBuilder withGroupId( String groupId )
-    {
-        this.groupId = ofNullable( groupId );
+    public DependencyBuilder withGroupId(String groupId) {
+        this.groupId = ofNullable(groupId);
         return this;
     }
 
@@ -61,9 +57,8 @@ public class DependencyBuilder
      * @param artifactId given artifactId
      * @return builder instance
      */
-    public DependencyBuilder withArtifactId( String artifactId )
-    {
-        this.artifactId = ofNullable( artifactId );
+    public DependencyBuilder withArtifactId(String artifactId) {
+        this.artifactId = ofNullable(artifactId);
         return this;
     }
 
@@ -72,9 +67,8 @@ public class DependencyBuilder
      * @param version given version
      * @return builder instance
      */
-    public DependencyBuilder withVersion( String version )
-    {
-        this.version = ofNullable( version );
+    public DependencyBuilder withVersion(String version) {
+        this.version = ofNullable(version);
         return this;
     }
 
@@ -83,9 +77,8 @@ public class DependencyBuilder
      * @param type given type
      * @return builder instance
      */
-    public DependencyBuilder withType( String type )
-    {
-        this.type = ofNullable( type );
+    public DependencyBuilder withType(String type) {
+        this.type = ofNullable(type);
         return this;
     }
 
@@ -94,9 +87,8 @@ public class DependencyBuilder
      * @param classifier given classifier
      * @return builder instance
      */
-    public DependencyBuilder withClassifier( String classifier )
-    {
-        this.classifier = ofNullable( classifier );
+    public DependencyBuilder withClassifier(String classifier) {
+        this.classifier = ofNullable(classifier);
         return this;
     }
 
@@ -105,9 +97,8 @@ public class DependencyBuilder
      * @param scope given scope
      * @return builder instance
      */
-    public DependencyBuilder withScope( String scope )
-    {
-        this.scope = ofNullable( scope );
+    public DependencyBuilder withScope(String scope) {
+        this.scope = ofNullable(scope);
         return this;
     }
 
@@ -116,9 +107,8 @@ public class DependencyBuilder
      * @param optional given optional as String
      * @return builder instance
      */
-    public DependencyBuilder withOptional( String optional )
-    {
-        this.optional = ofNullable( optional );
+    public DependencyBuilder withOptional(String optional) {
+        this.optional = ofNullable(optional);
         return this;
     }
 
@@ -127,9 +117,8 @@ public class DependencyBuilder
      * @param optional given optional as boolean
      * @return builder instance
      */
-    public DependencyBuilder withOptional( boolean optional )
-    {
-        this.optional = of( String.valueOf( optional ) );
+    public DependencyBuilder withOptional(boolean optional) {
+        this.optional = of(String.valueOf(optional));
         return this;
     }
 
@@ -137,8 +126,7 @@ public class DependencyBuilder
      * Creates a new instance of the builder
      * @return new instance of the builder
      */
-    public static DependencyBuilder newBuilder()
-    {
+    public static DependencyBuilder newBuilder() {
         return new DependencyBuilder();
     }
 
@@ -149,12 +137,11 @@ public class DependencyBuilder
      * @param version version of the dependency
      * @return new instance of {@linkplain Dependency}
      */
-    public static Dependency dependencyWith( String groupId, String artifactId, String version )
-    {
+    public static Dependency dependencyWith(String groupId, String artifactId, String version) {
         return newBuilder()
-                .withGroupId( groupId )
-                .withArtifactId( artifactId )
-                .withVersion( version )
+                .withGroupId(groupId)
+                .withArtifactId(artifactId)
+                .withVersion(version)
                 .build();
     }
 
@@ -168,16 +155,15 @@ public class DependencyBuilder
      * @param scope scope of the dependency
      * @return new instance of {@linkplain Dependency}
      */
-    public static Dependency dependencyWith( String groupId, String artifactId, String version, String type,
-                                             String classifier, String scope )
-    {
+    public static Dependency dependencyWith(
+            String groupId, String artifactId, String version, String type, String classifier, String scope) {
         return newBuilder()
-                .withGroupId( groupId )
-                .withArtifactId( artifactId )
-                .withVersion( version )
-                .withType( type )
-                .withClassifier( classifier )
-                .withScope( scope )
+                .withGroupId(groupId)
+                .withArtifactId(artifactId)
+                .withVersion(version)
+                .withType(type)
+                .withClassifier(classifier)
+                .withScope(scope)
                 .build();
     }
 
@@ -185,16 +171,15 @@ public class DependencyBuilder
      * Builds the {@linkplain Dependency} instance
      * @return {@linkplain Dependency} instance
      */
-    public Dependency build()
-    {
+    public Dependency build() {
         Dependency inst = new Dependency();
-        groupId.ifPresent( inst::setGroupId );
-        artifactId.ifPresent( inst::setArtifactId );
-        version.ifPresent( inst::setVersion );
-        type.ifPresent( inst::setType );
-        classifier.ifPresent( inst::setClassifier );
-        scope.ifPresent( inst::setScope );
-        optional.ifPresent( inst::setOptional );
+        groupId.ifPresent(inst::setGroupId);
+        artifactId.ifPresent(inst::setArtifactId);
+        version.ifPresent(inst::setVersion);
+        type.ifPresent(inst::setType);
+        classifier.ifPresent(inst::setClassifier);
+        scope.ifPresent(inst::setScope);
+        optional.ifPresent(inst::setOptional);
 
         return inst;
     }

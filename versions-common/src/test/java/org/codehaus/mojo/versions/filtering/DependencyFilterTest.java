@@ -34,193 +34,132 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 
-class DependencyFilterTest
-{
+class DependencyFilterTest {
 
     @Nested
-    class RemoveFromTest
-    {
-        private final Set<Dependency> input = new HashSet<>( asList(
-            DependencyBuilder.dependencyWith( "foo", "bar", "1" ),
-            DependencyBuilder.dependencyWith( "localhost", "my-api", "2" ),
-            DependencyBuilder.dependencyWith( "localhost", "my-impl", "3" )
-        ) );
+    class RemoveFromTest {
+        private final Set<Dependency> input = new HashSet<>(asList(
+                DependencyBuilder.dependencyWith("foo", "bar", "1"),
+                DependencyBuilder.dependencyWith("localhost", "my-api", "2"),
+                DependencyBuilder.dependencyWith("localhost", "my-impl", "3")));
 
         @Test
-        void removesExcludedDepsWithExactMatch()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom(
-                    Collections.singletonList( "localhost:my-impl:3" ) );
+        void removesExcludedDepsWithExactMatch() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(Collections.singletonList("localhost:my-impl:3"));
 
-            Set<Dependency> actual = exclusions.removingFrom( input );
+            Set<Dependency> actual = exclusions.removingFrom(input);
 
             MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "foo", "bar", "1" ),
-                    HasGAVMatcher.hasGAV( "localhost", "my-api", "2" )
-                )
-            );
+                    actual,
+                    Matchers.containsInAnyOrder(
+                            HasGAVMatcher.hasGAV("foo", "bar", "1"), HasGAVMatcher.hasGAV("localhost", "my-api", "2")));
         }
 
         @Test
-        void removesExcludedDepsWithWildcardInVersion()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom(
-                    Collections.singletonList( "localhost:my-impl:*" ) );
+        void removesExcludedDepsWithWildcardInVersion() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(Collections.singletonList("localhost:my-impl:*"));
 
-            Set<Dependency> actual = exclusions.removingFrom( input );
+            Set<Dependency> actual = exclusions.removingFrom(input);
 
             MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "foo", "bar", "1" ),
-                    HasGAVMatcher.hasGAV( "localhost", "my-api", "2" )
-                )
-            );
+                    actual,
+                    Matchers.containsInAnyOrder(
+                            HasGAVMatcher.hasGAV("foo", "bar", "1"), HasGAVMatcher.hasGAV("localhost", "my-api", "2")));
         }
 
         @Test
-        void removesExcludedDepsWithWildcardInGroupId()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( Collections.singletonList( "localhost:*:*" ) );
+        void removesExcludedDepsWithWildcardInGroupId() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(Collections.singletonList("localhost:*:*"));
 
-            Set<Dependency> actual = exclusions.removingFrom( input );
+            Set<Dependency> actual = exclusions.removingFrom(input);
 
-            MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "foo", "bar", "1" )
-                )
-            );
+            MatcherAssert.assertThat(actual, Matchers.containsInAnyOrder(HasGAVMatcher.hasGAV("foo", "bar", "1")));
         }
 
         @Test
-        void removesExcludedDepsWithAllWildcards()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( Collections.singletonList( "*:*:*" ) );
+        void removesExcludedDepsWithAllWildcards() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(Collections.singletonList("*:*:*"));
 
-            Set<Dependency> actual = exclusions.removingFrom( input );
+            Set<Dependency> actual = exclusions.removingFrom(input);
 
-            assertThat(
-                actual,
-                empty()
-            );
+            assertThat(actual, empty());
         }
 
         @Test
-        void removesMultiplePatterns()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList(
-                "*:my-api",
-                "*:my-impl"
-            ) );
+        void removesMultiplePatterns() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(asList("*:my-api", "*:my-impl"));
 
-            Set<Dependency> actual = exclusions.removingFrom( input );
+            Set<Dependency> actual = exclusions.removingFrom(input);
 
-            MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "foo", "bar", "1" )
-                )
-            );
+            MatcherAssert.assertThat(actual, Matchers.containsInAnyOrder(HasGAVMatcher.hasGAV("foo", "bar", "1")));
         }
-
     }
 
     @Nested
-    class RetainingInTest
-    {
-        private final Set<Dependency> input = new HashSet<>( asList(
-            DependencyBuilder.dependencyWith( "foo", "bar", "1" ),
-            DependencyBuilder.dependencyWith( "localhost", "my-api", "2" ),
-            DependencyBuilder.dependencyWith( "localhost", "my-impl", "3" )
-        ) );
+    class RetainingInTest {
+        private final Set<Dependency> input = new HashSet<>(asList(
+                DependencyBuilder.dependencyWith("foo", "bar", "1"),
+                DependencyBuilder.dependencyWith("localhost", "my-api", "2"),
+                DependencyBuilder.dependencyWith("localhost", "my-impl", "3")));
 
         @Test
-        void retainsOnlyDepsWithExactMatch()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom(
-                    Collections.singletonList( "localhost:my-impl:3" ) );
+        void retainsOnlyDepsWithExactMatch() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(Collections.singletonList("localhost:my-impl:3"));
 
-            Set<Dependency> actual = exclusions.retainingIn( input );
+            Set<Dependency> actual = exclusions.retainingIn(input);
 
             MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "localhost", "my-impl", "3" )
-                )
-            );
+                    actual, Matchers.containsInAnyOrder(HasGAVMatcher.hasGAV("localhost", "my-impl", "3")));
         }
 
         @Test
-        void retainsOnlyDepsMatchingWildcardInVersion()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom(
-                    Collections.singletonList( "localhost:my-api:*" ) );
+        void retainsOnlyDepsMatchingWildcardInVersion() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(Collections.singletonList("localhost:my-api:*"));
 
-            Set<Dependency> actual = exclusions.retainingIn( input );
+            Set<Dependency> actual = exclusions.retainingIn(input);
 
             MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "localhost", "my-api", "2" )
-                )
-            );
+                    actual, Matchers.containsInAnyOrder(HasGAVMatcher.hasGAV("localhost", "my-api", "2")));
         }
 
         @Test
-        void retainsOnlyDepsWithMultipleWildcards()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( Collections.singletonList( "localhost:my-*:*" ) );
+        void retainsOnlyDepsWithMultipleWildcards() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(Collections.singletonList("localhost:my-*:*"));
 
-            Set<Dependency> actual = exclusions.retainingIn( input );
+            Set<Dependency> actual = exclusions.retainingIn(input);
 
             MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "localhost", "my-api", "2" ),
-                    HasGAVMatcher.hasGAV( "localhost", "my-impl", "3" )
-                )
-            );
+                    actual,
+                    Matchers.containsInAnyOrder(
+                            HasGAVMatcher.hasGAV("localhost", "my-api", "2"),
+                            HasGAVMatcher.hasGAV("localhost", "my-impl", "3")));
         }
 
         @Test
-        void retainsAllOnAllWildcards()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( Collections.singletonList( "*:*:*" ) );
+        void retainsAllOnAllWildcards() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(Collections.singletonList("*:*:*"));
 
-            Set<Dependency> actual = exclusions.retainingIn( input );
+            Set<Dependency> actual = exclusions.retainingIn(input);
 
             MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "foo", "bar", "1" ),
-                    HasGAVMatcher.hasGAV( "localhost", "my-api", "2" ),
-                    HasGAVMatcher.hasGAV( "localhost", "my-impl", "3" )
-                )
-            );
+                    actual,
+                    Matchers.containsInAnyOrder(
+                            HasGAVMatcher.hasGAV("foo", "bar", "1"),
+                            HasGAVMatcher.hasGAV("localhost", "my-api", "2"),
+                            HasGAVMatcher.hasGAV("localhost", "my-impl", "3")));
         }
 
-
         @Test
-        void retainsMultiplePatterns()
-        {
-            DependencyFilter exclusions = DependencyFilter.parseFrom( asList(
-                "*:my-api",
-                "*:my-impl"
-            ) );
+        void retainsMultiplePatterns() {
+            DependencyFilter exclusions = DependencyFilter.parseFrom(asList("*:my-api", "*:my-impl"));
 
-            Set<Dependency> actual = exclusions.retainingIn( input );
+            Set<Dependency> actual = exclusions.retainingIn(input);
 
             MatcherAssert.assertThat(
-                actual,
-                Matchers.containsInAnyOrder(
-                    HasGAVMatcher.hasGAV( "localhost", "my-api", "2" ),
-                    HasGAVMatcher.hasGAV( "localhost", "my-impl", "3" )
-                )
-            );
+                    actual,
+                    Matchers.containsInAnyOrder(
+                            HasGAVMatcher.hasGAV("localhost", "my-api", "2"),
+                            HasGAVMatcher.hasGAV("localhost", "my-impl", "3")));
         }
     }
-
 }

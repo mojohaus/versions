@@ -52,27 +52,25 @@ import org.eclipse.aether.resolution.ArtifactRequest;
  * @author Paul Gier
  * @since 1.0-alpha-3
  */
-@Mojo( name = "lock-snapshots", threadSafe = true )
-public class LockSnapshotsMojo
-    extends AbstractVersionsDependencyUpdaterMojo
-{
+@Mojo(name = "lock-snapshots", threadSafe = true)
+public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     // ------------------------------ FIELDS ------------------------------
 
     /**
      * Pattern to match a timestamped snapshot version. For example 1.0-20090128.202731-1
      */
-    private static final Pattern TIMESTAMPED_SNAPSHOT_REGEX = Pattern.compile( "-" + Artifact.SNAPSHOT_VERSION );
+    private static final Pattern TIMESTAMPED_SNAPSHOT_REGEX = Pattern.compile("-" + Artifact.SNAPSHOT_VERSION);
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
-    public LockSnapshotsMojo( RepositorySystem repositorySystem,
-                              org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                              Map<String, Wagon> wagonMap,
-                              Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public LockSnapshotsMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -82,102 +80,84 @@ public class LockSnapshotsMojo
      * @throws XMLStreamException when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
-        try
-        {
-            if ( isProcessingDependencyManagement() )
-            {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException {
+        try {
+            if (isProcessingDependencyManagement()) {
                 DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
-                if ( dependencyManagement != null )
-                {
-                    lockSnapshots( pom, dependencyManagement.getDependencies() );
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    lockSnapshots(pom, dependencyManagement.getDependencies());
                 }
             }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                lockSnapshots( pom, getProject().getDependencies() );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                lockSnapshots(pom, getProject().getDependencies());
             }
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                lockParentSnapshot( pom, getProject().getParent() );
+            if (getProject().getParent() != null && isProcessingParent()) {
+                lockParentSnapshot(pom, getProject().getParent());
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void lockSnapshots( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException
-    {
-        for ( Dependency dep : dependencies )
-        {
-            if ( isExcludeReactor() && isProducedByReactor( dep ) )
-            {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+    private void lockSnapshots(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+            throws XMLStreamException, MojoExecutionException {
+        for (Dependency dep : dependencies) {
+            if (isExcludeReactor() && isProducedByReactor(dep)) {
+                getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
             }
 
-            if ( isHandledByProperty( dep ) )
-            {
-                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+            if (isHandledByProperty(dep)) {
+                getLog().debug("Ignoring dependency with property as version: " + toString(dep));
                 continue;
             }
 
-            if ( !isIncluded( this.toArtifact( dep ) ) )
-            {
+            if (!isIncluded(this.toArtifact(dep))) {
                 continue;
             }
 
             String version = dep.getVersion();
-            Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher( version );
-            if ( versionMatcher.find() && versionMatcher.end() == version.length() )
-            {
-                String lockedVersion = resolveSnapshotVersion( dep );
-                if ( !version.equals( lockedVersion ) )
-                {
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), version,
-                                                         lockedVersion, getProject().getModel() ) )
-                    {
-                        getLog().info( "Locked " + toString( dep ) + " to version " + lockedVersion );
+            Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher(version);
+            if (versionMatcher.find() && versionMatcher.end() == version.length()) {
+                String lockedVersion = resolveSnapshotVersion(dep);
+                if (!version.equals(lockedVersion)) {
+                    if (PomHelper.setDependencyVersion(
+                            pom,
+                            dep.getGroupId(),
+                            dep.getArtifactId(),
+                            version,
+                            lockedVersion,
+                            getProject().getModel())) {
+                        getLog().info("Locked " + toString(dep) + " to version " + lockedVersion);
                     }
                 }
             }
         }
     }
 
-    private void lockParentSnapshot( ModifiedPomXMLEventReader pom, MavenProject parent )
-        throws XMLStreamException, MojoExecutionException
-    {
-        if ( parent == null )
-        {
-            getLog().info( "Project does not have a parent" );
+    private void lockParentSnapshot(ModifiedPomXMLEventReader pom, MavenProject parent)
+            throws XMLStreamException, MojoExecutionException {
+        if (parent == null) {
+            getLog().info("Project does not have a parent");
             return;
         }
 
-        if ( reactorProjects.contains( parent ) )
-        {
-            getLog().info( "Project's parent is part of the reactor" );
+        if (reactorProjects.contains(parent)) {
+            getLog().info("Project's parent is part of the reactor");
             return;
         }
 
         Artifact parentArtifact = parent.getArtifact();
         String parentVersion = parentArtifact.getVersion();
 
-        Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher( parentVersion );
-        if ( versionMatcher.find() && versionMatcher.end() == parentVersion.length() )
-        {
-            String lockedParentVersion = resolveSnapshotVersion( parentArtifact );
-            if ( !parentVersion.equals( lockedParentVersion ) )
-            {
-                if ( PomHelper.setProjectParentVersion( pom, lockedParentVersion ) )
-                {
-                    getLog().info( "Locked parent " + parentArtifact + " to version "
-                        + lockedParentVersion );
+        Matcher versionMatcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher(parentVersion);
+        if (versionMatcher.find() && versionMatcher.end() == parentVersion.length()) {
+            String lockedParentVersion = resolveSnapshotVersion(parentArtifact);
+            if (!parentVersion.equals(lockedParentVersion)) {
+                if (PomHelper.setProjectParentVersion(pom, lockedParentVersion)) {
+                    getLog().info("Locked parent " + parentArtifact + " to version " + lockedParentVersion);
                 }
             }
         }
@@ -189,23 +169,22 @@ public class LockSnapshotsMojo
      * @param artifact
      * @return The timestamp version if exists, otherwise the original snapshot artifact version is returned.
      */
-    private String resolveSnapshotVersion( Artifact artifact )
-    {
-        getLog().debug( "Resolving snapshot version for artifact: " + artifact );
+    private String resolveSnapshotVersion(Artifact artifact) {
+        getLog().debug("Resolving snapshot version for artifact: " + artifact);
 
         String lockedVersion = artifact.getVersion();
 
-        try
-        {
-            aetherRepositorySystem.resolveArtifact( session.getRepositorySession(),
-                    new ArtifactRequest( RepositoryUtils.toArtifact( artifact ),
-                    getProject().getRemoteProjectRepositories(), getClass().getName() ) );
+        try {
+            aetherRepositorySystem.resolveArtifact(
+                    session.getRepositorySession(),
+                    new ArtifactRequest(
+                            RepositoryUtils.toArtifact(artifact),
+                            getProject().getRemoteProjectRepositories(),
+                            getClass().getName()));
 
             lockedVersion = artifact.getVersion();
-        }
-        catch ( Exception e )
-        {
-            getLog().error( e );
+        } catch (Exception e) {
+            getLog().error(e);
         }
         return lockedVersion;
     }
@@ -216,27 +195,24 @@ public class LockSnapshotsMojo
      * @param dep
      * @return The timestamp version if exists, otherwise the original snapshot dependency version is returned.
      */
-    private String resolveSnapshotVersion( Dependency dep )
-    {
-        getLog().debug( "Resolving snapshot version for dependency: " + dep );
+    private String resolveSnapshotVersion(Dependency dep) {
+        getLog().debug("Resolving snapshot version for dependency: " + dep);
 
         String lockedVersion = dep.getVersion();
 
-        try
-        {
-            Artifact depArtifact = getHelper().createDependencyArtifact( dep );
-            aetherRepositorySystem.resolveArtifact( session.getRepositorySession(),
-                    new ArtifactRequest( RepositoryUtils.toArtifact( depArtifact ),
+        try {
+            Artifact depArtifact = getHelper().createDependencyArtifact(dep);
+            aetherRepositorySystem.resolveArtifact(
+                    session.getRepositorySession(),
+                    new ArtifactRequest(
+                            RepositoryUtils.toArtifact(depArtifact),
                             getProject().getRemoteProjectRepositories(),
-                            getClass().getName() ) );
+                            getClass().getName()));
 
             lockedVersion = depArtifact.getVersion();
-        }
-        catch ( Exception e )
-        {
-            getLog().error( e );
+        } catch (Exception e) {
+            getLog().error(e);
         }
         return lockedVersion;
     }
-
 }

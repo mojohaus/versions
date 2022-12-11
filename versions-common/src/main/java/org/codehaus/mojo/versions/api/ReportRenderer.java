@@ -22,8 +22,7 @@ package org.codehaus.mojo.versions.api;
 /**
  * Common interface for reporting components
  */
-public interface ReportRenderer
-{
+public interface ReportRenderer {
     /**
      * Renders the report
      */

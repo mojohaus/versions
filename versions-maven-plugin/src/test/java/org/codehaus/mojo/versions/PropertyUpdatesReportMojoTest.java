@@ -40,54 +40,50 @@ import static org.hamcrest.Matchers.not;
 /**
  * Unit tests for {@link PropertyUpdatesReportMojo}
  */
-public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase
-{
+public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase {
     @Rule
-    public MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule(this);
+
     private static final org.eclipse.aether.RepositorySystem AETHER_REPOSITORY_SYSTEM = mockAetherRepositorySystem();
     private static final SiteTool SITE_TOOL = mockSiteTool();
 
     @Test
-    public void testIncludeParentTrueShouldContainProperty() throws Exception
-    {
+    public void testIncludeParentTrueShouldContainProperty() throws Exception {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
 
-        PropertyUpdatesReportMojo mojo =
-                (PropertyUpdatesReportMojo) mojoRule.lookupConfiguredMojo(
-                        new File( "src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child" ),
-                        "property-updates-report" );
-        setVariableValueToObject( mojo, "siteTool", SITE_TOOL );
-        setVariableValueToObject( mojo, "aetherRepositorySystem", AETHER_REPOSITORY_SYSTEM );
-        setVariableValueToObject( mojo, "includeParent", true );
-        mojo.generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+        PropertyUpdatesReportMojo mojo = (PropertyUpdatesReportMojo) mojoRule.lookupConfiguredMojo(
+                new File("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child"),
+                "property-updates-report");
+        setVariableValueToObject(mojo, "siteTool", SITE_TOOL);
+        setVariableValueToObject(mojo, "aetherRepositorySystem", AETHER_REPOSITORY_SYSTEM);
+        setVariableValueToObject(mojo, "includeParent", true);
+        mojo.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString()
-                .replaceAll( "<[^>]+>", " " )
-                .replaceAll( "&[^;]+;", " " )
-                .replaceAll( "\\s+", " " );
-        assertThat( output, containsString( "${ver}" ) );
+                .replaceAll("<[^>]+>", " ")
+                .replaceAll("&[^;]+;", " ")
+                .replaceAll("\\s+", " ");
+        assertThat(output, containsString("${ver}"));
     }
 
     @Test
-    public void testIncludeParentFalseShouldNotContainProperty() throws Exception
-    {
+    public void testIncludeParentFalseShouldNotContainProperty() throws Exception {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
 
-        PropertyUpdatesReportMojo mojo =
-                (PropertyUpdatesReportMojo) mojoRule.lookupConfiguredMojo(
-                        new File( "src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child" ),
-                        "property-updates-report" );
-        setVariableValueToObject( mojo, "siteTool", SITE_TOOL );
-        setVariableValueToObject( mojo, "aetherRepositorySystem", AETHER_REPOSITORY_SYSTEM );
-        setVariableValueToObject( mojo, "includeParent", false );
-        mojo.generate( sinkFactory.createSink( os ), sinkFactory, Locale.getDefault() );
+        PropertyUpdatesReportMojo mojo = (PropertyUpdatesReportMojo) mojoRule.lookupConfiguredMojo(
+                new File("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child"),
+                "property-updates-report");
+        setVariableValueToObject(mojo, "siteTool", SITE_TOOL);
+        setVariableValueToObject(mojo, "aetherRepositorySystem", AETHER_REPOSITORY_SYSTEM);
+        setVariableValueToObject(mojo, "includeParent", false);
+        mojo.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString()
-                .replaceAll( "<[^>]+>", " " )
-                .replaceAll( "&[^;]+;", " " )
-                .replaceAll( "\\s+", " " );
-        assertThat( output, not( containsString( "${ver}" ) ) );
+                .replaceAll("<[^>]+>", " ")
+                .replaceAll("&[^;]+;", " ")
+                .replaceAll("\\s+", " ");
+        assertThat(output, not(containsString("${ver}")));
     }
 }

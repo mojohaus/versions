@@ -1,6 +1,5 @@
 package org.codehaus.mojo.versions.reporting;
 
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -40,8 +39,7 @@ import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
  *
  * @author Andrzej Jarmoniuk
  */
-public class OverviewStats
-{
+public class OverviewStats {
     private int major;
 
     private int minor;
@@ -64,90 +62,67 @@ public class OverviewStats
      * @param <V> subclass of {@linkplain ArtifactVersions}
      * @return instance of the {@linkplain OverviewStats}
      */
-    public static <T extends OverviewStats, V extends AbstractVersionDetails>
-    T fromUpdates( Collection<V> updates, ArtifactVersionsCache cache )
-    {
+    public static <T extends OverviewStats, V extends AbstractVersionDetails> T fromUpdates(
+            Collection<V> updates, ArtifactVersionsCache cache) {
         OverviewStats stats = new OverviewStats();
-        updates.forEach( details ->
-        {
-            if ( getNewestUpdate( cache, details, of( SUBINCREMENTAL ) ) != null )
-            {
+        updates.forEach(details -> {
+            if (getNewestUpdate(cache, details, of(SUBINCREMENTAL)) != null) {
                 stats.incrementAny();
-            }
-            else if ( getNewestUpdate( cache, details, of( INCREMENTAL ) ) != null )
-            {
+            } else if (getNewestUpdate(cache, details, of(INCREMENTAL)) != null) {
                 stats.incrementIncremental();
-            }
-            else if ( getNewestUpdate( cache, details, of( MINOR ) ) != null )
-            {
+            } else if (getNewestUpdate(cache, details, of(MINOR)) != null) {
                 stats.incrementMinor();
-            }
-            else if ( getNewestUpdate( cache, details, of( MAJOR ) ) != null )
-            {
+            } else if (getNewestUpdate(cache, details, of(MAJOR)) != null) {
                 stats.incrementMajor();
-            }
-            else
-            {
+            } else {
                 stats.incrementUpToDate();
             }
-        } );
+        });
         return (T) stats;
     }
 
-    protected static <V extends AbstractVersionDetails> ArtifactVersion getNewestUpdate( ArtifactVersionsCache cache,
-                                                                                   V details,
-                                                                                   Optional<Segment> segment )
-    {
-        return cache != null ? cache.get( details, segment ) : details.getNewestUpdate( segment );
+    protected static <V extends AbstractVersionDetails> ArtifactVersion getNewestUpdate(
+            ArtifactVersionsCache cache, V details, Optional<Segment> segment) {
+        return cache != null ? cache.get(details, segment) : details.getNewestUpdate(segment);
     }
 
-    public int getMajor()
-    {
+    public int getMajor() {
         return major;
     }
 
-    public void incrementMajor()
-    {
+    public void incrementMajor() {
         major++;
     }
 
-    public int getMinor()
-    {
+    public int getMinor() {
         return minor;
     }
 
-    public void incrementMinor()
-    {
+    public void incrementMinor() {
         minor++;
     }
 
-    public int getIncremental()
-    {
+    public int getIncremental() {
         return incremental;
     }
 
-    public void incrementIncremental()
-    {
+    public void incrementIncremental() {
         incremental++;
     }
 
-    public int getAny()
-    {
+    public int getAny() {
         return any;
     }
 
-    public void incrementAny()
-    {
+    public void incrementAny() {
         any++;
     }
 
-    public int getUpToDate()
-    {
+    public int getUpToDate() {
         return upToDate;
     }
 
-    public void incrementUpToDate()
-    {
+    public void incrementUpToDate() {
         upToDate++;
     }
 }

@@ -38,48 +38,42 @@ import static org.codehaus.mojo.versions.utils.TestUtils.tearDownTempDir;
 /**
  * Base class for {@link UpdatePropertiesMojo} and {@link UpdatePropertyMojo} test suites
  */
-public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase
-{
+public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase {
     @Rule
-    public MojoRule mojoRule = new MojoRule( this );
+    public MojoRule mojoRule = new MojoRule(this);
+
     protected Path pomDir;
     protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
     protected TestChangeRecorder changeRecorder;
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
-        pomDir = createTempDir( "update-property" );
-        aetherRepositorySystem = mockAetherRepositorySystem( new HashMap<String, String[]>()
-        {{
-            put( "default-artifact", new String[] {"1.0.0", "1.0.1-rc1", "1.1.0-alpha", "2.0.0-M1"} );
-        }} );
+        pomDir = createTempDir("update-property");
+        aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("default-artifact", new String[] {"1.0.0", "1.0.1-rc1", "1.1.0-alpha", "2.0.0-M1"});
+            }
+        });
     }
 
     @After
-    public void tearDown() throws Exception
-    {
-        try
-        {
-            tearDownTempDir( pomDir );
-        }
-        finally
-        {
+    public void tearDown() throws Exception {
+        try {
+            tearDownTempDir(pomDir);
+        } finally {
             super.tearDown();
         }
     }
 
-    @SuppressWarnings( "unchecked" )
-    protected  <T extends Mojo> T setUpMojo( String goal ) throws Exception
-    {
-        T mojo = (T) mojoRule.lookupConfiguredMojo( pomDir.toFile(), goal );
-        setVariableValueToObject( mojo, "aetherRepositorySystem", aetherRepositorySystem );
-        setVariableValueToObject( mojo, "generateBackupPoms", false );
-        setVariableValueToObject( mojo, "changeRecorderFormat", "test" );
+    @SuppressWarnings("unchecked")
+    protected <T extends Mojo> T setUpMojo(String goal) throws Exception {
+        T mojo = (T) mojoRule.lookupConfiguredMojo(pomDir.toFile(), goal);
+        setVariableValueToObject(mojo, "aetherRepositorySystem", aetherRepositorySystem);
+        setVariableValueToObject(mojo, "generateBackupPoms", false);
+        setVariableValueToObject(mojo, "changeRecorderFormat", "test");
         changeRecorder = (TestChangeRecorder)
-            ( (Map<String, ChangeRecorder>) getVariableValueFromObject( mojo, "changeRecorders" ) )
-                .get( "test" );
+                ((Map<String, ChangeRecorder>) getVariableValueFromObject(mojo, "changeRecorders")).get("test");
 
         return (T) mojo;
     }

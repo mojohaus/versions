@@ -24,53 +24,43 @@ import org.eclipse.aether.version.Version;
 /**
  * Stubs the {@link Version}
  */
-public class VersionStub implements Version
-{
+public class VersionStub implements Version {
     private final String version;
 
     /**
      * Creates a new instance with the given version string
      * @param version version to be set
      */
-    public VersionStub( String version )
-    {
+    public VersionStub(String version) {
         assert version != null;
         this.version = version;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return version;
     }
 
     @Override
-    public int compareTo( Version o )
-    {
-        return o != null
-                ? version.compareTo( o.toString() )
-                : 1;
+    public int compareTo(Version o) {
+        return o != null ? version.compareTo(o.toString()) : 1;
     }
 
     @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
 
-        if ( !( o instanceof Version ) )
-        {
+        if (!(o instanceof Version)) {
             return false;
         }
 
-        return version.equals( o.toString() );
+        return version.equals(o.toString());
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return version.hashCode();
     }
 }

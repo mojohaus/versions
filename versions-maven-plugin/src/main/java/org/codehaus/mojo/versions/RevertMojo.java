@@ -45,15 +45,14 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-@Mojo( name = "revert", threadSafe = true )
-public class RevertMojo extends AbstractMojo
-{
+@Mojo(name = "revert", threadSafe = true)
+public class RevertMojo extends AbstractMojo {
     /**
      * The {@link MavenSession} instance
      *
      * @since 2.14.0
      */
-    @Parameter( defaultValue = "${session}", required = true, readonly = true )
+    @Parameter(defaultValue = "${session}", required = true, readonly = true)
     private MavenSession session;
 
     /**
@@ -63,7 +62,7 @@ public class RevertMojo extends AbstractMojo
      *
      * @since 2.13.0
      */
-    @Parameter( property = "processFromLocalAggregationRoot", defaultValue = "true" )
+    @Parameter(property = "processFromLocalAggregationRoot", defaultValue = "true")
     private boolean processFromLocalAggregationRoot;
 
     /**
@@ -74,46 +73,41 @@ public class RevertMojo extends AbstractMojo
     protected final ProjectBuilder projectBuilder;
 
     @Inject
-    protected RevertMojo( ProjectBuilder projectBuilder )
-    {
+    protected RevertMojo(ProjectBuilder projectBuilder) {
         this.projectBuilder = projectBuilder;
     }
 
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
+    public void execute() throws MojoExecutionException, MojoFailureException {
         final MavenProject projectToProcess = !processFromLocalAggregationRoot
-                ? PomHelper.getLocalRoot( projectBuilder, session, getLog() )
+                ? PomHelper.getLocalRoot(projectBuilder, session, getLog())
                 : session.getCurrentProject();
 
-        getLog().info( "Local aggregation root: " + projectToProcess.getBasedir() );
-        Set<String> reactor = PomHelper.getAllChildModules( projectToProcess, getLog() );
-        reactor.add( "." );
+        getLog().info("Local aggregation root: " + projectToProcess.getBasedir());
+        Set<String> reactor = PomHelper.getAllChildModules(projectToProcess, getLog());
+        reactor.add(".");
 
-        reactor.forEach( entry ->
-        {
-            Path pomFile = projectToProcess.getBasedir().toPath().resolve( entry ).resolve( "pom.xml" ).normalize();
-            getLog().debug( "Processing:" + pomFile );
-            Path backupFile = Paths.get( pomFile + ".versionsBackup" );
-            if ( Files.exists( backupFile ) )
-            {
-                getLog().info( "Restoring " + pomFile + " from " + backupFile );
-                try
-                {
-                    Files.copy( backupFile, pomFile, REPLACE_EXISTING );
-                    try
-                    {
-                        Files.delete( backupFile );
+        reactor.forEach(entry -> {
+            Path pomFile = projectToProcess
+                    .getBasedir()
+                    .toPath()
+                    .resolve(entry)
+                    .resolve("pom.xml")
+                    .normalize();
+            getLog().debug("Processing:" + pomFile);
+            Path backupFile = Paths.get(pomFile + ".versionsBackup");
+            if (Files.exists(backupFile)) {
+                getLog().info("Restoring " + pomFile + " from " + backupFile);
+                try {
+                    Files.copy(backupFile, pomFile, REPLACE_EXISTING);
+                    try {
+                        Files.delete(backupFile);
+                    } catch (IOException e) {
+                        getLog().warn("Error deleting " + backupFile);
                     }
-                    catch ( IOException e )
-                    {
-                        getLog().warn( "Error deleting " + backupFile );
-                    }
-                }
-                catch ( IOException e )
-                {
-                    getLog().warn( "Error copying " + backupFile + " onto " + pomFile );
+                } catch (IOException e) {
+                    getLog().warn("Error copying " + backupFile + " onto " + pomFile);
                 }
             }
-        } );
+        });
     }
 }

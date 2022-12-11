@@ -27,8 +27,7 @@ import org.codehaus.mojo.versions.api.ReportRenderer;
 /**
  * Factory for report renderers
  */
-public interface ReportRendererFactory
-{
+public interface ReportRendererFactory {
     /**
      * Creates a new {@linkplain ReportRenderer} instance for the given report renderer name.
      *
@@ -41,6 +40,6 @@ public interface ReportRendererFactory
      * @return new report renderer
      * @throws IllegalArgumentException thrown if the report with the given name could not be found
      */
-    <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model )
+    <T extends ReportRenderer, U> T createReportRenderer(String reportName, Sink sink, Locale locale, U model)
             throws IllegalArgumentException;
 }

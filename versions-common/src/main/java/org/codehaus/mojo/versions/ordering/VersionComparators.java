@@ -33,13 +33,11 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
  * @deprecated
  * Note: This comparator should be replaced by using the one of Maven core instead.
  */
-public final class VersionComparators
-{
-    private static final Pattern SNAPSHOT_PATTERN = Pattern.compile( "(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$" );
+public final class VersionComparators {
+    private static final Pattern SNAPSHOT_PATTERN = Pattern.compile("(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$");
 
-    private VersionComparators()
-    {
-        throw new IllegalAccessError( "Utility classes should never be instantiated" );
+    private VersionComparators() {
+        throw new IllegalAccessError("Utility classes should never be instantiated");
     }
 
     /**
@@ -49,131 +47,93 @@ public final class VersionComparators
      * @return the version comparator to use.
      * @since 1.0-alpha-1
      */
-    public static VersionComparator getVersionComparator( String comparisonMethod )
-    {
-        if ( "numeric".equalsIgnoreCase( comparisonMethod ) )
-        {
+    public static VersionComparator getVersionComparator(String comparisonMethod) {
+        if ("numeric".equalsIgnoreCase(comparisonMethod)) {
             return new NumericVersionComparator();
-        }
-        else if ( "mercury".equalsIgnoreCase( comparisonMethod ) )
-        {
+        } else if ("mercury".equalsIgnoreCase(comparisonMethod)) {
             return new MercuryVersionComparator();
         }
         return new MavenVersionComparator();
     }
 
-    public static String alphaNumIncrement( String token )
-    {
+    public static String alphaNumIncrement(String token) {
         String newToken;
         int i = token.length();
         boolean done = false;
         newToken = token;
-        while ( !done && i > 0 )
-        {
+        while (!done && i > 0) {
             i--;
-            char c = token.charAt( i );
-            if ( '0' <= c && c < '9' )
-            {
+            char c = token.charAt(i);
+            if ('0' <= c && c < '9') {
                 c++;
-                newToken =
-                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring( i + 1 ) : "" );
+                newToken = newToken.substring(0, i) + c + (i + 1 < newToken.length() ? newToken.substring(i + 1) : "");
                 done = true;
-            }
-            else if ( c == '9' )
-            {
+            } else if (c == '9') {
                 c = '0';
-                newToken =
-                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring( i + 1 ) : "" );
-            }
-            else if ( 'A' <= c && c < 'Z' )
-            {
+                newToken = newToken.substring(0, i) + c + (i + 1 < newToken.length() ? newToken.substring(i + 1) : "");
+            } else if ('A' <= c && c < 'Z') {
                 c++;
-                newToken =
-                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring( i + 1 ) : "" );
+                newToken = newToken.substring(0, i) + c + (i + 1 < newToken.length() ? newToken.substring(i + 1) : "");
                 done = true;
-            }
-            else if ( c == 'Z' )
-            {
+            } else if (c == 'Z') {
                 c = 'A';
-                newToken =
-                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring( i + 1 ) : "" );
-            }
-            else if ( 'a' <= c && c < 'z' )
-            {
+                newToken = newToken.substring(0, i) + c + (i + 1 < newToken.length() ? newToken.substring(i + 1) : "");
+            } else if ('a' <= c && c < 'z') {
                 c++;
-                newToken =
-                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring( i + 1 ) : "" );
+                newToken = newToken.substring(0, i) + c + (i + 1 < newToken.length() ? newToken.substring(i + 1) : "");
                 done = true;
-            }
-            else if ( c == 'z' )
-            {
+            } else if (c == 'z') {
                 c = 'a';
-                newToken =
-                    newToken.substring( 0, i ) + c + ( i + 1 < newToken.length() ? newToken.substring( i + 1 ) : "" );
+                newToken = newToken.substring(0, i) + c + (i + 1 < newToken.length() ? newToken.substring(i + 1) : "");
             }
         }
-        if ( done )
-        {
+        if (done) {
             return newToken;
-        }
-        else
-        {
+        } else {
             // ok this is roll-over time
             boolean lastNumeric = false;
             boolean lastAlpha = false;
             boolean lastUpper = false;
             i = token.length();
-            while ( !lastAlpha && !lastNumeric && i > 0 )
-            {
+            while (!lastAlpha && !lastNumeric && i > 0) {
                 i--;
-                char c = token.charAt( i );
-                lastAlpha = Character.isLetter( c );
-                lastUpper = c == Character.toUpperCase( c );
-                lastNumeric = Character.isDigit( c );
+                char c = token.charAt(i);
+                lastAlpha = Character.isLetter(c);
+                lastUpper = c == Character.toUpperCase(c);
+                lastNumeric = Character.isDigit(c);
             }
-            if ( lastAlpha )
-            {
-                if ( lastUpper )
-                {
+            if (lastAlpha) {
+                if (lastUpper) {
                     return token + 'A';
                 }
                 return token + 'a';
             }
             return token + '0';
-
         }
     }
 
-    static boolean isSnapshot( ArtifactVersion v )
-    {
-        return v != null && SNAPSHOT_PATTERN.matcher( v.toString() ).find();
+    static boolean isSnapshot(ArtifactVersion v) {
+        return v != null && SNAPSHOT_PATTERN.matcher(v.toString()).find();
     }
 
-    static ArtifactVersion stripSnapshot( ArtifactVersion v )
-    {
+    static ArtifactVersion stripSnapshot(ArtifactVersion v) {
         final String version = v.toString();
-        final Matcher matcher = SNAPSHOT_PATTERN.matcher( version );
-        if ( matcher.find() )
-        {
-            return new DefaultArtifactVersion( version.substring( 0, matcher.start( 1 ) - 1 ) );
+        final Matcher matcher = SNAPSHOT_PATTERN.matcher(version);
+        if (matcher.find()) {
+            return new DefaultArtifactVersion(version.substring(0, matcher.start(1) - 1));
         }
         return v;
     }
 
-    static ArtifactVersion copySnapshot( ArtifactVersion source, ArtifactVersion destination )
-    {
-        if ( isSnapshot( destination ) )
-        {
-            destination = stripSnapshot( destination );
+    static ArtifactVersion copySnapshot(ArtifactVersion source, ArtifactVersion destination) {
+        if (isSnapshot(destination)) {
+            destination = stripSnapshot(destination);
         }
-        final Matcher matcher = SNAPSHOT_PATTERN.matcher( source.toString() );
-        if ( matcher.find() )
-        {
-            return new DefaultArtifactVersion( destination.toString() + "-" + matcher.group( 0 ) );
-        }
-        else
-        {
-            return new DefaultArtifactVersion( destination.toString() + "-SNAPSHOT" );
+        final Matcher matcher = SNAPSHOT_PATTERN.matcher(source.toString());
+        if (matcher.find()) {
+            return new DefaultArtifactVersion(destination.toString() + "-" + matcher.group(0));
+        } else {
+            return new DefaultArtifactVersion(destination.toString() + "-SNAPSHOT");
         }
     }
 }

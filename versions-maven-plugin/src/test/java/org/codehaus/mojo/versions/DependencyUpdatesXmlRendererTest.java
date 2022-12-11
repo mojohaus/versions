@@ -46,59 +46,62 @@ import static org.hamcrest.Matchers.containsString;
  *
  * @author Andrzej Jarmoniuk
  */
-public class DependencyUpdatesXmlRendererTest
-{
+public class DependencyUpdatesXmlRendererTest {
     private Path tempFile;
 
     @Before
-    public void setUp() throws IOException
-    {
-        tempFile = Files.createTempFile( "xml-dependency-report", "" );
+    public void setUp() throws IOException {
+        tempFile = Files.createTempFile("xml-dependency-report", "");
     }
 
     @After
-    public void tearDown() throws IOException
-    {
-        if ( tempFile != null && Files.exists( tempFile ) )
-        {
-            Files.delete( tempFile );
+    public void tearDown() throws IOException {
+        if (tempFile != null && Files.exists(tempFile)) {
+            Files.delete(tempFile);
         }
     }
 
     @Test
-    public void testReportGeneration() throws IOException
-    {
-        new DependencyUpdatesXmlReportRenderer( new DependencyUpdatesModel(
-                singletonMap( DependencyBuilder.newBuilder()
-                        .withGroupId( "default-group" )
-                        .withArtifactId( "artifactA" )
-                        .withVersion( "1.0.0" )
-                        .build(), new ArtifactVersions(
-                        new DefaultArtifact( "default-group", "artifactA",
-                                "1.0.0", SCOPE_COMPILE, "jar", "default",
-                                null ),
-                        Arrays.asList(
-                                new DefaultArtifactVersion( "1.0.0" ),
-                                new DefaultArtifactVersion( "1.0.1" ),
-                                new DefaultArtifactVersion( "1.1.0" ),
-                                new DefaultArtifactVersion( "2.0.0" )
-                        ),
-                        new MavenVersionComparator() ) ),
-                emptyMap() ), tempFile ).render();
-        String output = String.join( "", Files.readAllLines( tempFile ) )
-                .replaceAll( ">\\s*<", "><" );
+    public void testReportGeneration() throws IOException {
+        new DependencyUpdatesXmlReportRenderer(
+                        new DependencyUpdatesModel(
+                                singletonMap(
+                                        DependencyBuilder.newBuilder()
+                                                .withGroupId("default-group")
+                                                .withArtifactId("artifactA")
+                                                .withVersion("1.0.0")
+                                                .build(),
+                                        new ArtifactVersions(
+                                                new DefaultArtifact(
+                                                        "default-group",
+                                                        "artifactA",
+                                                        "1.0.0",
+                                                        SCOPE_COMPILE,
+                                                        "jar",
+                                                        "default",
+                                                        null),
+                                                Arrays.asList(
+                                                        new DefaultArtifactVersion("1.0.0"),
+                                                        new DefaultArtifactVersion("1.0.1"),
+                                                        new DefaultArtifactVersion("1.1.0"),
+                                                        new DefaultArtifactVersion("2.0.0")),
+                                                new MavenVersionComparator())),
+                                emptyMap()),
+                        tempFile)
+                .render();
+        String output = String.join("", Files.readAllLines(tempFile)).replaceAll(">\\s*<", "><");
 
-        assertThat( output, containsString( "<usingLastVersion>0</usingLastVersion>" ) );
-        assertThat( output, containsString( "<nextVersionAvailable>0</nextVersionAvailable>" ) );
-        assertThat( output, containsString( "<nextIncrementalAvailable>1</nextIncrementalAvailable>" ) );
-        assertThat( output, containsString( "<nextMinorAvailable>0</nextMinorAvailable>" ) );
-        assertThat( output, containsString( "<nextMajorAvailable>0</nextMajorAvailable>" ) );
+        assertThat(output, containsString("<usingLastVersion>0</usingLastVersion>"));
+        assertThat(output, containsString("<nextVersionAvailable>0</nextVersionAvailable>"));
+        assertThat(output, containsString("<nextIncrementalAvailable>1</nextIncrementalAvailable>"));
+        assertThat(output, containsString("<nextMinorAvailable>0</nextMinorAvailable>"));
+        assertThat(output, containsString("<nextMajorAvailable>0</nextMajorAvailable>"));
 
-        assertThat( output, containsString( "<currentVersion>1.0.0</currentVersion>" ) );
-        assertThat( output, containsString( "<lastVersion>2.0.0</lastVersion>" ) );
-        assertThat( output, containsString( "<incremental>1.0.1</incremental>" ) );
-        assertThat( output, containsString( "<minor>1.1.0</minor>" ) );
-        assertThat( output, containsString( "<major>2.0.0</major>" ) );
-        assertThat( output, containsString( "<status>incremental available</status>" ) );
+        assertThat(output, containsString("<currentVersion>1.0.0</currentVersion>"));
+        assertThat(output, containsString("<lastVersion>2.0.0</lastVersion>"));
+        assertThat(output, containsString("<incremental>1.0.1</incremental>"));
+        assertThat(output, containsString("<minor>1.1.0</minor>"));
+        assertThat(output, containsString("<major>2.0.0</major>"));
+        assertThat(output, containsString("<status>incremental available</status>"));
     }
 }

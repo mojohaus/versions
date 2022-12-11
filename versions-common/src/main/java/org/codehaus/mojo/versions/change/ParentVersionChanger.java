@@ -30,26 +30,19 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 /**
  *
  */
-public class ParentVersionChanger
-    extends AbstractVersionChanger
-{
+public class ParentVersionChanger extends AbstractVersionChanger {
 
-    public ParentVersionChanger( Model model, ModifiedPomXMLEventReader pom, Log reporter )
-    {
-        super( model, pom, reporter );
+    public ParentVersionChanger(Model model, ModifiedPomXMLEventReader pom, Log reporter) {
+        super(model, pom, reporter);
     }
 
-    public void apply( VersionChange versionChange )
-        throws XMLStreamException
-    {
-        if ( getModel().getParent() != null && versionChange.getGroupId().equals( getModel().getParent().getGroupId() )
-            && versionChange.getArtifactId().equals( getModel().getParent().getArtifactId() ) )
-        {
-            if ( PomHelper.setProjectParentVersion( getPom(), versionChange.getNewVersion() ) )
-            {
-                info( "    Updating parent " + versionChange.getGroupId() + ":" + versionChange.getArtifactId() );
-                info( "        from version " + versionChange.getOldVersion() + " to "
-                    + versionChange.getNewVersion() );
+    public void apply(VersionChange versionChange) throws XMLStreamException {
+        if (getModel().getParent() != null
+                && versionChange.getGroupId().equals(getModel().getParent().getGroupId())
+                && versionChange.getArtifactId().equals(getModel().getParent().getArtifactId())) {
+            if (PomHelper.setProjectParentVersion(getPom(), versionChange.getNewVersion())) {
+                info("    Updating parent " + versionChange.getGroupId() + ":" + versionChange.getArtifactId());
+                info("        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion());
             }
         }
     }

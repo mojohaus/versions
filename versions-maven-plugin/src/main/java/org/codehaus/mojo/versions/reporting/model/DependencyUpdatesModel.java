@@ -27,11 +27,10 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 /**
  * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
  */
-public class DependencyUpdatesModel extends AbstractUpdatesModel<ArtifactVersions>
-{
-    public DependencyUpdatesModel( Map<Dependency, ArtifactVersions> dependencyUpdates,
-                                   Map<Dependency, ArtifactVersions> dependencyManagementUpdates )
-    {
-        super( dependencyUpdates, dependencyManagementUpdates, id -> id );
+public class DependencyUpdatesModel extends AbstractUpdatesModel<ArtifactVersions> {
+    public DependencyUpdatesModel(
+            Map<Dependency, ArtifactVersions> dependencyUpdates,
+            Map<Dependency, ArtifactVersions> dependencyManagementUpdates) {
+        super(dependencyUpdates, dependencyManagementUpdates, id -> id);
     }
 }

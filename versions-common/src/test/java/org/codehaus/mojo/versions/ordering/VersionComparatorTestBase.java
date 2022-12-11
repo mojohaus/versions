@@ -29,72 +29,62 @@ import static org.hamcrest.Matchers.lessThan;
  * Abstract base class for {@link MavenVersionComparatorTest}, {@link MercuryVersionComparatorTest},
  * and {@link NumericVersionComparatorTest}
  */
-public abstract class VersionComparatorTestBase
-{
+public abstract class VersionComparatorTestBase {
     protected final VersionComparator instance;
 
-    public VersionComparatorTestBase( VersionComparator instance )
-    {
+    public VersionComparatorTestBase(VersionComparator instance) {
         this.instance = instance;
     }
 
-    protected static ArtifactVersion version( String version )
-    {
-        return new DefaultArtifactVersion( version );
+    protected static ArtifactVersion version(String version) {
+        return new DefaultArtifactVersion(version);
     }
 
     @Test
-    public void testVersionComparatorRow1()
-    {
-        assertThat( instance.compare( version( "1" ), version( "2" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0" ), version( "2.0" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0" ), version( "1.1" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0" ), version( "1.1" ) ), lessThan( 0 ) );
+    public void testVersionComparatorRow1() {
+        assertThat(instance.compare(version("1"), version("2")), lessThan(0));
+        assertThat(instance.compare(version("1.0"), version("2.0")), lessThan(0));
+        assertThat(instance.compare(version("1.0"), version("1.1")), lessThan(0));
+        assertThat(instance.compare(version("1.0"), version("1.1")), lessThan(0));
     }
 
     @Test
-    public void testVersionComparatorRow2()
-    {
-        assertThat( instance.compare( version( "1.0" ), version( "2.0" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0" ), version( "1.1" ) ), lessThan( 0 ) );
+    public void testVersionComparatorRow2() {
+        assertThat(instance.compare(version("1.0"), version("2.0")), lessThan(0));
+        assertThat(instance.compare(version("1.0"), version("1.1")), lessThan(0));
     }
 
     @Test
-    public void testVersionComparatorRow3()
-    {
-        assertThat( instance.compare( version( "1.0.0" ), version( "2.0.0" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0.0" ), version( "1.1.0" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0.0" ), version( "1.0.1" ) ), lessThan( 0 ) );
+    public void testVersionComparatorRow3() {
+        assertThat(instance.compare(version("1.0.0"), version("2.0.0")), lessThan(0));
+        assertThat(instance.compare(version("1.0.0"), version("1.1.0")), lessThan(0));
+        assertThat(instance.compare(version("1.0.0"), version("1.0.1")), lessThan(0));
     }
 
     @Test
-    public void testVersionComparatorRow4()
-    {
-        assertThat( instance.compare( version( "1.0.0-1" ), version( "2.0.0-1" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0.0-1" ), version( "1.1.0-1" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0.0-1" ), version( "1.0.1-1" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0.0-1" ), version( "1.0.0-2" ) ), lessThan( 0 ) );
+    public void testVersionComparatorRow4() {
+        assertThat(instance.compare(version("1.0.0-1"), version("2.0.0-1")), lessThan(0));
+        assertThat(instance.compare(version("1.0.0-1"), version("1.1.0-1")), lessThan(0));
+        assertThat(instance.compare(version("1.0.0-1"), version("1.0.1-1")), lessThan(0));
+        assertThat(instance.compare(version("1.0.0-1"), version("1.0.0-2")), lessThan(0));
     }
 
     @Test
-    public void testVersionComparatorRow5()
-    {
-        assertThat( instance.compare( version( "1.0.0-sp1" ), version( "2.0.0-sp1" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0.0-sp1" ), version( "1.1.0-sp1" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0.0-sp1" ), version( "1.0.1-sp1" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1.0.0-sp1" ), version( "1.0.0-1-sp1" ) ), lessThan( 0 ) );
+    public void testVersionComparatorRow5() {
+        assertThat(instance.compare(version("1.0.0-sp1"), version("2.0.0-sp1")), lessThan(0));
+        assertThat(instance.compare(version("1.0.0-sp1"), version("1.1.0-sp1")), lessThan(0));
+        assertThat(instance.compare(version("1.0.0-sp1"), version("1.0.1-sp1")), lessThan(0));
+        assertThat(instance.compare(version("1.0.0-sp1"), version("1.0.0-1-sp1")), lessThan(0));
     }
 
     @Test
-    public void testVersionComparatorRow6()
-    {
-        assertThat( instance.compare( version( "foobar" ), version( "foobar-1" ) ), lessThan( 0 ) );
+    public void testVersionComparatorRow6() {
+        assertThat(instance.compare(version("foobar"), version("foobar-1")), lessThan(0));
     }
 
     @Test
-    public void testVersionComparatorRow7()
-    {
-        assertThat( instance.compare( version( "1-alpha-1" ), version( "2-alpha-1" ) ), lessThan( 0 ) );
-        assertThat( instance.compare( version( "1-alpha-1" ), version( "1-alpha-2" ) ), lessThan( 0 ) );
+    public void testVersionComparatorRow7() {
+        assertThat(instance.compare(version("1-alpha-1"), version("2-alpha-1")), lessThan(0));
+        assertThat(instance.compare(version("1-alpha-1"), version("1-alpha-2")), lessThan(0));
     }
 }

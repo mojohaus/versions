@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.reporting.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.maven.project.MavenProject;
 
 /**
@@ -27,8 +28,7 @@ import org.apache.maven.project.MavenProject;
  *
  * @since 2.14.0
  * */
-public class AggregateReportUtils
-{
+public class AggregateReportUtils {
 
     /**
      * Returns an aggregated list of {@link MavenProject} for the given project.
@@ -37,17 +37,14 @@ public class AggregateReportUtils
      *
      * @return aggregated list of MavenProject objects for the given project(also containing the project itself)
      * */
-    public static List<MavenProject> getProjectsToProcess( final MavenProject project )
-    {
-        if ( project == null )
-        {
+    public static List<MavenProject> getProjectsToProcess(final MavenProject project) {
+        if (project == null) {
             return Collections.emptyList();
         }
 
         List<MavenProject> result = new ArrayList<>();
-        result.add( project );
-        result.addAll( project.getCollectedProjects() );
+        result.add(project);
+        result.addAll(project.getCollectedProjects());
         return result;
     }
-
 }

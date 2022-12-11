@@ -19,23 +19,19 @@ package org.codehaus.mojo.versions.filtering;
  * under the License.
  */
 
-public class NullAwareWildcardMatcher extends WildcardMatcher
-{
+public class NullAwareWildcardMatcher extends WildcardMatcher {
     public static final String NULL_KEYWORD = "null";
 
-    public NullAwareWildcardMatcher( String pattern )
-    {
-        super( pattern );
+    public NullAwareWildcardMatcher(String pattern) {
+        super(pattern);
     }
 
     @Override
-    public boolean test( String token )
-    {
-        if ( NULL_KEYWORD.equals( getPattern() ) )
-        {
+    public boolean test(String token) {
+        if (NULL_KEYWORD.equals(getPattern())) {
             return token == null;
         }
 
-        return super.test( token );
+        return super.test(token);
     }
 }

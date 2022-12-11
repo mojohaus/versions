@@ -28,16 +28,15 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @author Anton Johansson
  * @since 2.5
  */
-@Mojo( name = "set-scm-tag", aggregator = true, threadSafe = true )
-public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
-{
+@Mojo(name = "set-scm-tag", aggregator = true, threadSafe = true)
+public class SetScmTagMojo extends AbstractVersionsUpdaterMojo {
 
     /**
      * The new SCM tag to set.
      *
      * @since 2.5
      */
-    @Parameter( property = "newTag" )
+    @Parameter(property = "newTag")
     private String newTag;
 
     /**
@@ -45,7 +44,7 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "connection" )
+    @Parameter(property = "connection")
     private String connection;
 
     /**
@@ -53,7 +52,7 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "developerConnection" )
+    @Parameter(property = "developerConnection")
     private String developerConnection;
 
     /**
@@ -61,16 +60,16 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
      *
      * @since 2.12.0
      */
-    @Parameter( property = "url" )
+    @Parameter(property = "url")
     private String url;
 
     @Inject
-    public SetScmTagMojo( RepositorySystem repositorySystem,
-                          org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                          Map<String, Wagon> wagonMap,
-                          Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public SetScmTagMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -80,78 +79,64 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo
      * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong.
      */
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
-        if ( isAllBlank( newTag, connection, developerConnection, url ) )
-        {
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        if (isAllBlank(newTag, connection, developerConnection, url)) {
             throw new MojoFailureException(
-                    "One of: \"newTag\", \"connection\", \"developerConnection\", \"url\" should be provided." );
+                    "One of: \"newTag\", \"connection\", \"developerConnection\", \"url\" should be provided.");
         }
 
         super.execute();
     }
 
     @Override
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
-        try
-        {
-            Scm scm = PomHelper.getRawModel( pom ).getScm();
-            if ( scm == null )
-            {
-                throw new MojoFailureException( "No <scm> was present" );
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException {
+        try {
+            Scm scm = PomHelper.getRawModel(pom).getScm();
+            if (scm == null) {
+                throw new MojoFailureException("No <scm> was present");
             }
 
             List<String> failures = new ArrayList<>();
-            if ( !isBlank( newTag ) )
-            {
-                getLog().info( "Updating tag: " + ( scm != null && scm.getTag() != null
-                        ? scm.getTag() : "(empty)" ) + " -> " + newTag );
-                if ( !PomHelper.setElementValue( pom, "/project/scm", "tag", newTag ) )
-                {
-                    failures.add( "tag: " + newTag );
+            if (!isBlank(newTag)) {
+                getLog().info("Updating tag: " + (scm != null && scm.getTag() != null ? scm.getTag() : "(empty)")
+                        + " -> " + newTag);
+                if (!PomHelper.setElementValue(pom, "/project/scm", "tag", newTag)) {
+                    failures.add("tag: " + newTag);
                 }
             }
-            if ( !isBlank( connection ) )
-            {
-                getLog().info( "Updating connection: " + ( scm != null && scm.getConnection() != null
-                        ? scm.getConnection() : "(empty)" ) + " -> " + connection );
-                if ( !PomHelper.setElementValue( pom, "/project/scm", "connection", connection ) )
-                {
-                    failures.add( "connection: " + connection );
+            if (!isBlank(connection)) {
+                getLog().info("Updating connection: "
+                        + (scm != null && scm.getConnection() != null ? scm.getConnection() : "(empty)") + " -> "
+                        + connection);
+                if (!PomHelper.setElementValue(pom, "/project/scm", "connection", connection)) {
+                    failures.add("connection: " + connection);
                 }
             }
-            if ( !isBlank( developerConnection ) )
-            {
-                getLog().info( "Updating developerConnection: "
-                        + ( scm != null && scm.getDeveloperConnection() != null
-                        ? scm.getDeveloperConnection() : "(empty)" ) + " -> "
-                        + developerConnection );
-                if ( !PomHelper.setElementValue( pom, "/project/scm", "developerConnection",
-                        developerConnection ) )
-                {
-                    failures.add( "developerConnection: " + developerConnection );
+            if (!isBlank(developerConnection)) {
+                getLog().info("Updating developerConnection: "
+                        + (scm != null && scm.getDeveloperConnection() != null
+                                ? scm.getDeveloperConnection()
+                                : "(empty)")
+                        + " -> "
+                        + developerConnection);
+                if (!PomHelper.setElementValue(pom, "/project/scm", "developerConnection", developerConnection)) {
+                    failures.add("developerConnection: " + developerConnection);
                 }
             }
-            if ( !isBlank( url ) )
-            {
-                getLog().info( "Updating url: " + ( scm != null && scm.getUrl() != null
-                        ? scm.getUrl() : "(empty)" ) + " -> " + url );
-                if ( !PomHelper.setElementValue( pom, "/project/scm", "url", url ) )
-                {
-                    failures.add( "url: " + url );
+            if (!isBlank(url)) {
+                getLog().info("Updating url: " + (scm != null && scm.getUrl() != null ? scm.getUrl() : "(empty)")
+                        + " -> " + url);
+                if (!PomHelper.setElementValue(pom, "/project/scm", "url", url)) {
+                    failures.add("url: " + url);
                 }
             }
-            if ( !failures.isEmpty() )
-            {
-                throw new MojoFailureException( "Could not update one or more SCM elements: " + String.join( ", ",
-                        failures ) + ". Please make sure they are present in the original POM. " );
+            if (!failures.isEmpty()) {
+                throw new MojoFailureException("Could not update one or more SCM elements: "
+                        + String.join(", ", failures) + ". Please make sure they are present in the original POM. ");
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 }

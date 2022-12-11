@@ -48,9 +48,7 @@ import org.codehaus.plexus.i18n.I18N;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public abstract class AbstractVersionsReport<T>
-    extends AbstractMavenReport
-{
+public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     /**
      * Internationalization component.
      *
@@ -65,7 +63,7 @@ public abstract class AbstractVersionsReport<T>
      *
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "versions.skip" )
+    @Parameter(property = "versions.skip")
     private boolean skip;
 
     /**
@@ -78,7 +76,7 @@ public abstract class AbstractVersionsReport<T>
      *
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "maven.version.rules.serverId", defaultValue = "serverId" )
+    @Parameter(property = "maven.version.rules.serverId", defaultValue = "serverId")
     private String serverId;
 
     /**
@@ -88,7 +86,7 @@ public abstract class AbstractVersionsReport<T>
      *
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "maven.version.rules" )
+    @Parameter(property = "maven.version.rules")
     private String rulesUri;
 
     /**
@@ -98,7 +96,7 @@ public abstract class AbstractVersionsReport<T>
      *
      * @since 1.0-alpha-1
      */
-    @Parameter( property = "comparisonMethod" )
+    @Parameter(property = "comparisonMethod")
     protected String comparisonMethod;
 
     /**
@@ -106,7 +104,7 @@ public abstract class AbstractVersionsReport<T>
      *
      * @since 1.0-alpha-3
      */
-    @Parameter( property = "allowSnapshots", defaultValue = "false" )
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
     /**
@@ -119,10 +117,10 @@ public abstract class AbstractVersionsReport<T>
      *
      * @since 1.0-beta-1
      */
-    @Parameter( defaultValue = "${session}", required = true, readonly = true )
+    @Parameter(defaultValue = "${session}", required = true, readonly = true)
     protected MavenSession session;
 
-    @Parameter( defaultValue = "${mojoExecution}", required = true, readonly = true )
+    @Parameter(defaultValue = "${mojoExecution}", required = true, readonly = true)
     private MojoExecution mojoExecution;
 
     /**
@@ -149,7 +147,7 @@ public abstract class AbstractVersionsReport<T>
      * <p><em>Currently, this parameter will override the defined {@link #ruleSet}</em></p>
      * @since 2.13.0
      */
-    @Parameter( property = "maven.version.ignore" )
+    @Parameter(property = "maven.version.ignore")
     protected Set<String> ignoredVersions;
 
     /**
@@ -168,11 +166,12 @@ public abstract class AbstractVersionsReport<T>
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
-    protected AbstractVersionsReport( I18N i18n, RepositorySystem repositorySystem,
-                                      org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                      Map<String, Wagon> wagonMap,
-                                      ReportRendererFactory rendererFactory )
-    {
+    protected AbstractVersionsReport(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
         this.i18n = i18n;
         this.repositorySystem = repositorySystem;
         this.aetherRepositorySystem = aetherRepositorySystem;
@@ -180,29 +179,23 @@ public abstract class AbstractVersionsReport<T>
         this.rendererFactory = rendererFactory;
     }
 
-    public VersionsHelper getHelper()
-        throws MavenReportException
-    {
-        if ( helper == null )
-        {
-            try
-            {
+    public VersionsHelper getHelper() throws MavenReportException {
+        if (helper == null) {
+            try {
                 helper = new DefaultVersionsHelper.Builder()
-                        .withRepositorySystem( repositorySystem )
-                        .withAetherRepositorySystem( aetherRepositorySystem )
-                        .withWagonMap( wagonMap )
-                        .withServerId( serverId )
-                        .withRulesUri( rulesUri )
-                        .withRuleSet( ruleSet )
-                        .withIgnoredVersions( ignoredVersions )
-                        .withLog( getLog() )
-                        .withMavenSession( session )
-                        .withMojoExecution( mojoExecution )
+                        .withRepositorySystem(repositorySystem)
+                        .withAetherRepositorySystem(aetherRepositorySystem)
+                        .withWagonMap(wagonMap)
+                        .withServerId(serverId)
+                        .withRulesUri(rulesUri)
+                        .withRuleSet(ruleSet)
+                        .withIgnoredVersions(ignoredVersions)
+                        .withLog(getLog())
+                        .withMavenSession(session)
+                        .withMojoExecution(mojoExecution)
                         .build();
-            }
-            catch ( MojoExecutionException e )
-            {
-                throw new MavenReportException( e.getMessage(), e );
+            } catch (MojoExecutionException e) {
+                throw new MavenReportException(e.getMessage(), e);
             }
         }
         return helper;
@@ -211,18 +204,12 @@ public abstract class AbstractVersionsReport<T>
     /**
      * {@inheritDoc}
      */
-    protected void executeReport( Locale locale )
-        throws MavenReportException
-    {
-        if ( !skip )
-        {
-            try
-            {
-                doGenerateReport( locale, getSink() );
-            }
-            catch ( MojoExecutionException e )
-            {
-                throw new MavenReportException( e.getMessage(), e );
+    protected void executeReport(Locale locale) throws MavenReportException {
+        if (!skip) {
+            try {
+                doGenerateReport(locale, getSink());
+            } catch (MojoExecutionException e) {
+                throw new MavenReportException(e.getMessage(), e);
             }
         }
     }
@@ -235,42 +222,36 @@ public abstract class AbstractVersionsReport<T>
      * @throws MavenReportException when things go wrong.
      * @throws MojoExecutionException if something goes wrong.
      */
-    protected abstract void doGenerateReport( Locale locale, Sink sink )
-        throws MavenReportException, MojoExecutionException;
+    protected abstract void doGenerateReport(Locale locale, Sink sink)
+            throws MavenReportException, MojoExecutionException;
 
     @Override
-    protected MavenProject getProject()
-    {
+    protected MavenProject getProject() {
         return project;
     }
 
     @Override
-    protected String getOutputDirectory()
-    {
-        if ( !outputDirectory.isAbsolute() )
-        {
-            outputDirectory = new File( project.getBasedir(), outputDirectory.getPath() );
+    protected String getOutputDirectory() {
+        if (!outputDirectory.isAbsolute()) {
+            outputDirectory = new File(project.getBasedir(), outputDirectory.getPath());
         }
 
         return outputDirectory.getAbsolutePath();
     }
 
     @Override
-    protected Renderer getSiteRenderer()
-    {
+    protected Renderer getSiteRenderer() {
         return siteRenderer;
     }
 
     @Override
-    public String getDescription( Locale locale )
-    {
-        return getText( locale, "report.description" );
+    public String getDescription(Locale locale) {
+        return getText(locale, "report.description");
     }
 
     @Override
-    public String getName( Locale locale )
-    {
-        return getText( locale, "report.title" );
+    public String getName(Locale locale) {
+        return getText(locale, "report.title");
     }
 
     /**
@@ -280,24 +261,19 @@ public abstract class AbstractVersionsReport<T>
      * @param key the message key.
      * @return the message.
      */
-    public String getText( Locale locale, String key )
-    {
-        return i18n.getString( getOutputName(), locale, key );
+    public String getText(Locale locale, String key) {
+        return i18n.getString(getOutputName(), locale, key);
     }
 
-    public Boolean getAllowSnapshots()
-    {
+    public Boolean getAllowSnapshots() {
         return this.allowSnapshots;
     }
 
-    public String getComparisonMethod()
-    {
+    public String getComparisonMethod() {
         return comparisonMethod;
     }
 
-    public I18N getI18n()
-    {
+    public I18N getI18n() {
         return i18n;
     }
-
 }

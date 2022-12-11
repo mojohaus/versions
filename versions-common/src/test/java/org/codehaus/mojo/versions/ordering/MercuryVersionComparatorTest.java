@@ -24,23 +24,18 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class MercuryVersionComparatorTest extends VersionComparatorTestBase
-{
-    public MercuryVersionComparatorTest()
-    {
-        super( new MercuryVersionComparator() );
+public class MercuryVersionComparatorTest extends VersionComparatorTestBase {
+    public MercuryVersionComparatorTest() {
+        super(new MercuryVersionComparator());
     }
 
     @Test
-    public void testSegmentCounting()
-    {
-        assertEquals( 1, instance.getSegmentCount( new DefaultArtifactVersion( "5" ) ) );
-        assertEquals( 2, instance.getSegmentCount( new DefaultArtifactVersion( "5.0" ) ) );
-        assertEquals( 2, instance.getSegmentCount( new DefaultArtifactVersion( "5-0" ) ) );
-        assertEquals( 3, instance.getSegmentCount( new DefaultArtifactVersion( "5.3.a" ) ) );
-        assertEquals( 6, instance.getSegmentCount( new DefaultArtifactVersion( "5.0.a.1.4.5" ) ) );
-        assertEquals( 0, instance.getSegmentCount( new DefaultArtifactVersion( "" ) ) );
+    public void testSegmentCounting() {
+        assertEquals(1, instance.getSegmentCount(new DefaultArtifactVersion("5")));
+        assertEquals(2, instance.getSegmentCount(new DefaultArtifactVersion("5.0")));
+        assertEquals(2, instance.getSegmentCount(new DefaultArtifactVersion("5-0")));
+        assertEquals(3, instance.getSegmentCount(new DefaultArtifactVersion("5.3.a")));
+        assertEquals(6, instance.getSegmentCount(new DefaultArtifactVersion("5.0.a.1.4.5")));
+        assertEquals(0, instance.getSegmentCount(new DefaultArtifactVersion("")));
     }
-
-
 }

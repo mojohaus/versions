@@ -52,10 +52,8 @@ import static org.apache.commons.lang3.StringUtils.split;
  * @author Karl Heinz Marbaise
  * @since 2.5
  */
-@Mojo( name = "set-property", threadSafe = true )
-public class SetPropertyMojo
-    extends AbstractVersionsUpdaterMojo
-{
+@Mojo(name = "set-property", threadSafe = true)
+public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -63,19 +61,19 @@ public class SetPropertyMojo
      * A property to update.
      * You can also specify multiple property names separated by "," which are all set to the same new version.
      */
-    @Parameter( property = "property" )
+    @Parameter(property = "property")
     private String property = null;
 
     /**
      * The new version to set the property.
      */
-    @Parameter( property = "newVersion" )
+    @Parameter(property = "newVersion")
     private String newVersion = null;
 
     /**
      * Whether properties linking versions should be auto-detected or not.
      */
-    @Parameter( property = "autoLinkItems", defaultValue = "true" )
+    @Parameter(property = "autoLinkItems", defaultValue = "true")
     private boolean autoLinkItems;
 
     /**
@@ -84,17 +82,16 @@ public class SetPropertyMojo
      *
      * @since 2.9
      */
-
-    @Parameter( property = "propertiesVersionsFile" )
+    @Parameter(property = "propertiesVersionsFile")
     private String propertiesVersionsFile;
 
     @Inject
-    public SetPropertyMojo( RepositorySystem repositorySystem,
-                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                            Map<String, Wagon> wagonMap,
-                            Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public SetPropertyMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -104,87 +101,69 @@ public class SetPropertyMojo
      * @throws XMLStreamException     when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException
-    {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException {
         Property[] propertiesConfig;
         String properties;
-        if ( !isEmpty( propertiesVersionsFile ) )
-        {
+        if (!isEmpty(propertiesVersionsFile)) {
             logWrongConfigWarning();
-            getLog().debug( "Reading properties and versions to update from file: " + propertiesVersionsFile );
-            PropertiesVersionsFileReader reader = new PropertiesVersionsFileReader( propertiesVersionsFile );
-            try
-            {
+            getLog().debug("Reading properties and versions to update from file: " + propertiesVersionsFile);
+            PropertiesVersionsFileReader reader = new PropertiesVersionsFileReader(propertiesVersionsFile);
+            try {
                 reader.read();
-            }
-            catch ( IOException e )
-            {
-                getLog().error( "Unable to read property file  " + propertiesVersionsFile
-                                    + ". re-run with -X option for more details." );
-                getLog().debug( "Error while reading  property file " + propertiesVersionsFile, e );
-                throw new MojoFailureException( "Unable to read property file " + propertiesVersionsFile );
+            } catch (IOException e) {
+                getLog().error("Unable to read property file  " + propertiesVersionsFile
+                        + ". re-run with -X option for more details.");
+                getLog().debug("Error while reading  property file " + propertiesVersionsFile, e);
+                throw new MojoFailureException("Unable to read property file " + propertiesVersionsFile);
             }
             propertiesConfig = reader.getPropertiesConfig();
             properties = reader.getProperties();
-        }
-        else if ( !isEmpty( property ) )
-        {
-            getLog().debug( "Reading properties and versions to update from property and newVersion " );
-            propertiesConfig = Arrays.stream( split( property, "," ) ).map(
-                    prp ->
-                    {
-                        Property propertyConfig = new Property( prp );
-                        propertyConfig.setVersion( newVersion );
+        } else if (!isEmpty(property)) {
+            getLog().debug("Reading properties and versions to update from property and newVersion ");
+            propertiesConfig = Arrays.stream(split(property, ","))
+                    .map(prp -> {
+                        Property propertyConfig = new Property(prp);
+                        propertyConfig.setVersion(newVersion);
                         return propertyConfig;
-                    } )
-                .toArray( Property[]::new );
+                    })
+                    .toArray(Property[]::new);
             properties = property;
+        } else {
+            throw new MojoExecutionException("Please provide either 'property' or 'propertiesVersionsFile' parameter.");
         }
-        else
-        {
-            throw new MojoExecutionException(
-                "Please provide either 'property' or 'propertiesVersionsFile' parameter." );
-        }
-        update( pom, propertiesConfig, properties );
+        update(pom, propertiesConfig, properties);
     }
 
-    private void update( ModifiedPomXMLEventReader pom, Property[] propertiesConfig, String properties )
-        throws MojoExecutionException, XMLStreamException
-    {
-        Map<Property, PropertyVersions> propertyVersions =
-                this.getHelper().getVersionPropertiesMap( VersionsHelper.VersionPropertiesMapRequest.builder()
-                        .withMavenProject( getProject() )
-                        .withPropertyDefinitions( propertiesConfig )
-                        .withIncludeProperties( properties )
-                        .withAutoLinkItems( autoLinkItems )
-                        .build() );
-        for ( Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet() )
-        {
+    private void update(ModifiedPomXMLEventReader pom, Property[] propertiesConfig, String properties)
+            throws MojoExecutionException, XMLStreamException {
+        Map<Property, PropertyVersions> propertyVersions = this.getHelper()
+                .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
+                        .withMavenProject(getProject())
+                        .withPropertyDefinitions(propertiesConfig)
+                        .withIncludeProperties(properties)
+                        .withAutoLinkItems(autoLinkItems)
+                        .build());
+        for (Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet()) {
             Property currentProperty = entry.getKey();
             PropertyVersions version = entry.getValue();
             String newVersionGiven = currentProperty.getVersion();
 
-            final String currentVersion = getProject().getProperties().getProperty( currentProperty.getName() );
-            if ( currentVersion == null )
-            {
+            final String currentVersion = getProject().getProperties().getProperty(currentProperty.getName());
+            if (currentVersion == null) {
                 continue;
             }
-            PomHelper.setPropertyVersion( pom, version.getProfileId(), currentProperty.getName(), 
-                    defaultString( newVersionGiven ) );
+            PomHelper.setPropertyVersion(
+                    pom, version.getProfileId(), currentProperty.getName(), defaultString(newVersionGiven));
         }
     }
 
-    private void logWrongConfigWarning()
-    {
-        if ( !isEmpty( property ) )
-        {
-            getLog().warn( "-Dproperty provided but will be ignored as -DpropertiesVersionsFile is used" );
+    private void logWrongConfigWarning() {
+        if (!isEmpty(property)) {
+            getLog().warn("-Dproperty provided but will be ignored as -DpropertiesVersionsFile is used");
         }
-        if ( !isEmpty( newVersion ) )
-        {
-            getLog().warn( "-DnewVersion provided but will be ignored as -DpropertiesVersionsFile is used" );
+        if (!isEmpty(newVersion)) {
+            getLog().warn("-DnewVersion provided but will be ignored as -DpropertiesVersionsFile is used");
         }
     }
-
 }

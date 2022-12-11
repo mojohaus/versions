@@ -1,6 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -108,8 +107,8 @@
   <scm>
     <connection>scm:git:https://github.com/mojohaus/versions.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions.git</developerConnection>
-    <url>https://github.com/mojohaus/versions/tree/master</url>
     <tag>HEAD</tag>
+    <url>https://github.com/mojohaus/versions/tree/master</url>
   </scm>
 
   <issueManagement>
@@ -133,7 +132,8 @@
     <sitePluginVersion>3.7</sitePluginVersion>
     <modelloNamespaceRuleVersion>2.1.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
-    <scmpublish.content>${project.build.directory}/staging</scmpublish.content><!-- mono-module doesn't require site:stage for scm-publish -->
+    <scmpublish.content>${project.build.directory}/staging</scmpublish.content>
+    <!-- mono-module doesn't require site:stage for scm-publish -->
     <project.build.outputTimestamp>2022-10-23T15:41:47Z</project.build.outputTimestamp>
     <sisu-maven-plugin-version>0.9.0.M1</sisu-maven-plugin-version>
   </properties>
@@ -230,10 +230,10 @@
         <executions>
           <execution>
             <id>check-java18</id>
-            <phase>test</phase>
             <goals>
               <goal>check</goal>
             </goals>
+            <phase>test</phase>
             <configuration>
               <signature>
                 <groupId>org.codehaus.mojo.signature</groupId>
@@ -251,11 +251,11 @@
         <executions>
           <execution>
             <id>default-site</id>
-            <phase>site</phase>
             <goals>
               <goal>site</goal>
               <goal>stage</goal>
             </goals>
+            <phase>site</phase>
           </execution>
         </executions>
       </plugin>
@@ -270,7 +270,7 @@
         <artifactId>maven-plugin-report-plugin</artifactId>
         <reportSets>
           <reportSet>
-            <reports/>
+            <reports />
           </reportSet>
         </reportSets>
       </plugin>

@@ -80,253 +80,252 @@ import static org.mockito.Mockito.when;
 /**
  * Test {@link DefaultVersionsHelper}
  */
-public class DefaultVersionsHelperTest extends AbstractMojoTestCase
-{
+public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
     @Test
-    public void testPerRuleVersionsIgnored() throws Exception
-    {
-        final org.eclipse.aether.RepositorySystem repositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
-        final Artifact artifact = mock( Artifact.class );
-        when( artifact.getGroupId() ).thenReturn( "com.mycompany.maven" );
-        when( artifact.getArtifactId() ).thenReturn( "artifact-one" );
-        when( artifact.getType() ).thenReturn( "jar" );
-        when( artifact.getArtifactHandler() ).thenReturn( new DefaultArtifactHandlerStub( "default" ) );
-        when( repositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
-                .then( i -> new VersionRangeResult( i.getArgument( 1 ) )
-                        .setVersions( Arrays.asList(
-                                new VersionStub( "one" ),
-                                new VersionStub( "two" ),
-                                new VersionStub( "three" ),
-                                new VersionStub( "1.200" ),
-                                new VersionStub( "illegalVersion" ) ) ) );
+    public void testPerRuleVersionsIgnored() throws Exception {
+        final org.eclipse.aether.RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        final Artifact artifact = mock(Artifact.class);
+        when(artifact.getGroupId()).thenReturn("com.mycompany.maven");
+        when(artifact.getArtifactId()).thenReturn("artifact-one");
+        when(artifact.getType()).thenReturn("jar");
+        when(artifact.getArtifactHandler()).thenReturn(new DefaultArtifactHandlerStub("default"));
+        when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> new VersionRangeResult(i.getArgument(1))
+                        .setVersions(Arrays.asList(
+                                new VersionStub("one"),
+                                new VersionStub("two"),
+                                new VersionStub("three"),
+                                new VersionStub("1.200"),
+                                new VersionStub("illegalVersion"))));
 
-        VersionsHelper helper = createHelper( repositorySystem );
+        VersionsHelper helper = createHelper(repositorySystem);
 
-        final ArtifactVersions versions = helper.lookupArtifactVersions( artifact, true );
+        final ArtifactVersions versions = helper.lookupArtifactVersions(artifact, true);
 
-        final List<String> actual = Arrays.stream( versions.getVersions( true ) )
-                .map( ArtifactVersion::toString )
-                .collect( Collectors.toList() );
+        final List<String> actual = Arrays.stream(versions.getVersions(true))
+                .map(ArtifactVersion::toString)
+                .collect(Collectors.toList());
 
-        assertEquals( 3, actual.size() );
-        assertThat( actual, hasItems( "three", "1.200", "illegalVersion" ) );
+        assertEquals(3, actual.size());
+        assertThat(actual, hasItems("three", "1.200", "illegalVersion"));
     }
 
     @Test
-    public void testGlobalRuleVersionsIgnored() throws Exception
-    {
-        final org.eclipse.aether.RepositorySystem repositorySystem = mock( org.eclipse.aether.RepositorySystem.class );
-        final Artifact artifact = mock( Artifact.class );
-        when( artifact.getGroupId() ).thenReturn( "other.company" );
-        when( artifact.getArtifactId() ).thenReturn( "artifact-two" );
-        when( artifact.getType() ).thenReturn( "jar" );
-        when( artifact.getArtifactHandler() ).thenReturn( new DefaultArtifactHandlerStub( "default" ) );
+    public void testGlobalRuleVersionsIgnored() throws Exception {
+        final org.eclipse.aether.RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        final Artifact artifact = mock(Artifact.class);
+        when(artifact.getGroupId()).thenReturn("other.company");
+        when(artifact.getArtifactId()).thenReturn("artifact-two");
+        when(artifact.getType()).thenReturn("jar");
+        when(artifact.getArtifactHandler()).thenReturn(new DefaultArtifactHandlerStub("default"));
 
         final List<Version> artifactVersions = new ArrayList<>();
 
-        final Version one = new VersionStub( "one" );
-        final Version two = new VersionStub( "two" );
-        final Version three = new VersionStub( "three" );
-        artifactVersions.add( one );
-        artifactVersions.add( two );
-        artifactVersions.add( new VersionStub( "three-alpha" ) );
-        artifactVersions.add( new VersionStub( "three-beta" ) );
-        artifactVersions.add( three );
-        final Version illegal = new VersionStub( "illegalVersion" );
-        artifactVersions.add( illegal );
+        final Version one = new VersionStub("one");
+        final Version two = new VersionStub("two");
+        final Version three = new VersionStub("three");
+        artifactVersions.add(one);
+        artifactVersions.add(two);
+        artifactVersions.add(new VersionStub("three-alpha"));
+        artifactVersions.add(new VersionStub("three-beta"));
+        artifactVersions.add(three);
+        final Version illegal = new VersionStub("illegalVersion");
+        artifactVersions.add(illegal);
 
-        when( repositorySystem.resolveVersionRange( any(), any( VersionRangeRequest.class ) ) )
-                .then( i -> new VersionRangeResult( i.getArgument( 1 ) )
-                        .setVersions( artifactVersions ) );
+        when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> new VersionRangeResult(i.getArgument(1)).setVersions(artifactVersions));
 
-        VersionsHelper helper = createHelper( repositorySystem );
+        VersionsHelper helper = createHelper(repositorySystem);
 
-        final ArtifactVersions versions = helper.lookupArtifactVersions( artifact, true );
+        final ArtifactVersions versions = helper.lookupArtifactVersions(artifact, true);
 
-        final List<Version> actual = Arrays.stream( versions.getVersions( true ) )
-                .map( ArtifactVersion::toString )
-                .map( VersionStub::new )
-                .collect( Collectors.toList() );
+        final List<Version> actual = Arrays.stream(versions.getVersions(true))
+                .map(ArtifactVersion::toString)
+                .map(VersionStub::new)
+                .collect(Collectors.toList());
 
-        assertEquals( 4, actual.size() );
-        assertThat( actual, hasItems( one, two, three, illegal ) );
+        assertEquals(4, actual.size());
+        assertThat(actual, hasItems(one, two, three, illegal));
     }
 
     @Test
-    public void testWildcardMatching()
-        throws Exception
-    {
-        assertTrue( DefaultVersionsHelper.exactMatch( "*", "com.foo.bar" ) );
-        assertFalse( DefaultVersionsHelper.exactMatch( "com.bar*", "com-bar" ) );
-        assertTrue( DefaultVersionsHelper.exactMatch( "com?foo.bar", "com.foo.bar" ) );
-        assertTrue( DefaultVersionsHelper.exactMatch( "co*.foo.b?r", "com.foo.bar" ) );
-        assertTrue( DefaultVersionsHelper.exactMatch( "c*oo*r", "com.foo.bar" ) );
+    public void testWildcardMatching() throws Exception {
+        assertTrue(DefaultVersionsHelper.exactMatch("*", "com.foo.bar"));
+        assertFalse(DefaultVersionsHelper.exactMatch("com.bar*", "com-bar"));
+        assertTrue(DefaultVersionsHelper.exactMatch("com?foo.bar", "com.foo.bar"));
+        assertTrue(DefaultVersionsHelper.exactMatch("co*.foo.b?r", "com.foo.bar"));
+        assertTrue(DefaultVersionsHelper.exactMatch("c*oo*r", "com.foo.bar"));
     }
 
     @Test
-    public void testRuleSets()
-        throws Exception
-    {
+    public void testRuleSets() throws Exception {
         VersionsHelper helper = createHelper();
 
-        assertEquals( "no match gives default", VersionComparators.getVersionComparator( "maven" ),
-                      helper.getVersionComparator( "net.foo", "bar" ) );
-        assertEquals( "matches wildcard", VersionComparators.getVersionComparator( "mercury" ),
-                      helper.getVersionComparator( "org.apache.maven", "plugins" ) );
-        assertEquals( "exact match wins over initial match", VersionComparators.getVersionComparator( "mercury" ),
-                      helper.getVersionComparator( "com.mycompany.custom.maven", "plugins" ) );
-        assertEquals( "non-wildcard prefix wins over wildcard prefix match",
-                      VersionComparators.getVersionComparator( "maven" ),
-                      helper.getVersionComparator( "com.mycompany.maven.plugins", "plugins" ) );
-        assertEquals( VersionComparators.getVersionComparator( "maven" ),
-                      helper.getVersionComparator( "com.mycompany.maven", "new-maven-plugin" ) );
-        assertEquals( VersionComparators.getVersionComparator( "mercury" ),
-                      helper.getVersionComparator( "com.mycompany.maven", "old-maven-plugin" ) );
+        assertEquals(
+                "no match gives default",
+                VersionComparators.getVersionComparator("maven"),
+                helper.getVersionComparator("net.foo", "bar"));
+        assertEquals(
+                "matches wildcard",
+                VersionComparators.getVersionComparator("mercury"),
+                helper.getVersionComparator("org.apache.maven", "plugins"));
+        assertEquals(
+                "exact match wins over initial match",
+                VersionComparators.getVersionComparator("mercury"),
+                helper.getVersionComparator("com.mycompany.custom.maven", "plugins"));
+        assertEquals(
+                "non-wildcard prefix wins over wildcard prefix match",
+                VersionComparators.getVersionComparator("maven"),
+                helper.getVersionComparator("com.mycompany.maven.plugins", "plugins"));
+        assertEquals(
+                VersionComparators.getVersionComparator("maven"),
+                helper.getVersionComparator("com.mycompany.maven", "new-maven-plugin"));
+        assertEquals(
+                VersionComparators.getVersionComparator("mercury"),
+                helper.getVersionComparator("com.mycompany.maven", "old-maven-plugin"));
     }
 
-
     @Test
-    public void testMVERSIONS159ExcludedAndNotIncluded()
-        throws Exception
-    {
+    public void testMVERSIONS159ExcludedAndNotIncluded() throws Exception {
         VersionsHelper helper = createHelper();
         MavenProject project = null;
 
-        Property[] propertyDefinitions = new Property[] {
-            new Property( "bar.version" )
-        };
+        Property[] propertyDefinitions = new Property[] {new Property("bar.version")};
         // should not throw an IllegalStateException
         Map<Property, PropertyVersions> result =
-            helper.getVersionPropertiesMap( VersionsHelper.VersionPropertiesMapRequest.builder()
-                    .withMavenProject( project )
-                    .withPropertyDefinitions( propertyDefinitions )
-                    .withIncludeProperties( "foo.version" )
-                    .withExcludeProperties( "bar.version" )
-                    .withIncludeParent( false )
-                    .withAutoLinkItems( false )
-                    .build() );
-        assertTrue( result.isEmpty() );
+                helper.getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
+                        .withMavenProject(project)
+                        .withPropertyDefinitions(propertyDefinitions)
+                        .withIncludeProperties("foo.version")
+                        .withExcludeProperties("bar.version")
+                        .withIncludeParent(false)
+                        .withAutoLinkItems(false)
+                        .build());
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    public void testIsClasspathUriDetectsClassPathProtocol() throws Exception
-    {
+    public void testIsClasspathUriDetectsClassPathProtocol() throws Exception {
         DefaultVersionsHelper helper = createHelper();
         String uri = "classpath:/p/a/c/k/a/g/e/resource.res";
 
-        assertThat( DefaultVersionsHelper.isClasspathUri( uri ), CoreMatchers.is( true ) );
+        assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(true));
     }
 
     @Test
-    public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws Exception
-    {
+    public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws Exception {
         DefaultVersionsHelper helper = createHelper();
         String uri = "http://10.10.10.10/p/a/c/k/a/g/e/resource.res";
 
-        assertThat( DefaultVersionsHelper.isClasspathUri( uri ), CoreMatchers.is( false ) );
+        assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(false));
     }
 
-
-    private DefaultVersionsHelper createHelper()
-        throws Exception
-    {
-        return createHelper( null );
+    private DefaultVersionsHelper createHelper() throws Exception {
+        return createHelper(null);
     }
 
-    private static Wagon mockFileWagon( URI rulesUri )
+    private static Wagon mockFileWagon(URI rulesUri)
             throws AuthenticationException, ConnectionException, AuthorizationException, TransferFailedException,
-            ResourceDoesNotExistException
-    {
-        Wagon fileWagon = mock( Wagon.class );
-        doNothing().when( fileWagon ).connect( any( org.apache.maven.wagon.repository.Repository.class ),
-                any( AuthenticationInfo.class ), any( ProxyInfo.class ) );
-        doAnswer( i ->
-        {
-            File tempFile = i.getArgument( 1 );
-            Files.copy( Paths.get( rulesUri ), tempFile.toPath(), REPLACE_EXISTING );
-            return null;
-        } ).when( fileWagon ).get( anyString(), any( File.class ) );
+                    ResourceDoesNotExistException {
+        Wagon fileWagon = mock(Wagon.class);
+        doNothing()
+                .when(fileWagon)
+                .connect(
+                        any(org.apache.maven.wagon.repository.Repository.class),
+                        any(AuthenticationInfo.class),
+                        any(ProxyInfo.class));
+        doAnswer(i -> {
+                    File tempFile = i.getArgument(1);
+                    Files.copy(Paths.get(rulesUri), tempFile.toPath(), REPLACE_EXISTING);
+                    return null;
+                })
+                .when(fileWagon)
+                .get(anyString(), any(File.class));
         return fileWagon;
     }
 
-    private DefaultVersionsHelper createHelper( org.eclipse.aether.RepositorySystem aetherRepositorySystem )
-            throws Exception
-    {
-        final String resourcePath = "/" + getClass().getPackage().getName().replace( '.', '/' ) + "/rules.xml";
-        final String rulesUri = Objects.requireNonNull( getClass().getResource( resourcePath ) ).toExternalForm();
-        MavenSession mavenSession = mock( MavenSession.class );
-        when( mavenSession.getCurrentProject() ).thenReturn( mock( MavenProject.class ) );
-        when( mavenSession.getCurrentProject().getRemotePluginRepositories() )
-                .thenReturn( emptyList() );
-        when( mavenSession.getCurrentProject().getRemotePluginRepositories() )
-                .thenReturn( emptyList() );
-        when( mavenSession.getRepositorySession() ).thenReturn( new DefaultRepositorySystemSession() );
+    private DefaultVersionsHelper createHelper(org.eclipse.aether.RepositorySystem aetherRepositorySystem)
+            throws Exception {
+        final String resourcePath = "/" + getClass().getPackage().getName().replace('.', '/') + "/rules.xml";
+        final String rulesUri =
+                Objects.requireNonNull(getClass().getResource(resourcePath)).toExternalForm();
+        MavenSession mavenSession = mock(MavenSession.class);
+        when(mavenSession.getCurrentProject()).thenReturn(mock(MavenProject.class));
+        when(mavenSession.getCurrentProject().getRemotePluginRepositories()).thenReturn(emptyList());
+        when(mavenSession.getCurrentProject().getRemotePluginRepositories()).thenReturn(emptyList());
+        when(mavenSession.getRepositorySession()).thenReturn(new DefaultRepositorySystemSession());
 
         return new DefaultVersionsHelper.Builder()
-                .withRepositorySystem( lookup( RepositorySystem.class ) )
-                .withAetherRepositorySystem( aetherRepositorySystem )
-                .withWagonMap( singletonMap( "file", mockFileWagon( new URI( rulesUri ) ) ) )
-                .withServerId( "" )
-                .withRulesUri( rulesUri )
-                .withLog( mock( Log.class ) )
-                .withMavenSession( mavenSession )
-                .withMojoExecution( mock( MojoExecution.class ) ).build();
+                .withRepositorySystem(lookup(RepositorySystem.class))
+                .withAetherRepositorySystem(aetherRepositorySystem)
+                .withWagonMap(singletonMap("file", mockFileWagon(new URI(rulesUri))))
+                .withServerId("")
+                .withRulesUri(rulesUri)
+                .withLog(mock(Log.class))
+                .withMavenSession(mavenSession)
+                .withMojoExecution(mock(MojoExecution.class))
+                .build();
     }
 
     @Test
     public void testIgnoredVersionsShouldBeTheOnlyPresentInAnEmptyRuleSet()
-            throws MojoExecutionException, IllegalAccessException
-    {
+            throws MojoExecutionException, IllegalAccessException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
-                .withLog( new SystemStreamLog() )
-                .withIgnoredVersions( Arrays.asList( ".*-M.", ".*-SNAPSHOT" ) )
+                .withLog(new SystemStreamLog())
+                .withIgnoredVersions(Arrays.asList(".*-M.", ".*-SNAPSHOT"))
                 .build();
-        RuleSet ruleSet = (RuleSet) getVariableValueFromObject( versionsHelper, "ruleSet" );
-        assertThat( ruleSet.getIgnoreVersions(), hasSize( 2 ) );
-        assertThat( ruleSet.getIgnoreVersions().stream().map( IgnoreVersion::getVersion )
-                .collect( Collectors.toList() ), containsInAnyOrder( ".*-M.", ".*-SNAPSHOT" ) );
+        RuleSet ruleSet = (RuleSet) getVariableValueFromObject(versionsHelper, "ruleSet");
+        assertThat(ruleSet.getIgnoreVersions(), hasSize(2));
+        assertThat(
+                ruleSet.getIgnoreVersions().stream()
+                        .map(IgnoreVersion::getVersion)
+                        .collect(Collectors.toList()),
+                containsInAnyOrder(".*-M.", ".*-SNAPSHOT"));
     }
 
     @Test
-    public void testDefaultsShouldBePresentInAnEmptyRuleSet()
-            throws MojoExecutionException, IllegalAccessException
-    {
+    public void testDefaultsShouldBePresentInAnEmptyRuleSet() throws MojoExecutionException, IllegalAccessException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
-                .withLog( new SystemStreamLog() )
-                .withIgnoredVersions( singletonList( ".*-M." ) )
+                .withLog(new SystemStreamLog())
+                .withIgnoredVersions(singletonList(".*-M."))
                 .build();
-        RuleSet ruleSet = (RuleSet) getVariableValueFromObject( versionsHelper, "ruleSet" );
-        assertThat( ruleSet.getComparisonMethod(), is( "maven" ) );
+        RuleSet ruleSet = (RuleSet) getVariableValueFromObject(versionsHelper, "ruleSet");
+        assertThat(ruleSet.getComparisonMethod(), is("maven"));
     }
 
     @Test
-    public void testIgnoredVersionsShouldExtendTheRuleSet() throws MojoExecutionException, IllegalAccessException
-    {
+    public void testIgnoredVersionsShouldExtendTheRuleSet() throws MojoExecutionException, IllegalAccessException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
-                .withLog( new SystemStreamLog() )
-                .withRuleSet( new RuleSet()
-                {{
-                    setIgnoreVersions( new ArrayList<>( singletonList( new IgnoreVersion()
-                    {{
-                        setVersion( "1.0.0" );
-                    }} ) ) );
-                    setRules( singletonList( new Rule()
-                    {{
-                        setGroupId( "org.slf4j" );
-                        setArtifactId( "slf4j-api" );
-                        setIgnoreVersions( singletonList( new IgnoreVersion()
-                        {{
-                            setType( "regex" );
-                            setVersion( "^[^1]\\.*" );
-                        }} ) );
-                    }} ) );
-                }} )
-                .withIgnoredVersions( Arrays.asList( ".*-M.", ".*-SNAPSHOT" ) )
+                .withLog(new SystemStreamLog())
+                .withRuleSet(new RuleSet() {
+                    {
+                        setIgnoreVersions(new ArrayList<>(singletonList(new IgnoreVersion() {
+                            {
+                                setVersion("1.0.0");
+                            }
+                        })));
+                        setRules(singletonList(new Rule() {
+                            {
+                                setGroupId("org.slf4j");
+                                setArtifactId("slf4j-api");
+                                setIgnoreVersions(singletonList(new IgnoreVersion() {
+                                    {
+                                        setType("regex");
+                                        setVersion("^[^1]\\.*");
+                                    }
+                                }));
+                            }
+                        }));
+                    }
+                })
+                .withIgnoredVersions(Arrays.asList(".*-M.", ".*-SNAPSHOT"))
                 .build();
-        RuleSet ruleSet = (RuleSet) getVariableValueFromObject( versionsHelper, "ruleSet" );
-        assertThat( ruleSet.getIgnoreVersions(), hasSize( 3 ) );
-        assertThat( ruleSet.getIgnoreVersions().stream().map( IgnoreVersion::getVersion )
-                .collect( Collectors.toList() ), containsInAnyOrder( ".*-M.", ".*-SNAPSHOT", "1.0.0" ) );
+        RuleSet ruleSet = (RuleSet) getVariableValueFromObject(versionsHelper, "ruleSet");
+        assertThat(ruleSet.getIgnoreVersions(), hasSize(3));
+        assertThat(
+                ruleSet.getIgnoreVersions().stream()
+                        .map(IgnoreVersion::getVersion)
+                        .collect(Collectors.toList()),
+                containsInAnyOrder(".*-M.", ".*-SNAPSHOT", "1.0.0"));
     }
-
 }

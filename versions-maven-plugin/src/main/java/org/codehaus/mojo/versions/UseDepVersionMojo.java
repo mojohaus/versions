@@ -52,117 +52,96 @@ import static java.util.Collections.singletonList;
  * @author Dan Arcari
  * @since 2.3
  */
-@Mojo( name = "use-dep-version", threadSafe = true )
-public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo
-{
+@Mojo(name = "use-dep-version", threadSafe = true)
+public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     /**
      * The exact version to be applied for the included dependencies
      */
-    @Parameter( property = "depVersion",
-                required = true )
+    @Parameter(property = "depVersion", required = true)
     protected String depVersion;
 
     /**
      * If set to true, will use whatever version is supplied without attempting to validate that such a version is
      * obtainable from the repository chain.
      */
-    @Parameter( property = "forceVersion",
-                defaultValue = "false" )
+    @Parameter(property = "forceVersion", defaultValue = "false")
     protected boolean forceVersion;
 
     @Inject
-    public UseDepVersionMojo( RepositorySystem repositorySystem,
-                              org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                              Map<String, Wagon> wagonMap,
-                              Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UseDepVersionMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     @Override
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
-    {
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
 
-        if ( depVersion == null || depVersion.equals( "" ) )
-        {
+        if (depVersion == null || depVersion.equals("")) {
             throw new IllegalArgumentException(
-                "depVersion must be supplied with use-specific-version, and cannot be blank." );
+                    "depVersion must be supplied with use-specific-version, and cannot be blank.");
         }
 
-        if ( !forceVersion && !hasIncludes() )
-        {
+        if (!forceVersion && !hasIncludes()) {
             throw new IllegalArgumentException(
-                "The use-specific-version goal is intended to be used with a single artifact. "
-                    + "Please specify a value for the 'includes' parameter, "
-                    + "or use -DforceVersion=true to override this check." );
+                    "The use-specific-version goal is intended to be used with a single artifact. "
+                            + "Please specify a value for the 'includes' parameter, "
+                            + "or use -DforceVersion=true to override this check.");
         }
 
-        try
-        {
-            if ( isProcessingDependencyManagement() )
-            {
+        try {
+            if (isProcessingDependencyManagement()) {
                 DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
-                if ( dependencyManagement != null )
-                {
-                    useDepVersion( pom, dependencyManagement.getDependencies(),
-                                   ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT );
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    useDepVersion(
+                            pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
                 }
             }
 
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useDepVersion( pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                useDepVersion(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
             }
 
-            if ( getProject().getParent() != null && isProcessingParent() )
-            {
-                useDepVersion( pom, singletonList( getParentDependency() ),
-                               ChangeRecord.ChangeKind.PARENT );
+            if (getProject().getParent() != null && isProcessingParent()) {
+                useDepVersion(pom, singletonList(getParentDependency()), ChangeRecord.ChangeKind.PARENT);
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void useDepVersion( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies,
-                                ChangeRecord.ChangeKind changeKind )
-        throws MojoExecutionException, XMLStreamException, VersionRetrievalException
-    {
-        for ( Dependency dep : dependencies )
-        {
-            if ( isExcludeReactor() && isProducedByReactor( dep ) )
-            {
-                getLog().info( "Ignoring reactor dependency: " + toString( dep ) );
+    private void useDepVersion(
+            ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            throws MojoExecutionException, XMLStreamException, VersionRetrievalException {
+        for (Dependency dep : dependencies) {
+            if (isExcludeReactor() && isProducedByReactor(dep)) {
+                getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
             }
 
-            if ( isHandledByProperty( dep ) )
-            {
-                getLog().debug( "Ignoring dependency with property as version: " + toString( dep ) );
+            if (isHandledByProperty(dep)) {
+                getLog().debug("Ignoring dependency with property as version: " + toString(dep));
                 continue;
             }
 
-            Artifact artifact = this.toArtifact( dep );
+            Artifact artifact = this.toArtifact(dep);
 
-            if ( isIncluded( artifact ) )
-            {
-                if ( !forceVersion )
-                {
-                    ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
+            if (isIncluded(artifact)) {
+                if (!forceVersion) {
+                    ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
 
-                    if ( !versions.containsVersion( depVersion ) )
-                    {
-                        throw new MojoExecutionException(
-                            String.format( "Version %s is not available for artifact %s:%s",
-                                           depVersion, artifact.getGroupId(), artifact.getArtifactId() ) );
+                    if (!versions.containsVersion(depVersion)) {
+                        throw new MojoExecutionException(String.format(
+                                "Version %s is not available for artifact %s:%s",
+                                depVersion, artifact.getGroupId(), artifact.getArtifactId()));
                     }
                 }
-                updateDependencyVersion( pom, dep, depVersion, changeKind );
+                updateDependencyVersion(pom, dep, depVersion, changeKind);
             }
         }
     }

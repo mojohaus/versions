@@ -31,44 +31,50 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Unit tests for {@link UpdatePropertiesMojo}
  */
-public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase
-{
+public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
     @Test
-    public void testAllowMajorUpdates() throws Exception
-    {
-        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml" ),
-                Paths.get( pomDir.toString(), "pom.xml" ), REPLACE_EXISTING );
-        UpdatePropertyMojo mojo = setUpMojo( "update-property" );
+    public void testAllowMajorUpdates() throws Exception {
+        Files.copy(
+                Paths.get("src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml"),
+                Paths.get(pomDir.toString(), "pom.xml"),
+                REPLACE_EXISTING);
+        UpdatePropertyMojo mojo = setUpMojo("update-property");
         mojo.property = "artifact-version";
         mojo.execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
-            new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "2.0.0-M1" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                Matchers.hasItem(new DefaultVersionChange("default-group", "default-artifact", "1.0.0", "2.0.0-M1")));
     }
 
     @Test
-    public void testAllowMinorUpdates() throws Exception
-    {
-        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml" ),
-                Paths.get( pomDir.toString(), "pom.xml" ), REPLACE_EXISTING );
-        UpdatePropertyMojo mojo = setUpMojo( "update-property" );
+    public void testAllowMinorUpdates() throws Exception {
+        Files.copy(
+                Paths.get("src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml"),
+                Paths.get(pomDir.toString(), "pom.xml"),
+                REPLACE_EXISTING);
+        UpdatePropertyMojo mojo = setUpMojo("update-property");
         mojo.property = "artifact-version";
         mojo.allowMajorUpdates = false;
         mojo.execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
-            new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "1.1.0-alpha" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                Matchers.hasItem(
+                        new DefaultVersionChange("default-group", "default-artifact", "1.0.0", "1.1.0-alpha")));
     }
 
     @Test
-    public void testAllowIncrementalUpdates() throws Exception
-    {
-        Files.copy( Paths.get( "src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml" ),
-                Paths.get( pomDir.toString(), "pom.xml" ), REPLACE_EXISTING );
-        UpdatePropertyMojo mojo = setUpMojo( "update-property" );
+    public void testAllowIncrementalUpdates() throws Exception {
+        Files.copy(
+                Paths.get("src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml"),
+                Paths.get(pomDir.toString(), "pom.xml"),
+                REPLACE_EXISTING);
+        UpdatePropertyMojo mojo = setUpMojo("update-property");
         mojo.property = "artifact-version";
         mojo.allowMajorUpdates = false;
         mojo.allowMinorUpdates = false;
         mojo.execute();
-        assertThat( changeRecorder.getChanges(), Matchers.hasItem(
-            new DefaultVersionChange( "default-group", "default-artifact", "1.0.0", "1.0.1-rc1" ) ) );
+        assertThat(
+                changeRecorder.getChanges(),
+                Matchers.hasItem(new DefaultVersionChange("default-group", "default-artifact", "1.0.0", "1.0.1-rc1")));
     }
 }

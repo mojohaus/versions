@@ -19,9 +19,11 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import javax.inject.Inject;
+
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
+
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -37,51 +39,47 @@ import org.codehaus.plexus.i18n.I18N;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "dependency-updates-report",
-       requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true )
-public class DependencyUpdatesReportMojo extends AbstractDependencyUpdatesReportMojo
-{
+@Mojo(name = "dependency-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+public class DependencyUpdatesReportMojo extends AbstractDependencyUpdatesReportMojo {
 
     @Inject
-    protected DependencyUpdatesReportMojo( I18N i18n, RepositorySystem repositorySystem,
-                                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                           Map<String, Wagon> wagonMap,
-                                           ReportRendererFactory rendererFactory )
-    {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
+    protected DependencyUpdatesReportMojo(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
+        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
     }
 
     /**
      * {@inheritDoc}
      * */
     @Override
-    protected void populateDependencies( Set<Dependency> dependenciesCollector )
-    {
-        getLog().debug( String.format( "Collecting dependencies for project %s",
-                                       getProject().getName() ) );
-        dependenciesCollector.addAll( getProject().getDependencies() );
+    protected void populateDependencies(Set<Dependency> dependenciesCollector) {
+        getLog().debug(String.format(
+                "Collecting dependencies for project %s", getProject().getName()));
+        dependenciesCollector.addAll(getProject().getDependencies());
     }
 
     /**
      * {@inheritDoc}
      * */
     @Override
-    protected void populateDependencyManagement( Set<Dependency> dependencyManagementCollector,
-                                                Set<Dependency> dependencies ) throws MavenReportException
-    {
-        if ( hasDependencyManagement( getProject() ) )
-        {
-            getLog().debug( String.format( "Collecting managed dependencies for project %s",
-                                           getProject().getName() ) );
-            handleDependencyManagementTransitive( getProject(), dependencyManagementCollector );
+    protected void populateDependencyManagement(
+            Set<Dependency> dependencyManagementCollector, Set<Dependency> dependencies) throws MavenReportException {
+        if (hasDependencyManagement(getProject())) {
+            getLog().debug(String.format(
+                    "Collecting managed dependencies for project %s",
+                    getProject().getName()));
+            handleDependencyManagementTransitive(getProject(), dependencyManagementCollector);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getOutputName()
-    {
+    public String getOutputName() {
         return "dependency-updates-report";
     }
 }

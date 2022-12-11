@@ -23,8 +23,7 @@ package org.codehaus.mojo.versions.api.change;
  * @author Slawomir Jaranowski
  * @since 2.14.0
  */
-public interface VersionChange
-{
+public interface VersionChange {
     /**
      * @return a groupId of changed item
      * @since 2.14.0
@@ -48,5 +47,4 @@ public interface VersionChange
      * @since 2.14.0
      */
     String getNewVersion();
-
 }

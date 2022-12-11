@@ -17,8 +17,6 @@ package org.codehaus.mojo.versions;
  *
  */
 
-import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -42,20 +41,20 @@ import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.xml.PluginUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
+import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
+
 /**
  * Generates a report of available updates for the plugins of a project.
  */
-
-public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdatesModel>
-{
+public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdatesModel> {
 
     private static final PluginComparator PLUGIN_COMPARATOR = PluginComparator.INSTANCE;
 
     /**
      * Report formats (html and/or xml). HTML by default.
      */
-    @Parameter( property = "pluginUpdatesReportFormats", defaultValue = "html" )
-    private String[] formats = new String[] { "html" };
+    @Parameter(property = "pluginUpdatesReportFormats", defaultValue = "html")
+    private String[] formats = new String[] {"html"};
 
     /**
      * If <code>true</code>, only shows the subsection of the <code>pluginManagement</code> artifacts that
@@ -63,7 +62,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
      *
      * @since 2.12
      */
-    @Parameter( property = "onlyProjectPlugins", defaultValue = "false" )
+    @Parameter(property = "onlyProjectPlugins", defaultValue = "false")
     protected boolean onlyProjectPlugins;
 
     /**
@@ -71,44 +70,42 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
      *
      * @since 2.12
      */
-    @Parameter( property = "onlyUpgradable", defaultValue = "false" )
+    @Parameter(property = "onlyUpgradable", defaultValue = "false")
     protected boolean onlyUpgradable;
 
-    public AbstractPluginUpdatesReportMojo( I18N i18n,
-                                            RepositorySystem repositorySystem,
-                                            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                            Map<String, Wagon> wagonMap,
-                                            ReportRendererFactory rendererFactory )
-    {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
+    public AbstractPluginUpdatesReportMojo(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
+        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isExternalReport()
-    {
+    public boolean isExternalReport() {
         return false;
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean canGenerateReport()
-    {
-        return haveBuildPlugins( getProject() ) || haveBuildPluginManagementPlugins( getProject() );
+    public boolean canGenerateReport() {
+        return haveBuildPlugins(getProject()) || haveBuildPluginManagementPlugins(getProject());
     }
 
-    protected boolean haveBuildPluginManagementPlugins( MavenProject project )
-    {
-        return project.getBuild() != null && project.getBuild().getPluginManagement() != null
-                && project.getBuild().getPluginManagement().getPlugins() != null && !project.getBuild()
-                .getPluginManagement().getPlugins().isEmpty();
+    protected boolean haveBuildPluginManagementPlugins(MavenProject project) {
+        return project.getBuild() != null
+                && project.getBuild().getPluginManagement() != null
+                && project.getBuild().getPluginManagement().getPlugins() != null
+                && !project.getBuild().getPluginManagement().getPlugins().isEmpty();
     }
 
-    protected boolean haveBuildPlugins( MavenProject project )
-    {
-        return project.getBuild() != null && project.getBuild().getPlugins() != null
+    protected boolean haveBuildPlugins(MavenProject project) {
+        return project.getBuild() != null
+                && project.getBuild().getPlugins() != null
                 && !project.getBuild().getPlugins().isEmpty();
     }
 
@@ -118,34 +115,29 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
      * @param locale the locale to generate the report for.
      * @param sink   the report formatting tool
      */
-    protected void doGenerateReport( Locale locale, Sink sink ) throws MavenReportException
-    {
+    protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
 
         Set<Plugin> pluginManagement = getPluginManagement();
 
         Set<Plugin> plugins = getPlugins();
 
-        handleOnlyProjectPlugins( pluginManagement, plugins );
+        handleOnlyProjectPlugins(pluginManagement, plugins);
 
-        try
-        {
+        try {
 
             Map<Plugin, PluginUpdatesDetails> pluginUpdates =
-                    getHelper().lookupPluginsUpdates( plugins, getAllowSnapshots() );
+                    getHelper().lookupPluginsUpdates(plugins, getAllowSnapshots());
             Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates =
-                    getHelper().lookupPluginsUpdates( pluginManagement, getAllowSnapshots() );
+                    getHelper().lookupPluginsUpdates(pluginManagement, getAllowSnapshots());
 
-            if ( onlyUpgradable )
-            {
-                pluginUpdates = filter( pluginUpdates, p -> p.getVersions().length > 0 );
-                pluginManagementUpdates = filter( pluginManagementUpdates, p -> p.getVersions().length > 0 );
+            if (onlyUpgradable) {
+                pluginUpdates = filter(pluginUpdates, p -> p.getVersions().length > 0);
+                pluginManagementUpdates = filter(pluginManagementUpdates, p -> p.getVersions().length > 0);
             }
 
-            renderReport( locale, sink, new PluginUpdatesModel( pluginUpdates, pluginManagementUpdates ) );
-        }
-        catch ( VersionRetrievalException e )
-        {
-            throw new MavenReportException( e.getMessage(), e );
+            renderReport(locale, sink, new PluginUpdatesModel(pluginUpdates, pluginManagementUpdates));
+        } catch (VersionRetrievalException e) {
+            throw new MavenReportException(e.getMessage(), e);
         }
     }
 
@@ -157,10 +149,9 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
      * @return a {@link Set<Plugin>} that can be additionally populated by {@link #populatePluginManagement(Set)}}.
      * If not, an empty set is returned
      * */
-    private Set<Plugin> getPluginManagement()
-    {
-        final Set<Plugin> pluginManagementCollector = new TreeSet<>( PLUGIN_COMPARATOR );
-        populatePluginManagement( pluginManagementCollector );
+    private Set<Plugin> getPluginManagement() {
+        final Set<Plugin> pluginManagementCollector = new TreeSet<>(PLUGIN_COMPARATOR);
+        populatePluginManagement(pluginManagementCollector);
         return pluginManagementCollector;
     }
 
@@ -170,8 +161,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
      *
      * @param pluginManagementCollector, a set initialized with a {@link PluginComparator} comparator.
      * */
-    protected abstract void populatePluginManagement( Set<Plugin> pluginManagementCollector );
-
+    protected abstract void populatePluginManagement(Set<Plugin> pluginManagementCollector);
 
     /**
      * Constructs a final instance of a {@link Set<Plugin>} with a {@link PluginComparator} comparator. This set can be
@@ -180,10 +170,9 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
      * @return a {@link Set<Plugin>} that can be additionally populated by {@link #populatePlugins(Set)}.
      * If not, an empty set is returned
      * */
-    private Set<Plugin> getPlugins()
-    {
-        final Set<Plugin> pluginsCollector = new TreeSet<>( PLUGIN_COMPARATOR );
-        populatePlugins( pluginsCollector );
+    private Set<Plugin> getPlugins() {
+        final Set<Plugin> pluginsCollector = new TreeSet<>(PLUGIN_COMPARATOR);
+        populatePlugins(pluginsCollector);
         return pluginsCollector;
     }
 
@@ -193,52 +182,39 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
      *
      *@param pluginsCollector, a set initialized with a {@link PluginComparator} comparator.
      * */
-    protected abstract void populatePlugins( Set<Plugin> pluginsCollector );
+    protected abstract void populatePlugins(Set<Plugin> pluginsCollector);
 
-    private void renderReport( Locale locale, Sink sink, PluginUpdatesModel model )
-            throws MavenReportException
-    {
-        for ( String format : formats )
-        {
-            if ( "html".equals( format ) )
-            {
-                rendererFactory.createReportRenderer( getOutputName(), sink, locale, model ).render();
-            }
-            else if ( "xml".equals( format ) )
-            {
-                Path outputDir = Paths.get( getProject().getBuild().getDirectory() );
-                if ( !Files.exists( outputDir ) )
-                {
-                    try
-                    {
-                        Files.createDirectories( outputDir );
-                    }
-                    catch ( IOException e )
-                    {
-                        throw new MavenReportException( "Could not create the output directory" );
+    private void renderReport(Locale locale, Sink sink, PluginUpdatesModel model) throws MavenReportException {
+        for (String format : formats) {
+            if ("html".equals(format)) {
+                rendererFactory
+                        .createReportRenderer(getOutputName(), sink, locale, model)
+                        .render();
+            } else if ("xml".equals(format)) {
+                Path outputDir = Paths.get(getProject().getBuild().getDirectory());
+                if (!Files.exists(outputDir)) {
+                    try {
+                        Files.createDirectories(outputDir);
+                    } catch (IOException e) {
+                        throw new MavenReportException("Could not create the output directory");
                     }
                 }
-                Path outputFile = outputDir.resolve( getOutputName() + ".xml" );
-                new PluginUpdatesXmlReportRenderer( model, outputFile ).render();
+                Path outputFile = outputDir.resolve(getOutputName() + ".xml");
+                new PluginUpdatesXmlReportRenderer(model, outputFile).render();
             }
         }
     }
 
-    private void handleOnlyProjectPlugins( Set<Plugin> pluginManagement, Set<Plugin> plugins )
-    {
+    private void handleOnlyProjectPlugins(Set<Plugin> pluginManagement, Set<Plugin> plugins) {
 
-        if ( !onlyProjectPlugins )
-        {
+        if (!onlyProjectPlugins) {
             // Retains only plugins not present in pluginManagement
-            plugins.removeIf( plugin -> pluginManagement.stream()
-                    .anyMatch( pmPlugin -> PLUGIN_COMPARATOR.compare( plugin, pmPlugin ) == 0 ) );
-        }
-        else
-        {
+            plugins.removeIf(plugin ->
+                    pluginManagement.stream().anyMatch(pmPlugin -> PLUGIN_COMPARATOR.compare(plugin, pmPlugin) == 0));
+        } else {
             // Retain only plugins in pluginManagement that are also present in plugins
             pluginManagement.removeIf(
-                    pmPlugin -> plugins.stream()
-                            .noneMatch( plugin -> PLUGIN_COMPARATOR.compare( plugin, pmPlugin ) == 0 ) );
+                    pmPlugin -> plugins.stream().noneMatch(plugin -> PLUGIN_COMPARATOR.compare(plugin, pmPlugin) == 0));
         }
     }
 

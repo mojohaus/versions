@@ -49,14 +49,11 @@ import static java.nio.file.StandardOpenOption.WRITE;
 /**
  * A recorder of version updates.
  */
-
-@Named( "xml" )
-public class ChangeRecorderXML implements ChangeRecorder
-{
+@Named("xml")
+public class ChangeRecorderXML implements ChangeRecorder {
     /**
      * The XML namespace used for serialized changes.
      */
-
     public static final String CHANGES_NAMESPACE = "http://www.mojohaus.org/versions-maven-plugin/schema/updates/1.0";
 
     private final Document document;
@@ -65,63 +62,52 @@ public class ChangeRecorderXML implements ChangeRecorder
     /**
      * Creates a new instance
      */
-    public ChangeRecorderXML()
-    {
-        try
-        {
+    public ChangeRecorderXML() {
+        try {
             final DocumentBuilderFactory documentBuilders = DocumentBuilderFactory.newInstance();
             final DocumentBuilder documentBuilder = documentBuilders.newDocumentBuilder();
             document = documentBuilder.newDocument();
-            root = document.createElementNS( CHANGES_NAMESPACE, "updates" );
-            document.appendChild( root );
-        }
-        catch ( final ParserConfigurationException | DOMException e )
-        {
-            throw new IllegalStateException( e );
+            root = document.createElementNS(CHANGES_NAMESPACE, "updates");
+            document.appendChild(root);
+        } catch (final ParserConfigurationException | DOMException e) {
+            throw new IllegalStateException(e);
         }
     }
 
     @Override
-    public final void recordChange( ChangeRecord changeRecord )
-    {
-        final Element update = this.document.createElementNS( CHANGES_NAMESPACE, "update" );
-        update.setAttribute( "kind", changeRecord.getKind().getLabel() );
-        update.setAttribute( "groupId", changeRecord.getVersionChange().getGroupId() );
-        update.setAttribute( "artifactId", changeRecord.getVersionChange().getArtifactId() );
-        update.setAttribute( "oldVersion", changeRecord.getVersionChange().getOldVersion() );
-        update.setAttribute( "newVersion", changeRecord.getVersionChange().getNewVersion() );
-        this.root.appendChild( update );
+    public final void recordChange(ChangeRecord changeRecord) {
+        final Element update = this.document.createElementNS(CHANGES_NAMESPACE, "update");
+        update.setAttribute("kind", changeRecord.getKind().getLabel());
+        update.setAttribute("groupId", changeRecord.getVersionChange().getGroupId());
+        update.setAttribute("artifactId", changeRecord.getVersionChange().getArtifactId());
+        update.setAttribute("oldVersion", changeRecord.getVersionChange().getOldVersion());
+        update.setAttribute("newVersion", changeRecord.getVersionChange().getNewVersion());
+        this.root.appendChild(update);
     }
 
     @Override
-    public final void writeReport( final Path outputPath ) throws IOException
-    {
-        if ( outputPath == null )
-        {
-            throw new IOException( "changeRecorderOutputFile not provided" );
+    public final void writeReport(final Path outputPath) throws IOException {
+        if (outputPath == null) {
+            throw new IOException("changeRecorderOutputFile not provided");
         }
 
-        if ( root.getChildNodes().getLength() == 0 )
-        {
+        if (root.getChildNodes().getLength() == 0) {
             // don't generate empty file
             return;
         }
 
-        Files.createDirectories( outputPath.getParent() );
+        Files.createDirectories(outputPath.getParent());
 
-        try ( OutputStream outputStream = Files.newOutputStream( outputPath, CREATE, TRUNCATE_EXISTING, WRITE ) )
-        {
+        try (OutputStream outputStream = Files.newOutputStream(outputPath, CREATE, TRUNCATE_EXISTING, WRITE)) {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            transformerFactory.setAttribute( XMLConstants.ACCESS_EXTERNAL_DTD, "" );
-            transformerFactory.setAttribute( XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "" );
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             Transformer transformer = transformerFactory.newTransformer();
-            Source source = new DOMSource( this.document );
-            transformer.transform( source, new StreamResult( outputStream ) );
+            Source source = new DOMSource(this.document);
+            transformer.transform(source, new StreamResult(outputStream));
             outputStream.flush();
-        }
-        catch ( final TransformerException ex )
-        {
-            throw new IOException( ex );
+        } catch (final TransformerException ex) {
+            throw new IOException(ex);
         }
     }
 }

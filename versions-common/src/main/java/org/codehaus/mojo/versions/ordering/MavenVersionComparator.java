@@ -30,65 +30,53 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public class MavenVersionComparator extends AbstractVersionComparator
-{
+public class MavenVersionComparator extends AbstractVersionComparator {
 
     /**
      * {@inheritDoc}
      */
-    public int compare( ArtifactVersion o1, ArtifactVersion o2 )
-    {
-        if ( o1 instanceof BoundArtifactVersion )
-        {
-            return o1.compareTo( o2 );
+    public int compare(ArtifactVersion o1, ArtifactVersion o2) {
+        if (o1 instanceof BoundArtifactVersion) {
+            return o1.compareTo(o2);
         }
-        return new ComparableVersion( o1.toString() ).compareTo( new ComparableVersion( o2.toString() ) );
+        return new ComparableVersion(o1.toString()).compareTo(new ComparableVersion(o2.toString()));
     }
 
     /**
      * {@inheritDoc}
      */
-    protected int innerGetSegmentCount( ArtifactVersion v )
-    {
+    protected int innerGetSegmentCount(ArtifactVersion v) {
         // if the version does not match the maven rules, then we have only one segment
         // i.e. the qualifier
-        if ( v.getBuildNumber() != 0 )
-        {
+        if (v.getBuildNumber() != 0) {
             // the version was successfully parsed, and we have a build number
             // have to have four segments
             return 4;
         }
-        if ( ( v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0 )
-            && v.getQualifier() != null )
-        {
+        if ((v.getMajorVersion() != 0 || v.getMinorVersion() != 0 || v.getIncrementalVersion() != 0)
+                && v.getQualifier() != null) {
             // the version was successfully parsed, and we have a qualifier
             // have to have four segments
             return 4;
         }
         final String version = v.toString();
-        if ( version.indexOf( '-' ) != -1 )
-        {
+        if (version.indexOf('-') != -1) {
             // the version has parts and was not parsed successfully
             // have to have one segment
-            return version.equals( v.getQualifier() ) ? 1 : 4;
+            return version.equals(v.getQualifier()) ? 1 : 4;
         }
-        if ( version.indexOf( '.' ) != -1 )
-        {
+        if (version.indexOf('.') != -1) {
             // the version has parts and was not parsed successfully
             // have to have one segment
-            return version.equals( v.getQualifier() ) ? 1 : 3;
+            return version.equals(v.getQualifier()) ? 1 : 3;
         }
-        if ( StringUtils.isEmpty( version ) )
-        {
+        if (StringUtils.isEmpty(version)) {
             return 3;
         }
-        try
-        {
-            Integer.parseInt( version );
+        try {
+            Integer.parseInt(version);
             return 3;
-        }
-        catch ( NumberFormatException e )
-        {
+        } catch (NumberFormatException e) {
             return 1;
         }
     }
@@ -96,33 +84,28 @@ public class MavenVersionComparator extends AbstractVersionComparator
     /**
      * {@inheritDoc}
      */
-    protected ArtifactVersion innerIncrementSegment( ArtifactVersion v, Segment segment ) throws InvalidSegmentException
-    {
+    protected ArtifactVersion innerIncrementSegment(ArtifactVersion v, Segment segment) throws InvalidSegmentException {
         String version = v.toString();
-        if ( innerGetSegmentCount( v ) == 1 )
-        {
+        if (innerGetSegmentCount(v) == 1) {
             // only the qualifier
-            version = VersionComparators.alphaNumIncrement( version );
-            return new DefaultArtifactVersion( version );
-        }
-        else
-        {
+            version = VersionComparators.alphaNumIncrement(version);
+            return new DefaultArtifactVersion(version);
+        } else {
             int major = v.getMajorVersion();
             int minor = v.getMinorVersion();
             int incremental = v.getIncrementalVersion();
             int build = v.getBuildNumber();
             String qualifier = v.getQualifier();
 
-            int minorIndex = version.indexOf( '.' );
+            int minorIndex = version.indexOf('.');
             boolean haveMinor = minorIndex != -1;
-            int incrementalIndex = haveMinor ? version.indexOf( '.', minorIndex + 1 ) : -1;
+            int incrementalIndex = haveMinor ? version.indexOf('.', minorIndex + 1) : -1;
             boolean haveIncremental = incrementalIndex != -1;
-            int buildIndex = version.indexOf( '-' );
+            int buildIndex = version.indexOf('-');
             boolean haveBuild = buildIndex != -1 && qualifier == null;
             boolean haveQualifier = buildIndex != -1 && qualifier != null;
 
-            switch ( segment )
-            {
+            switch (segment) {
                 case MAJOR:
                     major++;
                     minor = 0;
@@ -134,8 +117,7 @@ public class MavenVersionComparator extends AbstractVersionComparator
                     minor++;
                     incremental = 0;
                     build = 0;
-                    if ( haveQualifier && qualifier.endsWith( "SNAPSHOT" ) )
-                    {
+                    if (haveQualifier && qualifier.endsWith("SNAPSHOT")) {
                         qualifier = "SNAPSHOT";
                     }
                     break;
@@ -145,12 +127,9 @@ public class MavenVersionComparator extends AbstractVersionComparator
                     qualifier = null;
                     break;
                 case SUBINCREMENTAL:
-                    if ( haveQualifier )
-                    {
-                        qualifier = qualifierIncrement( qualifier );
-                    }
-                    else
-                    {
+                    if (haveQualifier) {
+                        qualifier = qualifierIncrement(qualifier);
+                    } else {
                         build++;
                     }
                     break;
@@ -159,50 +138,41 @@ public class MavenVersionComparator extends AbstractVersionComparator
                     break;
             }
             StringBuilder result = new StringBuilder();
-            result.append( major );
-            if ( haveMinor || minor > 0 || incremental > 0 )
-            {
-                result.append( '.' );
-                result.append( minor );
+            result.append(major);
+            if (haveMinor || minor > 0 || incremental > 0) {
+                result.append('.');
+                result.append(minor);
             }
-            if ( haveIncremental || incremental > 0 )
-            {
-                result.append( '.' );
-                result.append( incremental );
+            if (haveIncremental || incremental > 0) {
+                result.append('.');
+                result.append(incremental);
             }
-            if ( haveQualifier && qualifier != null )
-            {
-                result.append( '-' );
-                result.append( qualifier );
+            if (haveQualifier && qualifier != null) {
+                result.append('-');
+                result.append(qualifier);
+            } else if (haveBuild || build > 0) {
+                result.append('-');
+                result.append(build);
             }
-            else if ( haveBuild || build > 0 )
-            {
-                result.append( '-' );
-                result.append( build );
-            }
-            return new DefaultArtifactVersion( result.toString() );
+            return new DefaultArtifactVersion(result.toString());
         }
     }
 
-    private String qualifierIncrement( String qualifier )
-    {
-        if ( qualifier.toLowerCase().startsWith( "alpha" ) )
-        {
-            return qualifier.substring( 0, 5 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 5 ) );
+    private String qualifierIncrement(String qualifier) {
+        if (qualifier.toLowerCase().startsWith("alpha")) {
+            return qualifier.substring(0, 5) + VersionComparators.alphaNumIncrement(qualifier.substring(5));
         }
-        if ( qualifier.toLowerCase().startsWith( "beta" ) )
-        {
-            return qualifier.substring( 0, 4 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 4 ) );
+        if (qualifier.toLowerCase().startsWith("beta")) {
+            return qualifier.substring(0, 4) + VersionComparators.alphaNumIncrement(qualifier.substring(4));
         }
-        if ( qualifier.toLowerCase().startsWith( "milestone" ) )
-        {
-            return qualifier.substring( 0, 8 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 8 ) );
+        if (qualifier.toLowerCase().startsWith("milestone")) {
+            return qualifier.substring(0, 8) + VersionComparators.alphaNumIncrement(qualifier.substring(8));
         }
-        if ( qualifier.toLowerCase().startsWith( "cr" ) || qualifier.toLowerCase().startsWith( "rc" )
-            || qualifier.toLowerCase().startsWith( "sp" ) )
-        {
-            return qualifier.substring( 0, 2 ) + VersionComparators.alphaNumIncrement( qualifier.substring( 2 ) );
+        if (qualifier.toLowerCase().startsWith("cr")
+                || qualifier.toLowerCase().startsWith("rc")
+                || qualifier.toLowerCase().startsWith("sp")) {
+            return qualifier.substring(0, 2) + VersionComparators.alphaNumIncrement(qualifier.substring(2));
         }
-        return VersionComparators.alphaNumIncrement( qualifier );
+        return VersionComparators.alphaNumIncrement(qualifier);
     }
 }

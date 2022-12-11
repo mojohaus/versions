@@ -56,19 +56,17 @@ import static org.codehaus.mojo.versions.xml.CommonXmlReportRendererUtils.status
  * @author Illia Dubinin
  * @since 2.4
  */
-public class PluginUpdatesXmlReportRenderer implements ReportRenderer
-{
+public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
     private final PluginUpdatesModel model;
     private final Path outputFile;
-    private final ArtifactVersionsCache newestUpdateCache
-            = new ArtifactVersionsCache( AbstractVersionDetails::getNewestUpdate );
+    private final ArtifactVersionsCache newestUpdateCache =
+            new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdate);
     /**
      * Creates a new instance
      * @param model object containing the updates model
      * @param outputFile output file for the report
      */
-    public PluginUpdatesXmlReportRenderer( PluginUpdatesModel model, Path outputFile )
-    {
+    public PluginUpdatesXmlReportRenderer(PluginUpdatesModel model, Path outputFile) {
         this.model = model;
         this.outputFile = outputFile;
     }
@@ -77,54 +75,53 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer
      * Creates an XML report
      */
     @Override
-    public void render()
-    {
-        try ( BufferedWriter writer = Files.newBufferedWriter( outputFile,
-                StandardCharsets.UTF_8 ) )
-        {
-            new PluginUpdatesReportXpp3Writer().write( writer, new PluginUpdatesReport()
-            {{
-                setSummary( new PluginReportSummary()
-                {{
-                    PluginOverviewStats overviewStats = PluginOverviewStats.fromUpdates(
-                            model.getAllUpdates().values(), newestUpdateCache );
-                    setUsingLastVersion( String.valueOf( overviewStats.getUpToDate() ) );
-                    setNextVersionAvailable( String.valueOf( overviewStats.getAny() ) );
-                    setNextIncrementalAvailable( String.valueOf( overviewStats.getIncremental() ) );
-                    setNextMinorAvailable( String.valueOf( overviewStats.getMinor() ) );
-                    setNextMajorAvailable( String.valueOf( overviewStats.getMajor() ) );
-                    setDependencyUpdates( String.valueOf( overviewStats.getDependencies() ) );
-                }} );
-                setPluginManagements( createPluginInfo( model.getArtifactManagementUpdates() ) );
-                setPlugins( createPluginInfo( model.getArtifactUpdates() ) );
-            }} );
-        }
-        catch ( IOException e )
-        {
-            throw new RuntimeException( e );
+    public void render() {
+        try (BufferedWriter writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8)) {
+            new PluginUpdatesReportXpp3Writer().write(writer, new PluginUpdatesReport() {
+                {
+                    setSummary(new PluginReportSummary() {
+                        {
+                            PluginOverviewStats overviewStats = PluginOverviewStats.fromUpdates(
+                                    model.getAllUpdates().values(), newestUpdateCache);
+                            setUsingLastVersion(String.valueOf(overviewStats.getUpToDate()));
+                            setNextVersionAvailable(String.valueOf(overviewStats.getAny()));
+                            setNextIncrementalAvailable(String.valueOf(overviewStats.getIncremental()));
+                            setNextMinorAvailable(String.valueOf(overviewStats.getMinor()));
+                            setNextMajorAvailable(String.valueOf(overviewStats.getMajor()));
+                            setDependencyUpdates(String.valueOf(overviewStats.getDependencies()));
+                        }
+                    });
+                    setPluginManagements(createPluginInfo(model.getArtifactManagementUpdates()));
+                    setPlugins(createPluginInfo(model.getArtifactUpdates()));
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private static List<PluginInfo> createPluginInfo( Map<Dependency, PluginUpdatesDetails> versions )
-    {
-        return versions.entrySet().stream().map( e ->
-                new PluginInfo()
-        {{
-            setGroupId( e.getKey().getGroupId() );
-            setArtifactId( e.getKey().getArtifactId() );
-            setCurrentVersion( e.getKey().getVersion() );
-            setScope( e.getKey().getScope() );
-            setType( e.getKey().getType() );
-            setClassifier( e.getKey().getClassifier() );
+    private static List<PluginInfo> createPluginInfo(Map<Dependency, PluginUpdatesDetails> versions) {
+        return versions.entrySet().stream()
+                .map(e -> new PluginInfo() {
+                    {
+                        setGroupId(e.getKey().getGroupId());
+                        setArtifactId(e.getKey().getArtifactId());
+                        setCurrentVersion(e.getKey().getVersion());
+                        setScope(e.getKey().getScope());
+                        setType(e.getKey().getType());
+                        setClassifier(e.getKey().getClassifier());
 
-            ofNullable( e.getValue().getNewestUpdate( empty() ) )
-                    .map( ArtifactVersion::toString ).ifPresent( this::setLastVersion );
+                        ofNullable(e.getValue().getNewestUpdate(empty()))
+                                .map(ArtifactVersion::toString)
+                                .ifPresent(this::setLastVersion);
 
-            setSection( e.getValue(), INCREMENTAL, this::setIncrementals );
-            setSection( e.getValue(), MINOR, this::setMinors );
-            setSection( e.getValue(), MAJOR, this::setMajors );
+                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals);
+                        setSection(e.getValue(), MINOR, this::setMinors);
+                        setSection(e.getValue(), MAJOR, this::setMajors);
 
-            setStatus( statusFor( getLastVersion(), getIncrementals(), getMinors() ) );
-        }} ).collect( Collectors.toList() );
+                        setStatus(statusFor(getLastVersion(), getIncrementals(), getMinors()));
+                    }
+                })
+                .collect(Collectors.toList());
     }
 }

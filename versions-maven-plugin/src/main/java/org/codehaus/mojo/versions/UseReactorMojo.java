@@ -47,20 +47,18 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  * @author Stephen Connolly
  * @since 2.2
  */
-@Mojo( name = "use-reactor", threadSafe = true )
-public class UseReactorMojo
-    extends AbstractVersionsDependencyUpdaterMojo
-{
+@Mojo(name = "use-reactor", threadSafe = true)
+public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     // ------------------------------ METHODS --------------------------
 
     @Inject
-    public UseReactorMojo( RepositorySystem repositorySystem,
-                           org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                           Map<String, Wagon> wagonMap,
-                           Map<String, ChangeRecorder> changeRecorders )
-    {
-        super( repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders );
+    public UseReactorMojo(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            Map<String, ChangeRecorder> changeRecorders) {
+        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -70,58 +68,49 @@ public class UseReactorMojo
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
      * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
      */
-    protected void update( ModifiedPomXMLEventReader pom )
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException
-    {
-        try
-        {
-            if ( isProcessingParent() && getProject().hasParent() )
-            {
-                useReactor( pom, getProject().getParent() );
+    protected void update(ModifiedPomXMLEventReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
+        try {
+            if (isProcessingParent() && getProject().hasParent()) {
+                useReactor(pom, getProject().getParent());
             }
-            if ( isProcessingDependencyManagement() )
-            {
+            if (isProcessingDependencyManagement()) {
                 DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel( getProject() ).getDependencyManagement();
-                if ( dependencyManagement != null )
-                {
-                    useReactor( pom, dependencyManagement.getDependencies() );
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    useReactor(pom, dependencyManagement.getDependencies());
                 }
             }
-            if ( getProject().getDependencies() != null && isProcessingDependencies() )
-            {
-                useReactor( pom, getProject().getDependencies() );
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                useReactor(pom, getProject().getDependencies());
             }
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private void useReactor( ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies )
-        throws XMLStreamException, MojoExecutionException, VersionRetrievalException
-    {
+    private void useReactor(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
 
-        for ( Dependency dep : dependencies )
-        {
-            Artifact artifact = this.toArtifact( dep );
-            if ( !isIncluded( artifact ) )
-            {
+        for (Dependency dep : dependencies) {
+            Artifact artifact = this.toArtifact(dep);
+            if (!isIncluded(artifact)) {
                 continue;
             }
 
-            for ( MavenProject reactorProject : reactorProjects )
-            {
+            for (MavenProject reactorProject : reactorProjects) {
                 MavenProject project = reactorProject;
-                if ( StringUtils.equals( project.getGroupId(), dep.getGroupId() )
-                    && StringUtils.equals( project.getArtifactId(), dep.getArtifactId() )
-                    && !StringUtils.equals( project.getVersion(), dep.getVersion() ) )
-                {
-                    if ( PomHelper.setDependencyVersion( pom, dep.getGroupId(), dep.getArtifactId(), dep.getVersion(),
-                                                         project.getVersion(), getProject().getModel() ) )
-                    {
-                        getLog().info( "Updated " + toString( dep ) + " to version " + project.getVersion() );
+                if (StringUtils.equals(project.getGroupId(), dep.getGroupId())
+                        && StringUtils.equals(project.getArtifactId(), dep.getArtifactId())
+                        && !StringUtils.equals(project.getVersion(), dep.getVersion())) {
+                    if (PomHelper.setDependencyVersion(
+                            pom,
+                            dep.getGroupId(),
+                            dep.getArtifactId(),
+                            dep.getVersion(),
+                            project.getVersion(),
+                            getProject().getModel())) {
+                        getLog().info("Updated " + toString(dep) + " to version " + project.getVersion());
                     }
                     break;
                 }
@@ -129,22 +118,16 @@ public class UseReactorMojo
         }
     }
 
-    private void useReactor( ModifiedPomXMLEventReader pom, MavenProject parent )
-        throws XMLStreamException, VersionRetrievalException
-    {
-        for ( MavenProject project : reactorProjects )
-        {
-            if ( StringUtils.equals( project.getGroupId(), parent.getGroupId() )
-                && StringUtils.equals( project.getArtifactId(), parent.getArtifactId() )
-                && !StringUtils.equals( project.getVersion(), parent.getVersion() ) )
-            {
-                if ( PomHelper.setProjectParentVersion( pom, project.getVersion() ) )
-                {
-                    getLog().info( "Updated parent " + toString( parent ) + " to version " + project.getVersion() );
+    private void useReactor(ModifiedPomXMLEventReader pom, MavenProject parent)
+            throws XMLStreamException, VersionRetrievalException {
+        for (MavenProject project : reactorProjects) {
+            if (StringUtils.equals(project.getGroupId(), parent.getGroupId())
+                    && StringUtils.equals(project.getArtifactId(), parent.getArtifactId())
+                    && !StringUtils.equals(project.getVersion(), parent.getVersion())) {
+                if (PomHelper.setProjectParentVersion(pom, project.getVersion())) {
+                    getLog().info("Updated parent " + toString(parent) + " to version " + project.getVersion());
                 }
             }
-
         }
     }
-
 }

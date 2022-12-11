@@ -19,8 +19,10 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.util.Map;
 import javax.inject.Inject;
+
+import java.util.Map;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -39,35 +41,31 @@ import org.codehaus.plexus.i18n.I18N;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo( name = "property-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME,
-       threadSafe = true )
-public class PropertyUpdatesReportMojo extends AbstractPropertyUpdatesReportMojo
-{
+@Mojo(name = "property-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+public class PropertyUpdatesReportMojo extends AbstractPropertyUpdatesReportMojo {
     @Inject
-    protected PropertyUpdatesReportMojo( I18N i18n,
-                                         RepositorySystem repositorySystem,
-                                         org.eclipse.aether.RepositorySystem aetherRepositorySystem,
-                                         Map<String, Wagon> wagonMap,
-                                         ReportRendererFactory rendererFactory )
-    {
-        super( i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory );
+    protected PropertyUpdatesReportMojo(
+            I18N i18n,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            ReportRendererFactory rendererFactory) {
+        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void populateUpdateSet( Map<Property, PropertyVersions> propertyCollector )
-            throws MojoExecutionException, MavenReportException
-    {
-        propertyCollector.putAll( getHelper().getVersionPropertiesMap( getRequest( getProject() ) ) );
+    protected void populateUpdateSet(Map<Property, PropertyVersions> propertyCollector)
+            throws MojoExecutionException, MavenReportException {
+        propertyCollector.putAll(getHelper().getVersionPropertiesMap(getRequest(getProject())));
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getOutputName()
-    {
+    public String getOutputName() {
         return "property-updates-report";
     }
 }

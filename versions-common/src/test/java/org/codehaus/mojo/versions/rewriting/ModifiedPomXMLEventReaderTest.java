@@ -44,10 +44,8 @@ import static org.mockito.Mockito.when;
  *
  * @author Andrzej Jarmoniuk
  */
-
-@RunWith( MockitoJUnitRunner.class )
-public class ModifiedPomXMLEventReaderTest extends AbstractMojoTestCase
-{
+@RunWith(MockitoJUnitRunner.class)
+public class ModifiedPomXMLEventReaderTest extends AbstractMojoTestCase {
     private static final String[] STR = {"xyz", "0123456789abcdef"};
     private static final String REPLACEMENT = "abcdef";
 
@@ -66,73 +64,64 @@ public class ModifiedPomXMLEventReaderTest extends AbstractMojoTestCase
     private ModifiedPomXMLEventReader pomXMLEventReader;
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
 
-        when( location.getCharacterOffset() )
-                .thenReturn( STR[0].length() )
-                .thenReturn( STR[0].length() + STR[1].length() );
+        when(location.getCharacterOffset()).thenReturn(STR[0].length()).thenReturn(STR[0].length() + STR[1].length());
 
-        when( xmlEvent.isCharacters() ).thenReturn( true );
-        when( xmlEvent.getLocation() ).thenReturn( location );
+        when(xmlEvent.isCharacters()).thenReturn(true);
+        when(xmlEvent.getLocation()).thenReturn(location);
 
-        when( xmlEventReader.hasNext() )
-                .thenReturn( true ).thenReturn( true )  // str[0]
-                .thenReturn( true ).thenReturn( true )  // str[1]
-                .thenReturn( false );                      // ∅
-        when( xmlEventReader.nextEvent() )
-                .thenReturn( xmlEvent )
-                .thenReturn( xmlEvent );
-        when( xmlEventReader.peek() )
-                .thenReturn( xmlEvent );
+        when(xmlEventReader.hasNext())
+                .thenReturn(true)
+                .thenReturn(true) // str[0]
+                .thenReturn(true)
+                .thenReturn(true) // str[1]
+                .thenReturn(false); // ∅
+        when(xmlEventReader.nextEvent()).thenReturn(xmlEvent).thenReturn(xmlEvent);
+        when(xmlEventReader.peek()).thenReturn(xmlEvent);
 
-        when( xmlInputFactory.createXMLEventReader( any( StringReader.class ) ) )
-                .thenReturn( xmlEventReader );
+        when(xmlInputFactory.createXMLEventReader(any(StringReader.class))).thenReturn(xmlEventReader);
 
         pomXMLEventReader =
-                new ModifiedPomXMLEventReader( new StringBuilder( STR[0] ).append( STR[1] ), xmlInputFactory, "" );
+                new ModifiedPomXMLEventReader(new StringBuilder(STR[0]).append(STR[1]), xmlInputFactory, "");
     }
 
     @Test
-    public void testReplace() throws XMLStreamException, IllegalAccessException
-    {
-        assertThat( pomXMLEventReader.hasNext(), is( true ) );
-        assertThat( pomXMLEventReader.nextEvent(), is( xmlEvent ) );
+    public void testReplace() throws XMLStreamException, IllegalAccessException {
+        assertThat(pomXMLEventReader.hasNext(), is(true));
+        assertThat(pomXMLEventReader.nextEvent(), is(xmlEvent));
 
-        assertThat( pomXMLEventReader.hasNext(), is( true ) );
-        assertThat( pomXMLEventReader.nextEvent(), is( xmlEvent ) );
+        assertThat(pomXMLEventReader.hasNext(), is(true));
+        assertThat(pomXMLEventReader.nextEvent(), is(xmlEvent));
 
-        pomXMLEventReader.replace( REPLACEMENT );
-        assertThat( pomXMLEventReader.asStringBuilder().toString(), is( STR[0] + REPLACEMENT ) );
+        pomXMLEventReader.replace(REPLACEMENT);
+        assertThat(pomXMLEventReader.asStringBuilder().toString(), is(STR[0] + REPLACEMENT));
 
-        pomXMLEventReader.mark( 0 );
-        assertThat( pomXMLEventReader.getMarkVerbatim( 0 ), is( REPLACEMENT ) );
+        pomXMLEventReader.mark(0);
+        assertThat(pomXMLEventReader.getMarkVerbatim(0), is(REPLACEMENT));
 
         // more dangerous test since this touches the implementation
-        assertThat( getVariableValueFromObject( pomXMLEventReader, "lastEnd" ),
-                is( ( STR[0] + REPLACEMENT ).length() ) );
+        assertThat(getVariableValueFromObject(pomXMLEventReader, "lastEnd"), is((STR[0] + REPLACEMENT).length()));
     }
 
     @Test
-    public void testReplaceMark() throws XMLStreamException, IllegalAccessException
-    {
-        assertThat( pomXMLEventReader.hasNext(), is( true ) );
-        assertThat( pomXMLEventReader.nextEvent(), is( xmlEvent ) );
+    public void testReplaceMark() throws XMLStreamException, IllegalAccessException {
+        assertThat(pomXMLEventReader.hasNext(), is(true));
+        assertThat(pomXMLEventReader.nextEvent(), is(xmlEvent));
 
-        assertThat( pomXMLEventReader.hasNext(), is( true ) );
-        assertThat( pomXMLEventReader.nextEvent(), is( xmlEvent ) );
+        assertThat(pomXMLEventReader.hasNext(), is(true));
+        assertThat(pomXMLEventReader.nextEvent(), is(xmlEvent));
 
-        pomXMLEventReader.mark( 0 );
+        pomXMLEventReader.mark(0);
 
-        pomXMLEventReader.replaceMark( 0, REPLACEMENT );
-        assertThat( pomXMLEventReader.asStringBuilder().toString(), is( STR[0] + REPLACEMENT ) );
+        pomXMLEventReader.replaceMark(0, REPLACEMENT);
+        assertThat(pomXMLEventReader.asStringBuilder().toString(), is(STR[0] + REPLACEMENT));
 
-        pomXMLEventReader.mark( 0 );
-        assertThat( pomXMLEventReader.getMarkVerbatim( 0 ), is( REPLACEMENT ) );
+        pomXMLEventReader.mark(0);
+        assertThat(pomXMLEventReader.getMarkVerbatim(0), is(REPLACEMENT));
 
         // more dangerous test since this touches the implementation
-        assertThat( getVariableValueFromObject( pomXMLEventReader, "lastEnd" ),
-                is( ( STR[0] + REPLACEMENT ).length() ) );
+        assertThat(getVariableValueFromObject(pomXMLEventReader, "lastEnd"), is((STR[0] + REPLACEMENT).length()));
     }
 }

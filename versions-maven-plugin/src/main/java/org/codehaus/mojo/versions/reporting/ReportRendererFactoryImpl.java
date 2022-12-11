@@ -38,8 +38,7 @@ import org.codehaus.plexus.i18n.I18N;
  */
 @Named
 @Singleton
-public class ReportRendererFactoryImpl implements ReportRendererFactory
-{
+public class ReportRendererFactoryImpl implements ReportRendererFactory {
     public static final String DEPENDENCY_UPDATES_REPORT = "dependency-updates-report";
     public static final String DEPENDENCY_UPDATES_AGGREGATE_REPORT = "dependency-updates-aggregate-report";
     public static final String PLUGIN_UPDATES_REPORT = "plugin-updates-report";
@@ -50,8 +49,7 @@ public class ReportRendererFactoryImpl implements ReportRendererFactory
     private final I18N i18N;
 
     @Inject
-    public ReportRendererFactoryImpl( I18N i18N )
-    {
+    public ReportRendererFactoryImpl(I18N i18N) {
         this.i18N = i18N;
     }
 
@@ -59,31 +57,22 @@ public class ReportRendererFactoryImpl implements ReportRendererFactory
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings( "unchecked" )
-    public <T extends ReportRenderer, U> T createReportRenderer( String reportName, Sink sink, Locale locale, U model )
-            throws IllegalArgumentException
-    {
-        if ( DEPENDENCY_UPDATES_REPORT.equals( reportName )
-                ||  DEPENDENCY_UPDATES_AGGREGATE_REPORT.equals( reportName ) )
-        {
-            return (T) new DependencyUpdatesReportRenderer<>( i18N, sink, locale, reportName,
-                    (DependencyUpdatesModel) model );
+    @SuppressWarnings("unchecked")
+    public <T extends ReportRenderer, U> T createReportRenderer(String reportName, Sink sink, Locale locale, U model)
+            throws IllegalArgumentException {
+        if (DEPENDENCY_UPDATES_REPORT.equals(reportName) || DEPENDENCY_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
+            return (T) new DependencyUpdatesReportRenderer<>(
+                    i18N, sink, locale, reportName, (DependencyUpdatesModel) model);
         }
-        if ( PLUGIN_UPDATES_REPORT.equals( reportName ) || PLUGIN_UPDATES_AGGREGATE_REPORT.equals( reportName ) )
-        {
-            return (T) new PluginUpdatesReportRenderer( i18N, sink, locale, reportName,
-                    (PluginUpdatesModel) model );
+        if (PLUGIN_UPDATES_REPORT.equals(reportName) || PLUGIN_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
+            return (T) new PluginUpdatesReportRenderer(i18N, sink, locale, reportName, (PluginUpdatesModel) model);
         }
-        if ( PROPERTY_UPDATES_REPORT.equals( reportName ) ||  PROPERTY_UPDATES_AGGREGATE_REPORT.equals( reportName ) )
-        {
-            return (T) new PropertyUpdatesReportRenderer( i18N, sink, locale, reportName,
-                    (PropertyUpdatesModel) model );
+        if (PROPERTY_UPDATES_REPORT.equals(reportName) || PROPERTY_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
+            return (T) new PropertyUpdatesReportRenderer(i18N, sink, locale, reportName, (PropertyUpdatesModel) model);
         }
-        if ( PARENT_UPDATES_REPORT.equals( reportName ) )
-        {
-            return (T) new ParentUpdatesReportRenderer( i18N, sink, locale, reportName,
-                    (ParentUpdatesModel) model );
+        if (PARENT_UPDATES_REPORT.equals(reportName)) {
+            return (T) new ParentUpdatesReportRenderer(i18N, sink, locale, reportName, (ParentUpdatesModel) model);
         }
-        throw new IllegalArgumentException( "Invalid report name: " + reportName );
+        throw new IllegalArgumentException("Invalid report name: " + reportName);
     }
 }
