@@ -130,9 +130,11 @@
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>3.7</sitePluginVersion>
+    <!-- dotted property can not be used in .vm -->
+    <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
     <modelloNamespaceRuleVersion>2.1.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
-    <scmpublish.content>${project.build.directory}/staging</scmpublish.content>
+    <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
     <!-- mono-module doesn't require site:stage for scm-publish -->
     <project.build.outputTimestamp>2022-10-23T15:41:47Z</project.build.outputTimestamp>
     <sisu-maven-plugin-version>0.9.0.M1</sisu-maven-plugin-version>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 https://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+  <head>
+    <title>Page Not Found</title>
+    <!-- the base URL for all relative address in a document. -->
+    <!-- Not Found page can be displayed in any level -->
+    <base href="${project.url}" />
+    <!-- need to import styles by hand since the generated html has them relative and before the base tag -->
+    <link rel="stylesheet" href="${project.url}css/apache-maven-fluido-${fluidoVersion}.min.css" />
+    <link rel="stylesheet" href="${project.url}css/site.css" />
+    <link rel="stylesheet" href="${project.url}css/print.css" media="print" />
+    <script type="text/javascript" src="${project.url}js/apache-maven-fluido-${fluidoVersion}.min.js" />
+    <script type="text/javascript" src="/js/404-matomo-event.js" defer="defer"/>
+  </head>
+
+  <body>
+    <section name="Page Not Found">
+
+      <p>We're sorry, but the page you requested cannot be found. This may be because:</p>
+      <ul>
+        <li>The page has moved, was outdated, has removed or has not been created yet</li>
+        <li>You typed the address incorrectly</li>
+        <li>You followed a link from another site that pointed to this page</li>
+      </ul>
+
+      <p>If you came to this page by following a broken link on our site,
+         you can <a href="./issue-management.html">report an issue</a>
+         or <a href="./scm.html">submitting a patch</a></p>
+
+    </section>
+  </body>
+</document>
