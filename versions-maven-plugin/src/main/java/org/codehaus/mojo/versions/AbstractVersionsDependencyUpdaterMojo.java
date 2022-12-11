@@ -73,7 +73,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * A comma separated list of artifact patterns to include. Follows the pattern
      * "groupId:artifactId:type:classifier:version". Designed to allow specifying the set of includes from the command
      * line. When specifying includes from the pom, use the {@link #includes} configuration instead. If this property is
-     * specified then the {@link # include} configuration is ignored.
+     * specified then the {@link #includes} configuration is ignored.
      *
      * @since 1.0-beta-1
      */
@@ -84,7 +84,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo
      * A comma separated list of artifact patterns to exclude. Follows the pattern
      * "groupId:artifactId:type:classifier:version". Designed to allow specifying the set of excludes from the command
      * line. When specifying excludes from the pom, use the {@link #excludes} configuration instead. If this property is
-     * specified then the {@link # exclude} configuration is ignored.
+     * specified then the {@link #excludes} configuration is ignored.
      *
      * @since 1.0-beta-1
      */
