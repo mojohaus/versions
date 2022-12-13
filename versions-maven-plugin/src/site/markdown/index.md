@@ -96,7 +96,7 @@ The Versions Plugin has the following reporting goals.
 ## Enforcer rules overview
 
 The Versions Plugin currently provides one Maven Enforcer Plugin rule:
-* [maxDependencyUpdates](../versions-enforcer/max-dependency-updates.html) allows the user to specify a maximum number of updates which,
+* [maxDependencyUpdates](../versions-enforcer/index.html) allows the user to specify a maximum number of updates which,
   if exceeded, will trigger the enforcer plugin to fail.
 
 ## Usage
