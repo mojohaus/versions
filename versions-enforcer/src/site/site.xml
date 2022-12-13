@@ -6,10 +6,6 @@
       <item name="Maven Enforcer Rules" href="index.html"/>
     </menu>
 
-    <menu name="Rules Details">
-      <item name="Max Dependency Updates" href="max-dependency-updates.html"/>
-    </menu>
-
     <menu ref="parent"/>
   </body>
 </project>
