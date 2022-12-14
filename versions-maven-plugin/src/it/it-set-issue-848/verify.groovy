@@ -1,0 +1,5 @@
+assert new File( basedir, "pom.xml" ).text.contains( 'TEST' )
+assert new File( basedir, "moduleA/moduleA1.xml" ).text.contains( 'TEST' )
+assert new File( basedir, "moduleA/moduleA2.xml" ).text.contains( 'TEST' )
+assert new File( basedir, "moduleB/pom.xml" ).text.contains( 'TEST' )
+assert new File( basedir, "docs/moduleC/pom.xml" ).text.contains( 'TEST' )

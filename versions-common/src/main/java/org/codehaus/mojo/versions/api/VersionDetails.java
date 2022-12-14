@@ -405,6 +405,8 @@ public interface VersionDetails {
      *
      * @param scope most major segment where updates are allowed Optional.empty() for no restriction
      * @return {@linkplain Restriction} object based on the arguments
+     * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
+     * the segment count)
      */
     Restriction restrictionFor(Optional<Segment> scope) throws InvalidSegmentException;
 

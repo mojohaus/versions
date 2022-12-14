@@ -217,6 +217,7 @@ public interface VersionsHelper {
      * @param plugin The {@link Plugin} instance to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return The plugin update details.
+     * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
     PluginUpdatesDetails lookupPluginUpdates(Plugin plugin, boolean allowSnapshots) throws VersionRetrievalException;
