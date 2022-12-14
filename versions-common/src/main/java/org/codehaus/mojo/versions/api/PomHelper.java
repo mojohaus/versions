@@ -106,7 +106,9 @@ public class PomHelper {
     public static Model getRawModel(File moduleProjectFile) throws IOException {
         try (Reader reader =
                 new BufferedReader(new InputStreamReader(Files.newInputStream(moduleProjectFile.toPath())))) {
-            return getRawModel(reader);
+            Model result = getRawModel(reader);
+            result.setPomFile(moduleProjectFile);
+            return result;
         }
     }
 
@@ -1203,36 +1205,6 @@ public class PomHelper {
     }
 
     /**
-     * Modifies the collection of child modules removing those which cannot be found relative to the parent.
-     *
-     * @param logger       The logger to log to.
-     * @param basedir      the project basedir.
-     * @param childModules the child modules.
-     */
-    public static void removeMissingChildModules(Log logger, File basedir, Collection<String> childModules) {
-        logger.debug("Removing child modules which are missing...");
-        Iterator<String> i = childModules.iterator();
-        while (i.hasNext()) {
-            String modulePath = i.next();
-            File moduleFile = new File(basedir, modulePath);
-
-            if (moduleFile.isDirectory() && new File(moduleFile, "pom.xml").isFile()) {
-                // it's a directory that exists
-                continue;
-            }
-
-            if (moduleFile.isFile()) {
-                // it's the pom.xml file directly referenced and it exists.
-                continue;
-            }
-
-            logger.debug("Removing missing child module " + modulePath);
-            i.remove();
-        }
-        debugModules(logger, "After removing missing", childModules);
-    }
-
-    /**
      * Extracts the version from a raw model, interpolating from the parent if necessary.
      *
      * @param model The model.
@@ -1362,50 +1334,41 @@ public class PomHelper {
      * @return A map of raw models keyed by path relative to the project's basedir.
      * @throws IOException if things go wrong.
      */
-    public static Map<String, Model> getReactorModels(MavenProject project, Log logger) throws IOException {
-        Map<String, Model> result = new LinkedHashMap<>();
+    public static Map<File, Model> getChildModels(MavenProject project, Log logger) throws IOException {
+        Map<File, Model> result = new LinkedHashMap<>();
         final Model model = getRawModel(project);
-        final String path = "";
-        result.put(path, model);
-        result.putAll(getReactorModels(path, model, project, logger));
+        result.put(project.getFile(), model);
+        result.putAll(getChildModels(model, logger));
         return result;
     }
 
     /**
      * Builds a sub-map of raw models keyed by module path.
      *
-     * @param path    The relative path to base the sub-map on.
-     * @param model   The model at the relative path.
-     * @param project The project to build from.
+     * @param model   The root model
      * @param logger  The logger for logging.
      * @return A map of raw models keyed by path relative to the project's basedir.
      * @throws IOException if things go wrong.
      */
-    private static Map<String, Model> getReactorModels(String path, Model model, MavenProject project, Log logger)
-            throws IOException {
-        Map<String, Model> result = new LinkedHashMap<>();
-        Map<String, Model> childResults = new LinkedHashMap<>();
-        Set<String> childModules = getAllChildModules(model, logger);
+    private static Map<File, Model> getChildModels(Model model, Log logger) throws IOException {
+        Map<File, Model> result = new LinkedHashMap<>();
+        Map<File, Model> childResults = new LinkedHashMap<>();
 
-        File baseDir = path.length() > 0 ? new File(project.getBasedir(), path) : project.getBasedir();
-        removeMissingChildModules(logger, baseDir, childModules);
+        File baseDir = model.getPomFile().getParentFile();
 
-        childModules.stream()
+        getAllChildModules(model, logger).parallelStream()
                 .map(moduleName -> new File(baseDir, moduleName))
+                .map(file -> file.isFile() ? file : new File(file, "pom.xml"))
                 .filter(File::exists)
-                .forEach(moduleFile -> {
-                    File pomFile = moduleFile.isDirectory() ? new File(moduleFile, "/pom.xml") : moduleFile;
-                    String modulePath = (!path.isEmpty() && !path.endsWith("/") ? path + "/" : path)
-                            + pomFile.getParentFile().getName();
-
+                .forEach(pomFile -> {
                     try {
                         // the aim of this goal is to fix problems when the project cannot be parsed by Maven,
                         // so we have to work with the raw model and not the interpolated parsed model from maven
                         Model moduleModel = getRawModel(pomFile);
-                        result.put(modulePath, moduleModel);
-                        childResults.putAll(getReactorModels(modulePath, moduleModel, project, logger));
+                        result.put(pomFile, moduleModel);
+                        childResults.putAll(getChildModels(moduleModel, logger));
                     } catch (IOException e) {
-                        logger.debug("Could not parse " + pomFile.getPath(), e);
+                        logger.error("Could not parse " + pomFile.getPath(), e);
                     }
                 });
 
@@ -1421,10 +1384,10 @@ public class PomHelper {
      * @param artifactId The artifactId of the parent.
      * @return a map of models that have a specified groupId and artifactId as parent keyed by path.
      */
-    public static Map<String, Model> getChildModels(Map<String, Model> reactor, String groupId, String artifactId) {
-        final Map<String, Model> result = new LinkedHashMap<>();
-        for (Map.Entry<String, Model> entry : reactor.entrySet()) {
-            final String path = entry.getKey();
+    public static Map<File, Model> getChildModels(Map<File, Model> reactor, String groupId, String artifactId) {
+        final Map<File, Model> result = new LinkedHashMap<>();
+        for (Map.Entry<File, Model> entry : reactor.entrySet()) {
+            final File path = entry.getKey();
             final Model model = entry.getValue();
             final Parent parent = model.getParent();
             if (parent != null && groupId.equals(parent.getGroupId()) && artifactId.equals(parent.getArtifactId())) {
@@ -1442,7 +1405,7 @@ public class PomHelper {
      * @param artifactId The artifactId to match.
      * @return The model or <code>null</code> if the model was not in the reactor.
      */
-    public static Model getModel(Map<String, Model> reactor, String groupId, String artifactId) {
+    public static Model getModel(Map<File, Model> reactor, String groupId, String artifactId) {
         return reactor.values().stream()
                 .filter(model -> (groupId == null || groupId.equals(getGroupId(model)))
                         && artifactId.equals(getArtifactId(model)))
@@ -1459,8 +1422,7 @@ public class PomHelper {
      * @param artifactId The artifactId to match.
      * @return The model entry or <code>null</code> if the model was not in the reactor.
      */
-    public static Map.Entry<String, Model> getModelEntry(
-            Map<String, Model> reactor, String groupId, String artifactId) {
+    public static Map.Entry<File, Model> getModelEntry(Map<File, Model> reactor, String groupId, String artifactId) {
         return reactor.entrySet().stream()
                 .filter(e -> (groupId == null || groupId.equals(PomHelper.getGroupId(e.getValue())))
                         && artifactId.equals(PomHelper.getArtifactId(e.getValue())))
@@ -1475,7 +1437,7 @@ public class PomHelper {
      * @param model   The model.
      * @return The number of parents of this model in the reactor.
      */
-    public static int getReactorParentCount(Map<String, Model> reactor, Model model) {
+    public static int getReactorParentCount(Map<File, Model> reactor, Model model) {
         if (model.getParent() == null) {
             return 0;
         }

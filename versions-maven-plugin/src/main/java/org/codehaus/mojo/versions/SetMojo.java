@@ -283,8 +283,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
         if (removeSnapshot && !nextSnapshot) {
             String version = getVersion();
             if (version.endsWith(SNAPSHOT)) {
-                String release = version.substring(0, version.indexOf(SNAPSHOT));
-                newVersion = release;
+                newVersion = version.substring(0, version.indexOf(SNAPSHOT));
                 getLog().info("SNAPSHOT found.  BEFORE " + version + "  --> AFTER: " + newVersion);
             }
         }
@@ -332,8 +331,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                     : getProject();
 
             getLog().info("Local aggregation root: " + project.getBasedir());
-            Map<String, Model> reactorModels = PomHelper.getReactorModels(project, getLog());
-            final SortedMap<String, Model> reactor = new TreeMap<>(new ReactorDepthComparator(reactorModels));
+            Map<File, Model> reactorModels = PomHelper.getChildModels(project, getLog());
+            final SortedMap<File, Model> reactor = new TreeMap<>(new ReactorDepthComparator(reactorModels));
             reactor.putAll(reactorModels);
 
             // set of files to update
@@ -371,8 +370,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                 reactor.values().parallelStream()
                         .map(m -> PomHelper.getModelEntry(reactor, PomHelper.getGroupId(m), PomHelper.getArtifactId(m)))
                         .filter(Objects::nonNull)
-                        .map(Map.Entry::getKey)
-                        .map(f -> getModuleProjectFile(project, f))
+                        .map(Map.Entry::getValue)
+                        .map(Model::getPomFile)
                         .forEach(files::add);
             }
 
@@ -421,7 +420,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
 
     private void applyChange(
             MavenProject project,
-            SortedMap<String, Model> reactor,
+            SortedMap<File, Model> reactor,
             Set<File> files,
             String groupId,
             String artifactId,
@@ -432,14 +431,14 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
         addChange(groupId, artifactId, oldVersion, newVersion);
         // now fake out the triggering change
 
-        Map.Entry<String, Model> current = PomHelper.getModelEntry(reactor, groupId, artifactId);
+        Map.Entry<File, Model> current = PomHelper.getModelEntry(reactor, groupId, artifactId);
         if (current != null) {
             current.getValue().setVersion(newVersion);
-            files.add(getModuleProjectFile(project, current.getKey()));
+            files.add(current.getValue().getPomFile());
         }
 
-        for (Map.Entry<String, Model> sourceEntry : reactor.entrySet()) {
-            final String sourcePath = sourceEntry.getKey();
+        for (Map.Entry<File, Model> sourceEntry : reactor.entrySet()) {
+            final File sourcePath = sourceEntry.getKey();
             final Model sourceModel = sourceEntry.getValue();
 
             getLog().debug(
@@ -463,12 +462,12 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                 continue;
             }
 
-            files.add(getModuleProjectFile(project, sourcePath));
+            files.add(sourceModel.getPomFile());
 
             getLog().debug("Looking for modules which use "
                     + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId) + " as their parent");
 
-            for (Map.Entry<String, Model> stringModelEntry : processAllModules
+            for (Map.Entry<File, Model> stringModelEntry : processAllModules
                     ? reactor.entrySet()
                     : PomHelper.getChildModels(reactor, sourceGroupId, sourceArtifactId)
                             .entrySet()) {
@@ -512,20 +511,6 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                 }
             }
         }
-    }
-
-    private static File getModuleProjectFile(MavenProject project, String relativePath) {
-        final File moduleDir = new File(project.getBasedir(), relativePath);
-        final File projectBaseDir = project.getBasedir();
-
-        if (projectBaseDir.equals(moduleDir)) {
-            return project.getFile();
-        } else if (moduleDir.isDirectory()) {
-            return new File(moduleDir, "pom.xml");
-        }
-        // i don't think this should ever happen... but just in case
-        // the module references the file-name
-        return moduleDir;
     }
 
     /**

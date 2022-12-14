@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
+import java.io.File;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -31,14 +32,14 @@ import org.codehaus.mojo.versions.api.PomHelper;
  * @author Stephen Connolly
  * @since 15-Sep-2010 14:54:42
  */
-public class ReactorDepthComparator implements Comparator<String> {
-    private final Map<String, Model> reactor;
+public class ReactorDepthComparator implements Comparator<File> {
+    private final Map<File, Model> reactor;
 
-    public ReactorDepthComparator(Map<String, Model> reactor) {
+    public ReactorDepthComparator(Map<File, Model> reactor) {
         this.reactor = reactor;
     }
 
-    public int compare(String o1, String o2) {
+    public int compare(File o1, File o2) {
         final Model m1 = reactor.get(o1);
         final Model m2 = reactor.get(o2);
         final int d1 = PomHelper.getReactorParentCount(reactor, m1);

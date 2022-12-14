@@ -25,7 +25,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.Map;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -218,7 +217,6 @@ public class PomHelperTest extends AbstractMojoTestCase {
     public void testIssue505ChildModules() throws Exception {
         MavenProject project =
                 mojoRule.readMavenProject(new File("src/test/resources/org/codehaus/mojo/versions/api/issue-505"));
-        Map<String, Model> reactorModels = PomHelper.getReactorModels(project, new SystemStreamLog());
-        assertThat(reactorModels.keySet(), hasSize(3));
+        assertThat(PomHelper.getChildModels(project, new SystemStreamLog()).entrySet(), hasSize(3));
     }
 }

@@ -84,8 +84,8 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
         boolean didSomething = false;
 
         try {
-            final Map<String, Model> reactor = PomHelper.getReactorModels(getProject(), getLog());
-            List<String> order = new ArrayList<>(reactor.keySet());
+            final Map<File, Model> reactor = PomHelper.getChildModels(getProject(), getLog());
+            List<File> order = new ArrayList<>(reactor.keySet());
             order.sort((o1, o2) -> {
                 Model m1 = reactor.get(o1);
                 Model m2 = reactor.get(o2);
@@ -99,7 +99,7 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
                 return 0;
             });
 
-            for (String sourcePath : order) {
+            for (File sourcePath : order) {
                 Model sourceModel = reactor.get(sourcePath);
 
                 getLog().debug(
@@ -128,31 +128,20 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
                             + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId)
                             + " as their parent to update it to " + sourceVersion);
 
-                    for (Map.Entry<String, Model> target : PomHelper.getChildModels(
+                    for (Map.Entry<File, Model> target : PomHelper.getChildModels(
                                     reactor, sourceGroupId, sourceArtifactId)
                             .entrySet()) {
-                        String targetPath = target.getKey();
-
-                        File moduleDir = new File(getProject().getBasedir(), targetPath);
-
-                        File moduleProjectFile;
-
-                        if (moduleDir.isDirectory()) {
-                            moduleProjectFile = new File(moduleDir, "pom.xml");
-                        } else {
-                            // i don't think this should ever happen... but just in case
-                            // the module references the file-name
-                            moduleProjectFile = moduleDir;
-                        }
+                        File moduleProjectFile = target.getKey();
+                        String moduleName = moduleProjectFile.getParent();
 
                         Model targetModel = target.getValue();
                         final Parent parent = targetModel.getParent();
                         if (sourceVersion.equals(parent.getVersion())) {
-                            getLog().debug("Module: " + targetPath + " parent is "
+                            getLog().debug("Module: " + moduleName + " parent is "
                                     + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId) + ":"
                                     + sourceVersion);
                         } else {
-                            getLog().info("Module: " + targetPath);
+                            getLog().info("Module: " + moduleName);
                             getLog().info("    parent was "
                                     + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId) + ":"
                                     + parent.getVersion());

@@ -75,7 +75,9 @@ public class MavenProjectUtils {
      * @param processDependencyManagementTransitive if {@code true}, the original model will be considered
      *                                              instead of the interpolated model, which does not contain
      *                                              imported dependencies
+     * @param log {@link Log} instance (may not be null)
      * @return set of {@link Dependency} objects
+     * @throws VersionRetrievalException thrown if version information retrieval fails
      * or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
      */
     public static Set<Dependency> extractDependenciesFromDependencyManagement(
