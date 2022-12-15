@@ -39,6 +39,7 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
@@ -65,6 +66,7 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.StringUtils;
 
+import static java.util.Optional.ofNullable;
 import static org.codehaus.plexus.util.StringUtils.isEmpty;
 
 /**
@@ -348,9 +350,22 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                     Pattern.compile(RegexUtils.convertWildcardsToRegex(fixNullOrEmpty(oldVersion, "*"), true));
 
             for (Model m : reactor.values()) {
-                final String mGroupId = PomHelper.getGroupId(m);
-                final String mArtifactId = PomHelper.getArtifactId(m);
-                final String mVersion = PomHelper.getVersion(m);
+                Map<String, String> properties = ofNullable(m.getProperties())
+                        .map(p -> p.entrySet().stream()
+                                .collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue()
+                                        .toString())))
+                        .orElse(null);
+
+                String mGroupId = PomHelper.getGroupId(m);
+                String mArtifactId = PomHelper.getArtifactId(m);
+                String mVersion = PomHelper.getVersion(m);
+
+                if (properties != null) {
+                    mGroupId = PomHelper.evaluate(mGroupId, properties);
+                    mArtifactId = PomHelper.evaluate(mArtifactId, properties);
+                    mVersion = PomHelper.evaluate(mVersion, properties);
+                }
+
                 if ((processAllModules
                                 || groupIdRegex.matcher(mGroupId).matches()
                                         && artifactIdRegex.matcher(mArtifactId).matches())
