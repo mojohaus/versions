@@ -158,4 +158,49 @@ public class SetMojoTest extends AbstractMojoTestCase {
                 String.join("", Files.readAllLines(tempDir.resolve("pom.xml"))),
                 not(containsString("<version>bar</version>")));
     }
+
+    private void testSetParameterValue(String filename) throws Exception {
+        Files.copy(
+                Paths.get("src/test/resources/org/codehaus/mojo/set/issue-855/").resolve(filename),
+                tempDir.resolve("pom.xml"));
+        SetMojo mojo = (SetMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "set");
+        mojo.execute();
+        assertThat(
+                String.join("", Files.readAllLines(tempDir.resolve("pom.xml"))),
+                containsString("<version>testing</version>"));
+    }
+
+    @Test
+    public void testSetParameterValueSimple() throws Exception {
+        testSetParameterValue("pom-simple.xml");
+    }
+
+    @Test
+    public void testSetParameterValueBuildNumber() throws Exception {
+        testSetParameterValue("pom-build-number.xml");
+    }
+
+    @Test
+    public void testSetParameterValueUndefined() throws Exception {
+        testSetParameterValue("pom-undefined.xml");
+    }
+
+    @Test
+    public void testSetParameterValueMultipleProps() throws Exception {
+        testSetParameterValue("pom-multiple-props.xml");
+    }
+
+    @Test
+    public void testParentWithProperty() throws Exception {
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/set/issue-855/parent-with-property"), tempDir);
+        SetMojo mojo = (SetMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "set");
+        mojo.execute();
+        assertThat(
+                String.join("", Files.readAllLines(tempDir.resolve("pom.xml"))),
+                containsString("<version>testing</version>"));
+        assertThat(
+                String.join("", Files.readAllLines(tempDir.resolve("child/pom.xml"))),
+                containsString("<version>testing</version>"));
+    }
 }
