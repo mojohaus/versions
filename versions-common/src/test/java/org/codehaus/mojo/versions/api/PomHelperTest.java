@@ -25,8 +25,16 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.StringReader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.io.DefaultModelWriter;
+import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
@@ -49,6 +57,8 @@ import static org.hamcrest.core.Is.is;
  * Tests the methods of {@link PomHelper}.
  */
 public class PomHelperTest extends AbstractMojoTestCase {
+    private static final int NUMBER_OF_CHILD_PROJECTS = 30;
+
     @Rule
     public MojoRule mojoRule = new MojoRule(this);
 
@@ -218,5 +228,51 @@ public class PomHelperTest extends AbstractMojoTestCase {
         MavenProject project =
                 mojoRule.readMavenProject(new File("src/test/resources/org/codehaus/mojo/versions/api/issue-505"));
         assertThat(PomHelper.getChildModels(project, new SystemStreamLog()).entrySet(), hasSize(3));
+    }
+
+    @Test
+    public void testChildModelsForMultiLevelProject() throws Exception {
+        Path tempDirectory = Files.createTempDirectory("testChildModelsForLargeNumberOfModules");
+        ModelWriter modelWriter = new DefaultModelWriter();
+        Map<Path, Model> createdModels = new LinkedHashMap<>();
+
+        try {
+            Model rootProject = createSimpleModel("root");
+            createdModels.put(tempDirectory, rootProject);
+            for (int levelOne = 0; levelOne < NUMBER_OF_CHILD_PROJECTS; levelOne++) {
+                Model levelOneProject = createSimpleModel("child-" + levelOne);
+                Path levelOneProjectDirectory = tempDirectory.resolve(levelOneProject.getArtifactId());
+                rootProject.addModule(levelOneProject.getArtifactId());
+                createdModels.put(levelOneProjectDirectory, levelOneProject);
+
+                for (int levelTwo = 0; levelTwo < NUMBER_OF_CHILD_PROJECTS; levelTwo++) {
+                    Model levelTwoProject = createSimpleModel("child-" + levelOne + "-" + levelTwo);
+                    Path levelTwoProjectDirectory = levelOneProjectDirectory.resolve(levelTwoProject.getArtifactId());
+                    levelOneProject.addModule(levelTwoProject.getArtifactId());
+                    createdModels.put(levelTwoProjectDirectory, levelTwoProject);
+                }
+            }
+
+            for (Map.Entry<Path, Model> entry : createdModels.entrySet()) {
+                modelWriter.write(entry.getKey().resolve("pom.xml").toFile(), Collections.emptyMap(), entry.getValue());
+            }
+
+            MavenProject project = mojoRule.readMavenProject(tempDirectory.toFile());
+
+            assertThat(
+                    PomHelper.getChildModels(project, new SystemStreamLog()).entrySet(), hasSize(createdModels.size()));
+        } finally {
+            FileUtils.deleteDirectory(tempDirectory.toFile());
+        }
+    }
+
+    private Model createSimpleModel(String artifactId) {
+        Model module = new Model();
+        module.setGroupId("child.test");
+        module.setArtifactId(artifactId);
+        module.setVersion("1.0.0-SNAPSHOT");
+        module.setPackaging("pom");
+        module.setModelVersion("4.0.0");
+        return module;
     }
 }
