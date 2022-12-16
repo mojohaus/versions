@@ -1356,7 +1356,7 @@ public class PomHelper {
 
         File baseDir = model.getPomFile().getParentFile();
 
-        getAllChildModules(model, logger).parallelStream()
+        getAllChildModules(model, logger).stream()
                 .map(moduleName -> new File(baseDir, moduleName))
                 .map(file -> file.isFile() ? file : new File(file, "pom.xml"))
                 .filter(File::exists)

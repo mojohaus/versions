@@ -367,7 +367,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             }
 
             if ("always".equals(updateBuildOutputTimestampPolicy)) {
-                reactor.values().parallelStream()
+                reactor.values().stream()
                         .map(m -> PomHelper.getModelEntry(reactor, PomHelper.getGroupId(m), PomHelper.getArtifactId(m)))
                         .filter(Objects::nonNull)
                         .map(Map.Entry::getValue)
