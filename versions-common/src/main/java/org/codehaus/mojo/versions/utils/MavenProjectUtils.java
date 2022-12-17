@@ -61,7 +61,7 @@ public class MavenProjectUtils {
      * or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
      */
     public static Set<Dependency> extractDependenciesFromPlugins(MavenProject project) {
-        return project.getBuildPlugins().parallelStream()
+        return project.getBuildPlugins().stream()
                 .filter(plugin -> plugin.getDependencies() != null)
                 .flatMap(plugin -> plugin.getDependencies().stream())
                 .collect(() -> new TreeSet<>(DependencyComparator.INSTANCE), Set::add, Set::addAll);
