@@ -620,7 +620,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         buf.append(start);
         int padding = len;
         for (String end : ends) {
-            padding -= end.length();
+            padding -= String.valueOf(end).length();
         }
         buf.append(' ');
         while (buf.length() < padding) {
