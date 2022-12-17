@@ -429,8 +429,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                         getHelper()
                                 .lookupDependenciesUpdates(
                                         filterDependencies(
-                                                getProject().getDependencies().parallelStream()
-                                                        .filter(dep -> finalDependencyManagement.parallelStream()
+                                                getProject().getDependencies().stream()
+                                                        .filter(dep -> finalDependencyManagement.stream()
                                                                 .noneMatch(depMan -> dependenciesMatch(dep, depMan)))
                                                         .collect(
                                                                 () -> new TreeSet<>(DependencyComparator.INSTANCE),

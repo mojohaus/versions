@@ -194,7 +194,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                                                             .getRemoteProjectRepositories(),
                                             "lookupArtifactVersions"))
                             .getVersions()
-                            .parallelStream()
+                            .stream()
                             .filter(v -> ignoredVersions.stream().noneMatch(i -> {
                                 if (TYPE_REGEX.equals(i.getType())
                                         && Pattern.compile(i.getVersion())

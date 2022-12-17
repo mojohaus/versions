@@ -268,7 +268,7 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
             return new DefaultVersionsHelper.Builder()
                     .withRepositorySystem(ruleHelper.getComponent(RepositorySystem.class))
                     .withAetherRepositorySystem(ruleHelper.getComponent(org.eclipse.aether.RepositorySystem.class))
-                    .withWagonMap(ruleHelper.getComponentMap(Wagon.class.getName()).entrySet().parallelStream()
+                    .withWagonMap(ruleHelper.getComponentMap(Wagon.class.getName()).entrySet().stream()
                             .filter(e -> e.getValue() instanceof Wagon)
                             .collect(HashMap::new, (m, e) -> m.put(e.getKey(), (Wagon) e.getValue()), HashMap::putAll))
                     .withServerId(serverId)
@@ -349,7 +349,7 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
                     ? of(SUBINCREMENTAL)
                     : ignoreIncrementalUpdates ? of(INCREMENTAL) : ignoreMinorUpdates ? of(MINOR) : empty();
             List<ArtifactVersions> upgradable =
-                    versionsHelper.lookupDependenciesUpdates(dependencies, false).values().parallelStream()
+                    versionsHelper.lookupDependenciesUpdates(dependencies, false).values().stream()
                             .filter(v -> v.getVersions(v.restrictionForIgnoreScope(ignoredSegment), true).length > 0)
                             .collect(Collectors.toList());
             if (upgradable.size() > maxUpdates) {

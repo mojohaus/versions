@@ -856,7 +856,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 1.0-alpha-1
      */
     private Map<String, Plugin> getLifecyclePlugins(MavenProject project) throws MojoExecutionException {
-        return getBoundPlugins(project).parallelStream()
+        return getBoundPlugins(project).stream()
                 .filter(Objects::nonNull)
                 .filter(p -> p.getKey() != null)
                 .collect(HashMap<String, Plugin>::new, (m, p) -> m.put(p.getKey(), p), Map::putAll);
@@ -874,7 +874,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     private Set<Plugin> getBoundPlugins(MavenProject project) {
         // we need to provide a copy with the version blanked out so that inferring from super-pom
         // works as for 2.x as 3.x fills in the version on us!
-        return lifecycleExecutor.getPluginsBoundByDefaultToAllLifecycles(project.getPackaging()).parallelStream()
+        return lifecycleExecutor.getPluginsBoundByDefaultToAllLifecycles(project.getPackaging()).stream()
                 .map(p -> new Plugin() {
                     {
                         setGroupId(p.getGroupId());
