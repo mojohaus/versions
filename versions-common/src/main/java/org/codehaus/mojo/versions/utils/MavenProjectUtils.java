@@ -94,7 +94,7 @@ public class MavenProjectUtils {
                 log.debug("dependency from pom: " + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":"
                         + dependency.getVersion() + ":" + dependency.getScope());
                 if (dependency.getVersion() == null) {
-                    // get parent and get the information from there.
+                    // getModel parent and getModel the information from there.
                     if (project.hasParent()) {
                         log.debug("Reading parent dependencyManagement information");
                         DependencyManagement parentProjectDependencyManagement = processDependencyManagementTransitive
@@ -112,10 +112,10 @@ public class MavenProjectUtils {
                             }
                         }
                     } else {
-                        String message = "We can't get the version for the dependency " + dependency.getGroupId() + ":"
-                                + dependency.getArtifactId() + " because there does not exist a parent.";
+                        String message = "We can't getModel the version for the dependency " + dependency.getGroupId()
+                                + ":" + dependency.getArtifactId() + " because there does not exist a parent.";
                         log.error(message);
-                        // Throw error because we will not able to get a version for a dependency.
+                        // Throw error because we will not able to getModel a version for a dependency.
                         throw new VersionRetrievalException(message);
                     }
                 } else {

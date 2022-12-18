@@ -140,7 +140,7 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
      */
     protected void update(ModifiedPomXMLEventReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
-        // Note we have to get the dependencies from the model because the dependencies in the
+        // Note we have to getModel the dependencies from the model because the dependencies in the
         // project may have already had their range resolved [MNG-4138]
         if (hasDependencyManagement()
                 && hasDependenciesInDependencyManagement()

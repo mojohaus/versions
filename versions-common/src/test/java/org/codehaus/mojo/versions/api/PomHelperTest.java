@@ -27,20 +27,25 @@ import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.hamcrest.MatcherAssert;
 import org.junit.BeforeClass;
@@ -52,6 +57,7 @@ import static org.codehaus.stax2.XMLInputFactory2.P_PRESERVE_LOCATION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests the methods of {@link PomHelper}.
@@ -274,5 +280,49 @@ public class PomHelperTest extends AbstractMojoTestCase {
         module.setPackaging("pom");
         module.setModelVersion("4.0.0");
         return module;
+    }
+
+    @Test
+    public void testGetRawModelTree() throws Exception {
+        Log log = mock(Log.class);
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
+        Path path = Paths.get("src/test/resources/org/codehaus/mojo/versions/api/getRawModelTree/pom.xml");
+        ModifiedPomXMLEventReader pomReader = new ModifiedPomXMLEventReader(
+                new StringBuilder(new String(Files.readAllBytes(path))), inputFactory, path.toString());
+        List<ModelNode> rawModelTree =
+                PomHelper.getRawModelTree(new ModelNode(PomHelper.getRawModel(pomReader), pomReader), log);
+        assertThat(
+                rawModelTree.stream()
+                        .map(ModelNode::getModel)
+                        .map(Model::getArtifactId)
+                        .collect(Collectors.joining(" ")),
+                is("grandparent childA grandchild childB"));
+    }
+
+    @Test
+    public void testFindProperty() throws Exception {
+        Log log = mock(Log.class);
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
+        Path path = Paths.get("src/test/resources/org/codehaus/mojo/versions/api/findProperty/pom.xml");
+        ModifiedPomXMLEventReader pomReader = new ModifiedPomXMLEventReader(
+                new StringBuilder(new String(Files.readAllBytes(path))), inputFactory, path.toString());
+        List<ModelNode> rawModelTree =
+                PomHelper.getRawModelTree(new ModelNode(PomHelper.getRawModel(pomReader), pomReader), log);
+
+        ModelNode grandparent = rawModelTree.get(0);
+        assertThat(grandparent.getModel().getArtifactId(), is("grandparent"));
+        ModelNode childA = rawModelTree.get(1);
+        assertThat(childA.getModel().getArtifactId(), is("childA"));
+        ModelNode grandchild = rawModelTree.get(2);
+        assertThat(grandchild.getModel().getArtifactId(), is("grandchild"));
+        ModelNode childB = rawModelTree.get(3);
+        assertThat(childB.getModel().getArtifactId(), is("childB"));
+        assertThat(PomHelper.findProperty("a", grandchild).get(), is(childA));
+        assertThat(PomHelper.findProperty("a", childA).get(), is(childA));
+        assertThat(PomHelper.findProperty("a", grandparent).get(), is(grandparent));
+        assertThat(PomHelper.findProperty("a", childB).get(), is(grandparent));
+        assertThat(PomHelper.findProperty("b", childB).get(), is(childB));
     }
 }

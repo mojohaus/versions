@@ -119,7 +119,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @since 1.0-alpha-3
      */
     @Parameter(property = "generateBackupPoms", defaultValue = "true")
-    private boolean generateBackupPoms;
+    protected boolean generateBackupPoms;
 
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
@@ -298,19 +298,6 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         final ArtifactVersions artifactVersions =
                 getHelper().lookupArtifactVersions(artifact, versionRange, usePluginRepositories);
         return artifactVersions.getNewestVersion(versionRange, null, includeSnapshots, false);
-    }
-
-    /**
-     * Gets the property value that is defined in the pom. This is an extension point to allow updating a file external
-     * to the reactor.
-     *
-     * @param pom      The pom.
-     * @param property The property.
-     * @return The value as defined in the pom or <code>null</code> if not defined.
-     * @since 1.0-alpha-1
-     */
-    protected String getPropertyValue(StringBuilder pom, String property) {
-        return project.getProperties().getProperty(property);
     }
 
     /**

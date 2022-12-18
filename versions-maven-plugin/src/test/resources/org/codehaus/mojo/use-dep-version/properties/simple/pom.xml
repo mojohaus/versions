@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>test-group</groupId>
+    <artifactId>test-artifact</artifactId>
+    <version>DEVELOP-SNAPSHOT</version>
+
+    <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>default-group</groupId>
+            <artifactId>artifactA</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <configuration>
+                    <serverId>serverId</serverId>
+                    <includesList>default-group</includesList>
+                    <depVersion>2.0.0</depVersion>
+                    <processProperties>true</processProperties>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

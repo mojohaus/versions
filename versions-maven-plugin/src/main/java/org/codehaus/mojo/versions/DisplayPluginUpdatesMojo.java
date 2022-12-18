@@ -248,7 +248,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Gets the plugin management plugins of a specific project.
      *
-     * @param model the model to get the plugin management plugins from.
+     * @param model the model to getModel the plugin management plugins from.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
      */
@@ -729,7 +729,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Returns a set of Strings which correspond to the plugin coordinates where there is a version specified.
      *
-     * @param pomContents The project to get the plugins with versions specified.
+     * @param pomContents The project to getModel the plugins with versions specified.
      * @param path        Path that points to the source of the XML
      * @return a set of Strings which correspond to the plugin coordinates where there is a version specified.
      */
@@ -818,7 +818,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Gets the build plugins of a specific project.
      *
-     * @param model                the model to get the build plugins from.
+     * @param model                the model to getModel the build plugins from.
      * @param onlyIncludeInherited {@code true} to only return the plugins definitions that will be inherited by
      *                             child projects.
      * @return The map of effective plugin versions keyed by coordinates.
@@ -850,7 +850,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Returns the lifecycle plugins of a specific project.
      *
-     * @param project the project to get the lifecycle plugins from.
+     * @param project the project to getModel the lifecycle plugins from.
      * @return The map of effective plugin versions keyed by coordinates.
      * @throws org.apache.maven.plugin.MojoExecutionException if things go wrong.
      * @since 1.0-alpha-1
@@ -887,7 +887,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Returns all the parent projects of the specified project, with the root project first.
      *
-     * @param project The maven project to get the parents of
+     * @param project The maven project to getModel the parents of
      * @return the parent projects of the specified project, with the root project first.
      * @throws org.apache.maven.plugin.MojoExecutionException if the super-pom could not be created.
      * @since 1.0-alpha-1
@@ -1149,7 +1149,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Gets the report plugins of a specific project.
      *
-     * @param model                the model to get the report plugins from.
+     * @param model                the model to getModel the report plugins from.
      * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be inherited by
      *                             child projects.
      * @return The map of effective plugin versions keyed by coordinates.

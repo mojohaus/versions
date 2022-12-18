@@ -193,7 +193,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
         } else {
             if (project.getOriginalModel().getDependencyManagement() != null
                     && project.getOriginalModel().getDependencyManagement().getDependencies() != null) {
-                // Using the original model to get the original dependencyManagement entries and
+                // Using the original model to getModel the original dependencyManagement entries and
                 // not the interpolated model.
                 // TODO: I'm not 100% sure if this will work correctly in all cases.
                 for (Dependency dep :

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>test-group</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
+    </properties>
+
+    <modules>
+        <module>child</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>test-group</groupId>
+            <artifactId>artifactB</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <configuration>
+                    <includesList>test-group:artifactB</includesList>
+                    <depVersion>2.0.0</depVersion>
+                    <excludeReactor>false</excludeReactor>
+                    <processProperties>true</processProperties>
+                    <!-- we don't care about artifact resolution here -->
+                    <forceVersion>true</forceVersion>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

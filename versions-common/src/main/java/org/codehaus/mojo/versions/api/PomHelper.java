@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
@@ -28,7 +29,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +41,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
@@ -45,6 +50,7 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -65,6 +71,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
@@ -72,6 +79,7 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.codehaus.stax2.XMLInputFactory2;
 
 import static java.util.Collections.singletonMap;
 import static java.util.stream.IntStream.range;
@@ -88,7 +96,7 @@ public class PomHelper {
     /**
      * Gets the raw model before any interpolation what-so-ever.
      *
-     * @param project The project to get the raw model for.
+     * @param project The project to getModel the raw model for.
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
@@ -99,7 +107,7 @@ public class PomHelper {
     /**
      * Gets the raw model before any interpolation what-so-ever.
      *
-     * @param moduleProjectFile The project file to get the raw model for.
+     * @param moduleProjectFile The project file to getModel the raw model for.
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
@@ -115,21 +123,23 @@ public class PomHelper {
     /**
      * Gets the current raw model before any interpolation what-so-ever.
      *
-     * @param modifiedPomXMLEventReader The {@link ModifiedPomXMLEventReader} to get the raw model for.
+     * @param modifiedPomXMLEventReader The {@link ModifiedPomXMLEventReader} to getModel the raw model for.
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
     public static Model getRawModel(ModifiedPomXMLEventReader modifiedPomXMLEventReader) throws IOException {
         try (Reader reader =
                 new StringReader(modifiedPomXMLEventReader.asStringBuilder().toString())) {
-            return getRawModel(reader);
+            Model result = getRawModel(reader);
+            result.setPomFile(new File(modifiedPomXMLEventReader.getPath()));
+            return result;
         }
     }
 
     /**
      * Gets the current raw model before any interpolation what-so-ever.
      *
-     * @param reader The {@link Reader} to get the raw model for.
+     * @param reader The {@link Reader} to getModel the raw model for.
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
@@ -433,7 +443,7 @@ public class PomHelper {
      * @param artifactId The artifactId of the dependency.
      * @param oldVersion The old version of the dependency.
      * @param newVersion The new version of the dependency.
-     * @param model      The model to get the project properties from.
+     * @param model      The model to getModel the project properties from.
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if something went wrong.
      */
@@ -595,65 +605,67 @@ public class PomHelper {
             return null;
         }
 
-        String expression = stripTokens(expr);
-        if (expression.equals(expr)) {
-            int index = expr.indexOf("${");
-            if (index >= 0) {
-                int lastIndex = expr.indexOf("}", index);
-                if (lastIndex >= 0) {
-                    String retVal = expr.substring(0, index);
+        return extractExpression(expr)
+                .map(expression -> {
+                    String value = properties.get(expression);
 
-                    if (index > 0 && expr.charAt(index - 1) == '$') {
-                        retVal += expr.substring(index + 1, lastIndex + 1);
+                    if (value != null) {
+                        int exprStartDelimiter = value.indexOf("${");
+
+                        if (exprStartDelimiter >= 0) {
+                            if (exprStartDelimiter > 0) {
+                                value = value.substring(0, exprStartDelimiter)
+                                        + evaluate(value.substring(exprStartDelimiter), properties);
+                            } else {
+                                value = evaluate(value.substring(exprStartDelimiter), properties);
+                            }
+                        }
                     } else {
-                        retVal += evaluate(expr.substring(index, lastIndex + 1), properties);
+                        // TODO find a way to log that and not use this System.out!!
+                        // this class could be a component with logger injected !!
+                        System.out.println("expression: " + expression + " no value ");
+                    }
+                    return value == null ? expr : value;
+                })
+                .orElseGet(() -> {
+                    int index = expr.indexOf("${");
+                    if (index >= 0) {
+                        int lastIndex = expr.indexOf("}", index);
+                        if (lastIndex >= 0) {
+                            String retVal = expr.substring(0, index);
+
+                            if (index > 0 && expr.charAt(index - 1) == '$') {
+                                retVal += expr.substring(index + 1, lastIndex + 1);
+                            } else {
+                                retVal += evaluate(expr.substring(index, lastIndex + 1), properties);
+                            }
+
+                            retVal += evaluate(expr.substring(lastIndex + 1), properties);
+                            return retVal;
+                        }
                     }
 
-                    retVal += evaluate(expr.substring(lastIndex + 1), properties);
-                    return retVal;
-                }
-            }
-
-            // Was not an expression
-            if (expression.contains("$$")) {
-                return expression.replaceAll("\\$\\$", "\\$");
-            } else {
-                return expression;
-            }
-        }
-
-        String value = properties.get(expression);
-
-        if (value != null) {
-            int exprStartDelimiter = value.indexOf("${");
-
-            if (exprStartDelimiter >= 0) {
-                if (exprStartDelimiter > 0) {
-                    value = value.substring(0, exprStartDelimiter)
-                            + evaluate(value.substring(exprStartDelimiter), properties);
-                } else {
-                    value = evaluate(value.substring(exprStartDelimiter), properties);
-                }
-            }
-        } else {
-            // TODO find a way to log that and not use this System.out!!
-            // this class could be a component with logger injected !!
-            System.out.println("expression: " + expression + " no value ");
-        }
-        return value == null ? expr : value;
+                    // Was not an expression
+                    if (expr.contains("$$")) {
+                        return expr.replaceAll("\\$\\$", "\\$");
+                    } else {
+                        return expr;
+                    }
+                });
     }
 
     /**
      * Strips the expression token markers from the start and end of the string.
      *
      * @param expr the string (perhaps with token markers)
-     * @return the string (definately without token markers)
+     * @return the string (without token markers) if a property has been found, {@link Optional#empty()}
+     * otherwise
      */
-    private static String stripTokens(String expr) {
-        if (expr.startsWith("${") && expr.indexOf("}") == expr.length() - 1) {
-            expr = expr.substring(2, expr.length() - 1);
-        }
-        return expr;
+    public static Optional<String> extractExpression(String expr) {
+        return Optional.ofNullable(expr)
+                .map(String::trim)
+                .filter(e -> e.startsWith("${") && e.indexOf("}") == e.length() - 1)
+                .map(e -> e.substring(2, e.length() - 1));
     }
 
     /**
@@ -1179,7 +1191,7 @@ public class PomHelper {
      * @return the set of all child modules of the project.
      */
     public static Set<String> getAllChildModules(Model model, Log logger) {
-        logger.debug("Finding child modules...");
+        logger.debug("Finding child modules of " + model);
         Set<String> childModules = new TreeSet<>(model.getModules());
         model.getProfiles().forEach(profile -> childModules.addAll(profile.getModules()));
         debugModules(logger, "Child modules:", childModules);
@@ -1324,6 +1336,64 @@ public class PomHelper {
                 Arrays.stream(initializers).forEach(i -> i.accept(this));
             }
         };
+    }
+
+    /**
+     * Builds a {@link ModelNode} tree of raw models keyed by module path and returns a list of all nodes,
+     * ordered depth-first visiting order. The root node is always the first node of the list.
+     *
+     * @param rootNode The root node of the reactor
+     * @param logger logger to log parsing errors to
+     * @return the root node of the {@link ModelNode} of raw models relative to the project's basedir.
+     * @throws UncheckedIOException thrown if reading one of the models down the tree fails
+     */
+    public static List<ModelNode> getRawModelTree(ModelNode rootNode, Log logger) throws UncheckedIOException {
+        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
+        inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
+        return getRawModelTree(rootNode, logger, inputFactory);
+    }
+
+    private static List<ModelNode> getRawModelTree(ModelNode rootNode, Log logger, XMLInputFactory inputFactory)
+            throws UncheckedIOException {
+        Path baseDir = rootNode.getModel().getPomFile().getParentFile().toPath();
+        List<ModelNode> result = new ArrayList<>();
+        result.add(rootNode);
+        result.addAll(getAllChildModules(rootNode.getModel(), logger).stream()
+                .map(baseDir::resolve)
+                .map(path -> Files.isDirectory(path) ? path.resolve("pom.xml") : path)
+                .map(pomFile -> {
+                    try {
+                        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader(
+                                new StringBuilder(new String(Files.readAllBytes(pomFile))),
+                                inputFactory,
+                                pomFile.toString());
+                        return new ModelNode(rootNode, getRawModel(pom), pom);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException("Could not open " + pomFile, e);
+                    } catch (XMLStreamException e) {
+                        throw new RuntimeException("Could not parse " + pomFile, e);
+                    }
+                })
+                .flatMap(node -> getRawModelTree(node, logger, inputFactory).stream())
+                .collect(Collectors.toList()));
+        return result;
+    }
+
+    /**
+     * Traverses the module tree upwards searching for the closest definition of a property with the given name.
+     *
+     * @param propertyName name of the property to be found
+     * @param node model tree node at which the search should be started
+     * @return {@link Optional} object containing the model tree node containing the closest
+     * property definition, or {@link Optional#empty()} if none has been found
+     */
+    public static Optional<ModelNode> findProperty(String propertyName, ModelNode node) {
+        if (Optional.ofNullable(node.getModel().getProperties())
+                .map(properties -> properties.getProperty(propertyName))
+                .isPresent()) {
+            return Optional.of(node);
+        }
+        return node.getParent().flatMap(parent -> findProperty(propertyName, parent));
     }
 
     /**
