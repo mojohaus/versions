@@ -514,4 +514,8 @@ public class ModifiedPomXMLEventReader implements XMLEventReader {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         return reader.read(new StringReader(pom.toString()));
     }
+
+    public String getPath() {
+        return path;
+    }
 }

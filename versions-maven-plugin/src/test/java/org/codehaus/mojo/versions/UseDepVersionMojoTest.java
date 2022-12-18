@@ -19,13 +19,30 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
+import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.mojo.versions.utils.TestUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
 /**
  * Basic tests for {@linkplain UseDepVersionMojo}.
@@ -36,16 +53,275 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
     @Rule
     public MojoRule mojoRule = new MojoRule(this);
 
+    private Path tempDir;
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        tempDir = TestUtils.createTempDir("use-dep-version");
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        try {
+            TestUtils.tearDownTempDir(tempDir);
+        } finally {
+            super.tearDown();
+        }
+    }
+
     @Test
     public void testIssue673() throws Exception {
-        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(
-                new File("target/test-classes/org/codehaus/mojo/use-dep-version/issue-637"), "use-dep-version");
-        setVariableValueToObject(mojo, "processDependencies", true);
-        setVariableValueToObject(mojo, "processDependencyManagement", true);
-        setVariableValueToObject(mojo, "excludeReactor", true);
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/issue-637"), tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "serverId", "serverId");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
 
         mojo.execute();
+    }
+
+    /**
+     * Tests a simple case with a single property: the property value needs to be changed.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertiesSimple() throws Exception {
+        Log logger = new SystemStreamLog() {
+            @Override
+            public boolean isDebugEnabled() {
+                return true;
+            }
+        };
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/simple"), tempDir);
+        TestChangeRecorder changeRecorder = new TestChangeRecorder();
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "log", logger);
+
+        mojo.execute();
+
+        String pom = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
+        assertThat(pom, containsString("<version>${revision}</version>"));
+        assertThat(pom, containsString("<revision>2.0.0</revision>"));
+    }
+
+    /**
+     * The same as {@link #testPropertiesSimple()}, but with profiles.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertiesSimpleProfiles() throws Exception {
+        Log logger = new SystemStreamLog() {
+            @Override
+            public boolean isDebugEnabled() {
+                return true;
+            }
+        };
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/simple-profiles"), tempDir);
+        TestChangeRecorder changeRecorder = new TestChangeRecorder();
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "log", logger);
+
+        mojo.execute();
+
+        String pom = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
+        assertThat(pom, containsString("<version>${revision}</version>"));
+        assertThat(pom, containsString("<revision>2.0.0</revision>"));
+    }
+
+    /**
+     * Tests a case with a single property used for more than one dependency, of which only one is to be changed:
+     * the property value must remain unchanged, and a warning must be logged.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertiesConflict() throws Exception {
+        Log logger = mock(Log.class);
+        StringBuilder warnLog = new StringBuilder();
+        doAnswer(i -> warnLog.append(i.getArgument(0).toString())).when(logger).warn(anyString());
+        TestChangeRecorder changeRecorder = new TestChangeRecorder();
+
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/conflict"), tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+        setVariableValueToObject(mojo, "log", logger);
+
+        mojo.execute();
+
+        assertThat(changeRecorder.getChanges(), empty());
+        assertThat(
+                warnLog.toString(),
+                containsString("Cannot update property ${revision}: controls more than one dependency: artifactB"));
+    }
+
+    /**
+     * Tests a case with a single property used for more than one dependency, of which only one is to be changed:
+     * however, the other dependency (not to be changed) uses the redefined value of the property.
+     * In this case, the change should take place in the child, but not in the parent.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertiesConflictRedefinition() throws Exception {
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/conflict-redefinition"),
+                tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+
+        mojo.execute();
+
+        String child = String.join("", Files.readAllLines(tempDir.resolve("child/pom.xml")));
+        String parent = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
+        assertThat(child, containsString("<version>${revision}</version>"));
+        assertThat(parent, containsString("<version>${revision}</version>"));
+        assertThat(child, containsString("<revision>2.0.0</revision>"));
+        assertThat(parent, containsString("<revision>1.0.0-SNAPSHOT</revision>"));
+    }
+
+    /**
+     * Tests a case with a single property used for more than one dependency, of which only one is to be changed:
+     * the dependency to be changed is in the parent, and both the child and the parent redefine the same property.
+     * Because the property is redefined at the child level, the child is immune to property changes, hence
+     * the substitution must take place.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertiesConflictCancellation() throws Exception {
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/conflict-cancellation"),
+                tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+
+        mojo.execute();
+
+        String child = String.join("", Files.readAllLines(tempDir.resolve("child/pom.xml")));
+        String parent = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
+        assertThat(child, containsString("<version>${revision}</version>"));
+        assertThat(parent, containsString("<version>${revision}</version>"));
+        assertThat(parent, containsString("<revision>2.0.0</revision>"));
+        assertThat(child, containsString("<revision>1.0.1</revision>"));
+    }
+
+    /**
+     * The same as {@link #testPropertiesConflictCancellation()}, but working on profiles.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertiesConflictCancellationProfiles() throws Exception {
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/"
+                        + "conflict-cancellation-profiles"),
+                tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+
+        mojo.execute();
+
+        String child = String.join("", Files.readAllLines(tempDir.resolve("child/pom.xml")));
+        String parent = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
+        assertThat(child, containsString("<version>${revision}</version>"));
+        assertThat(parent, containsString("<version>${revision}</version>"));
+        assertThat(parent, containsString("<revision>2.0.0</revision>"));
+        assertThat(child, containsString("<revision>1.0.1</revision>"));
+    }
+
+    /**
+     * Tests a case with a single property defined in the parent, and used in the child: the property value in
+     * the parent needs to be updated.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertiesChildParent() throws Exception {
+        Log logger = new SystemStreamLog() {
+            @Override
+            public boolean isDebugEnabled() {
+                return true;
+            }
+        };
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/child-parent"), tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "log", logger);
+
+        mojo.execute();
+
+        String child = String.join("", Files.readAllLines(tempDir.resolve("child/pom.xml")));
+        String parent = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
+        assertThat(child, containsString("<version>${revision}</version>"));
+        assertThat(parent, containsString("<revision>2.0.0</revision>"));
+    }
+
+    /**
+     * Tests a case with a single property defined in the parent and then redefined in the child: the property
+     * must be redefined in the child and remain the same in the parent.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertiesChildParentRedefinition() throws Exception {
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/child-parent-redefinition"),
+                tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+
+        mojo.execute();
+
+        String child = String.join("", Files.readAllLines(tempDir.resolve("child/pom.xml")));
+        String parent = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
+        assertThat(child, containsString("<version>${revision}</version>"));
+        assertThat(parent, containsString("<revision>1.0.0-SNAPSHOT</revision>"));
+        assertThat(child, containsString("<revision>2.0.0</revision>"));
+    }
+
+    /**
+     * Tests a case with a single property defined in the parent: a warning must be logged and no files must
+     * be changed.
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testPropertyFromParent() throws Exception {
+        Log logger = mock(Log.class);
+        StringBuilder log = new StringBuilder();
+        doAnswer(i -> log.append("[WARN] ").append(i.getArgument(0).toString()))
+                .when(logger)
+                .warn(anyString());
+        TestChangeRecorder changeRecorder = new TestChangeRecorder();
+
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/child-parent"), tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo)
+                mojoRule.lookupConfiguredMojo(tempDir.resolve("child").toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+        setVariableValueToObject(mojo, "log", logger);
+
+        mojo.execute();
+
+        assertThat(changeRecorder.getChanges(), empty());
+        assertThat(log.toString(), containsString("[WARN] Not updating property ${revision}: defined in parent"));
     }
 }
