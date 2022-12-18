@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -94,17 +95,17 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
 
         try {
+            Model rawModel = PomHelper.getRawModel(getProject());
             if (isProcessingDependencyManagement()) {
-                DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                DependencyManagement dependencyManagement = rawModel.getDependencyManagement();
                 if (dependencyManagement != null) {
                     useDepVersion(
                             pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
                 }
             }
 
-            if (getProject().getDependencies() != null && isProcessingDependencies()) {
-                useDepVersion(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
+            if (rawModel.getDependencies() != null && isProcessingDependencies()) {
+                useDepVersion(pom, rawModel.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
             }
 
             if (getProject().getParent() != null && isProcessingParent()) {
@@ -121,11 +122,6 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
         for (Dependency dep : dependencies) {
             if (isExcludeReactor() && isProducedByReactor(dep)) {
                 getLog().info("Ignoring reactor dependency: " + toString(dep));
-                continue;
-            }
-
-            if (isHandledByProperty(dep)) {
-                getLog().debug("Ignoring dependency with property as version: " + toString(dep));
                 continue;
             }
 
