@@ -15,6 +15,10 @@
   <name>Versions Maven Plugin</name>
   <description>The Versions Maven Plugin is used when you want to manage the versions of artifacts in a project's POM.</description>
 
+  <prerequisites>
+    <maven>${mavenVersion}</maven>
+  </prerequisites>
+
   <dependencies>
     <dependency>
       <groupId>org.codehaus.mojo.versions</groupId>
