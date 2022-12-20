@@ -26,8 +26,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generic implementation of version comparison.
@@ -37,6 +39,8 @@ import java.util.Stack;
  * Note: The implementation of the maven core should be used.
  */
 public class ComparableVersion implements Comparable<ComparableVersion> {
+    private static final Map<String, ComparableVersion> CACHE = new ConcurrentHashMap<>();
+
     private String value;
 
     private String canonical;
@@ -283,7 +287,17 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
         }
     }
 
-    public ComparableVersion(String version) {
+    /**
+     * Get a ComparableVersion representing the version in a string.
+     */
+    public static ComparableVersion of(String version) {
+        return CACHE.computeIfAbsent(version, ComparableVersion::new);
+    }
+
+    /**
+     * Create a ComparableVersion from a string. Try to avoid using this and instead use the cache by calling {@link #of(String)}
+     */
+    protected ComparableVersion(String version) {
         parseVersion(version);
     }
 

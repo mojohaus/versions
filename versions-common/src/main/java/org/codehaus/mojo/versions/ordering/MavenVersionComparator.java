@@ -39,7 +39,7 @@ public class MavenVersionComparator extends AbstractVersionComparator {
         if (o1 instanceof BoundArtifactVersion) {
             return o1.compareTo(o2);
         }
-        return new ComparableVersion(o1.toString()).compareTo(new ComparableVersion(o2.toString()));
+        return ComparableVersion.of(o1.toString()).compareTo(ComparableVersion.of(o2.toString()));
     }
 
     /**
