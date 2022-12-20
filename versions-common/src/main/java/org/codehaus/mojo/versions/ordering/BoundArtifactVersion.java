@@ -56,7 +56,7 @@ public class BoundArtifactVersion extends DefaultArtifactVersion {
             return -1;
         }
 
-        return comparator.compareTo(new ComparableVersion(other.toString()));
+        return comparator.compareTo(ComparableVersion.of(other.toString()));
     }
 
     @Override
