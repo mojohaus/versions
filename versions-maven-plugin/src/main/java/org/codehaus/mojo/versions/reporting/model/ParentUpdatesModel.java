@@ -21,12 +21,13 @@ package org.codehaus.mojo.versions.reporting.model;
 
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 
 /**
- * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
+ * Model class for using with the {@linkplain ReportRenderer} API
  */
 public class ParentUpdatesModel extends DependencyUpdatesModel {
     public ParentUpdatesModel(Dependency parent, ArtifactVersions dependencyUpdates) {

@@ -33,13 +33,13 @@ import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
-import org.codehaus.mojo.versions.api.ReportRenderer;
 import org.codehaus.mojo.versions.reporting.OverviewStats;
 import org.codehaus.mojo.versions.reporting.model.DependencyInfo;
 import org.codehaus.mojo.versions.reporting.model.DependencyReportSummary;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesReport;
 import org.codehaus.mojo.versions.reporting.model.io.xpp3.DependencyUpdatesReportXpp3Writer;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -61,14 +61,28 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
     private final Path outputFile;
     private final ArtifactVersionsCache newestUpdateCache =
             new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdate);
+
+    private final boolean allowSnapshots;
+
     /**
      * Creates a new instance
      * @param model object containing the updates model
      * @param outputFile output file for the report
      */
-    public DependencyUpdatesXmlReportRenderer(DependencyUpdatesModel model, Path outputFile) {
+    public DependencyUpdatesXmlReportRenderer(DependencyUpdatesModel model, Path outputFile, boolean allowSnapshots) {
         this.model = model;
         this.outputFile = outputFile;
+        this.allowSnapshots = allowSnapshots;
+    }
+
+    @Override
+    public boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Dependency updates";
     }
 
     /**
@@ -82,7 +96,7 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
                     setSummary(new DependencyReportSummary() {
                         {
                             OverviewStats overviewStats = OverviewStats.fromUpdates(
-                                    model.getAllUpdates().values(), newestUpdateCache);
+                                    model.getAllUpdates().values(), newestUpdateCache, isAllowSnapshots());
                             setUsingLastVersion(String.valueOf(overviewStats.getUpToDate()));
                             setNextVersionAvailable(String.valueOf(overviewStats.getAny()));
                             setNextIncrementalAvailable(String.valueOf(overviewStats.getIncremental()));
@@ -90,8 +104,9 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
                             setNextMajorAvailable(String.valueOf(overviewStats.getMajor()));
                         }
                     });
-                    setDependencyManagements(createDependencyInfo(model.getArtifactManagementUpdates()));
-                    setDependencies(createDependencyInfo(model.getArtifactUpdates()));
+                    setDependencyManagements(
+                            createDependencyInfo(model.getArtifactManagementUpdates(), isAllowSnapshots()));
+                    setDependencies(createDependencyInfo(model.getArtifactUpdates(), isAllowSnapshots()));
                 }
             });
         } catch (IOException e) {
@@ -99,7 +114,8 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
         }
     }
 
-    private static List<DependencyInfo> createDependencyInfo(Map<Dependency, ArtifactVersions> versions) {
+    private static List<DependencyInfo> createDependencyInfo(
+            Map<Dependency, ArtifactVersions> versions, boolean allowSnapshots) {
         return versions.entrySet().stream()
                 .map(e -> new DependencyInfo() {
                     {
@@ -110,13 +126,13 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
                         setType(e.getKey().getType());
                         setClassifier(e.getKey().getClassifier());
 
-                        ofNullable(e.getValue().getNewestUpdate(empty()))
+                        ofNullable(e.getValue().getNewestUpdate(empty(), allowSnapshots))
                                 .map(ArtifactVersion::toString)
                                 .ifPresent(this::setLastVersion);
 
-                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals);
-                        setSection(e.getValue(), MINOR, this::setMinors);
-                        setSection(e.getValue(), MAJOR, this::setMajors);
+                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals, allowSnapshots);
+                        setSection(e.getValue(), MINOR, this::setMinors, allowSnapshots);
+                        setSection(e.getValue(), MAJOR, this::setMajors, allowSnapshots);
 
                         setStatus(statusFor(getLastVersion(), getIncrementals(), getMinors()));
                     }

@@ -33,13 +33,13 @@ import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
-import org.codehaus.mojo.versions.api.ReportRenderer;
 import org.codehaus.mojo.versions.reporting.PluginOverviewStats;
 import org.codehaus.mojo.versions.reporting.model.PluginInfo;
 import org.codehaus.mojo.versions.reporting.model.PluginReportSummary;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesReport;
 import org.codehaus.mojo.versions.reporting.model.io.xpp3.PluginUpdatesReportXpp3Writer;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -61,14 +61,28 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
     private final Path outputFile;
     private final ArtifactVersionsCache newestUpdateCache =
             new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdate);
+
+    private final boolean allowSnapshots;
+
     /**
      * Creates a new instance
      * @param model object containing the updates model
      * @param outputFile output file for the report
      */
-    public PluginUpdatesXmlReportRenderer(PluginUpdatesModel model, Path outputFile) {
+    public PluginUpdatesXmlReportRenderer(PluginUpdatesModel model, Path outputFile, boolean allowSnapshots) {
         this.model = model;
         this.outputFile = outputFile;
+        this.allowSnapshots = allowSnapshots;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Plugin updates";
+    }
+
+    @Override
+    public boolean isAllowSnapshots() {
+        return allowSnapshots;
     }
 
     /**
@@ -82,7 +96,7 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
                     setSummary(new PluginReportSummary() {
                         {
                             PluginOverviewStats overviewStats = PluginOverviewStats.fromUpdates(
-                                    model.getAllUpdates().values(), newestUpdateCache);
+                                    model.getAllUpdates().values(), newestUpdateCache, isAllowSnapshots());
                             setUsingLastVersion(String.valueOf(overviewStats.getUpToDate()));
                             setNextVersionAvailable(String.valueOf(overviewStats.getAny()));
                             setNextIncrementalAvailable(String.valueOf(overviewStats.getIncremental()));
@@ -91,8 +105,8 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
                             setDependencyUpdates(String.valueOf(overviewStats.getDependencies()));
                         }
                     });
-                    setPluginManagements(createPluginInfo(model.getArtifactManagementUpdates()));
-                    setPlugins(createPluginInfo(model.getArtifactUpdates()));
+                    setPluginManagements(createPluginInfo(model.getArtifactManagementUpdates(), isAllowSnapshots()));
+                    setPlugins(createPluginInfo(model.getArtifactUpdates(), isAllowSnapshots()));
                 }
             });
         } catch (IOException e) {
@@ -100,7 +114,8 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
         }
     }
 
-    private static List<PluginInfo> createPluginInfo(Map<Dependency, PluginUpdatesDetails> versions) {
+    private static List<PluginInfo> createPluginInfo(
+            Map<Dependency, PluginUpdatesDetails> versions, boolean allowSnapshots) {
         return versions.entrySet().stream()
                 .map(e -> new PluginInfo() {
                     {
@@ -111,13 +126,13 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
                         setType(e.getKey().getType());
                         setClassifier(e.getKey().getClassifier());
 
-                        ofNullable(e.getValue().getNewestUpdate(empty()))
+                        ofNullable(e.getValue().getNewestUpdate(empty(), allowSnapshots))
                                 .map(ArtifactVersion::toString)
                                 .ifPresent(this::setLastVersion);
 
-                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals);
-                        setSection(e.getValue(), MINOR, this::setMinors);
-                        setSection(e.getValue(), MAJOR, this::setMajors);
+                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals, allowSnapshots);
+                        setSection(e.getValue(), MINOR, this::setMinors, allowSnapshots);
+                        setSection(e.getValue(), MAJOR, this::setMajors, allowSnapshots);
 
                         setStatus(statusFor(getLastVersion(), getIncrementals(), getMinors()));
                     }

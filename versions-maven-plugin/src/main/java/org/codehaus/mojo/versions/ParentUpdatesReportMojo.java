@@ -95,7 +95,6 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
         try {
             ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions(project.getParentArtifact(), false);
-            artifactVersions.setIncludeSnapshots(allowSnapshots);
             rendererFactory
                     .createReportRenderer(
                             getOutputName(),
@@ -118,7 +117,8 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
                                                     .getArtifact()
                                                     .getClassifier())
                                             .build(),
-                                    artifactVersions))
+                                    artifactVersions),
+                            allowSnapshots)
                     .render();
         } catch (VersionRetrievalException e) {
             throw new MavenReportException(e.getMessage(), e);

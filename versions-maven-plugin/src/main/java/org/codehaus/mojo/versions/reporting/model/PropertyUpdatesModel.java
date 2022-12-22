@@ -27,7 +27,7 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
 
 /**
- * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
+ * Model class for using with the {@linkplain org.apache.maven.reporting.MavenReportRenderer} API
  */
 public class PropertyUpdatesModel {
     private final Map<Property, PropertyVersions> allUpdates;

@@ -22,24 +22,24 @@ package org.codehaus.mojo.versions.api;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.function.TriFunction;
+import org.apache.commons.lang3.tuple.Triple;
 
 /**
- * Utility providing a cached {@link ArtifactVersions#getNewestUpdate(Optional)} API
+ * Utility providing a cached {@link ArtifactVersions#getNewestUpdate(Optional, boolean)} API
  */
 public class ArtifactVersionsCache {
-    private BiFunction<AbstractVersionDetails, Optional<Segment>, ?> cachedFunction;
-
-    private Map<Pair<? extends AbstractVersionDetails, Optional<Segment>>, Object> updateCache = new HashMap<>();
+    private TriFunction<AbstractVersionDetails, Optional<Segment>, Boolean, ?> cachedFunction;
+    private Map<Triple<? extends AbstractVersionDetails, Optional<Segment>, Boolean>, Object> updateCache =
+            new HashMap<>();
 
     /**
      * Constructs a new instance given the concrete function for obtaining the details
      *
      * @param cachedFunction reference to the function computing the required information
      */
-    public ArtifactVersionsCache(BiFunction<AbstractVersionDetails, Optional<Segment>, ?> cachedFunction) {
+    public ArtifactVersionsCache(TriFunction<AbstractVersionDetails, Optional<Segment>, Boolean, ?> cachedFunction) {
         this.cachedFunction = cachedFunction;
     }
 
@@ -52,11 +52,14 @@ public class ArtifactVersionsCache {
      * @param <R> return type of the cached function
      * @param artifactVersions {@linkplain ArtifactVersions} object referring to the given dependency
      * @param updateScope      update scope
+     * @param allowSnapshots   whether snapshots should be included
      * @return last retrieved update information
      */
     @SuppressWarnings("unchecked")
-    public <V extends AbstractVersionDetails, R> R get(V artifactVersions, Optional<Segment> updateScope) {
+    public <V extends AbstractVersionDetails, R> R get(
+            V artifactVersions, Optional<Segment> updateScope, boolean allowSnapshots) {
         return (R) updateCache.computeIfAbsent(
-                Pair.of(artifactVersions, updateScope), pair -> cachedFunction.apply(pair.getLeft(), pair.getRight()));
+                Triple.of(artifactVersions, updateScope, allowSnapshots),
+                triple -> cachedFunction.apply(triple.getLeft(), triple.getMiddle(), triple.getRight()));
     }
 }

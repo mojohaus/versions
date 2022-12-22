@@ -53,22 +53,23 @@ public class PluginOverviewStats extends OverviewStats {
      *
      * @param updates collection of all version updates, typically from {@linkplain PluginUpdatesModel#getAllUpdates()}
      * @param cache if not null, cache to retrieve the version information, initialised with
-     * the {@link ArtifactVersions#getNewestUpdate(Optional)} update information
+     * the {@link ArtifactVersions#getNewestUpdate(Optional, boolean)} update information
      * @param <T> always equal to {@linkplain PluginOverviewStats}
      * @param <V> always equal to {@linkplain PluginUpdatesDetails}
+     * @param allowSnapshots whether snapshots should be included
      * @return instance of the {@linkplain PluginOverviewStats}, initialised with the update information
      */
     public static <T extends OverviewStats, V extends AbstractVersionDetails> T fromUpdates(
-            Collection<V> updates, ArtifactVersionsCache cache) {
+            Collection<V> updates, ArtifactVersionsCache cache, boolean allowSnapshots) {
         PluginOverviewStats stats = new PluginOverviewStats();
         updates.forEach(details -> {
-            if (getNewestUpdate(cache, details, of(SUBINCREMENTAL)) != null) {
+            if (getNewestUpdate(cache, details, of(SUBINCREMENTAL), allowSnapshots) != null) {
                 stats.incrementAny();
-            } else if (getNewestUpdate(cache, details, of(INCREMENTAL)) != null) {
+            } else if (getNewestUpdate(cache, details, of(INCREMENTAL), allowSnapshots) != null) {
                 stats.incrementIncremental();
-            } else if (getNewestUpdate(cache, details, of(MINOR)) != null) {
+            } else if (getNewestUpdate(cache, details, of(MINOR), allowSnapshots) != null) {
                 stats.incrementMinor();
-            } else if (getNewestUpdate(cache, details, of(MAJOR)) != null) {
+            } else if (getNewestUpdate(cache, details, of(MAJOR), allowSnapshots) != null) {
                 stats.incrementMajor();
             } else {
                 stats.incrementUpToDate();

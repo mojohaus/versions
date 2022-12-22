@@ -34,7 +34,6 @@ import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
-import org.codehaus.mojo.versions.api.ReportRenderer;
 import org.codehaus.mojo.versions.reporting.OverviewStats;
 import org.codehaus.mojo.versions.reporting.model.PropertyAssociation;
 import org.codehaus.mojo.versions.reporting.model.PropertyInfo;
@@ -42,6 +41,7 @@ import org.codehaus.mojo.versions.reporting.model.PropertyReportSummary;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesReport;
 import org.codehaus.mojo.versions.reporting.model.io.xpp3.PropertyUpdatesReportXpp3Writer;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -60,14 +60,27 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
     private final Path outputFile;
     private final ArtifactVersionsCache newestUpdateCache =
             new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdate);
+    private final boolean allowSnapshots;
+
     /**
      * Creates a new instance
      * @param model object containing the updates model
      * @param outputFile output file for the report
      */
-    public PropertyUpdatesXmlReportRenderer(PropertyUpdatesModel model, Path outputFile) {
+    public PropertyUpdatesXmlReportRenderer(PropertyUpdatesModel model, Path outputFile, boolean allowSnapshots) {
         this.model = model;
         this.outputFile = outputFile;
+        this.allowSnapshots = allowSnapshots;
+    }
+
+    @Override
+    public boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Property updates";
     }
 
     /**
@@ -81,7 +94,7 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
                     setSummary(new PropertyReportSummary() {
                         {
                             OverviewStats overviewStats = OverviewStats.fromUpdates(
-                                    model.getAllUpdates().values(), newestUpdateCache);
+                                    model.getAllUpdates().values(), newestUpdateCache, isAllowSnapshots());
                             setUsingLastVersion(String.valueOf(overviewStats.getUpToDate()));
                             setNextVersionAvailable(String.valueOf(overviewStats.getAny()));
                             setNextIncrementalAvailable(String.valueOf(overviewStats.getIncremental()));
@@ -89,7 +102,7 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
                             setNextMajorAvailable(String.valueOf(overviewStats.getMajor()));
                         }
                     });
-                    setProperties(createPropertyInfo(model.getAllUpdates()));
+                    setProperties(createPropertyInfo(model.getAllUpdates(), allowSnapshots));
                 }
             });
         } catch (IOException e) {
@@ -97,7 +110,8 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
         }
     }
 
-    private static List<PropertyInfo> createPropertyInfo(Map<Property, PropertyVersions> versions) {
+    private static List<PropertyInfo> createPropertyInfo(
+            Map<Property, PropertyVersions> versions, boolean allowSnapshots) {
         return versions.entrySet().stream()
                 .map(e -> new PropertyInfo() {
                     {
@@ -114,13 +128,13 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
                                     .collect(Collectors.toList()));
                         }
                         setCurrentVersion(e.getKey().getVersion());
-                        ofNullable(e.getValue().getNewestUpdate(empty()))
+                        ofNullable(e.getValue().getNewestUpdate(empty(), allowSnapshots))
                                 .map(ArtifactVersion::toString)
                                 .ifPresent(this::setLastVersion);
 
-                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals);
-                        setSection(e.getValue(), MINOR, this::setMinors);
-                        setSection(e.getValue(), MAJOR, this::setMajors);
+                        setSection(e.getValue(), INCREMENTAL, this::setIncrementals, allowSnapshots);
+                        setSection(e.getValue(), MINOR, this::setMinors, allowSnapshots);
+                        setSection(e.getValue(), MAJOR, this::setMajors, allowSnapshots);
 
                         setStatus(statusFor(getLastVersion(), getIncrementals(), getMinors()));
                     }

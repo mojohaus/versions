@@ -244,6 +244,13 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
     protected RuleSet ruleSet;
 
     /**
+     * Whether snapshots should be counted as updates. Default is {@code false}.
+     *
+     * @since 2.14.2
+     */
+    protected boolean allowSnapshots;
+
+    /**
      * Retrieves the maven project from metadata
      * @param ruleHelper EnforcerRuleHelper object
      * @return maven project
@@ -349,14 +356,14 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
                     ? of(SUBINCREMENTAL)
                     : ignoreIncrementalUpdates ? of(INCREMENTAL) : ignoreMinorUpdates ? of(MINOR) : empty();
             List<ArtifactVersions> upgradable =
-                    versionsHelper.lookupDependenciesUpdates(dependencies, false).values().stream()
+                    versionsHelper.lookupDependenciesUpdates(dependencies, false, allowSnapshots).values().stream()
                             .filter(v -> v.getVersions(v.restrictionForIgnoreScope(ignoredSegment), true).length > 0)
                             .collect(Collectors.toList());
             if (upgradable.size() > maxUpdates) {
                 throw new EnforcerRuleException("More than " + maxUpdates + " upgradable artifacts detected: "
                         + upgradable.stream()
                                 .map(av -> av.getArtifact() + " -> ["
-                                        + Arrays.stream(av.getVersions())
+                                        + Arrays.stream(av.getVersions(allowSnapshots))
                                                 .map(ArtifactVersion::toString)
                                                 .collect(Collectors.joining(", "))
                                         + "]")

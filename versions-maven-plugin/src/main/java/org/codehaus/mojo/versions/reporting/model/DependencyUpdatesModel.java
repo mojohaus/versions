@@ -23,9 +23,10 @@ import java.util.Map;
 
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 /**
- * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
+ * Model class for using with the {@linkplain ReportRenderer} API
  */
 public class DependencyUpdatesModel extends AbstractUpdatesModel<ArtifactVersions> {
     public DependencyUpdatesModel(

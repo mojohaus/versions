@@ -67,10 +67,6 @@ public interface VersionDetails {
      */
     void setCurrentVersion(String currentVersion);
 
-    boolean isIncludeSnapshots();
-
-    void setIncludeSnapshots(boolean includeSnapshots);
-
     /**
      * Retrieves the current version.
      *
@@ -86,14 +82,6 @@ public interface VersionDetails {
      * @since 1.0-beta-1
      */
     VersionComparator getVersionComparator();
-
-    /**
-     * Returns all the available versions in increasing order.
-     *
-     * @return all the available versions in increasing order.
-     * @since 1.0-alpha-3
-     */
-    ArtifactVersion[] getVersions();
 
     /**
      * Returns all available versions in increasing order.
@@ -113,16 +101,6 @@ public interface VersionDetails {
      * @since 1.0-alpha-3
      */
     ArtifactVersion[] getVersions(VersionRange versionRange, boolean includeSnapshots);
-
-    /**
-     * Returns all available versions within the specified bounds.
-     *
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
-     * @return all available versions within the specified version range.
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion[] getVersions(ArtifactVersion lowerBound, ArtifactVersion upperBound);
 
     /**
      * Returns all available versions within the specified bounds.
@@ -169,17 +147,6 @@ public interface VersionDetails {
      */
     ArtifactVersion getNewestVersion(
             VersionRange versionRange, Restriction restriction, boolean includeSnapshots, boolean allowDowngrade);
-
-    /**
-     * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
-     * <code>null</code> if no such version exists.
-     *
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
-     * @return the latest version between lowerBound and upperBound or <code>null</code> if no version is available.
-     * @since 1.0-alpha-3
-     */
-    ArtifactVersion getNewestVersion(ArtifactVersion lowerBound, ArtifactVersion upperBound);
 
     /**
      * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
@@ -322,28 +289,6 @@ public interface VersionDetails {
      * <code>null</code> if no such version exists.
      *
      * @param updateScope the update scope to include.
-     * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
-     *         version is available.
-     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion getNewestUpdate(Optional<Segment> updateScope) throws InvalidSegmentException;
-
-    /**
-     * Returns the all versions newer than the specified current version, but within the specified update scope.
-     *
-     * @param updateScope the update scope to include.
-     * @return the all versions after currentVersion within the specified update scope.
-     * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion[] getAllUpdates(Optional<Segment> updateScope) throws InvalidSegmentException;
-
-    /**
-     * Returns the newest version newer than the specified current version, but within the specified update scope or
-     * <code>null</code> if no such version exists.
-     *
-     * @param updateScope the update scope to include.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
      * @return the newest version after currentVersion within the specified update scope or <code>null</code> if no
      *         version is available.
@@ -357,7 +302,7 @@ public interface VersionDetails {
      * Returns the all versions newer than the specified current version, but within the specified update scope.
      *
      * @param updateScope the update scope to include.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
+     * @param includeSnapshots {@code true} if snapshots are to be included.
      * @return the all versions after currentVersion within the specified update scope.
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
@@ -368,19 +313,11 @@ public interface VersionDetails {
     /**
      * Returns the all versions newer than the specified current version
      *
+     * @param includeSnapshots {@code true} if snapshots are to be included.
      * @return the all versions after currentVersion
      * @since 2.13.0
      */
-    ArtifactVersion[] getAllUpdates();
-
-    /**
-     * Returns the all versions newer than the specified current version, but within the specified update scope.
-     *
-     * @param versionRange the version range to include.
-     * @return the all versions after currentVersion within the specified update scope.
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion[] getAllUpdates(VersionRange versionRange);
+    ArtifactVersion[] getAllUpdates(boolean includeSnapshots);
 
     /**
      * Returns the all versions newer than the specified current version, but within the specified update scope.

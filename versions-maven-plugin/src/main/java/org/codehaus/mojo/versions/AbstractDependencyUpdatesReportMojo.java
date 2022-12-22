@@ -146,27 +146,27 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
         try {
 
             Map<Dependency, ArtifactVersions> dependencyUpdates =
-                    getHelper().lookupDependenciesUpdates(dependencies, false);
+                    getHelper().lookupDependenciesUpdates(dependencies, false, allowSnapshots);
 
             Map<Dependency, ArtifactVersions> dependencyManagementUpdates = processDependencyManagement
-                    ? getHelper().lookupDependenciesUpdates(dependencyManagement, false)
+                    ? getHelper().lookupDependenciesUpdates(dependencyManagement, false, allowSnapshots)
                     : emptyMap();
 
             if (onlyUpgradable) {
-                dependencyUpdates = filter(dependencyUpdates, e -> e.getVersions().length > 0);
-                dependencyManagementUpdates = filter(dependencyManagementUpdates, e -> e.getVersions().length > 0);
+                dependencyUpdates = filter(dependencyUpdates, e -> !e.isEmpty(allowSnapshots));
+                dependencyManagementUpdates = filter(dependencyManagementUpdates, e -> !e.isEmpty(allowSnapshots));
             }
 
             if (getLog().isDebugEnabled()) {
                 getLog().debug("Dependency versions:");
                 dependencyUpdates.forEach((key, value) -> getLog().debug(key.toString() + ": "
-                        + Arrays.stream(value.getVersions())
+                        + Arrays.stream(value.getVersions(true /* already filtered */))
                                 .map(ArtifactVersion::toString)
                                 .collect(Collectors.joining(", "))));
 
                 getLog().debug("Dependency management versions:");
                 dependencyManagementUpdates.forEach((key, value) -> getLog().debug(key.toString() + ": "
-                        + Arrays.stream(value.getVersions())
+                        + Arrays.stream(value.getVersions(true /* already filtered */))
                                 .map(ArtifactVersion::toString)
                                 .collect(Collectors.joining(", "))));
             }
@@ -275,7 +275,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
         for (String format : formats) {
             if ("html".equals(format)) {
                 rendererFactory
-                        .createReportRenderer(getOutputName(), sink, locale, model)
+                        .createReportRenderer(getOutputName(), sink, locale, model, allowSnapshots)
                         .render();
             } else if ("xml".equals(format)) {
                 Path outputDir = Paths.get(getProject().getBuild().getDirectory());
@@ -287,7 +287,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
                     }
                 }
                 Path outputFile = outputDir.resolve(getOutputName() + ".xml");
-                new DependencyUpdatesXmlReportRenderer(model, outputFile).render();
+                new DependencyUpdatesXmlReportRenderer(model, outputFile, allowSnapshots).render();
             }
         }
     }

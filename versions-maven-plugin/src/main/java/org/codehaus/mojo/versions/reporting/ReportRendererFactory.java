@@ -22,7 +22,7 @@ package org.codehaus.mojo.versions.reporting;
 import java.util.Locale;
 
 import org.apache.maven.doxia.sink.Sink;
-import org.codehaus.mojo.versions.api.ReportRenderer;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 /**
  * Factory for report renderers
@@ -37,9 +37,11 @@ public interface ReportRendererFactory {
      * @param sink sink to use for rendering
      * @param locale locale to use for rendering
      * @param model data to render
+     * @param allowSnapshots whether snapshots should be included
      * @return new report renderer
      * @throws IllegalArgumentException thrown if the report with the given name could not be found
      */
-    <T extends ReportRenderer, U> T createReportRenderer(String reportName, Sink sink, Locale locale, U model)
+    <T extends ReportRenderer, U> T createReportRenderer(
+            String reportName, Sink sink, Locale locale, U model, boolean allowSnapshots)
             throws IllegalArgumentException;
 }

@@ -131,8 +131,8 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
                     getHelper().lookupPluginsUpdates(pluginManagement, getAllowSnapshots());
 
             if (onlyUpgradable) {
-                pluginUpdates = filter(pluginUpdates, p -> p.getVersions().length > 0);
-                pluginManagementUpdates = filter(pluginManagementUpdates, p -> p.getVersions().length > 0);
+                pluginUpdates = filter(pluginUpdates, p -> !p.isEmpty(allowSnapshots));
+                pluginManagementUpdates = filter(pluginManagementUpdates, p -> !p.isEmpty(allowSnapshots));
             }
 
             renderReport(locale, sink, new PluginUpdatesModel(pluginUpdates, pluginManagementUpdates));
@@ -188,7 +188,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
         for (String format : formats) {
             if ("html".equals(format)) {
                 rendererFactory
-                        .createReportRenderer(getOutputName(), sink, locale, model)
+                        .createReportRenderer(getOutputName(), sink, locale, model, allowSnapshots)
                         .render();
             } else if ("xml".equals(format)) {
                 Path outputDir = Paths.get(getProject().getBuild().getDirectory());
@@ -200,7 +200,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
                     }
                 }
                 Path outputFile = outputDir.resolve(getOutputName() + ".xml");
-                new PluginUpdatesXmlReportRenderer(model, outputFile).render();
+                new PluginUpdatesXmlReportRenderer(model, outputFile, allowSnapshots).render();
             }
         }
     }
