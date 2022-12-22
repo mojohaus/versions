@@ -20,18 +20,22 @@
   </prerequisites>
 
   <dependencies>
+    <!-- project dependencies -->
     <dependency>
       <groupId>org.codehaus.mojo.versions</groupId>
       <artifactId>versions-model</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.codehaus.mojo.versions</groupId>
       <artifactId>versions-model-report</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.codehaus.mojo.versions</groupId>
+      <artifactId>versions-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.codehaus.mojo.versions</groupId>
       <artifactId>versions-test</artifactId>
@@ -39,52 +43,38 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.codehaus.mojo.versions</groupId>
-      <artifactId>versions-common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
+    <!-- maven core dependencies -->
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
       <scope>provided</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-settings</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-impl</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-common-artifact-filters</artifactId>
@@ -124,6 +114,7 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
 
+    <!-- testing -->
     <dependency>
       <groupId>org.apache.maven.plugin-testing</groupId>
       <artifactId>maven-plugin-testing-harness</artifactId>
@@ -164,7 +155,6 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-compat</artifactId>
-      <version>${mavenVersion}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
