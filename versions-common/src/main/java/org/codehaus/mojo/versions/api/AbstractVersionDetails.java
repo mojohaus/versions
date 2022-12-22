@@ -64,13 +64,6 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      */
     private ArtifactVersion currentVersion = null;
 
-    /**
-     * Do we want to include snapshots when snapshot inclusion is not specified. Guarded by {@link #currentVersionLock}.
-     *
-     * @since 1.0-beta-1
-     */
-    private boolean includeSnapshots = false;
-
     protected boolean verboseDetail = true;
 
     /**
@@ -146,35 +139,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     }
 
     @Override
-    public final boolean isIncludeSnapshots() {
-        synchronized (currentVersionLock) {
-            return includeSnapshots;
-        }
-    }
-
-    @Override
-    public final void setIncludeSnapshots(boolean includeSnapshots) {
-        synchronized (currentVersionLock) {
-            this.includeSnapshots = includeSnapshots;
-        }
-    }
-
-    @Override
-    public final ArtifactVersion[] getVersions() {
-        return getVersions(isIncludeSnapshots());
-    }
-
-    @Override
-    public abstract ArtifactVersion[] getVersions(boolean includeSnapshots);
-
-    @Override
     public final ArtifactVersion[] getVersions(VersionRange versionRange, boolean includeSnapshots) {
         return getVersions(versionRange, null, includeSnapshots);
-    }
-
-    @Override
-    public final ArtifactVersion[] getVersions(ArtifactVersion lowerBound, ArtifactVersion upperBound) {
-        return getVersions(lowerBound, upperBound, isIncludeSnapshots());
     }
 
     @Override
@@ -182,11 +148,6 @@ public abstract class AbstractVersionDetails implements VersionDetails {
             ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots) {
         Restriction restriction = new Restriction(lowerBound, false, upperBound, false);
         return getVersions(restriction, includeSnapshots);
-    }
-
-    @Override
-    public final ArtifactVersion getNewestVersion(ArtifactVersion lowerBound, ArtifactVersion upperBound) {
-        return getNewestVersion(lowerBound, upperBound, isIncludeSnapshots());
     }
 
     @Override
@@ -335,16 +296,6 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     }
 
     @Override
-    public final ArtifactVersion getNewestUpdate(Optional<Segment> updateScope) {
-        return getNewestUpdate(updateScope, isIncludeSnapshots());
-    }
-
-    @Override
-    public final ArtifactVersion[] getAllUpdates(Optional<Segment> updateScope) {
-        return getAllUpdates(updateScope, isIncludeSnapshots());
-    }
-
-    @Override
     public final ArtifactVersion getNewestUpdate(Optional<Segment> updateScope, boolean includeSnapshots) {
         if (isCurrentVersionDefined()) {
             return getNewestUpdate(getCurrentVersion(), updateScope, includeSnapshots);
@@ -361,13 +312,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     }
 
     @Override
-    public final ArtifactVersion[] getAllUpdates() {
-        return getAllUpdates((VersionRange) null, isIncludeSnapshots());
-    }
-
-    @Override
-    public final ArtifactVersion[] getAllUpdates(VersionRange versionRange) {
-        return getAllUpdates(versionRange, isIncludeSnapshots());
+    public final ArtifactVersion[] getAllUpdates(boolean includeSnapshots) {
+        return getAllUpdates((VersionRange) null, includeSnapshots);
     }
 
     @Override
@@ -441,13 +387,14 @@ public abstract class AbstractVersionDetails implements VersionDetails {
 
     /**
      * Returns the latest version newer than the specified current version, and within the specified update scope,
-     * or <code>null</code> if no such version exists.
+     * or {@code null} if no such version exists.
      * @param updateScope the scope of updates to include.
+     * @param includeSnapshots whether snapshots should be included
      * @return the newest version after currentVersion within the specified update scope,
      *         or <code>null</code> if no version is available.
      */
-    public final ArtifactVersion getReportNewestUpdate(Optional<Segment> updateScope) {
-        return getArtifactVersionStream(updateScope)
+    public final ArtifactVersion getReportNewestUpdate(Optional<Segment> updateScope, boolean includeSnapshots) {
+        return getArtifactVersionStream(updateScope, includeSnapshots)
                 .min(Collections.reverseOrder(getVersionComparator()))
                 .orElse(null);
     }
@@ -455,10 +402,11 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     /**
      * Returns all versions newer than the specified current version, and within the specified update scope.
      * @param updateScope the scope of updates to include.
+     * @param includeSnapshots whether snapshots should be included
      * @return all versions after currentVersion within the specified update scope.
      */
-    public final ArtifactVersion[] getReportUpdates(Optional<Segment> updateScope) {
-        TreeSet<ArtifactVersion> versions = getArtifactVersionStream(updateScope)
+    public final ArtifactVersion[] getReportUpdates(Optional<Segment> updateScope, boolean includeSnapshots) {
+        TreeSet<ArtifactVersion> versions = getArtifactVersionStream(updateScope, includeSnapshots)
                 .collect(Collectors.toCollection(() -> new TreeSet<>(getVersionComparator())));
         // filter out intermediate minor versions.
         if (!verboseDetail) {
@@ -493,16 +441,16 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     /**
      * Returns all versions newer than the specified current version, and within the specified update scope.
      * @param updateScope the scope of updates to include.
+     * @param includeSnapshots whether snapshots should be included
      * @return all versions after currentVersion within the specified update scope.
      */
-    private Stream<ArtifactVersion> getArtifactVersionStream(Optional<Segment> updateScope) {
+    private Stream<ArtifactVersion> getArtifactVersionStream(Optional<Segment> updateScope, boolean includeSnapshots) {
         if (isCurrentVersionDefined()) {
             try {
                 Restriction restriction = restrictionFor(updateScope);
 
-                return Arrays.stream(getVersions())
-                        .filter(candidate -> (isIncludeSnapshots() || !ArtifactUtils.isSnapshot(candidate.toString()))
-                                && isVersionInRestriction(restriction, candidate));
+                return Arrays.stream(getVersions(includeSnapshots))
+                        .filter(candidate -> isVersionInRestriction(restriction, candidate));
             } catch (InvalidSegmentException ignored) {
                 ignored.printStackTrace(System.err);
             }

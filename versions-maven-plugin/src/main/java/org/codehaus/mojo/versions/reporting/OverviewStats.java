@@ -57,22 +57,23 @@ public class OverviewStats {
      * @param updates collection of all version updates, typically from
      * {@linkplain org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel#getAllUpdates()}
      * @param cache if not null, cache to retrieve the version information, initialised with
-     * the {@link ArtifactVersions#getNewestUpdate(Optional)} update information
+     * the {@link ArtifactVersions#getNewestUpdate(Optional, boolean)} update information
      * @param <T> subclass of {@linkplain OverviewStats}
      * @param <V> subclass of {@linkplain ArtifactVersions}
+     * @param allowSnapshots whether snapshots should be included
      * @return instance of the {@linkplain OverviewStats}
      */
     public static <T extends OverviewStats, V extends AbstractVersionDetails> T fromUpdates(
-            Collection<V> updates, ArtifactVersionsCache cache) {
+            Collection<V> updates, ArtifactVersionsCache cache, boolean allowSnapshots) {
         OverviewStats stats = new OverviewStats();
         updates.forEach(details -> {
-            if (getNewestUpdate(cache, details, of(SUBINCREMENTAL)) != null) {
+            if (getNewestUpdate(cache, details, of(SUBINCREMENTAL), allowSnapshots) != null) {
                 stats.incrementAny();
-            } else if (getNewestUpdate(cache, details, of(INCREMENTAL)) != null) {
+            } else if (getNewestUpdate(cache, details, of(INCREMENTAL), allowSnapshots) != null) {
                 stats.incrementIncremental();
-            } else if (getNewestUpdate(cache, details, of(MINOR)) != null) {
+            } else if (getNewestUpdate(cache, details, of(MINOR), allowSnapshots) != null) {
                 stats.incrementMinor();
-            } else if (getNewestUpdate(cache, details, of(MAJOR)) != null) {
+            } else if (getNewestUpdate(cache, details, of(MAJOR), allowSnapshots) != null) {
                 stats.incrementMajor();
             } else {
                 stats.incrementUpToDate();
@@ -82,8 +83,10 @@ public class OverviewStats {
     }
 
     protected static <V extends AbstractVersionDetails> ArtifactVersion getNewestUpdate(
-            ArtifactVersionsCache cache, V details, Optional<Segment> segment) {
-        return cache != null ? cache.get(details, segment) : details.getNewestUpdate(segment);
+            ArtifactVersionsCache cache, V details, Optional<Segment> segment, boolean allowSnapshots) {
+        return cache != null
+                ? cache.get(details, segment, allowSnapshots)
+                : details.getNewestUpdate(segment, allowSnapshots);
     }
 
     public int getMajor() {

@@ -30,8 +30,8 @@ import org.codehaus.plexus.i18n.I18N;
  */
 public class ParentUpdatesReportRenderer extends DependencyUpdatesReportRenderer<ParentUpdatesModel> {
     public ParentUpdatesReportRenderer(
-            I18N i18n, Sink sink, Locale locale, String bundleName, ParentUpdatesModel model) {
-        super(i18n, sink, locale, bundleName, model);
+            I18N i18n, Sink sink, Locale locale, String bundleName, ParentUpdatesModel model, boolean allowSnapshots) {
+        super(i18n, sink, locale, bundleName, model, allowSnapshots);
     }
 
     @Override

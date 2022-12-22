@@ -36,8 +36,12 @@ import static java.util.Optional.ofNullable;
  * Common utils for Xml report renderers
  */
 class CommonXmlReportRendererUtils {
-    static void setSection(AbstractVersionDetails versions, Segment segment, Consumer<List<String>> setterFunction) {
-        ofNullable(versions.getAllUpdates(of(segment)))
+    static void setSection(
+            AbstractVersionDetails versions,
+            Segment segment,
+            Consumer<List<String>> setterFunction,
+            boolean allowSnapshots) {
+        ofNullable(versions.getAllUpdates(of(segment), allowSnapshots))
                 .map(v -> Arrays.stream(v).map(ArtifactVersion::toString).collect(Collectors.toList()))
                 .ifPresent(setterFunction);
     }

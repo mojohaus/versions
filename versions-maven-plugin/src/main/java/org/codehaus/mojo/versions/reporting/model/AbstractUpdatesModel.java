@@ -28,7 +28,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 
 /**
- * Base class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
+ * Base class for using with the {@linkplain org.codehaus.mojo.versions.reporting.util.ReportRenderer} API
  * @param <V> class extending ArtifactVersion in the constructor
  */
 public abstract class AbstractUpdatesModel<V extends ArtifactVersions> {

@@ -421,7 +421,9 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                         "Dependecy Management",
                         getLog());
 
-                logUpdates(getHelper().lookupDependenciesUpdates(dependencyManagement, false), "Dependency Management");
+                logUpdates(
+                        getHelper().lookupDependenciesUpdates(dependencyManagement, false, allowSnapshots),
+                        "Dependency Management");
             }
             if (isProcessingDependencies()) {
                 Set<Dependency> finalDependencyManagement = dependencyManagement;
@@ -440,7 +442,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                                                 dependencyExcludes,
                                                 "Dependencies",
                                                 getLog()),
-                                        false),
+                                        false,
+                                        allowSnapshots),
                         "Dependencies");
             }
             if (isProcessPluginDependenciesInDependencyManagement()) {
@@ -453,7 +456,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                                                 pluginManagementDependencyExcludes,
                                                 "Plugin Management Dependencies",
                                                 getLog()),
-                                        false),
+                                        false,
+                                        allowSnapshots),
                         "pluginManagement of plugins");
             }
             if (isProcessingPluginDependencies()) {
@@ -466,7 +470,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                                                 pluginDependencyExcludes,
                                                 "Plugin Dependencies",
                                                 getLog()),
-                                        false),
+                                        false,
+                                        allowSnapshots),
                         "Plugin Dependencies");
             }
         } catch (VersionRetrievalException e) {

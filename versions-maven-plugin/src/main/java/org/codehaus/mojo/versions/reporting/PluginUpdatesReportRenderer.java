@@ -40,8 +40,8 @@ import static java.util.Optional.empty;
 public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<PluginUpdatesModel> {
 
     public PluginUpdatesReportRenderer(
-            I18N i18n, Sink sink, Locale locale, String bundleName, PluginUpdatesModel model) {
-        super(i18n, sink, locale, bundleName, model);
+            I18N i18n, Sink sink, Locale locale, String bundleName, PluginUpdatesModel model, boolean allowSnapshots) {
+        super(i18n, sink, locale, bundleName, model, allowSnapshots);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
      */
     @Override
     protected PluginOverviewStats computeOverviewStats() {
-        return PluginOverviewStats.fromUpdates(model.getAllUpdates().values(), newestUpdateCache);
+        return PluginOverviewStats.fromUpdates(model.getAllUpdates().values(), newestUpdateCache, isAllowSnapshots());
     }
 
     @Override
@@ -178,7 +178,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
 
     private void renderPluginDetailTable(PluginUpdatesDetails details) {
         // warning: using caches here might break plugin report
-        ArtifactVersion[] allUpdates = details.getAllUpdates(empty());
+        ArtifactVersion[] allUpdates = details.getAllUpdates(empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.table();

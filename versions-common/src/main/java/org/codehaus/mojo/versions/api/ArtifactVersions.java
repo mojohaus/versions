@@ -91,7 +91,6 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
         versionComparator = other.versionComparator;
         versions = other.versions;
         setCurrentVersion(other.getCurrentVersion());
-        setIncludeSnapshots(other.isIncludeSnapshots());
     }
 
     @SuppressWarnings("checkstyle:InnerAssignment")
@@ -122,7 +121,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
 
         return new EqualsBuilder()
                 .append(getArtifact(), that.getArtifact())
-                .append(getVersions(), that.getVersions())
+                .append(getVersions(true), that.getVersions(true))
                 .append(getVersionComparator(), that.getVersionComparator())
                 .isEquals();
     }
@@ -131,7 +130,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(getArtifact())
-                .append(getVersions())
+                .append(getVersions(true))
                 .append(getVersionComparator())
                 .toHashCode();
     }
@@ -216,6 +215,24 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
                 : versions.stream()
                         .filter(v -> !ArtifactUtils.isSnapshot(v.toString()))
                         .toArray(ArtifactVersion[]::new);
+    }
+
+    /**
+     * Says whether the versions present in the {@link ArtifactVersions} collection are empty.
+     * If {@code includeSnapshots} is {@code true}, snapshots will not counted, which means that
+     * the method will only count release versions.
+     *
+     * @param includeSnapshots {@code includeSnapshots} is {@code true}, snapshots will not counted, which means that
+     *      * the method will only count release versions.
+     * @return if {@code includeSnapshots} is {@code true}, returns {@code true} if there are no versions.
+     * if {@code includeSnapshots} is {@code false}, returns {@code true} if there are no releases.
+     */
+    public boolean isEmpty(boolean includeSnapshots) {
+        return includeSnapshots
+                ? versions.isEmpty()
+                // the below means: the only versions that could be present in the collection
+                // are snapshots
+                : versions.stream().map(Object::toString).allMatch(ArtifactUtils::isSnapshot);
     }
 
     public VersionComparator getVersionComparator() {

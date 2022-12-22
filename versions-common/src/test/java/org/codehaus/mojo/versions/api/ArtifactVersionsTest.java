@@ -49,7 +49,8 @@ public class ArtifactVersionsTest {
 
     @Test
     public void test4DigitVersions() throws Exception {
-        ArtifactVersion[] versions = versions("1.0.0.1", "1.0.0.2", "2.121.2.1", "2.100.0.1", "3.1.0.1", "1.1.1");
+        ArtifactVersion[] versions =
+                versions("1.0.0.1", "1.0.0.2", "2.121.2.1", "2.100.0.1", "3.1.0.1", "1.1.1", "2.0.0-SNAPSHOT");
         final DefaultArtifact artifact = new DefaultArtifact(
                 "group",
                 "artifact",
@@ -64,21 +65,54 @@ public class ArtifactVersionsTest {
         assertEquals("artifact", instance.getArtifactId());
         assertEquals("group", instance.getGroupId());
         assertThat(
-                instance.getVersions(),
+                instance.getVersions(false),
                 arrayContaining(versions("1.0.0.1", "1.0.0.2", "1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
         assertThat(
-                instance.getVersions(new DefaultArtifactVersion("1.1"), null),
-                arrayContaining(versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
-
+                instance.getVersions(true),
+                arrayContaining(versions(
+                        "1.0.0.1", "1.0.0.2", "1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
         assertThat(
-                instance.getVersions(new DefaultArtifactVersion("1.0.0.2"), null),
+                instance.getVersions(new DefaultArtifactVersion("1.1"), null, false),
+                arrayContaining(versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
+        assertThat(
+                instance.getVersions(new DefaultArtifactVersion("1.1"), null, true),
+                arrayContaining(versions("1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
+        assertThat(
+                instance.getVersions(new DefaultArtifactVersion("1.0.0.2"), null, false),
                 // Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));
                 arrayContaining(versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
+        assertThat(
+                instance.getVersions(new DefaultArtifactVersion("1.0.0.2"), null, true),
+                // Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));
+                arrayContaining(versions("1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
 
         assertEquals(
                 new DefaultArtifactVersion("2.121.2.1"),
-                instance.getNewestVersion(new DefaultArtifactVersion("1.0"), new DefaultArtifactVersion("3.0")));
-        assertNull(instance.getNewestVersion(new DefaultArtifactVersion("1.1.1"), new DefaultArtifactVersion("2.0")));
+                instance.getNewestVersion(new DefaultArtifactVersion("1.0"), new DefaultArtifactVersion("3.0"), false));
+
+        assertNull(instance.getNewestVersion(
+                new DefaultArtifactVersion("1.1.1"), new DefaultArtifactVersion("2.0"), false));
+        assertEquals(
+                new DefaultArtifactVersion("2.0.0-SNAPSHOT"),
+                instance.getNewestVersion(
+                        new DefaultArtifactVersion("1.1.1"), new DefaultArtifactVersion("2.0"), true));
+    }
+
+    @Test
+    public void testIsEmpty() throws Exception {
+        ArtifactVersion[] versions = versions("1.0.1-SNAPSHOT", "1.0.2-SNAPSHOT");
+        final DefaultArtifact artifact = new DefaultArtifact(
+                "group",
+                "artifact",
+                VersionRange.createFromVersionSpec("[1.0,3.0]"),
+                "foo",
+                "bar",
+                "jar",
+                new DefaultArtifactHandler());
+        ArtifactVersions instance =
+                new ArtifactVersions(artifact, Arrays.asList(versions), new MavenVersionComparator());
+        assertThat(instance.isEmpty(false), is(true));
+        assertThat(instance.isEmpty(true), is(false));
     }
 
     @Test
@@ -96,13 +130,15 @@ public class ArtifactVersionsTest {
                 new ArtifactVersions(artifact, Arrays.asList(versions), new MavenVersionComparator());
         assertEquals("artifact", instance.getArtifactId());
         assertEquals("group", instance.getGroupId());
-        assertArrayEquals(versions("1.0", "1.0.1", "1.1", "3.0"), instance.getVersions());
-        assertArrayEquals(versions("3.0"), instance.getVersions(new DefaultArtifactVersion("1.1"), null));
-        assertArrayEquals(versions("1.1", "3.0"), instance.getVersions(new DefaultArtifactVersion("1.0.1"), null));
+        assertArrayEquals(versions("1.0", "1.0.1", "1.1", "3.0"), instance.getVersions(true));
+        assertArrayEquals(versions("3.0"), instance.getVersions(new DefaultArtifactVersion("1.1"), null, true));
+        assertArrayEquals(
+                versions("1.1", "3.0"), instance.getVersions(new DefaultArtifactVersion("1.0.1"), null, true));
         assertEquals(
                 new DefaultArtifactVersion("1.1"),
-                instance.getNewestVersion(new DefaultArtifactVersion("1.0"), new DefaultArtifactVersion("3.0")));
-        assertNull(instance.getNewestVersion(new DefaultArtifactVersion("1.1"), new DefaultArtifactVersion("3.0")));
+                instance.getNewestVersion(new DefaultArtifactVersion("1.0"), new DefaultArtifactVersion("3.0"), true));
+        assertNull(
+                instance.getNewestVersion(new DefaultArtifactVersion("1.1"), new DefaultArtifactVersion("3.0"), true));
     }
 
     private ArtifactVersion[] versions(String... versions) {
@@ -143,8 +179,8 @@ public class ArtifactVersionsTest {
                 Arrays.asList(versions),
                 new MavenVersionComparator());
 
-        assertThat(instance.getNewestUpdate(of(SUBINCREMENTAL)).toString(), is("1.1.0-2"));
-        assertThat(instance.getNewestUpdate(of(INCREMENTAL)).toString(), is("1.1.3"));
+        assertThat(instance.getNewestUpdate(of(SUBINCREMENTAL), false).toString(), is("1.1.0-2"));
+        assertThat(instance.getNewestUpdate(of(INCREMENTAL), false).toString(), is("1.1.3"));
     }
 
     @Test

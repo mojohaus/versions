@@ -87,7 +87,8 @@ public class DependencyUpdatesXmlRendererTest {
                                                         new DefaultArtifactVersion("2.0.0")),
                                                 new MavenVersionComparator())),
                                 emptyMap()),
-                        tempFile)
+                        tempFile,
+                        false)
                 .render();
         String output = String.join("", Files.readAllLines(tempFile)).replaceAll(">\\s*<", "><");
 

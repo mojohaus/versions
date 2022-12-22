@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions.api;
+package org.codehaus.mojo.versions.reporting.util;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,12 +19,16 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import org.apache.maven.reporting.MavenReportRenderer;
+
 /**
  * Common interface for reporting components
  */
-public interface ReportRenderer {
+public interface ReportRenderer extends MavenReportRenderer {
+
     /**
-     * Renders the report
+     * If {@code true}, the report renderer will include snapshots in the report
+     * @return if {@code true}, the report renderer will include snapshots in the report
      */
-    void render();
+    boolean isAllowSnapshots();
 }

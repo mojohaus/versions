@@ -422,23 +422,16 @@ public class DefaultVersionsHelper implements VersionsHelper {
         return new DefaultArtifactVersion(version);
     }
 
-    /**
-     * Returns a map of all possible updates per dependency. The lookup is done in parallel using
-     * {@code LOOKUP_PARALLEL_THREADS} threads.
-     *
-     * @param dependencies The set of {@link Dependency} instances to look up.
-     * @param usePluginRepositories Search the plugin repositories.
-     * @return map containing the ArtifactVersions object per dependency
-     */
     @Override
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
-            Set<Dependency> dependencies, boolean usePluginRepositories) throws VersionRetrievalException {
+            Set<Dependency> dependencies, boolean usePluginRepositories, boolean allowSnapshots)
+            throws VersionRetrievalException {
         ExecutorService executor = Executors.newFixedThreadPool(LOOKUP_PARALLEL_THREADS);
         try {
             Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>(DependencyComparator.INSTANCE);
             List<Future<? extends Pair<Dependency, ArtifactVersions>>> futures = dependencies.stream()
                     .map(dependency -> executor.submit(() -> new ImmutablePair<>(
-                            dependency, lookupDependencyUpdates(dependency, usePluginRepositories))))
+                            dependency, lookupDependencyUpdates(dependency, usePluginRepositories, allowSnapshots))))
                     .collect(Collectors.toList());
             for (Future<? extends Pair<Dependency, ArtifactVersions>> details : futures) {
                 Pair<Dependency, ArtifactVersions> pair = details.get();
@@ -455,13 +448,14 @@ public class DefaultVersionsHelper implements VersionsHelper {
     }
 
     @Override
-    public ArtifactVersions lookupDependencyUpdates(Dependency dependency, boolean usePluginRepositories)
+    public ArtifactVersions lookupDependencyUpdates(
+            Dependency dependency, boolean usePluginRepositories, boolean allowSnapshots)
             throws VersionRetrievalException {
         ArtifactVersions allVersions =
                 lookupArtifactVersions(createDependencyArtifact(dependency), usePluginRepositories);
         return new ArtifactVersions(
                 allVersions.getArtifact(),
-                Arrays.stream(allVersions.getAllUpdates()).collect(Collectors.toList()),
+                Arrays.stream(allVersions.getAllUpdates(allowSnapshots)).collect(Collectors.toList()),
                 allVersions.getVersionComparator());
     }
 
@@ -498,13 +492,13 @@ public class DefaultVersionsHelper implements VersionsHelper {
             pluginDependencies.addAll(plugin.getDependencies());
         }
         Map<Dependency, ArtifactVersions> pluginDependencyDetails =
-                lookupDependenciesUpdates(pluginDependencies, false);
+                lookupDependenciesUpdates(pluginDependencies, false, allowSnapshots);
 
         ArtifactVersions allVersions = lookupArtifactVersions(
                 createPluginArtifact(plugin.getGroupId(), plugin.getArtifactId(), version), true);
         ArtifactVersions updatedVersions = new ArtifactVersions(
                 allVersions.getArtifact(),
-                Arrays.stream(allVersions.getAllUpdates()).collect(Collectors.toList()),
+                Arrays.stream(allVersions.getAllUpdates(allowSnapshots)).collect(Collectors.toList()),
                 allVersions.getVersionComparator());
         return new PluginUpdatesDetails(updatedVersions, pluginDependencyDetails, allowSnapshots);
     }

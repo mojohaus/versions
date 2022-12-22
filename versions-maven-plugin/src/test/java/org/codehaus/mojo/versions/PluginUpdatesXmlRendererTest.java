@@ -87,7 +87,7 @@ public class PluginUpdatesXmlRendererTest {
                                                 new MavenVersionComparator())),
                                 false)),
                 emptyMap());
-        new PluginUpdatesXmlReportRenderer(pluginUpdates, tempFile).render();
+        new PluginUpdatesXmlReportRenderer(pluginUpdates, tempFile, false).render();
 
         String output = String.join("", Files.readAllLines(tempFile)).replaceAll(">\\s*<", "><");
 

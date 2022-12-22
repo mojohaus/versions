@@ -26,11 +26,11 @@ import javax.inject.Singleton;
 import java.util.Locale;
 
 import org.apache.maven.doxia.sink.Sink;
-import org.codehaus.mojo.versions.api.ReportRenderer;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.ParentUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
 /**
@@ -58,20 +58,24 @@ public class ReportRendererFactoryImpl implements ReportRendererFactory {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends ReportRenderer, U> T createReportRenderer(String reportName, Sink sink, Locale locale, U model)
+    public <T extends ReportRenderer, U> T createReportRenderer(
+            String reportName, Sink sink, Locale locale, U model, boolean allowSnapshots)
             throws IllegalArgumentException {
         if (DEPENDENCY_UPDATES_REPORT.equals(reportName) || DEPENDENCY_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
             return (T) new DependencyUpdatesReportRenderer<>(
-                    i18N, sink, locale, reportName, (DependencyUpdatesModel) model);
+                    i18N, sink, locale, reportName, (DependencyUpdatesModel) model, allowSnapshots);
         }
         if (PLUGIN_UPDATES_REPORT.equals(reportName) || PLUGIN_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
-            return (T) new PluginUpdatesReportRenderer(i18N, sink, locale, reportName, (PluginUpdatesModel) model);
+            return (T) new PluginUpdatesReportRenderer(
+                    i18N, sink, locale, reportName, (PluginUpdatesModel) model, allowSnapshots);
         }
         if (PROPERTY_UPDATES_REPORT.equals(reportName) || PROPERTY_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
-            return (T) new PropertyUpdatesReportRenderer(i18N, sink, locale, reportName, (PropertyUpdatesModel) model);
+            return (T) new PropertyUpdatesReportRenderer(
+                    i18N, sink, locale, reportName, (PropertyUpdatesModel) model, allowSnapshots);
         }
         if (PARENT_UPDATES_REPORT.equals(reportName)) {
-            return (T) new ParentUpdatesReportRenderer(i18N, sink, locale, reportName, (ParentUpdatesModel) model);
+            return (T) new ParentUpdatesReportRenderer(
+                    i18N, sink, locale, reportName, (ParentUpdatesModel) model, allowSnapshots);
         }
         throw new IllegalArgumentException("Invalid report name: " + reportName);
     }

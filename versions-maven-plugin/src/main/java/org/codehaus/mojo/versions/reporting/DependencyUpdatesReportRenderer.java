@@ -35,8 +35,9 @@ import org.codehaus.plexus.i18n.I18N;
  */
 public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel>
         extends AbstractVersionsReportRenderer<K> {
-    public DependencyUpdatesReportRenderer(I18N i18n, Sink sink, Locale locale, String bundleName, K model) {
-        super(i18n, sink, locale, bundleName, model);
+    public DependencyUpdatesReportRenderer(
+            I18N i18n, Sink sink, Locale locale, String bundleName, K model, boolean allowSnapshots) {
+        super(i18n, sink, locale, bundleName, model, allowSnapshots);
     }
 
     /**
@@ -78,7 +79,7 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel>
 
     @Override
     protected OverviewStats computeOverviewStats() {
-        return OverviewStats.fromUpdates(model.getAllUpdates().values(), newestUpdateCache);
+        return OverviewStats.fromUpdates(model.getAllUpdates().values(), newestUpdateCache, isAllowSnapshots());
     }
 
     protected void renderDependencyDetail(Dependency artifact, ArtifactVersions details) {

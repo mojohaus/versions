@@ -23,10 +23,11 @@ import java.util.Map;
 
 import org.apache.maven.model.Plugin;
 import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 
 /**
- * Model class for using with the {@linkplain org.codehaus.mojo.versions.api.ReportRenderer} API
+ * Model class for using with the {@linkplain ReportRenderer} API
  */
 public class PluginUpdatesModel extends AbstractUpdatesModel<PluginUpdatesDetails> {
     /**

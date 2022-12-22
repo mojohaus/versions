@@ -38,8 +38,13 @@ import static java.util.Optional.empty;
  */
 public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRenderer<PropertyUpdatesModel> {
     public PropertyUpdatesReportRenderer(
-            I18N i18n, Sink sink, Locale locale, String bundleName, PropertyUpdatesModel model) {
-        super(i18n, sink, locale, bundleName, model);
+            I18N i18n,
+            Sink sink,
+            Locale locale,
+            String bundleName,
+            PropertyUpdatesModel model,
+            boolean allowSnapshots) {
+        super(i18n, sink, locale, bundleName, model, allowSnapshots);
     }
 
     @Override
@@ -91,7 +96,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
     }
 
     private void renderPropertySummaryTableRow(Property property, PropertyVersions details) {
-        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty());
+        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.tableRow();
@@ -107,7 +112,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
     }
 
     protected void renderPropertyDetailTable(Property property, PropertyVersions details) {
-        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty());
+        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.table();
@@ -163,7 +168,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
 
     @Override
     protected OverviewStats computeOverviewStats() {
-        return OverviewStats.fromUpdates(model.getAllUpdates().values(), newestUpdateCache);
+        return OverviewStats.fromUpdates(model.getAllUpdates().values(), newestUpdateCache, isAllowSnapshots());
     }
 
     private void renderPropertyDetail(Property property, PropertyVersions details) {

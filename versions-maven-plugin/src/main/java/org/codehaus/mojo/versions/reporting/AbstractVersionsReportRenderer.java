@@ -35,7 +35,7 @@ import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.ArtifactVersionsCache;
-import org.codehaus.mojo.versions.api.ReportRenderer;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
 import static java.util.Optional.empty;
@@ -69,8 +69,9 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
 
     protected final SinkEventAttributes headerAttributes = new SinkEventAttributeSet(SinkEventAttributes.WIDTH, "30%");
 
-    protected AbstractVersionsReportRenderer(I18N i18n, Sink sink, Locale locale, String bundleName, T model) {
-        super(sink, i18n, locale, bundleName);
+    protected AbstractVersionsReportRenderer(
+            I18N i18n, Sink sink, Locale locale, String bundleName, T model, boolean allowSnapshots) {
+        super(sink, i18n, locale, bundleName, allowSnapshots);
         this.model = model;
     }
 
@@ -214,7 +215,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
 
     protected void renderSummaryTableRow(Dependency artifact, ArtifactVersions details, boolean includeScope) {
         details.setCurrentVersion(artifact.getVersion());
-        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty());
+        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.tableRow();
@@ -238,14 +239,14 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param details the artifact for which to render the newest versions.
      */
     protected void renderNewestVersions(AbstractVersionDetails details) {
-        renderBoldCell(newestUpdateCache.get(details, of(SUBINCREMENTAL)));
-        renderBoldCell(newestUpdateCache.get(details, of(INCREMENTAL)));
-        renderBoldCell(newestUpdateCache.get(details, of(MINOR)));
-        renderBoldCell(newestUpdateCache.get(details, of(MAJOR)));
+        renderBoldCell(newestUpdateCache.get(details, of(SUBINCREMENTAL), isAllowSnapshots()));
+        renderBoldCell(newestUpdateCache.get(details, of(INCREMENTAL), isAllowSnapshots()));
+        renderBoldCell(newestUpdateCache.get(details, of(MINOR), isAllowSnapshots()));
+        renderBoldCell(newestUpdateCache.get(details, of(MAJOR), isAllowSnapshots()));
     }
 
     protected void renderDependencyDetailTable(Dependency artifact, ArtifactVersions details, boolean includeScope) {
-        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty());
+        ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
         sink.table();
@@ -305,19 +306,19 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * @param details the artifact for which to render the status.
      */
     protected void renderStatus(AbstractVersionDetails details) {
-        if (newestUpdateCache.get(details, of(SUBINCREMENTAL)) != null) {
+        if (newestUpdateCache.get(details, of(SUBINCREMENTAL), isAllowSnapshots()) != null) {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text(getText("report.otherUpdatesAvailable"));
-        } else if (newestUpdateCache.get(details, of(INCREMENTAL)) != null) {
+        } else if (newestUpdateCache.get(details, of(INCREMENTAL), isAllowSnapshots()) != null) {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text(getText("report.incrementalUpdatesAvailable"));
-        } else if (newestUpdateCache.get(details, of(MINOR)) != null) {
+        } else if (newestUpdateCache.get(details, of(MINOR), isAllowSnapshots()) != null) {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text(getText("report.minorUpdatesAvailable"));
-        } else if (newestUpdateCache.get(details, of(MAJOR)) != null) {
+        } else if (newestUpdateCache.get(details, of(MAJOR), isAllowSnapshots()) != null) {
             renderWarningIcon();
             sink.nonBreakingSpace();
             sink.text(getText("report.majorUpdatesAvailable"));
@@ -398,19 +399,19 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected String getLabel(ArtifactVersion version, AbstractVersionDetails details) {
 
-        if (equals(version, newestUpdateCache.get(details, of(SUBINCREMENTAL)))) {
+        if (equals(version, newestUpdateCache.get(details, of(SUBINCREMENTAL), isAllowSnapshots()))) {
             return getText("report.latestSubIncremental");
         }
 
-        if (equals(version, newestUpdateCache.get(details, of(INCREMENTAL)))) {
+        if (equals(version, newestUpdateCache.get(details, of(INCREMENTAL), isAllowSnapshots()))) {
             return getText("report.latestIncremental");
         }
 
-        if (equals(version, newestUpdateCache.get(details, of(MINOR)))) {
+        if (equals(version, newestUpdateCache.get(details, of(MINOR), isAllowSnapshots()))) {
             return getText("report.latestMinor");
         }
 
-        if (equals(version, newestUpdateCache.get(details, of(MAJOR)))) {
+        if (equals(version, newestUpdateCache.get(details, of(MAJOR), isAllowSnapshots()))) {
             return getText("report.latestMajor");
         }
 

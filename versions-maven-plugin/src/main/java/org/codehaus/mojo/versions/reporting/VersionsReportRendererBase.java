@@ -25,19 +25,23 @@ import java.util.Locale;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.reporting.AbstractMavenReportRenderer;
+import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 
 /**
  * Base class over AbstractVersionsReportRenderer providing base
  * utility methods
  */
-public abstract class VersionsReportRendererBase extends AbstractMavenReportRenderer {
+public abstract class VersionsReportRendererBase extends AbstractMavenReportRenderer implements ReportRenderer {
     /**
      * Internationalization component.
      *
      * @since 1.0-beta-1
      */
     protected final I18N i18n;
+
+    private final boolean allowSnapshots;
+
     /**
      * The locale we are rendering for.
      *
@@ -51,15 +55,21 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      */
     protected String bundleName;
 
-    public VersionsReportRendererBase(Sink sink, I18N i18n, Locale locale, String bundleName) {
+    public VersionsReportRendererBase(Sink sink, I18N i18n, Locale locale, String bundleName, boolean allowSnapshots) {
         super(sink);
         this.i18n = i18n;
         this.locale = locale;
         this.bundleName = bundleName;
+        this.allowSnapshots = allowSnapshots;
     }
 
     public String getTitle() {
         return getText("report.title");
+    }
+
+    @Override
+    public boolean isAllowSnapshots() {
+        return allowSnapshots;
     }
 
     /**

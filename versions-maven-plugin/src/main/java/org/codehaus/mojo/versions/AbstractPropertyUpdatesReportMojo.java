@@ -153,7 +153,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
         for (String format : this.formats) {
             if ("html".equals(format)) {
                 this.rendererFactory
-                        .createReportRenderer(getOutputName(), sink, locale, propertyUpdatesModel)
+                        .createReportRenderer(getOutputName(), sink, locale, propertyUpdatesModel, allowSnapshots)
                         .render();
             } else if ("xml".equals(format)) {
                 Path outputDir = Paths.get(getProject().getBuild().getDirectory());
@@ -165,7 +165,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
                     }
                 }
                 Path outputFile = outputDir.resolve(getOutputName() + ".xml");
-                new PropertyUpdatesXmlReportRenderer(propertyUpdatesModel, outputFile).render();
+                new PropertyUpdatesXmlReportRenderer(propertyUpdatesModel, outputFile, allowSnapshots).render();
             }
         }
     }

@@ -432,4 +432,43 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             assert outputFile == null || !outputFile.exists() || outputFile.delete();
         }
     }
+
+    @Test
+    public void testAllowSnapshots()
+            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException {
+        Path tempPath = null;
+        try {
+            tempPath = Files.createTempFile("display-dependency-updates", "");
+            File tempFile = tempPath.toFile();
+            new DisplayDependencyUpdatesMojo(
+                    mockRepositorySystem(),
+                    mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                        {
+                            put("default-dependency", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
+                        }
+                    }),
+                    null,
+                    null) {
+                {
+                    setProject(createProject());
+                    setVariableValueToObject(this, "processDependencies", true);
+                    setVariableValueToObject(this, "dependencyIncludes", singletonList(WildcardMatcher.WILDCARD));
+                    setVariableValueToObject(this, "dependencyExcludes", emptyList());
+                    this.allowSnapshots = true;
+                    this.outputFile = tempFile;
+                    setPluginContext(new HashMap<>());
+
+                    session = mockMavenSession();
+                }
+            }.execute();
+
+            String output = String.join("", Files.readAllLines(tempPath));
+
+            assertThat(output, containsString("1.0.1-SNAPSHOT"));
+        } finally {
+            if (tempPath != null && Files.exists(tempPath)) {
+                Files.delete(tempPath);
+            }
+        }
+    }
 }
