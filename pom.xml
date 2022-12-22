@@ -137,7 +137,6 @@
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
     <!-- mono-module doesn't require site:stage for scm-publish -->
     <project.build.outputTimestamp>2022-12-15T11:58:30Z</project.build.outputTimestamp>
-    <sisu-maven-plugin-version>0.9.0.M1</sisu-maven-plugin-version>
   </properties>
 
   <dependencyManagement>
@@ -195,6 +194,29 @@
         <artifactId>maven-reporting-impl</artifactId>
         <version>3.2.0</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.doxia</groupId>
+        <artifactId>doxia-core</artifactId>
+        <version>${doxiaVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven.doxia</groupId>
+        <artifactId>doxia-sink-api</artifactId>
+        <version>${doxiaVersion}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.doxia</groupId>
+        <artifactId>doxia-site-renderer</artifactId>
+        <version>${doxia-sitetoolsVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven.doxia</groupId>
+        <artifactId>doxia-integration-tools</artifactId>
+        <version>${doxia-sitetoolsVersion}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.apache.maven.shared</groupId>
         <artifactId>maven-common-artifact-filters</artifactId>
@@ -255,6 +277,32 @@
         <scope>import</scope>
       </dependency>
 
+      <!-- manage transitive dependencies due to security patches -->
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.9.4</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.15</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.11.0</version>
+      </dependency>
+      <dependency>
+        <groupId>dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-archiver</artifactId>
+        <version>4.6.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
