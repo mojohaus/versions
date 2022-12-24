@@ -1,22 +1,18 @@
 package org.codehaus.mojo.versions.recording;
 
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 import javax.xml.parsers.DocumentBuilder;
@@ -29,8 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -61,16 +57,16 @@ public final class ChangeRecorderXMLTest {
         copyResource("expectedFile.xml", path0);
 
         final ChangeRecorder recorder = new ChangeRecorderXML();
-        recorder.recordChange(DefaultChangeRecord.builder()
-                .withKind(ChangeRecord.ChangeKind.DEPENDENCY)
+        recorder.recordChange(DefaultDependencyChangeRecord.builder()
+                .withKind(DependencyChangeRecord.ChangeKind.DEPENDENCY)
                 .withGroupId("org.codehaus")
                 .withArtifactId("example0")
                 .withOldVersion("0.0.1")
                 .withNewVersion("0.0.2")
                 .build());
 
-        recorder.recordChange(DefaultChangeRecord.builder()
-                .withKind(ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT)
+        recorder.recordChange(DefaultDependencyChangeRecord.builder()
+                .withKind(DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT)
                 .withGroupId("org.codehaus")
                 .withArtifactId("example1")
                 .withOldVersion("1.0.0")

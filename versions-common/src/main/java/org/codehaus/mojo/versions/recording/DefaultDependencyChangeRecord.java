@@ -1,18 +1,33 @@
 package org.codehaus.mojo.versions.recording;
 
+/*
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 import java.util.Objects;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
-import org.codehaus.mojo.versions.api.change.VersionChange;
-import org.codehaus.mojo.versions.api.recording.ChangeRecord;
-import org.codehaus.mojo.versions.change.DefaultVersionChange;
+import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
+import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
+import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 
-public class DefaultChangeRecord implements ChangeRecord {
+public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
     private final ChangeKind kind;
-    private final VersionChange versionChange;
+    private final DependencyVersionChange versionChange;
 
-    private DefaultChangeRecord(ChangeKind kind, VersionChange versionChange) {
+    private DefaultDependencyChangeRecord(ChangeKind kind, DependencyVersionChange versionChange) {
         this.kind = Objects.requireNonNull(kind, "kind must not be null");
         this.versionChange = Objects.requireNonNull(versionChange, "versionChange must not be null");
     }
@@ -23,7 +38,7 @@ public class DefaultChangeRecord implements ChangeRecord {
     }
 
     @Override
-    public VersionChange getVersionChange() {
+    public DependencyVersionChange getVersionChange() {
         return versionChange;
     }
 
@@ -78,8 +93,9 @@ public class DefaultChangeRecord implements ChangeRecord {
             return this;
         }
 
-        public ChangeRecord build() {
-            return new DefaultChangeRecord(kind, new DefaultVersionChange(groupId, artifactId, oldVersion, newVersion));
+        public DependencyChangeRecord build() {
+            return new DefaultDependencyChangeRecord(
+                    kind, new DefaultDependencyVersionChange(groupId, artifactId, oldVersion, newVersion));
         }
     }
 }

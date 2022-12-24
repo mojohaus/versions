@@ -1,22 +1,18 @@
 package org.codehaus.mojo.versions;
 
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 import javax.inject.Inject;
@@ -44,8 +40,8 @@ import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
@@ -132,14 +128,16 @@ public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
                         PomHelper.getRawModel(getProject()).getDependencyManagement();
                 if (dependencyManagement != null) {
                     useLatestReleases(
-                            pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
+                            pom,
+                            dependencyManagement.getDependencies(),
+                            DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
                 }
             }
             if (getProject().getDependencies() != null && isProcessingDependencies()) {
-                useLatestReleases(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
+                useLatestReleases(pom, getProject().getDependencies(), DependencyChangeRecord.ChangeKind.DEPENDENCY);
             }
             if (getProject().getParent() != null && isProcessingParent()) {
-                useLatestReleases(pom, singletonList(getParentDependency()), ChangeRecord.ChangeKind.PARENT);
+                useLatestReleases(pom, singletonList(getParentDependency()), DependencyChangeRecord.ChangeKind.PARENT);
             }
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage(), e);
@@ -147,7 +145,9 @@ public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
     }
 
     private void useLatestReleases(
-            ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            ModifiedPomXMLEventReader pom,
+            Collection<Dependency> dependencies,
+            DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
         Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
                 allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());

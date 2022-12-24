@@ -1,22 +1,18 @@
 package org.codehaus.mojo.versions;
 
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 import javax.inject.Inject;
@@ -42,9 +38,9 @@ import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.recording.DefaultChangeRecord;
+import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
+import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
@@ -483,7 +479,10 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @throws XMLStreamException thrown if updating the XML doesn't succeed
      */
     protected boolean updateDependencyVersion(
-            ModifiedPomXMLEventReader pom, Dependency dep, String newVersion, ChangeRecord.ChangeKind changeKind)
+            ModifiedPomXMLEventReader pom,
+            Dependency dep,
+            String newVersion,
+            DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException {
         boolean updated = false;
         if (isProcessingParent()
@@ -504,7 +503,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
                 getLog().debug("Made parent update from " + dep.getVersion() + " to " + newVersion);
             }
             getChangeRecorder()
-                    .recordChange(DefaultChangeRecord.builder()
+                    .recordChange(DefaultDependencyChangeRecord.builder()
                             .withKind(changeKind)
                             .withDependency(dep)
                             .withNewVersion(newVersion)
@@ -523,7 +522,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
                 getLog().info("Updated " + toString(dep) + " to version " + newVersion);
             }
             getChangeRecorder()
-                    .recordChange(DefaultChangeRecord.builder()
+                    .recordChange(DefaultDependencyChangeRecord.builder()
                             .withKind(changeKind)
                             .withDependency(dep)
                             .withNewVersion(newVersion)

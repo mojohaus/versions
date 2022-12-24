@@ -30,10 +30,18 @@ public interface ChangeRecorder {
     /**
      * Record that a dependency was updated.
      *
-     * @param changeRecord a record described change
+     * @param changeRecord a dependency record described change
      * @since 2.14.0
      */
-    void recordChange(ChangeRecord changeRecord);
+    void recordChange(DependencyChangeRecord changeRecord);
+
+    /**
+     * Record that a property was updated.
+     *
+     * @param changeRecord a property record described change
+     * @since 2.14.0
+     */
+    void recordChange(PropertyChangeRecord changeRecord);
 
     /**
      * Write the current set of changes to the given output path.

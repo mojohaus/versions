@@ -17,19 +17,40 @@ package org.codehaus.mojo.versions.api.recording;
  *
  */
 
-import org.codehaus.mojo.versions.api.change.VersionChange;
+import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 
 /**
  * Represents a change record of an item's version.
  *
  * @author Slawomir Jaranowski
  * @since 2.14.0
- * @param <T> concrete {@link VersionChange} sub-interface
  */
-public interface ChangeRecord<T extends VersionChange> {
+public interface DependencyChangeRecord extends ChangeRecord<DependencyVersionChange> {
     /**
-     * @return a details about changed item
+     * Describe where version item is updated.
+     */
+    enum ChangeKind {
+        DEPENDENCY("dependency-update"),
+        DEPENDENCY_MANAGEMENT("dependency-management-update"),
+        PARENT("parent-update"),
+        PLUGIN("plugin-update"),
+        PLUGIN_MANAGEMENT("plugin-management-update"),
+        PROPERTY("property-update");
+
+        private final String label;
+
+        ChangeKind(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+    }
+
+    /**
+     * @return a version item change kind
      * @since 2.14.0
      */
-    T getVersionChange();
+    ChangeKind getKind();
 }

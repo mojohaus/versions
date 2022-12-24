@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-
-<u:updates xmlns:u="http://www.mojohaus.org/versions-maven-plugin/schema/updates/1.0">
-    <u:update u:groupId="org.mojohaus" u:artifactId="example0" u:oldVersion="0.0.1" u:newVersion="0.0.2"/>
-    <u:update u:groupId="org.mojohaus" u:artifactId="example1" u:oldVersion="1.0.0" u:newVersion="2.0.0"/>
-</u:updates>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<updates xmlns="http://www.mojohaus.org/versions-maven-plugin/schema/updates/2.0">
+    <dependencyUpdate kind="dependency-update" groupId="org.mojohaus" artifactId="example0" oldVersion="0.0.1" newVersion="0.0.2"/>
+    <dependencyUpdate kind="dependency-update" groupId="org.mojohaus" artifactId="example1" oldVersion="1.0.0" newVersion="2.0.0"/>
+</updates>
