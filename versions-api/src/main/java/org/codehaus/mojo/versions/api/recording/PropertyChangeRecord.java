@@ -17,19 +17,12 @@ package org.codehaus.mojo.versions.api.recording;
  *
  */
 
-import org.codehaus.mojo.versions.api.change.VersionChange;
+import org.codehaus.mojo.versions.api.change.PropertyVersionChange;
 
 /**
  * Represents a change record of an item's version.
  *
  * @author Slawomir Jaranowski
  * @since 2.14.0
- * @param <T> concrete {@link VersionChange} sub-interface
  */
-public interface ChangeRecord<T extends VersionChange> {
-    /**
-     * @return a details about changed item
-     * @since 2.14.0
-     */
-    T getVersionChange();
-}
+public interface PropertyChangeRecord extends ChangeRecord<PropertyVersionChange> {}

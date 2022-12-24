@@ -1,22 +1,18 @@
 package org.codehaus.mojo.versions;
 
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 import javax.inject.Inject;
@@ -32,15 +28,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.ModelBase;
+import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -49,8 +49,9 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind;
+import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.ModelNode;
@@ -59,9 +60,6 @@ import org.codehaus.plexus.util.FileUtils;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
-import static org.codehaus.mojo.versions.api.recording.ChangeRecord.ChangeKind.DEPENDENCY;
-import static org.codehaus.mojo.versions.api.recording.ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT;
-import static org.codehaus.mojo.versions.api.recording.ChangeRecord.ChangeKind.PARENT;
 
 /**
  * Updates a dependency to a specific version.
@@ -194,17 +192,27 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                 useDepVersion(
                         node,
                         node.getModel().getDependencyManagement().getDependencies(),
-                        DEPENDENCY_MANAGEMENT,
+                        ChangeKind.DEPENDENCY_MANAGEMENT,
                         propertyBacklog,
                         propertyConflicts);
             }
 
             if (isProcessingDependencies()) {
-                useDepVersion(node, getDependencies(node.getModel()), DEPENDENCY, propertyBacklog, propertyConflicts);
+                useDepVersion(
+                        node,
+                        getDependencies(node.getModel()),
+                        ChangeKind.DEPENDENCY,
+                        propertyBacklog,
+                        propertyConflicts);
             }
 
             if (getProject().getParent() != null && isProcessingParent()) {
-                useDepVersion(node, singletonList(getParentDependency()), PARENT, propertyBacklog, propertyConflicts);
+                useDepVersion(
+                        node,
+                        singletonList(getParentDependency()),
+                        ChangeKind.PARENT,
+                        propertyBacklog,
+                        propertyConflicts);
             }
         } catch (XMLStreamException e) {
             throw new MojoFailureException(
@@ -285,7 +293,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @param node model tree node to process
      * @param dependencies collection of dependencies to process (can be taken from dependency management,
      *                     parent, or dependencies)
-     * @param changeKind {@link ChangeRecord.ChangeKind} instance for the change recorder
+     * @param changeKind {@link ChangeKind} instance for the change recorder
      * @param propertyBacklog a {@link Set} instance used to store dependencies to be updated, but which were not found
      *                        in the current subtree. These properties need to be carried over to the parent node for
      *                        processing.
@@ -300,7 +308,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     private void useDepVersion(
             ModelNode node,
             Collection<Dependency> dependencies,
-            ChangeRecord.ChangeKind changeKind,
+            ChangeKind changeKind,
             Set<String> propertyBacklog,
             Map<String, Set<Dependency>> propertyConflicts)
             throws MojoExecutionException, XMLStreamException, VersionRetrievalException {
@@ -373,7 +381,8 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                                 } else {
                                     if (getLog().isDebugEnabled()) {
                                         getLog().debug(String.format(
-                                                "Updated the %s property value to %s.", dep.getVersion(), depVersion));
+                                                "Updated the %s property value to %s.",
+                                                propertyName.get(), depVersion));
                                     }
                                 }
                                 return true;
@@ -394,34 +403,44 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     }
 
     private boolean updatePropertyValue(ModelNode node, String property) {
-        return ofNullable(node.getModel().getProperties())
-                        .filter(p -> p.containsKey(property))
-                        .map(ignored -> {
+        // concatenating properties from the main build section
+        // with properties from profiles
+        return Stream.concat(
+                        Stream.of(node.getModel().getProperties().getProperty(property))
+                                .filter(Objects::nonNull)
+                                .map(value -> new ImmutablePair<Profile, String>(null, value)),
+                        node.getModel().getProfiles().stream()
+                                .map(profile -> new ImmutablePair<>(profile, profile.getProperties()))
+                                .map(pair -> ofNullable(pair.getRight().getProperty(property))
+                                        .map(value -> new ImmutablePair<Profile, String>(pair.getLeft(), value))
+                                        .orElse(null)))
+                // and processing them
+                .filter(Objects::nonNull)
+                .map(pair -> {
+                    try {
+                        boolean result = PomHelper.setPropertyVersion(
+                                node.getModifiedPomXMLEventReader(),
+                                ofNullable(pair.getLeft()).map(Profile::getId).orElse(null),
+                                property,
+                                depVersion);
+                        if (result) {
                             try {
-                                return PomHelper.setPropertyVersion(
-                                        node.getModifiedPomXMLEventReader(), null, property, depVersion);
-                            } catch (XMLStreamException e) {
+                                getChangeRecorder()
+                                        .recordChange(DefaultPropertyChangeRecord.builder()
+                                                .withProperty(property)
+                                                .withOldValue(pair.getRight())
+                                                .withNewValue(depVersion)
+                                                .build());
+                            } catch (MojoExecutionException e) {
                                 throw new RuntimeException(e);
                             }
-                        })
-                        .orElse(false)
-                | ofNullable(node.getModel().getProfiles())
-                        .flatMap(profiles -> profiles.stream()
-                                .map(profile -> ofNullable(profile.getProperties())
-                                        .filter(p -> p.containsKey(property))
-                                        .map(ignored -> {
-                                            try {
-                                                return PomHelper.setPropertyVersion(
-                                                        node.getModifiedPomXMLEventReader(),
-                                                        profile.getId(),
-                                                        property,
-                                                        depVersion);
-                                            } catch (XMLStreamException e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                        })
-                                        .orElse(false))
-                                .reduce(Boolean::logicalOr))
-                        .orElse(false);
+                        }
+                        return result;
+                    } catch (XMLStreamException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .reduce(Boolean::logicalOr)
+                .orElse(false);
     }
 }

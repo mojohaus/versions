@@ -1,22 +1,18 @@
 package org.codehaus.mojo.versions;
 
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 import javax.inject.Inject;
@@ -38,12 +34,15 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Collections.singletonList;
+import static org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind.DEPENDENCY;
+import static org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT;
+import static org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind.PARENT;
 
 /**
  * Replaces any release versions with the next release version (if it has been released).
@@ -87,17 +86,16 @@ public class UseNextReleasesMojo extends UseLatestVersionsMojoBase {
                 DependencyManagement dependencyManagement =
                         PomHelper.getRawModel(getProject()).getDependencyManagement();
                 if (dependencyManagement != null) {
-                    useNextReleases(
-                            pom, dependencyManagement.getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
+                    useNextReleases(pom, dependencyManagement.getDependencies(), DEPENDENCY_MANAGEMENT);
                 }
             }
 
             if (getProject().getDependencies() != null && isProcessingDependencies()) {
-                useNextReleases(pom, getProject().getDependencies(), ChangeRecord.ChangeKind.DEPENDENCY);
+                useNextReleases(pom, getProject().getDependencies(), DEPENDENCY);
             }
 
             if (getProject().getParent() != null && isProcessingParent()) {
-                useNextReleases(pom, singletonList(getParentDependency()), ChangeRecord.ChangeKind.PARENT);
+                useNextReleases(pom, singletonList(getParentDependency()), PARENT);
             }
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage(), e);
@@ -105,7 +103,9 @@ public class UseNextReleasesMojo extends UseLatestVersionsMojoBase {
     }
 
     private void useNextReleases(
-            ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies, ChangeRecord.ChangeKind changeKind)
+            ModifiedPomXMLEventReader pom,
+            Collection<Dependency> dependencies,
+            DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
         useLatestVersions(
                 pom,

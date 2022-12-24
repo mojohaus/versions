@@ -1,4 +1,4 @@
-package org.codehaus.mojo.versions.api.recording;
+package org.codehaus.mojo.versions.api.change;
 
 /*
  * Copyright MojoHaus and Contributors
@@ -17,19 +17,34 @@ package org.codehaus.mojo.versions.api.recording;
  *
  */
 
-import org.codehaus.mojo.versions.api.change.VersionChange;
-
 /**
- * Represents a change record of an item's version.
+ * Represents a change of an item's version.
  *
  * @author Slawomir Jaranowski
  * @since 2.14.0
- * @param <T> concrete {@link VersionChange} sub-interface
  */
-public interface ChangeRecord<T extends VersionChange> {
+public interface DependencyVersionChange extends VersionChange {
     /**
-     * @return a details about changed item
+     * @return a groupId of changed item
      * @since 2.14.0
      */
-    T getVersionChange();
+    String getGroupId();
+
+    /**
+     * @return an ArtifactId of change item
+     * @since 2.14.0
+     */
+    String getArtifactId();
+
+    /**
+     * @return an old version of changed item
+     * @since 2.14.0
+     */
+    String getOldVersion();
+
+    /**
+     * @return a new version of changed item
+     * @since 2.14.0
+     */
+    String getNewVersion();
 }

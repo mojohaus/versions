@@ -14,37 +14,9 @@ package org.codehaus.mojo.versions.api.change;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 /**
- * Represents a change of an item's version.
- *
- * @author Slawomir Jaranowski
- * @since 2.14.0
+ * Base class for version changes
  */
-public interface VersionChange {
-    /**
-     * @return a groupId of changed item
-     * @since 2.14.0
-     */
-    String getGroupId();
-
-    /**
-     * @return an ArtifactId of change item
-     * @since 2.14.0
-     */
-    String getArtifactId();
-
-    /**
-     * @return an old version of changed item
-     * @since 2.14.0
-     */
-    String getOldVersion();
-
-    /**
-     * @return a new version of changed item
-     * @since 2.14.0
-     */
-    String getNewVersion();
-}
+public interface VersionChange {}
