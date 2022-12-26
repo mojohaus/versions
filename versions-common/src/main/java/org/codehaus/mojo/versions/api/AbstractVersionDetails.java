@@ -58,21 +58,13 @@ public abstract class AbstractVersionDetails implements VersionDetails {
                     + "[-.]?(\\d{0,2}[a-z]?|\\d{6}\\.\\d{4})|\\d{8}(?:\\.?\\d{6})?)$");
 
     /**
-     * The current version. Guarded by {@link #currentVersionLock}.
+     * Current version of the dependency artifact.
      *
      * @since 1.0-beta-1
      */
     private ArtifactVersion currentVersion = null;
 
     protected boolean verboseDetail = true;
-
-    /**
-     * Not sure if we need to be thread safe, but there's no harm being careful, after all we could be invoked from an
-     * IDE.
-     *
-     * @since 1.0-beta-1
-     */
-    private final Object currentVersionLock = new Object();
 
     protected AbstractVersionDetails() {}
 
@@ -121,16 +113,12 @@ public abstract class AbstractVersionDetails implements VersionDetails {
 
     @Override
     public final ArtifactVersion getCurrentVersion() {
-        synchronized (currentVersionLock) {
-            return currentVersion;
-        }
+        return currentVersion;
     }
 
     @Override
     public final void setCurrentVersion(ArtifactVersion currentVersion) {
-        synchronized (currentVersionLock) {
-            this.currentVersion = currentVersion;
-        }
+        this.currentVersion = currentVersion;
     }
 
     @Override
