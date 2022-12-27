@@ -96,6 +96,16 @@ public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
     @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     protected boolean allowIncrementalUpdates = true;
 
+    /**
+     * <p>Whether to downgrade a snapshot dependency if <code>allowSnapshots</code> is <code>false</code>
+     * and there exists a non-snapshot version within the range fulfilling the criteria.</p>
+     * <p>Only valid if <code>allowSnapshots</code> is <code>false</code>.</p>
+     *
+     * @since 2.15.0
+     */
+    @Parameter(property = "allowDowngrade", defaultValue = "false")
+    protected boolean allowDowngrade;
+
     // ------------------------------ METHODS --------------------------
 
     @Inject
@@ -148,7 +158,8 @@ public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
                 (dep, versions) -> {
                     try {
                         return getLastFiltered(
-                                versions.getNewerVersions(dep.getVersion(), unchangedSegment, false, false), dep);
+                                versions.getNewerVersions(dep.getVersion(), unchangedSegment, false, allowDowngrade),
+                                dep);
                     } catch (InvalidSegmentException e) {
                         getLog().warn(String.format(
                                 "Skipping the processing of %s:%s:%s due to: %s",
@@ -157,7 +168,8 @@ public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
                     return empty();
                 },
                 changeKind,
-                dep -> !SNAPSHOT_REGEX.matcher(dep.getVersion()).matches());
+                dep -> allowDowngrade
+                        || !SNAPSHOT_REGEX.matcher(dep.getVersion()).matches());
     }
 
     /**
