@@ -11,6 +11,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
+import org.codehaus.mojo.versions.change.DefaultVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.hamcrest.Matchers;
@@ -26,7 +27,10 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySys
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 
 public class UseLatestReleasesMojoTest {
@@ -97,5 +101,66 @@ public class UseLatestReleasesMojoTest {
             mojo.update(null);
         }
         assertThat(changeRecorder.getChanges(), Matchers.empty());
+    }
+
+    @Test
+    public void testAllowDowngrade()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
+            }
+        });
+        mojo.getProject()
+                .setDependencies(singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactA")
+                        .withVersion("1.0.1-SNAPSHOT")
+                        .build()));
+        mojo.allowDowngrade = true;
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(
+                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class)))
+                    .thenReturn(true);
+            pomHelper
+                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
+                    .thenReturn(mojo.getProject().getModel());
+            mojo.update(null);
+        }
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultVersionChange(
+                        "default-group", "artifactA",
+                        "1.0.1-SNAPSHOT", "1.0.0")));
+    }
+
+    @Test
+    public void testDisallowDowngrade()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
+            }
+        });
+        mojo.getProject()
+                .setDependencies(singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactA")
+                        .withVersion("1.0.1-SNAPSHOT")
+                        .build()));
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setDependencyVersion(
+                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class)))
+                    .thenReturn(true);
+            pomHelper
+                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
+                    .thenReturn(mojo.getProject().getModel());
+            mojo.update(null);
+        }
+        assertThat(changeRecorder.getChanges(), empty());
     }
 }

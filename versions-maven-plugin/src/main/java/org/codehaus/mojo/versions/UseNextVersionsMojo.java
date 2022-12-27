@@ -26,18 +26,21 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Collections.singletonList;
@@ -50,6 +53,16 @@ import static java.util.Collections.singletonList;
  */
 @Mojo(name = "use-next-versions", threadSafe = true)
 public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
+
+    /**
+     * <p>Whether to downgrade a snapshot dependency if <code>allowSnapshots</code> is <code>false</code>
+     * and there exists a non-snapshot version within the range fulfilling the criteria.</p>
+     * <p>Only valid if <code>allowSnapshots</code> is <code>false</code>.</p>
+     *
+     * @since 2.15.0
+     */
+    @Parameter(property = "allowDowngrade", defaultValue = "false")
+    protected boolean allowDowngrade;
 
     // ------------------------------ METHODS --------------------------
 
@@ -97,8 +110,15 @@ public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
         useLatestVersions(
                 pom,
                 dependencies,
-                (dep, versions) -> Arrays.stream(versions.getNewerVersions(dep.getVersion(), allowSnapshots))
-                        .findFirst(),
+                (dep, versions) -> {
+                    try {
+                        return Arrays.stream(versions.getNewerVersions(
+                                        dep.getVersion(), Optional.empty(), allowSnapshots, allowDowngrade))
+                                .findFirst();
+                    } catch (InvalidSegmentException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
                 changeKind);
     }
 }
