@@ -29,10 +29,10 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,11 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -52,9 +56,11 @@ import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Prerequisites;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.Reporting;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.building.ModelProblemCollector;
@@ -72,7 +78,6 @@ import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.wagon.Wagon;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
@@ -86,7 +91,6 @@ import org.codehaus.plexus.util.ReaderFactory;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * Displays all plugins that have newer versions available, taking care of Maven version prerequisites.
@@ -181,9 +185,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * Returns the pluginManagement section of the super-pom.
      *
      * @return Returns the pluginManagement section of the super-pom.
-     * @throws MojoExecutionException when things go wrong.
      */
-    private Map<String, String> getSuperPomPluginManagement() throws MojoExecutionException {
+    private Map<String, String> getSuperPomPluginManagement() {
         // we need to provide a copy with the version blanked out so that inferring from super-pom
         // works as for 2.x as 3.x fills in the version on us!
         Map<String, String> result =
@@ -210,40 +213,38 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                             curState = new StackState("");
                             pathStack.clear();
                         } else if (event.isStartElement()) {
-                            String elementName =
-                                    event.asStartElement().getName().getLocalPart();
-                            if (curState != null
-                                    && pathRegex.matcher(curState.path).matches()) {
-                                if ("groupId".equals(elementName)) {
-                                    curState.groupId = pom.getElementText().trim();
-                                    continue;
-                                } else if ("artifactId".equals(elementName)) {
-                                    curState.artifactId = pom.getElementText().trim();
-                                    continue;
+                            if (curState != null) {
+                                String elementName =
+                                        event.asStartElement().getName().getLocalPart();
+                                if (pathRegex.matcher(curState.path).matches()) {
+                                    if ("groupId".equals(elementName)) {
+                                        curState.groupId = pom.getElementText().trim();
+                                        continue;
+                                    } else if ("artifactId".equals(elementName)) {
+                                        curState.artifactId =
+                                                pom.getElementText().trim();
+                                        continue;
 
-                                } else if ("version".equals(elementName)) {
-                                    curState.version = pom.getElementText().trim();
-                                    continue;
-                                }
-                            }
-
-                            pathStack.push(curState);
-                            curState = new StackState(curState.path + "/" + elementName);
-                        } else if (event.isEndElement()) {
-                            if (curState != null
-                                    && pathRegex.matcher(curState.path).matches()) {
-                                if (curState.artifactId != null) {
-                                    Plugin plugin = new Plugin();
-                                    plugin.setArtifactId(curState.artifactId);
-                                    plugin.setGroupId(
-                                            curState.groupId == null
-                                                    ? PomHelper.APACHE_MAVEN_PLUGINS_GROUPID
-                                                    : curState.groupId);
-                                    plugin.setVersion(curState.version);
-                                    if (!result.containsKey(plugin.getKey())) {
-                                        result.put(plugin.getKey(), plugin.getVersion());
+                                    } else if ("version".equals(elementName)) {
+                                        curState.version = pom.getElementText().trim();
+                                        continue;
                                     }
                                 }
+
+                                pathStack.push(curState);
+                                curState = new StackState(curState.path + "/" + elementName);
+                            }
+                        } else if (event.isEndElement()) {
+                            if (curState != null
+                                    && curState.artifactId != null
+                                    && pathRegex.matcher(curState.path).matches()) {
+                                result.putIfAbsent(
+                                        Plugin.constructKey(
+                                                curState.groupId == null
+                                                        ? PomHelper.APACHE_MAVEN_PLUGINS_GROUPID
+                                                        : curState.groupId,
+                                                curState.artifactId),
+                                        curState.version);
                             }
                             curState = pathStack.pop();
                         }
@@ -260,7 +261,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Gets the plugin management plugins of a specific project.
      *
-     * @param model the model to getModel the plugin management plugins from.
+     * @param model the model to get the plugin management plugins from.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
      */
@@ -329,12 +330,12 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         Map<String, String> parentPlugins = getParentsPlugins(parents);
         // TODO remove, not used any more (found while extracting getParentsPlugins method and
         //      renaming parentPluginManagement to parentPlugins)
-        // NOTICE: getProjectPlugins() takes profiles while getParentPlugins does not
+        // NOTICE: getPluginManagementPlugins() takes profiles while getParentPlugins does not
         //         there is probably a little inconsistency (if plugins configured in profiles of parents)
         Map<String, String> parentBuildPlugins = new HashMap<>();
         Map<String, String> parentReportPlugins = new HashMap<>();
 
-        Set<Plugin> plugins = getProjectPlugins(
+        Set<Plugin> plugins = getPluginManagementPlugins(
                 superPomPluginManagement,
                 parentPlugins,
                 parentBuildPlugins,
@@ -352,14 +353,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         Map<ArtifactVersion, Map<String, String>> mavenUpgrades = new TreeMap<>(new MavenVersionComparator());
 
         for (Plugin plugin : plugins) {
-            String groupId = plugin.getGroupId();
-            String artifactId = plugin.getArtifactId();
-            String version = plugin.getVersion();
-            String coords = ArtifactUtils.versionlessKey(groupId, artifactId);
-
-            if (version == null) {
-                version = parentPlugins.get(coords);
-            }
+            String coords = ArtifactUtils.versionlessKey(plugin.getGroupId(), plugin.getArtifactId());
+            String version = ofNullable(plugin.getVersion()).orElse(parentPlugins.get(coords));
 
             boolean versionSpecifiedInCurrentPom = pluginsWithVersionsSpecified.contains(coords);
             if (!versionSpecifiedInCurrentPom && !processUnboundPlugins && parentPlugins.containsKey(coords)) {
@@ -367,70 +362,20 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 getLog().debug("Use the \"processUnboundPlugins\" parameter to see these updates.");
                 continue;
             }
+
             getLog().debug("Checking " + coords + " for updates newer than " + version);
-            String effectiveVersion = version;
-
-            Artifact artifactRange =
-                    getHelper().createPluginArtifact(plugin.getGroupId(), plugin.getArtifactId(), version);
-
-            ArtifactVersion artifactVersion = null;
+            String effectiveVersion;
+            ArtifactVersion artifactVersion;
             try {
                 // now we want to find the newest versions and check their Maven version prerequisite
-                ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions(artifactRange, true);
-                ArtifactVersion[] newerVersions = artifactVersions.getVersions(this.allowSnapshots);
-                ArtifactVersion minRequires = null;
-                for (int j = newerVersions.length - 1; j >= 0; j--) {
-                    try {
-                        ArtifactVersion pluginRequires = getPrerequisitesMavenVersion(
-                                getPluginProject(groupId, artifactId, newerVersions[j].toString()));
-                        if (artifactVersion == null && compare(specMavenVersion, pluginRequires) >= 0) {
-                            // ok, newer version compatible with current specMavenVersion
-                            artifactVersion = newerVersions[j];
-                        }
-                        if (effectiveVersion == null && compare(curMavenVersion, pluginRequires) >= 0) {
-                            // version was unspecified, current version of maven thinks it should use this
-                            effectiveVersion = newerVersions[j].toString();
-                        }
-                        if (artifactVersion != null && effectiveVersion != null) {
-                            // no need to look at any older versions: latest compatible found
-                            break;
-                        }
-                        // newer version not compatible with current specMavenVersion: track opportunity if Maven spec
-                        // upgrade
-                        if (minRequires == null || compare(minRequires, pluginRequires) > 0) {
-                            Map<String, String> upgradePlugins =
-                                    mavenUpgrades.computeIfAbsent(pluginRequires, k -> new LinkedHashMap<>());
-
-                            String upgradePluginKey = compactKey(groupId, artifactId);
-                            if (!upgradePlugins.containsKey(upgradePluginKey)) {
-                                String newer = newerVersions[j].toString();
-                                if (newer.equals(effectiveVersion)) {
-                                    // plugin version configured that require a Maven version higher than spec
-                                    upgradePlugins.put(
-                                            upgradePluginKey,
-                                            pad(upgradePluginKey, INFO_PAD_SIZE + getOutputLineWidthOffset(), newer));
-                                } else {
-                                    // plugin that can be upgraded
-                                    upgradePlugins.put(
-                                            upgradePluginKey,
-                                            pad(
-                                                    upgradePluginKey,
-                                                    INFO_PAD_SIZE + getOutputLineWidthOffset(),
-                                                    effectiveVersion,
-                                                    " -> ",
-                                                    newer));
-                                }
-                            }
-                            minRequires = pluginRequires;
-                        }
-                    } catch (ArtifactResolutionException | ProjectBuildingException e) {
-                        // ignore bad version
-                    }
-                }
+                Pair<ArtifactVersion, String> effectiveVersionPair =
+                        getEffectivePluginVersion(plugin, version, specMavenVersion, curMavenVersion, mavenUpgrades);
+                effectiveVersion = effectiveVersionPair.getRight();
+                artifactVersion = effectiveVersionPair.getLeft();
                 if (effectiveVersion != null) {
                     try {
-                        ArtifactVersion requires =
-                                getPrerequisitesMavenVersion(getPluginProject(groupId, artifactId, effectiveVersion));
+                        ArtifactVersion requires = getPrerequisitesMavenVersion(
+                                getPluginProject(plugin.getGroupId(), plugin.getArtifactId(), effectiveVersion));
                         if (minMavenVersion == null || compare(minMavenVersion, requires) < 0) {
                             minMavenVersion = requires;
                         }
@@ -455,13 +400,17 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 version = artifactVersion != null ? artifactVersion.toString() : null;
             }
 
-            getLog().debug("[" + coords + "].version=" + version);
-            getLog().debug("[" + coords + "].artifactVersion=" + artifactVersion);
-            getLog().debug("[" + coords + "].effectiveVersion=" + effectiveVersion);
-            getLog().debug("[" + coords + "].specified=" + versionSpecifiedInCurrentPom);
-            if (version == null || (!processUnboundPlugins && !versionSpecifiedInCurrentPom)) {
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("[" + coords + "].version=" + version);
+                getLog().debug("[" + coords + "].artifactVersion=" + artifactVersion);
+                getLog().debug("[" + coords + "].effectiveVersion=" + effectiveVersion);
+                getLog().debug("[" + coords + "].specified=" + versionSpecifiedInCurrentPom);
+            }
+            if (version == null || !processUnboundPlugins && !versionSpecifiedInCurrentPom) {
                 version = superPomPluginManagement.get(coords);
-                getLog().debug("[" + coords + "].superPom.version=" + version);
+                if (getLog().isDebugEnabled()) {
+                    getLog().debug("[" + coords + "].superPom.version=" + version);
+                }
 
                 newVersion = artifactVersion != null
                         ? artifactVersion.toString()
@@ -471,7 +420,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 }
 
                 pluginLockdowns.add(pad(
-                        compactKey(groupId, artifactId),
+                        compactKey(plugin.getGroupId(), plugin.getArtifactId()),
                         WARN_PAD_SIZE + getOutputLineWidthOffset(),
                         superPomDrivingMinVersion ? FROM_SUPER_POM : "",
                         newVersion));
@@ -487,7 +436,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                     && new DefaultArtifactVersion(effectiveVersion).compareTo(new DefaultArtifactVersion(newVersion))
                             < 0) {
                 pluginUpdates.add(pad(
-                        compactKey(groupId, artifactId),
+                        compactKey(plugin.getGroupId(), plugin.getArtifactId()),
                         INFO_PAD_SIZE + getOutputLineWidthOffset(),
                         effectiveVersion,
                         " -> ",
@@ -590,6 +539,70 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         logLine(false, "");
     }
 
+    private Pair<ArtifactVersion, String> getEffectivePluginVersion(
+            Plugin plugin,
+            String effectiveVersion,
+            ArtifactVersion specMavenVersion,
+            ArtifactVersion curMavenVersion,
+            Map<ArtifactVersion, Map<String, String>> mavenUpgrades)
+            throws MojoExecutionException, VersionRetrievalException {
+        Artifact artifactRange =
+                getHelper().createPluginArtifact(plugin.getGroupId(), plugin.getArtifactId(), effectiveVersion);
+        ArtifactVersion[] newerVersions =
+                getHelper().lookupArtifactVersions(artifactRange, true).getVersions(this.allowSnapshots);
+        ArtifactVersion minRequires = null;
+        ArtifactVersion artifactVersion = null;
+        for (int j = newerVersions.length - 1; j >= 0; j--) {
+            try {
+                ArtifactVersion pluginRequires = getPrerequisitesMavenVersion(
+                        getPluginProject(plugin.getGroupId(), plugin.getArtifactId(), newerVersions[j].toString()));
+                if (artifactVersion == null && compare(specMavenVersion, pluginRequires) >= 0) {
+                    // ok, newer version compatible with current specMavenVersion
+                    artifactVersion = newerVersions[j];
+                }
+                if (effectiveVersion == null && compare(curMavenVersion, pluginRequires) >= 0) {
+                    // version was unspecified, current version of maven thinks it should use this
+                    effectiveVersion = newerVersions[j].toString();
+                }
+                if (artifactVersion != null && effectiveVersion != null) {
+                    // no need to look at any older versions: latest compatible found
+                    break;
+                }
+                // newer version not compatible with current specMavenVersion: track opportunity if Maven spec
+                // upgrade
+                if (minRequires == null || compare(minRequires, pluginRequires) > 0) {
+                    Map<String, String> upgradePlugins =
+                            mavenUpgrades.computeIfAbsent(pluginRequires, k -> new LinkedHashMap<>());
+
+                    String upgradePluginKey = compactKey(plugin.getGroupId(), plugin.getArtifactId());
+                    if (!upgradePlugins.containsKey(upgradePluginKey)) {
+                        String newer = newerVersions[j].toString();
+                        if (newer.equals(effectiveVersion)) {
+                            // plugin version configured that require a Maven version higher than spec
+                            upgradePlugins.put(
+                                    upgradePluginKey,
+                                    pad(upgradePluginKey, INFO_PAD_SIZE + getOutputLineWidthOffset(), newer));
+                        } else {
+                            // plugin that can be upgraded
+                            upgradePlugins.put(
+                                    upgradePluginKey,
+                                    pad(
+                                            upgradePluginKey,
+                                            INFO_PAD_SIZE + getOutputLineWidthOffset(),
+                                            effectiveVersion,
+                                            " -> ",
+                                            newer));
+                        }
+                    }
+                    minRequires = pluginRequires;
+                }
+            } catch (ArtifactResolutionException | ProjectBuildingException e) {
+                // ignore bad version
+            }
+        }
+        return new ImmutablePair<>(artifactVersion, effectiveVersion);
+    }
+
     /**
      * Builds a {@link MavenProject} instance for the plugin with a given {@code groupId},
      * {@code artifactId}, and {@code version}.
@@ -627,21 +640,16 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     }
 
     private static String pad(String start, int len, String... ends) {
-        StringBuilder buf = new StringBuilder(len);
-        buf.append("  ");
-        buf.append(start);
-        int padding = len;
-        for (String end : ends) {
-            padding -= String.valueOf(end).length();
-        }
+        StringBuilder buf = new StringBuilder(len).append("  ").append(start).append(' ');
+        int padding = len
+                - Arrays.stream(ends)
+                        .map(String::valueOf)
+                        .map(String::length)
+                        .reduce(Integer::sum)
+                        .orElse(0);
+        IntStream.range(0, padding - buf.length()).forEach(ignored -> buf.append('.'));
         buf.append(' ');
-        while (buf.length() < padding) {
-            buf.append('.');
-        }
-        buf.append(' ');
-        for (String end : ends) {
-            buf.append(end);
-        }
+        Arrays.stream(ends).forEach(buf::append);
         return buf.toString();
     }
 
@@ -741,7 +749,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Returns a set of Strings which correspond to the plugin coordinates where there is a version specified.
      *
-     * @param pomContents The project to getModel the plugins with versions specified.
+     * @param pomContents The project to get the plugins with versions specified.
      * @param path        Path that points to the source of the XML
      * @return a set of Strings which correspond to the plugin coordinates where there is a version specified.
      */
@@ -830,7 +838,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Gets the build plugins of a specific project.
      *
-     * @param model                the model to getModel the build plugins from.
+     * @param model                the model to get the build plugins from.
      * @param onlyIncludeInherited {@code true} to only return the plugins definitions that will be inherited by
      *                             child projects.
      * @return The map of effective plugin versions keyed by coordinates.
@@ -860,21 +868,6 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     }
 
     /**
-     * Returns the lifecycle plugins of a specific project.
-     *
-     * @param project the project to getModel the lifecycle plugins from.
-     * @return The map of effective plugin versions keyed by coordinates.
-     * @throws org.apache.maven.plugin.MojoExecutionException if things go wrong.
-     * @since 1.0-alpha-1
-     */
-    private Map<String, Plugin> getLifecyclePlugins(MavenProject project) throws MojoExecutionException {
-        return getBoundPlugins(project).stream()
-                .filter(Objects::nonNull)
-                .filter(p -> p.getKey() != null)
-                .collect(HashMap<String, Plugin>::new, (m, p) -> m.put(p.getKey(), p), Map::putAll);
-    }
-
-    /**
      * Gets the plugins that are bound to the defined phases. This does not find plugins bound in the pom to a phase
      * later than the plugin is executing.
      *
@@ -883,7 +876,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     // pilfered this from enforcer-rules
     // TODO coordinate with Brian Fox to remove the duplicate code
-    private Set<Plugin> getBoundPlugins(MavenProject project) {
+    private Stream<Plugin> getBoundPlugins(MavenProject project) {
         // we need to provide a copy with the version blanked out so that inferring from super-pom
         // works as for 2.x as 3.x fills in the version on us!
         return lifecycleExecutor.getPluginsBoundByDefaultToAllLifecycles(project.getPackaging()).stream()
@@ -892,14 +885,13 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                         setGroupId(p.getGroupId());
                         setArtifactId(p.getArtifactId());
                     }
-                })
-                .collect(toSet());
+                });
     }
 
     /**
      * Returns all the parent projects of the specified project, with the root project first.
      *
-     * @param project The maven project to getModel the parents of
+     * @param project The maven project to get the parents of
      * @return the parent projects of the specified project, with the root project first.
      * @throws org.apache.maven.plugin.MojoExecutionException if the super-pom could not be created.
      * @since 1.0-alpha-1
@@ -922,23 +914,18 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param parentReportPlugins          the parent pom's report plugins.
      * @param pluginsWithVersionsSpecified the plugin coords that have a version defined in the project.
      * @return the set of plugins used by the project.
-     * @throws org.apache.maven.plugin.MojoExecutionException if things go wrong.
      */
     @SuppressWarnings("checkstyle:MethodLength")
-    private Set<Plugin> getProjectPlugins(
+    private Set<Plugin> getPluginManagementPlugins(
             Map<String, String> superPomPluginManagement,
             Map<String, String> parentPluginManagement,
             Map<String, String> parentBuildPlugins,
             Map<String, String> parentReportPlugins,
-            Set<String> pluginsWithVersionsSpecified)
-            throws MojoExecutionException {
-        Map<String, Plugin> plugins = new HashMap<>();
-
+            Set<String> pluginsWithVersionsSpecified) {
         getLog().debug("Building list of project plugins...");
 
         if (getLog().isDebugEnabled()) {
             StringWriter origModel = new StringWriter();
-
             try {
                 origModel.write("Original model:\n");
                 getProject().writeOriginalModel(origModel);
@@ -947,19 +934,6 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 // ignore
             }
         }
-
-        debugVersionMap("super-pom version map", superPomPluginManagement);
-        debugVersionMap("parent version map", parentPluginManagement);
-
-        Map<String, String> excludePluginManagement = new HashMap<>(superPomPluginManagement);
-        excludePluginManagement.putAll(parentPluginManagement);
-
-        debugVersionMap("aggregate version map", excludePluginManagement);
-
-        excludePluginManagement.keySet().removeAll(pluginsWithVersionsSpecified);
-
-        debugVersionMap("final aggregate version map", excludePluginManagement);
-
         ModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest();
         modelBuildingRequest.setUserProperties(getProject().getProperties());
         Model originalModel = modelInterpolator.interpolateModel(
@@ -968,134 +942,126 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 modelBuildingRequest,
                 new IgnoringModelProblemCollector());
 
-        try {
-            addProjectPlugins(
-                    plugins, originalModel.getBuild().getPluginManagement().getPlugins(), excludePluginManagement);
-        } catch (NullPointerException e) {
-            // guess there are no plugins here
-        }
+        Map<String, String> excludePluginManagement = new HashMap<>(superPomPluginManagement);
+        excludePluginManagement.putAll(parentPluginManagement);
+        debugVersionMap("super-pom version map", superPomPluginManagement);
+        debugVersionMap("parent version map", parentPluginManagement);
+        debugVersionMap("aggregate version map", excludePluginManagement);
+
+        excludePluginManagement.keySet().removeAll(pluginsWithVersionsSpecified);
+        debugVersionMap("final aggregate version map", excludePluginManagement);
+
+        Map<String, Plugin> plugins = new HashMap<>();
+        ofNullable(originalModel.getBuild())
+                .map(DisplayPluginUpdatesMojo::getPluginManagementPlugins)
+                .ifPresent(p -> mergePluginsMap(plugins, p, excludePluginManagement));
         debugPluginMap("after adding local pluginManagement", plugins);
 
-        try {
-            List<Plugin> lifecyclePlugins =
-                    new ArrayList<>(getLifecyclePlugins(getProject()).values());
-            for (Iterator<Plugin> i = lifecyclePlugins.iterator(); i.hasNext(); ) {
-                Plugin lifecyclePlugin = i.next();
-                if (lifecyclePlugin.getVersion() != null) {
-                    // version comes from lifecycle, therefore cannot modify
-                    i.remove();
-                } else {
-                    // lifecycle leaves version open
-                    String parentVersion = parentPluginManagement.get(lifecyclePlugin.getKey());
-                    if (parentVersion != null) {
-                        // parent controls version
-                        i.remove();
-                    }
-                }
-            }
-            addProjectPlugins(plugins, lifecyclePlugins, parentPluginManagement);
+        mergePluginsMap(plugins, getLifecyclePlugins(parentPluginManagement), parentPluginManagement);
+        debugPluginMap("after adding lifecycle plugins", plugins);
+        debugPluginMap("after adding lifecycle plugins", plugins);
 
-            debugPluginMap("after adding lifecycle plugins", plugins);
-        } catch (NullPointerException e) {
-            // using maven 3.x or newer
-        }
-
-        try {
-            List<Plugin> buildPlugins = new ArrayList<>(originalModel.getBuild().getPlugins());
-            for (Iterator<Plugin> i = buildPlugins.iterator(); i.hasNext(); ) {
-                Plugin buildPlugin = i.next();
-                if (buildPlugin.getVersion() == null) {
-                    String parentVersion = parentPluginManagement.get(buildPlugin.getKey());
-                    if (parentVersion != null) {
-                        // parent controls version
-                        i.remove();
-                    }
-                }
-            }
-            addProjectPlugins(plugins, buildPlugins, parentBuildPlugins);
-        } catch (NullPointerException e) {
-            // guess there are no plugins here
-        }
+        ofNullable(originalModel.getBuild())
+                .map(b -> getBuildPlugins(b, parentPluginManagement))
+                .ifPresent(p -> mergePluginsMap(plugins, p, parentPluginManagement));
         debugPluginMap("after adding build plugins", plugins);
 
-        try {
-            List<ReportPlugin> reportPlugins =
-                    new ArrayList<>(originalModel.getReporting().getPlugins());
-            for (Iterator<ReportPlugin> i = reportPlugins.iterator(); i.hasNext(); ) {
-                ReportPlugin reportPlugin = i.next();
-                if (reportPlugin.getVersion() == null) {
-                    String parentVersion = parentPluginManagement.get(reportPlugin.getKey());
-                    if (parentVersion != null) {
-                        // parent controls version
-                        i.remove();
-                    }
-                }
-            }
-            addProjectPlugins(plugins, toPlugins(reportPlugins), parentReportPlugins);
-        } catch (NullPointerException e) {
-            // guess there are no plugins here
-        }
+        ofNullable(originalModel.getReporting())
+                .map(r -> getReportingPlugins(r, parentPluginManagement))
+                .ifPresent(p -> mergePluginsMap(plugins, p, parentReportPlugins));
         debugPluginMap("after adding reporting plugins", plugins);
 
         for (Profile profile : originalModel.getProfiles()) {
-            try {
-                addProjectPlugins(
-                        plugins, profile.getBuild().getPluginManagement().getPlugins(), excludePluginManagement);
-            } catch (NullPointerException e) {
-                // guess there are no plugins here
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Processing profile " + profile.getId());
             }
-            debugPluginMap("after adding build pluginManagement for profile " + profile.getId(), plugins);
+            ofNullable(profile.getBuild())
+                    .map(DisplayPluginUpdatesMojo::getPluginManagementPlugins)
+                    .ifPresent(p -> mergePluginsMap(plugins, p, excludePluginManagement));
+            debugPluginMap("after adding profile " + profile.getId() + " pluginManagement", plugins);
 
-            try {
-                addProjectPlugins(plugins, profile.getBuild().getPlugins(), parentBuildPlugins);
-            } catch (NullPointerException e) {
-                // guess there are no plugins here
-            }
-            debugPluginMap("after adding build plugins for profile " + profile.getId(), plugins);
+            ofNullable(profile.getBuild())
+                    .map(b -> getBuildPlugins(b, parentPluginManagement))
+                    .ifPresent(p -> mergePluginsMap(plugins, p, parentBuildPlugins));
+            debugPluginMap("after adding profile " + profile.getId() + " build plugins", plugins);
 
-            try {
-                addProjectPlugins(plugins, toPlugins(profile.getReporting().getPlugins()), parentReportPlugins);
-            } catch (NullPointerException e) {
-                // guess there are no plugins here
-            }
-            debugPluginMap("after adding reporting plugins for profile " + profile.getId(), plugins);
+            ofNullable(profile.getReporting())
+                    .map(r -> getReportingPlugins(r, parentPluginManagement))
+                    .ifPresent(p -> mergePluginsMap(plugins, p, parentReportPlugins));
+            debugPluginMap("after adding profile " + profile.getId() + " reporting plugins", plugins);
         }
         Set<Plugin> result = new TreeSet<>(PluginComparator.INSTANCE);
         result.addAll(plugins.values());
         return result;
     }
 
+    private static Stream<Plugin> getReportingPlugins(Reporting reporting, Map<String, String> parentPluginManagement) {
+        return reporting.getPlugins().stream()
+                // removing plugins without a version
+                // and with the parent also not defining it for them
+                .filter(plugin -> plugin.getVersion() != null || parentPluginManagement.get(plugin.getKey()) == null)
+                .map(DisplayPluginUpdatesMojo::toPlugin);
+    }
+
+    private static Stream<Plugin> getPluginManagementPlugins(BuildBase buildBase) {
+        return ofNullable(buildBase.getPluginManagement())
+                .map(PluginManagement::getPlugins)
+                .map(Collection::stream)
+                .orElse(Stream.empty());
+    }
+
+    private static Stream<Plugin> getBuildPlugins(BuildBase buildBase, Map<String, String> parentPluginManagement) {
+        return buildBase.getPlugins().stream()
+                // removing plugins without a version
+                // and with the parent also not defining it for them
+                .filter(plugin -> plugin.getVersion() != null || parentPluginManagement.get(plugin.getKey()) == null);
+    }
+
+    private Stream<Plugin> getLifecyclePlugins(Map<String, String> parentPluginManagement) {
+        return getBoundPlugins(getProject())
+                .filter(Objects::nonNull)
+                .filter(p -> p.getKey() != null)
+                .filter(p -> p.getVersion() != null)
+                .filter(p -> parentPluginManagement.get(p.getKey()) != null);
+    }
+
     /**
      * Adds those project plugins which are not inherited from the parent definitions to the list of plugins.
      *
-     * @param plugins           The list of plugins.
-     * @param projectPlugins    The project's plugins.
+     * @param plugins           map of plugins to merge into
+     * @param pluginsToMerge    plugins that need to be merged with the map
      * @param parentDefinitions The parent plugin definitions.
      * @since 1.0-alpha-1
      */
-    private void addProjectPlugins(
-            Map<String, Plugin> plugins, Collection<Plugin> projectPlugins, Map<String, String> parentDefinitions) {
-        for (Plugin plugin : projectPlugins) {
-            String coord = plugin.getKey();
-            String version = plugin.getVersion();
-            String parentVersion = parentDefinitions.get(coord);
-            if (version == null
-                    && (!plugins.containsKey(coord) || plugins.get(coord).getVersion() == null)
-                    && parentVersion != null) {
-                Plugin parentPlugin = new Plugin();
-                parentPlugin.setGroupId(plugin.getGroupId());
-                parentPlugin.setArtifactId(plugin.getArtifactId());
-                parentPlugin.setVersion(parentVersion);
-                plugins.put(coord, parentPlugin);
-            } else if (parentVersion == null || !parentVersion.equals(version)) {
-                if (!plugins.containsKey(coord) || plugins.get(coord).getVersion() == null) {
-                    plugins.put(coord, plugin);
+    private void mergePluginsMap(
+            Map<String, Plugin> plugins, Stream<Plugin> pluginsToMerge, Map<String, String> parentDefinitions) {
+        pluginsToMerge.forEach(plugin -> {
+            plugins.compute(plugin.getKey(), (key, existingVal) -> {
+                String versionFromParent = parentDefinitions.get(key);
+                if (plugin.getVersion() == null
+                        && (existingVal == null || existingVal.getVersion() == null)
+                        && versionFromParent != null) {
+                    // if the plugin is not present in plugins or if it is, it doesn't have a version,
+                    // but the parent does have it -> take the version from parent
+                    Plugin parentPlugin = new Plugin();
+                    parentPlugin.setGroupId(plugin.getGroupId());
+                    parentPlugin.setArtifactId(plugin.getArtifactId());
+                    parentPlugin.setVersion(versionFromParent);
+                    return parentPlugin;
+                } else if ((versionFromParent == null || !versionFromParent.equals(plugin.getVersion()))
+                        && (existingVal == null || existingVal.getVersion() == null)) {
+                    // if parent doesn't contain the plugin key or its version differs from plugin version
+                    // and currently stored version is either null or not there
+                    return plugin;
                 }
-            }
-            if (!plugins.containsKey(coord)) {
-                plugins.put(coord, plugin);
-            }
-        }
+                // otherwise, put the new value in the map only if existingVal is null
+                if (!processUnboundPlugins) {
+                    return existingVal != null ? existingVal : plugin;
+                } else {
+                    return plugin.getVersion() != null ? plugin : existingVal;
+                }
+            });
+        });
     }
 
     /**
@@ -1110,14 +1076,14 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         if (getLog().isDebugEnabled()) {
             Set<Plugin> sorted = new TreeSet<>(PluginComparator.INSTANCE);
             sorted.addAll(plugins.values());
-            StringBuilder buf = new StringBuilder(description);
-            for (Plugin plugin : sorted) {
-                buf.append("\n    ");
-                buf.append(plugin.getKey());
-                buf.append(":");
-                buf.append(plugin.getVersion());
-            }
-            getLog().debug(buf.toString());
+            getLog().debug(sorted.stream()
+                    .collect(
+                            () -> new StringBuilder(description),
+                            (s, e) -> s.append("\n    ")
+                                    .append(e.getKey())
+                                    .append(":")
+                                    .append(e.getVersion()),
+                            StringBuilder::append));
         }
     }
 
@@ -1131,14 +1097,14 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     private void debugVersionMap(String description, Map<String, String> pluginVersions) {
         if (getLog().isDebugEnabled()) {
-            StringBuilder buf = new StringBuilder(description);
-            for (Map.Entry<String, String> pluginVersion : pluginVersions.entrySet()) {
-                buf.append("\n    ");
-                buf.append(pluginVersion.getKey());
-                buf.append(":");
-                buf.append(pluginVersion.getValue());
-            }
-            getLog().debug(buf.toString());
+            getLog().debug(pluginVersions.entrySet().stream()
+                    .collect(
+                            () -> new StringBuilder(description),
+                            (s, e) -> s.append("\n    ")
+                                    .append(e.getKey())
+                                    .append(":")
+                                    .append(e.getValue()),
+                            StringBuilder::append));
         }
     }
 
@@ -1150,54 +1116,36 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         return plugin;
     }
 
-    private static List<Plugin> toPlugins(List<ReportPlugin> reportPlugins) {
-        List<Plugin> result = new ArrayList<>(reportPlugins.size());
-        for (ReportPlugin reportPlugin : reportPlugins) {
-            result.add(toPlugin(reportPlugin));
-        }
-        return result;
+    private static Stream<Plugin> toPlugins(Collection<ReportPlugin> reportPlugins) {
+        return reportPlugins.stream().map(DisplayPluginUpdatesMojo::toPlugin);
     }
 
     /**
      * Gets the report plugins of a specific project.
      *
-     * @param model                the model to getModel the report plugins from.
+     * @param model                the model to get the report plugins from.
      * @param onlyIncludeInherited <code>true</code> to only return the plugins definitions that will be inherited by
      *                             child projects.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
      */
     private Map<String, String> getReportPlugins(Model model, boolean onlyIncludeInherited) {
-        Map<String, String> reportPlugins = new HashMap<>();
-        try {
-            for (ReportPlugin plugin : model.getReporting().getPlugins()) {
-                String coord = plugin.getKey();
-                String version = plugin.getVersion();
-                if (version != null && (!onlyIncludeInherited || getPluginInherited(plugin))) {
-                    reportPlugins.put(coord, version);
-                }
-            }
-        } catch (NullPointerException e) {
-            // guess there are no plugins here
-        }
-        try {
-            for (Profile profile : model.getProfiles()) {
-                try {
-                    for (ReportPlugin plugin : profile.getReporting().getPlugins()) {
-                        String coord = plugin.getKey();
-                        String version = plugin.getVersion();
-                        if (version != null && (!onlyIncludeInherited || getPluginInherited(plugin))) {
-                            reportPlugins.put(coord, version);
-                        }
-                    }
-                } catch (NullPointerException e) {
-                    // guess there are no plugins here
-                }
-            }
-        } catch (NullPointerException e) {
-            // guess there are no profiles here
-        }
-        return reportPlugins;
+        return Stream.concat(
+                        ofNullable(model.getReporting())
+                                .map(Reporting::getPlugins)
+                                .map(Collection::stream)
+                                .orElse(Stream.empty()),
+                        ofNullable(model.getProfiles())
+                                .flatMap(profiles -> profiles.stream()
+                                        .map(Profile::getReporting)
+                                        .filter(Objects::nonNull)
+                                        .map(Reporting::getPlugins)
+                                        .map(Collection::stream)
+                                        .reduce(Stream::concat))
+                                .orElse(Stream.empty()))
+                .filter(p -> p.getVersion() != null)
+                .filter(p -> !onlyIncludeInherited || getPluginInherited(p))
+                .collect(toMap(ReportPlugin::getKey, ReportPlugin::getVersion));
     }
 
     /**
