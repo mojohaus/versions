@@ -64,6 +64,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
@@ -144,6 +145,17 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.14.0
      */
     protected final ProjectBuilder projectBuilder;
+
+    /**
+     * <p>If set to {@code true}, will also display updates to plugins where no version is specified
+     * in the current POM, but whose version is specified in the parent or the "superpom".</p>
+     * <p>It might not always be possible to update these plugins,
+     * thus the default value of this parameter is {@code false}</p>.
+     *
+     * @since 2.15.0
+     */
+    @Parameter(property = "processUnboundPlugins", defaultValue = "false")
+    protected boolean processUnboundPlugins;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -350,11 +362,11 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             }
 
             boolean versionSpecifiedInCurrentPom = pluginsWithVersionsSpecified.contains(coords);
-            if (!versionSpecifiedInCurrentPom && parentPlugins.containsKey(coords)) {
+            if (!versionSpecifiedInCurrentPom && !processUnboundPlugins && parentPlugins.containsKey(coords)) {
                 getLog().debug("Skip " + coords + ", version " + version + " is defined in parent POM.");
+                getLog().debug("Use the \"processUnboundPlugins\" parameter to see these updates.");
                 continue;
             }
-
             getLog().debug("Checking " + coords + " for updates newer than " + version);
             String effectiveVersion = version;
 
@@ -447,7 +459,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             getLog().debug("[" + coords + "].artifactVersion=" + artifactVersion);
             getLog().debug("[" + coords + "].effectiveVersion=" + effectiveVersion);
             getLog().debug("[" + coords + "].specified=" + versionSpecifiedInCurrentPom);
-            if (version == null || !versionSpecifiedInCurrentPom) {
+            if (version == null || (!processUnboundPlugins && !versionSpecifiedInCurrentPom)) {
                 version = superPomPluginManagement.get(coords);
                 getLog().debug("[" + coords + "].superPom.version=" + version);
 
