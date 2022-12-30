@@ -66,7 +66,6 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.StringUtils;
 
-import static java.util.Optional.ofNullable;
 import static org.codehaus.plexus.util.StringUtils.isEmpty;
 
 /**
@@ -252,6 +251,15 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      */
     protected final ProjectBuilder projectBuilder;
 
+    /**
+     * If set to {@code false}, the plugin will not interpolate property values when looking for versions
+     * to be changed, but will instead operate on raw model.
+     *
+     * @since 2.15.0
+     */
+    @Parameter(property = "interpolateProperties", defaultValue = "true")
+    protected boolean interpolateProperties = true;
+
     @Inject
     public SetMojo(
             RepositorySystem repositorySystem,
@@ -350,17 +358,16 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                     Pattern.compile(RegexUtils.convertWildcardsToRegex(fixNullOrEmpty(oldVersion, "*"), true));
 
             for (Model m : reactor.values()) {
-                Map<String, String> properties = ofNullable(m.getProperties())
-                        .map(p -> p.entrySet().stream()
-                                .collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue()
-                                        .toString())))
-                        .orElse(null);
-
                 String mGroupId = PomHelper.getGroupId(m);
                 String mArtifactId = PomHelper.getArtifactId(m);
                 String mVersion = PomHelper.getVersion(m);
 
-                if (properties != null) {
+                if (interpolateProperties) {
+                    assert m.getProperties() != null; // always non-null
+                    Map<String, String> properties = m.getProperties().entrySet().stream()
+                            .collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue()
+                                    .toString()));
+
                     mGroupId = PomHelper.evaluate(mGroupId, properties);
                     mArtifactId = PomHelper.evaluate(mArtifactId, properties);
                     mVersion = PomHelper.evaluate(mVersion, properties);

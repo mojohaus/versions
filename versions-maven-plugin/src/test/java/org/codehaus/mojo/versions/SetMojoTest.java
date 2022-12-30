@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -159,11 +161,12 @@ public class SetMojoTest extends AbstractMojoTestCase {
                 not(containsString("<version>bar</version>")));
     }
 
-    private void testSetParameterValue(String filename) throws Exception {
+    private void testSetParameterValue(String filename, Consumer<SetMojo>... initializers) throws Exception {
         Files.copy(
                 Paths.get("src/test/resources/org/codehaus/mojo/set/issue-855/").resolve(filename),
                 tempDir.resolve("pom.xml"));
         SetMojo mojo = (SetMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "set");
+        Stream.of(initializers).forEachOrdered(i -> i.accept(mojo));
         mojo.execute();
         assertThat(
                 String.join("", Files.readAllLines(tempDir.resolve("pom.xml"))),
@@ -173,6 +176,28 @@ public class SetMojoTest extends AbstractMojoTestCase {
     @Test
     public void testSetParameterValueSimple() throws Exception {
         testSetParameterValue("pom-simple.xml");
+    }
+
+    @Test
+    public void testSetParameterValueSimpleNoInterpolation() throws Exception {
+        try {
+            testSetParameterValue("pom-simple.xml", mojo -> mojo.interpolateProperties = false);
+            fail();
+        } catch (AssertionError e) {
+            assertThat(e.getMessage(), containsString("Expected: a string containing \"<version>testing</version>"));
+        }
+    }
+
+    @Test
+    public void testSetParameterValueSimpleNoInterpolationWildcard() throws Exception {
+        testSetParameterValue("pom-simple.xml", mojo -> {
+            mojo.interpolateProperties = false;
+            try {
+                setVariableValueToObject(mojo, "oldVersion", "*");
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Test
