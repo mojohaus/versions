@@ -23,9 +23,9 @@ import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -41,7 +41,6 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Collections.singletonList;
-import static java.util.Optional.of;
 
 /**
  * Replaces any release versions with the next release version (if it has been released).
@@ -51,13 +50,6 @@ import static java.util.Optional.of;
  */
 @Mojo(name = "use-next-releases", threadSafe = true)
 public class UseNextReleasesMojo extends UseLatestVersionsMojoBase {
-
-    // ------------------------------ FIELDS ------------------------------
-
-    /**
-     * Pattern to match a snapshot version.
-     */
-    private static final Pattern MATCH_SNAPSHOT_REGEX = Pattern.compile("^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$");
 
     // ------------------------------ METHODS --------------------------
 
@@ -107,7 +99,8 @@ public class UseNextReleasesMojo extends UseLatestVersionsMojoBase {
         useLatestVersions(
                 pom,
                 dependencies,
-                (dep, versions) -> of(versions.getNewerVersions(dep.getVersion(), false)[0]),
+                (dep, versions) -> Arrays.stream(versions.getNewerVersions(dep.getVersion(), false))
+                        .findFirst(),
                 changeKind,
                 dep -> !SNAPSHOT_REGEX.matcher(dep.getVersion()).matches());
     }

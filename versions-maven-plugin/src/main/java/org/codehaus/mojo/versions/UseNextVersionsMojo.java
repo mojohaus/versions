@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -40,7 +41,6 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Collections.singletonList;
-import static java.util.Optional.of;
 
 /**
  * Replaces any version with the latest version.
@@ -97,7 +97,8 @@ public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
         useLatestVersions(
                 pom,
                 dependencies,
-                (dep, versions) -> of(versions.getNewerVersions(dep.getVersion(), allowSnapshots)[0]),
+                (dep, versions) -> Arrays.stream(versions.getNewerVersions(dep.getVersion(), allowSnapshots))
+                        .findFirst(),
                 changeKind);
     }
 }
