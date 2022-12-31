@@ -4,12 +4,9 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.HashMap;
 
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -27,11 +24,10 @@ import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
 public class UseLatestReleasesMojoTest {
     private UseLatestReleasesMojo mojo;
@@ -39,20 +35,7 @@ public class UseLatestReleasesMojoTest {
 
     @Before
     public void setUp() throws Exception {
-        RepositorySystem repositorySystemMock = mock(RepositorySystem.class);
-        when(repositorySystemMock.createDependencyArtifact(any(Dependency.class)))
-                .thenAnswer(invocation -> {
-                    Dependency dependency = invocation.getArgument(0);
-                    return new DefaultArtifact(
-                            dependency.getGroupId(),
-                            dependency.getArtifactId(),
-                            dependency.getVersion(),
-                            dependency.getScope(),
-                            dependency.getType(),
-                            dependency.getClassifier() != null ? dependency.getClassifier() : "default",
-                            new DefaultArtifactHandlerStub("default"));
-                });
-
+        RepositorySystem repositorySystemMock = mockRepositorySystem();
         org.eclipse.aether.RepositorySystem aetherRepositorySystem =
                 mockAetherRepositorySystem(new HashMap<String, String[]>() {
                     {
