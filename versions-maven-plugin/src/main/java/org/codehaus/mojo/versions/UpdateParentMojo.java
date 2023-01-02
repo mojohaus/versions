@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -48,6 +47,7 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.recording.DefaultChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 
@@ -169,8 +169,9 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo {
 
         String initialVersion = parentVersion == null ? getProject().getParent().getVersion() : parentVersion;
         try {
-            ArtifactVersion artifactVersion =
-                    skipResolution ? new DefaultArtifactVersion(parentVersion) : resolveTargetVersion(initialVersion);
+            ArtifactVersion artifactVersion = skipResolution
+                    ? DefaultArtifactVersionCache.of(parentVersion)
+                    : resolveTargetVersion(initialVersion);
             if (artifactVersion != null) {
                 getLog().info("Updating parent from " + getProject().getParent().getVersion() + " to "
                         + artifactVersion);

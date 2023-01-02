@@ -33,7 +33,6 @@ import java.util.TreeSet;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.Restriction;
@@ -42,6 +41,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 
 import static java.util.Optional.empty;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
@@ -306,10 +306,10 @@ public class PropertyVersions extends AbstractVersionDetails {
                 property.getVersion() != null ? VersionRange.createFromVersionSpec(property.getVersion()) : null;
         helper.getLog().debug("Property ${" + property.getName() + "}: Restricting results to " + range);
 
-        ArtifactVersion currentVersion = new DefaultArtifactVersion(versionString);
+        ArtifactVersion currentVersion = DefaultArtifactVersionCache.of(versionString);
         ArtifactVersion lowerBound = allowDowngrade
                 ? getLowerBound(currentVersion, upperBoundSegment)
-                        .map(DefaultArtifactVersion::new)
+                        .map(DefaultArtifactVersionCache::of)
                         .orElse(null)
                 : currentVersion;
         if (helper.getLog().isDebugEnabled()) {

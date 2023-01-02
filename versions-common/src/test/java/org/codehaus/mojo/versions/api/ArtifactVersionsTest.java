@@ -24,12 +24,12 @@ import java.util.Arrays;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.ordering.MercuryVersionComparator;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.junit.Test;
 
 import static java.util.Optional.of;
@@ -72,30 +72,31 @@ public class ArtifactVersionsTest {
                 arrayContaining(versions(
                         "1.0.0.1", "1.0.0.2", "1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
         assertThat(
-                instance.getVersions(new DefaultArtifactVersion("1.1"), null, false),
+                instance.getVersions(DefaultArtifactVersionCache.of("1.1"), null, false),
                 arrayContaining(versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
         assertThat(
-                instance.getVersions(new DefaultArtifactVersion("1.1"), null, true),
+                instance.getVersions(DefaultArtifactVersionCache.of("1.1"), null, true),
                 arrayContaining(versions("1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
         assertThat(
-                instance.getVersions(new DefaultArtifactVersion("1.0.0.2"), null, false),
+                instance.getVersions(DefaultArtifactVersionCache.of("1.0.0.2"), null, false),
                 // Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));
                 arrayContaining(versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
         assertThat(
-                instance.getVersions(new DefaultArtifactVersion("1.0.0.2"), null, true),
+                instance.getVersions(DefaultArtifactVersionCache.of("1.0.0.2"), null, true),
                 // Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));
                 arrayContaining(versions("1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
 
         assertEquals(
-                new DefaultArtifactVersion("2.121.2.1"),
-                instance.getNewestVersion(new DefaultArtifactVersion("1.0"), new DefaultArtifactVersion("3.0"), false));
+                DefaultArtifactVersionCache.of("2.121.2.1"),
+                instance.getNewestVersion(
+                        DefaultArtifactVersionCache.of("1.0"), DefaultArtifactVersionCache.of("3.0"), false));
 
         assertNull(instance.getNewestVersion(
-                new DefaultArtifactVersion("1.1.1"), new DefaultArtifactVersion("2.0"), false));
+                DefaultArtifactVersionCache.of("1.1.1"), DefaultArtifactVersionCache.of("2.0"), false));
         assertEquals(
-                new DefaultArtifactVersion("2.0.0-SNAPSHOT"),
+                DefaultArtifactVersionCache.of("2.0.0-SNAPSHOT"),
                 instance.getNewestVersion(
-                        new DefaultArtifactVersion("1.1.1"), new DefaultArtifactVersion("2.0"), true));
+                        DefaultArtifactVersionCache.of("1.1.1"), DefaultArtifactVersionCache.of("2.0"), true));
     }
 
     @Test
@@ -131,20 +132,21 @@ public class ArtifactVersionsTest {
         assertEquals("artifact", instance.getArtifactId());
         assertEquals("group", instance.getGroupId());
         assertArrayEquals(versions("1.0", "1.0.1", "1.1", "3.0"), instance.getVersions(true));
-        assertArrayEquals(versions("3.0"), instance.getVersions(new DefaultArtifactVersion("1.1"), null, true));
+        assertArrayEquals(versions("3.0"), instance.getVersions(DefaultArtifactVersionCache.of("1.1"), null, true));
         assertArrayEquals(
-                versions("1.1", "3.0"), instance.getVersions(new DefaultArtifactVersion("1.0.1"), null, true));
+                versions("1.1", "3.0"), instance.getVersions(DefaultArtifactVersionCache.of("1.0.1"), null, true));
         assertEquals(
-                new DefaultArtifactVersion("1.1"),
-                instance.getNewestVersion(new DefaultArtifactVersion("1.0"), new DefaultArtifactVersion("3.0"), true));
-        assertNull(
-                instance.getNewestVersion(new DefaultArtifactVersion("1.1"), new DefaultArtifactVersion("3.0"), true));
+                DefaultArtifactVersionCache.of("1.1"),
+                instance.getNewestVersion(
+                        DefaultArtifactVersionCache.of("1.0"), DefaultArtifactVersionCache.of("3.0"), true));
+        assertNull(instance.getNewestVersion(
+                DefaultArtifactVersionCache.of("1.1"), DefaultArtifactVersionCache.of("3.0"), true));
     }
 
     private ArtifactVersion[] versions(String... versions) {
         ArtifactVersion[] artifactVersions = new ArtifactVersion[versions.length];
         for (int i = 0; i < versions.length; i++) {
-            artifactVersions[i] = new DefaultArtifactVersion(versions[i]);
+            artifactVersions[i] = DefaultArtifactVersionCache.of(versions[i]);
         }
         return artifactVersions;
     }
@@ -193,7 +195,7 @@ public class ArtifactVersionsTest {
 
         assertThat(
                 instance.getNewerVersions("1.0.0-SNAPSHOT", of(SUBINCREMENTAL), false, false),
-                arrayContaining(new DefaultArtifactVersion("1.0.0")));
+                arrayContaining(DefaultArtifactVersionCache.of("1.0.0")));
     }
 
     @Test
@@ -206,7 +208,7 @@ public class ArtifactVersionsTest {
         Restriction restriction = instance.restrictionForIgnoreScope(of(SUBINCREMENTAL));
         ArtifactVersion[] filteredVersions = instance.getVersions(restriction, false);
         assertThat(filteredVersions, arrayWithSize(1));
-        assertThat(filteredVersions, arrayContaining(new DefaultArtifactVersion("1.0.1")));
+        assertThat(filteredVersions, arrayContaining(DefaultArtifactVersionCache.of("1.0.1")));
     }
 
     @Test
@@ -219,7 +221,7 @@ public class ArtifactVersionsTest {
         Restriction restriction = instance.restrictionForIgnoreScope(of(INCREMENTAL));
         ArtifactVersion[] filteredVersions = instance.getVersions(restriction, false);
         assertThat(filteredVersions, arrayWithSize(1));
-        assertThat(filteredVersions, arrayContaining(new DefaultArtifactVersion("1.1.0")));
+        assertThat(filteredVersions, arrayContaining(DefaultArtifactVersionCache.of("1.1.0")));
     }
 
     @Test
@@ -232,7 +234,7 @@ public class ArtifactVersionsTest {
         Restriction restriction = instance.restrictionForIgnoreScope(of(MINOR));
         ArtifactVersion[] filteredVersions = instance.getVersions(restriction, false);
         assertThat(filteredVersions, arrayWithSize(1));
-        assertThat(filteredVersions, arrayContaining(new DefaultArtifactVersion("2.0.0")));
+        assertThat(filteredVersions, arrayContaining(DefaultArtifactVersionCache.of("2.0.0")));
     }
 
     @Test

@@ -52,7 +52,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
@@ -73,6 +72,7 @@ import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
@@ -228,7 +228,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
                                 return false;
                             }))
-                            .map(v -> new DefaultArtifactVersion(v.toString()))
+                            .map(v -> DefaultArtifactVersionCache.of(v.toString()))
                             .collect(Collectors.toList()),
                     getVersionComparator(artifact));
         } catch (VersionRangeResolutionException e) {
@@ -425,7 +425,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
     @Override
     public ArtifactVersion createArtifactVersion(String version) {
-        return new DefaultArtifactVersion(version);
+        return DefaultArtifactVersionCache.of(version);
     }
 
     @Override

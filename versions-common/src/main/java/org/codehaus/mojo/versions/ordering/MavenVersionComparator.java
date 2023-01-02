@@ -20,8 +20,9 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.plexus.util.StringUtils;
 
 /**
@@ -39,7 +40,7 @@ public class MavenVersionComparator extends AbstractVersionComparator {
         if (o1 instanceof BoundArtifactVersion) {
             return o1.compareTo(o2);
         }
-        return ComparableVersion.of(o1.toString()).compareTo(ComparableVersion.of(o2.toString()));
+        return new ComparableVersion(o1.toString()).compareTo(new ComparableVersion(o2.toString()));
     }
 
     /**
@@ -89,7 +90,7 @@ public class MavenVersionComparator extends AbstractVersionComparator {
         if (innerGetSegmentCount(v) == 1) {
             // only the qualifier
             version = VersionComparators.alphaNumIncrement(version);
-            return new DefaultArtifactVersion(version);
+            return DefaultArtifactVersionCache.of(version);
         } else {
             int major = v.getMajorVersion();
             int minor = v.getMinorVersion();
@@ -154,7 +155,7 @@ public class MavenVersionComparator extends AbstractVersionComparator {
                 result.append('-');
                 result.append(build);
             }
-            return new DefaultArtifactVersion(result.toString());
+            return DefaultArtifactVersionCache.of(result.toString());
         }
     }
 

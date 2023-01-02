@@ -1,44 +1,106 @@
 package org.codehaus.mojo.versions.ordering;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.codehaus.mojo.versions.api.Segment;
-
-import static org.codehaus.mojo.versions.ordering.ComparableVersion.IntegerItem.ZERO;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
- * <p>Represents an artifact version with all segments more major or equal to a given segment
- * held in place. It can be thought of as an artifact having +&infin; as its upper bound
- * on all segments less major than the held segment.</p>
- * <p>When compared with another artifact versions, this results with the other object
+ * <p>Represents an <b>immutable</b> artifact version with all segments <em>major</em> to the given segment
+ * held in place. It can be thought of as an artifact having +∞ as its upper bound
+ * on all segments minor to the held segment.</p>
+ * <p>For example:</p>
+ * <p>A {@link BoundArtifactVersion} of {@code [1.2.3-2, INCREMENTAL]} can be seen as {@code 1.2.+∞}
+ * and will be greater than all versions matching the {@code 1.2.*} pattern.</p>
+ * <p>A {@link BoundArtifactVersion} of {@code [1.2.3-2, SUBINCREMENTAL]} will be greater
+ *  * than all versions matching the {@code 1.2.3-2.*} pattern.</p>
+ * <p>When compared to another artifact versions, this results with the other object
  * with the segment versions up to the held segment being equal,
  * always comparing lower than this object.</p>
  * <p>This is particularly helpful for -SNAPSHOT and other versions with qualifiers, which
  * are lower than version 0 in the Maven versioning system.</p>
  */
-public class BoundArtifactVersion extends DefaultArtifactVersion {
+public class BoundArtifactVersion implements ArtifactVersion {
     /**
      * Most major segment that can change, i.e. not held in place.
      * All segments that are more major than this one are held in place.
      */
     private final Segment segment;
 
-    private final BoundComparableVersion comparator;
+    private final ArtifactVersion comparable;
 
     /**
-     * Constructs the instance
+     * Constructs the instance given the version in a text format.
+     * @param artifactVersion version in a text format
+     * @param segment most major segment that can change, i.e. <em>not</em> held in place
+     */
+    public BoundArtifactVersion(String artifactVersion, Segment segment) {
+        this.segment = segment;
+        StringBuilder versionBuilder = new StringBuilder();
+        String[] segments = tokens(artifactVersion);
+        for (int segNr = 0;
+                segNr <= segments.length || segNr <= Segment.SUBINCREMENTAL.value();
+                segNr++, versionBuilder.append(".")) {
+            if (segNr < segment.value()) {
+                versionBuilder.append(segNr < segments.length ? integerItemOrZero(segments[segNr]) : "0");
+            } else {
+                versionBuilder.append(Integer.MAX_VALUE);
+            }
+        }
+        versionBuilder.append(Integer.MAX_VALUE);
+        comparable = DefaultArtifactVersionCache.of(versionBuilder.toString());
+    }
+
+    /**
+     * Constructs the instance given a {@link ArtifactVersion instance}
      * @param artifactVersion artifact version containing the segment version values
      * @param segment most major segment that can change, i.e. <em>not</em> held in place
      */
     public BoundArtifactVersion(ArtifactVersion artifactVersion, Segment segment) {
-        super(artifactVersion.toString());
-        this.segment = segment;
-        this.comparator = new BoundComparableVersion(this);
+        this(artifactVersion.toString(), segment);
+    }
+
+    /**
+     * Splits the given version string into tokens, splitting them on the {@code .} or {@code -} characters
+     * as well as on letter/digit boundaries.
+     * @param version version string
+     * @return tokens of the parsed version string
+     */
+    private static String[] tokens(String version) {
+        if (version == null) {
+            return new String[0];
+        }
+        List<String> result = new ArrayList<>();
+        for (int begin = 0, end = 0; end <= version.length(); end++) {
+            if (end == version.length()
+                    || version.charAt(end) == '.'
+                    || version.charAt(end) == '-'
+                    || isTokenBoundary(version.charAt(begin), version.charAt(end))) {
+                if (end > begin) {
+                    result.add(version.substring(begin, end));
+                }
+                begin = end + 1;
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+
+    /**
+     * @param c1 character
+     * @param c2 another character
+     * @return will only return {@code true} if one of the characters is a digit and the other a letter
+     */
+    private static boolean isTokenBoundary(char c1, char c2) {
+        return Character.isDigit(c1) ^ Character.isDigit(c2);
+    }
+
+    private static String integerItemOrZero(String item) {
+        return StringUtils.isNumeric(item) ? item : "0";
     }
 
     /**
@@ -56,7 +118,7 @@ public class BoundArtifactVersion extends DefaultArtifactVersion {
             return -1;
         }
 
-        return comparator.compareTo(ComparableVersion.of(other.toString()));
+        return comparable.compareTo(other);
     }
 
     @Override
@@ -74,7 +136,7 @@ public class BoundArtifactVersion extends DefaultArtifactVersion {
         return new EqualsBuilder()
                 .appendSuper(super.equals(o))
                 .append(getSegment(), that.getSegment())
-                .append(comparator, that.comparator)
+                .append(comparable, that.comparable)
                 .isEquals();
     }
 
@@ -83,48 +145,42 @@ public class BoundArtifactVersion extends DefaultArtifactVersion {
         return new HashCodeBuilder(17, 37)
                 .appendSuper(super.hashCode())
                 .append(getSegment())
-                .append(comparator)
+                .append(comparable)
                 .toHashCode();
     }
 
-    protected static class BoundComparableVersion extends ComparableVersion {
-        private BoundArtifactVersion artifactVersion;
+    @Override
+    public int getMajorVersion() {
+        return comparable.getMajorVersion();
+    }
 
-        protected BoundComparableVersion(BoundArtifactVersion artifactVersion) {
-            super(artifactVersion.toString());
-            this.artifactVersion = artifactVersion;
-        }
+    @Override
+    public int getMinorVersion() {
+        return comparable.getMinorVersion();
+    }
 
-        @Override
-        public int compareTo(ComparableVersion o) {
-            // all segments more or equally major than artifactVersion.segment can change
-            return compareTo(
-                    ((List<Item>) items).iterator(),
-                    ((Iterable<Item>) o.items).iterator(),
-                    artifactVersion.segment.value());
-        }
+    @Override
+    public int getIncrementalVersion() {
+        return comparable.getIncrementalVersion();
+    }
 
-        private int compareTo(Iterator<Item> left, Iterator<Item> right, int comparisonsLeft) {
-            if (comparisonsLeft <= 0) {
-                // always greater than the other version if all more major segments are equal
-                return 1;
-            }
+    @Override
+    public int getBuildNumber() {
+        return comparable.getBuildNumber();
+    }
 
-            int result = left.hasNext() && right.hasNext()
-                    ? integerItemOrZero(left.next()).compareTo(right.next())
-                    : left.hasNext() || right.hasNext() ? compareToZero(left, right) : 1;
+    @Override
+    public String getQualifier() {
+        return comparable.getQualifier();
+    }
 
-            return result != 0 ? result : compareTo(left, right, comparisonsLeft - 1);
-        }
-
-        private static int compareToZero(Iterator<Item> left, Iterator<Item> right) {
-            return left.hasNext()
-                    ? integerItemOrZero(left.next()).compareTo(ZERO)
-                    : -right.next().compareTo(ZERO);
-        }
-
-        private static Item integerItemOrZero(Item item) {
-            return item instanceof IntegerItem ? item : ZERO;
-        }
+    /**
+     * @deprecated do not use: this method would mutate the state and therefore is illegal to use
+     * @throws UnsupportedOperationException thrown if the method is called
+     */
+    @Override
+    @Deprecated
+    public void parseVersion(String version) {
+        throw new UnsupportedOperationException();
     }
 }

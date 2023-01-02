@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 /**
@@ -27,7 +27,7 @@ class MinimalMavenBuildVersionFinder {
     static ArtifactVersion find(MavenProject mavenProject, String defaultVersion, Log log) {
         ArtifactVersion version = getEnforcerMavenVersion(mavenProject, log);
         if (version == null && defaultVersion != null) {
-            version = new DefaultArtifactVersion(defaultVersion);
+            version = DefaultArtifactVersionCache.of(defaultVersion);
         }
         return version;
     }
@@ -150,7 +150,7 @@ class MinimalMavenBuildVersionFinder {
         }
 
         if (openIndicesCount == 0) {
-            return new DefaultArtifactVersion(versionRange);
+            return DefaultArtifactVersionCache.of(versionRange);
         }
 
         if (!((versionRange.charAt(0) == '[' || versionRange.charAt(0) == '(')
@@ -169,7 +169,7 @@ class MinimalMavenBuildVersionFinder {
 
         if (commaIndex == -1) {
             if (versionRange.charAt(0) == '[' && versionRange.charAt(versionRange.length() - 1) == ']') {
-                return new DefaultArtifactVersion(innerString);
+                return DefaultArtifactVersionCache.of(innerString);
             } else {
                 return null;
             }
@@ -183,13 +183,13 @@ class MinimalMavenBuildVersionFinder {
             String minimumVersion = innerString.substring(0, innerString.length() - 1);
 
             if (versionRange.charAt(0) == '[' && versionRange.charAt(versionRange.length() - 1) == ')') {
-                return new DefaultArtifactVersion(minimumVersion);
+                return DefaultArtifactVersionCache.of(minimumVersion);
             }
 
             if (versionRange.charAt(0) == '(' && versionRange.charAt(versionRange.length() - 1) == ')') {
                 // this is actually wrong - the Maven version should be higher than this,
                 // the Maven version cannot be equal to this, but the Maven Enforcer plugin should capture this
-                return new DefaultArtifactVersion(minimumVersion);
+                return DefaultArtifactVersionCache.of(minimumVersion);
             }
 
             return null;
@@ -198,13 +198,13 @@ class MinimalMavenBuildVersionFinder {
         String minimumVersion = innerString.substring(0, commaIndex);
 
         if (versionRange.charAt(0) == '[') {
-            return new DefaultArtifactVersion(minimumVersion);
+            return DefaultArtifactVersionCache.of(minimumVersion);
         }
 
         if (versionRange.charAt(0) == '(') {
             // this is actually wrong - the Maven version should be higher than this,
             // the Maven version cannot be equal to this, but the Maven Enforcer plugin should capture this
-            return new DefaultArtifactVersion(minimumVersion);
+            return DefaultArtifactVersionCache.of(minimumVersion);
         }
 
         return null;

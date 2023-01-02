@@ -30,7 +30,6 @@ import java.util.function.Predicate;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.repository.RepositorySystem;
@@ -40,6 +39,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 
 /**
  * Common base class for {@link UseLatestVersionsMojo}
@@ -99,7 +99,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
                 continue;
             }
 
-            ArtifactVersion selectedVersion = new DefaultArtifactVersion(dep.getVersion());
+            ArtifactVersion selectedVersion = DefaultArtifactVersionCache.of(dep.getVersion());
             getLog().debug("Selected version:" + selectedVersion);
             getLog().debug("Looking for newer versions of " + toString(dep));
             ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
