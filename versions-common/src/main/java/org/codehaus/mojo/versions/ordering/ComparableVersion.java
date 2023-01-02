@@ -29,7 +29,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import org.apache.commons.collections4.map.LRUMap;
 
 /**
  * Generic implementation of version comparison.
@@ -39,7 +41,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Note: The implementation of the maven core should be used.
  */
 public class ComparableVersion implements Comparable<ComparableVersion> {
-    private static final Map<String, ComparableVersion> CACHE = new ConcurrentHashMap<>();
+    private static final int MAX_CACHE_SIZE = 0x200;
+    private static final Map<String, ComparableVersion> CACHE = new LRUMap<>(MAX_CACHE_SIZE);
+    private static final ReentrantReadWriteLock CACHE_LOCK = new ReentrantReadWriteLock();
 
     private String value;
 
@@ -291,7 +295,21 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
      * Get a ComparableVersion representing the version in a string.
      */
     public static ComparableVersion of(String version) {
-        return CACHE.computeIfAbsent(version, ComparableVersion::new);
+        try {
+            CACHE_LOCK.readLock().lock();
+            ComparableVersion result = CACHE.get(version);
+            if (result != null) {
+                return result;
+            }
+        } finally {
+            CACHE_LOCK.readLock().unlock();
+        }
+        try {
+            CACHE_LOCK.writeLock().lock();
+            return CACHE.computeIfAbsent(version, ComparableVersion::new);
+        } finally {
+            CACHE_LOCK.writeLock().unlock();
+        }
     }
 
     /**
