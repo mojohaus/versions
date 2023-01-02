@@ -53,6 +53,7 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
@@ -184,7 +185,12 @@ public class DefaultVersionsHelper implements VersionsHelper {
                                     mavenSession.getRepositorySession(),
                                     new VersionRangeRequest(
                                             toArtifact(artifact)
-                                                    .setVersion(versionRange != null ? versionRange.toString() : "(,)"),
+                                                    .setVersion(ofNullable(versionRange)
+                                                            .map(VersionRange::getRestrictions)
+                                                            .flatMap(list -> list.stream()
+                                                                    .findFirst()
+                                                                    .map(Restriction::toString))
+                                                            .orElse("(,)")),
                                             usePluginRepositories
                                                     ? mavenSession
                                                             .getCurrentProject()

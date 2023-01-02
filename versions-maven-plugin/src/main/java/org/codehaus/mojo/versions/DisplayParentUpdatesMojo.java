@@ -25,8 +25,6 @@ import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -71,26 +69,17 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
         }
 
         String currentVersion = getProject().getParent().getVersion();
-        String version = currentVersion;
-
-        VersionRange versionRange;
-        try {
-            versionRange = VersionRange.createFromVersionSpec(version);
-        } catch (InvalidVersionSpecificationException e) {
-            throw new MojoExecutionException("Invalid version range specification: " + version, e);
-        }
-
         Artifact artifact = getHelper()
                 .createDependencyArtifact(DependencyBuilder.newBuilder()
                         .withGroupId(getProject().getParent().getGroupId())
                         .withArtifactId(getProject().getParent().getArtifactId())
-                        .withVersion(version)
+                        .withVersion(currentVersion)
                         .withType("pom")
                         .build());
 
         ArtifactVersion artifactVersion;
         try {
-            artifactVersion = findLatestVersion(artifact, versionRange, null, false);
+            artifactVersion = findLatestVersion(artifact, null, allowSnapshots, false);
         } catch (VersionRetrievalException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
