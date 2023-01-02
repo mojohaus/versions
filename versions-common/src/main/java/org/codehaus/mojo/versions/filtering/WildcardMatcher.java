@@ -2,9 +2,9 @@ package org.codehaus.mojo.versions.filtering;
 
 import java.util.function.Predicate;
 
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 
 public class WildcardMatcher implements Predicate<String> {
     public static final String WILDCARD = "*";
@@ -61,7 +61,7 @@ public class WildcardMatcher implements Predicate<String> {
 
     private boolean isVersionIncludedInRange(final String version, final String range) {
         try {
-            return VersionRange.createFromVersionSpec(range).containsVersion(new DefaultArtifactVersion(version));
+            return VersionRange.createFromVersionSpec(range).containsVersion(DefaultArtifactVersionCache.of(version));
         } catch (InvalidVersionSpecificationException e) {
             return false;
         }

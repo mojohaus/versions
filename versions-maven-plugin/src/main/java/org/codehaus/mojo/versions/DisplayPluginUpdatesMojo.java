@@ -83,6 +83,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.util.IOUtil;
@@ -344,7 +345,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
 
         List<String> pluginUpdates = new ArrayList<>();
         List<String> pluginLockdowns = new ArrayList<>();
-        ArtifactVersion curMavenVersion = new DefaultArtifactVersion(runtimeInformation.getMavenVersion());
+        ArtifactVersion curMavenVersion = DefaultArtifactVersionCache.of(runtimeInformation.getMavenVersion());
         ArtifactVersion specMavenVersion =
                 MinimalMavenBuildVersionFinder.find(getProject(), DEFAULT_MVN_VERSION, getLog());
         ArtifactVersion minMavenVersion = null;
@@ -433,7 +434,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                     && artifactVersion != null
                     && newVersion != null
                     && effectiveVersion != null
-                    && new DefaultArtifactVersion(effectiveVersion).compareTo(new DefaultArtifactVersion(newVersion))
+                    && DefaultArtifactVersionCache.of(effectiveVersion)
+                                    .compareTo(DefaultArtifactVersionCache.of(newVersion))
                             < 0) {
                 pluginUpdates.add(pad(
                         compactKey(plugin.getGroupId(), plugin.getArtifactId()),
@@ -815,7 +817,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         return ofNullable(pluginProject.getPrerequisites())
                 .map(Prerequisites::getMaven)
                 .map(DefaultArtifactVersion::new)
-                .orElse(new DefaultArtifactVersion(DEFAULT_MVN_VERSION));
+                .orElse(DefaultArtifactVersionCache.of(DEFAULT_MVN_VERSION));
     }
 
     /**

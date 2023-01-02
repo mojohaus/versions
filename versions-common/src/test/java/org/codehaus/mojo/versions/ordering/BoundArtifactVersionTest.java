@@ -19,7 +19,7 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.junit.Test;
 
 import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
@@ -36,57 +36,57 @@ import static org.hamcrest.Matchers.lessThan;
 public class BoundArtifactVersionTest {
     @Test
     public void testMajorUpperBoundGreaterThanNextMajor() {
-        BoundArtifactVersion bound = new BoundArtifactVersion(new DefaultArtifactVersion("1.2.3"), MAJOR);
-        ArtifactVersion artifactVersion = new DefaultArtifactVersion("2.0.0");
+        BoundArtifactVersion bound = new BoundArtifactVersion("1.2.3", MAJOR);
+        ArtifactVersion artifactVersion = DefaultArtifactVersionCache.of("2.0.0");
         assertThat(bound.compareTo(artifactVersion), greaterThan(0));
     }
 
     @Test
     public void testSubIncrementalUpperBoundGreaterThanNextSubIncremental() {
-        BoundArtifactVersion bound = new BoundArtifactVersion(new DefaultArtifactVersion("1.2.3-2"), SUBINCREMENTAL);
-        ArtifactVersion artifactVersion = new DefaultArtifactVersion("1.2.3-3");
+        BoundArtifactVersion bound = new BoundArtifactVersion("1.2.3-2", SUBINCREMENTAL);
+        ArtifactVersion artifactVersion = DefaultArtifactVersionCache.of("1.2.3-3");
         assertThat(bound.compareTo(artifactVersion), greaterThan(0));
     }
 
     @Test
     public void testVersionShorterThanSegment() {
-        BoundArtifactVersion bound = new BoundArtifactVersion(new DefaultArtifactVersion("1.1"), INCREMENTAL);
-        ArtifactVersion artifactVersion = new DefaultArtifactVersion("1.1.3");
+        BoundArtifactVersion bound = new BoundArtifactVersion("1.1", INCREMENTAL);
+        ArtifactVersion artifactVersion = DefaultArtifactVersionCache.of("1.1.3");
         assertThat(bound.compareTo(artifactVersion), greaterThan(0));
     }
 
     @Test
     public void testVersionBoundArtifactVersionShorterThanConcreteVersionAndSegment() {
-        BoundArtifactVersion bound = new BoundArtifactVersion(new DefaultArtifactVersion("1.1"), SUBINCREMENTAL);
-        ArtifactVersion artifactVersion = new DefaultArtifactVersion("1.1.3");
+        BoundArtifactVersion bound = new BoundArtifactVersion("1.1", SUBINCREMENTAL);
+        ArtifactVersion artifactVersion = DefaultArtifactVersionCache.of("1.1.3");
         assertThat(bound.compareTo(artifactVersion), lessThan(0));
     }
 
     @Test
     public void testVersionSubIncrementalBoundGreaterThanSubIncremental() {
-        BoundArtifactVersion bound = new BoundArtifactVersion(new DefaultArtifactVersion("1.1"), SUBINCREMENTAL);
-        ArtifactVersion artifactVersion = new DefaultArtifactVersion("1.1.0-2");
+        BoundArtifactVersion bound = new BoundArtifactVersion("1.1", SUBINCREMENTAL);
+        ArtifactVersion artifactVersion = DefaultArtifactVersionCache.of("1.1.0-2");
         assertThat(bound.compareTo(artifactVersion), greaterThan(0));
     }
 
     @Test
     public void testVersionSubIncrementalBoundGreaterThanIncremental() {
-        BoundArtifactVersion bound = new BoundArtifactVersion(new DefaultArtifactVersion("1.1"), INCREMENTAL);
-        ArtifactVersion artifactVersion = new DefaultArtifactVersion("1.1.3");
+        BoundArtifactVersion bound = new BoundArtifactVersion("1.1", INCREMENTAL);
+        ArtifactVersion artifactVersion = DefaultArtifactVersionCache.of("1.1.3");
         assertThat(bound.compareTo(artifactVersion), greaterThan(0));
     }
 
     @Test
     public void testVersionSubIncrementalBoundGreaterThanMinor() {
-        BoundArtifactVersion bound = new BoundArtifactVersion(new DefaultArtifactVersion("1.1"), MINOR);
-        ArtifactVersion artifactVersion = new DefaultArtifactVersion("1.3");
+        BoundArtifactVersion bound = new BoundArtifactVersion("1.1", MINOR);
+        ArtifactVersion artifactVersion = DefaultArtifactVersionCache.of("1.3");
         assertThat(bound.compareTo(artifactVersion), greaterThan(0));
     }
 
     @Test
     public void testSnapshotWithSubIncremental() {
-        BoundArtifactVersion bound = new BoundArtifactVersion(new DefaultArtifactVersion("1.0.0-SNAPSHOT"), MINOR);
-        ArtifactVersion artifactVersion = new DefaultArtifactVersion("1.0.0");
+        BoundArtifactVersion bound = new BoundArtifactVersion("1.0.0-SNAPSHOT", MINOR);
+        ArtifactVersion artifactVersion = DefaultArtifactVersionCache.of("1.0.0");
         assertThat(bound.compareTo(artifactVersion), greaterThan(0));
     }
 }

@@ -26,12 +26,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Plugin;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.mojo.versions.xml.PluginUpdatesXmlReportRenderer;
@@ -74,7 +74,7 @@ public class PluginUpdatesXmlRendererTest {
                                 new ArtifactVersions(
                                         artifactOf("default-group", "artifactA", "1.0.0"),
                                         Stream.of("1.0.0", "1.0.1", "1.1.0", "2.0.0")
-                                                .map(DefaultArtifactVersion::new)
+                                                .map(DefaultArtifactVersionCache::of)
                                                 .collect(Collectors.toList()),
                                         new MavenVersionComparator()),
                                 singletonMap(
@@ -82,7 +82,7 @@ public class PluginUpdatesXmlRendererTest {
                                         new ArtifactVersions(
                                                 artifactOf("default-group", "artifactB", "1.0.0"),
                                                 Stream.of("1.0.0", "1.0.1-SNAPSHOT", "1.1.0-rc1", "2.0.0")
-                                                        .map(DefaultArtifactVersion::new)
+                                                        .map(DefaultArtifactVersionCache::of)
                                                         .collect(Collectors.toList()),
                                                 new MavenVersionComparator())),
                                 false)),

@@ -31,13 +31,13 @@ import java.util.stream.Stream;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 
 import static java.util.Collections.reverseOrder;
 import static java.util.Optional.empty;
@@ -123,7 +123,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
 
     @Override
     public final void setCurrentVersion(String currentVersion) {
-        setCurrentVersion(currentVersion == null ? null : new DefaultArtifactVersion(currentVersion));
+        setCurrentVersion(currentVersion == null ? null : DefaultArtifactVersionCache.of(currentVersion));
     }
 
     @Override
@@ -194,7 +194,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
 
     @Override
     public final ArtifactVersion[] getNewerVersions(String version, boolean includeSnapshots) {
-        return getNewerVersions(new DefaultArtifactVersion(version), includeSnapshots);
+        return getNewerVersions(DefaultArtifactVersionCache.of(version), includeSnapshots);
     }
 
     @Deprecated
@@ -209,10 +209,10 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     public final ArtifactVersion[] getNewerVersions(
             String versionString, Optional<Segment> unchangedSegment, boolean includeSnapshots, boolean allowDowngrade)
             throws InvalidSegmentException {
-        ArtifactVersion currentVersion = new DefaultArtifactVersion(versionString);
+        ArtifactVersion currentVersion = DefaultArtifactVersionCache.of(versionString);
         ArtifactVersion lowerBound = allowDowngrade
                 ? getLowerBound(currentVersion, unchangedSegment)
-                        .map(DefaultArtifactVersion::new)
+                        .map(DefaultArtifactVersionCache::of)
                         .orElse(null)
                 : currentVersion;
         ArtifactVersion upperBound = unchangedSegment
@@ -228,10 +228,10 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     public Optional<ArtifactVersion> getNewestVersion(
             String versionString, Optional<Segment> upperBoundSegment, boolean includeSnapshots, boolean allowDowngrade)
             throws InvalidSegmentException {
-        ArtifactVersion currentVersion = new DefaultArtifactVersion(versionString);
+        ArtifactVersion currentVersion = DefaultArtifactVersionCache.of(versionString);
         ArtifactVersion lowerBound = allowDowngrade
                 ? getLowerBound(currentVersion, upperBoundSegment)
-                        .map(DefaultArtifactVersion::new)
+                        .map(DefaultArtifactVersionCache::of)
                         .orElse(null)
                 : currentVersion;
         ArtifactVersion upperBound = upperBoundSegment

@@ -23,8 +23,8 @@ import java.math.BigInteger;
 import java.util.StringTokenizer;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 
 /**
  * A comparator which will compare all segments of a dot separated version string as numbers if possible, i.e. 1.3.34
@@ -243,6 +243,6 @@ public class NumericVersionComparator extends AbstractVersionComparator {
             tok.nextToken();
             buf.append("0");
         }
-        return new DefaultArtifactVersion(buf.toString());
+        return DefaultArtifactVersionCache.of(buf.toString());
     }
 }

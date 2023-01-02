@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 
 /**
  * Utility.
@@ -120,7 +120,7 @@ public final class VersionComparators {
         final String version = v.toString();
         final Matcher matcher = SNAPSHOT_PATTERN.matcher(version);
         if (matcher.find()) {
-            return new DefaultArtifactVersion(version.substring(0, matcher.start(1) - 1));
+            return DefaultArtifactVersionCache.of(version.substring(0, matcher.start(1) - 1));
         }
         return v;
     }
@@ -131,9 +131,9 @@ public final class VersionComparators {
         }
         final Matcher matcher = SNAPSHOT_PATTERN.matcher(source.toString());
         if (matcher.find()) {
-            return new DefaultArtifactVersion(destination.toString() + "-" + matcher.group(0));
+            return DefaultArtifactVersionCache.of(destination.toString() + "-" + matcher.group(0));
         } else {
-            return new DefaultArtifactVersion(destination.toString() + "-SNAPSHOT");
+            return DefaultArtifactVersionCache.of(destination.toString() + "-SNAPSHOT");
         }
     }
 }

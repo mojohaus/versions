@@ -23,8 +23,9 @@ import java.math.BigInteger;
 import java.util.StringTokenizer;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 
 /**
  * A comparator which uses Mercury's version rules.
@@ -40,7 +41,7 @@ public class MercuryVersionComparator extends AbstractVersionComparator {
      * {@inheritDoc}
      */
     public int compare(ArtifactVersion o1, ArtifactVersion o2) {
-        return ComparableVersion.of(o1.toString()).compareTo(ComparableVersion.of(o2.toString()));
+        return new ComparableVersion(o1.toString()).compareTo(new ComparableVersion(o2.toString()));
     }
 
     protected int innerGetSegmentCount(ArtifactVersion v) {
@@ -114,6 +115,6 @@ public class MercuryVersionComparator extends AbstractVersionComparator {
                 index++;
             }
         }
-        return new DefaultArtifactVersion(result.toString());
+        return DefaultArtifactVersionCache.of(result.toString());
     }
 }
