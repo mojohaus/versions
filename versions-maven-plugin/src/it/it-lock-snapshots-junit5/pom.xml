@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-lock-snapshots-001</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <!-- Can't get mrm-maven-plugin to provide maven-metadata -->
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>5.0-SNAPSHOT</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+
+</project>

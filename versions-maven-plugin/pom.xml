@@ -190,6 +190,14 @@
               ! Not deleting as it might be helpful with assessing performance measurements.
             -->
             <pomExclude>it-property-updates-report-002-slow/*</pomExclude>
+            <!--
+              ! The below test is testing Resolver's resolveVersion being able
+              ! to find a timestamped version of a snapshot. Disabled as it's not using
+              ! the mrm-maven-plugin, and so depends on external artifacts; also:
+              ! it's actually testing Resolver and not the plugin itself.
+              ! It's there for debugging purposes if something goes wrong.
+            -->
+            <pomExclude>it-lock-snapshots-junit/*</pomExclude>
           </pomExcludes>
           <postBuildHookScript>verify</postBuildHookScript>
           <filterProperties>
