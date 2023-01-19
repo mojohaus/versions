@@ -19,7 +19,6 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.io.File;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -228,15 +227,6 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     @Override
     protected MavenProject getProject() {
         return project;
-    }
-
-    @Override
-    protected String getOutputDirectory() {
-        if (!outputDirectory.isAbsolute()) {
-            outputDirectory = new File(project.getBasedir(), outputDirectory.getPath());
-        }
-
-        return outputDirectory.getAbsolutePath();
     }
 
     @Override

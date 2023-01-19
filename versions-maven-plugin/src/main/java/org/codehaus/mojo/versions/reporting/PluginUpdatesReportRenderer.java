@@ -93,6 +93,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
 
     protected void renderSummaryTable(Map<Dependency, PluginUpdatesDetails> contents) {
         sink.table();
+        sink.tableRows(null, false);
 
         sink.tableRow();
         renderSummaryTableHeader(false, false);
@@ -104,6 +105,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         renderSummaryTableHeader(false, false);
         sink.tableRow_();
 
+        sink.tableRows_();
         sink.table_();
     }
 

@@ -96,40 +96,6 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
                 || (v1 != null && v2 != null && v1.toString().equals(v2.toString()));
     }
 
-    protected void safeBold() {
-        try {
-            sink.bold();
-        } catch (NoSuchMethodError e) {
-            // ignore Maven 2.1.0
-        }
-    }
-
-    @SuppressWarnings("checkstyle:MethodName")
-    protected void safeBold_() {
-        try {
-            sink.bold_();
-        } catch (NoSuchMethodError e) {
-            // ignore Maven 2.1.0
-        }
-    }
-
-    protected void safeItalic() {
-        try {
-            sink.italic();
-        } catch (NoSuchMethodError e) {
-            // ignore Maven 2.1.0
-        }
-    }
-
-    @SuppressWarnings("checkstyle:MethodName")
-    protected void safeItalic_() {
-        try {
-            sink.italic_();
-        } catch (NoSuchMethodError e) {
-            // ignore Maven 2.1.0
-        }
-    }
-
     /**
      * Renders a table header containing elements denoted by the given keys
      * @param keys variable argument list containing keys of the property file to retrieve the
@@ -188,11 +154,11 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
             String text = object.toString();
             if (!text.isEmpty()) {
                 if (bold) {
-                    safeBold();
+                    sink.bold();
                 }
                 sink.text(text);
                 if (bold) {
-                    safeBold_();
+                    sink.bold_();
                 }
             }
         }
