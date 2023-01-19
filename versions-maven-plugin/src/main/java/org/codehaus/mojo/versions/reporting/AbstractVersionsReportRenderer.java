@@ -112,9 +112,11 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected void renderOverview() {
         sink.table();
+        sink.tableRows(null, false);
         sink.tableRow();
         renderOverviewTableRow(computeOverviewStats());
         sink.tableRow_();
+        sink.tableRows_();
         sink.table_();
     }
 
@@ -187,6 +189,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
 
     protected void renderSummaryTable(Map<Dependency, ArtifactVersions> contents, boolean hasScope) {
         sink.table();
+        sink.tableRows(null, false);
 
         sink.tableRow();
         renderSummaryTableHeader(hasScope, true);
@@ -198,6 +201,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         renderSummaryTableHeader(hasScope, true);
         sink.tableRow_();
 
+        sink.tableRows_();
         sink.table_();
     }
 
@@ -368,26 +372,26 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
                 someNotAllowed = true;
             }
             if (allowed && label != null) {
-                safeBold();
+                sink.bold();
             }
             sink.text(allUpdates[i].toString());
             if (label != null) {
                 if (allowed) {
-                    safeBold_();
+                    sink.bold_();
                 }
                 sink.nonBreakingSpace();
-                safeItalic();
+                sink.italic();
                 sink.text(label);
-                safeItalic_();
+                sink.italic_();
             }
         }
         if (someNotAllowed) {
             sink.lineBreak();
             sink.lineBreak();
             sink.text("* ");
-            safeItalic();
+            sink.italic();
             sink.text(getText("report.excludedVersion"));
-            safeItalic_();
+            sink.italic_();
         }
     }
 

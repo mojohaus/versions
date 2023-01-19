@@ -81,6 +81,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
 
     protected void renderSummaryTable(Map<Property, PropertyVersions> contents) {
         sink.table();
+        sink.tableRows(null, false);
 
         sink.tableRow();
         renderSummaryTableHeader(false, false);
@@ -92,6 +93,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         renderSummaryTableHeader(false, false);
         sink.tableRow_();
 
+        sink.tableRows_();
         sink.table_();
     }
 
