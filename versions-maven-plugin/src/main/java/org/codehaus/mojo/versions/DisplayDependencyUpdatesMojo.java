@@ -484,7 +484,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
         validateGAVList(dependencyIncludes, 6, "dependencyIncludes");
         validateGAVList(dependencyExcludes, 6, "dependencyExcludes");
         validateGAVList(dependencyManagementIncludes, 6, "dependencyManagementIncludes");
-        validateGAVList(dependencyManagementIncludes, 6, "dependencyManagementExcludes");
+        validateGAVList(dependencyManagementExcludes, 6, "dependencyManagementExcludes");
         validateGAVList(pluginDependencyIncludes, 3, "pluginDependencyIncludes");
         validateGAVList(pluginDependencyExcludes, 3, "pluginDependencyExcludes");
         validateGAVList(pluginManagementDependencyIncludes, 3, "pluginManagementDependencyIncludes");
