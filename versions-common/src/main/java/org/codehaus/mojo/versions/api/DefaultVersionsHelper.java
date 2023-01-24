@@ -45,6 +45,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -89,6 +90,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -172,11 +174,34 @@ public class DefaultVersionsHelper implements VersionsHelper {
     public ArtifactVersions lookupArtifactVersions(
             Artifact artifact, VersionRange versionRange, boolean usePluginRepositories)
             throws VersionRetrievalException {
+        return lookupArtifactVersions(artifact, versionRange, usePluginRepositories, !usePluginRepositories);
+    }
+
+    @Override
+    public ArtifactVersions lookupArtifactVersions(
+            Artifact artifact, VersionRange versionRange, boolean usePluginRepositories, boolean useProjectRepositories)
+            throws VersionRetrievalException {
         try {
             Collection<IgnoreVersion> ignoredVersions = getIgnoredVersions(artifact);
             if (!ignoredVersions.isEmpty() && getLog().isDebugEnabled()) {
                 getLog().debug("Found ignored versions: "
                         + ignoredVersions.stream().map(IgnoreVersion::toString).collect(Collectors.joining(", ")));
+            }
+
+            final List<RemoteRepository> repositories;
+            if (usePluginRepositories && !useProjectRepositories) {
+                repositories = mavenSession.getCurrentProject().getRemotePluginRepositories();
+            } else if (!usePluginRepositories && useProjectRepositories) {
+                repositories = mavenSession.getCurrentProject().getRemoteProjectRepositories();
+            } else if (usePluginRepositories) {
+                repositories = Stream.concat(
+                                mavenSession.getCurrentProject().getRemoteProjectRepositories().stream(),
+                                mavenSession.getCurrentProject().getRemotePluginRepositories().stream())
+                        .distinct()
+                        .collect(Collectors.toList());
+            } else {
+                // testing?
+                repositories = emptyList();
             }
             return new ArtifactVersions(
                     artifact,
@@ -191,13 +216,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                                                                     .findFirst()
                                                                     .map(Restriction::toString))
                                                             .orElse("(,)")),
-                                            usePluginRepositories
-                                                    ? mavenSession
-                                                            .getCurrentProject()
-                                                            .getRemotePluginRepositories()
-                                                    : mavenSession
-                                                            .getCurrentProject()
-                                                            .getRemoteProjectRepositories(),
+                                            repositories,
                                             "lookupArtifactVersions"))
                             .getVersions()
                             .stream()
@@ -428,16 +447,20 @@ public class DefaultVersionsHelper implements VersionsHelper {
         return DefaultArtifactVersionCache.of(version);
     }
 
-    @Override
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
-            Set<Dependency> dependencies, boolean usePluginRepositories, boolean allowSnapshots)
+            Set<Dependency> dependencies,
+            boolean usePluginRepositories,
+            boolean useProjectRepositories,
+            boolean allowSnapshots)
             throws VersionRetrievalException {
         ExecutorService executor = Executors.newFixedThreadPool(LOOKUP_PARALLEL_THREADS);
         try {
             Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>(DependencyComparator.INSTANCE);
             List<Future<? extends Pair<Dependency, ArtifactVersions>>> futures = dependencies.stream()
                     .map(dependency -> executor.submit(() -> new ImmutablePair<>(
-                            dependency, lookupDependencyUpdates(dependency, usePluginRepositories, allowSnapshots))))
+                            dependency,
+                            lookupDependencyUpdates(
+                                    dependency, usePluginRepositories, useProjectRepositories, allowSnapshots))))
                     .collect(Collectors.toList());
             for (Future<? extends Pair<Dependency, ArtifactVersions>> details : futures) {
                 Pair<Dependency, ArtifactVersions> pair = details.get();
@@ -454,11 +477,21 @@ public class DefaultVersionsHelper implements VersionsHelper {
     }
 
     @Override
-    public ArtifactVersions lookupDependencyUpdates(
-            Dependency dependency, boolean usePluginRepositories, boolean allowSnapshots)
+    public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
+            Set<Dependency> dependencies, boolean usePluginRepositories, boolean allowSnapshots)
             throws VersionRetrievalException {
-        ArtifactVersions allVersions =
-                lookupArtifactVersions(createDependencyArtifact(dependency), usePluginRepositories);
+        return lookupDependenciesUpdates(dependencies, usePluginRepositories, !usePluginRepositories, allowSnapshots);
+    }
+
+    @Override
+    public ArtifactVersions lookupDependencyUpdates(
+            Dependency dependency,
+            boolean usePluginRepositories,
+            boolean useProjectRepositories,
+            boolean allowSnapshots)
+            throws VersionRetrievalException {
+        ArtifactVersions allVersions = lookupArtifactVersions(
+                createDependencyArtifact(dependency), null, usePluginRepositories, useProjectRepositories);
         return new ArtifactVersions(
                 allVersions.getArtifact(),
                 Arrays.stream(allVersions.getAllUpdates(allowSnapshots)).collect(Collectors.toList()),
