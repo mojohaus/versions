@@ -152,7 +152,7 @@ public interface VersionsHelper {
      * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
      *
      * @param artifact The artifact to look for versions of.
-     * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
+     * @param usePluginRepositories {@code true} will consult the pluginRepositories, while {@code false} will
      *            consult the repositories for normal dependencies.
      * @return The details of the available artifact versions.
      * @throws VersionRetrievalException thrown if version resolution fails
@@ -167,7 +167,24 @@ public interface VersionsHelper {
      * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
      *
      * @param artifact The artifact to look for versions of.
-     * @param versionRange versionRange to restrict the search
+     * @param versionRange versionRange to restrict the search, may be {@code null}
+     * @param usePluginRepositories {@code true} will consult the pluginRepositories
+     * @param useProjectRepositories {@code true} will consult regular project repositories
+     * @return The details of the available artifact versions.
+     * @throws VersionRetrievalException thrown if version resolution fails
+     * @since 2.15.0
+     */
+    ArtifactVersions lookupArtifactVersions(
+            Artifact artifact, VersionRange versionRange, boolean usePluginRepositories, boolean useProjectRepositories)
+            throws VersionRetrievalException;
+
+    /**
+     * Looks up the versions of the specified artifact that are available in either the local repository, or the
+     * appropriate remote repositories.
+     * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
+     *
+     * @param artifact The artifact to look for versions of.
+     * @param versionRange versionRange to restrict the search, may be {@code null}
      * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
      *            consult the repositories for normal dependencies.
      * @return The details of the available artifact versions.
@@ -191,17 +208,38 @@ public interface VersionsHelper {
             throws VersionRetrievalException;
 
     /**
+     * Returns a map of all possible updates per dependency. The lookup is done in parallel using
+     * {@code LOOKUP_PARALLEL_THREADS} threads.
+     *
+     * @param dependencies The set of {@link Dependency} instances to look up.
+     * @param usePluginRepositories Search the plugin repositories.
+     * @param useProjectRepositories whether to use regular project repositories
+     * @param allowSnapshots whether snapshots should be included
+     * @return map containing the ArtifactVersions object per dependency
+     */
+    Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
+            Set<Dependency> dependencies,
+            boolean usePluginRepositories,
+            boolean useProjectRepositories,
+            boolean allowSnapshots)
+            throws VersionRetrievalException;
+
+    /**
      * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency.
      *
      * @param dependency The dependency.
      * @param usePluginRepositories Search the plugin repositories.
+     * @param useProjectRepositories whether to use regular project repositories
      * @param allowSnapshots whether snapshots should be included
      * @return The details of updates to the dependency.
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
     ArtifactVersions lookupDependencyUpdates(
-            Dependency dependency, boolean usePluginRepositories, boolean allowSnapshots)
+            Dependency dependency,
+            boolean usePluginRepositories,
+            boolean useProjectRepositories,
+            boolean allowSnapshots)
             throws VersionRetrievalException;
 
     /**

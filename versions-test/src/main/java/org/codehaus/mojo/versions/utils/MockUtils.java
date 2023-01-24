@@ -1,23 +1,19 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package org.codehaus.mojo.versions.utils;
+
+/*
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 
 import java.io.File;
 import java.util.ArrayList;
@@ -152,11 +148,22 @@ public class MockUtils {
      * @return mocked {@link MavenSession}
      */
     public static MavenSession mockMavenSession() {
+        MavenProject project = mock(MavenProject.class);
+        when(project.getRemotePluginRepositories()).thenReturn(emptyList());
+        when(project.getRemoteProjectRepositories()).thenReturn(emptyList());
+        return mockMavenSession(project);
+    }
+
+    /**
+     * Creates a very simple mock of {@link MavenSession}
+     * by providing only a non-{@code null} implementation of its {@link MavenSession#getRepositorySession()} method.
+     * @param project {@link MavenProject} to link to
+     * @return mocked {@link MavenSession}
+     */
+    public static MavenSession mockMavenSession(MavenProject project) {
         MavenSession session = mock(MavenSession.class);
         when(session.getRepositorySession()).thenReturn(mock(RepositorySystemSession.class));
-        when(session.getCurrentProject()).thenReturn(mock(MavenProject.class));
-        when(session.getCurrentProject().getRemotePluginRepositories()).thenReturn(emptyList());
-        when(session.getCurrentProject().getRemoteProjectRepositories()).thenReturn(emptyList());
+        when(session.getCurrentProject()).thenReturn(project);
         return session;
     }
 }
