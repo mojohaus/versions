@@ -85,6 +85,14 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
     @Parameter(property = "propertiesVersionsFile")
     private String propertiesVersionsFile;
 
+    /**
+     * The Maven profile to apply the changes. If the provided profile is not found, no changes will be applied
+     *
+     * @since 2.15
+     */
+    @Parameter(property = "profileId")
+    private String profileId = null;
+
     @Inject
     public SetPropertyMojo(
             RepositorySystem repositorySystem,
@@ -148,13 +156,13 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
             Property currentProperty = entry.getKey();
             PropertyVersions version = entry.getValue();
             String newVersionGiven = currentProperty.getVersion();
-
+            final String profileToApply = isEmpty(profileId) ? version.getProfileId() : profileId;
             final String currentVersion = getProject().getProperties().getProperty(currentProperty.getName());
             if (currentVersion == null) {
                 continue;
             }
             PomHelper.setPropertyVersion(
-                    pom, version.getProfileId(), currentProperty.getName(), defaultString(newVersionGiven));
+                    pom, profileToApply, currentProperty.getName(), defaultString(newVersionGiven));
         }
     }
 
