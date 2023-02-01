@@ -40,6 +40,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
+import org.apache.maven.shared.artifact.filter.ScopeArtifactFilter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecord;
@@ -105,6 +106,14 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      */
     @Parameter
     private String[] excludes = null;
+
+    /**
+     * a scope to use to filter the artifacts matching the asked scope (as well as the ones implied by maven)
+     *
+     * @since 2.15
+     */
+    @Parameter(property = "scope")
+    private String scope = null;
 
     /**
      * Whether to process the dependencies section of the project.
@@ -376,6 +385,12 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
             result = result && excludesFilter.include(artifact);
         }
 
+        ArtifactFilter scopeFilter = this.getScopeArtifactFilter();
+
+        if (scopeFilter != null) {
+            result = result && scopeFilter.include(artifact);
+        }
+
         return result;
     }
 
@@ -412,6 +427,13 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
             excludesFilter = new PatternExcludesArtifactFilter(patterns);
         }
         return excludesFilter;
+    }
+
+    private ArtifactFilter getScopeArtifactFilter() {
+        if (scope == null) {
+            return null;
+        }
+        return new ScopeArtifactFilter(scope);
     }
 
     /**
