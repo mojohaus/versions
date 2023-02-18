@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import groovy.xml.XmlSlurper
 
 def parent = new XmlSlurper().parse( new File( basedir, 'pom.xml' ) )
 assert parent.dependencies.dependency.version == '1.0.1'

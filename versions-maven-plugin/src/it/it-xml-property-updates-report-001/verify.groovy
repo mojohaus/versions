@@ -1,3 +1,5 @@
+import groovy.xml.XmlSlurper
+
 def pom = new XmlSlurper()
         .parse( new File( basedir, 'target/property-updates-report.xml' ) )
 
