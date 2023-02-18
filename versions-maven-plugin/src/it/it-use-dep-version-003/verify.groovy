@@ -17,5 +17,7 @@
  * under the License.
  */
 
+import groovy.xml.XmlSlurper
+
 def project = new XmlSlurper().parse( new File( basedir, 'pom.xml' ) )
 assert project.profiles.profile.dependencies.dependency.version == '1.0.1'

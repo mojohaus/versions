@@ -1,3 +1,5 @@
+import groovy.xml.XmlSlurper
+
 def project = new XmlSlurper().parse( new File( basedir, 'pom.xml' ) )
 
 assert project.dependencyManagement.dependencies.'*'.size() == 1

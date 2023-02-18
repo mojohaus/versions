@@ -16,7 +16,7 @@
   <description>The Versions Maven Plugin is used when you want to manage the versions of artifacts in a project's POM.</description>
 
   <prerequisites>
-    <maven>${mavenVersion}</maven>
+    <maven>${maven.version}</maven>
   </prerequisites>
 
   <dependencies>
