@@ -10,7 +10,7 @@
 
   <groupId>org.codehaus.mojo.versions</groupId>
   <artifactId>versions</artifactId>
-  <version>2.15.0</version>
+  <version>2.15.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Versions</name>
@@ -139,7 +139,7 @@
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
     <!-- mono-module doesn't require site:stage for scm-publish -->
-    <project.build.outputTimestamp>2023-02-21T22:56:58Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2023-02-21T23:02:23Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
