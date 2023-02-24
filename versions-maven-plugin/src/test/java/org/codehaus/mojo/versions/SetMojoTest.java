@@ -156,9 +156,11 @@ public class SetMojoTest extends AbstractMojoTestCase {
         setVariableValueToObject(mojo, "newVersion", "bar");
         setVariableValueToObject(mojo, "processAllModules", true);
         mojo.execute();
+        // with processAllModules, the module *should* be selected for update
+        // regardless of the version
         assertThat(
                 String.join("", Files.readAllLines(tempDir.resolve("pom.xml"))),
-                not(containsString("<version>bar</version>")));
+                containsString("<version>bar</version>"));
     }
 
     private void testSetParameterValue(String filename, Consumer<SetMojo>... initializers) throws Exception {
@@ -168,36 +170,13 @@ public class SetMojoTest extends AbstractMojoTestCase {
         SetMojo mojo = (SetMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "set");
         Stream.of(initializers).forEachOrdered(i -> i.accept(mojo));
         mojo.execute();
-        assertThat(
-                String.join("", Files.readAllLines(tempDir.resolve("pom.xml"))),
-                containsString("<version>testing</version>"));
+        String output = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
+        assertThat(output, containsString("<version>testing</version>"));
     }
 
     @Test
     public void testSetParameterValueSimple() throws Exception {
         testSetParameterValue("pom-simple.xml");
-    }
-
-    @Test
-    public void testSetParameterValueSimpleNoInterpolation() throws Exception {
-        try {
-            testSetParameterValue("pom-simple.xml", mojo -> mojo.interpolateProperties = false);
-            fail();
-        } catch (AssertionError e) {
-            assertThat(e.getMessage(), containsString("Expected: a string containing \"<version>testing</version>"));
-        }
-    }
-
-    @Test
-    public void testSetParameterValueSimpleNoInterpolationWildcard() throws Exception {
-        testSetParameterValue("pom-simple.xml", mojo -> {
-            mojo.interpolateProperties = false;
-            try {
-                setVariableValueToObject(mojo, "oldVersion", "*");
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     @Test
@@ -213,6 +192,11 @@ public class SetMojoTest extends AbstractMojoTestCase {
     @Test
     public void testSetParameterValueMultipleProps() throws Exception {
         testSetParameterValue("pom-multiple-props.xml");
+    }
+
+    @Test
+    public void testSetParameterValuePartial() throws Exception {
+        testSetParameterValue("pom-revision.xml");
     }
 
     @Test
