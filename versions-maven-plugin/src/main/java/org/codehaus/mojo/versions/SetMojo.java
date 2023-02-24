@@ -35,7 +35,6 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
@@ -85,42 +84,54 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private String newVersion;
 
     /**
-     * The groupId of the dependency/module to update.
-     * If you like to update modules of a aggregator you
-     * should set <code>-DgroupId='*'</code> to ignore the
-     * group of the current project. On Windows you can omit
-     * the single quotes on Linux they are necessary to prevent
-     * expansion through the shell.
+     * If set to {@code true}, will process all modules regardless whether they
+     * match {@code groupId:artifactId:oldVersion}.
+     *
+     * @since 2.5
+     */
+    @Parameter(property = "processAllModules", defaultValue = "false")
+    private boolean processAllModules;
+
+    /**
+     * <p>The <b>non-interpolated</b> groupId of the dependency/module to be selected for update.</p>
+     * <p>If not set, will be equal to the non-interpolated groupId of the project file.</p>
+     * <p>If you wish to update modules of a aggregator regardless of the groupId, you
+     * should set {@code -DgroupId='*'} to ignore the groupId of the current project.</p>
+     * <p>Alternatively, you can use {@code -DprocessAllModules=true}</p>
+     * <p><u>The goal does not interpolate the properties used in groupId used in the pom.xml file.</u></p>
+     * <p><i>The single quotes are only necessary on POSIX-compatible shells (Linux, MacOS, etc.).</i></p>
      *
      * @since 1.2
      */
-    @Parameter(property = "groupId", defaultValue = "${project.groupId}")
+    @Parameter(property = "groupId")
     private String groupId;
 
     /**
-     * The artifactId of the dependency/module to update.
-     * If you like to update modules of a aggregator you
-     * should set <code>-DartifactId='*'</code> to ignore the
-     * artifactId of the current project. On Windows you can omit
-     * the single quotes on Linux they are necessary to prevent
-     * expansion through the shell.
+     * <p>The <b>non-interpolated</b> artifactId of the dependency/module to be selected for update.</p>
+     * <p>If not set, will be equal to the non-interpolated artifactId of the project file.</p>
+     * <p>If you wish to update modules of a aggregator regardless of the artifactId, you
+     * should set {@code -DartifactId='*'} to ignore the artifactId of the current project.</p>
+     * <p>Alternatively, you can use {@code -DprocessAllModules=true}</p>
+     * <p><u>The goal does not interpolate the properties used in artifactId used in the pom.xml file.</u></p>
+     * <p><i>The single quotes are only necessary on POSIX-compatible shells (Linux, MacOS, etc.).</i></p>
      *
      * @since 1.2
      */
-    @Parameter(property = "artifactId", defaultValue = "${project.artifactId}")
+    @Parameter(property = "artifactId")
     private String artifactId;
 
     /**
-     * The version of the dependency/module to update.
-     * If you are changing an aggregator you should give
-     * <code>-DoldVersion='*'</code> to suppress the check against the
-     * version of the current project. On Windows you can omit
-     * the single quotes on Linux they are necessary to prevent
-     * expansion through the shell.
+     * <p>The <b>non-interpolated</b> version of the dependency/module to be selected for update.</p>
+     * <p>If not set, will be equal to the non-interpolated version of the project file.</p>
+     * <p>If you wish to update modules of a aggregator regardless of the version, you
+     * should set {@code -Dversion='*'} to ignore the version of the current project.</p>
+     * <p>Alternatively, you can use {@code -DprocessAllModules=true}</p>
+     * <p><u>The goal does not interpolate the properties used in version used in the pom.xml file.</u></p>
+     * <p><i>The single quotes are only necessary on POSIX-compatible shells (Linux, MacOS, etc.).</i></p>
      *
      * @since 1.2
      */
-    @Parameter(property = "oldVersion", defaultValue = "${project.version}")
+    @Parameter(property = "oldVersion")
     private String oldVersion;
 
     /**
@@ -199,14 +210,6 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     protected Integer nextSnapshotIndexToIncrement;
 
     /**
-     * Whether to process all modules whereas they have parent/child or not.
-     *
-     * @since 2.5
-     */
-    @Parameter(property = "processAllModules", defaultValue = "false")
-    private boolean processAllModules;
-
-    /**
      * Whether to start processing at the local aggregation root (which might be a parent module
      * of that module where Maven is executed in, and the version change may affect parent and sibling modules).
      * Setting to false makes sure only the module (and it's submodules) where Maven is executed for is affected.
@@ -246,15 +249,6 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      * @since 2.14.0
      */
     protected final ProjectBuilder projectBuilder;
-
-    /**
-     * If set to {@code false}, the plugin will not interpolate property values when looking for versions
-     * to be changed, but will instead operate on raw model.
-     *
-     * @since 2.15.0
-     */
-    @Parameter(property = "interpolateProperties", defaultValue = "true")
-    protected boolean interpolateProperties = true;
 
     @Inject
     public SetMojo(
@@ -344,35 +338,45 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             // set of files to update
             final Set<File> files = new LinkedHashSet<>();
 
-            getLog().info("Processing change of " + groupId + ":" + artifactId + ":" + oldVersion + " -> "
-                    + newVersion);
-            Pattern groupIdRegex =
-                    Pattern.compile(RegexUtils.convertWildcardsToRegex(fixNullOrEmpty(groupId, "*"), true));
-            Pattern artifactIdRegex =
-                    Pattern.compile(RegexUtils.convertWildcardsToRegex(fixNullOrEmpty(artifactId, "*"), true));
-            Pattern oldVersionIdRegex =
-                    Pattern.compile(RegexUtils.convertWildcardsToRegex(fixNullOrEmpty(oldVersion, "*"), true));
+            // groupId, artifactId, oldVersion are matched against every module of the project to see if the module
+            // needs to be changed as well
+            // setting them to the main project coordinates in case they are not set by the user,
+            // so that the main project can be selected
+            Model rootModel = reactorModels.get(session.getCurrentProject().getFile());
+            if (groupId == null) {
+                groupId = rootModel.getGroupId();
+            }
+            if (artifactId == null) {
+                artifactId = rootModel.getArtifactId();
+            }
+            if (oldVersion == null) {
+                oldVersion = rootModel.getVersion();
+            }
+
+            getLog().info(String.format(
+                    "Processing change of %s:%s:%s -> %s", groupId, artifactId, oldVersion, newVersion));
+
+            Pattern groupIdRegex = processAllModules || StringUtils.isBlank(groupId) || "*".equals(groupId)
+                    ? null
+                    : Pattern.compile(RegexUtils.convertWildcardsToRegex(groupId, true));
+            Pattern artifactIdRegex = processAllModules || StringUtils.isBlank(artifactId) || "*".equals(artifactId)
+                    ? null
+                    : Pattern.compile(RegexUtils.convertWildcardsToRegex(artifactId, true));
+            Pattern oldVersionIdRegex = processAllModules || StringUtils.isBlank(oldVersion) || "*".equals(oldVersion)
+                    ? null
+                    : Pattern.compile(RegexUtils.convertWildcardsToRegex(oldVersion, true));
 
             for (Model m : reactor.values()) {
                 String mGroupId = PomHelper.getGroupId(m);
                 String mArtifactId = PomHelper.getArtifactId(m);
                 String mVersion = PomHelper.getVersion(m);
 
-                if (interpolateProperties) {
-                    assert m.getProperties() != null; // always non-null
-                    Map<String, String> properties = m.getProperties().entrySet().stream()
-                            .collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue()
-                                    .toString()));
-
-                    mGroupId = PomHelper.evaluate(mGroupId, properties);
-                    mArtifactId = PomHelper.evaluate(mArtifactId, properties);
-                    mVersion = PomHelper.evaluate(mVersion, properties);
-                }
-
-                if ((processAllModules
-                                || groupIdRegex.matcher(mGroupId).matches()
-                                        && artifactIdRegex.matcher(mArtifactId).matches())
-                        && oldVersionIdRegex.matcher(mVersion).matches()
+                if ((groupIdRegex == null || groupIdRegex.matcher(mGroupId).matches())
+                        && (artifactIdRegex == null
+                                || artifactIdRegex.matcher(mArtifactId).matches())
+                        && (mVersion == null
+                                || oldVersionIdRegex == null
+                                || oldVersionIdRegex.matcher(mVersion).matches())
                         && !newVersion.equals(mVersion)) {
                     applyChange(
                             project,
