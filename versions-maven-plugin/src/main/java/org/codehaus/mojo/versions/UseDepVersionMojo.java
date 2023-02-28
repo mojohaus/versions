@@ -355,38 +355,44 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
             Artifact artifact = toArtifact(dep);
             if (isIncluded(artifact)) {
-                if (!forceVersion) {
-                    if (!getHelper().lookupArtifactVersions(artifact, false).containsVersion(depVersion)) {
-                        throw new MojoExecutionException(String.format(
-                                "Version %s is not available for artifact %s:%s",
-                                depVersion, artifact.getGroupId(), artifact.getArtifactId()));
-                    }
-                }
-                if (!propertyName.isPresent()) {
-                    updateDependencyVersion(node.getModifiedPomXMLEventReader(), dep, depVersion, changeKind);
+                if (dep.getVersion() == null) {
+                    getLog().warn(String.format(
+                            "Not updating %s:%s in dependencies: version defined " + "in dependencyManagement",
+                            dep.getGroupId(), dep.getArtifactId()));
                 } else {
-                    // propertyName is present
-                    ofNullable(propertyConflicts.get(propertyName.get()))
-                            .map(conflict -> {
-                                getLog().warn("Cannot update property ${" + propertyName.get() + "}: "
-                                        + "controls more than one dependency: "
-                                        + conflict.stream()
-                                                .map(Dependency::getArtifactId)
-                                                .collect(Collectors.joining(", ")));
-                                return false;
-                            })
-                            .orElseGet(() -> {
-                                if (!updatePropertyValue(node, propertyName.get())) {
-                                    propertyBacklog.add(propertyName.get());
-                                } else {
-                                    if (getLog().isDebugEnabled()) {
-                                        getLog().debug(String.format(
-                                                "Updated the %s property value to %s.",
-                                                propertyName.get(), depVersion));
+                    if (!forceVersion) {
+                        if (!getHelper().lookupArtifactVersions(artifact, false).containsVersion(depVersion)) {
+                            throw new MojoExecutionException(String.format(
+                                    "Version %s is not available for artifact %s:%s",
+                                    depVersion, artifact.getGroupId(), artifact.getArtifactId()));
+                        }
+                    }
+                    if (!propertyName.isPresent()) {
+                        updateDependencyVersion(node.getModifiedPomXMLEventReader(), dep, depVersion, changeKind);
+                    } else {
+                        // propertyName is present
+                        ofNullable(propertyConflicts.get(propertyName.get()))
+                                .map(conflict -> {
+                                    getLog().warn("Cannot update property ${" + propertyName.get() + "}: "
+                                            + "controls more than one dependency: "
+                                            + conflict.stream()
+                                                    .map(Dependency::getArtifactId)
+                                                    .collect(Collectors.joining(", ")));
+                                    return false;
+                                })
+                                .orElseGet(() -> {
+                                    if (!updatePropertyValue(node, propertyName.get())) {
+                                        propertyBacklog.add(propertyName.get());
+                                    } else {
+                                        if (getLog().isDebugEnabled()) {
+                                            getLog().debug(String.format(
+                                                    "Updated the %s property value to %s.",
+                                                    propertyName.get(), depVersion));
+                                        }
                                     }
-                                }
-                                return true;
-                            });
+                                    return true;
+                                });
+                    }
                 }
             }
         }

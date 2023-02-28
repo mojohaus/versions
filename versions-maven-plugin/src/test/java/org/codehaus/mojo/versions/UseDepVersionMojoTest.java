@@ -24,6 +24,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
+import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.change.DefaultPropertyVersionChange;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.codehaus.mojo.versions.utils.TestUtils;
@@ -347,5 +348,86 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
 
         assertThat(changeRecorder.getChanges(), empty());
         assertThat(log.toString(), containsString("[WARN] Not updating property ${revision}: defined in parent"));
+    }
+
+    @Test
+    public void testVersionlessDependency() throws Exception {
+        Log logger = mock(Log.class);
+        StringBuilder log = new StringBuilder();
+        doAnswer(i -> log.append("[WARN] ").append(i.getArgument(0).toString()))
+                .when(logger)
+                .warn(anyString());
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/issue-925"), tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+        setVariableValueToObject(mojo, "log", logger);
+        mojo.depVersion = "2.0.0";
+        mojo.forceVersion = true;
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "processDependencyManagement", false);
+        setVariableValueToObject(mojo, "includes", new String[] {"default-group:artifactA"});
+
+        mojo.execute();
+
+        assertThat(changeRecorder.getChanges(), empty());
+        assertThat(
+                log.toString(),
+                containsString(
+                        "[WARN] Not updating default-group:artifactA in dependencies: version defined in dependencyManagement"));
+    }
+
+    @Test
+    public void testDependencyManagemenent() throws Exception {
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/issue-925"), tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+        mojo.depVersion = "2.0.0";
+        mojo.forceVersion = true;
+        setVariableValueToObject(mojo, "processDependencies", false);
+        setVariableValueToObject(mojo, "processDependencyManagement", true);
+        setVariableValueToObject(mojo, "includes", new String[] {"default-group:artifactA"});
+
+        mojo.execute();
+
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultDependencyVersionChange("default-group", "artifactA", "1.0.0", "2.0.0")));
+    }
+
+    @Test
+    public void testVersionDefinedInDependencyManagemenent() throws Exception {
+        Log logger = mock(Log.class);
+        StringBuilder log = new StringBuilder();
+        doAnswer(i -> log.append("[WARN] ").append(i.getArgument(0).toString()))
+                .when(logger)
+                .warn(anyString());
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/issue-925"), tempDir);
+        UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
+        setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
+        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
+        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+        setVariableValueToObject(mojo, "log", logger);
+        mojo.depVersion = "2.0.0";
+        mojo.forceVersion = true;
+        setVariableValueToObject(mojo, "processDependencies", true);
+        setVariableValueToObject(mojo, "processDependencyManagement", true);
+        setVariableValueToObject(mojo, "includes", new String[] {"default-group:artifactA"});
+
+        mojo.execute();
+
+        assertThat(
+                log.toString(),
+                containsString(
+                        "[WARN] Not updating default-group:artifactA in dependencies: version defined in dependencyManagement"));
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultDependencyVersionChange("default-group", "artifactA", "1.0.0", "2.0.0")));
     }
 }
