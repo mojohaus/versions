@@ -183,4 +183,15 @@ public class BoundArtifactVersion implements ArtifactVersion {
     public void parseVersion(String version) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Quasi-contract: {@link #toString()} must produce the textual representation of the version, without any
+     * additional items, this is required by the implementation of {@link NumericVersionComparator}.
+     */
+    @Override
+    public String toString() {
+        return comparable.toString();
+    }
 }
