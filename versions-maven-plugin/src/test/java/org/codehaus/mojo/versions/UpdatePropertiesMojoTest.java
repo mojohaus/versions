@@ -17,13 +17,16 @@ package org.codehaus.mojo.versions;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.codehaus.mojo.versions.utils.TestUtils;
 import org.junit.Test;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -85,6 +88,26 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
         //            pomHelperClass.when( () -> PomHelper.setPropertyVersion( any(), anyString(), anyString(),
         // anyString() ) )
         //                            .thenReturn( false );
+        mojo.execute();
+        assertThat(changeRecorder.getChanges(), is(empty()));
+    }
+
+    @Test
+    public void testIssue929() throws Exception {
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/update-properties/issue-929"), pomDir);
+        UpdatePropertiesMojo mojo = setUpMojo("update-properties");
+        mojo.allowMajorUpdates = false;
+        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {"6.2.5.Final", "8.0.0.Final"});
+            }
+        });
+        mojo.ruleSet = new RuleSet() {
+            {
+                setComparisonMethod("numeric");
+            }
+        };
+
         mojo.execute();
         assertThat(changeRecorder.getChanges(), is(empty()));
     }

@@ -19,10 +19,12 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 
 /**
@@ -86,5 +88,11 @@ public abstract class VersionComparatorTestBase {
     public void testVersionComparatorRow7() {
         assertThat(instance.compare(version("1-alpha-1"), version("2-alpha-1")), lessThan(0));
         assertThat(instance.compare(version("1-alpha-1"), version("1-alpha-2")), lessThan(0));
+    }
+
+    @Test
+    public void testBoundArtifactVersion() {
+        assertThat(
+                instance.compare(new BoundArtifactVersion("1.0.0", Segment.MAJOR), version("1.9.9")), greaterThan(0));
     }
 }
