@@ -20,7 +20,6 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,6 +53,7 @@ import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKin
 import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.MavenProjectUtils;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -136,10 +136,10 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         validateInput();
         List<ModelNode> rawModels;
+
         try {
             ModifiedPomXMLEventReader pomReader = newModifiedPomXER(
-                    new StringBuilder(
-                            new String(Files.readAllBytes(getProject().getFile().toPath()))),
+                    MavenProjectUtils.readFile(getProject().getFile().toPath()),
                     getProject().getFile().toPath().toString());
             ModelNode rootNode = new ModelNode(PomHelper.getRawModel(pomReader), pomReader);
             rawModels = PomHelper.getRawModelTree(rootNode, getLog());

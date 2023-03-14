@@ -18,6 +18,9 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -29,6 +32,7 @@ import org.apache.maven.model.PluginManagement;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
+import org.codehaus.plexus.util.xml.XmlStreamReader;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
@@ -149,5 +153,17 @@ public class MavenProjectUtils {
             }
         }
         return dependency;
+    }
+
+    /**
+     * Reads the given file to a StringBuilder using {@link XmlStreamReader} to determine the file encoding.
+     * @param path file path
+     * @return StringBuilder containing the given file
+     * @throws IOException thrown in case of an I/O error
+     */
+    public static StringBuilder readFile(Path path) throws IOException {
+        try (XmlStreamReader reader = new XmlStreamReader(path.toFile())) {
+            return new StringBuilder(new String(Files.readAllBytes(path), reader.getEncoding()));
+        }
     }
 }

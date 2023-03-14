@@ -71,6 +71,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.utils.MavenProjectUtils;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
@@ -1364,9 +1365,7 @@ public class PomHelper {
                 .map(pomFile -> {
                     try {
                         ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader(
-                                new StringBuilder(new String(Files.readAllBytes(pomFile))),
-                                inputFactory,
-                                pomFile.toString());
+                                MavenProjectUtils.readFile(pomFile), inputFactory, pomFile.toString());
                         return new ModelNode(rootNode, getRawModel(pom), pom);
                     } catch (IOException e) {
                         throw new UncheckedIOException("Could not open " + pomFile, e);
