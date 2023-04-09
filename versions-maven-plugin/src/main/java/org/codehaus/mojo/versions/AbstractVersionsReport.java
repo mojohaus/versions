@@ -43,11 +43,10 @@ import org.codehaus.plexus.i18n.I18N;
 /**
  * Base class for all versions reports.
  *
- * @param <T> modelled report object
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
+public abstract class AbstractVersionsReport extends AbstractMavenReport {
     /**
      * Internationalization component.
      *

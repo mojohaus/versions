@@ -47,7 +47,7 @@ import org.codehaus.plexus.i18n.I18N;
  * @since 2.13.0
  */
 @Mojo(name = "parent-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
-public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdatesModel> {
+public class ParentUpdatesReportMojo extends AbstractVersionsReport {
     @Parameter(defaultValue = "${reactorProjects}", required = true, readonly = true)
     protected List<MavenProject> reactorProjects;
 

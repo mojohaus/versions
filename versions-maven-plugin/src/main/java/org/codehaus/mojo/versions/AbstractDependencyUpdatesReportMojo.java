@@ -52,7 +52,7 @@ import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 /**
  * Generates a report of available updates for the dependencies of a project.
  */
-public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersionsReport<DependencyUpdatesModel> {
+public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersionsReport {
 
     private static final DependencyComparator DEPENDENCY_COMPARATOR = DependencyComparator.INSTANCE;
 

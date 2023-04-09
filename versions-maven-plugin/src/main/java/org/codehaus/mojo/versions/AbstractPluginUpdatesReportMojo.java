@@ -46,7 +46,7 @@ import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 /**
  * Generates a report of available updates for the plugins of a project.
  */
-public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdatesModel> {
+public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsReport {
 
     private static final PluginComparator PLUGIN_COMPARATOR = PluginComparator.INSTANCE;
 

@@ -45,7 +45,7 @@ import org.codehaus.plexus.i18n.I18N;
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
  * plugins of a project.
  */
-public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUpdatesModel> {
+public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersionsReport {
 
     private static final PropertyComparator PROPERTIES_COMPARATOR = PropertyComparator.INSTANCE;
 
