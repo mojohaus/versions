@@ -57,7 +57,7 @@ public class OverviewStats {
      * @param updates collection of all version updates, typically from
      * {@linkplain org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel#getAllUpdates()}
      * @param cache if not null, cache to retrieve the version information, initialised with
-     * the {@link ArtifactVersions#getNewestUpdate(Optional, boolean)} update information
+     * the {@link ArtifactVersions#getNewestUpdateWithinSegment(Optional, boolean)} update information
      * @param <T> subclass of {@linkplain OverviewStats}
      * @param <V> subclass of {@linkplain ArtifactVersions}
      * @param allowSnapshots whether snapshots should be included
@@ -84,9 +84,8 @@ public class OverviewStats {
 
     protected static <V extends AbstractVersionDetails> ArtifactVersion getNewestUpdate(
             ArtifactVersionsCache cache, V details, Optional<Segment> segment, boolean allowSnapshots) {
-        return cache != null
-                ? cache.get(details, segment, allowSnapshots)
-                : details.getNewestUpdate(segment, allowSnapshots);
+        assert cache != null;
+        return cache.get(details, segment, allowSnapshots);
     }
 
     public int getMajor() {

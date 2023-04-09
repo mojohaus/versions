@@ -19,19 +19,13 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
@@ -64,51 +58,93 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      */
     private ArtifactVersion currentVersion = null;
 
+    private VersionRange currentVersionRange = null;
+
     protected boolean verboseDetail = true;
 
     protected AbstractVersionDetails() {}
 
-    @Override
-    public Restriction restrictionFor(Optional<Segment> scope) throws InvalidSegmentException {
-        // one range spec can have multiple restrictions, and multiple 'lower bound', we want the highest one.
-        // [1.0,2.0),[3.0,4.0) -> 3.0
-        ArtifactVersion highestLowerBound = currentVersion;
-        if (currentVersion != null) {
-            try {
-                highestLowerBound =
-                        VersionRange.createFromVersionSpec(currentVersion.toString()).getRestrictions().stream()
-                                .map(Restriction::getLowerBound)
-                                .filter(Objects::nonNull)
-                                .max(getVersionComparator())
-                                .orElse(currentVersion);
-            } catch (InvalidVersionSpecificationException ignored) {
-                ignored.printStackTrace(System.err);
-            }
-        }
+    /**
+     * If a version is a version range consisting of one or more version ranges, returns the highest <u>lower</u>
+     * bound. If a single version range is present, returns its value.
+     * @param lowerBoundVersion actual version used
+     * @return highest lower bound of the given version range or {@link #getCurrentVersion()} if there's no lower bound
+     */
+    protected ArtifactVersion getHighestLowerBound(ArtifactVersion lowerBoundVersion) {
+        return getCurrentVersionRange().getRestrictions().stream()
+                .map(Restriction::getLowerBound)
+                .filter(Objects::nonNull)
+                .max(getVersionComparator())
+                .orElse(lowerBoundVersion);
+    }
 
-        final ArtifactVersion currentVersion = highestLowerBound;
-        ArtifactVersion nextVersion = scope.filter(s -> s.isMajorTo(SUBINCREMENTAL))
-                .map(s -> (ArtifactVersion) new BoundArtifactVersion(currentVersion, Segment.of(s.value() + 1)))
-                .orElse(currentVersion);
+    /**
+     * If the artifact is bound by one or more version ranges, returns the restriction that constitutes
+     * the version range containing the selected actual version.
+     * If there are no version ranges, returns the provided version.
+     * @param selectedVersion actual version used
+     * @return restriction containing the version range selected by the given version,
+     * or {@link Optional#empty()} if there are no ranges
+     */
+    protected Optional<Restriction> getSelectedRestriction(ArtifactVersion selectedVersion) {
+        return Optional.ofNullable(getCurrentVersionRange())
+                .map(VersionRange::getRestrictions)
+                .flatMap(r -> r.stream()
+                        .filter(rr -> rr.containsVersion(selectedVersion))
+                        .findAny());
+    }
+
+    @Override
+    public Restriction restrictionForSelectedSegment(ArtifactVersion lowerBound, Optional<Segment> selectedSegment) {
+        ArtifactVersion highestLowerBound = getHighestLowerBound(lowerBound);
+        ArtifactVersion nextVersion = selectedSegment
+                .filter(s -> s.isMajorTo(SUBINCREMENTAL))
+                .map(Segment::minorTo)
+                .map(s -> (ArtifactVersion) new BoundArtifactVersion(highestLowerBound, s))
+                .orElse(highestLowerBound);
         return new Restriction(
                 nextVersion,
                 false,
-                scope.filter(MAJOR::isMajorTo)
-                        .map(s -> (ArtifactVersion) new BoundArtifactVersion(currentVersion, s))
+                selectedSegment
+                        .filter(MAJOR::isMajorTo)
+                        .map(s -> (ArtifactVersion) new BoundArtifactVersion(highestLowerBound, s))
                         .orElse(null),
                 false);
     }
 
     @Override
-    public Restriction restrictionForIgnoreScope(Optional<Segment> ignored) {
-        ArtifactVersion nextVersion = ignored.map(s -> (ArtifactVersion) new BoundArtifactVersion(currentVersion, s))
-                .orElse(currentVersion);
-        return new Restriction(nextVersion, false, null, false);
+    public Restriction restrictionForUnchangedSegment(
+            ArtifactVersion actualVersion, Optional<Segment> unchangedSegment, boolean allowDowngrade)
+            throws InvalidSegmentException {
+        Optional<Restriction> selectedRestriction = getSelectedRestriction(actualVersion);
+        ArtifactVersion selectedRestrictionUpperBound =
+                selectedRestriction.map(Restriction::getUpperBound).orElse(actualVersion);
+        ArtifactVersion lowerBound = allowDowngrade
+                ? getLowerBound(selectedRestrictionUpperBound, unchangedSegment)
+                        .map(DefaultArtifactVersionCache::of)
+                        .orElse(null)
+                : selectedRestrictionUpperBound;
+        ArtifactVersion upperBound = unchangedSegment
+                .map(s -> (ArtifactVersion) new BoundArtifactVersion(
+                        selectedRestrictionUpperBound, s.isMajorTo(SUBINCREMENTAL) ? Segment.minorTo(s) : s))
+                .orElse(null);
+        return new Restriction(
+                lowerBound,
+                allowDowngrade
+                        || selectedRestriction
+                                .map(Restriction::isUpperBoundInclusive)
+                                .map(b -> !b)
+                                .orElse(false),
+                upperBound,
+                allowDowngrade);
     }
 
     @Override
-    public final boolean isCurrentVersionDefined() {
-        return getCurrentVersion() != null;
+    public Restriction restrictionForIgnoreScope(ArtifactVersion lowerBound, Optional<Segment> ignored) {
+        ArtifactVersion highestLowerBound = getHighestLowerBound(lowerBound);
+        ArtifactVersion nextVersion = ignored.map(s -> (ArtifactVersion) new BoundArtifactVersion(highestLowerBound, s))
+                .orElse(highestLowerBound);
+        return new Restriction(nextVersion, false, null, false);
     }
 
     @Override
@@ -122,6 +158,16 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     }
 
     @Override
+    public final VersionRange getCurrentVersionRange() {
+        return currentVersionRange;
+    }
+
+    @Override
+    public final void setCurrentVersionRange(VersionRange versionRange) {
+        currentVersionRange = versionRange;
+    }
+
+    @Override
     public final void setCurrentVersion(String currentVersion) {
         setCurrentVersion(currentVersion == null ? null : DefaultArtifactVersionCache.of(currentVersion));
     }
@@ -129,20 +175,6 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     @Override
     public final ArtifactVersion[] getVersions(VersionRange versionRange, boolean includeSnapshots) {
         return getVersions(versionRange, null, includeSnapshots);
-    }
-
-    @Override
-    public final ArtifactVersion[] getVersions(
-            ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots) {
-        Restriction restriction = new Restriction(lowerBound, false, upperBound, false);
-        return getVersions(restriction, includeSnapshots);
-    }
-
-    @Override
-    public final ArtifactVersion getNewestVersion(
-            ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots) {
-        Restriction restriction = new Restriction(lowerBound, false, upperBound, false);
-        return getNewestVersion(restriction, includeSnapshots);
     }
 
     @Override
@@ -187,24 +219,6 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         return false;
     }
 
-    private ArtifactVersion[] getNewerVersions(ArtifactVersion version, boolean includeSnapshots) {
-        Restriction restriction = new Restriction(version, false, null, false);
-        return getVersions(restriction, includeSnapshots);
-    }
-
-    @Override
-    public final ArtifactVersion[] getNewerVersions(String version, boolean includeSnapshots) {
-        return getNewerVersions(DefaultArtifactVersionCache.of(version), includeSnapshots);
-    }
-
-    @Deprecated
-    @Override
-    public final ArtifactVersion[] getNewerVersions(
-            String version, Optional<Segment> upperBoundSegment, boolean includeSnapshots)
-            throws InvalidSegmentException {
-        return getNewerVersions(version, upperBoundSegment, includeSnapshots, false);
-    }
-
     @Override
     public final ArtifactVersion[] getNewerVersions(
             String versionString, Optional<Segment> unchangedSegment, boolean includeSnapshots, boolean allowDowngrade)
@@ -216,8 +230,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
                         .orElse(null)
                 : currentVersion;
         ArtifactVersion upperBound = unchangedSegment
-                .map(s -> (ArtifactVersion) new BoundArtifactVersion(
-                        currentVersion, s.isMajorTo(SUBINCREMENTAL) ? Segment.of(s.value() + 1) : s))
+                .map(s -> (ArtifactVersion)
+                        new BoundArtifactVersion(currentVersion, s.isMajorTo(SUBINCREMENTAL) ? Segment.minorTo(s) : s))
                 .orElse(null);
 
         Restriction restriction = new Restriction(lowerBound, allowDowngrade, upperBound, allowDowngrade);
@@ -226,22 +240,21 @@ public abstract class AbstractVersionDetails implements VersionDetails {
 
     @Override
     public Optional<ArtifactVersion> getNewestVersion(
-            String versionString, Optional<Segment> upperBoundSegment, boolean includeSnapshots, boolean allowDowngrade)
+            String actualVersion, Optional<Segment> unchangedSegment, boolean includeSnapshots, boolean allowDowngrade)
             throws InvalidSegmentException {
-        ArtifactVersion currentVersion = DefaultArtifactVersionCache.of(versionString);
-        ArtifactVersion lowerBound = allowDowngrade
-                ? getLowerBound(currentVersion, upperBoundSegment)
-                        .map(DefaultArtifactVersionCache::of)
-                        .orElse(null)
-                : currentVersion;
-        ArtifactVersion upperBound = upperBoundSegment
-                .map(s -> (ArtifactVersion) new BoundArtifactVersion(
-                        currentVersion, s.isMajorTo(SUBINCREMENTAL) ? Segment.of(s.value() + 1) : s))
-                .orElse(null);
-
-        Restriction restriction = new Restriction(lowerBound, allowDowngrade, upperBound, allowDowngrade);
+        Restriction segmentRestriction = restrictionForUnchangedSegment(
+                DefaultArtifactVersionCache.of(actualVersion), unchangedSegment, allowDowngrade);
+        Restriction lookupRestriction;
+        if (!allowDowngrade
+                && Optional.ofNullable(currentVersion)
+                        .map(v -> v.compareTo(segmentRestriction.getLowerBound()) > 0)
+                        .orElse(false)) {
+            lookupRestriction = new Restriction(currentVersion, false, null, false);
+        } else {
+            lookupRestriction = segmentRestriction;
+        }
         return Arrays.stream(getVersions(includeSnapshots))
-                .filter(candidate -> isVersionInRestriction(restriction, candidate))
+                .filter(candidate -> isVersionInRestriction(lookupRestriction, candidate))
                 .filter(candidate -> includeSnapshots || !ArtifactUtils.isSnapshot(candidate.toString()))
                 .max(getVersionComparator());
     }
@@ -264,36 +277,28 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     }
 
     @Override
-    public final ArtifactVersion getNewestUpdate(
+    public final ArtifactVersion getNewestUpdateWithinSegment(
             ArtifactVersion currentVersion, Optional<Segment> updateScope, boolean includeSnapshots) {
-        try {
-            return getNewestVersion(restrictionFor(updateScope), includeSnapshots);
-        } catch (InvalidSegmentException e) {
-            return null;
-        }
+        return getNewestVersion(restrictionForSelectedSegment(currentVersion, updateScope), includeSnapshots);
     }
 
     @Override
     public final ArtifactVersion[] getAllUpdates(
             ArtifactVersion currentVersion, Optional<Segment> updateScope, boolean includeSnapshots) {
-        try {
-            return getVersions(restrictionFor(updateScope), includeSnapshots);
-        } catch (InvalidSegmentException e) {
-            return null;
-        }
+        return getVersions(restrictionForSelectedSegment(currentVersion, updateScope), includeSnapshots);
     }
 
     @Override
-    public final ArtifactVersion getNewestUpdate(Optional<Segment> updateScope, boolean includeSnapshots) {
-        if (isCurrentVersionDefined()) {
-            return getNewestUpdate(getCurrentVersion(), updateScope, includeSnapshots);
+    public final ArtifactVersion getNewestUpdateWithinSegment(Optional<Segment> updateScope, boolean includeSnapshots) {
+        if (getCurrentVersion() != null) {
+            return getNewestUpdateWithinSegment(getCurrentVersion(), updateScope, includeSnapshots);
         }
         return null;
     }
 
     @Override
     public final ArtifactVersion[] getAllUpdates(Optional<Segment> updateScope, boolean includeSnapshots) {
-        if (isCurrentVersionDefined()) {
+        if (getCurrentVersion() != null) {
             return getAllUpdates(getCurrentVersion(), updateScope, includeSnapshots);
         }
         return null;
@@ -433,15 +438,11 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      * @return all versions after currentVersion within the specified update scope.
      */
     private Stream<ArtifactVersion> getArtifactVersionStream(Optional<Segment> updateScope, boolean includeSnapshots) {
-        if (isCurrentVersionDefined()) {
-            try {
-                Restriction restriction = restrictionFor(updateScope);
+        if (getCurrentVersion() != null) {
+            Restriction restriction = restrictionForSelectedSegment(getCurrentVersion(), updateScope);
 
-                return Arrays.stream(getVersions(includeSnapshots))
-                        .filter(candidate -> isVersionInRestriction(restriction, candidate));
-            } catch (InvalidSegmentException ignored) {
-                ignored.printStackTrace(System.err);
-            }
+            return Arrays.stream(getVersions(includeSnapshots))
+                    .filter(candidate -> isVersionInRestriction(restriction, candidate));
         }
         return Stream.empty();
     }

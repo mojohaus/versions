@@ -60,7 +60,7 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
     private final DependencyUpdatesModel model;
     private final Path outputFile;
     private final ArtifactVersionsCache newestUpdateCache =
-            new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdate);
+            new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdateWithinSegment);
 
     private final boolean allowSnapshots;
 
@@ -126,7 +126,7 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
                         setType(e.getKey().getType());
                         setClassifier(e.getKey().getClassifier());
 
-                        ofNullable(e.getValue().getNewestUpdate(empty(), allowSnapshots))
+                        ofNullable(e.getValue().getNewestUpdateWithinSegment(empty(), allowSnapshots))
                                 .map(ArtifactVersion::toString)
                                 .ifPresent(this::setLastVersion);
 

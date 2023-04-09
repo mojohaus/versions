@@ -1,21 +1,17 @@
 package org.codehaus.mojo.versions;
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.nio.file.Files;
@@ -34,8 +30,7 @@ import org.junit.Test;
 import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Unit tests for {@link DisplayPropertyUpdatesMojo}
@@ -46,10 +41,13 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
 
     private Path tempDir;
 
+    private Path tempFile;
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
         tempDir = TestUtils.createTempDir("display-property-updates");
+        tempFile = Files.createTempFile(tempDir, "output", "");
     }
 
     @After
@@ -63,8 +61,6 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
 
     @Test
     public void testPropertiesFromParent() throws Exception {
-        Path tempFile = Files.createTempFile(tempDir, "output", "");
-
         TestUtils.copyDir(
                 Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367"), tempDir);
         DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
@@ -83,8 +79,6 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
 
     @Test
     public void testDisablePropertiesFromParent() throws Exception {
-        Path tempFile = Files.createTempFile(tempDir, "output", "");
-
         TestUtils.copyDir(
                 Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367"), tempDir);
         DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
@@ -99,5 +93,40 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         assertThat(
                 String.join("", Files.readAllLines(tempFile)),
                 not(matchesPattern(".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*")));
+    }
+
+    private void testAllowUpdatesFromLesserSegments(String availableVersion) throws Exception {
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-960"), tempDir);
+        DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
+                mojoRule.lookupConfiguredMojo(tempDir.toFile(), "display-property-updates");
+        mojo.outputEncoding = UTF_8;
+        mojo.outputFile = tempFile.toFile();
+        mojo.setPluginContext(new HashMap<>());
+        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {availableVersion, "2"});
+            }
+        });
+        mojo.includeParent = false;
+        setVariableValueToObject(mojo, "allowMajorUpdates", false);
+        mojo.execute();
+
+        assertThat(String.join("", Files.readAllLines(tempFile)), containsString(availableVersion));
+    }
+
+    @Test
+    public void testAllowUpdatesFromLesserSegmentsMinor() throws Exception {
+        testAllowUpdatesFromLesserSegments("1.1");
+    }
+
+    @Test
+    public void testAllowUpdatesFromLesserSegmentsIncremental() throws Exception {
+        testAllowUpdatesFromLesserSegments("1.0.1");
+    }
+
+    @Test
+    public void testAllowUpdatesFromLesserSegmentsSubIncremental() throws Exception {
+        testAllowUpdatesFromLesserSegments("1.0.0-1");
     }
 }

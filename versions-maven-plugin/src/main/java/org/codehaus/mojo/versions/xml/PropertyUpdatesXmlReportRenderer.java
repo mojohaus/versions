@@ -59,7 +59,7 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
     private final PropertyUpdatesModel model;
     private final Path outputFile;
     private final ArtifactVersionsCache newestUpdateCache =
-            new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdate);
+            new ArtifactVersionsCache(AbstractVersionDetails::getNewestUpdateWithinSegment);
     private final boolean allowSnapshots;
 
     /**
@@ -128,7 +128,7 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
                                     .collect(Collectors.toList()));
                         }
                         setCurrentVersion(e.getKey().getVersion());
-                        ofNullable(e.getValue().getNewestUpdate(empty(), allowSnapshots))
+                        ofNullable(e.getValue().getNewestUpdateWithinSegment(empty(), allowSnapshots))
                                 .map(ArtifactVersion::toString)
                                 .ifPresent(this::setLastVersion);
 

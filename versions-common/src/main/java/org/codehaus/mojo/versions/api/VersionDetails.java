@@ -44,14 +44,6 @@ public interface VersionDetails {
     boolean containsVersion(String version);
 
     /**
-     * Returns <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
-     *
-     * @return <code>true</code> if and only if <code>getCurrentVersion() != null</code>.
-     * @since 1.0-beta-1
-     */
-    boolean isCurrentVersionDefined();
-
-    /**
      * Sets the current version.
      *
      * @param currentVersion The new current version.
@@ -68,12 +60,26 @@ public interface VersionDetails {
     void setCurrentVersion(String currentVersion);
 
     /**
-     * Retrieves the current version.
+     * Returns the current version.
      *
-     * @return The current version (may be <code>null</code>).
+     * @return The current version (may be {@code null}).
      * @since 1.0-beta-1
      */
     ArtifactVersion getCurrentVersion();
+
+    /**
+     * Returns the current version range (may be {@code null})
+     * @return current version range (may be {@code null})
+     * @since 2.16.0
+     */
+    VersionRange getCurrentVersionRange();
+
+    /**
+     * Sets the current version range (may be {@code null})
+     * @param versionRange version range to set (may be {@code null})
+     * @since 2.16.0
+     */
+    void setCurrentVersionRange(VersionRange versionRange);
 
     /**
      * Gets the rule for version comparison of this artifact.
@@ -101,17 +107,6 @@ public interface VersionDetails {
      * @since 1.0-alpha-3
      */
     ArtifactVersion[] getVersions(VersionRange versionRange, boolean includeSnapshots);
-
-    /**
-     * Returns all available versions within the specified bounds.
-     *
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return all available versions within the specified version range.
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion[] getVersions(ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots);
 
     /**
      * Returns all available versions within the specified bounds.
@@ -147,18 +142,6 @@ public interface VersionDetails {
      */
     ArtifactVersion getNewestVersion(
             VersionRange versionRange, Restriction restriction, boolean includeSnapshots, boolean allowDowngrade);
-
-    /**
-     * Returns the latest version newer than the specified lowerBound, but less than the specified upper bound or
-     * <code>null</code> if no such version exists.
-     *
-     * @param lowerBound the lower bound or <code>null</code> if the lower limit is unbounded.
-     * @param upperBound the upper bound or <code>null</code> if the upper limit is unbounded.
-     * @param includeSnapshots <code>true</code> if snapshots are to be included.
-     * @return the latest version between currentVersion and upperBound or <code>null</code> if no version is available.
-     * @since 1.0-alpha-3
-     */
-    ArtifactVersion getNewestVersion(ArtifactVersion lowerBound, ArtifactVersion upperBound, boolean includeSnapshots);
 
     /**
      * Returns the latest version newer than the specified current version, but less than the specified upper bound or
@@ -199,7 +182,7 @@ public interface VersionDetails {
      * should be included.
      *
      * @param versionString current version
-     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
+     * @param unchangedSegment segment that may not be changed; empty() means no upper bound
      * @param includeSnapshots whether snapshot versions should be included
      * @param allowDowngrade whether to allow downgrading if the current version is a snapshots and snapshots
      *                       are disallowed
@@ -208,7 +191,7 @@ public interface VersionDetails {
      * the segment count)
      */
     Optional<ArtifactVersion> getNewestVersion(
-            String versionString, Optional<Segment> upperBoundSegment, boolean includeSnapshots, boolean allowDowngrade)
+            String versionString, Optional<Segment> unchangedSegment, boolean includeSnapshots, boolean allowDowngrade)
             throws InvalidSegmentException;
 
     /**
@@ -223,34 +206,8 @@ public interface VersionDetails {
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate(
+    ArtifactVersion getNewestUpdateWithinSegment(
             ArtifactVersion currentVersion, Optional<Segment> updateScope, boolean includeSnapshots)
-            throws InvalidSegmentException;
-
-    /**
-     * Returns an array of newer versions than the given version, given whether snapshots
-     * should be included.
-     *
-     * @param version           current version in String format
-     * @param includeSnapshots  whether snapshot versions should be included
-     * @return array of newer versions fulfilling the criteria
-     */
-    ArtifactVersion[] getNewerVersions(String version, boolean includeSnapshots);
-
-    /**
-     * Returns an array of newer versions than the given version, given the upper bound segment and whether snapshots
-     * should be included.
-     *
-     * @param version           current version
-     * @param upperBoundSegment the upper bound segment; empty() means no upper bound
-     * @param includeSnapshots  whether snapshot versions should be included
-     * @return array of newer versions fulfilling the criteria
-     * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
-     *                                 the segment count)
-     * @deprecated please use {@link AbstractVersionDetails#getNewerVersions(String, Optional, boolean, boolean)},
-     * boolean, boolean)} instead
-     */
-    ArtifactVersion[] getNewerVersions(String version, Optional<Segment> upperBoundSegment, boolean includeSnapshots)
             throws InvalidSegmentException;
 
     /**
@@ -285,8 +242,9 @@ public interface VersionDetails {
             throws InvalidSegmentException;
 
     /**
-     * Returns the newest version newer than the specified current version, but within the specified update scope or
-     * <code>null</code> if no such version exists.
+     * <p>Returns the newest version newer than the specified current version, <u>only within the segment specified
+     * by {@code updateScope}</u> or {@code null} if no such version exists.</p>
+     * <p>If {@code updateScope} is {@link Optional#empty()}, will return all updates.</p>
      *
      * @param updateScope the update scope to include.
      * @param includeSnapshots <code>true</code> if snapshots are to be included.
@@ -295,7 +253,7 @@ public interface VersionDetails {
      * @throws InvalidSegmentException thrown if the updateScope is greater than the number of segments
      * @since 1.0-beta-1
      */
-    ArtifactVersion getNewestUpdate(Optional<Segment> updateScope, boolean includeSnapshots)
+    ArtifactVersion getNewestUpdateWithinSegment(Optional<Segment> updateScope, boolean includeSnapshots)
             throws InvalidSegmentException;
 
     /**
@@ -331,27 +289,40 @@ public interface VersionDetails {
 
     /**
      * <p>Returns a {@linkplain Restriction} object for computing version <em>upgrades</em>
-     * with the given segment allowing updates, with all more major segments locked in place.</p>
-     * <p>The resulting restriction could be thought of as one
-     * retaining the versions on positions up to the held position,
-     * the position right after the position held in place will be incremented by one,
-     * and on all positions which are more minor than that, the range would contain -&infin;
-     * for the bottom bound and +&infin; for the above bound.</p>
-     * <p>This will allow matching the required versions while not matching versions which are considered
-     * inferior than the zeroth version, i.e. versions with a qualifier.</p>
+     * <u>within the given segment</u> allowing updates, with all more major segments locked in place,
+     * but also <u>ignoring all version updates from lesser scopes</u>.</p>
      *
-     * @param scope most major segment where updates are allowed Optional.empty() for no restriction
+     * @param lowerBound artifact version, for which the unchanged segment is computed
+     * @param selectedSegment segment, for which the restriction is to be built or {@link Optional#empty()} for no restriction
      * @return {@linkplain Restriction} object based on the arguments
      * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
      * the segment count)
      */
-    Restriction restrictionFor(Optional<Segment> scope) throws InvalidSegmentException;
+    Restriction restrictionForSelectedSegment(ArtifactVersion lowerBound, Optional<Segment> selectedSegment)
+            throws InvalidSegmentException;
+
+    /**
+     * <p>Returns a {@linkplain Restriction} object for computing version <em>upgrades</em>
+     * <u>within the all segments</u> minor/lesser to the provided {@code unchangedSegment}.</p>
+     * <p>If the provided segment is {@link Optional#empty()}, all possible updates are returned.</p>
+     *
+     * @param lowerBound artifact version, for which the unchanged segment is computed
+     * @param unchangedSegment segment, which should not be changed or {@link Optional#empty()} for no restriction
+     * @param allowDowngrade whether downgrades are allowed
+     * @return {@linkplain Restriction} object based on the arguments
+     * @throws InvalidSegmentException if the requested segment is outside the bounds (less than 1 or greater than
+     * the segment count)
+     */
+    Restriction restrictionForUnchangedSegment(
+            ArtifactVersion lowerBound, Optional<Segment> unchangedSegment, boolean allowDowngrade)
+            throws InvalidSegmentException;
 
     /**
      * Returns the {@link Restriction} objects for a segemnt scope which is to be <b>ignored</b>.
      *
+     * @param lowerBound artifact version, for which the unchanged segment is computed
      * @param ignored most major segment where updates are to be ignored; Optional.empty() for no ignored segments
      * @return {@linkplain Restriction} object based on the arguments
      */
-    Restriction restrictionForIgnoreScope(Optional<Segment> ignored);
+    Restriction restrictionForIgnoreScope(ArtifactVersion lowerBound, Optional<Segment> ignored);
 }

@@ -27,6 +27,7 @@ import java.util.TreeSet;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
@@ -48,6 +49,10 @@ class PropertyVersionsBuilder {
 
     private final Map<String, Boolean> lowerBounds = new LinkedHashMap<>();
 
+    private ArtifactVersion currentVersion;
+
+    private VersionRange currentVersionRange;
+
     /**
      * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.
      *
@@ -62,12 +67,9 @@ class PropertyVersionsBuilder {
         this.helper = helper;
     }
 
-    public void addAssociation(Artifact artifact, boolean usePluginRepositories) {
+    public PropertyVersionsBuilder withAssociation(Artifact artifact, boolean usePluginRepositories) {
         associations.add(new DefaultArtifactAssociation(artifact, usePluginRepositories));
-    }
-
-    public void removeAssociation(Artifact artifact, boolean usePluginRepositories) {
-        associations.remove(new DefaultArtifactAssociation(artifact, usePluginRepositories));
+        return this;
     }
 
     public void clearAssociations() {
@@ -82,8 +84,11 @@ class PropertyVersionsBuilder {
         return associations.toArray(new ArtifactAssociation[0]);
     }
 
-    public PropertyVersions newPropertyVersions() throws VersionRetrievalException {
-        return new PropertyVersions(profileId, name, helper, associations);
+    public PropertyVersions build() throws VersionRetrievalException {
+        PropertyVersions instance = new PropertyVersions(profileId, name, helper, associations);
+        instance.setCurrentVersion(currentVersion);
+        instance.setCurrentVersionRange(currentVersionRange);
+        return instance;
     }
 
     public String getName() {
@@ -150,7 +155,7 @@ class PropertyVersionsBuilder {
         return buf.toString();
     }
 
-    public void addLowerBound(String lowerBound, boolean includeLower) {
+    public PropertyVersionsBuilder withLowerBound(String lowerBound, boolean includeLower) {
         Boolean value = lowerBounds.get(lowerBound);
         if (value == null) {
             value = includeLower;
@@ -158,9 +163,10 @@ class PropertyVersionsBuilder {
             value = includeLower && value;
         }
         lowerBounds.put(lowerBound, value);
+        return this;
     }
 
-    public void addUpperBound(String upperBound, boolean includeUpper) {
+    public PropertyVersionsBuilder withUpperBound(String upperBound, boolean includeUpper) {
         Boolean value = upperBounds.get(upperBound);
         if (value == null) {
             value = includeUpper;
@@ -168,6 +174,7 @@ class PropertyVersionsBuilder {
             value = includeUpper && value;
         }
         upperBounds.put(upperBound, value);
+        return this;
     }
 
     private VersionComparator[] lookupComparators() {
@@ -201,5 +208,15 @@ class PropertyVersionsBuilder {
             }
             return result;
         }
+    }
+
+    public PropertyVersionsBuilder withCurrentVersion(ArtifactVersion currentVersion) {
+        this.currentVersion = currentVersion;
+        return this;
+    }
+
+    public PropertyVersionsBuilder withCurrentVersionRange(VersionRange currentVersionRange) {
+        this.currentVersionRange = currentVersionRange;
+        return this;
     }
 }

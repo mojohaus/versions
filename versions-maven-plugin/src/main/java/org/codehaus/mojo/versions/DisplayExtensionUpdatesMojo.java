@@ -42,10 +42,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
-import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.api.Segment;
-import org.codehaus.mojo.versions.api.VersionRetrievalException;
+import org.codehaus.mojo.versions.api.*;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
@@ -282,7 +279,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     private Optional<Segment> calculateUpdateScope() {
         return of(SegmentUtils.determineUnchangedSegment(
                         allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog())
-                .map(s -> Segment.of(s.value() + 1))
+                .map(Segment::minorTo)
                 .orElse(MAJOR));
     }
 
@@ -293,16 +290,16 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
             String left = "  " + ArtifactUtils.versionlessKey(versions.getArtifact()) + " ";
             final String current;
             ArtifactVersion latest;
-            if (versions.isCurrentVersionDefined()) {
+            if (versions.getCurrentVersion() != null) {
                 current = versions.getCurrentVersion().toString();
-                latest = versions.getNewestUpdate(calculateUpdateScope(), allowSnapshots);
+                latest = versions.getNewestUpdateWithinSegment(calculateUpdateScope(), allowSnapshots);
             } else {
                 ArtifactVersion newestVersion =
                         versions.getNewestVersion(versions.getArtifact().getVersionRange(), allowSnapshots);
                 current = versions.getArtifact().getVersionRange().toString();
                 latest = newestVersion == null
                         ? null
-                        : versions.getNewestUpdate(newestVersion, calculateUpdateScope(), allowSnapshots);
+                        : versions.getNewestUpdateWithinSegment(newestVersion, calculateUpdateScope(), allowSnapshots);
                 if (latest != null
                         && ArtifactVersions.isVersionInRange(
                                 latest, versions.getArtifact().getVersionRange())) {
