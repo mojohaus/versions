@@ -1,40 +1,34 @@
 package org.codehaus.mojo.versions;
 
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright MojoHaus and Contributors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.model.TestIgnoreVersions;
+import org.codehaus.mojo.versions.utils.CloseableTempFile;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
@@ -45,16 +39,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.TYPE_REGEX;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.matches;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Basic tests for {@linkplain DisplayDependencyUpdatesMojo}.
@@ -83,10 +70,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
     @Test
     public void testRuleSetPresentAndWorking() throws Exception {
-        File outputFile = null;
-        try {
-            outputFile = File.createTempFile("display-dependency-updates", "");
-            assert outputFile.exists();
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
 
             DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
                     new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/ruleset"),
@@ -108,7 +92,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                                     .withVersion(".+-M\\d+"))));
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
-            mojo.outputFile = outputFile;
+            mojo.outputFile = tempFile.getPath().toFile();
             mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
                 {
                     put("dummy-api", new String[] {"1.0.0", "1.0.1", "1.1.0-M1", "1.2.0-SNAPSHOT"});
@@ -117,10 +101,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             assertThat(mojo.ruleSet.getIgnoreVersions(), Matchers.hasSize(3));
             mojo.execute();
-            List<String> output = Files.readAllLines(outputFile.toPath(), UTF_8);
+            List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
             assertThat(output, not(hasItem(containsString("1.1.0-M1"))));
-        } finally {
-            assert outputFile == null || !outputFile.exists() || outputFile.delete();
         }
     }
 
@@ -145,12 +127,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testVersionsWithQualifiersNotConsideredAsMinorUpdates()
-            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException {
-        Path tempPath = null;
-        try {
-            tempPath = Files.createTempFile("display-dependency-updates", "");
-            final File tempFile = tempPath.toFile();
+    public void testVersionsWithQualifiersNotConsideredAsMinorUpdates() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
                     mockRepositorySystem(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -164,13 +142,12 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                     null) {
                 {
                     setProject(createProject());
-                    setVariableValueToObject(this, "allowAnyUpdates", false);
                     setVariableValueToObject(this, "allowMajorUpdates", false);
                     setVariableValueToObject(this, "processDependencies", true);
                     setVariableValueToObject(this, "dependencyIncludes", singletonList(WildcardMatcher.WILDCARD));
                     setVariableValueToObject(this, "dependencyExcludes", emptyList());
                     this.allowSnapshots = true;
-                    this.outputFile = tempFile;
+                    this.outputFile = tempFile.getPath().toFile();
                     setPluginContext(new HashMap<>());
 
                     session = mockMavenSession();
@@ -178,25 +155,17 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             }.execute();
 
             assertThat(
-                    String.join("", Files.readAllLines(tempPath)),
+                    String.join("", Files.readAllLines(tempFile.getPath())),
                     not(anyOf(
                             containsString("2.0.0-SNAPSHOT"),
                             containsString("2.0.0-beta"),
                             containsString("2.0.0-rc1"))));
-        } finally {
-            if (tempPath != null && Files.exists(tempPath)) {
-                Files.delete(tempPath);
-            }
         }
     }
 
     @Test
-    public void testAllowMajorUpdatesFalse()
-            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException {
-        Path tempPath = null;
-        try {
-            tempPath = Files.createTempFile("display-dependency-updates", "");
-            final File tempFile = tempPath.toFile();
+    public void testAllowMajorUpdatesFalse() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
                     mockRepositorySystem(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -208,36 +177,27 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                     null) {
                 {
                     setProject(createProject());
-                    setVariableValueToObject(this, "allowAnyUpdates", false);
                     setVariableValueToObject(this, "allowMajorUpdates", false);
                     setVariableValueToObject(this, "processDependencies", true);
                     setVariableValueToObject(this, "dependencyIncludes", singletonList(WildcardMatcher.WILDCARD));
                     setVariableValueToObject(this, "dependencyExcludes", emptyList());
-                    this.outputFile = tempFile;
+                    this.outputFile = tempFile.getPath().toFile();
                     setPluginContext(new HashMap<>());
 
                     session = mockMavenSession();
                 }
             }.execute();
 
-            String output = String.join("", Files.readAllLines(tempPath));
+            String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
             assertThat(output, containsString("1.1.0"));
             assertThat(output, not(containsString("2.0.0")));
-        } finally {
-            if (tempPath != null && Files.exists(tempPath)) {
-                Files.delete(tempPath);
-            }
         }
     }
 
     @Test
-    public void testAllowMinorUpdatesFalse()
-            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException {
-        Path tempPath = null;
-        try {
-            tempPath = Files.createTempFile("display-dependency-updates", "");
-            final File tempFile = tempPath.toFile();
+    public void testAllowMinorUpdatesFalse() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
                     mockRepositorySystem(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -249,37 +209,28 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                     null) {
                 {
                     setProject(createProject());
-                    setVariableValueToObject(this, "allowAnyUpdates", false);
                     setVariableValueToObject(this, "allowMinorUpdates", false);
                     setVariableValueToObject(this, "processDependencies", true);
                     setVariableValueToObject(this, "dependencyIncludes", singletonList(WildcardMatcher.WILDCARD));
                     setVariableValueToObject(this, "dependencyExcludes", emptyList());
-                    this.outputFile = tempFile;
+                    this.outputFile = tempFile.getPath().toFile();
                     setPluginContext(new HashMap<>());
 
                     session = mockMavenSession();
                 }
             }.execute();
 
-            String output = String.join("", Files.readAllLines(tempPath));
+            String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
             assertThat(output, containsString("1.0.1"));
             assertThat(output, not(containsString("1.1.0")));
             assertThat(output, not(containsString("2.0.0")));
-        } finally {
-            if (tempPath != null && Files.exists(tempPath)) {
-                Files.delete(tempPath);
-            }
         }
     }
 
     @Test
-    public void testAllowIncrementalUpdatesFalse()
-            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException {
-        Path tempPath = null;
-        try {
-            tempPath = Files.createTempFile("display-dependency-updates", "");
-            final File tempFile = tempPath.toFile();
+    public void testAllowIncrementalUpdatesFalse() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
                     mockRepositorySystem(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -291,38 +242,29 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                     null) {
                 {
                     setProject(createProject());
-                    setVariableValueToObject(this, "allowAnyUpdates", false);
                     setVariableValueToObject(this, "allowIncrementalUpdates", false);
                     setVariableValueToObject(this, "processDependencies", true);
                     setVariableValueToObject(this, "dependencyIncludes", singletonList(WildcardMatcher.WILDCARD));
                     setVariableValueToObject(this, "dependencyExcludes", emptyList());
-                    this.outputFile = tempFile;
+                    this.outputFile = tempFile.getPath().toFile();
                     setPluginContext(new HashMap<>());
 
                     session = mockMavenSession();
                 }
             }.execute();
 
-            String output = String.join("", Files.readAllLines(tempPath));
+            String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
             assertThat(output, containsString("1.0.0-1"));
             assertThat(output, not(containsString("1.0.1")));
             assertThat(output, not(containsString("1.1.0")));
             assertThat(output, not(containsString("2.0.0")));
-        } finally {
-            if (tempPath != null && Files.exists(tempPath)) {
-                Files.delete(tempPath);
-            }
         }
     }
 
     @Test
-    public void testVersionsWithQualifiersNotConsideredAsIncrementalUpdates()
-            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException {
-        Path tempPath = null;
-        try {
-            tempPath = Files.createTempFile("display-dependency-updates", "");
-            final File tempFile = tempPath.toFile();
+    public void testVersionsWithQualifiersNotConsideredAsIncrementalUpdates() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
                     mockRepositorySystem(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -336,13 +278,12 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                     null) {
                 {
                     setProject(createProject());
-                    setVariableValueToObject(this, "allowAnyUpdates", false);
                     setVariableValueToObject(this, "allowMinorUpdates", false);
                     setVariableValueToObject(this, "processDependencies", true);
                     setVariableValueToObject(this, "dependencyIncludes", singletonList(WildcardMatcher.WILDCARD));
                     setVariableValueToObject(this, "dependencyExcludes", emptyList());
                     this.allowSnapshots = true;
-                    this.outputFile = tempFile;
+                    this.outputFile = tempFile.getPath().toFile();
                     setPluginContext(new HashMap<>());
 
                     session = mockMavenSession();
@@ -350,24 +291,17 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             }.execute();
 
             assertThat(
-                    String.join("", Files.readAllLines(tempPath)),
+                    String.join("", Files.readAllLines(tempFile.getPath())),
                     not(anyOf(
                             containsString("1.9.0-SNAPSHOT"),
                             containsString("1.9.0-beta"),
                             containsString("1.9.0-rc1"))));
-        } finally {
-            if (tempPath != null && Files.exists(tempPath)) {
-                Files.delete(tempPath);
-            }
         }
     }
 
     @Test
     public void testDetermineUpdatedSegment() throws Exception {
-        File outputFile = null;
-        try {
-            outputFile = File.createTempFile("display-dependency-updates", "");
-            assert outputFile.exists();
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
 
             DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
                     new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/ruleset"),
@@ -390,7 +324,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                                     .withVersion(".+-M\\d+"))));
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
-            mojo.outputFile = outputFile;
+            mojo.outputFile = tempFile.getPath().toFile();
             mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
                 {
                     put("dummy-api", new String[] {"1.0.0", "1.0.1", "1.1.0-M1", "1.2.0-SNAPSHOT"});
@@ -399,26 +333,21 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             assertThat(mojo.ruleSet.getIgnoreVersions(), Matchers.hasSize(3));
             mojo.execute();
-            List<String> output = Files.readAllLines(outputFile.toPath(), UTF_8);
+            List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
             assertThat(output, not(hasItem(containsString("1.1.0-M1"))));
-        } finally {
-            assert outputFile == null || !outputFile.exists() || outputFile.delete();
         }
     }
 
     @Test
     public void testVersionInterpolation() throws Exception {
-        File outputFile = null;
-        try {
-            outputFile = File.createTempFile("display-dependency-updates", "");
-            assert outputFile.exists();
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
 
             DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
                     new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/version-interpolation"),
                     "display-dependency-updates");
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
-            mojo.outputFile = outputFile;
+            mojo.outputFile = tempFile.getPath().toFile();
             mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
                 {
                     put("dummy-api", new String[] {"2.0.1"});
@@ -426,25 +355,19 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             });
             setVariableValueToObject(mojo, "processDependencyManagementTransitive", false);
             mojo.execute();
-            List<String> output = Files.readAllLines(outputFile.toPath(), UTF_8);
+            List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
             assertThat(output, not(hasItem(containsString("mycomponent.version"))));
-        } finally {
-            assert outputFile == null || !outputFile.exists() || outputFile.delete();
         }
     }
 
     @Test
-    public void testAllowSnapshots()
-            throws MojoExecutionException, MojoFailureException, IllegalAccessException, IOException {
-        Path tempPath = null;
-        try {
-            tempPath = Files.createTempFile("display-dependency-updates", "");
-            File tempFile = tempPath.toFile();
+    public void testAllowSnapshots() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
                     mockRepositorySystem(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
                         {
-                            put("default-dependency", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
+                            put("default-dependency", new String[] {"2.0.0-SNAPSHOT"});
                         }
                     }),
                     null,
@@ -455,20 +378,61 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                     setVariableValueToObject(this, "dependencyIncludes", singletonList(WildcardMatcher.WILDCARD));
                     setVariableValueToObject(this, "dependencyExcludes", emptyList());
                     this.allowSnapshots = true;
-                    this.outputFile = tempFile;
+                    this.outputFile = tempFile.getPath().toFile();
                     setPluginContext(new HashMap<>());
 
                     session = mockMavenSession();
                 }
             }.execute();
 
-            String output = String.join("", Files.readAllLines(tempPath));
+            String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
-            assertThat(output, containsString("1.0.1-SNAPSHOT"));
-        } finally {
-            if (tempPath != null && Files.exists(tempPath)) {
-                Files.delete(tempPath);
-            }
+            assertThat(output, containsString("2.0.0-SNAPSHOT"));
         }
+    }
+
+    private void testAllowUpdatesFromLesserSegments(String availableVersion) throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            new DisplayDependencyUpdatesMojo(
+                    mockRepositorySystem(),
+                    mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                        {
+                            put("default-dependency", new String[] {availableVersion});
+                        }
+                    }),
+                    null,
+                    null) {
+                {
+                    setProject(createProject());
+                    setVariableValueToObject(this, "processDependencies", true);
+                    setVariableValueToObject(this, "dependencyIncludes", singletonList(WildcardMatcher.WILDCARD));
+                    setVariableValueToObject(this, "dependencyExcludes", emptyList());
+                    setVariableValueToObject(this, "allowMajorUpdates", false);
+                    this.outputFile = tempFile.getPath().toFile();
+                    setPluginContext(new HashMap<>());
+
+                    session = mockMavenSession();
+                }
+            }.execute();
+
+            String output = String.join("", Files.readAllLines(tempFile.getPath()));
+
+            assertThat(output, containsString(availableVersion));
+        }
+    }
+
+    @Test
+    public void testAllowUpdatesFromLesserSegmentsMinor() throws Exception {
+        testAllowUpdatesFromLesserSegments("1.1.0");
+    }
+
+    @Test
+    public void testAllowUpdatesFromLesserSegmentsIncremental() throws Exception {
+        testAllowUpdatesFromLesserSegments("1.0.1");
+    }
+
+    @Test
+    public void testAllowUpdatesFromLesserSegmentsSubIncremental() throws Exception {
+        testAllowUpdatesFromLesserSegments("1.0.0-1");
     }
 }

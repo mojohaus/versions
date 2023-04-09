@@ -18,6 +18,10 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
+import java.util.Optional;
+
+import org.apache.maven.plugin.logging.Log;
+import org.codehaus.mojo.versions.api.Segment;
 import org.junit.Test;
 
 import static java.util.Optional.empty;
@@ -53,6 +57,26 @@ public class SegmentUtilsTest {
 
     @Test
     public void testEmpty() {
-        assertThat(determineUnchangedSegment(true, true, true, null), is(empty()));
+        Optional<Segment> result;
+        boolean allowMinorUpdates = true;
+        boolean allowIncrementalUpdates = true;
+        Log log = null;
+        if (log != null && !allowIncrementalUpdates) {
+            log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
+        }
+
+        Optional<Segment> unchangedSegment = allowIncrementalUpdates
+                ? empty()
+                : allowMinorUpdates && allowIncrementalUpdates
+                        ? of(MAJOR)
+                        : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
+        if (log != null && log.isDebugEnabled()) {
+            log.debug(unchangedSegment
+                            .map(Segment::minorTo)
+                            .map(Segment::toString)
+                            .orElse("ALL") + " version changes allowed");
+        }
+        result = unchangedSegment;
+        assertThat(result, is(empty()));
     }
 }

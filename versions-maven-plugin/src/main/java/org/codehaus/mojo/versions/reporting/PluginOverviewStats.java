@@ -1,4 +1,5 @@
 package org.codehaus.mojo.versions.reporting;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -53,7 +54,7 @@ public class PluginOverviewStats extends OverviewStats {
      *
      * @param updates collection of all version updates, typically from {@linkplain PluginUpdatesModel#getAllUpdates()}
      * @param cache if not null, cache to retrieve the version information, initialised with
-     * the {@link ArtifactVersions#getNewestUpdate(Optional, boolean)} update information
+     * the {@link ArtifactVersions#getNewestUpdateWithinSegment(Optional, boolean)} update information
      * @param <T> always equal to {@linkplain PluginOverviewStats}
      * @param <V> always equal to {@linkplain PluginUpdatesDetails}
      * @param allowSnapshots whether snapshots should be included

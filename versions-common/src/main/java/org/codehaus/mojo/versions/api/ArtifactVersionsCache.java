@@ -27,7 +27,7 @@ import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Triple;
 
 /**
- * Utility providing a cached {@link ArtifactVersions#getNewestUpdate(Optional, boolean)} API
+ * Utility providing a cached {@link ArtifactVersions#getNewestUpdateWithinSegment(Optional, boolean)} API
  */
 public class ArtifactVersionsCache {
     private TriFunction<AbstractVersionDetails, Optional<Segment>, Boolean, ?> cachedFunction;

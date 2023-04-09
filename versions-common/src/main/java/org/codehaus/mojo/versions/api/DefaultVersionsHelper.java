@@ -53,6 +53,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
@@ -688,11 +689,10 @@ public class DefaultVersionsHelper implements VersionsHelper {
             if (dependencies != null) {
                 for (Dependency dependency : dependencies) {
                     getLog().debug("Property ${" + property.getName() + "}: Adding association to " + dependency);
-                    builder.addAssociation(this.createDependencyArtifact(dependency), false);
+                    builder.withAssociation(this.createDependencyArtifact(dependency), false);
                 }
             }
             try {
-                final PropertyVersions versions = builder.newPropertyVersions();
                 if (property.isAutoLinkDependencies()
                         && StringUtils.isEmpty(property.getVersion())
                         && !StringUtils.isEmpty(builder.getVersionRange())) {
@@ -702,8 +702,17 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 }
                 final String currentVersion =
                         request.getMavenProject().getProperties().getProperty(property.getName());
-                versions.setCurrentVersion(currentVersion);
                 property.setValue(currentVersion);
+                final PropertyVersions versions;
+                try {
+                    if (currentVersion != null) {
+                        builder.withCurrentVersion(DefaultArtifactVersionCache.of(currentVersion))
+                                .withCurrentVersionRange(VersionRange.createFromVersionSpec(currentVersion));
+                    }
+                } catch (InvalidVersionSpecificationException e) {
+                    throw new RuntimeException(e);
+                }
+                versions = builder.build();
                 propertyVersions.put(property, versions);
             } catch (VersionRetrievalException e) {
                 throw new MojoExecutionException(e.getMessage(), e);

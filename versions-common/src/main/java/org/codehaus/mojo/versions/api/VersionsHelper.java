@@ -202,6 +202,7 @@ public interface VersionsHelper {
      * @param usePluginRepositories Search the plugin repositories.
      * @param allowSnapshots whether snapshots should be included
      * @return map containing the ArtifactVersions object per dependency
+     * @throws VersionRetrievalException thrown if a version cannot be retrieved
      */
     Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
             Set<Dependency> dependencies, boolean usePluginRepositories, boolean allowSnapshots)
@@ -216,6 +217,7 @@ public interface VersionsHelper {
      * @param useProjectRepositories whether to use regular project repositories
      * @param allowSnapshots whether snapshots should be included
      * @return map containing the ArtifactVersions object per dependency
+     * @throws VersionRetrievalException thrown if a version cannot be retrieved
      */
     Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
             Set<Dependency> dependencies,

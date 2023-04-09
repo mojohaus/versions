@@ -23,6 +23,7 @@ import java.util.Optional;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
@@ -37,7 +38,9 @@ import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
 import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
-import static org.codehaus.mojo.versions.utils.SegmentUtils.determineUnchangedSegment;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.codehaus.mojo.versions.api.Segment.*;
 
 /**
  * Common base class for {@link UpdatePropertiesMojo}
@@ -133,8 +136,27 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
             }
 
             if (canUpdateProperty) {
-                Optional<Segment> unchangedSegment = determineUnchangedSegment(
-                        allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
+                Log log = getLog();
+                if (log != null && !allowIncrementalUpdates) {
+                    log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
+                }
+
+                if (log != null && !allowMinorUpdates) {
+                    log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
+                }
+
+                Optional<Segment> unchangedSegment1 = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
+                        ? empty()
+                        : allowMinorUpdates && allowIncrementalUpdates
+                                ? of(MAJOR)
+                                : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
+                if (log != null && log.isDebugEnabled()) {
+                    log.debug(unchangedSegment1
+                                    .map(Segment::minorTo)
+                                    .map(Segment::toString)
+                                    .orElse("ALL") + " version changes allowed");
+                }
+                Optional<Segment> unchangedSegment = unchangedSegment1;
                 try {
                     ArtifactVersion targetVersion = updatePropertyToNewestVersion(
                             pom, property, version, currentVersion, allowDowngrade, unchangedSegment);

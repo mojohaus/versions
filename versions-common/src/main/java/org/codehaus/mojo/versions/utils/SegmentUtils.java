@@ -26,9 +26,7 @@ import org.codehaus.mojo.versions.api.Segment;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
+import static org.codehaus.mojo.versions.api.Segment.*;
 
 /**
  * Utility class for manipulating with {@link Segment} objects
@@ -79,7 +77,8 @@ public class SegmentUtils {
                         : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
         if (log != null && log.isDebugEnabled()) {
             log.debug(unchangedSegment
-                            .map(s -> Segment.of(s.value() + 1).toString())
+                            .map(Segment::minorTo)
+                            .map(Segment::toString)
                             .orElse("ALL") + " version changes allowed");
         }
         return unchangedSegment;

@@ -1021,7 +1021,7 @@ public class PomHelper {
                         }
                         // might as well capture the current value
                         String evaluatedVersion = (String) expressionEvaluator.evaluate(plugin.getVersion());
-                        property.addAssociation(
+                        property.withAssociation(
                                 helper.createPluginArtifact(groupId, artifactId, evaluatedVersion), true);
                         if (!propertyRef.equals(version)) {
                             addBounds(property, version, propertyRef);
@@ -1066,7 +1066,7 @@ public class PomHelper {
                         }
                         // might as well capture the current value
                         String versionEvaluated = (String) expressionEvaluator.evaluate(plugin.getVersion());
-                        property.addAssociation(
+                        property.withAssociation(
                                 helper.createPluginArtifact(groupId, artifactId, versionEvaluated), true);
                         if (!propertyRef.equals(version)) {
                             addBounds(property, version, propertyRef);
@@ -1111,7 +1111,7 @@ public class PomHelper {
                         }
                         // might as well capture the current value
                         String versionEvaluated = (String) expressionEvaluator.evaluate(dependency.getVersion());
-                        property.addAssociation(
+                        property.withAssociation(
                                 helper.createDependencyArtifact(
                                         groupId,
                                         artifactId,
@@ -1138,7 +1138,7 @@ public class PomHelper {
             boolean includeLower = "[".equals(m.group(1));
             String lowerLimit = m.group(2);
             if (StringUtils.isNotEmpty(lowerLimit)) {
-                builder.addLowerBound(lowerLimit, includeLower);
+                builder.withLowerBound(lowerLimit, includeLower);
             }
         }
         m = upperBound.matcher(rawVersionRange);
@@ -1146,7 +1146,7 @@ public class PomHelper {
             boolean includeUpper = "[".equals(m.group(3));
             String upperLimit = m.group(2);
             if (StringUtils.isNotEmpty(upperLimit)) {
-                builder.addUpperBound(upperLimit, includeUpper);
+                builder.withUpperBound(upperLimit, includeUpper);
             }
         }
     }

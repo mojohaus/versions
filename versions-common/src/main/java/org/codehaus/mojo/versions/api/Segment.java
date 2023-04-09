@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Optional;
+
 /**
  * Indicates the segment along with its 0-based index
  *
@@ -44,6 +46,26 @@ public enum Segment implements Comparable<Segment> {
             throw new IllegalArgumentException("Wrong segment index: " + index);
         }
         return values()[index];
+    }
+
+    /**
+     * Creates a segment that has a greater scope than the given segment or {@code null}
+     * if the segment is already {@link #MAJOR}
+     * @param other segment that the new segment is to be based on
+     * @return that has a greater scope than the given segment or {@code null}
+     * if the segment is already {@link #MAJOR}
+     */
+    public static Segment majorTo(Segment other) {
+        return Optional.ofNullable(other).map(s -> of(s.value() - 1)).orElse(null);
+    }
+
+    /**
+     * Creates a segment that has a lesser scope than the given segment
+     * @param other segment that the new segment is to be based on
+     * @return that has a lesser scope than the given segment
+     */
+    public static Segment minorTo(Segment other) {
+        return Optional.ofNullable(other).map(s -> of(s.value() + 1)).orElse(MAJOR);
     }
 
     /**

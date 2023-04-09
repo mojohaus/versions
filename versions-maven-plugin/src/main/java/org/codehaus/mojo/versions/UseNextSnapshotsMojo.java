@@ -28,6 +28,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.repository.RepositorySystem;
@@ -39,10 +40,11 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.codehaus.mojo.versions.api.Segment.*;
 
 /**
  * Replaces any release versions with the next snapshot version (if it has been deployed).
@@ -127,8 +129,27 @@ public class UseNextSnapshotsMojo extends UseLatestVersionsMojoBase {
             Collection<Dependency> dependencies,
             DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
-        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
-                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
+        Log log = getLog();
+        if (log != null && !allowIncrementalUpdates) {
+            log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
+        }
+
+        if (log != null && !allowMinorUpdates) {
+            log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
+        }
+
+        Optional<Segment> unchangedSegment1 = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
+                ? empty()
+                : allowMinorUpdates && allowIncrementalUpdates
+                        ? of(MAJOR)
+                        : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
+        if (log != null && log.isDebugEnabled()) {
+            log.debug(unchangedSegment1
+                            .map(Segment::minorTo)
+                            .map(Segment::toString)
+                            .orElse("ALL") + " version changes allowed");
+        }
+        Optional<Segment> unchangedSegment = unchangedSegment1;
 
         useLatestVersions(
                 pom,
