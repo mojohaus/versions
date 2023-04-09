@@ -21,13 +21,7 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -54,9 +48,7 @@ import static java.util.Optional.of;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.filtering.DependencyFilter.filterDependencies;
-import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromDependencyManagement;
-import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
-import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDependenciesFromPluginsInPluginManagement;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.*;
 
 /**
  * Displays all dependencies that have newer versions available.
@@ -246,11 +238,14 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     private boolean allowIncrementalUpdates = true;
 
     /**
-     * Whether to allow any version change to be allowed. This keeps
-     * compatibility with previous versions of the plugin.
-     * If you set this to false you can control changes in version
-     * number by {@link #allowMajorUpdates}, {@link #allowMinorUpdates} or
-     * {@link #allowIncrementalUpdates}.
+     * <p>Ignored -- largely replaced by {@linkplain #allowMajorUpdates},
+     * {@linkplain #allowMinorUpdates} and {@linkplain #allowIncrementalUpdates},
+     * which are equal to {@code true} by default.</p>
+     *
+     * <p><b>Please note: Prior to version 2.16.0, leaving this parameter at its default
+     * value ({@code true}) would mean that the plugin would <u>ignore</u>
+     * {@linkplain #allowMajorUpdates}, {@linkplain #allowMinorUpdates}, and {@linkplain #allowIncrementalUpdates},
+     * which confused many users.</b></p>
      *
      * @since 2.5
      * @deprecated This will be removed with version 3.0.0
@@ -489,6 +484,11 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
         validateGAVList(pluginDependencyExcludes, 3, "pluginDependencyExcludes");
         validateGAVList(pluginManagementDependencyIncludes, 3, "pluginManagementDependencyIncludes");
         validateGAVList(pluginManagementDependencyExcludes, 3, "pluginManagementDependencyExcludes");
+        if (getLog() != null
+                && allowAnyUpdates
+                && !(allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates)) {
+            getLog().warn("Assuming allowAnyUpdates false because one or more other \"allow\" switches is false.");
+        }
     }
 
     /**
@@ -506,7 +506,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     }
 
     private Optional<Segment> calculateUpdateScope() {
-        return allowAnyUpdates
+        return allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
                 ? empty()
                 : of(SegmentUtils.determineUnchangedSegment(
                                 allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog())
