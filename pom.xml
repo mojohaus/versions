@@ -128,7 +128,7 @@
     <recommendedJavaBuildVersion>11</recommendedJavaBuildVersion>
 
     <junitBomVersion>5.9.3</junitBomVersion>
-    <maven.version>3.2.5</maven.version>
+    <maven.version>3.5.4</maven.version>
     <doxiaVersion>1.12.0</doxiaVersion>
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
