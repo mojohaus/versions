@@ -75,6 +75,9 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
         this.versionComparator = versionComparator;
         this.versions = new TreeSet<>(versionComparator);
         this.versions.addAll(versions);
+        // DefaultArtifact objects are often built from raw model, without a version set
+        // (where the actual version is taken from parent or dependency/plugin management)
+        // this probably isn't the case in an actual Maven execution
         if (artifact.getVersion() != null) {
             setCurrentVersion(artifact.getVersion());
         }
@@ -119,8 +122,12 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
 
         ArtifactVersions that = (ArtifactVersions) o;
 
+        // can't just use Artifact::equals() since e.g. we can have an empty version here
         return new EqualsBuilder()
-                .append(getArtifact(), that.getArtifact())
+                .append(getArtifact().getGroupId(), that.getGroupId())
+                .append(getArtifact().getArtifactId(), that.getArtifact().getArtifactId())
+                .append(getArtifact().getVersion(), that.getArtifact().getVersion())
+                .append(getArtifact().getScope(), that.getArtifact().getScope())
                 .append(getVersions(true), that.getVersions(true))
                 .append(getVersionComparator(), that.getVersionComparator())
                 .isEquals();
