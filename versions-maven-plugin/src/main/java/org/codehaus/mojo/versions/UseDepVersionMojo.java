@@ -53,7 +53,6 @@ import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKin
 import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
-import org.codehaus.mojo.versions.utils.MavenProjectUtils;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -139,7 +138,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
         try {
             ModifiedPomXMLEventReader pomReader = newModifiedPomXER(
-                    MavenProjectUtils.readFile(getProject().getFile().toPath()),
+                    PomHelper.readXmlFile(getProject().getFile()),
                     getProject().getFile().toPath().toString());
             ModelNode rootNode = new ModelNode(PomHelper.getRawModel(pomReader), pomReader);
             rawModels = PomHelper.getRawModelTree(rootNode, getLog());
