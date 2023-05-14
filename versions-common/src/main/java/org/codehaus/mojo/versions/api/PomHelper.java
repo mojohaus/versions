@@ -1364,9 +1364,7 @@ public class PomHelper {
                 .map(pomFile -> {
                     try {
                         ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader(
-                                new StringBuilder(new String(Files.readAllBytes(pomFile))),
-                                inputFactory,
-                                pomFile.toString());
+                                readXmlFile(pomFile.toFile()), inputFactory, pomFile.toString());
                         return new ModelNode(rootNode, getRawModel(pom), pom);
                     } catch (IOException e) {
                         throw new UncheckedIOException("Could not open " + pomFile, e);
