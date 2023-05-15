@@ -137,20 +137,24 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
     protected boolean ignoreSubIncrementalUpdates = false;
 
     /**
-     * List of dependency inclusion patterns.
-     * Only dependencies matching all the patterns will be considered.
+     * <p>List of <u>input</u> dependency inclusion patterns.</p>
+     * <p><b><u>Note</u>: even if a version is specified, it will refer to the input dependency version.</b>
+     * To filter <u>output</u> versions, please use {@link #ruleSet}.</p>
+     * <p>Only dependencies matching all the patterns will be considered.
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
-     * The version token does support version ranges.
+     * The version token does support version ranges.</p>
      *
      * @since 2.14.0
      */
     protected List<String> dependencyIncludes = singletonList(WILDCARD);
 
     /**
-     * List of dependency exclusion patterns.
-     * Only dependencies matching none of the patterns will be considered.
+     * <p>List of <u>input</u> dependency exclusion patterns.</p>
+     * <p><b><u>Note</u>: even if a version is specified, it will refer to the input dependency version.</b>
+     * To filter <u>output</u> versions, please use {@link #ruleSet}.</p>
+     * <p>Only dependencies matching none of the patterns will be considered.
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
-     * The version token does support version ranges.
+     * The version token does support version ranges.</p>
      *
      * @since 2.14.0
      */

@@ -152,7 +152,9 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     private boolean processDependencies;
 
     /**
-     * Only take these artifacts into consideration.
+     * <p>Only take the specified <u>input</u> dependencies into account.</p>
+     * <p><b><u>Note</u>: even if a version is specified, it will refer to the input dependency version.</b>
+     * To filter <u>output</u> versions, please use {@link #ruleSet} or {@link #ignoredVersions}.</p>
      * <p>
      * Comma-separated list of extended GAV patterns.
      *
@@ -174,7 +176,9 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     private List<String> dependencyIncludes;
 
     /**
-     * Exclude these artifacts from consideration.
+     * <p>Do not take the specified <u>input</u> dependencies into account.</p>
+     * <p><b><u>Note</u>: even if a version is specified, it will refer to the input dependency version.</b>
+     * To filter <u>output</u> versions, please use {@link #ruleSet} or {@link #ignoredVersions}.</p>
      * <p>
      * Comma-separated list of extended GAV patterns.
      *
@@ -182,7 +186,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * Extended GAV: groupId:artifactId:version:type:classifier:scope
      * </p>
      * <p>
-     * The wildcard "*" can be used as the only, first, last or both characters in each token.
+     * The wildca<u>Note:</u>rd "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
      *
