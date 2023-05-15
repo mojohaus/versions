@@ -64,3 +64,33 @@ manager.
 
 In most cases, using a repository manager will solve these issues as the repository managers usually
 rebuild the metadata files based on the artifacts that are present.
+
+### Why is a dependency version not excluded by dependencyExcludes
+
+`dependencyIncludes` and `dependencyExcludes` work on *input* dependencies and not on <u>output</u> dependencies. That will mean that even if you include a version string you don't want the given dependency to be updated to, that version might still get chosen as the target dependency version.
+
+The reason for that is that the option filters *input* dependency versions.
+
+Let's suppose you wanted `org.apache.maven.doxia:doxia-core:` not to be updated to `2.0.0-M6` or `org.apache.maven:maven-core` to `4.0.0-alpha-5'  or anything with a `-M` or `-alpha' in it. Upon first sight of the `dependencyExcludes` option, one might consider to use it to filter out anything with `2.*-M.*` or `*-alpha.*`.
+
+Well, that would be wrong. `dependencyIncludes` and `dependencyExcludes` work only on *input* dependencies, that is, dependency versions that are already being used by your project. This means that it is likely that you will still see the dreaded `2.0.0-M6`-like version in the updates.
+
+Instead, what you should be looking at is `ruleSet` or `ignoredVersions`. The former allows for a greater control where you can specify ignored version patterns per dependency whereas the latter is intended to be used from command line ans only offers simple version filters.
+
+So, to ignore all updates with an `-M.*` at the end of the version string, simply use:
+
+`-Dmaven.version.ignore=.*-M.*`
+
+or:
+
+```xml
+<configuration>
+    ...
+    <ignoredVersions>.*-M.*</ignoredVersions>
+    ...
+</configuration>
+```
+
+in your project config.
+
+See [Issue #258](https://github.com/mojohaus/versions/issues/258) and [the documentation for ignoredVersions](https://www.mojohaus.org/versions/versions-maven-plugin/display-dependency-updates-mojo.html#ignoredVersions)
