@@ -85,6 +85,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.repository.AuthenticationContext;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
@@ -119,25 +120,25 @@ public class DefaultVersionsHelper implements VersionsHelper {
      */
     private RuleSet ruleSet;
 
-    private RepositorySystem repositorySystem;
+    private final RepositorySystem repositorySystem;
 
-    private org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+    private final org.eclipse.aether.RepositorySystem aetherRepositorySystem;
 
     /**
      * The {@link Log} to send log messages to.
      *
      * @since 1.0-alpha-3
      */
-    private Log log;
+    private final Log log;
 
     /**
      * The maven session.
      *
      * @since 1.0-beta-1
      */
-    private MavenSession mavenSession;
+    private final MavenSession mavenSession;
 
-    private MojoExecution mojoExecution;
+    private final MojoExecution mojoExecution;
 
     /**
      * A cache mapping artifacts to their best fitting rule, since looking up
@@ -146,10 +147,82 @@ public class DefaultVersionsHelper implements VersionsHelper {
      * @since 2.12
      */
     private final Map<String, Rule> artifactBestFitRule = new HashMap<>();
+
+    private final List<RemoteRepository> remoteProjectRepositories;
+
+    private final List<RemoteRepository> remotePluginRepositories;
+
+    private final List<RemoteRepository> remoteRepositories;
+
     /**
      * Private constructor used by the builder
      */
-    private DefaultVersionsHelper() {}
+    private DefaultVersionsHelper(
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            MavenSession mavenSession,
+            MojoExecution mojoExecution,
+            Log log) {
+        this.repositorySystem = repositorySystem;
+        this.aetherRepositorySystem = aetherRepositorySystem;
+        this.mavenSession = mavenSession;
+        this.mojoExecution = mojoExecution;
+        this.log = log;
+
+        this.remoteProjectRepositories = Optional.ofNullable(mavenSession)
+                .map(MavenSession::getCurrentProject)
+                .map(MavenProject::getRemoteProjectRepositories)
+                .map(DefaultVersionsHelper::adjustRemoteRepositoriesRefreshPolicy)
+                .orElseGet(Collections::emptyList);
+
+        this.remotePluginRepositories = Optional.ofNullable(mavenSession)
+                .map(MavenSession::getCurrentProject)
+                .map(MavenProject::getRemotePluginRepositories)
+                .map(DefaultVersionsHelper::adjustRemoteRepositoriesRefreshPolicy)
+                .orElseGet(Collections::emptyList);
+
+        this.remoteRepositories = Stream.concat(remoteProjectRepositories.stream(), remotePluginRepositories.stream())
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    static List<RemoteRepository> adjustRemoteRepositoriesRefreshPolicy(List<RemoteRepository> remoteRepositories) {
+        return remoteRepositories.stream()
+                .map(DefaultVersionsHelper::adjustRemoteRepositoryRefreshPolicy)
+                .collect(Collectors.toList());
+    }
+
+    static RemoteRepository adjustRemoteRepositoryRefreshPolicy(RemoteRepository remoteRepository) {
+        RepositoryPolicy snapshotPolicy = remoteRepository.getPolicy(true);
+        RepositoryPolicy releasePolicy = remoteRepository.getPolicy(false);
+
+        RepositoryPolicy newSnapshotPolicy = null;
+        RepositoryPolicy newReleasePolicy = null;
+
+        if (snapshotPolicy.isEnabled()
+                && RepositoryPolicy.UPDATE_POLICY_NEVER.equals(snapshotPolicy.getUpdatePolicy())) {
+            newSnapshotPolicy = new RepositoryPolicy(
+                    true, RepositoryPolicy.UPDATE_POLICY_DAILY, snapshotPolicy.getChecksumPolicy());
+        }
+
+        if (releasePolicy.isEnabled() && RepositoryPolicy.UPDATE_POLICY_NEVER.equals(releasePolicy.getUpdatePolicy())) {
+            newReleasePolicy =
+                    new RepositoryPolicy(true, RepositoryPolicy.UPDATE_POLICY_DAILY, releasePolicy.getChecksumPolicy());
+        }
+
+        if (newSnapshotPolicy != null || newReleasePolicy != null) {
+            RemoteRepository.Builder builder = new RemoteRepository.Builder(remoteRepository);
+            if (newSnapshotPolicy != null) {
+                builder.setSnapshotPolicy(newSnapshotPolicy);
+            }
+            if (newReleasePolicy != null) {
+                builder.setReleasePolicy(newReleasePolicy);
+            }
+            return builder.build();
+        } else {
+            return remoteRepository;
+        }
+    }
 
     static boolean exactMatch(String wildcardRule, String value) {
         Pattern p = Pattern.compile(RegexUtils.convertWildcardsToRegex(wildcardRule, true));
@@ -190,19 +263,16 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
             final List<RemoteRepository> repositories;
             if (usePluginRepositories && !useProjectRepositories) {
-                repositories = mavenSession.getCurrentProject().getRemotePluginRepositories();
+                repositories = remotePluginRepositories;
             } else if (!usePluginRepositories && useProjectRepositories) {
-                repositories = mavenSession.getCurrentProject().getRemoteProjectRepositories();
+                repositories = remoteProjectRepositories;
             } else if (usePluginRepositories) {
-                repositories = Stream.concat(
-                                mavenSession.getCurrentProject().getRemoteProjectRepositories().stream(),
-                                mavenSession.getCurrentProject().getRemotePluginRepositories().stream())
-                        .distinct()
-                        .collect(Collectors.toList());
+                repositories = remoteRepositories;
             } else {
                 // testing?
                 repositories = emptyList();
             }
+
             return new ArtifactVersions(
                     artifact,
                     aetherRepositorySystem
@@ -911,10 +981,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
          * @throws MojoExecutionException should the constructor with the RuleSet retrieval doesn't succeed
          */
         public DefaultVersionsHelper build() throws MojoExecutionException {
-            DefaultVersionsHelper instance = new DefaultVersionsHelper();
-            instance.repositorySystem = repositorySystem;
-            instance.mavenSession = mavenSession;
-            instance.mojoExecution = mojoExecution;
+            DefaultVersionsHelper instance = new DefaultVersionsHelper(
+                    repositorySystem, aetherRepositorySystem, mavenSession, mojoExecution, log);
             if (ruleSet != null) {
                 if (!isBlank(rulesUri)) {
                     log.warn("rulesUri is ignored if rules are specified in pom or as parameters");
@@ -928,8 +996,6 @@ public class DefaultVersionsHelper implements VersionsHelper {
             if (ignoredVersions != null && !ignoredVersions.isEmpty()) {
                 instance.ruleSet = enrichRuleSet(ignoredVersions, instance.ruleSet);
             }
-            instance.aetherRepositorySystem = aetherRepositorySystem;
-            instance.log = log;
             return instance;
         }
 
