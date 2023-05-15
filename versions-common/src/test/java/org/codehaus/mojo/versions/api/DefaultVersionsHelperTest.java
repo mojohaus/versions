@@ -55,6 +55,8 @@ import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.utils.VersionStub;
 import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.version.Version;
@@ -67,8 +69,10 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -327,5 +331,52 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
                         .map(IgnoreVersion::getVersion)
                         .collect(Collectors.toList()),
                 containsInAnyOrder(".*-M.", ".*-SNAPSHOT", "1.0.0"));
+    }
+
+    @Test
+    public void testRemoteRepositoryWithNeverUpdatePolicyShouldBeChangToDaily() {
+
+        RemoteRepository repo1 = new RemoteRepository.Builder("id1", "", "")
+                .setSnapshotPolicy(new RepositoryPolicy(
+                        true, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_IGNORE))
+                .setReleasePolicy(new RepositoryPolicy(
+                        true, RepositoryPolicy.UPDATE_POLICY_DAILY, RepositoryPolicy.CHECKSUM_POLICY_IGNORE))
+                .build();
+
+        RemoteRepository repo2 = new RemoteRepository.Builder("id2", "", "")
+                .setSnapshotPolicy(new RepositoryPolicy(
+                        false, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_IGNORE))
+                .setReleasePolicy(new RepositoryPolicy(
+                        true, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_IGNORE))
+                .build();
+
+        RemoteRepository repo3 = new RemoteRepository.Builder("id3", "", "")
+                .setSnapshotPolicy(new RepositoryPolicy(
+                        true, RepositoryPolicy.UPDATE_POLICY_DAILY, RepositoryPolicy.CHECKSUM_POLICY_IGNORE))
+                .setReleasePolicy(new RepositoryPolicy(
+                        true, RepositoryPolicy.UPDATE_POLICY_DAILY, RepositoryPolicy.CHECKSUM_POLICY_IGNORE))
+                .build();
+
+        List<RemoteRepository> remoteRepositories =
+                DefaultVersionsHelper.adjustRemoteRepositoriesRefreshPolicy(Arrays.asList(repo1, repo2, repo3));
+
+        assertThat(remoteRepositories, hasSize(3));
+        assertThat(remoteRepositories.get(0), not(is(repo1)));
+        assertThat(remoteRepositories.get(1), not(is(repo2)));
+        assertThat(remoteRepositories.get(2), is(repo3));
+
+        assertThat(
+                remoteRepositories.get(0).getPolicy(true).getUpdatePolicy(),
+                equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
+        assertThat(
+                remoteRepositories.get(0).getPolicy(false).getUpdatePolicy(),
+                equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
+
+        assertThat(
+                remoteRepositories.get(1).getPolicy(true).getUpdatePolicy(),
+                equalTo(RepositoryPolicy.UPDATE_POLICY_NEVER));
+        assertThat(
+                remoteRepositories.get(1).getPolicy(false).getUpdatePolicy(),
+                equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
     }
 }
