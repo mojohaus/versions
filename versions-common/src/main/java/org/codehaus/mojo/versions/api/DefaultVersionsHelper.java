@@ -83,6 +83,7 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.repository.AuthenticationContext;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
@@ -273,11 +274,14 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 repositories = emptyList();
             }
 
+            DefaultRepositorySystemSession versionDiscoverSession =
+                    new DefaultRepositorySystemSession(mavenSession.getRepositorySession());
+            versionDiscoverSession.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_ALWAYS);
             return new ArtifactVersions(
                     artifact,
                     aetherRepositorySystem
                             .resolveVersionRange(
-                                    mavenSession.getRepositorySession(),
+                                    versionDiscoverSession,
                                     new VersionRangeRequest(
                                             toArtifact(artifact)
                                                     .setVersion(ofNullable(versionRange)
