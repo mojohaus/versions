@@ -274,6 +274,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 repositories = emptyList();
             }
 
+            // in future sessions may become AutoCloseable, so all this would go into try-with-resource block
             DefaultRepositorySystemSession versionDiscoverSession =
                     new DefaultRepositorySystemSession(mavenSession.getRepositorySession());
             versionDiscoverSession.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_ALWAYS);
