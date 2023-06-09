@@ -30,6 +30,7 @@ import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link AbstractVersionDetails}
@@ -155,5 +156,25 @@ public class AbstractVersionDetailsTest {
                 instance.restrictionForUnchangedSegment(version("1.0.1"), empty(), false)
                         .containsVersion(version("2.0.0-1")),
                 is(true));
+    }
+
+    @Test
+    public void testRestrictionForUnchangedSegmentWithoutVersionInformation()
+            throws InvalidSegmentException, InvalidVersionSpecificationException {
+        instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("[,0]"));
+        assertThat(
+                instance.restrictionForUnchangedSegment(null, empty(), false).containsVersion(version("1.0.0")),
+                is(true));
+    }
+
+    @Test
+    public void testGetSelectedRestrictionForNoVersion()
+            throws InvalidVersionSpecificationException, InvalidSegmentException {
+        instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("[,0]"));
+        try {
+            instance.getSelectedRestriction(null);
+            fail("Expected a NullPointerException to be thrown or assertions are not enabled.");
+        } catch (AssertionError ignored) {
+        }
     }
 }

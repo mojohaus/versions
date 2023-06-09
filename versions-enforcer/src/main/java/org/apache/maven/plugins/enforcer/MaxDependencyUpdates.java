@@ -359,14 +359,15 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
             Optional<Segment> ignoredSegment = ignoreSubIncrementalUpdates
                     ? of(SUBINCREMENTAL)
                     : ignoreIncrementalUpdates ? of(INCREMENTAL) : ignoreMinorUpdates ? of(MINOR) : empty();
-            List<ArtifactVersions> upgradable =
-                    versionsHelper.lookupDependenciesUpdates(dependencies, false, allowSnapshots).values().stream()
-                            .filter(v -> v.getVersions(
-                                                    v.restrictionForIgnoreScope(v.getCurrentVersion(), ignoredSegment),
-                                                    true)
-                                            .length
-                                    > 0)
-                            .collect(Collectors.toList());
+            List<ArtifactVersions> upgradable = versionsHelper
+                    .lookupDependenciesUpdates(
+                            dependencies.stream().filter(d -> d.getVersion() != null), false, allowSnapshots)
+                    .values()
+                    .stream()
+                    .filter(v -> v.getVersions(v.restrictionForIgnoreScope(v.getCurrentVersion(), ignoredSegment), true)
+                                    .length
+                            > 0)
+                    .collect(Collectors.toList());
             if (upgradable.size() > maxUpdates) {
                 throw new EnforcerRuleException("More than " + maxUpdates + " upgradable artifacts detected: "
                         + upgradable.stream()

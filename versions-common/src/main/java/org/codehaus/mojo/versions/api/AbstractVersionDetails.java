@@ -82,11 +82,12 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      * If the artifact is bound by one or more version ranges, returns the restriction that constitutes
      * the version range containing the selected actual version.
      * If there are no version ranges, returns the provided version.
-     * @param selectedVersion actual version used
+     * @param selectedVersion actual version used, may not be {@code null}
      * @return restriction containing the version range selected by the given version,
      * or {@link Optional#empty()} if there are no ranges
      */
     protected Optional<Restriction> getSelectedRestriction(ArtifactVersion selectedVersion) {
+        assert selectedVersion != null;
         return Optional.ofNullable(getCurrentVersionRange())
                 .map(VersionRange::getRestrictions)
                 .flatMap(r -> r.stream()
@@ -116,7 +117,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     public Restriction restrictionForUnchangedSegment(
             ArtifactVersion actualVersion, Optional<Segment> unchangedSegment, boolean allowDowngrade)
             throws InvalidSegmentException {
-        Optional<Restriction> selectedRestriction = getSelectedRestriction(actualVersion);
+        Optional<Restriction> selectedRestriction =
+                Optional.ofNullable(actualVersion).flatMap(this::getSelectedRestriction);
         ArtifactVersion selectedRestrictionUpperBound =
                 selectedRestriction.map(Restriction::getUpperBound).orElse(actualVersion);
         ArtifactVersion lowerBound = allowDowngrade
