@@ -21,8 +21,8 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>localhost</groupId>
-          <artifactId>dummy-maven-plugin</artifactId>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
           <dependencies>
             <dependency>
               <groupId>localhost</groupId>
