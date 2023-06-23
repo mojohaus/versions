@@ -145,11 +145,16 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
 
         try {
 
-            Map<Dependency, ArtifactVersions> dependencyUpdates =
-                    getHelper().lookupDependenciesUpdates(dependencies, false, allowSnapshots);
+            Map<Dependency, ArtifactVersions> dependencyUpdates = getHelper()
+                    .lookupDependenciesUpdates(
+                            dependencies.stream().filter(d -> d.getVersion() != null), false, allowSnapshots);
 
             Map<Dependency, ArtifactVersions> dependencyManagementUpdates = processDependencyManagement
-                    ? getHelper().lookupDependenciesUpdates(dependencyManagement, false, allowSnapshots)
+                    ? getHelper()
+                            .lookupDependenciesUpdates(
+                                    dependencyManagement.stream().filter(d -> d.getVersion() != null),
+                                    false,
+                                    allowSnapshots)
                     : emptyMap();
 
             if (onlyUpgradable) {

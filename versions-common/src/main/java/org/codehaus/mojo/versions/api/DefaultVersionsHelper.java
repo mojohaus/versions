@@ -519,7 +519,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
     }
 
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
-            Set<Dependency> dependencies,
+            Stream<Dependency> dependencies,
             boolean usePluginRepositories,
             boolean useProjectRepositories,
             boolean allowSnapshots)
@@ -527,7 +527,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
         ExecutorService executor = Executors.newFixedThreadPool(LOOKUP_PARALLEL_THREADS);
         try {
             Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>(DependencyComparator.INSTANCE);
-            List<Future<? extends Pair<Dependency, ArtifactVersions>>> futures = dependencies.stream()
+            List<Future<? extends Pair<Dependency, ArtifactVersions>>> futures = dependencies
                     .map(dependency -> executor.submit(() -> new ImmutablePair<>(
                             dependency,
                             lookupDependencyUpdates(
@@ -549,7 +549,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
     @Override
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
-            Set<Dependency> dependencies, boolean usePluginRepositories, boolean allowSnapshots)
+            Stream<Dependency> dependencies, boolean usePluginRepositories, boolean allowSnapshots)
             throws VersionRetrievalException {
         return lookupDependenciesUpdates(dependencies, usePluginRepositories, !usePluginRepositories, allowSnapshots);
     }
@@ -570,13 +570,13 @@ public class DefaultVersionsHelper implements VersionsHelper {
     }
 
     @Override
-    public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates(Set<Plugin> plugins, boolean allowSnapshots)
+    public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates(Stream<Plugin> plugins, boolean allowSnapshots)
             throws VersionRetrievalException {
         ExecutorService executor = Executors.newFixedThreadPool(LOOKUP_PARALLEL_THREADS);
         try {
             Map<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>(PluginComparator.INSTANCE);
-            List<Future<? extends Pair<Plugin, PluginUpdatesDetails>>> futures = plugins.stream()
-                    .map(p -> executor.submit(() -> new ImmutablePair<>(p, lookupPluginUpdates(p, allowSnapshots))))
+            List<Future<? extends Pair<Plugin, PluginUpdatesDetails>>> futures = plugins.map(
+                            p -> executor.submit(() -> new ImmutablePair<>(p, lookupPluginUpdates(p, allowSnapshots))))
                     .collect(Collectors.toList());
             for (Future<? extends Pair<Plugin, PluginUpdatesDetails>> details : futures) {
                 Pair<Plugin, PluginUpdatesDetails> pair = details.get();
@@ -602,7 +602,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
             pluginDependencies.addAll(plugin.getDependencies());
         }
         Map<Dependency, ArtifactVersions> pluginDependencyDetails =
-                lookupDependenciesUpdates(pluginDependencies, false, allowSnapshots);
+                lookupDependenciesUpdates(pluginDependencies.stream(), false, allowSnapshots);
 
         ArtifactVersions allVersions = lookupArtifactVersions(
                 createPluginArtifact(plugin.getGroupId(), plugin.getArtifactId(), version), true);

@@ -255,7 +255,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
         }
 
         try {
-            logUpdates(getHelper().lookupDependenciesUpdates(dependencies, true, true, allowSnapshots));
+            logUpdates(getHelper().lookupDependenciesUpdates(dependencies.stream(), true, true, allowSnapshots));
         } catch (VersionRetrievalException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }

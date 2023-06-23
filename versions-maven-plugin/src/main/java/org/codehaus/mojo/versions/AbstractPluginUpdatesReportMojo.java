@@ -126,9 +126,9 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
         try {
 
             Map<Plugin, PluginUpdatesDetails> pluginUpdates =
-                    getHelper().lookupPluginsUpdates(plugins, getAllowSnapshots());
+                    getHelper().lookupPluginsUpdates(plugins.stream(), getAllowSnapshots());
             Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates =
-                    getHelper().lookupPluginsUpdates(pluginManagement, getAllowSnapshots());
+                    getHelper().lookupPluginsUpdates(pluginManagement.stream(), getAllowSnapshots());
 
             if (onlyUpgradable) {
                 pluginUpdates = filter(pluginUpdates, p -> !p.isEmpty(allowSnapshots));

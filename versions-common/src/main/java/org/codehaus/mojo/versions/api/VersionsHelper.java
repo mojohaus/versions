@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -198,21 +199,21 @@ public interface VersionsHelper {
      * Returns a map of all possible updates per dependency. The lookup is done in parallel using
      * {@code LOOKUP_PARALLEL_THREADS} threads.
      *
-     * @param dependencies The set of {@link Dependency} instances to look up.
+     * @param dependencyStream a stream of {@link Dependency} instances to look up.
      * @param usePluginRepositories Search the plugin repositories.
      * @param allowSnapshots whether snapshots should be included
      * @return map containing the ArtifactVersions object per dependency
      * @throws VersionRetrievalException thrown if a version cannot be retrieved
      */
     Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
-            Set<Dependency> dependencies, boolean usePluginRepositories, boolean allowSnapshots)
+            Stream<Dependency> dependencyStream, boolean usePluginRepositories, boolean allowSnapshots)
             throws VersionRetrievalException;
 
     /**
      * Returns a map of all possible updates per dependency. The lookup is done in parallel using
      * {@code LOOKUP_PARALLEL_THREADS} threads.
      *
-     * @param dependencies The set of {@link Dependency} instances to look up.
+     * @param dependencies stream of {@link Dependency} instances to look up.
      * @param usePluginRepositories Search the plugin repositories.
      * @param useProjectRepositories whether to use regular project repositories
      * @param allowSnapshots whether snapshots should be included
@@ -220,7 +221,7 @@ public interface VersionsHelper {
      * @throws VersionRetrievalException thrown if a version cannot be retrieved
      */
     Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
-            Set<Dependency> dependencies,
+            Stream<Dependency> dependencies,
             boolean usePluginRepositories,
             boolean useProjectRepositories,
             boolean allowSnapshots)
@@ -247,13 +248,13 @@ public interface VersionsHelper {
     /**
      * Looks up the updates for a set of plugins.
      *
-     * @param plugins The set of {@link Plugin} instances to look up.
+     * @param plugins A stream of {@link Plugin} instances to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.api.PluginUpdatesDetails}.
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
      */
-    Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates(Set<Plugin> plugins, boolean allowSnapshots)
+    Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates(Stream<Plugin> plugins, boolean allowSnapshots)
             throws VersionRetrievalException;
 
     /**

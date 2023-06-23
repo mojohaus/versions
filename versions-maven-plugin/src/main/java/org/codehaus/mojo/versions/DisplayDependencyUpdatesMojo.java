@@ -399,7 +399,11 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                         getLog());
 
                 logUpdates(
-                        getHelper().lookupDependenciesUpdates(dependencyManagement, false, allowSnapshots),
+                        getHelper()
+                                .lookupDependenciesUpdates(
+                                        dependencyManagement.stream().filter(d -> d.getVersion() != null),
+                                        false,
+                                        allowSnapshots),
                         "Dependency Management");
             }
             if (isProcessingDependencies()) {
@@ -408,17 +412,21 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                         getHelper()
                                 .lookupDependenciesUpdates(
                                         filterDependencies(
-                                                getProject().getDependencies().stream()
-                                                        .filter(dep -> finalDependencyManagement.stream()
-                                                                .noneMatch(depMan -> dependenciesMatch(dep, depMan)))
-                                                        .collect(
-                                                                () -> new TreeSet<>(DependencyComparator.INSTANCE),
-                                                                Set::add,
-                                                                Set::addAll),
-                                                dependencyIncludes,
-                                                dependencyExcludes,
-                                                "Dependencies",
-                                                getLog()),
+                                                        getProject().getDependencies().stream()
+                                                                .filter(dep -> finalDependencyManagement.stream()
+                                                                        .noneMatch(depMan ->
+                                                                                dependenciesMatch(dep, depMan)))
+                                                                .collect(
+                                                                        () -> new TreeSet<>(
+                                                                                DependencyComparator.INSTANCE),
+                                                                        Set::add,
+                                                                        Set::addAll),
+                                                        dependencyIncludes,
+                                                        dependencyExcludes,
+                                                        "Dependencies",
+                                                        getLog())
+                                                .stream()
+                                                .filter(d -> d.getVersion() != null),
                                         false,
                                         allowSnapshots),
                         "Dependencies");
@@ -428,11 +436,14 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                         getHelper()
                                 .lookupDependenciesUpdates(
                                         filterDependencies(
-                                                extractPluginDependenciesFromPluginsInPluginManagement(getProject()),
-                                                pluginManagementDependencyIncludes,
-                                                pluginManagementDependencyExcludes,
-                                                "Plugin Management Dependencies",
-                                                getLog()),
+                                                        extractPluginDependenciesFromPluginsInPluginManagement(
+                                                                getProject()),
+                                                        pluginManagementDependencyIncludes,
+                                                        pluginManagementDependencyExcludes,
+                                                        "Plugin Management Dependencies",
+                                                        getLog())
+                                                .stream()
+                                                .filter(d -> d.getVersion() != null),
                                         false,
                                         allowSnapshots),
                         "pluginManagement of plugins");
@@ -442,11 +453,13 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                         getHelper()
                                 .lookupDependenciesUpdates(
                                         filterDependencies(
-                                                extractDependenciesFromPlugins(getProject()),
-                                                pluginDependencyIncludes,
-                                                pluginDependencyExcludes,
-                                                "Plugin Dependencies",
-                                                getLog()),
+                                                        extractDependenciesFromPlugins(getProject()),
+                                                        pluginDependencyIncludes,
+                                                        pluginDependencyExcludes,
+                                                        "Plugin Dependencies",
+                                                        getLog())
+                                                .stream()
+                                                .filter(d -> d.getVersion() != null),
                                         false,
                                         allowSnapshots),
                         "Plugin Dependencies");
