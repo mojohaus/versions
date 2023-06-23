@@ -7,6 +7,12 @@
   <packaging>pom</packaging>
   <name>display-dependency-updates-from-plugins</name>
 
+  <description>
+    Edge case: the pom.xml will fail when we try executing the actual plugin
+    as it is invalid -- lacks version, which caused an NPE (Issue #973)
+    when executing display-dependency-updates.
+  </description>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
