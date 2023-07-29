@@ -51,7 +51,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Model;
@@ -816,7 +815,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     private ArtifactVersion getPrerequisitesMavenVersion(MavenProject pluginProject) {
         return ofNullable(pluginProject.getPrerequisites())
                 .map(Prerequisites::getMaven)
-                .map(DefaultArtifactVersion::new)
+                .map(DefaultArtifactVersionCache::of)
                 .orElse(DefaultArtifactVersionCache.of(DEFAULT_MVN_VERSION));
     }
 

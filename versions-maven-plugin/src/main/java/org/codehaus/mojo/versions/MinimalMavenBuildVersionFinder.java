@@ -1,15 +1,21 @@
 package org.codehaus.mojo.versions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
+import org.apache.maven.model.Prerequisites;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * Finds the minimal Maven version required to build a Maven project.
@@ -24,12 +30,26 @@ class MinimalMavenBuildVersionFinder {
         // not supposed to be created, static methods only
     }
 
-    static ArtifactVersion find(MavenProject mavenProject, String defaultVersion, Log log) {
-        ArtifactVersion version = getEnforcerMavenVersion(mavenProject, log);
-        if (version == null && defaultVersion != null) {
-            version = DefaultArtifactVersionCache.of(defaultVersion);
-        }
-        return version;
+    static Optional<ArtifactVersion> getGreatestVersion(ArtifactVersion... v) {
+        return Arrays.stream(v).filter(Objects::nonNull).reduce((v1, v2) -> {
+            if (v1.compareTo(v2) >= 0) {
+                return v1;
+            }
+            return v2;
+        });
+    }
+
+    static ArtifactVersion find(MavenProject mavenProject, String defaultMavenVersion, Log log) {
+        return getGreatestVersion(
+                        getEnforcerMavenVersion(mavenProject, log),
+                        ofNullable(mavenProject.getPrerequisites())
+                                .map(Prerequisites::getMaven)
+                                .map(DefaultArtifactVersionCache::of)
+                                .orElse(null),
+                        ofNullable(defaultMavenVersion)
+                                .map(DefaultArtifactVersionCache::of)
+                                .orElse(null))
+                .orElse(null);
     }
 
     private static ArtifactVersion getEnforcerMavenVersion(MavenProject mavenProject, Log log) {
