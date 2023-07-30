@@ -124,8 +124,6 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     private static final String FROM_SUPER_POM = "(from super-pom) ";
 
-    public static final String DEFAULT_MVN_VERSION = "3.2.5";
-
     /**
      * @since 1.0-alpha-1
      */
@@ -345,8 +343,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         List<String> pluginUpdates = new ArrayList<>();
         List<String> pluginLockdowns = new ArrayList<>();
         ArtifactVersion curMavenVersion = DefaultArtifactVersionCache.of(runtimeInformation.getMavenVersion());
-        ArtifactVersion specMavenVersion =
-                MinimalMavenBuildVersionFinder.find(getProject(), DEFAULT_MVN_VERSION, getLog());
+        ArtifactVersion specMavenVersion = MinimalMavenBuildVersionFinder.find(getProject(), getLog());
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
         // if Maven prerequisite upgraded to a version, Map<plugin compact key, latest compatible plugin vesion>
@@ -472,10 +469,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         logLine(false, "");
 
         // information on minimum Maven version
-        boolean noMavenMinVersion = MinimalMavenBuildVersionFinder.find(getProject(), null, getLog()) == null;
-        if (noMavenMinVersion) {
-            getLog().warn("Project does not define minimum Maven version required for build, default is: "
-                    + DEFAULT_MVN_VERSION);
+        if (specMavenVersion == null) {
+            getLog().warn("Project does not define minimum Maven version required for build");
         } else {
             logLine(false, "Project requires minimum Maven version for build of: " + specMavenVersion);
         }
@@ -488,7 +483,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         logLine(false, "");
 
         if (isMavenPluginProject()) {
-            if (noMavenMinVersion) {
+            if (specMavenVersion == null) {
                 getLog().warn("Project (which is a Maven plugin) does not define required minimum version of Maven.");
                 getLog().warn("Update the pom.xml to contain");
                 getLog().warn("    <prerequisites>");
@@ -507,7 +502,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 logLine(false, "No plugins require a newer version of Maven than specified by the pom.");
             }
         } else {
-            if (noMavenMinVersion) {
+            if (specMavenVersion == null) {
                 logLine(true, "Project does not define required minimum version of Maven.");
                 logLine(true, "Update the pom.xml to contain maven-enforcer-plugin to");
                 logLine(true, "force the Maven version which is needed to build this project.");
@@ -528,7 +523,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         for (Map.Entry<ArtifactVersion, Map<String, String>> mavenUpgrade : mavenUpgrades.entrySet()) {
             ArtifactVersion mavenUpgradeVersion = mavenUpgrade.getKey();
             Map<String, String> upgradePlugins = mavenUpgrade.getValue();
-            if (upgradePlugins.isEmpty() || compare(specMavenVersion, mavenUpgradeVersion) >= 0) {
+            if (upgradePlugins.isEmpty() || compare(mavenUpgradeVersion, specMavenVersion) < 0) {
                 continue;
             }
             logLine(false, "");
@@ -816,7 +811,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         return ofNullable(pluginProject.getPrerequisites())
                 .map(Prerequisites::getMaven)
                 .map(DefaultArtifactVersionCache::of)
-                .orElse(DefaultArtifactVersionCache.of(DEFAULT_MVN_VERSION));
+                .orElse(null);
     }
 
     /**
@@ -1159,7 +1154,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     }
 
     private static int compare(ArtifactVersion a, ArtifactVersion b) {
-        return a.compareTo(b);
+        return a == null ? b == null ? 0 : -1 : b == null ? 1 : a.compareTo(b);
     }
 
     private static class IgnoringModelProblemCollector implements ModelProblemCollector {

@@ -17,5 +17,5 @@
 
 assert new File(basedir, 'output.txt').text
         .replaceAll('\r', '')
-        .contains('The following plugin updates are available:\n'
-        + '  maven-jar-plugin ................................... 3.0.0 -> 3.3.0')
+        .contains('Require Maven 3.2.5 to use the following plugin updates:\n' +
+                '  maven-jar-plugin ................................... 3.0.0 -> 3.3.0')

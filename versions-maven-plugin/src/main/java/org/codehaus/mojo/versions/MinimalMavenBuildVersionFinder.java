@@ -39,14 +39,11 @@ class MinimalMavenBuildVersionFinder {
         });
     }
 
-    static ArtifactVersion find(MavenProject mavenProject, String defaultMavenVersion, Log log) {
+    static ArtifactVersion find(MavenProject mavenProject, Log log) {
         return getGreatestVersion(
                         getEnforcerMavenVersion(mavenProject, log),
                         ofNullable(mavenProject.getPrerequisites())
                                 .map(Prerequisites::getMaven)
-                                .map(DefaultArtifactVersionCache::of)
-                                .orElse(null),
-                        ofNullable(defaultMavenVersion)
                                 .map(DefaultArtifactVersionCache::of)
                                 .orElse(null))
                 .orElse(null);
