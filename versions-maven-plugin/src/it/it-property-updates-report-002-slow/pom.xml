@@ -9,7 +9,7 @@
   <description>Validate performance of property-updates-report</description>
 
   <properties>
-    <spring.version>3.2.17.RELEASE</spring.version>
+    <spring.version>4.3.30.RELEASE</spring.version>
     <hibernate-validator.version>4.3.2.Final</hibernate-validator.version>
     <slf4j.version>1.7.10</slf4j.version>
     <jaxb.version>2.2.11</jaxb.version>
