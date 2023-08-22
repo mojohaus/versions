@@ -253,7 +253,12 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo {
             }
         }
 
-        getLog().info("No versions found");
+        if (versions.isEmpty(allowSnapshots)) {
+            getLog().info("No versions found");
+        } else {
+            getLog().info("The parent project is the latest version");
+        }
+
         return null;
     }
 
