@@ -1,0 +1,24 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>localhost</groupId>
+    <artifactId>it-display-dependency-updates-issue-1001-groupid</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+
+    <description>groupId is expressed via a Maven property</description>
+
+    <properties>
+        <dep.groupId>localhost</dep.groupId>
+        <dep.version>1.0</dep.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${dep.groupId}</groupId>
+            <artifactId>dummy-api</artifactId>
+            <version>${dep.version}</version>
+        </dependency>
+    </dependencies>
+</project>
