@@ -66,15 +66,17 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
 
     /**
      * Whether to process the dependencyManagement part transitive or not.
+     * <p/>
      * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
      * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
-     * by default to report also the imported dependencies.
-     * If processTransitive is set to <code>false</code> the report will only show
-     * updates of the imported pom itself.
+     * by default the report will only show updates of the imported pom itself.
+     * <p/>
+     * If <code>processDependencyManagementTransitive</code> is set to <code>true</code>
+     * the updates for the imported dependencies are also reported.
      *
-     * @since 2.5 Note: Currently in experimental state.
+     * @since 2.5
      */
-    @Parameter(property = "processDependencyManagementTransitive", defaultValue = "true")
+    @Parameter(property = "processDependencyManagementTransitive", defaultValue = "false")
     protected boolean processDependencyManagementTransitive;
 
     /**

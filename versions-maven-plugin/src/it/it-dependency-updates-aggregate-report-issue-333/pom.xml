@@ -49,6 +49,10 @@
         <artifactId>@project.artifactId@</artifactId>
         <version>@project.version@</version>
         <inherited>false</inherited>
+        <configuration>
+          <!-- Is there a bug ??? https://github.com/mojohaus/versions/issues/1004 -->
+          <processDependencyManagementTransitive>true</processDependencyManagementTransitive>
+        </configuration>
         <reportSets>
           <reportSet>
             <reports>
