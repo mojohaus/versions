@@ -1,0 +1,17 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-parent2</artifactId>
+        <version>3.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>it-use-releases-issue-978-parent-snapshot</artifactId>
+    <version>1</version>
+    <packaging>pom</packaging>
+
+    <description>Test that parent is updated if it uses a snapshot version</description>
+
+</project>
