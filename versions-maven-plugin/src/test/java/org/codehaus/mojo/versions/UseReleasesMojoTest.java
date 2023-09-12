@@ -106,6 +106,49 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase {
     }
 
     @Test
+    public void testProcessTimestampedParent()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+                    VersionRetrievalException {
+        setVariableValueToObject(mojo, "processParent", true);
+        mojo.getProject().setParent(new MavenProject(new Model() {
+            {
+                setGroupId("default-group");
+                setArtifactId("artifactA");
+                setVersion("1.0.0-SNAPSHOT");
+            }
+        }));
+        mojo.getProject()
+                .setParentArtifact(
+                        new DefaultArtifact(
+                                "default-group",
+                                "artifactA",
+                                "1.0.0-20230912.080442-1",
+                                SCOPE_COMPILE,
+                                "pom",
+                                "default",
+                                null) {
+                            {
+                                setBaseVersion("1.0.0-SNAPSHOT");
+                            }
+                        });
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setProjectParentVersion(any(), anyString()))
+                    .thenReturn(true);
+            pomHelper
+                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
+                    .thenReturn(mojo.getProject().getModel());
+            mojo.update(null);
+        }
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultDependencyVersionChange(
+                        "default-group", "artifactA",
+                        "1.0.0-SNAPSHOT", "1.0.0")));
+    }
+
+    @Test
     public void testReplaceSnapshotWithRelease()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
         mojo.getProject()

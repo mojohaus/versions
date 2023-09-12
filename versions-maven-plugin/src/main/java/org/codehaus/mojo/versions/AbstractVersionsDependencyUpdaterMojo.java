@@ -509,28 +509,49 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
         boolean updated = false;
         if (isProcessingParent()
                 && getProject().getParent() != null
-                && DependencyComparator.INSTANCE.compare(
-                                dep,
-                                DependencyBuilder.newBuilder()
-                                        .withGroupId(
-                                                getProject().getParentArtifact().getGroupId())
-                                        .withArtifactId(
-                                                getProject().getParentArtifact().getArtifactId())
-                                        .withVersion(
-                                                getProject().getParentArtifact().getVersion())
-                                        .build())
-                        == 0
-                && PomHelper.setProjectParentVersion(pom, newVersion)) {
-            if (getLog().isDebugEnabled()) {
-                getLog().debug("Made parent update from " + dep.getVersion() + " to " + newVersion);
+                && (DependencyComparator.INSTANCE.compare(
+                                        dep,
+                                        DependencyBuilder.newBuilder()
+                                                .withGroupId(getProject()
+                                                        .getParentArtifact()
+                                                        .getGroupId())
+                                                .withArtifactId(getProject()
+                                                        .getParentArtifact()
+                                                        .getArtifactId())
+                                                .withVersion(getProject()
+                                                        .getParentArtifact()
+                                                        .getVersion())
+                                                .build())
+                                == 0
+                        || getProject().getParentArtifact().getBaseVersion() != null
+                                && DependencyComparator.INSTANCE.compare(
+                                                dep,
+                                                DependencyBuilder.newBuilder()
+                                                        .withGroupId(getProject()
+                                                                .getParentArtifact()
+                                                                .getGroupId())
+                                                        .withArtifactId(getProject()
+                                                                .getParentArtifact()
+                                                                .getArtifactId())
+                                                        .withVersion(getProject()
+                                                                .getParentArtifact()
+                                                                .getBaseVersion())
+                                                        .build())
+                                        == 0)) {
+            if (PomHelper.setProjectParentVersion(pom, newVersion)) {
+                if (getLog().isDebugEnabled()) {
+                    getLog().debug("Made parent update from " + dep.getVersion() + " to " + newVersion);
+                }
+                getChangeRecorder()
+                        .recordChange(DefaultDependencyChangeRecord.builder()
+                                .withKind(changeKind)
+                                .withDependency(dep)
+                                .withNewVersion(newVersion)
+                                .build());
+                updated = true;
+            } else {
+                getLog().warn("Could not update parent: " + dep.toString() + " to " + newVersion);
             }
-            getChangeRecorder()
-                    .recordChange(DefaultDependencyChangeRecord.builder()
-                            .withKind(changeKind)
-                            .withDependency(dep)
-                            .withNewVersion(newVersion)
-                            .build());
-            updated = true;
         }
 
         if (PomHelper.setDependencyVersion(
