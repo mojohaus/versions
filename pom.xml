@@ -122,17 +122,13 @@
   </ciManagement>
 
   <properties>
-    <mojo.java.target>8</mojo.java.target>
-
     <!-- some of plugins requires JDK 11 -->
     <recommendedJavaBuildVersion>11</recommendedJavaBuildVersion>
-
-    <junitBomVersion>5.10.0</junitBomVersion>
     <maven.version>3.2.5</maven.version>
     <doxiaVersion>1.12.0</doxiaVersion>
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <pluginVersion>${project.version}</pluginVersion>
-    <sitePluginVersion>3.12.1</sitePluginVersion>
+    <sitePluginVersion>${maven-site-plugin.version}</sitePluginVersion>
     <!-- dotted property can not be used in .vm -->
     <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
     <modelloNamespaceRuleVersion>2.1.0</modelloNamespaceRuleVersion>
@@ -304,14 +300,6 @@
         <artifactId>plexus-xml</artifactId>
         <!-- To keep Maven 3.x compatibility - use only 3.x versions -->
         <version>3.0.0</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.junit</groupId>
-        <artifactId>junit-bom</artifactId>
-        <version>${junitBomVersion}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
 
       <!-- manage transitive dependencies due to security patches -->
