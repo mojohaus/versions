@@ -303,7 +303,7 @@
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-xml</artifactId>
         <!-- To keep Maven 3.x compatibility - use only 3.x versions -->
-        <version>3.0.0</version>
+        <version>4.0.2</version>
       </dependency>
 
       <dependency>
