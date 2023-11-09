@@ -200,6 +200,7 @@
             <pomExclude>it-lock-snapshots-junit/*</pomExclude>
           </pomExcludes>
           <postBuildHookScript>verify</postBuildHookScript>
+          <preBuildHookScript>setup</preBuildHookScript>
           <filterProperties>
             <repository.proxy.url>${repository.proxy.url}</repository.proxy.url>
           </filterProperties>
