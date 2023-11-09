@@ -1416,9 +1416,8 @@ public class PomHelper {
      * @param model   The root model
      * @param logger  The logger for logging.
      * @return A map of raw models keyed by path relative to the project's basedir.
-     * @throws IOException if things go wrong.
      */
-    private static Map<File, Model> getChildModels(Model model, Log logger) throws IOException {
+    private static Map<File, Model> getChildModels(Model model, Log logger) {
         Map<File, Model> result = new LinkedHashMap<>();
         Map<File, Model> childResults = new LinkedHashMap<>();
 
@@ -1436,7 +1435,7 @@ public class PomHelper {
                         result.put(pomFile, moduleModel);
                         childResults.putAll(getChildModels(moduleModel, logger));
                     } catch (IOException e) {
-                        logger.error("Could not parse " + pomFile.getPath(), e);
+                        throw new UncheckedIOException(e);
                     }
                 });
 
