@@ -153,17 +153,17 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
             logLine(false, "Parent project is part of the reactor.");
             return;
         }
-        String currentVersion = parentVersion == null ? getProject().getParent().getVersion() : parentVersion;
+        String initialVersion = parentVersion == null ? getProject().getParent().getVersion() : parentVersion;
         ArtifactVersion artifactVersion;
         try {
             artifactVersion = skipResolution
                     ? DefaultArtifactVersionCache.of(parentVersion)
-                    : resolveTargetVersion(currentVersion);
+                    : resolveTargetVersion(initialVersion);
         } catch (VersionRetrievalException | InvalidVersionSpecificationException | InvalidSegmentException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
 
-        if (artifactVersion == null || currentVersion.equals(artifactVersion.toString())) {
+        if (artifactVersion == null || initialVersion.equals(artifactVersion.toString())) {
             logLine(false, "The parent project is the latest version:");
             StringBuilder buf = new StringBuilder(MESSAGE_LENGTH);
             buf.append("  ");
@@ -171,12 +171,12 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
             buf.append(':');
             buf.append(getProject().getParent().getArtifactId());
             buf.append(' ');
-            int padding = MESSAGE_LENGTH - currentVersion.length();
+            int padding = MESSAGE_LENGTH - initialVersion.length();
             while (buf.length() < padding) {
                 buf.append('.');
             }
             buf.append(' ');
-            buf.append(currentVersion);
+            buf.append(initialVersion);
             logLine(false, buf.toString());
         } else {
             logLine(false, "The parent project has a newer version:");
@@ -187,14 +187,14 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
             buf.append(getProject().getParent().getArtifactId());
             buf.append(' ');
             int padding = MESSAGE_LENGTH
-                    - currentVersion.length()
+                    - initialVersion.length()
                     - artifactVersion.toString().length()
                     - " -> ".length();
             while (buf.length() < padding) {
                 buf.append('.');
             }
             buf.append(' ');
-            buf.append(currentVersion);
+            buf.append(initialVersion);
             buf.append(" -> ");
             buf.append(artifactVersion);
             logLine(false, buf.toString());
