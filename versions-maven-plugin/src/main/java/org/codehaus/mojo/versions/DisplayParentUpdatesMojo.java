@@ -69,7 +69,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      *
      * <p>If {@code skipResolution} is {@code true}, will specify the target version to which
      * the parent artifact will be updated.</p>
-     * @since 2.16.1
+     * @since 2.17.0
      */
     @Parameter(property = "parentVersion")
     protected String parentVersion = null;
@@ -77,7 +77,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * to update parent version by force when it is RELEASE or LATEST
      *
-     * @since 2.16.1
+     * @since 2.17.0
      */
     @Parameter(property = "forceUpdate", defaultValue = "false")
     protected boolean forceUpdate = false;
@@ -86,7 +86,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      * Skips version resolution, only valid if {@code parentVersion} is set.
      * Will effectively set the new parent version to the one from {@code parentVersion}
      *
-     * @since 2.16.1
+     * @since 2.17.0
      */
     @Parameter(property = "skipResolution", defaultValue = "false")
     protected boolean skipResolution = false;
@@ -96,7 +96,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      * and there exists a version within the range fulfilling the criteria.</p>
      * <p>Default <code>false</code></p>
      *
-     * @since 2.16.1
+     * @since 2.17.0
      */
     @Parameter(property = "allowDowngrade", defaultValue = "false")
     protected boolean allowDowngrade;
@@ -104,7 +104,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Whether to allow the major version number to be changed.
      *
-     * @since 2.16.1
+     * @since 2.17.0
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
     protected boolean allowMajorUpdates = true;
@@ -114,7 +114,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      *
      * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} {@code false}</b></p>
      *
-     * @since 2.16.1
+     * @since 2.17.0
      */
     @Parameter(property = "allowMinorUpdates", defaultValue = "true")
     protected boolean allowMinorUpdates = true;
@@ -125,7 +125,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
      * and {@linkplain #allowMinorUpdates} {@code false}</b></p>
      *
-     * @since 2.16.1
+     * @since 2.17.0
      */
     @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
     protected boolean allowIncrementalUpdates = true;
