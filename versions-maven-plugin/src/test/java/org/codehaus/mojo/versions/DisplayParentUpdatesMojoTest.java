@@ -15,11 +15,11 @@ package org.codehaus.mojo.versions;
  *  limitations under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import javax.xml.stream.XMLStreamException;
-
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -86,15 +86,13 @@ public class DisplayParentUpdatesMojoTest {
     public void setUp() throws IllegalAccessException, IOException {
         tempDir = TestUtils.createTempDir("display-property-updates");
         tempFile = Files.createTempFile(tempDir, "output", "");
-        mojo =
-                new DisplayParentUpdatesMojo(
-                        repositorySystem, aetherRepositorySystem, null, null) {
-                    {
-                        setProject(createProject());
-                        reactorProjects = Collections.emptyList();
-                        session = mockMavenSession();
-                    }
-                };
+        mojo = new DisplayParentUpdatesMojo(repositorySystem, aetherRepositorySystem, null, null) {
+            {
+                setProject(createProject());
+                reactorProjects = Collections.emptyList();
+                session = mockMavenSession();
+            }
+        };
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
     }
@@ -144,7 +142,7 @@ public class DisplayParentUpdatesMojoTest {
 
     @Test
     public void testArtifactIdDoesNotExist()
-        throws MojoExecutionException, InvalidVersionSpecificationException, VersionRetrievalException {
+            throws MojoExecutionException, InvalidVersionSpecificationException, VersionRetrievalException {
         mojo.getProject().setParent(new MavenProject() {
             {
                 setGroupId("default-group");
@@ -167,25 +165,27 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    public void testParentDowngradeAllowed()
-        throws MojoExecutionException, MojoFailureException, IOException {
+    public void testParentDowngradeAllowed() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowDowngrade = true;
         mojo.execute();
         assertThat(
-            String.join("", Files.readAllLines(tempFile)),
-            stringContainsInOrder("The parent project has a newer version:", "default-group:parent-artifact",
-                "1.0.1-SNAPSHOT -> 1.0.0"));
+                String.join("", Files.readAllLines(tempFile)),
+                stringContainsInOrder(
+                        "The parent project has a newer version:",
+                        "default-group:parent-artifact",
+                        "1.0.1-SNAPSHOT -> 1.0.0"));
     }
 
     @Test
-    public void testParentDowngradeForbidden()
-        throws MojoExecutionException, MojoFailureException, IOException {
+    public void testParentDowngradeForbidden() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowDowngrade = false;
         mojo.execute();
         assertThat(
-            String.join("", Files.readAllLines(tempFile)),
-            stringContainsInOrder("The parent project is the latest version:", "default-group:parent-artifact",
-                "1.0.1-SNAPSHOT"));
+                String.join("", Files.readAllLines(tempFile)),
+                stringContainsInOrder(
+                        "The parent project is the latest version:",
+                        "default-group:parent-artifact",
+                        "1.0.1-SNAPSHOT"));
     }
 
     @Test
@@ -232,16 +232,16 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    public void testAllowSnapshotsWithParentVersion()
-        throws MojoExecutionException, MojoFailureException, IOException {
+    public void testAllowSnapshotsWithParentVersion() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "0.0.1-1-impl-SNAPSHOT";
         mojo.execute();
         assertThat(
-            String.join("", Files.readAllLines(tempFile)),
-            stringContainsInOrder("The parent project is the latest version:", "default-group:parent-artifact",
-                "0.0.1-1-impl-SNAPSHOT"));
-
+                String.join("", Files.readAllLines(tempFile)),
+                stringContainsInOrder(
+                        "The parent project is the latest version:",
+                        "default-group:parent-artifact",
+                        "0.0.1-1-impl-SNAPSHOT"));
     }
 
     @Test
@@ -259,7 +259,8 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    public void testSkipResolutionDowngradeUnknownVersion() throws MojoExecutionException, MojoFailureException, IOException {
+    public void testSkipResolutionDowngradeUnknownVersion()
+            throws MojoExecutionException, MojoFailureException, IOException {
         testSkipResolution("0.8.0");
     }
 
@@ -269,7 +270,8 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    public void testSkipResolutionUpgradeUnknownVersion() throws MojoExecutionException, MojoFailureException, IOException {
+    public void testSkipResolutionUpgradeUnknownVersion()
+            throws MojoExecutionException, MojoFailureException, IOException {
         testSkipResolution("2.0.0");
     }
 
@@ -285,14 +287,13 @@ public class DisplayParentUpdatesMojoTest {
         });
         mojo.execute();
         assertThat(
-            String.join("", Files.readAllLines(tempFile)),
-            stringContainsInOrder("The parent project is the latest version:", "default-group:parent-artifact",
-                version));
+                String.join("", Files.readAllLines(tempFile)),
+                stringContainsInOrder(
+                        "The parent project is the latest version:", "default-group:parent-artifact", version));
     }
 
     @Test
-    public void testShouldUpgradeToSnapshot()
-        throws MojoExecutionException, MojoFailureException, IOException {
+    public void testShouldUpgradeToSnapshot() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.getProject().setParent(new MavenProject() {
             {
                 setGroupId("default-group");
@@ -304,10 +305,12 @@ public class DisplayParentUpdatesMojoTest {
         mojo.parentVersion = "[0,1.0.1-SNAPSHOT]";
         mojo.execute();
         assertThat(
-            String.join("", Files.readAllLines(tempFile)),
-            stringContainsInOrder("The parent project has a newer version:", "default-group:parent-artifact",
-                "[0,1.0.1-SNAPSHOT]",
-                "1.0.1-SNAPSHOT"));
+                String.join("", Files.readAllLines(tempFile)),
+                stringContainsInOrder(
+                        "The parent project has a newer version:",
+                        "default-group:parent-artifact",
+                        "[0,1.0.1-SNAPSHOT]",
+                        "1.0.1-SNAPSHOT"));
     }
 
     @Test
@@ -352,8 +355,7 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    public void testParentVersionRange()
-        throws MojoExecutionException, MojoFailureException, IOException {
+    public void testParentVersionRange() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.getProject().setParent(new MavenProject() {
             {
                 setGroupId("default-group");
@@ -366,15 +368,13 @@ public class DisplayParentUpdatesMojoTest {
         mojo.execute();
 
         assertThat(
-            String.join("", Files.readAllLines(tempFile)),
-            stringContainsInOrder("The parent project has a newer version:", "dummy-parent2",
-                "[,3.0-!)",
-                "2.0"));
+                String.join("", Files.readAllLines(tempFile)),
+                stringContainsInOrder("The parent project has a newer version:", "dummy-parent2", "[,3.0-!)", "2.0"));
     }
 
     @Test
     public void testParentVersionRange2()
-        throws MojoExecutionException, XMLStreamException, MojoFailureException, IOException {
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IOException {
         mojo.getProject().setParent(new MavenProject() {
             {
                 setGroupId("default-group");
@@ -386,9 +386,7 @@ public class DisplayParentUpdatesMojoTest {
         mojo.parentVersion = "[,3.0-!)";
         mojo.execute();
         assertThat(
-            String.join("", Files.readAllLines(tempFile)),
-            stringContainsInOrder("The parent project is the latest version:", "dummy-parent2",
-                "[,3.0-!)"));
-
+                String.join("", Files.readAllLines(tempFile)),
+                stringContainsInOrder("The parent project is the latest version:", "dummy-parent2", "[,3.0-!)"));
     }
 }
