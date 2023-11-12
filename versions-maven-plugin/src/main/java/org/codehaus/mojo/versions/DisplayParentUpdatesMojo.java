@@ -19,21 +19,20 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import javax.inject.Inject;
+import static org.apache.maven.shared.utils.StringUtils.isBlank;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+import javax.inject.Inject;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.repository.RepositorySystem;
@@ -46,13 +45,7 @@ import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.apache.maven.shared.utils.StringUtils.isBlank;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 
 /**
  * Displays any updates of the project's parent project
@@ -224,27 +217,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
         }
 
         final ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
-        Log log = getLog();
-        if (log != null && !allowIncrementalUpdates) {
-            log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
-        }
-
-        if (log != null && !allowMinorUpdates) {
-            log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
-        }
-
-        Optional<Segment> unchangedSegment1 = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
-                ? empty()
-                : allowMinorUpdates && allowIncrementalUpdates
-                        ? of(MAJOR)
-                        : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
-        if (log != null && log.isDebugEnabled()) {
-            log.debug(unchangedSegment1
-                            .map(Segment::minorTo)
-                            .map(Segment::toString)
-                            .orElse("ALL") + " version changes allowed");
-        }
-        Optional<Segment> unchangedSegment = unchangedSegment1;
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
 
         // currentVersion (set to parentVersion here) is not included in the version range for searching upgrades
         // unless we set allowDowngrade to true
