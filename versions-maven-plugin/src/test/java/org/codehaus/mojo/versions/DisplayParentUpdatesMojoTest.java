@@ -15,6 +15,9 @@ package org.codehaus.mojo.versions;
  *  limitations under the License.
  */
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.xml.stream.XMLStreamException;
 
 import java.util.Collections;
@@ -32,16 +35,13 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.mojo.versions.utils.TestUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.MockedStatic;
 
 import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
@@ -49,24 +49,24 @@ import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableVal
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 public class DisplayParentUpdatesMojoTest {
-    private TestChangeRecorder changeRecorder;
-
     private DisplayParentUpdatesMojo mojo;
 
     private static RepositorySystem repositorySystem;
 
     private static org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+
+    private Path tempDir;
+
+    private Path tempFile;
 
     @BeforeClass
     public static void setUpStatic() {
@@ -83,17 +83,25 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Before
-    public void setUp() throws IllegalAccessException {
-        changeRecorder = new TestChangeRecorder();
+    public void setUp() throws IllegalAccessException, IOException {
+        tempDir = TestUtils.createTempDir("display-property-updates");
+        tempFile = Files.createTempFile(tempDir, "output", "");
         mojo =
                 new DisplayParentUpdatesMojo(
-                        repositorySystem, aetherRepositorySystem, null, changeRecorder.asTestMap()) {
+                        repositorySystem, aetherRepositorySystem, null, null) {
                     {
                         setProject(createProject());
                         reactorProjects = Collections.emptyList();
                         session = mockMavenSession();
                     }
                 };
+        mojo.outputFile = tempFile.toFile();
+        mojo.setPluginContext(new HashMap<>());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        TestUtils.tearDownTempDir(tempDir);
     }
 
     private MavenProject createProject() {
@@ -135,10 +143,8 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
     public void testArtifactIdDoesNotExist()
-            throws VersionRetrievalException, MojoExecutionException, XMLStreamException, MojoFailureException,
-                    InvalidVersionSpecificationException, VersionRetrievalException {
+        throws MojoExecutionException, InvalidVersionSpecificationException, VersionRetrievalException {
         mojo.getProject().setParent(new MavenProject() {
             {
                 setGroupId("default-group");
@@ -158,43 +164,28 @@ public class DisplayParentUpdatesMojoTest {
         assertThat(
                 mojo.findLatestVersion(artifact, VersionRange.createFromVersionSpec("1.0.1-SNAPSHOT"), null, false),
                 is(nullValue()));
-
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
-                    .thenReturn(true);
-            mojo.update(null);
-        }
     }
 
     @Test
-    @Ignore
     public void testParentDowngradeAllowed()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowDowngrade = true;
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
-                    .thenReturn(true);
-            mojo.update(null);
-        }
+        mojo.execute();
         assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "parent-artifact", "1.0.1-SNAPSHOT", "1.0.0")));
+            String.join("", Files.readAllLines(tempFile)),
+            stringContainsInOrder("The parent project has a newer version:", "default-group:parent-artifact",
+                "1.0.1-SNAPSHOT -> 1.0.0"));
     }
 
     @Test
     public void testParentDowngradeForbidden()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowDowngrade = false;
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
-                    .thenReturn(true);
-            mojo.update(null);
-        }
-        assertThat(changeRecorder.getChanges(), is(empty()));
+        mojo.execute();
+        assertThat(
+            String.join("", Files.readAllLines(tempFile)),
+            stringContainsInOrder("The parent project is the latest version:", "default-group:parent-artifact",
+                "1.0.1-SNAPSHOT"));
     }
 
     @Test
@@ -241,29 +232,16 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    @Ignore
     public void testAllowSnapshotsWithParentVersion()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "0.0.1-1-impl-SNAPSHOT";
-        mojo.getProject().setParent(new MavenProject() {
-            {
-                setGroupId("default-group");
-                setArtifactId("issue-670-artifact");
-                setVersion("0.0.1-1");
-            }
-        });
-
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
-                    .thenReturn(true);
-            mojo.update(null);
-        }
+        mojo.execute();
         assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "issue-670-artifact", "0.0.1-1", "0.0.1-1-impl-SNAPSHOT")));
+            String.join("", Files.readAllLines(tempFile)),
+            stringContainsInOrder("The parent project is the latest version:", "default-group:parent-artifact",
+                "0.0.1-1-impl-SNAPSHOT"));
+
     }
 
     @Test
@@ -281,24 +259,21 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    @Ignore
-    public void testSkipResolutionDowngradeUnknownVersion() throws VersionRetrievalException {
+    public void testSkipResolutionDowngradeUnknownVersion() throws MojoExecutionException, MojoFailureException, IOException {
         testSkipResolution("0.8.0");
     }
 
     @Test
-    @Ignore
-    public void testSkipResolutionDowngrade() throws VersionRetrievalException {
+    public void testSkipResolutionDowngrade() throws MojoExecutionException, MojoFailureException, IOException {
         testSkipResolution("0.9.0");
     }
 
     @Test
-    @Ignore
-    public void testSkipResolutionUpgradeUnknownVersion() throws VersionRetrievalException {
+    public void testSkipResolutionUpgradeUnknownVersion() throws MojoExecutionException, MojoFailureException, IOException {
         testSkipResolution("2.0.0");
     }
 
-    private void testSkipResolution(String version) throws VersionRetrievalException {
+    private void testSkipResolution(String version) throws IOException, MojoExecutionException, MojoFailureException {
         mojo.parentVersion = version;
         mojo.skipResolution = true;
         mojo.getProject().setParent(new MavenProject() {
@@ -308,23 +283,16 @@ public class DisplayParentUpdatesMojoTest {
                 setVersion("1.0.0");
             }
         });
-
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
-                    .thenReturn(true);
-            mojo.update(null);
-        }
-
+        mojo.execute();
         assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "parent-artifact", "1.0.0", version)));
+            String.join("", Files.readAllLines(tempFile)),
+            stringContainsInOrder("The parent project is the latest version:", "default-group:parent-artifact",
+                version));
     }
 
     @Test
-    @Ignore
     public void testShouldUpgradeToSnapshot()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        throws MojoExecutionException, MojoFailureException, IOException {
         mojo.getProject().setParent(new MavenProject() {
             {
                 setGroupId("default-group");
@@ -334,16 +302,12 @@ public class DisplayParentUpdatesMojoTest {
         });
         mojo.allowSnapshots = true;
         mojo.parentVersion = "[0,1.0.1-SNAPSHOT]";
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
-                    .thenReturn(true);
-            mojo.update(null);
-        }
+        mojo.execute();
         assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "parent-artifact", "0.9.0", "1.0.1-SNAPSHOT")));
+            String.join("", Files.readAllLines(tempFile)),
+            stringContainsInOrder("The parent project has a newer version:", "default-group:parent-artifact",
+                "[0,1.0.1-SNAPSHOT]",
+                "1.0.1-SNAPSHOT"));
     }
 
     @Test
@@ -388,9 +352,8 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     @Test
-    @Ignore
     public void testParentVersionRange()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        throws MojoExecutionException, MojoFailureException, IOException {
         mojo.getProject().setParent(new MavenProject() {
             {
                 setGroupId("default-group");
@@ -400,20 +363,18 @@ public class DisplayParentUpdatesMojoTest {
         });
         mojo.allowSnapshots = true;
         mojo.parentVersion = "[,3.0-!)";
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
-                    .thenReturn(true);
-            mojo.update(null);
-        }
+        mojo.execute();
+
         assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "dummy-parent2", "1.0", "2.0")));
+            String.join("", Files.readAllLines(tempFile)),
+            stringContainsInOrder("The parent project has a newer version:", "dummy-parent2",
+                "[,3.0-!)",
+                "2.0"));
     }
 
     @Test
     public void testParentVersionRange2()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        throws MojoExecutionException, XMLStreamException, MojoFailureException, IOException {
         mojo.getProject().setParent(new MavenProject() {
             {
                 setGroupId("default-group");
@@ -423,12 +384,11 @@ public class DisplayParentUpdatesMojoTest {
         });
         mojo.allowSnapshots = true;
         mojo.parentVersion = "[,3.0-!)";
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
-                    .thenReturn(true);
-            mojo.update(null);
-        }
-        assertThat(changeRecorder.getChanges(), empty());
+        mojo.execute();
+        assertThat(
+            String.join("", Files.readAllLines(tempFile)),
+            stringContainsInOrder("The parent project is the latest version:", "dummy-parent2",
+                "[,3.0-!)"));
+
     }
 }
