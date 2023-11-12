@@ -153,6 +153,11 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
             logLine(false, "Parent project is part of the reactor.");
             return;
         }
+
+        if (skipResolution && isBlank(parentVersion)) {
+            throw new MojoExecutionException("skipResolution is only valid if parentVersion is set");
+        }
+
         String initialVersion = parentVersion == null ? getProject().getParent().getVersion() : parentVersion;
         ArtifactVersion artifactVersion;
         try {
