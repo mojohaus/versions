@@ -157,8 +157,8 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
         if (skipResolution && isBlank(parentVersion)) {
             throw new MojoExecutionException("skipResolution is only valid if parentVersion is set");
         }
-
-        String initialVersion = parentVersion == null ? getProject().getParent().getVersion() : parentVersion;
+        String initialVersion = Optional.ofNullable(parentVersion)
+                .orElse(getProject().getParent().getVersion());
         ArtifactVersion artifactVersion;
         try {
             artifactVersion = skipResolution
