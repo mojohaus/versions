@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>localhost</groupId>
+    <artifactId>dummy-parent</artifactId>
+    <version>1.0</version>
+  </parent>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-aggregate-plugn-multiple-versions-same-plugin</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>use-reactor basic test</name>
+
+  <modules>
+    <module>module-a1</module>
+    <module>module-a2</module>
+    <module>module-a3</module>
+    <module>module-a4</module>
+  </modules>
+
+  <profiles>
+    <profile>
+      <id>dependency-updates-reports</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>versions-maven-plugin</artifactId>
+            <version>@project.version@</version>
+            <executions>
+              <execution>
+                <id>root-report</id>
+                <goals>
+                  <goal>dependency-updates-aggregate-report</goal>
+                  <goal>plugin-updates-aggregate-report</goal>
+                </goals>
+                <phase>validate</phase>
+                <configuration>
+                  <formats>
+                    <format>html</format>
+                  </formats>
+                  <onlyProjectDependencies>false</onlyProjectDependencies>
+                  <onlyUpgradable>true</onlyUpgradable>
+                  <ruleSet>
+                    <rules>
+                      <rule>
+                        <!-- ignore maven alpha/beta releases -->
+                        <groupId>org.apache.maven</groupId>
+                        <ignoreVersions>
+                          <ignoreVersion>
+                            <type>regex</type>
+                            <version>.+-(alpha|beta).?[0-9]+</version>
+                          </ignoreVersion>
+                        </ignoreVersions>
+                      </rule>
+                    </rules>
+                  </ruleSet>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

@@ -51,6 +51,10 @@ public class PluginUpdatesDetails extends ArtifactVersions {
         return dependencyVersions;
     }
 
+    public void addDependencyVersions(Map<Dependency, ArtifactVersions> dependencyVersions) {
+        this.dependencyVersions.putAll(dependencyVersions);
+    }
+
     /**
      * Returns true if a new version of the artifact fulfilling the criteria (whether to include snapshots) can be found
      *

@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.BinaryOperator;
 
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
@@ -131,7 +132,12 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
                     getHelper().lookupPluginsUpdates(pluginManagement.stream(), getAllowSnapshots());
 
             if (onlyUpgradable) {
-                pluginUpdates = filter(pluginUpdates, p -> !p.isEmpty(allowSnapshots));
+
+                BinaryOperator<PluginUpdatesDetails> merger = (pluginUpdatesDetails, pluginUpdatesDetails2) -> {
+                    pluginUpdatesDetails.addDependencyVersions(pluginUpdatesDetails2.getDependencyVersions());
+                    return pluginUpdatesDetails;
+                };
+                pluginUpdates = filter(pluginUpdates, p -> !p.isEmpty(allowSnapshots), merger);
                 pluginManagementUpdates = filter(pluginManagementUpdates, p -> !p.isEmpty(allowSnapshots));
             }
 
