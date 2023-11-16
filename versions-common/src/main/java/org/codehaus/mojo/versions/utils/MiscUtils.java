@@ -1,6 +1,7 @@
 package org.codehaus.mojo.versions.utils;
 
 import java.util.Map;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,5 +23,12 @@ public class MiscUtils {
         return map.entrySet().stream()
                 .filter(e -> predicate.apply(e.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public static <K, V> Map<K, V> filter(
+            Map<K, V> map, Function<V, Boolean> predicate, BinaryOperator<V> mergeFunction) {
+        return map.entrySet().stream()
+                .filter(e -> predicate.apply(e.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, mergeFunction));
     }
 }
