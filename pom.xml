@@ -10,7 +10,7 @@
 
   <groupId>org.codehaus.mojo.versions</groupId>
   <artifactId>versions</artifactId>
-  <version>2.16.2</version>
+  <version>2.16.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Versions</name>
@@ -107,7 +107,7 @@
   <scm>
     <connection>scm:git:https://github.com/mojohaus/versions.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mojohaus/versions.git</developerConnection>
-    <tag>2.16.2</tag>
+    <tag>2.15.0</tag>
     <url>https://github.com/mojohaus/versions/tree/master</url>
   </scm>
 
@@ -135,7 +135,7 @@
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
     <!-- mono-module doesn't require site:stage for scm-publish -->
-    <project.build.outputTimestamp>2023-11-16T23:59:58Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2023-11-17T00:00:27Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
