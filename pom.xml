@@ -326,7 +326,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-archiver</artifactId>
-        <version>4.9.0</version>
+        <version>4.9.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
