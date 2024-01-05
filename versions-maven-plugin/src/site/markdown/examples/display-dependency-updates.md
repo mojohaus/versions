@@ -62,7 +62,7 @@ Let's suppose you wanted `org.apache.maven.doxia:doxia-core:` not to be updated 
 
 Well, that would be wrong. `dependencyIncludes` and `dependencyExcludes` work only on *input* dependencies, that is, dependency versions that are already being used by your project. This means that it is likely that you will still see the dreaded `2.0.0-M6`-like version in the updates.
 
-You can either use `ruleSet` or `ignoredVersions`. The former allows for a greater control where you can specify ignored version patterns per dependency whereas the latter is intended to be used from command line ans only offers simple version filters.
+You can either use `ruleSet` or `ignoredVersions`. The former allows for a greater control where you can specify ignored version patterns per dependency whereas the latter is intended to be used from command line and only offers simple version filters.
 
 So, let's say we want to display dependency updates of this very plugin and while doing so, ignore all updates with an `-M` or `-alpha` at the end of the version string, simply use:
 
