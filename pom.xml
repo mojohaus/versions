@@ -243,7 +243,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-interactivity-api</artifactId>
-        <version>1.2</version>
+        <version>1.3</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.woodstox</groupId>
