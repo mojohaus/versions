@@ -133,7 +133,7 @@
     <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
     <modelloNamespaceRuleVersion>2.1.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
-    <byteBuddyVersion>1.14.11</byteBuddyVersion>
+    <byteBuddyVersion>1.14.12</byteBuddyVersion>
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
     <!-- mono-module doesn't require site:stage for scm-publish -->
     <project.build.outputTimestamp>2023-11-17T00:00:27Z</project.build.outputTimestamp>
