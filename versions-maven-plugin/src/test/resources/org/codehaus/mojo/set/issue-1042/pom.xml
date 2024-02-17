@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>default</groupId>
+        <artifactId>pom-parent</artifactId>
+        <version>1.0</version>
+        <relativePath>main-reactor/pom-parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>child-reactor</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>child-webapp</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <goals>
+                    <goal>set</goal>
+                </goals>
+                <configuration>
+                    <newVersion>1.0</newVersion>
+                    <generateBackupPoms>false</generateBackupPoms>
+                    <processAllModules>true</processAllModules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
