@@ -25,20 +25,24 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -334,6 +338,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             Map<File, Model> reactorModels = PomHelper.getChildModels(project, getLog());
             final SortedMap<File, Model> reactor = new TreeMap<>(new ReactorDepthComparator(reactorModels));
             reactor.putAll(reactorModels);
+            final Map<Pair<String, String>, Set<Model>> children = computeChildren(reactorModels);
 
             // set of files to update
             final Set<File> files = new LinkedHashSet<>();
@@ -379,8 +384,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                                 || oldVersionIdRegex.matcher(mVersion).matches())
                         && !newVersion.equals(mVersion)) {
                     applyChange(
-                            project,
                             reactor,
+                            children,
                             files,
                             mGroupId,
                             m.getArtifactId(),
@@ -405,6 +410,34 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
+    }
+
+    static Map<Pair<String, String>, Set<Model>> computeChildren(Map<File, Model> reactor) {
+        return reactor.values().stream()
+                .filter(v -> v.getParent() != null)
+                .reduce(
+                        new HashMap<>(),
+                        (map, child) -> {
+                            map.compute(
+                                    new ImmutablePair<>(
+                                            child.getParent().getGroupId(),
+                                            child.getParent().getArtifactId()),
+                                    (pair, set) -> Optional.ofNullable(set)
+                                            .map(children -> {
+                                                children.add(child);
+                                                return children;
+                                            })
+                                            .orElse(new HashSet<Model>() {
+                                                {
+                                                    add(child);
+                                                }
+                                            }));
+                            return map;
+                        },
+                        (m1, m2) -> {
+                            m1.putAll(m2);
+                            return m1;
+                        });
     }
 
     /**
@@ -436,28 +469,21 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
         return StringUtils.join(numbers.toArray(new String[0]), ".") + "-SNAPSHOT";
     }
 
-    private static String fixNullOrEmpty(String value, String defaultValue) {
-        return StringUtils.isBlank(value) ? defaultValue : value;
-    }
-
     private void applyChange(
-            MavenProject project,
             SortedMap<File, Model> reactor,
+            Map<Pair<String, String>, Set<Model>> children,
             Set<File> files,
             String groupId,
             String artifactId,
             String oldVersion) {
 
         getLog().debug("Applying change " + groupId + ":" + artifactId + ":" + oldVersion + " -> " + newVersion);
-        // this is a triggering change
         addChange(groupId, artifactId, oldVersion, newVersion);
-        // now fake out the triggering change
 
-        Map.Entry<File, Model> current = PomHelper.getModelEntry(reactor, groupId, artifactId);
-        if (current != null) {
-            current.getValue().setVersion(newVersion);
-            files.add(current.getValue().getPomFile());
-        }
+        Optional.ofNullable(PomHelper.getModelEntry(reactor, groupId, artifactId))
+                .map(Map.Entry::getValue)
+                .map(Model::getPomFile)
+                .ifPresent(files::add);
 
         for (Map.Entry<File, Model> sourceEntry : reactor.entrySet()) {
             final File sourcePath = sourceEntry.getKey();
@@ -488,50 +514,27 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
 
             getLog().debug("Looking for modules which use "
                     + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId) + " as their parent");
-
-            for (Map.Entry<File, Model> stringModelEntry : processAllModules
-                    ? reactor.entrySet()
-                    : PomHelper.getChildModels(reactor, sourceGroupId, sourceArtifactId)
-                            .entrySet()) {
-                final Model targetModel = stringModelEntry.getValue();
-                final Parent parent = targetModel.getParent();
-                getLog().debug("Module: " + stringModelEntry.getKey());
-                if (parent != null && sourceVersion.equals(parent.getVersion())) {
-                    getLog().debug("    parent already is "
-                            + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId) + ":" + sourceVersion);
-                } else {
-                    getLog().debug("    parent is " + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId)
-                            + ":" + (parent == null ? "" : parent.getVersion()));
-                    getLog().debug("    will become " + ArtifactUtils.versionlessKey(sourceGroupId, sourceArtifactId)
-                            + ":" + sourceVersion);
-                }
-                final boolean targetExplicit = PomHelper.isExplicitVersion(targetModel);
-                if ((updateMatchingVersions || !targetExplicit) //
-                        && (parent != null
-                                && StringUtils.equals(parent.getVersion(), PomHelper.getVersion(targetModel)))) {
-                    getLog().debug("    module is "
-                            + ArtifactUtils.versionlessKey(
-                                    PomHelper.getGroupId(targetModel), PomHelper.getArtifactId(targetModel))
-                            + ":"
-                            + PomHelper.getVersion(targetModel));
-                    getLog().debug("    will become "
-                            + ArtifactUtils.versionlessKey(
-                                    PomHelper.getGroupId(targetModel), PomHelper.getArtifactId(targetModel))
-                            + ":" + sourceVersion);
-                    addChange(
-                            PomHelper.getGroupId(targetModel),
-                            PomHelper.getArtifactId(targetModel),
-                            PomHelper.getVersion(targetModel),
-                            sourceVersion);
-                    targetModel.setVersion(sourceVersion);
-                } else {
-                    getLog().debug("    module is "
-                            + ArtifactUtils.versionlessKey(
-                                    PomHelper.getGroupId(targetModel), PomHelper.getArtifactId(targetModel))
-                            + ":"
-                            + PomHelper.getVersion(targetModel));
-                }
-            }
+            Optional.ofNullable(children.get(new ImmutablePair<>(sourceGroupId, sourceArtifactId)))
+                    .ifPresent(set -> set.forEach(model -> {
+                        final boolean hasExplicitVersion = PomHelper.isExplicitVersion(model);
+                        if ((updateMatchingVersions || !hasExplicitVersion)
+                                && (StringUtils.equals(sourceVersion, PomHelper.getVersion(model)))) {
+                            getLog().debug("    module is "
+                                    + ArtifactUtils.versionlessKey(
+                                            PomHelper.getGroupId(model), PomHelper.getArtifactId(model))
+                                    + ":"
+                                    + PomHelper.getVersion(model));
+                            getLog().debug("    will become "
+                                    + ArtifactUtils.versionlessKey(
+                                            PomHelper.getGroupId(model), PomHelper.getArtifactId(model))
+                                    + ":" + newVersion);
+                            addChange(
+                                    PomHelper.getGroupId(model),
+                                    PomHelper.getArtifactId(model),
+                                    PomHelper.getVersion(model),
+                                    newVersion);
+                        }
+                    }));
         }
     }
 
