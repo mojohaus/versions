@@ -74,6 +74,31 @@ public class MockUtils {
      */
     public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem(Map<String, String[]> versionMap) {
         org.eclipse.aether.RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        prepareAetherRepositorySystemMockForVersionRange(repositorySystem, versionMap);
+
+        try {
+            when(repositorySystem.resolveArtifact(any(RepositorySystemSession.class), any(ArtifactRequest.class)))
+                    .then(invocation -> {
+                        ArtifactRequest request = invocation.getArgument(1);
+                        org.eclipse.aether.artifact.Artifact copiedArtifact =
+                                new org.eclipse.aether.artifact.DefaultArtifact(
+                                        request.getArtifact().getGroupId(),
+                                        request.getArtifact().getArtifactId(),
+                                        request.getArtifact().getClassifier(),
+                                        request.getArtifact().getExtension(),
+                                        request.getArtifact().getVersion());
+                        copiedArtifact.setFile(mock(File.class));
+                        return new ArtifactResult(request).setArtifact(copiedArtifact);
+                    });
+        } catch (ArtifactResolutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        return repositorySystem;
+    }
+
+    public static void prepareAetherRepositorySystemMockForVersionRange(
+            org.eclipse.aether.RepositorySystem repositorySystem, Map<String, String[]> versionMap) {
         try {
             when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
                     .then(invocation -> {
@@ -88,24 +113,9 @@ public class MockUtils {
                                 .map(versions -> new VersionRangeResult(request).setVersions(versions))
                                 .orElse(null); // should tell us if we haven't populated all cases in the test
                     });
-            when(repositorySystem.resolveArtifact(any(RepositorySystemSession.class), any(ArtifactRequest.class)))
-                    .then(invocation -> {
-                        ArtifactRequest request = invocation.getArgument(1);
-                        org.eclipse.aether.artifact.Artifact copiedArtifact =
-                                new org.eclipse.aether.artifact.DefaultArtifact(
-                                        request.getArtifact().getGroupId(),
-                                        request.getArtifact().getArtifactId(),
-                                        request.getArtifact().getClassifier(),
-                                        request.getArtifact().getExtension(),
-                                        request.getArtifact().getVersion());
-                        copiedArtifact.setFile(mock(File.class));
-                        return new ArtifactResult(request).setArtifact(copiedArtifact);
-                    });
-        } catch (VersionRangeResolutionException | ArtifactResolutionException e) {
+        } catch (VersionRangeResolutionException e) {
             throw new RuntimeException(e);
         }
-
-        return repositorySystem;
     }
 
     public static I18N mockI18N() {
@@ -128,6 +138,11 @@ public class MockUtils {
 
     public static RepositorySystem mockRepositorySystem() {
         RepositorySystem repositorySystem = mock(RepositorySystem.class);
+        prepareRepositorySystemMock(repositorySystem);
+        return repositorySystem;
+    }
+
+    public static void prepareRepositorySystemMock(RepositorySystem repositorySystem) {
         when(repositorySystem.createDependencyArtifact(any(Dependency.class))).thenAnswer(invocation -> {
             Dependency dependency = invocation.getArgument(0);
             return new DefaultArtifact(
@@ -139,7 +154,6 @@ public class MockUtils {
                     dependency.getClassifier(),
                     new DefaultArtifactHandlerStub("default"));
         });
-        return repositorySystem;
     }
 
     /**

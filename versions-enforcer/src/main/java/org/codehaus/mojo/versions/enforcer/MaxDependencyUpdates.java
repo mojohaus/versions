@@ -1,4 +1,4 @@
-package org.apache.maven.plugins.enforcer;
+package org.codehaus.mojo.versions.enforcer;
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,20 +18,21 @@ package org.apache.maven.plugins.enforcer;
  * under the License.
  */
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.enforcer.rule.api.EnforcerLevel;
-import org.apache.maven.enforcer.rule.api.EnforcerRule;
-import org.apache.maven.enforcer.rule.api.EnforcerRule2;
+import org.apache.maven.enforcer.rule.api.AbstractEnforcerRule;
+import org.apache.maven.enforcer.rule.api.EnforcerRuleError;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
-import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecution;
@@ -46,8 +47,6 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
-import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -62,7 +61,8 @@ import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependen
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDependenciesFromPluginsInPluginManagement;
 
-public class MaxDependencyUpdates implements EnforcerRule2 {
+@Named("maxDependencyUpdates")
+public class MaxDependencyUpdates extends AbstractEnforcerRule {
     /**
      * Maximum allowed number of updates.
      *
@@ -232,7 +232,7 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
      * version numbers. The URI could be either a Wagon URI or a classpath URI
      * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
      *
-     * 2.14.0
+     * @since 2.14.0
      */
     private String rulesUri;
 
@@ -254,81 +254,78 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
      */
     protected boolean allowSnapshots;
 
-    /**
-     * Retrieves the maven project from metadata
-     * @param ruleHelper EnforcerRuleHelper object
-     * @return maven project
-     */
-    private static MavenProject getMavenProject(EnforcerRuleHelper ruleHelper) {
-        try {
-            return (MavenProject) ruleHelper.evaluate("${project}");
-        } catch (ExpressionEvaluationException e) {
-            throw new RuntimeException("Cannot evaluate project metadata", e);
-        }
+    private final MavenProject project;
+
+    private final RepositorySystem repositorySystem;
+
+    private final org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+
+    private final Map<String, Wagon> wagonMap;
+
+    private final MavenSession mavenSession;
+
+    private final MojoExecution mojoExecution;
+
+    @Inject
+    public MaxDependencyUpdates(
+            MavenProject project,
+            RepositorySystem repositorySystem,
+            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
+            Map<String, Wagon> wagonMap,
+            MavenSession mavenSession,
+            MojoExecution mojoExecution) {
+        this.project = project;
+        this.repositorySystem = repositorySystem;
+        this.aetherRepositorySystem = aetherRepositorySystem;
+        this.wagonMap = wagonMap;
+        this.mavenSession = mavenSession;
+        this.mojoExecution = mojoExecution;
     }
 
     /**
      * Creates the VersionsHelper object
-     * @param ruleHelper EnforcerRuleHelper object
      * @return VersionsHelper object
      */
-    @SuppressWarnings("unchecked")
-    private static VersionsHelper createVersionsHelper(
-            EnforcerRuleHelper ruleHelper, String serverId, String rulesUri, RuleSet ruleSet) {
+    private VersionsHelper createVersionsHelper(String serverId, String rulesUri, RuleSet ruleSet)
+            throws EnforcerRuleError {
         try {
             return new DefaultVersionsHelper.Builder()
-                    .withRepositorySystem(ruleHelper.getComponent(RepositorySystem.class))
-                    .withAetherRepositorySystem(ruleHelper.getComponent(org.eclipse.aether.RepositorySystem.class))
-                    .withWagonMap(ruleHelper.getComponentMap(Wagon.class.getName()).entrySet().stream()
-                            .filter(e -> e.getValue() instanceof Wagon)
-                            .collect(HashMap::new, (m, e) -> m.put(e.getKey(), (Wagon) e.getValue()), HashMap::putAll))
+                    .withRepositorySystem(repositorySystem)
+                    .withAetherRepositorySystem(aetherRepositorySystem)
+                    .withWagonMap(wagonMap)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)
                     .withIgnoredVersions(null)
-                    .withLog(ruleHelper.getLog())
-                    .withMavenSession((MavenSession) ruleHelper.evaluate("${session}"))
-                    .withMojoExecution((MojoExecution) ruleHelper.evaluate("${mojoExecution}"))
+                    .withLog(new PluginLogWrapper(getLog()))
+                    .withMavenSession(mavenSession)
+                    .withMojoExecution(mojoExecution)
                     .build();
-        } catch (ExpressionEvaluationException e) {
-            throw new RuntimeException("Cannot evaluate project metadata", e);
-        } catch (ComponentLookupException | MojoExecutionException e) {
-            throw new RuntimeException("Cannot resolve dependency", e);
+        } catch (MojoExecutionException e) {
+            throw new EnforcerRuleError("Cannot resolve dependency", e);
         }
     }
 
     @Override
-    public boolean isCacheable() {
-        return false;
-    }
+    public void execute() throws EnforcerRuleException {
 
-    @Override
-    public boolean isResultValid(EnforcerRule enforcerRule) {
-        return false;
-    }
+        PluginLogWrapper pluginLog = new PluginLogWrapper(getLog());
 
-    @Override
-    public String getCacheId() {
-        return "Does not matter as not cacheable";
-    }
-
-    @Override
-    public void execute(EnforcerRuleHelper ruleHelper) throws EnforcerRuleException {
         VersionsHelper versionsHelper =
-                createVersionsHelper(ruleHelper, serverId != null ? serverId : "serverId", rulesUri, ruleSet);
-        MavenProject project = getMavenProject(ruleHelper);
+                createVersionsHelper(serverId != null ? serverId : "serverId", rulesUri, ruleSet);
+
         Set<Dependency> dependencies = new TreeSet<>(DependencyComparator.INSTANCE);
         if (processDependencyManagement) {
             try {
                 dependencies.addAll(filterDependencies(
                         extractDependenciesFromDependencyManagement(
-                                project, processDependencyManagementTransitive, ruleHelper.getLog()),
+                                project, processDependencyManagementTransitive, pluginLog),
                         dependencyManagementIncludes,
                         dependencyManagementExcludes,
                         "Dependency Management",
-                        ruleHelper.getLog()));
+                        pluginLog));
             } catch (VersionRetrievalException e) {
-                throw new EnforcerRuleException(e.getMessage());
+                throw new EnforcerRuleError(e.getMessage());
             }
         }
         if (processPluginDependencies) {
@@ -337,7 +334,7 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
                     pluginDependencyIncludes,
                     pluginDependencyExcludes,
                     "Plugin Dependencies",
-                    ruleHelper.getLog()));
+                    pluginLog));
         }
         if (processPluginDependenciesInPluginManagement) {
             dependencies.addAll(filterDependencies(
@@ -345,15 +342,11 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
                     pluginManagementDependencyIncludes,
                     pluginManagementDependencyExcludes,
                     "Plugin Management Dependencies",
-                    ruleHelper.getLog()));
+                    pluginLog));
         }
         if (processDependencies) {
             dependencies.addAll(filterDependencies(
-                    project.getDependencies(),
-                    dependencyIncludes,
-                    dependencyExcludes,
-                    "Dependencies",
-                    ruleHelper.getLog()));
+                    project.getDependencies(), dependencyIncludes, dependencyExcludes, "Dependencies", pluginLog));
         }
         try {
             Optional<Segment> ignoredSegment = ignoreSubIncrementalUpdates
@@ -379,13 +372,7 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
                                 .collect(Collectors.joining(", ")));
             }
         } catch (VersionRetrievalException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new EnforcerRuleError(e);
         }
-    }
-
-    @Override
-    public EnforcerLevel getLevel() {
-        // all reported items should be treated as errors
-        return EnforcerLevel.ERROR;
     }
 }
