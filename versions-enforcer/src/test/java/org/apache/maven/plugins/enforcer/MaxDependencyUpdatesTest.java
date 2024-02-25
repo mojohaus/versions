@@ -22,6 +22,7 @@ import java.util.HashMap;
 
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
@@ -72,6 +73,7 @@ public class MaxDependencyUpdatesTest {
                         setDependencies(asList(
                                 dependencyWith("group", "artifactA", "1.0.0"),
                                 dependencyWith("group", "artifactB", "1.0.0")));
+                        setOriginalModel(new Model());
                     }
                 },
                 mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -100,6 +102,7 @@ public class MaxDependencyUpdatesTest {
                 new MavenProject() {
                     {
                         setDependencies(singletonList(dependencyWith("group", "artifactA", "1.0.0")));
+                        setOriginalModel(new Model());
                     }
                 },
                 mockAetherRepositorySystem(singletonMap("artifactA", new String[] {"1.0.0", "2.0.0"})));
@@ -124,6 +127,7 @@ public class MaxDependencyUpdatesTest {
                         setDependencies(asList(
                                 dependencyWith("group", "artifactA", "1.0.0"),
                                 dependencyWith("group", "artifactB", "1.0.0")));
+                        setOriginalModel(new Model());
                     }
                 },
                 mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -153,6 +157,7 @@ public class MaxDependencyUpdatesTest {
                         setDependencies(asList(
                                 dependencyWith("group", "artifactA", "1.0.0"),
                                 dependencyWith("group", "artifactB", "1.0.0")));
+                        setOriginalModel(new Model());
                     }
                 },
                 mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -182,6 +187,7 @@ public class MaxDependencyUpdatesTest {
                         setDependencies(asList(
                                 dependencyWith("group", "artifactA", "1.0.0"),
                                 dependencyWith("group", "artifactB", "1.0.0")));
+                        setOriginalModel(new Model());
                     }
                 },
                 mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -209,6 +215,7 @@ public class MaxDependencyUpdatesTest {
                 new MavenProject() {
                     {
                         setDependencies(singletonList(dependencyWith("group", "artifactA", "1.0.0")));
+                        setOriginalModel(new Model());
                     }
                 },
                 mockAetherRepositorySystem(singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1"})));
@@ -230,6 +237,7 @@ public class MaxDependencyUpdatesTest {
                 new MavenProject() {
                     {
                         setDependencies(singletonList(dependencyWith("group", "artifactA", "1.0.0")));
+                        setOriginalModel(new Model());
                     }
                 },
                 mockAetherRepositorySystem(singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1", "1.0.1"})));
@@ -251,6 +259,7 @@ public class MaxDependencyUpdatesTest {
                 new MavenProject() {
                     {
                         setDependencies(asList(dependencyWith("group", "artifactA", "1.0.0")));
+                        setOriginalModel(new Model());
                     }
                 },
                 mockAetherRepositorySystem(

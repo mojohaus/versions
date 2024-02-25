@@ -86,14 +86,17 @@ public class MaxDependencyUpdates implements EnforcerRule2 {
 
     /**
      * Whether to process the dependencyManagement part transitive or not.
-     * In case of type {@code pom} and scope {@code import}, this means
-     * by default to report also the imported dependencies.
-     * If the parameter is set to {@code false}, the report will only show
-     * updates of the imported pom itself.
+     * <p/>
+     * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
+     * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
+     * by default the report will only show updates of the imported pom itself.
+     * <p/>
+     * If <code>processDependencyManagementTransitive</code> is set to <code>true</code>
+     * the updates for the imported dependencies are also reported.
      *
      * @since 2.14.0
      */
-    protected boolean processDependencyManagementTransitive = true;
+    protected boolean processDependencyManagementTransitive = false;
 
     /**
      * Whether to process the dependencies sections of plugins.

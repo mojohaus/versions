@@ -80,15 +80,17 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * Whether to process the dependencyManagement part transitive or not.
+     * <p/>
      * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
      * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
-     * by default to report also the imported dependencies.
-     * If processTransitive is set to <code>false</code> the report will only show
-     * updates of the imported pom it self.
+     * by default the report will only show updates of the imported pom itself.
+     * <p/>
+     * If <code>processDependencyManagementTransitive</code> is set to <code>true</code>
+     * the updates for the imported dependencies are also reported.
      *
      * @since 2.11
      */
-    @Parameter(property = "processDependencyManagementTransitive", defaultValue = "true")
+    @Parameter(property = "processDependencyManagementTransitive", defaultValue = "false")
     private boolean processDependencyManagementTransitive;
 
     /**
