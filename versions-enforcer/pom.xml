@@ -13,6 +13,7 @@
   <description>Enforcer rules using Versions Maven Plugin</description>
 
   <properties>
+    <!-- used in documentations -->
     <maven-enforcer-plugin-version>${maven-enforcer-plugin.version}</maven-enforcer-plugin-version>
   </properties>
 
