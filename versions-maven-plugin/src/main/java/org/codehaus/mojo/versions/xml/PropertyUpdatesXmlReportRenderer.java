@@ -121,8 +121,8 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
                             setPropertyAssociations(Arrays.stream(e.getValue().getAssociations())
                                     .map(a -> {
                                         PropertyAssociation pa = new PropertyAssociation();
-                                        pa.setGroupId(a.getGroupId());
-                                        pa.setArtifactId(a.getArtifactId());
+                                        pa.setGroupId(a.getArtifact().getGroupId());
+                                        pa.setArtifactId(a.getArtifact().getArtifactId());
                                         return pa;
                                     })
                                     .collect(Collectors.toList()));

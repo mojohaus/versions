@@ -41,14 +41,6 @@ final class DefaultArtifactAssociation implements ArtifactAssociation {
         this.usePluginRepositories = usePluginRepositories;
     }
 
-    public String getGroupId() {
-        return artifact.getGroupId();
-    }
-
-    public String getArtifactId() {
-        return artifact.getArtifactId();
-    }
-
     public Artifact getArtifact() {
         return artifact;
     }
@@ -66,11 +58,11 @@ final class DefaultArtifactAssociation implements ArtifactAssociation {
         }
         DefaultArtifactAssociation that = (DefaultArtifactAssociation) o;
 
-        int rv = getGroupId().compareTo(that.getGroupId());
+        int rv = getArtifact().getGroupId().compareTo(that.getArtifact().getGroupId());
         if (rv != 0) {
             return rv;
         }
-        rv = getArtifactId().compareTo(that.getArtifactId());
+        rv = getArtifact().getArtifactId().compareTo(that.getArtifact().getArtifactId());
         if (rv != 0) {
             return rv;
         }
@@ -93,15 +85,15 @@ final class DefaultArtifactAssociation implements ArtifactAssociation {
         if (usePluginRepositories != that.usePluginRepositories) {
             return false;
         }
-        if (!getArtifactId().equals(that.getArtifactId())) {
+        if (!getArtifact().getArtifactId().equals(that.getArtifact().getArtifactId())) {
             return false;
         }
-        return getGroupId().equals(that.getGroupId());
+        return getArtifact().getGroupId().equals(that.getArtifact().getGroupId());
     }
 
     public int hashCode() {
-        int result = getGroupId().hashCode();
-        result = 31 * result + getArtifactId().hashCode();
+        int result = getArtifact().getGroupId().hashCode();
+        result = 31 * result + getArtifact().getArtifactId().hashCode();
         result = 31 * result + (usePluginRepositories ? 1 : 0);
         return result;
     }

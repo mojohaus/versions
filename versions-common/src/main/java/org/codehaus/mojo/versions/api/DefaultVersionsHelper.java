@@ -636,14 +636,14 @@ public class DefaultVersionsHelper implements VersionsHelper {
             }
 
             for (PropertyVersionsBuilder propertyVersionsBuilder : propertyVersionsBuilders) {
-                final String name = propertyVersionsBuilder.getName();
-                builders.put(name, propertyVersionsBuilder);
-                if (!properties.containsKey(name)) {
-                    final Property value = new Property(name);
-                    getLog().debug("Property ${" + name + "}: Adding inferred version range of "
+                final String propertyName = propertyVersionsBuilder.getName();
+                builders.put(propertyName, propertyVersionsBuilder);
+                if (!properties.containsKey(propertyName)) {
+                    final Property property = new Property(propertyName);
+                    getLog().debug("Property ${" + propertyName + "}: Adding inferred version range of "
                             + propertyVersionsBuilder.getVersionRange());
-                    value.setVersion(propertyVersionsBuilder.getVersionRange());
-                    properties.put(name, value);
+                    property.setVersion(propertyVersionsBuilder.getVersionRange());
+                    properties.put(propertyName, property);
                 }
             }
         }

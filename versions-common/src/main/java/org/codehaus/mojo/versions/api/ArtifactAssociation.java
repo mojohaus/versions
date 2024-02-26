@@ -28,10 +28,6 @@ import org.apache.maven.artifact.Artifact;
  * @since 1.0-alpha-3
  */
 public interface ArtifactAssociation extends Comparable<ArtifactAssociation> {
-    String getGroupId();
-
-    String getArtifactId();
-
     boolean isUsePluginRepositories();
 
     Artifact getArtifact();
