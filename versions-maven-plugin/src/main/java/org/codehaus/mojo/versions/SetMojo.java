@@ -39,6 +39,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.ArtifactUtils;
@@ -63,9 +64,8 @@ import org.codehaus.mojo.versions.utils.DelegatingContextualLog;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
-import org.codehaus.plexus.util.StringUtils;
 
-import static org.codehaus.plexus.util.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * Sets the current project's version and based on that change propagates that change onto any child modules as

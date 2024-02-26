@@ -155,8 +155,8 @@ public class PropertyVersions extends AbstractVersionDetails {
         // see if the version is available for all associations
         for (ArtifactAssociation association : associations) {
             for (Artifact artifact : artifacts) {
-                if (association.getGroupId().equals(artifact.getGroupId())
-                        && association.getArtifactId().equals(artifact.getArtifactId())) {
+                if (association.getArtifact().getGroupId().equals(artifact.getGroupId())
+                        && association.getArtifact().getArtifactId().equals(artifact.getArtifactId())) {
                     try {
                         result.add(artifact.getSelectedVersion());
                     } catch (OverConstrainedVersionException e) {
@@ -173,8 +173,8 @@ public class PropertyVersions extends AbstractVersionDetails {
             associations:
             for (ArtifactAssociation association : associations) {
                 for (Artifact artifact : artifacts) {
-                    if (association.getGroupId().equals(artifact.getGroupId())
-                            && association.getArtifactId().equals(artifact.getArtifactId())) {
+                    if (association.getArtifact().getGroupId().equals(artifact.getGroupId())
+                            && association.getArtifact().getArtifactId().equals(artifact.getArtifactId())) {
                         try {
                             if (candidate
                                     .toString()
