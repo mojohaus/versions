@@ -22,7 +22,7 @@ on: [push, pull_request]
 jobs:
   build:
     name: Verify
-    uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v3
+    uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v4
     with:
       ff-goal: '-P run-its install'         # site use project version for reporting
       verify-goal: '-P run-its install'     # should be the same as for first build
