@@ -318,7 +318,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-archiver</artifactId>
-        <version>4.9.1</version>
+        <version>4.9.2</version>
       </dependency>
 
       <!-- JDK 21 support -->
