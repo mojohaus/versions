@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>80</version>
+    <version>81</version>
   </parent>
 
   <groupId>org.codehaus.mojo.versions</groupId>
