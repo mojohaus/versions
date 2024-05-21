@@ -10,7 +10,7 @@ regarding copyright ownership.  The ASF licenses this file
 to you under the Apache License, Version 2.0 (the
 "License"); you may not use this file except in compliance
 with the License.  You may obtain a copy of the License at
-  https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -43,12 +43,12 @@ A pom will most likely specify -SNAPSHOT versions for certain dependencies.
 
 Using the `lock-snapshots` goal, the version can be locked down to the specific timestamped snapshot version used
 in the build.
-  
+
 ```sh
 mvn versions:lock-snapshots
 ```
 
-  The pom dependencies are modified to look like the following.
+The pom dependencies are modified to look like the following.
 
 ```xml
 <dependencies>
@@ -74,7 +74,7 @@ The `includes` and `excludes` parameters follow the format `groupId:artifactId:t
 Use a comma separated list to specify multiple includes.  Wildcards (*) can also be used to match
 multiple values.
 
-This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and 
+This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and
 artifactId matching "junit".
 
 ```sh
@@ -96,3 +96,4 @@ While this example will only process the `project/dependencies` section of your 
 ```sh
 mvn versions:lock-snapshots -DprocessDependencyManagement=false
 ```
+

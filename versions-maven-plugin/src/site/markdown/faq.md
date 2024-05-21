@@ -9,7 +9,7 @@ regarding copyright ownership.  The ASF licenses this file
 to you under the Apache License, Version 2.0 (the
 "License"); you may not use this file except in compliance
 with the License.  You may obtain a copy of the License at
-  https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -35,7 +35,7 @@ in the core of Maven expects that version numbers will have a very specific form
 ` <MajorVersion [> . <MinorVersion [> . <IncrementalVersion ] ] [> - <BuildNumber | Qualifier ]> `
 
 Where *MajorVersion*, *MinorVersion*, *IncrementalVersion* and *BuildNumber* are all numeric and *Qualifier*
-is a string. If your version number does not match this format, then the entire version number is treated as being 
+is a string. If your version number does not match this format, then the entire version number is treated as being
 the *Qualifier*.
 
 Version numbers in maven are compared using the individual components, so *MajorVersion*, *MinorVersion*,
@@ -56,9 +56,9 @@ then Maven will not know about versions that are available in your repositories.
 Here are some common reasons why your metadata can be invalid:
 
 - You are using a local repository as a remote repository. Stop, don't do this. The local repository
-uses a separate set of metadata files from those used by a remote repository. There are tools available
-to convert a local repository into a remote repository, but you're really better off using a repository
-manager.
+  uses a separate set of metadata files from those used by a remote repository. There are tools available
+  to convert a local repository into a remote repository, but you're really better off using a repository
+  manager.
 - Artifacts have been deployed by non-maven metadata aware tools.
 - Tools that claim to be maven meta-data aware have clobbered the metadata files.
 

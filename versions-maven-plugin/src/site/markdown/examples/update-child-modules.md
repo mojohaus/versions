@@ -10,7 +10,7 @@ regarding copyright ownership.  The ASF licenses this file
 to you under the Apache License, Version 2.0 (the
 "License"); you may not use this file except in compliance
 with the License.  You may obtain a copy of the License at
-  https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -45,7 +45,7 @@ Reason: Cannot find parent: com.foo.bar:bar for project: com.foo.bar:bar-child:j
 The above example was for a project structured like this:
 
 - /pom.xml
-    - /bar-child/pom.xml
+  - /bar-child/pom.xml
 
 With `/pom.xml` looking like
 
@@ -98,7 +98,7 @@ to run the goal.
 mvn -N versions:update-child-modules
 ```
 
-  Which produces the following output:
+Which produces the following output:
 
 ```log
 [INFO] Scanning for projects...

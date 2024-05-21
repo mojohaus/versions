@@ -11,4 +11,3 @@ Versions - XML schemas for reports
 - [plugin-updates-report-2.0.0.xsd](plugin-updates-report-2.0.0.xsd)
 - [property-updates-report-2.0.0.xsd](property-updates-report-2.0.0.xsd)
 
-
