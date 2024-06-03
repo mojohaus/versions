@@ -43,8 +43,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 /**
- * Maven plugin that uses SCM/VCS to enable dynamic versioning based on your
- * version control system.
+ * Maven plugin that uses SCM/VCS to enable dynamic versioning based on your version
+ * control system.
  *
  * @author Jimisola Laursen
  * @since 2.17.0
@@ -52,208 +52,182 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 @Mojo(name = "set-version-from-scm-tag", defaultPhase = LifecyclePhase.INITIALIZE)
 public class DynamicVersioningSCMPlugin extends AbstractMojo {
 
-    /**
-     * The Maven Project Object
-     */
-    @Parameter(defaultValue = "${project}", readonly = true, required = true)
-    private MavenProject project;
+	/**
+	 * The Maven Project Object
+	 */
+	@Parameter(defaultValue = "${project}", readonly = true, required = true)
+	private MavenProject project;
 
-    /**
-     * The name of the property that will contain the resolved version.
-     */
-    @Parameter(property = "propertyName", defaultValue = "revision")
-    protected String propertyName;
-    /**
-     * Whether the SNAPSHOT qualifier shall be apppended or not.
-     */
-    @Parameter(property = "appendSnapshot", defaultValue = "true")
-    protected boolean appendSnapshot;
+	/**
+	 * The name of the property that will contain the resolved version.
+	 */
+	@Parameter(property = "propertyName", defaultValue = "revision")
+	protected String propertyName;
 
-    /**
-     * Set the version instead of resolving from SCM tag information. Environment
-     * variable
-     * <i>DV_SCM_PLUGIN_USE_VERSION<i> can also be used and will
-     * override this
-     * parameter.
-     */
-    @Parameter(property = "useVersion")
-    protected String useVersion;
+	/**
+	 * Whether the SNAPSHOT qualifier shall be apppended or not.
+	 */
+	@Parameter(property = "appendSnapshot", defaultValue = "true")
+	protected boolean appendSnapshot;
 
-    /**
-     * The default version used when SCM repository has no commit or no semantic
-     * version
-     * tag.
-     */
-    @Parameter(property = "defaultVersion", defaultValue = "0.0.1")
-    protected String defaultVersion;
+	/**
+	 * Set the version instead of resolving from SCM tag information.
+	 */
+	@Parameter(property = "useVersion")
+	protected String useVersion;
 
-    // standard semantic versioning with an optional 'v' prefix
-    protected static final Pattern TAG_VERSION_PATTERN = Pattern.compile("refs/tags/(?:v)?((\\d+\\.\\d+\\.\\d+)(.*))");
+	/**
+	 * The default version used when SCM repository has no commit or no semantic version
+	 * tag.
+	 */
+	@Parameter(property = "defaultVersion", defaultValue = "0.0.1")
+	protected String defaultVersion;
 
-    protected static final String DV_SCM_USE_VERSION_ENV_VAR_NAME = "DV_SCM_PLUGIN_USE_VERSION";
+	// standard semantic versioning with an optional 'v' prefix
+	protected static final Pattern TAG_VERSION_PATTERN = Pattern.compile("refs/tags/(?:v)?((\\d+\\.\\d+\\.\\d+)(.*))");
 
-    public void execute() throws MojoExecutionException {
-        // limit JGits excessive logging
-        Logger.getLogger("org.eclipse.jgit").setLevel(Level.INFO);
+	public void execute() throws MojoExecutionException {
+		// limit JGits excessive logging
+		Logger.getLogger("org.eclipse.jgit").setLevel(Level.INFO);
 
-        VersionInformation vi;
+		VersionInformation vi;
 
-        Optional<String> mayBeVersion = getHardcodedVersion();
+		Optional<String> mayBeVersion = Optional.ofNullable(useVersion);
 
-        if (mayBeVersion.isPresent()) {
-            vi = new VersionInformation(mayBeVersion.get());
-        } else {
-            vi = getVersionFromSCM();
-        }
+		if (mayBeVersion.isPresent()) {
+			vi = new VersionInformation(mayBeVersion.get());
+		}
+		else {
+			vi = getVersionFromSCM();
+		}
 
-        project.getProperties().setProperty(propertyName, vi.toString());
-        getLog().info("Property '" + propertyName + "' set to: "
-                + project.getProperties().getProperty(propertyName));
-    }
+		project.getProperties().setProperty(propertyName, vi.toString());
+		getLog().info("Property '" + propertyName + "' set to: " + project.getProperties().getProperty(propertyName));
+	}
 
-    /**
-     * Returns value of environment variable
-     * {@code DV_SCM_PLUGIN_USE_VERSION}, parameter
-     * {@code useVersion}
-     * or, if
-     * none are set, Optional.empty() (in that order).
-     *
-     * @return Optional<String> that can contain version set by environment variable
-     *         of
-     *         parameter {@code useVersion}
-     */
-    protected Optional<String> getHardcodedVersion() {
-        String version = System.getenv(DV_SCM_USE_VERSION_ENV_VAR_NAME);
+	/**
+	 * Returns the resolved version based on SCM tag information for use with Maven CI.
+	 * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the
+	 * plugin itself
+	 */
+	protected VersionInformation getVersionFromSCM() throws MojoExecutionException {
+		// check for repository
+		try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(".git"))
+			.readEnvironment() // scan environment GIT_* variables
+			.findGitDir() // scan up the file system tree
+			.build();) {
 
-        if (version != null) {
-            return Optional.of(version);
-        } else if (useVersion != null) {
-            return Optional.of(useVersion);
-        }
+			if (repository.getDirectory() == null) {
+				throw new MojoExecutionException("Directory is not an SCM repository.");
+			}
 
-        return Optional.empty();
-    }
+			// check for latest commit
+			RevCommit latestCommit = getLatestCommit(repository);
 
-    /**
-     * Returns the resolved version based on SCM tag information for use with Maven
-     * CI.
-     *
-     * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with
-     *                                                        the
-     *                                                        plugin itself
-     */
-    protected VersionInformation getVersionFromSCM() throws MojoExecutionException {
-        // check for repository
-        try (Repository repository = new FileRepositoryBuilder()
-                .setGitDir(new File(".git"))
-                .readEnvironment() // scan environment GIT_* variables
-                .findGitDir() // scan up the file system tree
-                .build(); ) {
+			return getVersionFromCommit(repository, latestCommit);
+		}
+		catch (IOException e) {
+			throw new MojoExecutionException("Error reading Git information.", e);
+		}
+	}
 
-            if (repository.getDirectory() == null) {
-                throw new MojoExecutionException("Directory is not an SCM repository.");
-            }
+	protected RevCommit getLatestCommit(Repository repository) throws MojoExecutionException {
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			ObjectId head = repository.resolve("HEAD");
 
-            // check for latest commit
-            RevCommit latestCommit = getLatestCommit(repository);
+			if (head == null) {
+				throw new MojoExecutionException("SCM repo has no head/commits.");
+			}
 
-            return getVersionFromCommit(repository, latestCommit);
-        } catch (IOException e) {
-            throw new MojoExecutionException("Error reading Git information.", e);
-        }
-    }
+			return revWalk.parseCommit(head);
+		}
+		catch (IOException e) {
+			throw new MojoExecutionException("SCM repo most likely has no commits.", e);
+		}
+	}
 
-    protected RevCommit getLatestCommit(Repository repository) throws MojoExecutionException {
-        try (RevWalk revWalk = new RevWalk(repository)) {
-            ObjectId head = repository.resolve("HEAD");
+	protected VersionInformation getVersionFromCommit(Repository repository, RevCommit latestCommit)
+			throws MojoExecutionException {
 
-            if (head == null) {
-                throw new MojoExecutionException("SCM repo has no head/commits.");
-            }
+		try (Git git = Git.wrap(repository)) {
 
-            return revWalk.parseCommit(head);
-        } catch (IOException e) {
-            throw new MojoExecutionException("SCM repo most likely has no commits.", e);
-        }
-    }
+			List<String> versionTags = getVersionedTagsForCommit(git, latestCommit);
 
-    protected VersionInformation getVersionFromCommit(Repository repository, RevCommit latestCommit)
-            throws MojoExecutionException {
+			Optional<VersionInformation> ovi = findHighestVersion(versionTags);
 
-        try (Git git = Git.wrap(repository)) {
+			// latest commit has version tag(s), we use the highest one
+			if (ovi.isPresent()) {
+				return ovi.get();
+			}
 
-            List<String> versionTags = getVersionedTagsForCommit(git, latestCommit);
+			Iterable<RevCommit> commits = git.log().call();
+			int count = 0;
+			for (RevCommit commit : commits) {
+				count++;
 
-            Optional<VersionInformation> ovi = findHighestVersion(versionTags);
+				versionTags = getVersionedTagsForCommit(git, commit);
 
-            // latest commit has version tag(s), we use the highest one
-            if (ovi.isPresent()) {
-                return ovi.get();
-            }
+				ovi = findHighestVersion(versionTags);
 
-            Iterable<RevCommit> commits = git.log().call();
-            int count = 0;
-            for (RevCommit commit : commits) {
-                count++;
+				if (ovi.isPresent()) {
+					VersionInformation vi = ovi.get();
 
-                versionTags = getVersionedTagsForCommit(git, commit);
+					vi.setPatch(vi.getPatch() + 1);
+					vi.setBuildNumber(count);
 
-                ovi = findHighestVersion(versionTags);
+					return addSnapshotQualifier(vi);
+				}
+			}
 
-                if (ovi.isPresent()) {
-                    VersionInformation vi = ovi.get();
+			// no version tags in repository
+			return addSnapshotQualifier(new VersionInformation(defaultVersion + "-" + count));
 
-                    vi.setPatch(vi.getPatch() + 1);
-                    vi.setBuildNumber(count);
+		}
+		catch (GitAPIException e) {
+			throw new MojoExecutionException("Error reading Git information.", e);
+		}
+	}
 
-                    return addSnapshotQualifier(vi);
-                }
-            }
+	protected Optional<VersionInformation> findHighestVersion(List<String> versionTags) {
+		Optional<String> highestVersionString = versionTags.stream().max(this.new VersionComparator());
 
-            // no version tags in repository
-            return addSnapshotQualifier(new VersionInformation(defaultVersion + "-" + count));
+		return highestVersionString.map(VersionInformation::new);
+	}
 
-        } catch (GitAPIException e) {
-            throw new MojoExecutionException("Error reading Git information.", e);
-        }
-    }
+	protected List<String> getVersionedTagsForCommit(Git git, RevCommit commit) throws GitAPIException {
+		// get tags directly associated with the commit
+		return git.tagList()
+			.call()
+			.stream()
+			.filter(tag -> tag.getObjectId().equals(commit.getId()))
+			.map(Ref::getName)
+			.filter(tagName -> {
+				Matcher matcher = TAG_VERSION_PATTERN.matcher(tagName);
+				return matcher.matches() && matcher.groupCount() > 0;
+			})
+			.map(tagName -> {
+				Matcher matcher = TAG_VERSION_PATTERN.matcher(tagName);
+				matcher.matches();
+				return matcher.group(1);
+			})
+			.collect(Collectors.toList());
+	}
 
-    protected Optional<VersionInformation> findHighestVersion(List<String> versionTags) {
-        Optional<String> highestVersionString = versionTags.stream().max(this.new VersionComparator());
+	protected VersionInformation addSnapshotQualifier(VersionInformation vi) {
+		if (appendSnapshot) {
+			vi.setQualifier("SNAPSHOT");
+		}
 
-        return highestVersionString.map(VersionInformation::new);
-    }
+		return vi;
+	}
 
-    protected List<String> getVersionedTagsForCommit(Git git, RevCommit commit) throws GitAPIException {
-        // get tags directly associated with the commit
-        return git.tagList().call().stream()
-                .filter(tag -> tag.getObjectId().equals(commit.getId()))
-                .map(Ref::getName)
-                .filter(tagName -> {
-                    Matcher matcher = TAG_VERSION_PATTERN.matcher(tagName);
-                    return matcher.matches() && matcher.groupCount() > 0;
-                })
-                .map(tagName -> {
-                    Matcher matcher = TAG_VERSION_PATTERN.matcher(tagName);
-                    matcher.matches();
-                    return matcher.group(1);
-                })
-                .collect(Collectors.toList());
-    }
+	protected class VersionComparator implements Comparator<String> {
 
-    protected VersionInformation addSnapshotQualifier(VersionInformation vi) {
-        if (appendSnapshot) {
-            vi.setQualifier("SNAPSHOT");
-        }
+		@Override
+		public int compare(String version1, String version2) {
+			return new ComparableVersion(version1).compareTo(new ComparableVersion(version2));
+		}
 
-        return vi;
-    }
+	}
 
-    protected class VersionComparator implements Comparator<String> {
-
-        @Override
-        public int compare(String version1, String version2) {
-            return new ComparableVersion(version1).compareTo(new ComparableVersion(version2));
-        }
-    }
 }
