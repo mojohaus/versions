@@ -21,12 +21,10 @@
           <releases>
             <enabled>true</enabled>
             <checksumPolicy>ignore</checksumPolicy>
-            <updatePolicy>never</updatePolicy>
           </releases>
           <snapshots>
             <enabled>true</enabled>
             <checksumPolicy>ignore</checksumPolicy>
-            <updatePolicy>always</updatePolicy>
           </snapshots>
         </repository>
       </repositories>
@@ -37,12 +35,10 @@
           <releases>
             <enabled>true</enabled>
             <checksumPolicy>ignore</checksumPolicy>
-            <updatePolicy>never</updatePolicy>
           </releases>
           <snapshots>
             <enabled>true</enabled>
             <checksumPolicy>ignore</checksumPolicy>
-            <updatePolicy>always</updatePolicy>
           </snapshots>
         </pluginRepository>
       </pluginRepositories>
