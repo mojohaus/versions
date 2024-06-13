@@ -10,7 +10,7 @@ regarding copyright ownership.  The ASF licenses this file
 to you under the Apache License, Version 2.0 (the
 "License"); you may not use this file except in compliance
 with the License.  You may obtain a copy of the License at
-  https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -58,9 +58,10 @@ You can restrict the versions to be considered:
 mvn versions:update-parent "-DparentVersion=[14,16)"
 ```
 
-Note that, by default, -SNAPSHOT versions are ignored. You can force snapshots to be 
+Note that, by default, -SNAPSHOT versions are ignored. You can force snapshots to be
 included with the allowSnapshots parameter:
 
 ```shell
 mvn versions:update-parent -DallowSnapshots=true
 ```
+

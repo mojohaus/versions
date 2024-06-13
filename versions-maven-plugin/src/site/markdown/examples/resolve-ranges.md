@@ -10,7 +10,7 @@ regarding copyright ownership.  The ASF licenses this file
 to you under the Apache License, Version 2.0 (the
 "License"); you may not use this file except in compliance
 with the License.  You may obtain a copy of the License at
-  https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -49,12 +49,12 @@ A pom may specify version ranges for certain dependencies.
 
 Using the resolve-ranges goal, the version ranges can be set to the specific version
 used in the build.
-  
+
 ```sh
 mvn versions:resolve-ranges
 ```
 
-  The pom dependencies are modified to look like the following.
+The pom dependencies are modified to look like the following.
 
 ```xml
 <dependencies>
@@ -91,8 +91,8 @@ mvn versions:resolve-ranges -Dincludes=org.codehaus.plexus:plexus-utils
 The `includes` and `excludes` parameters follow the format `groupId:artifactId:type:classifier`.
 Use a comma separated separated list to specify multiple includes.  Wildcards (*) can also be used to match
 multiple values.
-  
-This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and 
+
+This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and
 artifactId matching "junit".
 
 ```sh
@@ -114,3 +114,4 @@ While this example will only process the `project/dependencies` section of your 
 ```sh
 mvn versions:resolve-ranges -DprocessDependencyManagement=false
 ```
+

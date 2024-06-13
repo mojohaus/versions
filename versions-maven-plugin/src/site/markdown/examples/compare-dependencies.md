@@ -10,7 +10,7 @@ regarding copyright ownership.  The ASF licenses this file
 to you under the Apache License, Version 2.0 (the
 "License"); you may not use this file except in compliance
 with the License.  You may obtain a copy of the License at
-  https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,9 +21,9 @@ under the License.
 
 # Compare dependency versions
 
-The `compare-dependencies` goal can be used to compare the dependencies in the current project to 
+The `compare-dependencies` goal can be used to compare the dependencies in the current project to
 the dependencyManagement of a remote project.  This is useful, for example, for finding differences
-between the current project dependencies and an organizational bill of materials (BOM) pom. 
+between the current project dependencies and an organizational bill of materials (BOM) pom.
 You specify the remote groupId, artifactId, and the version to which the current project
 should be compared, for example
 
@@ -31,7 +31,7 @@ should be compared, for example
 mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0
 ```
 
-By default the list of dependency differences will be output to the command line.  This can be 
+By default the list of dependency differences will be output to the command line.  This can be
 written to a file using the "reportOutputFile" parameter.
 
 ```sh
