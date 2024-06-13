@@ -172,12 +172,6 @@
           <settingsFile>src/it/settings.xml</settingsFile>
           <showErrors>true</showErrors>
           <streamLogs>true</streamLogs>
-          <!--
-            ! There seemed to be a problem with the indepance of the IT's
-            ! here. So we can't use more than one thread.
-            ! TODO: Dive more deeply into this problem.
-          -->
-          <parallelThreads>1</parallelThreads>
           <pomIncludes>
             <pomInclude>*/pom.xml</pomInclude>
           </pomIncludes>
