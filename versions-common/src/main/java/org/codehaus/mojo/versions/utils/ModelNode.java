@@ -91,7 +91,6 @@ public class ModelNode {
     }
 
     @Override
-    @SuppressWarnings("checkstyle:MagicNumber")
     public int hashCode() {
         return 13 * item.hashCode() + (parent == null ? 0 : 23 * parent.hashCode()) + 7 * pom.hashCode();
     }

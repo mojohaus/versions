@@ -30,7 +30,9 @@ import org.junit.Test;
 import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 
 /**
  * Unit tests for {@link DisplayPropertyUpdatesMojo}

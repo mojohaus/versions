@@ -26,7 +26,9 @@ import org.codehaus.mojo.versions.api.Segment;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.*;
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
 
 /**
  * Utility class for manipulating with {@link Segment} objects

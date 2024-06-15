@@ -21,7 +21,13 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -48,7 +54,9 @@ import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.codehaus.mojo.versions.filtering.DependencyFilter.filterDependencies;
-import static org.codehaus.mojo.versions.utils.MavenProjectUtils.*;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromDependencyManagement;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
+import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDependenciesFromPluginsInPluginManagement;
 
 /**
  * Displays all dependencies that have newer versions available.

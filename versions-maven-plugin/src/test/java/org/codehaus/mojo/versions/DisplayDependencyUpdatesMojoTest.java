@@ -39,9 +39,16 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.TYPE_REGEX;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.matches;
-import static org.codehaus.mojo.versions.utils.MockUtils.*;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * Basic tests for {@linkplain DisplayDependencyUpdatesMojo}.

@@ -210,7 +210,6 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
 
     @Test
     public void testIsClasspathUriDetectsClassPathProtocol() throws Exception {
-        DefaultVersionsHelper helper = createHelper();
         String uri = "classpath:/p/a/c/k/a/g/e/resource.res";
 
         assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(true));
@@ -218,7 +217,6 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
 
     @Test
     public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws Exception {
-        DefaultVersionsHelper helper = createHelper();
         String uri = "http://10.10.10.10/p/a/c/k/a/g/e/resource.res";
 
         assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(false));
