@@ -94,7 +94,6 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
             }
         };
         TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/simple"), tempDir);
-        TestChangeRecorder changeRecorder = new TestChangeRecorder();
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
         setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());

@@ -19,7 +19,12 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

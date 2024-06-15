@@ -28,16 +28,28 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.codehaus.mojo.versions.ordering.*;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
+import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
+import org.codehaus.mojo.versions.ordering.MercuryVersionComparator;
+import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.junit.Test;
 
 import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.*;
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
+import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.versions;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ArtifactVersionsTest {
 

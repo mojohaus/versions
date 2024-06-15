@@ -70,7 +70,6 @@ public final class DefaultPropertyVersionChange implements PropertyVersionChange
         return Objects.equals(newValue, versionChange.newValue);
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     public int hashCode() {
         int result = property != null ? property.hashCode() : 0;
         result = 7 * result + (oldValue != null ? oldValue.hashCode() : 0);

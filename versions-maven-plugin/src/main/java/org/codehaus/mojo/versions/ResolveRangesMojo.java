@@ -52,7 +52,9 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.*;
+import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
+import static org.codehaus.mojo.versions.api.Segment.MAJOR;
+import static org.codehaus.mojo.versions.api.Segment.MINOR;
 
 /**
  * Attempts to resolve dependency version ranges to the specific version being used in the build. For example a version
