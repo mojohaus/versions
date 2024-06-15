@@ -27,8 +27,8 @@ jobs:
       ff-goal: '-P run-its install'         # site use project version for reporting
       verify-goal: '-P run-its install'     # should be the same as for first build
 
-  deploy:
-    name: Deploy
-    needs: build
-    uses: mojohaus/.github/.github/workflows/maven-deploy.yml@master
-    secrets: inherit
+#  deploy:
+#    name: Deploy
+#    needs: build
+#    uses: mojohaus/.github/.github/workflows/maven-deploy.yml@master
+#    secrets: inherit
