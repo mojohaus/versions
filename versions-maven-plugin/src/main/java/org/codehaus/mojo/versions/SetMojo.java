@@ -65,7 +65,7 @@ import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Sets the current project's version and based on that change propagates that change onto any child modules as
