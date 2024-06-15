@@ -8,7 +8,7 @@ This is the [versions-maven-plugin](http://www.mojohaus.org/versions-maven-plugi
 
 ## Maintained versions
 
-Versions Maven Plugin requires Maven 3.2.5+ and JDK 1.8+
+Versions Maven Plugin requires Maven 3.6.3+ and JDK 1.8+
 
 However, we maintain the latest Plugin version with the latest Maven.
 
