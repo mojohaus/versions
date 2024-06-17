@@ -193,7 +193,7 @@
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>org.eclipse.sisu.plexus</artifactId>
         <!-- use the same version as in Maven core -->
-        <version>0.3.4</version>
+        <version>0.3.5</version>
         <scope>provided</scope>
       </dependency>
 
