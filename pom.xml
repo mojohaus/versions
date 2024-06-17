@@ -119,7 +119,7 @@
   </ciManagement>
 
   <properties>
-    <mavenVersion>3.6.3</mavenVersion>
+    <mavenVersion>3.9.8</mavenVersion>
     <doxiaVersion>1.12.0</doxiaVersion>
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <mockitoVersion>4.11.0</mockitoVersion>
