@@ -108,10 +108,6 @@ import static org.apache.maven.RepositoryUtils.toArtifact;
 public class DefaultVersionsHelper implements VersionsHelper {
     private static final String CLASSPATH_PROTOCOL = "classpath";
 
-    private static final String TYPE_EXACT = "exact";
-
-    private static final String TYPE_REGEX = "regex";
-
     private static final int LOOKUP_PARALLEL_THREADS = 5;
 
     /**
@@ -258,8 +254,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
         try {
             Collection<IgnoreVersion> ignoredVersions = getIgnoredVersions(artifact);
             if (!ignoredVersions.isEmpty() && getLog().isDebugEnabled()) {
-                getLog().debug("Found ignored versions: "
-                        + ignoredVersions.stream().map(IgnoreVersion::toString).collect(Collectors.joining(", ")));
+                getLog().debug("Found ignored versions: " + ignoredVersions + " for artifact" + artifact);
             }
 
             final List<RemoteRepository> repositories;
@@ -292,21 +287,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                             .getVersions()
                             .stream()
                             .filter(v -> ignoredVersions.stream().noneMatch(i -> {
-                                if (TYPE_REGEX.equals(i.getType())
-                                        && Pattern.compile(i.getVersion())
-                                                .matcher(v.toString())
-                                                .matches()) {
-                                    if (getLog().isDebugEnabled()) {
-                                        getLog().debug("Version " + v + " for artifact "
-                                                + ArtifactUtils.versionlessKey(artifact)
-                                                + " found on ignore list: "
-                                                + i);
-                                    }
-                                    return true;
-                                }
-
-                                if (TYPE_EXACT.equals(i.getType())
-                                        && i.getVersion().equals(v.toString())) {
+                                if (IgnoreVersionHelper.isVersionIgnored(v, i)) {
                                     if (getLog().isDebugEnabled()) {
                                         getLog().debug("Version " + v + " for artifact "
                                                 + ArtifactUtils.versionlessKey(artifact)
@@ -342,13 +323,12 @@ public class DefaultVersionsHelper implements VersionsHelper {
         final List<IgnoreVersion> ret = new ArrayList<>();
 
         for (final IgnoreVersion ignoreVersion : ruleSet.getIgnoreVersions()) {
-            if (!TYPE_EXACT.equals(ignoreVersion.getType()) && !TYPE_REGEX.equals(ignoreVersion.getType())) {
-                getLog().warn("The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion["
-                        + ignoreVersion + "] is not valid." + " Please use either '" + TYPE_EXACT + "' or '"
-                        + TYPE_REGEX
-                        + "'.");
-            } else {
+            if (IgnoreVersionHelper.isValidType(ignoreVersion)) {
                 ret.add(ignoreVersion);
+            } else {
+                getLog().warn("The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion["
+                        + ignoreVersion + "] is not valid. Please use one of '" + IgnoreVersionHelper.VALID_TYPES
+                        + "'.");
             }
         }
 
@@ -356,11 +336,11 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
         if (rule != null) {
             for (IgnoreVersion ignoreVersion : rule.getIgnoreVersions()) {
-                if (!TYPE_EXACT.equals(ignoreVersion.getType()) && !TYPE_REGEX.equals(ignoreVersion.getType())) {
-                    getLog().warn("The type attribute '" + ignoreVersion.getType() + "' for " + rule + " is not valid."
-                            + " Please use either '" + TYPE_EXACT + "' or '" + TYPE_REGEX + "'.");
-                } else {
+                if (IgnoreVersionHelper.isValidType(ignoreVersion)) {
                     ret.add(ignoreVersion);
+                } else {
+                    getLog().warn("The type attribute '" + ignoreVersion.getType() + "' for " + rule + " is not valid."
+                            + " Please use one of '" + IgnoreVersionHelper.VALID_TYPES + "'.");
                 }
             }
         }
@@ -789,7 +769,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                     .addAll(ignoredVersions.stream()
                             .map(v -> {
                                 IgnoreVersion ignoreVersion = new IgnoreVersion();
-                                ignoreVersion.setType(TYPE_REGEX);
+                                ignoreVersion.setType(IgnoreVersion.TYPE_REGEX);
                                 ignoreVersion.setVersion(v);
                                 return ignoreVersion;
                             })

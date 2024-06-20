@@ -207,14 +207,21 @@ under the License.
           <name>type</name>
           <version>2.0+</version>
           <type>String</type>
-          <description>The type of ignore mechanism to use. Allowed values are 'exact' and 'regex'.</description>
+          <description>The type of ignore mechanism to use. Allowed values are 'exact', 'regex' or 'range'.</description>
           <defaultValue>exact</defaultValue>
         </field>
       </fields>
       <codeSegments>
         <codeSegment>
           <version>2.0+</version>
-          <code><![CDATA[public String toString()
+          <code>
+            <![CDATA[
+    public static final String TYPE_EXACT = "exact";
+    public static final String TYPE_REGEX = "regex";
+    public static final String TYPE_RANGE = "range";
+
+    @Override
+    public String toString()
     {
         StringBuilder buf = new StringBuilder( 128 );
         buf.append( version );
@@ -222,7 +229,9 @@ under the License.
         buf.append( type );
         buf.append( ")" );
         return buf.toString();
-    }]]></code>
+    }
+        ]]>
+          </code>
         </codeSegment>
       </codeSegments>
     </class>

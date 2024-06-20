@@ -12,7 +12,13 @@
       <artifactId>dummy-api</artifactId>
       <version>1.1</version>
     </dependency>
+    <dependency>
+      <groupId>localhost</groupId>
+      <artifactId>dummy-impl</artifactId>
+      <version>1.0</version>
+    </dependency>
   </dependencies>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -27,6 +33,18 @@
                   <version>3.0</version>
                 </ignoreVersion>
               </ignoreVersions>
+              <rules>
+                <rule>
+                  <groupId>localhost</groupId>
+                  <artifactId>dummy-impl</artifactId>
+                  <ignoreVersions>
+                    <ignoreVersion>
+                      <type>range</type>
+                      <version>[2.0,)</version>
+                    </ignoreVersion>
+                  </ignoreVersions>
+                </rule>
+              </rules>
             </ruleSet>
           </configuration>
         </plugin>

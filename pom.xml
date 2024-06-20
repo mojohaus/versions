@@ -190,6 +190,12 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-util</artifactId>
+        <version>1.4.1</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>org.eclipse.sisu.plexus</artifactId>
         <!-- use the same version as in Maven core -->

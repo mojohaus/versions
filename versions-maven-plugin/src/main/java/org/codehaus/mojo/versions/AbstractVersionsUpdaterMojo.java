@@ -169,7 +169,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * <p>Allows specifying the {@linkplain RuleSet} object describing rules
      * on artifact versions to ignore when considering updates.</p>
      *
-     * @see <a href="https://www.mojohaus.org/versions-maven-plugin/version-rules.html#Using_the_ruleSet_element_in_the_POM">
+     * @see <a href="https://www.mojohaus.org/versions/versions-maven-plugin/version-rules.html#Using_the_ruleSet_element_in_the_POM">
      *     Using the ruleSet element in the POM</a>
      *
      * @since 2.13.0
