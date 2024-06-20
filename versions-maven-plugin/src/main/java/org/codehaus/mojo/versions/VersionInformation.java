@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 /**
  * This class will parse the version based on the given pattern in
- * {@link org.codehaus.mojo.buildhelper.ParseVersionMojo}.
+ * {@code  org.codehaus.mojo.buildhelper.ParseVersionMojo}.
  *
  * @author Karl Heinz Marbaise
  * <a href="mailto:khmarbaise@apache.org">khmarbaise@apache.org</a>
