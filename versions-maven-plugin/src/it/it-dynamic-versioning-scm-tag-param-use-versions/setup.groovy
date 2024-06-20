@@ -9,5 +9,8 @@ def testFile = new File(basedir, 'test.txt')
 testFile << 'content'
 
 exec('git init')
+exec('git config user.email "you@example.com"')
+exec('git config user.name "Your Name"')
+
 exec('git add test.txt')
 exec('git commit -m initial-commit')
