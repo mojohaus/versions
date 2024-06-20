@@ -55,14 +55,14 @@ The `versions-maven-plugin` knows three rules for comparing version numbers:
 The `versions-maven-plugin` will assume that all version numbers follow the `maven` scheme unless you tell
 it otherwise.
 
-Rules.xml
+rules.xml
 ---------
 
 To specify the version schemes to use, you may define a [rule-set xml file](../versions-model/rule.html), use the `ruleSet`
 element in the `versions-maven-plugin` plugin configuration, or specify ignored versions via
 the `maven.version.ignore` property.
 
-$h3 Using the `Rules.xml` file
+$h3 Using the `rules.xml` file
 
 The `rules.xml` file should conform to the xsd specified in the example below.
 
@@ -113,7 +113,7 @@ the `rules.xml` file:
                 <version>1.0.0</version>
               </ignoreVersion>
               <ignoreVersion>
-                <!-- can be either: 'exact' (default) or 'regex' -->
+                <!-- can be either: 'exact' (default), 'regex' or 'range' -->
                 <type>regex</type>
                 <version>(.+-SNAPSHOT|.+-M\d)</version>
               </ignoreVersion>
@@ -121,7 +121,11 @@ the `rules.xml` file:
                 <type>regex</type>
                 <version>.+-(alpha|beta)</version>
               </ignoreVersion>
-          </ignoreVersions>
+              <ignoreVersion>
+                <type>range</type>
+                <version>[2.0,)</version>
+              </ignoreVersion>
+            </ignoreVersions>
 
           <!-- zero or more elements -->
           <rules>
@@ -164,8 +168,8 @@ explained above. The described
 
 ```xml
 <ruleset comparisonMethod="maven"
-         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 https://www.mojohaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+         xmlns="https://www.mojohaus.org/VERSIONS/RULE/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://www.mojohaus.org/VERSIONS/RULE/2.1.0 https://www.mojohaus.org/versions/versions-model/xsd/rule-2.1.0.xsd">
   <ignoreVersions>
     <ignoreVersion type="regex">.*-beta</ignoreVersion>
   </ignoreVersions>
@@ -173,6 +177,7 @@ explained above. The described
     <rule groupId="com.mycompany.maven" comparisonMethod="maven">
       <ignoreVersions>
         <ignoreVersion type="regex">.*-RELEASE</ignoreVersion>
+        <ignoreVersion type="range">[2.0.0,)</ignoreVersion>
         <ignoreVersion>2.1.0</ignoreVersion>
       </ignoreVersions>
     </rule>
@@ -182,7 +187,7 @@ explained above. The described
 
 Note: it is possible to ignore versions using regular expressions.
 
-If you have your ruleset xml file hosted at, for example, http://www.mycompany.com/maven-version-rules.xml
+If you have your ruleset xml file hosted at, for example, `http://www.mycompany.com/maven-version-rules.xml`
 then the following configuration in your corporate pom would ensure that all projects use this rule set.
 
 ```xml

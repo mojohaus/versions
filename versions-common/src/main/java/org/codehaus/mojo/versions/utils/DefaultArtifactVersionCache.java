@@ -28,7 +28,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
  * Simple cache for {@link org.apache.maven.artifact.versioning.ArtifactVersion}
  */
 public class DefaultArtifactVersionCache {
-    private static final int MAX_CACHE_SIZE = 0x200;
+    private static final int MAX_CACHE_SIZE = 512;
     private static final Map<String, DefaultArtifactVersion> CACHE = new LRUMap<>(MAX_CACHE_SIZE);
     private static final ReentrantReadWriteLock CACHE_LOCK = new ReentrantReadWriteLock();
 
