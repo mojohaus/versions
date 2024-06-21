@@ -110,6 +110,11 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
     private static final int LOOKUP_PARALLEL_THREADS = 5;
 
+    // for testing purpose
+    RuleSet getRuleSet() {
+        return ruleSet;
+    }
+
     /**
      * The artifact comparison rules to use.
      *

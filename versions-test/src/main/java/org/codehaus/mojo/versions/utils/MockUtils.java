@@ -38,6 +38,8 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.Version;
 
 import static java.util.Collections.emptyList;
@@ -108,12 +110,20 @@ public class MockUtils {
                                         e.getKey().equals(request.getArtifact().getArtifactId()))
                                 .findAny()
                                 .map(e -> Arrays.stream(e.getValue())
-                                        .map(VersionStub::new)
+                                        .map(MockUtils::parseVersion)
                                         .collect(() -> new ArrayList<Version>(), ArrayList::add, ArrayList::addAll))
                                 .map(versions -> new VersionRangeResult(request).setVersions(versions))
                                 .orElse(null); // should tell us if we haven't populated all cases in the test
                     });
         } catch (VersionRangeResolutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Version parseVersion(String version) {
+        try {
+            return new GenericVersionScheme().parseVersion(version);
+        } catch (InvalidVersionSpecificationException e) {
             throw new RuntimeException(e);
         }
     }

@@ -22,17 +22,16 @@ package org.codehaus.mojo.versions.rewriting;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
 import java.io.StringReader;
+import java.lang.reflect.Field;
 
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -44,8 +43,8 @@ import static org.mockito.Mockito.when;
  *
  * @author Andrzej Jarmoniuk
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ModifiedPomXMLEventReaderTest extends AbstractMojoTestCase {
+@ExtendWith(MockitoExtension.class)
+class ModifiedPomXMLEventReaderTest {
     private static final String[] STR = {"xyz", "0123456789abcdef"};
     private static final String REPLACEMENT = "abcdef";
 
@@ -63,9 +62,8 @@ public class ModifiedPomXMLEventReaderTest extends AbstractMojoTestCase {
 
     private ModifiedPomXMLEventReader pomXMLEventReader;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    void setUp() throws Exception {
 
         when(location.getCharacterOffset()).thenReturn(STR[0].length()).thenReturn(STR[0].length() + STR[1].length());
 
@@ -88,7 +86,7 @@ public class ModifiedPomXMLEventReaderTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testReplace() throws XMLStreamException, IllegalAccessException {
+    void testReplace() throws Exception {
         assertThat(pomXMLEventReader.hasNext(), is(true));
         assertThat(pomXMLEventReader.nextEvent(), is(xmlEvent));
 
@@ -102,11 +100,13 @@ public class ModifiedPomXMLEventReaderTest extends AbstractMojoTestCase {
         assertThat(pomXMLEventReader.getMarkVerbatim(0), is(REPLACEMENT));
 
         // more dangerous test since this touches the implementation
-        assertThat(getVariableValueFromObject(pomXMLEventReader, "lastEnd"), is((STR[0] + REPLACEMENT).length()));
+        Field field = pomXMLEventReader.getClass().getDeclaredField("lastEnd");
+        field.setAccessible(true);
+        assertThat(field.getInt(pomXMLEventReader), is((STR[0] + REPLACEMENT).length()));
     }
 
     @Test
-    public void testReplaceMark() throws XMLStreamException, IllegalAccessException {
+    void testReplaceMark() throws Exception {
         assertThat(pomXMLEventReader.hasNext(), is(true));
         assertThat(pomXMLEventReader.nextEvent(), is(xmlEvent));
 
@@ -122,6 +122,9 @@ public class ModifiedPomXMLEventReaderTest extends AbstractMojoTestCase {
         assertThat(pomXMLEventReader.getMarkVerbatim(0), is(REPLACEMENT));
 
         // more dangerous test since this touches the implementation
-        assertThat(getVariableValueFromObject(pomXMLEventReader, "lastEnd"), is((STR[0] + REPLACEMENT).length()));
+        Field field = pomXMLEventReader.getClass().getDeclaredField("lastEnd");
+        field.setAccessible(true);
+
+        assertThat(field.getInt(pomXMLEventReader), is((STR[0] + REPLACEMENT).length()));
     }
 }

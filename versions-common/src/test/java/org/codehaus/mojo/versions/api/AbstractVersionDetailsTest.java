@@ -21,8 +21,8 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -30,17 +30,17 @@ import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit tests for {@link AbstractVersionDetails}
  */
-public class AbstractVersionDetailsTest {
+class AbstractVersionDetailsTest {
 
     private AbstractVersionDetails instance;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         instance = new AbstractVersionDetails() {
             @Override
             public VersionComparator getVersionComparator() {
@@ -55,7 +55,7 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testRestrictionForUnchangedSegmentWithSimpleVersion() throws InvalidSegmentException {
+    void testRestrictionForUnchangedSegmentWithSimpleVersion() throws InvalidSegmentException {
         assertThat(
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
                         .containsVersion(version("1.0.0")),
@@ -75,7 +75,7 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testRestrictionForUnchangedSegmentWithRange()
+    void testRestrictionForUnchangedSegmentWithRange()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0]"));
         assertThat(
@@ -97,7 +97,7 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testRestrictionForUnchangedSegmentWithTwoRanges()
+    void testRestrictionForUnchangedSegmentWithTwoRanges()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0],(1.0.0,2.0.0]"));
         assertThat(
@@ -119,7 +119,7 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges1()
+    void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges1()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0),(1.0.0,2.0.0]"));
         assertThat(
@@ -129,7 +129,7 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges2()
+    void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges2()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0),(1.0.0,2.0.0]"));
         assertThat(
@@ -139,7 +139,7 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges3()
+    void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges3()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0),(1.0.0,2.0.0]"));
         assertThat(
@@ -149,7 +149,7 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges4()
+    void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges4()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0),(1.0.0,2.0.0]"));
         assertThat(
@@ -159,7 +159,7 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testRestrictionForUnchangedSegmentWithoutVersionInformation()
+    void testRestrictionForUnchangedSegmentWithoutVersionInformation()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("[,0]"));
         assertThat(
@@ -168,13 +168,8 @@ public class AbstractVersionDetailsTest {
     }
 
     @Test
-    public void testGetSelectedRestrictionForNoVersion()
-            throws InvalidVersionSpecificationException, InvalidSegmentException {
+    void testGetSelectedRestrictionForNoVersion() throws InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("[,0]"));
-        try {
-            instance.getSelectedRestriction(null);
-            fail("Expected a NullPointerException to be thrown or assertions are not enabled.");
-        } catch (AssertionError ignored) {
-        }
+        assertThrows(NullPointerException.class, () -> instance.getSelectedRestriction(null));
     }
 }

@@ -31,14 +31,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.ConnectionException;
@@ -53,15 +52,16 @@ import org.codehaus.mojo.versions.model.IgnoreVersion;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
-import org.codehaus.mojo.versions.utils.VersionStub;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.Version;
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
@@ -74,6 +74,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
@@ -84,7 +87,7 @@ import static org.mockito.Mockito.when;
 /**
  * Test {@link DefaultVersionsHelper}
  */
-public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
+class DefaultVersionsHelperTest {
     @Test
     public void testPerRuleVersionsIgnored() throws Exception {
         final org.eclipse.aether.RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
@@ -92,15 +95,15 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
         when(artifact.getGroupId()).thenReturn("com.mycompany.maven");
         when(artifact.getArtifactId()).thenReturn("artifact-one");
         when(artifact.getType()).thenReturn("jar");
-        when(artifact.getArtifactHandler()).thenReturn(new DefaultArtifactHandlerStub("default"));
+        when(artifact.getArtifactHandler()).thenReturn(new DefaultArtifactHandler("default"));
         when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
                 .then(i -> new VersionRangeResult(i.getArgument(1))
                         .setVersions(Arrays.asList(
-                                new VersionStub("one"),
-                                new VersionStub("two"),
-                                new VersionStub("three"),
-                                new VersionStub("1.200"),
-                                new VersionStub("illegalVersion"))));
+                                parseVersion("one"),
+                                parseVersion("two"),
+                                parseVersion("three"),
+                                parseVersion("1.200"),
+                                parseVersion("illegalVersion"))));
 
         VersionsHelper helper = createHelper(repositorySystem);
 
@@ -121,19 +124,19 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
         when(artifact.getGroupId()).thenReturn("other.company");
         when(artifact.getArtifactId()).thenReturn("artifact-two");
         when(artifact.getType()).thenReturn("jar");
-        when(artifact.getArtifactHandler()).thenReturn(new DefaultArtifactHandlerStub("default"));
+        when(artifact.getArtifactHandler()).thenReturn(new DefaultArtifactHandler("default"));
 
         final List<Version> artifactVersions = new ArrayList<>();
 
-        final Version one = new VersionStub("one");
-        final Version two = new VersionStub("two");
-        final Version three = new VersionStub("three");
+        final Version one = parseVersion("one");
+        final Version two = parseVersion("two");
+        final Version three = parseVersion("three");
         artifactVersions.add(one);
         artifactVersions.add(two);
-        artifactVersions.add(new VersionStub("three-alpha"));
-        artifactVersions.add(new VersionStub("three-beta"));
+        artifactVersions.add(parseVersion("three-alpha"));
+        artifactVersions.add(parseVersion("three-beta"));
         artifactVersions.add(three);
-        final Version illegal = new VersionStub("illegalVersion");
+        final Version illegal = parseVersion("illegalVersion");
         artifactVersions.add(illegal);
 
         when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
@@ -145,7 +148,7 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
 
         final List<Version> actual = Arrays.stream(versions.getVersions(true))
                 .map(ArtifactVersion::toString)
-                .map(VersionStub::new)
+                .map(DefaultVersionsHelperTest::parseVersion)
                 .collect(Collectors.toList());
 
         assertEquals(4, actual.size());
@@ -166,21 +169,21 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
         VersionsHelper helper = createHelper();
 
         assertEquals(
-                "no match gives default",
                 VersionComparators.getVersionComparator("maven"),
-                helper.getVersionComparator("net.foo", "bar"));
+                helper.getVersionComparator("net.foo", "bar"),
+                "no match gives default");
         assertEquals(
-                "matches wildcard",
                 VersionComparators.getVersionComparator("mercury"),
-                helper.getVersionComparator("org.apache.maven", "plugins"));
+                helper.getVersionComparator("org.apache.maven", "plugins"),
+                "matches wildcard");
         assertEquals(
-                "exact match wins over initial match",
                 VersionComparators.getVersionComparator("mercury"),
-                helper.getVersionComparator("com.mycompany.custom.maven", "plugins"));
+                helper.getVersionComparator("com.mycompany.custom.maven", "plugins"),
+                "exact match wins over initial match");
         assertEquals(
-                "non-wildcard prefix wins over wildcard prefix match",
                 VersionComparators.getVersionComparator("maven"),
-                helper.getVersionComparator("com.mycompany.maven.plugins", "plugins"));
+                helper.getVersionComparator("com.mycompany.maven.plugins", "plugins"),
+                "non-wildcard prefix wins over wildcard prefix match");
         assertEquals(
                 VersionComparators.getVersionComparator("maven"),
                 helper.getVersionComparator("com.mycompany.maven", "new-maven-plugin"));
@@ -190,7 +193,7 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testMVERSIONS159ExcludedAndNotIncluded() throws Exception {
+    void testMVERSIONS159ExcludedAndNotIncluded() throws Exception {
         VersionsHelper helper = createHelper();
         MavenProject project = null;
 
@@ -209,14 +212,14 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testIsClasspathUriDetectsClassPathProtocol() throws Exception {
+    void testIsClasspathUriDetectsClassPathProtocol() throws Exception {
         String uri = "classpath:/p/a/c/k/a/g/e/resource.res";
 
         assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(true));
     }
 
     @Test
-    public void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws Exception {
+    void testIsClasspathUriDetectsThatItIsDifferentProtocol() throws Exception {
         String uri = "http://10.10.10.10/p/a/c/k/a/g/e/resource.res";
 
         assertThat(DefaultVersionsHelper.isClasspathUri(uri), CoreMatchers.is(false));
@@ -258,7 +261,7 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
         when(mavenSession.getRepositorySession()).thenReturn(new DefaultRepositorySystemSession());
 
         return new DefaultVersionsHelper.Builder()
-                .withRepositorySystem(lookup(RepositorySystem.class))
+                .withRepositorySystem(mock(RepositorySystem.class))
                 .withAetherRepositorySystem(aetherRepositorySystem)
                 .withWagonMap(singletonMap("file", mockFileWagon(new URI(rulesUri))))
                 .withServerId("")
@@ -270,13 +273,12 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testIgnoredVersionsShouldBeTheOnlyPresentInAnEmptyRuleSet()
-            throws MojoExecutionException, IllegalAccessException {
+    void testIgnoredVersionsShouldBeTheOnlyPresentInAnEmptyRuleSet() throws MojoExecutionException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
                 .withLog(new SystemStreamLog())
                 .withIgnoredVersions(Arrays.asList(".*-M.", ".*-SNAPSHOT"))
                 .build();
-        RuleSet ruleSet = (RuleSet) getVariableValueFromObject(versionsHelper, "ruleSet");
+        RuleSet ruleSet = versionsHelper.getRuleSet();
         assertThat(ruleSet.getIgnoreVersions(), hasSize(2));
         assertThat(
                 ruleSet.getIgnoreVersions().stream()
@@ -286,17 +288,17 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testDefaultsShouldBePresentInAnEmptyRuleSet() throws MojoExecutionException, IllegalAccessException {
+    void testDefaultsShouldBePresentInAnEmptyRuleSet() throws MojoExecutionException, IllegalAccessException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
                 .withLog(new SystemStreamLog())
                 .withIgnoredVersions(singletonList(".*-M."))
                 .build();
-        RuleSet ruleSet = (RuleSet) getVariableValueFromObject(versionsHelper, "ruleSet");
+        RuleSet ruleSet = versionsHelper.getRuleSet();
         assertThat(ruleSet.getComparisonMethod(), is("maven"));
     }
 
     @Test
-    public void testIgnoredVersionsShouldExtendTheRuleSet() throws MojoExecutionException, IllegalAccessException {
+    void testIgnoredVersionsShouldExtendTheRuleSet() throws MojoExecutionException, IllegalAccessException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
                 .withLog(new SystemStreamLog())
                 .withRuleSet(new RuleSet() {
@@ -322,7 +324,7 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
                 })
                 .withIgnoredVersions(Arrays.asList(".*-M.", ".*-SNAPSHOT"))
                 .build();
-        RuleSet ruleSet = (RuleSet) getVariableValueFromObject(versionsHelper, "ruleSet");
+        RuleSet ruleSet = versionsHelper.getRuleSet();
         assertThat(ruleSet.getIgnoreVersions(), hasSize(3));
         assertThat(
                 ruleSet.getIgnoreVersions().stream()
@@ -332,7 +334,7 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testRemoteRepositoryWithNeverUpdatePolicyShouldBeChangToDaily() {
+    void testRemoteRepositoryWithNeverUpdatePolicyShouldBeChangToDaily() {
 
         RemoteRepository repo1 = new RemoteRepository.Builder("id1", "", "")
                 .setSnapshotPolicy(new RepositoryPolicy(
@@ -376,5 +378,13 @@ public class DefaultVersionsHelperTest extends AbstractMojoTestCase {
         assertThat(
                 remoteRepositories.get(1).getPolicy(false).getUpdatePolicy(),
                 equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
+    }
+
+    private static Version parseVersion(String version) {
+        try {
+            return new GenericVersionScheme().parseVersion(version);
+        } catch (InvalidVersionSpecificationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
