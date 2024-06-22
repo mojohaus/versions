@@ -20,16 +20,17 @@ import javax.xml.stream.XMLStreamException;
 import java.util.Collections;
 import java.util.HashMap;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.eclipse.aether.RepositorySystem;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,8 +41,8 @@ import static java.util.Collections.singletonList;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -59,15 +60,14 @@ public class UseNextVersionsMojoTest {
 
     @Before
     public void setUp() throws Exception {
-        RepositorySystem repositorySystemMock = mockRepositorySystem();
-        org.eclipse.aether.RepositorySystem aetherRepositorySystem =
-                mockAetherRepositorySystem(new HashMap<String, String[]>() {
-                    {
-                        put("dependency-artifact", new String[] {"1.0.0", "1.1.0-SNAPSHOT"});
-                    }
-                });
+        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
+        RepositorySystem repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("dependency-artifact", new String[] {"1.0.0", "1.1.0-SNAPSHOT"});
+            }
+        });
         changeRecorder = new TestChangeRecorder();
-        mojo = new UseNextVersionsMojo(repositorySystemMock, aetherRepositorySystem, null, changeRecorder.asTestMap()) {
+        mojo = new UseNextVersionsMojo(artifactHandlerManager, repositorySystem, null, changeRecorder.asTestMap()) {
             {
                 reactorProjects = emptyList();
                 session = mockMavenSession();
@@ -113,12 +113,11 @@ public class UseNextVersionsMojoTest {
 
     @Test
     public void testFindANewerVersion() throws IllegalAccessException {
-        setVariableValueToObject(
-                mojo, "aetherRepositorySystem", mockAetherRepositorySystem(new HashMap<String, String[]>() {
-                    {
-                        put("dependency-artifact", new String[] {"1.0.0", "1.1.0-SNAPSHOT", "1.1.1", "2.0.0"});
-                    }
-                }));
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("dependency-artifact", new String[] {"1.0.0", "1.1.0-SNAPSHOT", "1.1.1", "2.0.0"});
+            }
+        }));
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
                     .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
@@ -139,7 +138,7 @@ public class UseNextVersionsMojoTest {
     @Test
     public void testAllowDowngrade()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("artifactA", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
             }
@@ -172,7 +171,7 @@ public class UseNextVersionsMojoTest {
     @Test
     public void testDisallowDowngrade()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("artifactA", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
             }

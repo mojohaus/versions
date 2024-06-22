@@ -24,16 +24,17 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Map;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Sets a property to the latest version in a given range of associated artifacts.
@@ -72,11 +73,11 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
 
     @Inject
     public UpdatePropertyMojo(
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
-        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
+        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
     }
 
     /**

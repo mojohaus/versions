@@ -79,8 +79,8 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase {
         copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/null-new-version"), pomDir);
         SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(pomDir.toFile(), "set-property");
 
-        mojo.aetherRepositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
-        when(mojo.aetherRepositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+        mojo.repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        when(mojo.repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
                 .then(i -> new VersionRangeResult(i.getArgument(1)));
 
         setVariableValueToObject(mojo, "newVersion", null);
@@ -98,8 +98,8 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase {
         copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/null-new-version"), pomDir);
         SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(pomDir.toFile(), "set-property");
 
-        mojo.aetherRepositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
-        when(mojo.aetherRepositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+        mojo.repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        when(mojo.repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
                 .then(i -> new VersionRangeResult(i.getArgument(1)));
 
         setVariableValueToObject(mojo, "newVersion", "");
@@ -184,8 +184,8 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase {
         copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/profiled-new-version"), pomDir);
         SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(pomDir.toFile(), "set-property");
 
-        mojo.aetherRepositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
-        when(mojo.aetherRepositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+        mojo.repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        when(mojo.repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
                 .then(i -> new VersionRangeResult(i.getArgument(1)));
 
         setVariableValueToObject(mojo, "newVersion", newVersion);

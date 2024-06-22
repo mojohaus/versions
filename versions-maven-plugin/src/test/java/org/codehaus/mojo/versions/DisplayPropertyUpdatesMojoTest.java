@@ -70,7 +70,7 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem();
+        mojo.repositorySystem = mockAetherRepositorySystem();
         mojo.includeParent = true;
         mojo.execute();
 
@@ -88,7 +88,7 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem();
+        mojo.repositorySystem = mockAetherRepositorySystem();
         mojo.includeParent = false;
         mojo.execute();
 
@@ -105,7 +105,7 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("artifactA", new String[] {availableVersion, "2"});
             }

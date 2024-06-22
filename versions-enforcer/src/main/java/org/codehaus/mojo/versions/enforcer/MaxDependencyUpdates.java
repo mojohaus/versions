@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.enforcer.rule.api.AbstractEnforcerRule;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleError;
@@ -38,7 +39,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
@@ -47,6 +47,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -256,9 +257,9 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
 
     private final MavenProject project;
 
-    private final RepositorySystem repositorySystem;
+    private final ArtifactHandlerManager artifactHandlerManager;
 
-    private final org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+    private final RepositorySystem repositorySystem;
 
     private final Map<String, Wagon> wagonMap;
 
@@ -269,14 +270,14 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
     @Inject
     public MaxDependencyUpdates(
             MavenProject project,
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             MavenSession mavenSession,
             MojoExecution mojoExecution) {
         this.project = project;
+        this.artifactHandlerManager = artifactHandlerManager;
         this.repositorySystem = repositorySystem;
-        this.aetherRepositorySystem = aetherRepositorySystem;
         this.wagonMap = wagonMap;
         this.mavenSession = mavenSession;
         this.mojoExecution = mojoExecution;
@@ -290,8 +291,8 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
             throws EnforcerRuleError {
         try {
             return new DefaultVersionsHelper.Builder()
+                    .withArtifactHandlerManager(artifactHandlerManager)
                     .withRepositorySystem(repositorySystem)
-                    .withAetherRepositorySystem(aetherRepositorySystem)
                     .withWagonMap(wagonMap)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)

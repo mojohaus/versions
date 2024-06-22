@@ -39,9 +39,9 @@ import org.codehaus.plexus.i18n.I18N;
 import org.junit.Test;
 
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -60,7 +60,7 @@ public class ParentUpdatesReportMojoTest {
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new ParentUpdatesReportMojo(
                 MOCK_I18N,
-                mockRepositorySystem(),
+                mockArtifactHandlerManager(),
                 mockAetherRepositorySystem(new HashMap<String, String[]>() {
                     {
                         put("default-artifact", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT"});

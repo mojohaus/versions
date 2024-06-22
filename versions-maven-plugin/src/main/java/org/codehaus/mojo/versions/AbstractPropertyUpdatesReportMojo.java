@@ -25,12 +25,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
@@ -40,6 +40,7 @@ import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
 import org.codehaus.mojo.versions.xml.PropertyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
@@ -99,11 +100,11 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
 
     public AbstractPropertyUpdatesReportMojo(
             I18N i18n,
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
-        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactHandlerManager, repositorySystem, wagonMap, rendererFactory);
     }
 
     /**

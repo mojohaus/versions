@@ -22,15 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.doxia.tools.SiteTool;
 import org.apache.maven.doxia.tools.SiteToolException;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.i18n.I18N;
+import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
@@ -62,20 +61,22 @@ public class MockUtils {
 
     /**
      * Creates a mocked  {@linkplain org.eclipse.aether.RepositorySystem}, providing the default version set
+     *
      * @return mocked {@linkplain org.eclipse.aether.RepositorySystem}
      */
-    public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem() {
+    public static RepositorySystem mockAetherRepositorySystem() {
         return mockAetherRepositorySystem(DEFAULT_VERSION_MAP);
     }
 
     /**
      * Creates a mocked  {@linkplain org.eclipse.aether.RepositorySystem}, providing the version map given in
      * the argument.
+     *
      * @param versionMap requested version map
      * @return mocked {@linkplain org.eclipse.aether.RepositorySystem}
      */
-    public static org.eclipse.aether.RepositorySystem mockAetherRepositorySystem(Map<String, String[]> versionMap) {
-        org.eclipse.aether.RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+    public static RepositorySystem mockAetherRepositorySystem(Map<String, String[]> versionMap) {
+        RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
         prepareAetherRepositorySystemMockForVersionRange(repositorySystem, versionMap);
 
         try {
@@ -100,7 +101,7 @@ public class MockUtils {
     }
 
     public static void prepareAetherRepositorySystemMockForVersionRange(
-            org.eclipse.aether.RepositorySystem repositorySystem, Map<String, String[]> versionMap) {
+            RepositorySystem repositorySystem, Map<String, String[]> versionMap) {
         try {
             when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
                     .then(invocation -> {
@@ -146,29 +147,23 @@ public class MockUtils {
         return siteTool;
     }
 
-    public static RepositorySystem mockRepositorySystem() {
-        RepositorySystem repositorySystem = mock(RepositorySystem.class);
-        prepareRepositorySystemMock(repositorySystem);
-        return repositorySystem;
-    }
-
-    public static void prepareRepositorySystemMock(RepositorySystem repositorySystem) {
-        when(repositorySystem.createDependencyArtifact(any(Dependency.class))).thenAnswer(invocation -> {
-            Dependency dependency = invocation.getArgument(0);
-            return new DefaultArtifact(
-                    dependency.getGroupId(),
-                    dependency.getArtifactId(),
-                    dependency.getVersion(),
-                    dependency.getScope(),
-                    dependency.getType(),
-                    dependency.getClassifier(),
-                    new DefaultArtifactHandlerStub("default"));
+    public static ArtifactHandlerManager mockArtifactHandlerManager() {
+        ArtifactHandlerManager artifactHandlerManager = mock(ArtifactHandlerManager.class);
+        when(artifactHandlerManager.getArtifactHandler(anyString())).thenAnswer(i -> {
+            String type = i.getArgument(0);
+            DefaultArtifactHandler artifactHandler = new DefaultArtifactHandler(type);
+            if (type.equals("maven-plugin")) {
+                artifactHandler.setExtension("jar");
+            }
+            return artifactHandler;
         });
+        return artifactHandlerManager;
     }
 
     /**
      * Creates a very simple mock of {@link MavenSession}
      * by providing only a non-{@code null} implementation of its {@link MavenSession#getRepositorySession()} method.
+     *
      * @return mocked {@link MavenSession}
      */
     public static MavenSession mockMavenSession() {
@@ -181,6 +176,7 @@ public class MockUtils {
     /**
      * Creates a very simple mock of {@link MavenSession}
      * by providing only a non-{@code null} implementation of its {@link MavenSession#getRepositorySession()} method.
+     *
      * @param project {@link MavenProject} to link to
      * @return mocked {@link MavenSession}
      */

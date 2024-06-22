@@ -40,8 +40,8 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -59,7 +59,7 @@ public class DisplayExtensionUpdatesMojoTest {
 
     @Before
     public void setUp() throws IllegalAccessException, IOException {
-        mojo = new DisplayExtensionUpdatesMojo(mockRepositorySystem(), mockAetherRepositorySystem(), null, null);
+        mojo = new DisplayExtensionUpdatesMojo(mockArtifactHandlerManager(), mockAetherRepositorySystem(), null, null);
         mojo.project = new MavenProject() {
             {
                 setModel(new Model() {

@@ -30,10 +30,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Abstract base class for the Display___ mojos.
@@ -83,11 +84,11 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
 
     @Inject
     protected AbstractVersionsDisplayMojo(
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
-        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
+        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
     }
 
     @SuppressWarnings("unchecked")

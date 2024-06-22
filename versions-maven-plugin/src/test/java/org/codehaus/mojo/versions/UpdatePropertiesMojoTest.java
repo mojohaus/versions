@@ -97,7 +97,7 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
         TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/update-properties/issue-929"), pomDir);
         UpdatePropertiesMojo mojo = setUpMojo("update-properties");
         mojo.allowMajorUpdates = false;
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("artifactA", new String[] {"6.2.5.Final", "8.0.0.Final"});
             }

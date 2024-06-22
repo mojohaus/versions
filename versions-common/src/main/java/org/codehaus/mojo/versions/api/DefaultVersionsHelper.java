@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -51,6 +52,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -63,7 +66,6 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.observers.Debug;
@@ -75,7 +77,6 @@ import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
-import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.utils.RegexUtils;
@@ -84,6 +85,7 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.repository.AuthenticationContext;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
@@ -122,9 +124,9 @@ public class DefaultVersionsHelper implements VersionsHelper {
      */
     private RuleSet ruleSet;
 
-    private final RepositorySystem repositorySystem;
+    private final ArtifactHandlerManager artifactHandlerManager;
 
-    private final org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+    private final RepositorySystem repositorySystem;
 
     /**
      * The {@link Log} to send log messages to.
@@ -160,13 +162,13 @@ public class DefaultVersionsHelper implements VersionsHelper {
      * Private constructor used by the builder
      */
     private DefaultVersionsHelper(
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             MavenSession mavenSession,
             MojoExecution mojoExecution,
             Log log) {
+        this.artifactHandlerManager = artifactHandlerManager;
         this.repositorySystem = repositorySystem;
-        this.aetherRepositorySystem = aetherRepositorySystem;
         this.mavenSession = mavenSession;
         this.mojoExecution = mojoExecution;
         this.log = log;
@@ -276,7 +278,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
             return new ArtifactVersions(
                     artifact,
-                    aetherRepositorySystem
+                    repositorySystem
                             .resolveVersionRange(
                                     mavenSession.getRepositorySession(),
                                     new VersionRangeRequest(
@@ -356,7 +358,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
     @Override
     public void resolveArtifact(Artifact artifact, boolean usePluginRepositories) throws ArtifactResolutionException {
         try {
-            ArtifactResult artifactResult = aetherRepositorySystem.resolveArtifact(
+            ArtifactResult artifactResult = repositorySystem.resolveArtifact(
                     mavenSession.getRepositorySession(),
                     new ArtifactRequest(
                             toArtifact(artifact),
@@ -445,11 +447,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
     @Override
     public Artifact createPluginArtifact(String groupId, String artifactId, String version) {
-        Plugin plugin = new Plugin();
-        plugin.setGroupId(groupId);
-        plugin.setArtifactId(artifactId);
-        plugin.setVersion(StringUtils.isNotBlank(version) ? version : "[0,]");
-        return repositorySystem.createPluginArtifact(plugin);
+        return createDependencyArtifact(groupId, artifactId, version, "maven-plugin", null, "runtime", false);
     }
 
     @Override
@@ -461,31 +459,37 @@ public class DefaultVersionsHelper implements VersionsHelper {
             String classifier,
             String scope,
             boolean optional) {
-        return repositorySystem.createDependencyArtifact(DependencyBuilder.newBuilder()
-                .withGroupId(groupId)
-                .withArtifactId(artifactId)
-                .withType(type)
-                .withClassifier(classifier)
-                .withScope(scope)
-                .withOptional(optional)
-                .withVersion(StringUtils.isNotBlank(version) ? version : "[0,]")
-                .build());
-    }
-
-    @Override
-    public Artifact createDependencyArtifact(
-            String groupId, String artifactId, String version, String type, String classifier, String scope) {
-        return createDependencyArtifact(groupId, artifactId, version, type, classifier, scope, false);
+        try {
+            return new DefaultArtifact(
+                    groupId,
+                    artifactId,
+                    VersionRange.createFromVersionSpec(StringUtils.isNotBlank(version) ? version : "[0,]"),
+                    scope,
+                    type,
+                    classifier,
+                    artifactHandlerManager.getArtifactHandler(type),
+                    optional);
+        } catch (InvalidVersionSpecificationException e) {
+            // version should have a proper format
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public Artifact createDependencyArtifact(Dependency dependency) {
-        if (StringUtils.isBlank(dependency.getVersion())) {
-            dependency = dependency.clone();
-            dependency.setVersion("[,0]");
-        }
+        Artifact artifact = createDependencyArtifact(
+                dependency.getGroupId(),
+                dependency.getArtifactId(),
+                dependency.getVersion(),
+                dependency.getType(),
+                dependency.getClassifier(),
+                dependency.getScope(),
+                false);
 
-        return repositorySystem.createDependencyArtifact(dependency);
+        if (Artifact.SCOPE_SYSTEM.equals(dependency.getScope()) && dependency.getSystemPath() != null) {
+            artifact.setFile(new File(dependency.getSystemPath()));
+        }
+        return artifact;
     }
 
     @Override
@@ -710,7 +714,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
      * Builder class for {@linkplain DefaultVersionsHelper}
      */
     public static class Builder {
-        private RepositorySystem repositorySystem;
+        private ArtifactHandlerManager artifactHandlerManager;
         private Collection<String> ignoredVersions;
         private RuleSet ruleSet;
         private String serverId;
@@ -718,7 +722,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
         private Log log;
         private MavenSession mavenSession;
         private MojoExecution mojoExecution;
-        private org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+        private RepositorySystem repositorySystem;
+
         private Map<String, Wagon> wagonMap;
 
         public Builder() {}
@@ -919,8 +924,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
             return pos == -1 ? empty() : of(url.substring(0, pos).trim());
         }
 
-        public Builder withRepositorySystem(RepositorySystem repositorySystem) {
-            this.repositorySystem = repositorySystem;
+        public Builder withArtifactHandlerManager(ArtifactHandlerManager artifactHandlerManager) {
+            this.artifactHandlerManager = artifactHandlerManager;
             return this;
         }
 
@@ -959,8 +964,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
             return this;
         }
 
-        public Builder withAetherRepositorySystem(org.eclipse.aether.RepositorySystem aetherRepositorySystem) {
-            this.aetherRepositorySystem = aetherRepositorySystem;
+        public Builder withRepositorySystem(RepositorySystem repositorySystem) {
+            this.repositorySystem = repositorySystem;
             return this;
         }
 
@@ -976,7 +981,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
          */
         public DefaultVersionsHelper build() throws MojoExecutionException {
             DefaultVersionsHelper instance = new DefaultVersionsHelper(
-                    repositorySystem, aetherRepositorySystem, mavenSession, mojoExecution, log);
+                    artifactHandlerManager, repositorySystem, mavenSession, mojoExecution, log);
             if (ruleSet != null) {
                 if (!isBlank(rulesUri)) {
                     log.warn("rulesUri is ignored if rules are specified in pom or as parameters");

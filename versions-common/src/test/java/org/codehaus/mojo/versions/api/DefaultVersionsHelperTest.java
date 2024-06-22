@@ -39,7 +39,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -53,6 +52,7 @@ import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.VersionRangeRequest;
@@ -67,6 +67,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
@@ -90,7 +91,7 @@ import static org.mockito.Mockito.when;
 class DefaultVersionsHelperTest {
     @Test
     public void testPerRuleVersionsIgnored() throws Exception {
-        final org.eclipse.aether.RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        final RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
         final Artifact artifact = mock(Artifact.class);
         when(artifact.getGroupId()).thenReturn("com.mycompany.maven");
         when(artifact.getArtifactId()).thenReturn("artifact-one");
@@ -119,7 +120,7 @@ class DefaultVersionsHelperTest {
 
     @Test
     public void testGlobalRuleVersionsIgnored() throws Exception {
-        final org.eclipse.aether.RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        final RepositorySystem repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
         final Artifact artifact = mock(Artifact.class);
         when(artifact.getGroupId()).thenReturn("other.company");
         when(artifact.getArtifactId()).thenReturn("artifact-two");
@@ -249,8 +250,7 @@ class DefaultVersionsHelperTest {
         return fileWagon;
     }
 
-    private DefaultVersionsHelper createHelper(org.eclipse.aether.RepositorySystem aetherRepositorySystem)
-            throws Exception {
+    private DefaultVersionsHelper createHelper(RepositorySystem repositorySystem) throws Exception {
         final String resourcePath = "/" + getClass().getPackage().getName().replace('.', '/') + "/rules.xml";
         final String rulesUri =
                 Objects.requireNonNull(getClass().getResource(resourcePath)).toExternalForm();
@@ -261,8 +261,7 @@ class DefaultVersionsHelperTest {
         when(mavenSession.getRepositorySession()).thenReturn(new DefaultRepositorySystemSession());
 
         return new DefaultVersionsHelper.Builder()
-                .withRepositorySystem(mock(RepositorySystem.class))
-                .withAetherRepositorySystem(aetherRepositorySystem)
+                .withRepositorySystem(repositorySystem)
                 .withWagonMap(singletonMap("file", mockFileWagon(new URI(rulesUri))))
                 .withServerId("")
                 .withRulesUri(rulesUri)
@@ -378,6 +377,22 @@ class DefaultVersionsHelperTest {
         assertThat(
                 remoteRepositories.get(1).getPolicy(false).getUpdatePolicy(),
                 equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
+    }
+
+    @Test
+    void createPluginArtifact() throws Exception {
+
+        DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
+                .withArtifactHandlerManager(mockArtifactHandlerManager())
+                .build();
+
+        Artifact artifact = versionsHelper.createPluginArtifact("groupId", "artifactId", "version");
+        assertEquals("groupId", artifact.getGroupId());
+        assertEquals("artifactId", artifact.getArtifactId());
+        assertEquals("version", artifact.getVersion());
+        assertEquals("maven-plugin", artifact.getType());
+        assertEquals("runtime", artifact.getScope());
+        assertEquals("jar", artifact.getArtifactHandler().getExtension());
     }
 
     private static Version parseVersion(String version) {

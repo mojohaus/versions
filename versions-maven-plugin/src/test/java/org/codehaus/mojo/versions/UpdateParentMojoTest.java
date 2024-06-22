@@ -22,21 +22,21 @@ import java.util.HashMap;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.eclipse.aether.RepositorySystem;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,6 +46,7 @@ import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -54,23 +55,21 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
 public class UpdateParentMojoTest {
     private TestChangeRecorder changeRecorder;
 
     private UpdateParentMojo mojo;
 
-    private static RepositorySystem repositorySystem;
+    private static ArtifactHandlerManager artifactHandlerManager;
 
-    private static org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+    private static RepositorySystem repositorySystem;
 
     @BeforeClass
     public static void setUpStatic() {
-        repositorySystem = mockRepositorySystem();
-        aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        artifactHandlerManager = mockArtifactHandlerManager();
+        repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("parent-artifact", new String[] {"0.9.0", "1.0.0", "1.0.1-SNAPSHOT"});
                 put("issue-670-artifact", new String[] {"0.0.1-1", "0.0.1-1-impl-SNAPSHOT"});
@@ -85,7 +84,7 @@ public class UpdateParentMojoTest {
     public void setUp() throws IllegalAccessException {
         changeRecorder = new TestChangeRecorder();
 
-        mojo = new UpdateParentMojo(repositorySystem, aetherRepositorySystem, null, changeRecorder.asTestMap()) {
+        mojo = new UpdateParentMojo(artifactHandlerManager, repositorySystem, null, changeRecorder.asTestMap()) {
             {
                 setProject(createProject());
                 reactorProjects = Collections.emptyList();
@@ -114,22 +113,6 @@ public class UpdateParentMojoTest {
                 });
             }
         };
-    }
-
-    private static RepositorySystem mockRepositorySystem() {
-        RepositorySystem repositorySystem = mock(RepositorySystem.class);
-        when(repositorySystem.createDependencyArtifact(any(Dependency.class))).thenAnswer(invocation -> {
-            Dependency dependency = invocation.getArgument(0);
-            return new DefaultArtifact(
-                    dependency.getGroupId(),
-                    dependency.getArtifactId(),
-                    dependency.getVersion(),
-                    dependency.getScope(),
-                    dependency.getType(),
-                    dependency.getClassifier() != null ? dependency.getClassifier() : "default",
-                    new DefaultArtifactHandlerStub("default"));
-        });
-        return repositorySystem;
     }
 
     @Test

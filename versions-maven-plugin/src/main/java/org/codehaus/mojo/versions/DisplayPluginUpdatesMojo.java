@@ -49,6 +49,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.lifecycle.LifecycleExecutor;
@@ -74,7 +75,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingResult;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -87,6 +87,7 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
+import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
@@ -164,15 +165,15 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Inject
     @SuppressWarnings("checkstyle:ParameterNumber")
     public DisplayPluginUpdatesMojo(
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             ProjectBuilder projectBuilder,
             Map<String, Wagon> wagonMap,
             LifecycleExecutor lifecycleExecutor,
             ModelInterpolator modelInterpolator,
             RuntimeInformation runtimeInformation,
             Map<String, ChangeRecorder> changeRecorders) {
-        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
+        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
         this.projectBuilder = projectBuilder;
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;
