@@ -32,7 +32,7 @@ import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.ordering.MercuryVersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
@@ -47,11 +47,11 @@ import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class ArtifactVersionsTest {
+class ArtifactVersionsTest {
 
     private void test4DigitVersion(VersionComparator comparator) throws InvalidVersionSpecificationException {
         ArtifactVersions instance = new ArtifactVersions(
@@ -101,17 +101,17 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void test4DigitVersionsMercury() throws Exception {
+    void test4DigitVersionsMercury() throws Exception {
         test4DigitVersion(new MercuryVersionComparator());
     }
 
     @Test
-    public void test4DigitVersionsMaven() throws Exception {
+    void test4DigitVersionsMaven() throws Exception {
         test4DigitVersion(new MavenVersionComparator());
     }
 
     @Test
-    public void testIsEmpty() throws Exception {
+    void testIsEmpty() throws Exception {
         ArtifactVersions instance = new ArtifactVersions(
                 new DefaultArtifact(
                         "group",
@@ -128,7 +128,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testSmokes() throws Exception {
+    void testSmokes() throws Exception {
         ArtifactVersions instance = new ArtifactVersions(
                 new DefaultArtifact(
                         "group",
@@ -155,7 +155,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testReportLabels() {
+    void testReportLabels() {
         ArtifactVersions instance = new ArtifactVersions(
                 new DefaultArtifact("default-group", "dummy-api", "1.1", "foo", "bar", "jar", null),
                 Arrays.asList(versions(
@@ -188,7 +188,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testGetNewerVersionsWithSnapshot() throws InvalidSegmentException {
+    void testGetNewerVersionsWithSnapshot() throws InvalidSegmentException {
         ArtifactVersions instance = new ArtifactVersions(
                 new DefaultArtifact("default-group", "dummy-api", "1.0.0-SNAPSHOT", "foo", "bar", "jar", null),
                 Arrays.asList(versions("1.0.0-SNAPSHOT", "1.0.0")),
@@ -207,7 +207,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testAllVersionsForIgnoreScopeSubIncremental() {
+    void testAllVersionsForIgnoreScopeSubIncremental() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.0-1", "1.0.1"));
         ArtifactVersion[] filteredVersions = instance.getVersions(
                 instance.restrictionForIgnoreScope(instance.getCurrentVersion(), of(SUBINCREMENTAL)), false);
@@ -216,7 +216,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testAllVersionsForIgnoreScopeIncremental() {
+    void testAllVersionsForIgnoreScopeIncremental() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.0-1", "1.0.1", "1.1.0"));
         ArtifactVersion[] filteredVersions = instance.getVersions(
                 instance.restrictionForIgnoreScope(instance.getCurrentVersion(), of(INCREMENTAL)), false);
@@ -225,7 +225,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testAllVersionsForIgnoreScopeMinor() {
+    void testAllVersionsForIgnoreScopeMinor() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"));
         ArtifactVersion[] filteredVersions = instance.getVersions(
                 instance.restrictionForIgnoreScope(instance.getCurrentVersion(), of(MINOR)), false);
@@ -234,7 +234,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testAllVersionsForIgnoreScopeMajor() {
+    void testAllVersionsForIgnoreScopeMajor() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"));
         ArtifactVersion[] filteredVersions = instance.getVersions(
                 instance.restrictionForIgnoreScope(instance.getCurrentVersion(), of(MAJOR)), false);
@@ -242,7 +242,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testGetReportNewestUpdateWithOnlyMajorUpdate() {
+    void testGetReportNewestUpdateWithOnlyMajorUpdate() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "2.0.0"));
         assertThat(instance.getReportNewestUpdate(Optional.empty(), true).toString(), is("2.0.0"));
         assertThat(instance.getReportNewestUpdate(of(MAJOR), true), hasToString("2.0.0"));
@@ -252,7 +252,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testGetReportNewestUpdateWithMinorAndMajor() {
+    void testGetReportNewestUpdateWithMinorAndMajor() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.1.0", "2.0.0"));
         assertThat(instance.getReportNewestUpdate(Optional.empty(), true).toString(), is("2.0.0"));
         assertThat(instance.getReportNewestUpdate(of(MAJOR), true), hasToString("2.0.0"));
@@ -262,7 +262,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testGetReportNewestUpdateWithIncrementalAndMajor() {
+    void testGetReportNewestUpdateWithIncrementalAndMajor() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.1", "2.0.0"));
         assertThat(instance.getReportNewestUpdate(Optional.empty(), true).toString(), is("2.0.0"));
         assertThat(instance.getReportNewestUpdate(of(MAJOR), true), hasToString("2.0.0"));
@@ -272,7 +272,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testGetNewestVersionWithLesserSegment() throws InvalidSegmentException {
+    void testGetNewestVersionWithLesserSegment() throws InvalidSegmentException {
         ArtifactVersions instance = createInstance(versions("1.0.0-1"));
         assertThat(instance.getNewestVersion("1.0.0", of(MAJOR), false, false).get(), hasToString("1.0.0-1"));
         assertThat(instance.getNewestVersion("1.0.0", of(MINOR), false, false).get(), hasToString("1.0.0-1"));
@@ -283,7 +283,7 @@ public class ArtifactVersionsTest {
     }
 
     @Test
-    public void testGetNewestVersionWithLesserSegmentWithSnapshots() throws InvalidSegmentException {
+    void testGetNewestVersionWithLesserSegmentWithSnapshots() throws InvalidSegmentException {
         ArtifactVersions instance = createInstance(versions("1.0.0-1-SNAPSHOT"));
         assertThat(instance.getNewestVersion("1.0.0", of(MAJOR), true, false).get(), hasToString("1.0.0-1-SNAPSHOT"));
         assertThat(instance.getNewestVersion("1.0.0", of(MINOR), true, false).get(), hasToString("1.0.0-1-SNAPSHOT"));

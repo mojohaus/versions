@@ -27,14 +27,16 @@ import java.nio.file.StandardCopyOption;
 
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public final class ChangeRecorderXMLTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+class ChangeRecorderXMLTest {
     private static void copyResource(final String name, final Path output) throws IOException {
         try (InputStream inputStream = ChangeRecorderXMLTest.class.getResourceAsStream(name)) {
             Files.copy(inputStream, output, StandardCopyOption.REPLACE_EXISTING);
@@ -48,7 +50,7 @@ public final class ChangeRecorderXMLTest {
     }
 
     @Test
-    public void testChanges() throws Exception {
+    void testChanges() throws Exception {
         final Path path0 = Files.createTempFile("ChangeRecorderTest", ".xml");
         final Path path1 = Files.createTempDirectory("ChangeRecorderTest")
                 .resolve("subDirectory")
@@ -81,39 +83,39 @@ public final class ChangeRecorderXMLTest {
         final NodeList elements0 = document0.getElementsByTagNameNS(ChangeRecorderXML.CHANGES_NAMESPACE, "updated");
         final NodeList elements1 = document1.getElementsByTagNameNS(ChangeRecorderXML.CHANGES_NAMESPACE, "updated");
 
-        Assert.assertEquals("Correct number of updates", elements0.getLength(), elements1.getLength());
+        assertEquals(elements0.getLength(), elements1.getLength(), "Correct number of updates");
 
         for (int index = 0; index < elements0.getLength(); ++index) {
             final Element element0 = (Element) elements0.item(index);
             final Element element1 = (Element) elements1.item(index);
 
-            Assert.assertEquals(
+            assertEquals(
                     element0.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "artifactId"),
                     element1.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "artifactId"));
-            Assert.assertEquals(
+            assertEquals(
                     element0.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "groupId"),
                     element1.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "groupId"));
-            Assert.assertEquals(
+            assertEquals(
                     element0.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "oldVersion"),
                     element1.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "oldVersion"));
-            Assert.assertEquals(
+            assertEquals(
                     element0.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "newVersion"),
                     element1.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "newVersion"));
 
             // FIXME - looks like assertions not working
-            Assert.assertEquals(
+            assertEquals(
                     element0.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "kind"),
                     element1.getAttributeNS(ChangeRecorderXML.CHANGES_NAMESPACE, "kind"));
         }
     }
 
     @Test
-    public void emptyResultShouldNotGenerateReports() throws Exception {
+    void emptyResultShouldNotGenerateReports() throws Exception {
         Path path = Files.createTempDirectory("ChangeRecorderTest").resolve("ChangeRecorderTest.xml");
 
         ChangeRecorder recorder = new ChangeRecorderXML();
         recorder.writeReport(path);
 
-        Assert.assertFalse("File should not be created", Files.isRegularFile(path));
+        assertFalse(Files.isRegularFile(path), "File should not be created");
     }
 }

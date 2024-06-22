@@ -25,7 +25,7 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Extension;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
@@ -38,10 +38,10 @@ import static org.mockito.Mockito.when;
  *
  * @author Andrzej Jarmoniuk
  */
-public class CoreExtensionUtilsTest {
+class CoreExtensionUtilsTest {
 
     @Test
-    public void testNoExtensions() throws XmlPullParserException, IOException {
+    void testNoExtensions() throws XmlPullParserException, IOException {
         MavenProject project = mock(MavenProject.class);
         when(project.getBasedir())
                 .thenReturn(
@@ -52,7 +52,7 @@ public class CoreExtensionUtilsTest {
     }
 
     @Test
-    public void testExtensionsFound() throws XmlPullParserException, IOException {
+    void testExtensionsFound() throws XmlPullParserException, IOException {
         MavenProject project = mock(MavenProject.class);
         when(project.getBasedir())
                 .thenReturn(new File("src/test/resources/org/codehaus/mojo/versions/utils/core-extensions"));

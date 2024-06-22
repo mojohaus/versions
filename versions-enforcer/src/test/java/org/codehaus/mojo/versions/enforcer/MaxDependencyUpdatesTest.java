@@ -27,25 +27,24 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
-import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MaxDependencyUpdatesTest {
+@ExtendWith(MockitoExtension.class)
+class MaxDependencyUpdatesTest {
 
     @Mock
     private EnforcerLogger enforcerLogger;
@@ -65,14 +64,14 @@ public class MaxDependencyUpdatesTest {
     @InjectMocks
     private MaxDependencyUpdates maxDependencyUpdates;
 
-    @Before
+    @BeforeEach
     public void setup() {
         maxDependencyUpdates.setLog(enforcerLogger);
         MockUtils.prepareRepositorySystemMock(repositorySystem);
     }
 
     @Test
-    public void testRuleFailsByMaxUpdatesExceeded() throws ExpressionEvaluationException, ComponentLookupException {
+    void testRuleFailsByMaxUpdatesExceeded() {
         when(project.getDependencies())
                 .thenReturn(asList(
                         DependencyBuilder.newBuilder()
@@ -94,18 +93,13 @@ public class MaxDependencyUpdatesTest {
                     }
                 });
 
-        try {
-            maxDependencyUpdates.maxUpdates = 1;
-            maxDependencyUpdates.execute();
-
-            fail("EnforcerRuleException should have been thrown");
-        } catch (EnforcerRuleException e) {
-            assertThat(e.getMessage(), containsString("More than 1 upgradable artifacts detected"));
-        }
+        maxDependencyUpdates.maxUpdates = 1;
+        Exception e = assertThrows(EnforcerRuleException.class, () -> maxDependencyUpdates.execute());
+        assertThat(e.getMessage(), containsString("More than 1 upgradable artifacts detected"));
     }
 
     @Test
-    public void testRulePassesByMaxUpdatesNotExceeded() throws Exception {
+    void testRulePassesByMaxUpdatesNotExceeded() {
 
         when(project.getDependencies())
                 .thenReturn(singletonList(DependencyBuilder.newBuilder()
@@ -118,11 +112,11 @@ public class MaxDependencyUpdatesTest {
                 aetherRepositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "2.0.0"}));
 
         maxDependencyUpdates.maxUpdates = 1;
-        maxDependencyUpdates.execute();
+        assertDoesNotThrow(() -> maxDependencyUpdates.execute());
     }
 
     @Test
-    public void testRulePassesByMaxUpdatesNotExceededDependencyIncludes() throws Exception {
+    void testRulePassesByMaxUpdatesNotExceededDependencyIncludes() {
 
         when(project.getDependencies())
                 .thenReturn(asList(
@@ -146,11 +140,11 @@ public class MaxDependencyUpdatesTest {
                 });
 
         maxDependencyUpdates.dependencyIncludes = singletonList("group:artifactB");
-        maxDependencyUpdates.execute();
+        assertDoesNotThrow(() -> maxDependencyUpdates.execute());
     }
 
     @Test
-    public void testRulePassesByMaxUpdatesNotExceededDependencyExcludes() throws Exception {
+    void testRulePassesByMaxUpdatesNotExceededDependencyExcludes() {
 
         when(project.getDependencies())
                 .thenReturn(asList(
@@ -174,11 +168,11 @@ public class MaxDependencyUpdatesTest {
                 });
 
         maxDependencyUpdates.dependencyExcludes = singletonList("group:artifactA");
-        maxDependencyUpdates.execute();
+        assertDoesNotThrow(() -> maxDependencyUpdates.execute());
     }
 
     @Test
-    public void testRulePassesByMaxUpdatesNotExceededDependencyIncludesExcludes() throws Exception {
+    void testRulePassesByMaxUpdatesNotExceededDependencyIncludesExcludes() {
 
         when(project.getDependencies())
                 .thenReturn(asList(
@@ -203,11 +197,11 @@ public class MaxDependencyUpdatesTest {
 
         maxDependencyUpdates.dependencyIncludes = singletonList("group:*");
         maxDependencyUpdates.dependencyExcludes = singletonList("group:artifactA");
-        maxDependencyUpdates.execute();
+        assertDoesNotThrow(() -> maxDependencyUpdates.execute());
     }
 
     @Test
-    public void testIgnoreSubIncrementalUpdates() throws Exception {
+    void testIgnoreSubIncrementalUpdates() {
 
         when(project.getDependencies())
                 .thenReturn(singletonList(DependencyBuilder.newBuilder()
@@ -220,11 +214,11 @@ public class MaxDependencyUpdatesTest {
                 aetherRepositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1"}));
 
         maxDependencyUpdates.ignoreSubIncrementalUpdates = true;
-        maxDependencyUpdates.execute();
+        assertDoesNotThrow(() -> maxDependencyUpdates.execute());
     }
 
     @Test
-    public void testIgnoreIncrementalUpdates() throws Exception {
+    void testIgnoreIncrementalUpdates() {
         when(project.getDependencies())
                 .thenReturn(singletonList(DependencyBuilder.newBuilder()
                         .withGroupId("group")
@@ -236,11 +230,11 @@ public class MaxDependencyUpdatesTest {
                 aetherRepositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1", "1.0.1"}));
 
         maxDependencyUpdates.ignoreIncrementalUpdates = true;
-        maxDependencyUpdates.execute();
+        assertDoesNotThrow(() -> maxDependencyUpdates.execute());
     }
 
     @Test
-    public void testIgnoreMinorUpdates() throws Exception {
+    void testIgnoreMinorUpdates() {
 
         when(project.getDependencies())
                 .thenReturn(singletonList(DependencyBuilder.newBuilder()
@@ -253,6 +247,6 @@ public class MaxDependencyUpdatesTest {
                 aetherRepositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0"}));
 
         maxDependencyUpdates.ignoreMinorUpdates = true;
-        maxDependencyUpdates.execute();
+        assertDoesNotThrow(() -> maxDependencyUpdates.execute());
     }
 }

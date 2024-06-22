@@ -20,17 +20,17 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MercuryVersionComparatorTest extends VersionComparatorTestBase {
-    public MercuryVersionComparatorTest() {
+class MercuryVersionComparatorTest extends VersionComparatorTestBase {
+    MercuryVersionComparatorTest() {
         super(new MercuryVersionComparator());
     }
 
     @Test
-    public void testSegmentCounting() {
+    void testSegmentCounting() {
         assertEquals(1, instance.getSegmentCount(DefaultArtifactVersionCache.of("5")));
         assertEquals(2, instance.getSegmentCount(DefaultArtifactVersionCache.of("5.0")));
         assertEquals(2, instance.getSegmentCount(DefaultArtifactVersionCache.of("5-0")));

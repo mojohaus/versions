@@ -92,7 +92,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      * or {@link Optional#empty()} if there are no ranges
      */
     protected Optional<Restriction> getSelectedRestriction(ArtifactVersion selectedVersion) {
-        assert selectedVersion != null;
+        Objects.requireNonNull(selectedVersion);
         return Optional.ofNullable(getCurrentVersionRange())
                 .map(VersionRange::getRestrictions)
                 .flatMap(r -> r.stream()

@@ -25,23 +25,25 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class PropertiesVersionsFileReaderTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class PropertiesVersionsFileReaderTest {
 
     private static final String TEST_PROPERTIES_FILE =
             "src/test/resources/org/codehaus/mojo/versions/utils/testPropertiesVersionsFile.properties";
 
     @Test
-    public void testRead() throws IOException {
+    void testRead() throws IOException {
         PropertiesVersionsFileReader reader = new PropertiesVersionsFileReader(TEST_PROPERTIES_FILE);
         reader.read();
 
         int numberOfPropertiesConfig = 3;
-        Assert.assertTrue(equalsCvsUnordered(
+        assertTrue(equalsCvsUnordered(
                 "booking-api.version,booking-lib.version,be-air-impl.version", reader.getProperties()));
-        Assert.assertEquals(numberOfPropertiesConfig, reader.getPropertiesConfig().length);
+        assertEquals(numberOfPropertiesConfig, reader.getPropertiesConfig().length);
     }
 
     private boolean equalsCvsUnordered(String csvExpected, String csvActual) {

@@ -20,13 +20,13 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NumericVersionComparatorTest extends VersionComparatorTestBase {
-    public NumericVersionComparatorTest() {
+class NumericVersionComparatorTest extends VersionComparatorTestBase {
+    NumericVersionComparatorTest() {
         super(new NumericVersionComparator());
     }
 
@@ -35,7 +35,7 @@ public class NumericVersionComparatorTest extends VersionComparatorTestBase {
     }
 
     @Test
-    public void testSmokes() {
+    void testSmokes() {
         assertTrue(instanceCompare("1.0.0.0.0", "1.0.0.0.1") < 0);
         assertTrue(instanceCompare("1.0.0.0.0", "2.0.0.0.1") < 0);
         assertTrue(instanceCompare("1.0.0.0.0", "1.0.0.0") < 0);
@@ -44,14 +44,14 @@ public class NumericVersionComparatorTest extends VersionComparatorTestBase {
     }
 
     @Test
-    public void testBigValues() {
+    void testBigValues() {
         assertTrue(instanceCompare("1.92.0", "1.100000000000000000000000.0") < 0);
         assertTrue(instanceCompare("1.100000000000000000000000.0", "1.92.0") > 0);
         assertTrue(instanceCompare("1.100000000000000000000000.0", "1.100000000000000000000000.0") == 0);
     }
 
     @Test
-    public void testStringValues() {
+    void testStringValues() {
         assertTrue(instanceCompare("1.a20.0", "1.a3.0") < 0);
         assertTrue(instanceCompare("1.a20.0", "1.b10.0") < 0);
         assertTrue(instanceCompare("1.a.0.b.0", "1.a.0.b.1") < 0);
@@ -71,7 +71,7 @@ public class NumericVersionComparatorTest extends VersionComparatorTestBase {
     }
 
     @Test
-    public void testQualifiers() {
+    void testQualifiers() {
         assertTrue(instanceCompare("1.0-alpha.10", "1.0-alpha.20") < 0);
         assertTrue(instanceCompare("1.0-alpha.10", "1.0-beta.1") < 0);
         assertTrue(instanceCompare("1.0", "1.0-alpha.2") > 0);
@@ -80,7 +80,7 @@ public class NumericVersionComparatorTest extends VersionComparatorTestBase {
     }
 
     @Test
-    public void testSegmentCounting() {
+    void testSegmentCounting() {
         assertEquals(1, instance.getSegmentCount(new DefaultArtifactVersion("5")));
         assertEquals(2, instance.getSegmentCount(new DefaultArtifactVersion("5.0")));
         assertEquals(1, instance.getSegmentCount(new DefaultArtifactVersion("5-0")));

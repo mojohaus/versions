@@ -41,37 +41,35 @@ import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.hamcrest.MatcherAssert;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import static org.codehaus.mojo.versions.utils.ModifiedPomXMLEventReaderUtils.matches;
 import static org.codehaus.stax2.XMLInputFactory2.P_PRESERVE_LOCATION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
  * Tests the methods of {@link PomHelper}.
  */
-public class PomHelperTest extends AbstractMojoTestCase {
+class PomHelperTest {
     private static final int NUMBER_OF_CHILD_PROJECTS = 30;
-
-    @Rule
-    public MojoRule mojoRule = new MojoRule(this);
 
     private static final XMLInputFactory INPUT_FACTORY = XMLInputFactory2.newInstance();
 
-    @BeforeClass
-    public static void setUpClass() {
+    @BeforeAll
+    static void setUpClass() {
         INPUT_FACTORY.setProperty(P_PRESERVE_LOCATION, Boolean.TRUE);
     }
 
@@ -82,7 +80,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
      * @throws Exception if the test fails.
      */
     @Test
-    public void testLongProperties() throws Exception {
+    void testLongProperties() throws Exception {
         URL url = getClass().getResource("PomHelperTest.testLongProperties.pom.xml");
         assert url != null;
         File file = new File(url.getPath());
@@ -97,7 +95,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
 
         String newVersion = "1";
 
-        assertTrue("The pom has been modified", PomHelper.setProjectVersion(pom, newVersion));
+        assertTrue(PomHelper.setProjectVersion(pom, newVersion), "The pom has been modified");
 
         assertEquals(newVersion, PomHelper.getProjectVersion(pom));
 
@@ -105,7 +103,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testGroupIdNotOnChildPom() throws Exception {
+    void testGroupIdNotOnChildPom() throws Exception {
         URL url = getClass().getResource("PomHelperTest.noGroupIdOnChild.pom.xml");
         assert url != null;
         StringBuilder input = PomHelper.readXmlFile(new File(url.getPath()));
@@ -116,67 +114,67 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testVersionVersionEqual() throws Exception {
+    void testVersionVersionEqual() throws Exception {
         assertTrue(PomHelper.isVersionOverlap("1.0.8", "1.0.8"));
     }
 
     @Test
-    public void testVersionVersionDiffer() throws Exception {
+    void testVersionVersionDiffer() throws Exception {
         assertFalse(PomHelper.isVersionOverlap("1.0.8", "1.0.0"));
     }
 
     @Test
-    public void testVersionRangeIntersect() throws Exception {
+    void testVersionRangeIntersect() throws Exception {
         assertTrue(PomHelper.isVersionOverlap("1.0.8", "[1.0.3,1.1.0]"));
     }
 
     @Test
-    public void testVersionRangeDisjoint() throws Exception {
+    void testVersionRangeDisjoint() throws Exception {
         assertFalse(PomHelper.isVersionOverlap("1.0.8", "[0.0.1,1.0.0]"));
     }
 
     @Test
-    public void testVersionLeftOpenRangeDisjoint() throws Exception {
+    void testVersionLeftOpenRangeDisjoint() throws Exception {
         assertFalse(PomHelper.isVersionOverlap("1.0.8", "[,1.0.0]"));
     }
 
     @Test
-    public void testVersionRightOpenRangeDisjoint() throws Exception {
+    void testVersionRightOpenRangeDisjoint() throws Exception {
         assertFalse(PomHelper.isVersionOverlap("1.0.8", "[1.1.0,)"));
     }
 
     @Test
-    public void testEmptyRange() throws Exception {
+    void testEmptyRange() throws Exception {
         assertTrue(PomHelper.isVersionOverlap("1.0.8", ""));
     }
 
     @Test
-    public void testRangeEmpty() throws Exception {
+    void testRangeEmpty() throws Exception {
         assertTrue(PomHelper.isVersionOverlap("[1.0.5,1.0.8]", ""));
     }
 
     @Test
-    public void testRangeRangeIntersect() throws Exception {
+    void testRangeRangeIntersect() throws Exception {
         assertTrue(PomHelper.isVersionOverlap("[1.0.5,1.0.8]", "[1.0.7,1.1.0]"));
     }
 
     @Test
-    public void testRangeRangeDisjoint() throws Exception {
+    void testRangeRangeDisjoint() throws Exception {
         assertFalse(PomHelper.isVersionOverlap("[1.0.5,1.0.6]", "[1.0.7,1.1.0]"));
     }
 
     @Test
-    public void testRangeVersionDisjoint() throws Exception {
+    void testRangeVersionDisjoint() throws Exception {
         assertFalse(PomHelper.isVersionOverlap("[1.0.5,1.0.6]", "1.0.8"));
     }
 
     @Test
-    public void testRangeVersionIntersect() throws Exception {
+    void testRangeVersionIntersect() throws Exception {
         assertTrue(PomHelper.isVersionOverlap("[1.0.0,2.0.0]", "1.0.8"));
     }
 
     @Test
-    public void testSetElementValueExistingValue() throws XMLStreamException {
+    void testSetElementValueExistingValue() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
                 new StringBuilder("<super-parent><parent><child>test</child></parent></super-parent>"),
                 INPUT_FACTORY,
@@ -188,7 +186,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testSetElementValueEmptyChild() throws XMLStreamException {
+    void testSetElementValueEmptyChild() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
                 new StringBuilder("<super-parent><parent><child/></parent></super-parent>"), INPUT_FACTORY, null);
 
@@ -198,7 +196,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testSetElementValueNewValueEmptyParent() throws XMLStreamException {
+    void testSetElementValueNewValueEmptyParent() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
                 new StringBuilder("<super-parent><parent/></super-parent>"), INPUT_FACTORY, null);
 
@@ -208,7 +206,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testSetElementValueNewValueNoChild() throws XMLStreamException {
+    void testSetElementValueNewValueNoChild() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
                 new StringBuilder("<super-parent><parent><child2/></parent></super-parent>"), INPUT_FACTORY, null);
 
@@ -218,7 +216,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testSetProjectValueNewValueNonEmptyParent() throws XMLStreamException {
+    void testSetProjectValueNewValueNonEmptyParent() throws XMLStreamException {
         ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
                 new StringBuilder("<super-parent><parent><child>test</child></parent></super-parent>"),
                 INPUT_FACTORY,
@@ -230,14 +228,14 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testIssue505ChildModules() throws Exception {
-        MavenProject project =
-                mojoRule.readMavenProject(new File("src/test/resources/org/codehaus/mojo/versions/api/issue-505"));
+    void testIssue505ChildModules() throws Exception {
+        MavenProject project = new MavenProject();
+        project.setFile(new File("src/test/resources/org/codehaus/mojo/versions/api/issue-505/pom.xml"));
         assertThat(PomHelper.getChildModels(project, new SystemStreamLog()).entrySet(), hasSize(3));
     }
 
     @Test
-    public void testChildModelsForMultiLevelProject() throws Exception {
+    void testChildModelsForMultiLevelProject() throws Exception {
         Path tempDirectory = Files.createTempDirectory("testChildModelsForLargeNumberOfModules");
         ModelWriter modelWriter = new DefaultModelWriter();
         Map<Path, Model> createdModels = new LinkedHashMap<>();
@@ -263,7 +261,8 @@ public class PomHelperTest extends AbstractMojoTestCase {
                 modelWriter.write(entry.getKey().resolve("pom.xml").toFile(), Collections.emptyMap(), entry.getValue());
             }
 
-            MavenProject project = mojoRule.readMavenProject(tempDirectory.toFile());
+            MavenProject project = new MavenProject();
+            project.setFile(tempDirectory.resolve("pom.xml").toFile());
 
             assertThat(
                     PomHelper.getChildModels(project, new SystemStreamLog()).entrySet(), hasSize(createdModels.size()));
@@ -283,7 +282,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testGetRawModelTree() throws Exception {
+    void testGetRawModelTree() throws Exception {
         Log log = mock(Log.class);
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
@@ -301,7 +300,7 @@ public class PomHelperTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testFindProperty() throws Exception {
+    void testFindProperty() throws Exception {
         Log log = mock(Log.class);
         XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
         inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
