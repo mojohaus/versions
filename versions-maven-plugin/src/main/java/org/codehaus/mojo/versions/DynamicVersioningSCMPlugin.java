@@ -44,8 +44,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 /**
  * Maven plugin that uses SCM/VCS to enable dynamic versioning based on your
- * version
- * control system.
+ * version control system. Goal will set the version in a property.
  *
  * @author Jimisola Laursen
  * @since 2.17.0
@@ -78,7 +77,7 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
     protected boolean appendSnapshot;
 
     /**
-     * Set the version instead of resolving from SCM tag information.
+     * Use this version instead of resolving from SCM tag information.
      *
      * @since 2.17.0
      */
@@ -86,8 +85,7 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
     protected String useVersion;
 
     /**
-     * The default version used when SCM repository has no commit or no semantic
-     * version
+     * The default version used when SCM repository has no commit or no version
      * tag.
      *
      * @since 2.17.0

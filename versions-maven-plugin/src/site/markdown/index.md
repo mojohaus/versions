@@ -73,6 +73,7 @@ have been a newer version and replaces them with the latest version.
 built-in "Poor Man's SCM".
 * [versions:revert](./revert-mojo.html) restores the `pom.xml` files from the `pom.xml.versionsBackup` files.
 Forms one half of the built-in "Poor Man's SCM".
+* [versions:use-dynamic-version-from-scm](./use-dynamic-version-from-scm-mojo.html) uses SCM/VCS tags to enable dynamic versioning and sets the version in a property.
 
 ## Reporting goals overview
 
@@ -135,3 +136,4 @@ you can take a look into the following examples:
 * [Replacing -SNAPSHOT versions with their corresponding releases](./examples/use-releases.html)
 * [Changing the project version](./examples/set.html)
 * [Recording version changes](./examples/recording-changes.html)
+* [Using use-dynamic-version-from-scm goal](./examples/use-dynamic-version-from-scm.html)
