@@ -54,24 +54,32 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
 
     /**
      * The Maven Project Object
+     *
+     * @since 2.17.0
      */
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
     /**
      * The name of the property that will contain the resolved version.
+     *
+     * @since 2.17.0
      */
     @Parameter(property = "propertyName", defaultValue = "revision")
     protected String propertyName;
 
     /**
      * Whether the SNAPSHOT qualifier shall be apppended or not.
+     *
+     * @since 2.17.0
      */
     @Parameter(property = "appendSnapshot", defaultValue = "true")
     protected boolean appendSnapshot;
 
     /**
      * Set the version instead of resolving from SCM tag information.
+     *
+     * @since 2.17.0
      */
     @Parameter(property = "useVersion")
     protected String useVersion;
@@ -79,6 +87,8 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
     /**
      * The default version used when SCM repository has no commit or no semantic version
      * tag.
+     *
+     * @since 2.17.0
      */
     @Parameter(property = "defaultVersion", defaultValue = "0.0.1")
     protected String defaultVersion;
