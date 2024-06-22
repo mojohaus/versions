@@ -24,14 +24,15 @@ import javax.inject.Inject;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.plexus.i18n.I18N;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Generates a report of available updates for the dependencies of a project.
@@ -45,11 +46,11 @@ public class DependencyUpdatesReportMojo extends AbstractDependencyUpdatesReport
     @Inject
     protected DependencyUpdatesReportMojo(
             I18N i18n,
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
-        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactHandlerManager, repositorySystem, wagonMap, rendererFactory);
     }
 
     /**

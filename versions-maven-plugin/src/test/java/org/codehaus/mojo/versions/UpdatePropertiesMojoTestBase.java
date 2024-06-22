@@ -27,6 +27,7 @@ import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.eclipse.aether.RepositorySystem;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -43,14 +44,14 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase 
     public MojoRule mojoRule = new MojoRule(this);
 
     protected Path pomDir;
-    protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+    protected RepositorySystem repositorySystem;
     protected TestChangeRecorder changeRecorder;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         pomDir = createTempDir("update-property");
-        aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("default-artifact", new String[] {"1.0.0", "1.0.1-rc1", "1.1.0-alpha", "2.0.0-M1"});
             }
@@ -69,7 +70,7 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase 
     @SuppressWarnings("unchecked")
     protected <T extends Mojo> T setUpMojo(String goal) throws Exception {
         T mojo = (T) mojoRule.lookupConfiguredMojo(pomDir.toFile(), goal);
-        setVariableValueToObject(mojo, "aetherRepositorySystem", aetherRepositorySystem);
+        setVariableValueToObject(mojo, "repositorySystem", repositorySystem);
         setVariableValueToObject(mojo, "generateBackupPoms", false);
         setVariableValueToObject(mojo, "changeRecorderFormat", "test");
         changeRecorder = (TestChangeRecorder)

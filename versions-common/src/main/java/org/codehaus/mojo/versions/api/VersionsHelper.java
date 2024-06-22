@@ -104,21 +104,6 @@ public interface VersionsHelper {
             boolean optional);
 
     /**
-     * Shorthand method for <code>getArtifactFactory().createDependencyArtifact(...)</code>.
-     *
-     * @param groupId The group id.
-     * @param artifactId The artifact id.
-     * @param version The version.
-     * @param type The type.
-     * @param classifier The classifier.
-     * @param scope The scope.
-     * @return The corresponding dependency artifact.
-     * @since 1.0-beta-1
-     */
-    Artifact createDependencyArtifact(
-            String groupId, String artifactId, String version, String type, String classifier, String scope);
-
-    /**
      * Shorthand method for <code>repositorySystem.createDependencyArtifact(...)</code> which extracts the
      * parameters from the Dependency instance.
      *

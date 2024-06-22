@@ -34,7 +34,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -96,8 +95,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
         TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/simple"), tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "log", logger);
 
         mojo.execute();
@@ -124,8 +122,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
         TestChangeRecorder changeRecorder = new TestChangeRecorder();
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "log", logger);
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
@@ -155,8 +152,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
                 Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/conflict"), tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
         setVariableValueToObject(mojo, "log", logger);
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
@@ -183,8 +179,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
                 tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
         mojo.execute();
@@ -213,8 +208,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
                 tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
         mojo.execute();
@@ -242,8 +236,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
                 tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
         mojo.execute();
@@ -276,8 +269,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
                 Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/properties/child-parent"), tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "log", logger);
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
@@ -303,8 +295,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
                 tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
         mojo.execute();
@@ -337,8 +328,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
         UseDepVersionMojo mojo = (UseDepVersionMojo)
                 mojoRule.lookupConfiguredMojo(tempDir.resolve("child").toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
         setVariableValueToObject(mojo, "log", logger);
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
@@ -359,8 +349,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
         TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/issue-925"), tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
         setVariableValueToObject(mojo, "log", logger);
         mojo.depVersion = "2.0.0";
@@ -383,8 +372,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
         TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/issue-925"), tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
         mojo.depVersion = "2.0.0";
         mojo.forceVersion = true;
@@ -409,8 +397,7 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
         TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/issue-925"), tempDir);
         UseDepVersionMojo mojo = (UseDepVersionMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "use-dep-version");
         setVariableValueToObject(mojo, "reactorProjects", Collections.singletonList(mojo.getProject()));
-        setVariableValueToObject(mojo, "repositorySystem", mockRepositorySystem());
-        setVariableValueToObject(mojo, "aetherRepositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
         setVariableValueToObject(mojo, "log", logger);
         mojo.depVersion = "2.0.0";

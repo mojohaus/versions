@@ -29,13 +29,13 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -44,6 +44,7 @@ import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
+import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptyMap;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.interpolateVersion;
@@ -102,11 +103,11 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
 
     public AbstractDependencyUpdatesReportMojo(
             I18N i18n,
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
-        super(i18n, repositorySystem, aetherRepositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactHandlerManager, repositorySystem, wagonMap, rendererFactory);
     }
 
     /**

@@ -40,8 +40,8 @@ import static java.util.Collections.singletonList;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.TYPE_REGEX;
 import static org.codehaus.mojo.versions.model.TestIgnoreVersions.matches;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -100,7 +100,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = tempFile.getPath().toFile();
-            mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
                 {
                     put("dummy-api", new String[] {"1.0.0", "1.0.1", "1.1.0-M1", "1.2.0-SNAPSHOT"});
                 }
@@ -137,7 +137,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testVersionsWithQualifiersNotConsideredAsMinorUpdates() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
                         {
                             put(
@@ -174,7 +174,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testAllowMajorUpdatesFalse() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
                         {
                             put("default-dependency", new String[] {"1.0.0", "1.1.0", "2.0.0"});
@@ -206,7 +206,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testAllowMinorUpdatesFalse() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
                         {
                             put("default-dependency", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0"});
@@ -239,7 +239,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testAllowIncrementalUpdatesFalse() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
                         {
                             put("default-dependency", new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"});
@@ -273,7 +273,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testVersionsWithQualifiersNotConsideredAsIncrementalUpdates() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
                         {
                             put(
@@ -332,7 +332,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = tempFile.getPath().toFile();
-            mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
                 {
                     put("dummy-api", new String[] {"1.0.0", "1.0.1", "1.1.0-M1", "1.2.0-SNAPSHOT"});
                 }
@@ -355,7 +355,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = tempFile.getPath().toFile();
-            mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
                 {
                     put("dummy-api", new String[] {"2.0.1"});
                 }
@@ -371,7 +371,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testAllowSnapshots() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
                         {
                             put("default-dependency", new String[] {"2.0.0-SNAPSHOT"});
@@ -401,7 +401,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     private void testAllowUpdatesFromLesserSegments(String availableVersion) throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(new HashMap<String, String[]>() {
                         {
                             put("default-dependency", new String[] {availableVersion});

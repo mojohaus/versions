@@ -27,12 +27,12 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.eclipse.aether.RepositorySystem;
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,8 +43,8 @@ import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -59,25 +59,23 @@ public class UseLatestVersionsMojoTest {
 
     @Before
     public void setUp() throws Exception {
-        RepositorySystem repositorySystemMock = mockRepositorySystem();
-        org.eclipse.aether.RepositorySystem aetherRepositorySystem =
-                mockAetherRepositorySystem(new HashMap<String, String[]>() {
-                    {
-                        put("dependency-artifact", new String[] {
-                            "1.1.1-SNAPSHOT", "1.1.0", "1.1.0-SNAPSHOT", "1.0.0", "1.0.0-SNAPSHOT", "0.9.0"
-                        });
-                        put("poison-artifact", new String[] {
-                            "1.1.1.1-SNAPSHOT", "1.1.1.0", "1.1.1.0-SNAPSHOT", "1.0.0.0", "1.0.0.0-SNAPSHOT", "0.9.0.0"
-                        });
-                        put("other-artifact", new String[] {"1.0", "2.0"});
-                    }
+        RepositorySystem repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put(
+                        "dependency-artifact",
+                        new String[] {"1.1.1-SNAPSHOT", "1.1.0", "1.1.0-SNAPSHOT", "1.0.0", "1.0.0-SNAPSHOT", "0.9.0"});
+                put("poison-artifact", new String[] {
+                    "1.1.1.1-SNAPSHOT", "1.1.1.0", "1.1.1.0-SNAPSHOT", "1.0.0.0", "1.0.0.0-SNAPSHOT", "0.9.0.0"
                 });
+                put("other-artifact", new String[] {"1.0", "2.0"});
+            }
+        });
 
         changeRecorder = new TestChangeRecorder();
 
         mojo =
                 new UseLatestVersionsMojo(
-                        repositorySystemMock, aetherRepositorySystem, null, changeRecorder.asTestMap()) {
+                        mockArtifactHandlerManager(), repositorySystem, null, changeRecorder.asTestMap()) {
                     {
                         reactorProjects = emptyList();
                         MavenProject project = new MavenProject() {

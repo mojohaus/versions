@@ -40,14 +40,15 @@ import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.codehaus.plexus.i18n.I18N;
+import org.eclipse.aether.RepositorySystem;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
@@ -67,7 +68,7 @@ public class DependencyUpdatesReportMojoTest {
         TestDependencyUpdatesReportMojo() {
             super(
                     MOCK_I18N,
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(),
                     null,
                     new ReportRendererFactoryImpl(MOCK_I18N));
@@ -86,9 +87,8 @@ public class DependencyUpdatesReportMojoTest {
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withAetherRepositorySystem(
-                org.eclipse.aether.RepositorySystem repositorySystem) {
-            this.aetherRepositorySystem = repositorySystem;
+        public TestDependencyUpdatesReportMojo withAetherRepositorySystem(RepositorySystem repositorySystem) {
+            this.repositorySystem = repositorySystem;
             return this;
         }
 

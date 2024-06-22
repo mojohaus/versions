@@ -99,7 +99,7 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = outputPath.toFile();
         mojo.setPluginContext(new HashMap<>());
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("default-plugin", new String[] {"1.0.0"});
                 put("maven-enforcer-plugin", new String[] {"3.0.0"});

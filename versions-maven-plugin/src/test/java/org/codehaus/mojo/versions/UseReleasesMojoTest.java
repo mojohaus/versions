@@ -22,8 +22,8 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.startsWith;
@@ -57,7 +57,7 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase {
     public void setUp() throws IllegalAccessException {
         changeRecorder = new TestChangeRecorder();
         mojo = new UseReleasesMojo(
-                mockRepositorySystem(), mockAetherRepositorySystem(), null, changeRecorder.asTestMap());
+                mockArtifactHandlerManager(), mockAetherRepositorySystem(), null, changeRecorder.asTestMap());
         setVariableValueToObject(mojo, "reactorProjects", emptyList());
         mojo.project = new MavenProject() {
             {
@@ -178,7 +178,7 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase {
     @Test
     public void testFailIfNotReplaced()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem(singletonMap("test-artifact", new String[] {}));
+        mojo.repositorySystem = mockAetherRepositorySystem(singletonMap("test-artifact", new String[] {}));
         mojo.getProject()
                 .setDependencies(singletonList(DependencyBuilder.newBuilder()
                         .withGroupId("default-group")

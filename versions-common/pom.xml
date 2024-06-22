@@ -122,6 +122,12 @@
       <artifactId>commons-io</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.mojo.versions</groupId>
+      <artifactId>versions-test</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

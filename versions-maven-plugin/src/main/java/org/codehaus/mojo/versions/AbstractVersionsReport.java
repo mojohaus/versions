@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.execution.MavenSession;
@@ -32,13 +33,13 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.plexus.i18n.I18N;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Base class for all versions reports.
@@ -55,7 +56,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
      */
     protected I18N i18n;
 
-    protected RepositorySystem repositorySystem;
+    protected ArtifactHandlerManager artifactHandlerManager;
 
     /**
      * Skip entire check.
@@ -66,9 +67,9 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     private boolean skip;
 
     /**
-     * The (injected) {@link org.eclipse.aether.RepositorySystem aetherRepositorySystem} instance.
+     * The (injected) {@link RepositorySystem repositorySystem} instance.
      */
-    protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+    protected RepositorySystem repositorySystem;
 
     /**
      * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
@@ -167,13 +168,13 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
 
     protected AbstractVersionsReport(
             I18N i18n,
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
         this.i18n = i18n;
+        this.artifactHandlerManager = artifactHandlerManager;
         this.repositorySystem = repositorySystem;
-        this.aetherRepositorySystem = aetherRepositorySystem;
         this.wagonMap = wagonMap;
         this.rendererFactory = rendererFactory;
     }
@@ -182,8 +183,8 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         if (helper == null) {
             try {
                 helper = new DefaultVersionsHelper.Builder()
+                        .withArtifactHandlerManager(artifactHandlerManager)
                         .withRepositorySystem(repositorySystem)
-                        .withAetherRepositorySystem(aetherRepositorySystem)
                         .withWagonMap(wagonMap)
                         .withServerId(serverId)
                         .withRulesUri(rulesUri)

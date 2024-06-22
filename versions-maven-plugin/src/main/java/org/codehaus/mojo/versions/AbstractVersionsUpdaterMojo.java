@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -43,7 +44,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
@@ -61,6 +61,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -80,14 +81,14 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected MavenProject project;
 
     /**
-     * The (injected) {@link RepositorySystem} instance.
+     * The (injected) {@link ArtifactHandlerManager} instance.
      */
-    protected final RepositorySystem repositorySystem;
+    protected final ArtifactHandlerManager artifactHandlerManager;
 
     /**
      * The (injected) {@link org.eclipse.aether.RepositorySystem} instance.
      */
-    protected org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+    protected RepositorySystem repositorySystem;
 
     /**
      * @since 1.0-alpha-1
@@ -203,12 +204,12 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     @Inject
     protected AbstractVersionsUpdaterMojo(
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
+        this.artifactHandlerManager = artifactHandlerManager;
         this.repositorySystem = repositorySystem;
-        this.aetherRepositorySystem = aetherRepositorySystem;
         this.wagonMap = wagonMap;
         this.changeRecorders = changeRecorders;
     }
@@ -216,8 +217,8 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     public VersionsHelper getHelper() throws MojoExecutionException {
         if (helper == null) {
             helper = new DefaultVersionsHelper.Builder()
+                    .withArtifactHandlerManager(artifactHandlerManager)
                     .withRepositorySystem(repositorySystem)
-                    .withAetherRepositorySystem(aetherRepositorySystem)
                     .withWagonMap(wagonMap)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)

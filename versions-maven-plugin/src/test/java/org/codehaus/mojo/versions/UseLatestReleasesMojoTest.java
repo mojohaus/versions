@@ -19,16 +19,17 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.HashMap;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.eclipse.aether.RepositorySystem;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,8 +40,8 @@ import static java.util.Collections.singletonList;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -54,46 +55,43 @@ public class UseLatestReleasesMojoTest {
 
     @Before
     public void setUp() throws Exception {
-        RepositorySystem repositorySystemMock = mockRepositorySystem();
-        org.eclipse.aether.RepositorySystem aetherRepositorySystem =
-                mockAetherRepositorySystem(new HashMap<String, String[]>() {
-                    {
-                        put("dependency-artifact", new String[] {"0.9.0", "1.0.0-beta"});
-                    }
-                });
+        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
+        RepositorySystem repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("dependency-artifact", new String[] {"0.9.0", "1.0.0-beta"});
+            }
+        });
 
         changeRecorder = new TestChangeRecorder();
 
-        mojo =
-                new UseLatestReleasesMojo(
-                        repositorySystemMock, aetherRepositorySystem, null, changeRecorder.asTestMap()) {
+        mojo = new UseLatestReleasesMojo(artifactHandlerManager, repositorySystem, null, changeRecorder.asTestMap()) {
+            {
+                reactorProjects = emptyList();
+                MavenProject project = new MavenProject() {
                     {
-                        reactorProjects = emptyList();
-                        MavenProject project = new MavenProject() {
+                        setModel(new Model() {
                             {
-                                setModel(new Model() {
-                                    {
-                                        setGroupId("default-group");
-                                        setArtifactId("project-artifact");
-                                        setVersion("1.0.0-SNAPSHOT");
+                                setGroupId("default-group");
+                                setArtifactId("project-artifact");
+                                setVersion("1.0.0-SNAPSHOT");
 
-                                        setDependencies(singletonList(DependencyBuilder.newBuilder()
-                                                .withGroupId("default-group")
-                                                .withArtifactId("dependency-artifact")
-                                                .withVersion("0.9.0")
-                                                .withScope(SCOPE_COMPILE)
-                                                .withType("jar")
-                                                .withClassifier("default")
-                                                .build()));
-                                    }
-                                });
+                                setDependencies(singletonList(DependencyBuilder.newBuilder()
+                                        .withGroupId("default-group")
+                                        .withArtifactId("dependency-artifact")
+                                        .withVersion("0.9.0")
+                                        .withScope(SCOPE_COMPILE)
+                                        .withType("jar")
+                                        .withClassifier("default")
+                                        .build()));
                             }
-                        };
-                        setProject(project);
-
-                        session = mockMavenSession();
+                        });
                     }
                 };
+                setProject(project);
+
+                session = mockMavenSession();
+            }
+        };
     }
 
     @Test
@@ -121,7 +119,7 @@ public class UseLatestReleasesMojoTest {
     @Test
     public void testAllowDowngrade()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("artifactA", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
             }
@@ -154,7 +152,7 @@ public class UseLatestReleasesMojoTest {
     @Test
     public void testDisallowDowngrade()
             throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
-        mojo.aetherRepositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("artifactA", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
             }

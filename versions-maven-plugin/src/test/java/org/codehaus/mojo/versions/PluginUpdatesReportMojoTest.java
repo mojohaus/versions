@@ -28,24 +28,22 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
-import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.codehaus.plexus.i18n.I18N;
+import org.eclipse.aether.RepositorySystem;
 import org.junit.Test;
 
-import static org.apache.maven.artifact.Artifact.SCOPE_RUNTIME;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -53,9 +51,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Basic tests for {@linkplain PluginUpdatesReportMojo}.
@@ -69,7 +64,7 @@ public class PluginUpdatesReportMojoTest {
         TestPluginUpdatesReportMojo() {
             super(
                     MOCK_I18N,
-                    mockRepositorySystem(),
+                    mockArtifactHandlerManager(),
                     mockAetherRepositorySystem(),
                     null,
                     new ReportRendererFactoryImpl(MOCK_I18N));
@@ -87,9 +82,8 @@ public class PluginUpdatesReportMojoTest {
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withAetherRepositorySystem(
-                org.eclipse.aether.RepositorySystem repositorySystem) {
-            this.aetherRepositorySystem = repositorySystem;
+        public TestPluginUpdatesReportMojo withAetherRepositorySystem(RepositorySystem repositorySystem) {
+            this.repositorySystem = repositorySystem;
             return this;
         }
 
@@ -116,22 +110,6 @@ public class PluginUpdatesReportMojoTest {
         public TestPluginUpdatesReportMojo withIgnoredVersions(Set<String> ignoredVersions) {
             this.ignoredVersions = ignoredVersions;
             return this;
-        }
-
-        private static RepositorySystem mockRepositorySystem() {
-            RepositorySystem repositorySystem = mock(RepositorySystem.class);
-            when(repositorySystem.createPluginArtifact(any(Plugin.class))).thenAnswer(invocation -> {
-                Plugin plugin = invocation.getArgument(0);
-                return new DefaultArtifact(
-                        plugin.getGroupId(),
-                        plugin.getArtifactId(),
-                        plugin.getVersion(),
-                        SCOPE_RUNTIME,
-                        "maven-plugin",
-                        "jar",
-                        new DefaultArtifactHandlerStub("default"));
-            });
-            return repositorySystem;
         }
     }
 

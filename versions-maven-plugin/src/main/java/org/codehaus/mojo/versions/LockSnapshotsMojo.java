@@ -31,18 +31,19 @@ import java.util.regex.Pattern;
 
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.resolution.VersionRequest;
 import org.eclipse.aether.resolution.VersionResolutionException;
 import org.eclipse.aether.resolution.VersionResult;
@@ -70,11 +71,11 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     @Inject
     public LockSnapshotsMojo(
+            ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            org.eclipse.aether.RepositorySystem aetherRepositorySystem,
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
-        super(repositorySystem, aetherRepositorySystem, wagonMap, changeRecorders);
+        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
     }
 
     /**
@@ -180,7 +181,7 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
      */
     private Optional<String> resolveSnapshotVersion(Artifact artifact) throws VersionResolutionException {
         getLog().debug("Resolving snapshot version for artifact: " + artifact);
-        VersionResult versionResult = aetherRepositorySystem.resolveVersion(
+        VersionResult versionResult = repositorySystem.resolveVersion(
                 session.getRepositorySession(),
                 new VersionRequest(
                         RepositoryUtils.toArtifact(artifact),

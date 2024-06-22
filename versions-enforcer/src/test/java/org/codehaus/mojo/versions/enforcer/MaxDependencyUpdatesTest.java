@@ -20,13 +20,14 @@ package org.codehaus.mojo.versions.enforcer;
 
 import java.util.HashMap;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.enforcer.rule.api.EnforcerLogger;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
+import org.eclipse.aether.RepositorySystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -58,8 +60,7 @@ class MaxDependencyUpdatesTest {
     @Mock
     private RepositorySystem repositorySystem;
 
-    @Mock
-    private org.eclipse.aether.RepositorySystem aetherRepositorySystem;
+    private ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
 
     @InjectMocks
     private MaxDependencyUpdates maxDependencyUpdates;
@@ -67,7 +68,6 @@ class MaxDependencyUpdatesTest {
     @BeforeEach
     public void setup() {
         maxDependencyUpdates.setLog(enforcerLogger);
-        MockUtils.prepareRepositorySystemMock(repositorySystem);
     }
 
     @Test
@@ -85,13 +85,12 @@ class MaxDependencyUpdatesTest {
                                 .withVersion("1.0.0")
                                 .build()));
 
-        MockUtils.prepareAetherRepositorySystemMockForVersionRange(
-                aetherRepositorySystem, new HashMap<String, String[]>() {
-                    {
-                        put("artifactA", new String[] {"1.0.0", "2.0.0"});
-                        put("artifactB", new String[] {"1.0.0", "2.0.0"});
-                    }
-                });
+        MockUtils.prepareAetherRepositorySystemMockForVersionRange(repositorySystem, new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {"1.0.0", "2.0.0"});
+                put("artifactB", new String[] {"1.0.0", "2.0.0"});
+            }
+        });
 
         maxDependencyUpdates.maxUpdates = 1;
         Exception e = assertThrows(EnforcerRuleException.class, () -> maxDependencyUpdates.execute());
@@ -109,7 +108,7 @@ class MaxDependencyUpdatesTest {
                         .build()));
 
         MockUtils.prepareAetherRepositorySystemMockForVersionRange(
-                aetherRepositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "2.0.0"}));
+                repositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "2.0.0"}));
 
         maxDependencyUpdates.maxUpdates = 1;
         assertDoesNotThrow(() -> maxDependencyUpdates.execute());
@@ -131,13 +130,12 @@ class MaxDependencyUpdatesTest {
                                 .withVersion("1.0.0")
                                 .build()));
 
-        MockUtils.prepareAetherRepositorySystemMockForVersionRange(
-                aetherRepositorySystem, new HashMap<String, String[]>() {
-                    {
-                        put("artifactA", new String[] {"1.0.0", "2.0.0"});
-                        put("artifactB", new String[] {"1.0.0"});
-                    }
-                });
+        MockUtils.prepareAetherRepositorySystemMockForVersionRange(repositorySystem, new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {"1.0.0", "2.0.0"});
+                put("artifactB", new String[] {"1.0.0"});
+            }
+        });
 
         maxDependencyUpdates.dependencyIncludes = singletonList("group:artifactB");
         assertDoesNotThrow(() -> maxDependencyUpdates.execute());
@@ -159,13 +157,12 @@ class MaxDependencyUpdatesTest {
                                 .withVersion("1.0.0")
                                 .build()));
 
-        MockUtils.prepareAetherRepositorySystemMockForVersionRange(
-                aetherRepositorySystem, new HashMap<String, String[]>() {
-                    {
-                        put("artifactA", new String[] {"1.0.0", "2.0.0"});
-                        put("artifactB", new String[] {"1.0.0"});
-                    }
-                });
+        MockUtils.prepareAetherRepositorySystemMockForVersionRange(repositorySystem, new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {"1.0.0", "2.0.0"});
+                put("artifactB", new String[] {"1.0.0"});
+            }
+        });
 
         maxDependencyUpdates.dependencyExcludes = singletonList("group:artifactA");
         assertDoesNotThrow(() -> maxDependencyUpdates.execute());
@@ -187,13 +184,12 @@ class MaxDependencyUpdatesTest {
                                 .withVersion("1.0.0")
                                 .build()));
 
-        MockUtils.prepareAetherRepositorySystemMockForVersionRange(
-                aetherRepositorySystem, new HashMap<String, String[]>() {
-                    {
-                        put("artifactA", new String[] {"1.0.0", "2.0.0"});
-                        put("artifactB", new String[] {"1.0.0"});
-                    }
-                });
+        MockUtils.prepareAetherRepositorySystemMockForVersionRange(repositorySystem, new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {"1.0.0", "2.0.0"});
+                put("artifactB", new String[] {"1.0.0"});
+            }
+        });
 
         maxDependencyUpdates.dependencyIncludes = singletonList("group:*");
         maxDependencyUpdates.dependencyExcludes = singletonList("group:artifactA");
@@ -211,7 +207,7 @@ class MaxDependencyUpdatesTest {
                         .build()));
 
         MockUtils.prepareAetherRepositorySystemMockForVersionRange(
-                aetherRepositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1"}));
+                repositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1"}));
 
         maxDependencyUpdates.ignoreSubIncrementalUpdates = true;
         assertDoesNotThrow(() -> maxDependencyUpdates.execute());
@@ -227,7 +223,7 @@ class MaxDependencyUpdatesTest {
                         .build()));
 
         MockUtils.prepareAetherRepositorySystemMockForVersionRange(
-                aetherRepositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1", "1.0.1"}));
+                repositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1", "1.0.1"}));
 
         maxDependencyUpdates.ignoreIncrementalUpdates = true;
         assertDoesNotThrow(() -> maxDependencyUpdates.execute());
@@ -244,7 +240,7 @@ class MaxDependencyUpdatesTest {
                         .build()));
 
         MockUtils.prepareAetherRepositorySystemMockForVersionRange(
-                aetherRepositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0"}));
+                repositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0"}));
 
         maxDependencyUpdates.ignoreMinorUpdates = true;
         assertDoesNotThrow(() -> maxDependencyUpdates.execute());
