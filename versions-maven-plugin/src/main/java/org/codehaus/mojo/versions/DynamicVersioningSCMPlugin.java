@@ -43,13 +43,14 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 /**
- * Maven plugin that uses SCM/VCS to enable dynamic versioning based on your version
+ * Maven plugin that uses SCM/VCS to enable dynamic versioning based on your
+ * version
  * control system.
  *
  * @author Jimisola Laursen
  * @since 2.17.0
  */
-@Mojo(name = "set-version-from-scm-tag", defaultPhase = LifecyclePhase.INITIALIZE)
+@Mojo(name = "use-dynamic-version-from-scm", defaultPhase = LifecyclePhase.INITIALIZE)
 public class DynamicVersioningSCMPlugin extends AbstractMojo {
 
     /**
@@ -85,7 +86,8 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
     protected String useVersion;
 
     /**
-     * The default version used when SCM repository has no commit or no semantic version
+     * The default version used when SCM repository has no commit or no semantic
+     * version
      * tag.
      *
      * @since 2.17.0
@@ -116,9 +118,12 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
     }
 
     /**
-     * Returns the resolved version based on SCM tag information for use with Maven CI.
-     * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the
-     * plugin itself
+     * Returns the resolved version based on SCM tag information for use with Maven
+     * CI.
+     *
+     * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with
+     *                                                        the
+     *                                                        plugin itself
      */
     protected VersionInformation getVersionFromSCM() throws MojoExecutionException {
         // check for repository
