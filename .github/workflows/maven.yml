@@ -26,6 +26,7 @@ jobs:
     with:
       ff-goal: 'install'                # site use project version for reporting, no ITs
       verify-goal: '-P run-its verify'
+      maven4-enabled: true
 
 #  deploy:
 #    name: Deploy
