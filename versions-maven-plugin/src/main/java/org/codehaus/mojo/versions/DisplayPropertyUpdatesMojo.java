@@ -137,7 +137,7 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.14.0
      */
     @Parameter(property = "includeParent", defaultValue = "false")
-    protected boolean includeParent = true;
+    protected boolean includeParent;
 
     // -------------------------- STATIC METHODS --------------------------
 
