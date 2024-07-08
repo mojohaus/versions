@@ -131,7 +131,7 @@
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
     <byteBuddyVersion>1.14.17</byteBuddyVersion>
     <!-- use the same version as in Maven core -->
-    <mavenResolverVersion>1.4.1</mavenResolverVersion>
+    <mavenResolverVersion>2.0.0</mavenResolverVersion>
 
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
     <!-- execute ITS in parallel by default -->
