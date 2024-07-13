@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <!-- ========================================================================
+       Basic project information
+       ======================================================================== -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.company.test</groupId>
+    <artifactId>parent</artifactId>
+    <version>100-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>child</artifactId>
+  <packaging>pom</packaging>
+ 
+  <!-- ========================================================================
+       Multi-Module Build: list of child modules
+       ======================================================================== -->
+  <modules>
+    <module>grandchild</module>
+  </modules>
+
+</project>
