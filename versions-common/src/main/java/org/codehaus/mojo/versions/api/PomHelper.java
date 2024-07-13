@@ -76,8 +76,8 @@ import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
+import org.codehaus.plexus.util.xml.XmlStreamReader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.codehaus.stax2.XMLInputFactory2;
 
@@ -90,8 +90,38 @@ import static java.util.stream.IntStream.range;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public class PomHelper {
+public final class PomHelper {
     public static final String APACHE_MAVEN_PLUGINS_GROUPID = "org.apache.maven.plugins";
+
+    public static final Pattern PATTERN_PROJECT_PROPERTIES = Pattern.compile("/project/properties");
+
+    public static final Pattern PATTERN_PROJECT_PROFILE = Pattern.compile("/project/profiles/profile");
+
+    public static final Pattern PATTERN_PROJECT_PROFILE_ID = Pattern.compile("/project/profiles/profile/id");
+
+    public static final Pattern PATTERN_PROJECT_VERSION = Pattern.compile("/project/version");
+
+    public static final Pattern PATTERN_PROJECT_PARENT_VERSION = Pattern.compile("/project/parent/version");
+
+    public static final Pattern PATTERN_PROJECT_DEPENDENCY = Pattern.compile("/project" + "(/profiles/profile)?"
+            + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
+            + "/dependencies/dependency");
+
+    public static final Pattern PATTERN_PROJECT_DEPENDENCY_VERSION = Pattern.compile("/project" + "(/profiles/profile)?"
+            + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
+            + "/dependencies/dependency"
+            + "((/groupId)|(/artifactId)|(/version))");
+
+    public static final Pattern PATTERN_PROJECT_PLUGIN = Pattern.compile(
+            "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin");
+
+    public static final Pattern PATTERN_PROJECT_PLUGIN_VERSION = Pattern.compile("/project" + "(/profiles/profile)?"
+            + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin"
+            + "((/groupId)|(/artifactId)|(/version))");
+
+    private PomHelper() {
+        // utility class
+    }
 
     /**
      * Gets the raw model before any interpolation what-so-ever.
@@ -173,12 +203,12 @@ public class PomHelper {
         boolean madeReplacement = false;
         if (profileId == null) {
             propertyRegex = Pattern.compile("/project/properties/" + RegexUtils.quote(property));
-            matchScopeRegex = Pattern.compile("/project/properties");
+            matchScopeRegex = PATTERN_PROJECT_PROPERTIES;
             projectProfileId = null;
         } else {
             propertyRegex = Pattern.compile("/project/profiles/profile/properties/" + RegexUtils.quote(property));
-            matchScopeRegex = Pattern.compile("/project/profiles/profile");
-            projectProfileId = Pattern.compile("/project/profiles/profile/id");
+            matchScopeRegex = PATTERN_PROJECT_PROFILE;
+            projectProfileId = PATTERN_PROJECT_PROFILE_ID;
         }
 
         pom.rewind();
@@ -362,7 +392,6 @@ public class PomHelper {
     public static String getProjectVersion(final ModifiedPomXMLEventReader pom) throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
-        final Pattern matchScopeRegex = Pattern.compile("/project/version");
 
         pom.rewind();
 
@@ -372,12 +401,12 @@ public class PomHelper {
                 stack.push(path);
                 path = path + "/" + event.asStartElement().getName().getLocalPart();
 
-                if (matchScopeRegex.matcher(path).matches()) {
+                if (PATTERN_PROJECT_VERSION.matcher(path).matches()) {
                     pom.mark(0);
                 }
             }
             if (event.isEndElement()) {
-                if (matchScopeRegex.matcher(path).matches()) {
+                if (PATTERN_PROJECT_VERSION.matcher(path).matches()) {
                     pom.mark(1);
                     if (pom.hasMark(0) && pom.hasMark(1)) {
                         return pom.getBetween(0, 1).trim();
@@ -403,9 +432,7 @@ public class PomHelper {
             throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
-        final Pattern matchScopeRegex;
         boolean madeReplacement = false;
-        matchScopeRegex = Pattern.compile("/project/parent/version");
 
         pom.rewind();
 
@@ -415,12 +442,12 @@ public class PomHelper {
                 stack.push(path);
                 path = path + "/" + event.asStartElement().getName().getLocalPart();
 
-                if (matchScopeRegex.matcher(path).matches()) {
+                if (PATTERN_PROJECT_PARENT_VERSION.matcher(path).matches()) {
                     pom.mark(0);
                 }
             }
             if (event.isEndElement()) {
-                if (matchScopeRegex.matcher(path).matches()) {
+                if (PATTERN_PROJECT_PARENT_VERSION.matcher(path).matches()) {
                     pom.mark(1);
                     if (pom.hasMark(0) && pom.hasMark(1)) {
                         pom.replaceBetween(0, 1, value);
@@ -514,15 +541,6 @@ public class PomHelper {
         boolean haveArtifactId = false;
         boolean haveOldVersion = false;
 
-        final Pattern matchScopeRegex = Pattern.compile("/project" + "(/profiles/profile)?"
-                + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
-                + "/dependencies/dependency");
-
-        final Pattern matchTargetRegex = Pattern.compile("/project" + "(/profiles/profile)?"
-                + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
-                + "/dependencies/dependency"
-                + "((/groupId)|(/artifactId)|(/version))");
-
         pom.rewind();
 
         while (pom.hasNext()) {
@@ -532,7 +550,7 @@ public class PomHelper {
                 final String elementName = event.asStartElement().getName().getLocalPart();
                 path = path + "/" + elementName;
 
-                if (matchScopeRegex.matcher(path).matches()) {
+                if (PATTERN_PROJECT_DEPENDENCY.matcher(path).matches()) {
                     // we're in a new match scope
                     // reset any previous partial matches
                     inMatchScope = true;
@@ -542,7 +560,8 @@ public class PomHelper {
                     haveGroupId = false;
                     haveArtifactId = false;
                     haveOldVersion = false;
-                } else if (inMatchScope && matchTargetRegex.matcher(path).matches()) {
+                } else if (inMatchScope
+                        && PATTERN_PROJECT_DEPENDENCY_VERSION.matcher(path).matches()) {
                     if ("groupId".equals(elementName)) {
                         haveGroupId =
                                 groupId.equals(evaluate(pom.getElementText().trim(), implicitProperties));
@@ -557,7 +576,7 @@ public class PomHelper {
                 }
             }
             if (event.isEndElement()) {
-                if (matchTargetRegex.matcher(path).matches()
+                if (PATTERN_PROJECT_DEPENDENCY_VERSION.matcher(path).matches()
                         && "version".equals(event.asEndElement().getName().getLocalPart())) {
                     pom.mark(1);
                     String compressedPomVersion =
@@ -570,7 +589,7 @@ public class PomHelper {
                         // fall back to string comparison
                         haveOldVersion = compressedOldVersion.equals(compressedPomVersion);
                     }
-                } else if (matchScopeRegex.matcher(path).matches()) {
+                } else if (PATTERN_PROJECT_DEPENDENCY.matcher(path).matches()) {
                     if (inMatchScope
                             && pom.hasMark(0)
                             && pom.hasMark(1)
@@ -720,21 +739,12 @@ public class PomHelper {
             throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
-        final Pattern matchScopeRegex;
-        final Pattern matchTargetRegex;
         boolean inMatchScope = false;
         boolean madeReplacement = false;
         boolean haveGroupId = false;
         boolean needGroupId = groupId != null && !APACHE_MAVEN_PLUGINS_GROUPID.equals(groupId);
         boolean haveArtifactId = false;
         boolean haveOldVersion = false;
-
-        matchScopeRegex = Pattern.compile(
-                "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin");
-
-        matchTargetRegex = Pattern.compile("/project" + "(/profiles/profile)?"
-                + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin"
-                + "((/groupId)|(/artifactId)|(/version))");
 
         pom.rewind();
 
@@ -745,7 +755,7 @@ public class PomHelper {
                 final String elementName = event.asStartElement().getName().getLocalPart();
                 path = path + "/" + elementName;
 
-                if (matchScopeRegex.matcher(path).matches()) {
+                if (PATTERN_PROJECT_PLUGIN.matcher(path).matches()) {
                     // we're in a new match scope
                     // reset any previous partial matches
                     inMatchScope = true;
@@ -755,7 +765,8 @@ public class PomHelper {
                     haveGroupId = false;
                     haveArtifactId = false;
                     haveOldVersion = false;
-                } else if (inMatchScope && matchTargetRegex.matcher(path).matches()) {
+                } else if (inMatchScope
+                        && PATTERN_PROJECT_PLUGIN_VERSION.matcher(path).matches()) {
                     if ("groupId".equals(elementName)) {
                         haveGroupId = pom.getElementText().trim().equals(groupId);
                         path = stack.pop();
@@ -768,7 +779,7 @@ public class PomHelper {
                 }
             }
             if (event.isEndElement()) {
-                if (matchTargetRegex.matcher(path).matches()
+                if (PATTERN_PROJECT_PLUGIN_VERSION.matcher(path).matches()
                         && "version".equals(event.asEndElement().getName().getLocalPart())) {
                     pom.mark(1);
 
@@ -779,7 +790,7 @@ public class PomHelper {
                         // fall back to string comparison
                         haveOldVersion = oldVersion.equals(pom.getBetween(0, 1).trim());
                     }
-                } else if (matchScopeRegex.matcher(path).matches()) {
+                } else if (PATTERN_PROJECT_PLUGIN.matcher(path).matches()) {
                     if (inMatchScope
                             && pom.hasMark(0)
                             && pom.hasMark(1)
@@ -1524,7 +1535,7 @@ public class PomHelper {
      * @throws java.io.IOException when things go wrong.
      */
     public static StringBuilder readXmlFile(File outFile) throws IOException {
-        try (Reader reader = ReaderFactory.newXmlReader(outFile)) {
+        try (Reader reader = new XmlStreamReader(outFile)) {
             return new StringBuilder(IOUtil.toString(reader));
         }
     }
