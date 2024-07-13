@@ -5,16 +5,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
@@ -29,12 +23,10 @@ import org.junit.Test;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 
 public class SetMojoTest extends AbstractMojoTestCase {
     @Rule
@@ -238,54 +230,5 @@ public class SetMojoTest extends AbstractMojoTestCase {
         assertThat(
                 String.join("", Files.readAllLines(tempDir.resolve("child-webapp/pom.xml"))),
                 matchesRegex(".*\\Q<artifactId>child-webapp</artifactId>\\E\\s*" + "\\Q<version>1.0</version>\\E.*"));
-    }
-
-    @Test
-    public void testComputeChildren() {
-        Map<Pair<String, String>, Set<Model>> children = SetMojo.computeChildren(new HashMap<File, Model>() {
-            {
-                put(new File("parent"), new Model() {
-                    {
-                        setArtifactId("parent");
-                        setParent(new Parent() {
-                            {
-                                setGroupId("default");
-                                setArtifactId("superParent");
-                            }
-                        });
-                    }
-                });
-                put(new File("child2"), new Model() {
-                    {
-                        setArtifactId("child2");
-                        setParent(new Parent() {
-                            {
-                                setGroupId("default");
-                                setArtifactId("superParent");
-                            }
-                        });
-                    }
-                });
-                put(new File("superParent"), new Model() {
-                    {
-                        setArtifactId("superParent");
-                    }
-                });
-                put(new File("child"), new Model() {
-                    {
-                        setArtifactId("child");
-                        setParent(new Parent() {
-                            {
-                                setGroupId("default");
-                                setArtifactId("parent");
-                            }
-                        });
-                    }
-                });
-            }
-        });
-        assertThat(children.get(new ImmutablePair<>("default", "superParent")), hasSize(2));
-        assertThat(children.get(new ImmutablePair<>("default", "parent")), hasSize(1));
-        assertThat(children.get(new ImmutablePair<>("default", "child")), is(nullValue()));
     }
 }

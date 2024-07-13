@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <!-- =======================================================================
+    Basic project information
+    ======================================================================== -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.company.test</groupId>
+  <artifactId>grandparent</artifactId>
+  <version>1</version>
+  <packaging>pom</packaging>
+
+  <url>https://github.com/mojohaus/versions/issues/1103</url>
+
+  <!-- ========================================================================
+    Multi-Module Build: list of child modules
+    ======================================================================== -->
+  <modules>
+    <module>parent</module>
+  </modules>
+
+</project>
