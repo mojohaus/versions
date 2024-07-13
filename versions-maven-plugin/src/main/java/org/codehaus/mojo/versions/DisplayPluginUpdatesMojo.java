@@ -125,6 +125,9 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     private static final String FROM_SUPER_POM = "(from super-pom) ";
 
+    public static final Pattern PATTERN_PROJECT_PLUGIN = Pattern.compile(
+            "/project(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin");
+
     /**
      * @since 1.0-alpha-1
      */
@@ -201,9 +204,6 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                     StringBuilder buf = new StringBuilder(IOUtil.toString(reader));
                     ModifiedPomXMLEventReader pom = newModifiedPomXER(buf, superPom.toString());
 
-                    Pattern pathRegex = Pattern.compile("/project(/profiles/profile)?"
-                            + "((/build(/pluginManagement)?)|(/reporting))"
-                            + "/plugins/plugin");
                     Stack<StackState> pathStack = new Stack<>();
                     StackState curState = null;
                     while (pom.hasNext()) {
@@ -215,7 +215,9 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                             if (curState != null) {
                                 String elementName =
                                         event.asStartElement().getName().getLocalPart();
-                                if (pathRegex.matcher(curState.path).matches()) {
+                                if (PATTERN_PROJECT_PLUGIN
+                                        .matcher(curState.path)
+                                        .matches()) {
                                     if ("groupId".equals(elementName)) {
                                         curState.groupId = pom.getElementText().trim();
                                         continue;
@@ -236,7 +238,9 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                         } else if (event.isEndElement()) {
                             if (curState != null
                                     && curState.artifactId != null
-                                    && pathRegex.matcher(curState.path).matches()) {
+                                    && PATTERN_PROJECT_PLUGIN
+                                            .matcher(curState.path)
+                                            .matches()) {
                                 result.putIfAbsent(
                                         Plugin.constructKey(
                                                 curState.groupId == null
@@ -755,8 +759,6 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         Set<String> result = new HashSet<>();
         ModifiedPomXMLEventReader pom = newModifiedPomXER(pomContents, path);
 
-        Pattern pathRegex = Pattern.compile(
-                "/project(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin");
         Stack<StackState> pathStack = new Stack<>();
         StackState curState = null;
         while (pom.hasNext()) {
@@ -766,7 +768,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 pathStack.clear();
             } else if (event.isStartElement()) {
                 String elementName = event.asStartElement().getName().getLocalPart();
-                if (curState != null && pathRegex.matcher(curState.path).matches()) {
+                if (curState != null
+                        && PATTERN_PROJECT_PLUGIN.matcher(curState.path).matches()) {
                     if ("groupId".equals(elementName)) {
                         curState.groupId = pom.getElementText().trim();
                         continue;
@@ -783,7 +786,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 pathStack.push(curState);
                 curState = new StackState(curState.path + "/" + elementName);
             } else if (event.isEndElement()) {
-                if (curState != null && pathRegex.matcher(curState.path).matches()) {
+                if (curState != null
+                        && PATTERN_PROJECT_PLUGIN.matcher(curState.path).matches()) {
                     if (curState.artifactId != null && curState.version != null) {
                         if (curState.groupId == null) {
                             curState.groupId = PomHelper.APACHE_MAVEN_PLUGINS_GROUPID;
