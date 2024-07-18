@@ -471,6 +471,7 @@ public final class PomHelper {
      * @param oldVersion The old version of the dependency.
      * @param newVersion The new version of the dependency.
      * @param model      The model to getModel the project properties from.
+     * @param logger     The logger to use.
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if something went wrong.
      */
@@ -481,7 +482,8 @@ public final class PomHelper {
             final String artifactId,
             final String oldVersion,
             final String newVersion,
-            final Model model)
+            final Model model,
+            final Log logger)
             throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
@@ -564,11 +566,11 @@ public final class PomHelper {
                         && PATTERN_PROJECT_DEPENDENCY_VERSION.matcher(path).matches()) {
                     if ("groupId".equals(elementName)) {
                         haveGroupId =
-                                groupId.equals(evaluate(pom.getElementText().trim(), implicitProperties));
+                                groupId.equals(evaluate(pom.getElementText().trim(), implicitProperties, logger));
                         path = stack.pop();
                     } else if ("artifactId".equals(elementName)) {
                         haveArtifactId =
-                                artifactId.equals(evaluate(pom.getElementText().trim(), implicitProperties));
+                                artifactId.equals(evaluate(pom.getElementText().trim(), implicitProperties, logger));
                         path = stack.pop();
                     } else if ("version".equals(elementName)) {
                         pom.mark(0);
@@ -617,9 +619,10 @@ public final class PomHelper {
      *
      * @param expr       The expression to evaluate.
      * @param properties The properties to substitute.
+     * @param logger  The logger to use.
      * @return The evaluated expression.
      */
-    public static String evaluate(String expr, Map<String, String> properties) {
+    public static String evaluate(String expr, Map<String, String> properties, Log logger) {
         if (expr == null) {
             return null;
         }
@@ -634,15 +637,15 @@ public final class PomHelper {
                         if (exprStartDelimiter >= 0) {
                             if (exprStartDelimiter > 0) {
                                 value = value.substring(0, exprStartDelimiter)
-                                        + evaluate(value.substring(exprStartDelimiter), properties);
+                                        + evaluate(value.substring(exprStartDelimiter), properties, logger);
                             } else {
-                                value = evaluate(value.substring(exprStartDelimiter), properties);
+                                value = evaluate(value.substring(exprStartDelimiter), properties, logger);
                             }
                         }
                     } else {
-                        // TODO find a way to log that and not use this System.out!!
-                        // this class could be a component with logger injected !!
-                        System.out.println("expression: " + expression + " no value ");
+                        // Because we work with the raw model, without interpolation, unevaluatable expressions are not
+                        // unexpected
+                        logger.debug("expression: " + expression + " no value ");
                     }
                     return value == null ? expr : value;
                 })
@@ -656,10 +659,10 @@ public final class PomHelper {
                             if (index > 0 && expr.charAt(index - 1) == '$') {
                                 retVal += expr.substring(index + 1, lastIndex + 1);
                             } else {
-                                retVal += evaluate(expr.substring(index, lastIndex + 1), properties);
+                                retVal += evaluate(expr.substring(index, lastIndex + 1), properties, logger);
                             }
 
-                            retVal += evaluate(expr.substring(lastIndex + 1), properties);
+                            retVal += evaluate(expr.substring(lastIndex + 1), properties, logger);
                             return retVal;
                         }
                     }

@@ -110,7 +110,8 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
                             dep.getArtifactId(),
                             dep.getVersion(),
                             project.getVersion(),
-                            getProject().getModel())) {
+                            getProject().getModel(),
+                            getLog())) {
                         getLog().info("Updated " + toString(dep) + " to version " + project.getVersion());
                     }
                     break;

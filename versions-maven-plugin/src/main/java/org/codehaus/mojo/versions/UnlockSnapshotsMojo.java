@@ -129,7 +129,8 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
                         dep.getArtifactId(),
                         dep.getVersion(),
                         unlockedVersion,
-                        getProject().getModel())) {
+                        getProject().getModel(),
+                        getLog())) {
 
                     getChangeRecorder()
                             .recordChange(DefaultDependencyChangeRecord.builder()

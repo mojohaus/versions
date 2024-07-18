@@ -233,9 +233,10 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                                         .orElse(Collections.emptyList())
                                         .stream()
                                         .map(e -> ExtensionBuilder.newBuilder()
-                                                .withGroupId(PomHelper.evaluate(e.getGroupId(), properties))
-                                                .withArtifactId(PomHelper.evaluate(e.getArtifactId(), properties))
-                                                .withVersion(PomHelper.evaluate(e.getVersion(), properties))
+                                                .withGroupId(PomHelper.evaluate(e.getGroupId(), properties, getLog()))
+                                                .withArtifactId(
+                                                        PomHelper.evaluate(e.getArtifactId(), properties, getLog()))
+                                                .withVersion(PomHelper.evaluate(e.getVersion(), properties, getLog()))
                                                 .build()));
                     }
                 }

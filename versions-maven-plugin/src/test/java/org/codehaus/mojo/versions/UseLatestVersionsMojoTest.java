@@ -129,7 +129,7 @@ public class UseLatestVersionsMojoTest {
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }
@@ -157,7 +157,7 @@ public class UseLatestVersionsMojoTest {
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }
@@ -181,7 +181,7 @@ public class UseLatestVersionsMojoTest {
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }
@@ -208,7 +208,7 @@ public class UseLatestVersionsMojoTest {
                     .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
                     .thenReturn(mojo.getProject().getModel());
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }
@@ -242,7 +242,7 @@ public class UseLatestVersionsMojoTest {
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }
@@ -283,7 +283,7 @@ public class UseLatestVersionsMojoTest {
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }
@@ -304,7 +304,7 @@ public class UseLatestVersionsMojoTest {
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }
@@ -327,7 +327,7 @@ public class UseLatestVersionsMojoTest {
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }
@@ -353,7 +353,7 @@ public class UseLatestVersionsMojoTest {
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(true);
             mojo.update(null);
         }

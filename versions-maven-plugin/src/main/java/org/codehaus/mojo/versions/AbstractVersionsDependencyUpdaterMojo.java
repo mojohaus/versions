@@ -561,7 +561,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
                 dep.getArtifactId(),
                 dep.getVersion(),
                 newVersion,
-                getProject().getModel())) {
+                getProject().getModel(),
+                getLog())) {
             if (getLog().isInfoEnabled()) {
                 getLog().info("Updated " + toString(dep) + " to version " + newVersion);
             }

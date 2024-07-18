@@ -89,7 +89,7 @@ public class LockSnapshotsMojoTest {
         LockSnapshotsMojo mojo = createMojo(repositorySystem);
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenThrow(new RuntimeException("Not supposed to modify the dependency"));
             mojo.lockSnapshots(null, mojo.project.getDependencies());
         }
@@ -103,7 +103,7 @@ public class LockSnapshotsMojoTest {
         LockSnapshotsMojo mojo = createMojo(repositorySystem);
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any()))
+                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
                     .thenThrow(new RuntimeException("Not supposed to modify the dependency"));
             mojo.lockSnapshots(null, mojo.project.getDependencies());
         }
