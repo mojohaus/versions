@@ -18,6 +18,7 @@ package org.codehaus.mojo.versions.utils;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -50,7 +51,7 @@ public final class CoreExtensionUtils {
             return Stream.empty();
         }
 
-        try (Reader reader = Files.newBufferedReader(extensionsFile)) {
+        try (Reader reader = Files.newBufferedReader(extensionsFile, Charset.defaultCharset())) {
             return new CoreExtensionsXpp3Reader()
                     .read(reader).getExtensions().stream().map(ex -> ExtensionBuilder.newBuilder()
                             .withGroupId(ex.getGroupId())
