@@ -26,6 +26,8 @@
       <item name="Replacing -SNAPSHOT versions with their corresponding releases" href="examples/use-releases.html"/>
       <item name="Changing the project version" href="examples/set.html"/>
       <item name="Changing aggregator project version" href="examples/setaggregator.html"/>
+      <item name="Recording Changes" href="examples/resolve-changes.html"/>
+      <item name="Using use-dynamic-version-from-scm goal" href="examples/use-dynamic-version-from-scm.html"/>
     </menu>
 
     <menu name="Reference">
