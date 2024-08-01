@@ -25,8 +25,10 @@ import javax.xml.stream.XMLStreamException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
@@ -277,6 +279,11 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
     private void resolvePropertyRanges(ModifiedPomXMLEventReader pom)
             throws XMLStreamException, MojoExecutionException {
 
+        if (includeProperties == null) {
+            Properties originalProperties = getProject().getOriginalModel().getProperties();
+            includeProperties =
+                    originalProperties.stringPropertyNames().stream().collect(Collectors.joining(","));
+        }
         Map<Property, PropertyVersions> propertyVersions = this.getHelper()
                 .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
                         .withMavenProject(getProject())
