@@ -42,7 +42,8 @@ public class DependencyVersionChanger extends AbstractVersionChanger {
                 versionChange.getArtifactId(),
                 versionChange.getOldVersion(),
                 versionChange.getNewVersion(),
-                getModel())) {
+                getModel(),
+                log)) {
             info("    Updating dependency " + versionChange.getGroupId() + ":" + versionChange.getArtifactId());
             info("        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion());
         }
