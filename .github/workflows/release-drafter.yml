@@ -4,10 +4,7 @@ on:
     branches:
       - master
   workflow_dispatch:
+
 jobs:
   update_release_draft:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: release-drafter/release-drafter@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: apache/maven-gh-actions-shared/.github/workflows/release-drafter.yml@v4
