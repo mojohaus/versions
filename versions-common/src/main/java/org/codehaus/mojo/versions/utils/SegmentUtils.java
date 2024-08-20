@@ -64,11 +64,11 @@ public class SegmentUtils {
      */
     public static Optional<Segment> determineUnchangedSegment(
             boolean allowMajorUpdates, boolean allowMinorUpdates, boolean allowIncrementalUpdates, Log log) {
-        if (log != null && !allowIncrementalUpdates) {
+        if (log != null && !allowIncrementalUpdates && allowMinorUpdates) {
             log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
         }
 
-        if (log != null && !allowMinorUpdates) {
+        if (log != null && !allowMinorUpdates && allowMajorUpdates) {
             log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
         }
 
