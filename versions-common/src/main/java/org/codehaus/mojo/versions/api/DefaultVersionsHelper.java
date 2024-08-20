@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -150,7 +151,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
      *
      * @since 2.12
      */
-    private final Map<String, Rule> artifactBestFitRule = new HashMap<>();
+    private final Map<String, Rule> artifactBestFitRule = new ConcurrentHashMap<>();
 
     private final List<RemoteRepository> remoteProjectRepositories;
 
@@ -441,7 +442,9 @@ public class DefaultVersionsHelper implements VersionsHelper {
             bestFit = rule;
         }
 
-        artifactBestFitRule.put(groupArtifactId, bestFit);
+        if (bestFit != null) {
+            artifactBestFitRule.put(groupArtifactId, bestFit);
+        }
         return bestFit;
     }
 
