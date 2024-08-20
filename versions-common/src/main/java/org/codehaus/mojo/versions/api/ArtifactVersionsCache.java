@@ -19,9 +19,9 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Triple;
@@ -32,7 +32,7 @@ import org.apache.commons.lang3.tuple.Triple;
 public class ArtifactVersionsCache {
     private TriFunction<AbstractVersionDetails, Optional<Segment>, Boolean, ?> cachedFunction;
     private Map<Triple<? extends AbstractVersionDetails, Optional<Segment>, Boolean>, Object> updateCache =
-            new HashMap<>();
+            new ConcurrentHashMap<>();
 
     /**
      * Constructs a new instance given the concrete function for obtaining the details
