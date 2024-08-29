@@ -34,7 +34,7 @@ public abstract class AbstractVersionChanger implements VersionChanger {
 
     private final ModifiedPomXMLEventReader pom;
 
-    private final Log log;
+    protected final Log log;
 
     public AbstractVersionChanger(Model model, ModifiedPomXMLEventReader pom, Log log) {
         this.model = model;

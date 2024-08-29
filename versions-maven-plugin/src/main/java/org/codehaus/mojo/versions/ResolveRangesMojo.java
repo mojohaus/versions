@@ -263,7 +263,8 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
                                 artifact.getArtifactId(),
                                 dep.getVersion(),
                                 artifactVersion,
-                                getProject().getModel())) {
+                                getProject().getModel(),
+                                getLog())) {
                             getLog().debug("Version set to " + artifactVersion + " for dependency: " + artifact);
                         } else {
                             getLog().debug("Could not find the version tag for dependency " + artifact + " in project "

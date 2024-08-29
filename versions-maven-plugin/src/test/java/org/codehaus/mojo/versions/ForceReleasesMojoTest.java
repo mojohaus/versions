@@ -118,7 +118,7 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
                     .when(() -> PomHelper.setDependencyVersion(
-                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class)))
+                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class), any()))
                     .thenReturn(true);
             pomHelper
                     .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
@@ -145,7 +145,7 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
                     .when(() -> PomHelper.setDependencyVersion(
-                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class)))
+                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class), any()))
                     .thenReturn(true);
             pomHelper
                     .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
@@ -172,7 +172,7 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
                     .when(() -> PomHelper.setDependencyVersion(
-                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class)))
+                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class), any()))
                     .thenReturn(true);
             pomHelper
                     .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
@@ -201,7 +201,7 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
                     .when(() -> PomHelper.setDependencyVersion(
-                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class)))
+                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class), any()))
                     .thenReturn(true);
             pomHelper
                     .when(() -> PomHelper.getRawModel(any(MavenProject.class)))

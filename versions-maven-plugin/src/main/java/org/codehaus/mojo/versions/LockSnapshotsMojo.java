@@ -134,7 +134,8 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
                             dep.getArtifactId(),
                             version,
                             lockedVersion.get(),
-                            getProject().getModel())) {
+                            getProject().getModel(),
+                            getLog())) {
                         getLog().info("Locked " + toString(dep) + " to version " + lockedVersion.get());
                     }
                 } else {
