@@ -119,7 +119,7 @@ the `rules.xml` file:
               </ignoreVersion>
               <ignoreVersion>
                 <type>regex</type>
-                <version>.+-(alpha|beta)</version>
+                <version>.+-(alpha|beta).+</version>
               </ignoreVersion>
               <ignoreVersion>
                 <type>range</type>
@@ -157,7 +157,7 @@ will be ignored when considering available versions.
 Examples:
 - `1.0.0`
 - `.+-SNAPSHOT`
-- `(.+-SNAPSHOT|.+-M\d),.+-(alpha|beta),3.0.0`
+- `(.+-SNAPSHOT|.+-M\d),.+-(alpha|beta).+,3.0.0`
 
 $h3 Ignoring certain versions
 
