@@ -84,7 +84,7 @@ It will also ignore all sub-incremental updates.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>${maven-enforcer-plugin-version}</version>
+                <version>${mavenEnforcerPluginVersion}</version>
                 <goals>
                     <goal>enforce</goal>
                 </goals>
