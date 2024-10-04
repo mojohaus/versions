@@ -27,7 +27,7 @@ Your Maven project should look like:
     <dependency>
       <groupId>org.codehaus.mojo.versions</groupId>
       <artifactId>versions-api</artifactId>
-      <version>${project.version}</version>
+      <version>${pluginVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -44,7 +44,7 @@ Your Maven project should look like:
         <!-- build index of JSR 330 components -->
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>sisu-maven-plugin</artifactId>
-        <version>${sisu-maven-plugin-version}</version>
+        <version>${sisuMavenPluginVersion}</version>
         <executions>
           <execution>
             <id>generate-index</id>
@@ -89,7 +89,7 @@ You need to add your extension as plugin dependency:
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
-          <version>${project.version}</version>
+          <version>${pluginVersion}</version>
           <dependencies>
             <dependency>
               <!-- add your extension as plugin dependency -->

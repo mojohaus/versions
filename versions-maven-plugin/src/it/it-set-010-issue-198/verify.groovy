@@ -1,4 +1,3 @@
-import org.apache.commons.lang.StringUtils
 
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
@@ -36,7 +35,7 @@ class Checker
             try
             {
                 def actual = readXPath( pom, xpath )
-                if ( !StringUtils.equals( expected, actual ) )
+                if ( !Objects.equals( expected, actual ) )
                 {
                     System.out.println( pom + " [xpath:" + xpath + "] expected '" + expected + "' found '" + actual + "' : " + message );
                     result = false;

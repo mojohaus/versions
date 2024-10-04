@@ -123,9 +123,11 @@
     <doxiaVersion>1.12.0</doxiaVersion>
     <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
     <mockitoVersion>4.11.0</mockitoVersion>
+
+    <!-- dotted property can not be used in .vm -->
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>${maven-site-plugin.version}</sitePluginVersion>
-    <!-- dotted property can not be used in .vm -->
+    <sisuMavenPluginVersion>${sisu-maven-plugin.version}</sisuMavenPluginVersion>
     <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
     <modelloNamespaceRuleVersion>2.1.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
