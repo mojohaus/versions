@@ -121,7 +121,7 @@
   <properties>
     <mavenVersion>3.6.3</mavenVersion>
     <doxiaVersion>1.12.0</doxiaVersion>
-    <doxia-sitetoolsVersion>1.11.1</doxia-sitetoolsVersion>
+    <doxia-sitetoolsVersion>2.0.0</doxia-sitetoolsVersion>
     <mockitoVersion>4.11.0</mockitoVersion>
     <pluginVersion>${project.version}</pluginVersion>
     <sitePluginVersion>${maven-site-plugin.version}</sitePluginVersion>
