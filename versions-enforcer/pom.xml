@@ -14,7 +14,7 @@
 
   <properties>
     <!-- used in documentations -->
-    <maven-enforcer-plugin-version>${maven-enforcer-plugin.version}</maven-enforcer-plugin-version>
+    <mavenEnforcerPluginVersion>${maven-enforcer-plugin.version}</mavenEnforcerPluginVersion>
   </properties>
 
   <dependencies>
