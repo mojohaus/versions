@@ -131,7 +131,7 @@
     <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
     <modelloNamespaceRuleVersion>2.1.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
-    <byteBuddyVersion>1.15.3</byteBuddyVersion>
+    <byteBuddyVersion>1.15.4</byteBuddyVersion>
     <!-- use the same version as in Maven core -->
     <mavenResolverVersion>1.4.1</mavenResolverVersion>
 
