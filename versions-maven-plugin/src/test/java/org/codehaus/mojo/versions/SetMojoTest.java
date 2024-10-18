@@ -6,14 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.utils.TestLog;
 import org.codehaus.mojo.versions.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -230,5 +233,19 @@ public class SetMojoTest extends AbstractMojoTestCase {
         assertThat(
                 String.join("", Files.readAllLines(tempDir.resolve("child-webapp/pom.xml"))),
                 matchesRegex(".*\\Q<artifactId>child-webapp</artifactId>\\E\\s*" + "\\Q<version>1.0</version>\\E.*"));
+    }
+
+    @Test
+    public void testIssue1137() throws Exception {
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set/issue-1137"), tempDir);
+        TestLog testLog = new TestLog();
+        SetMojo mojo =
+                (SetMojo) mojoRule.lookupConfiguredMojo(tempDir.resolve("child").toFile(), "set");
+        setVariableValueToObject(mojo, "newVersion", "1.1");
+        setVariableValueToObject(mojo, "log", testLog);
+        mojo.execute();
+        assertThat(
+                testLog.getLoggedMessages().stream().map(Triple::getMiddle).collect(Collectors.joining("\n")),
+                not(containsString("Processing change of null:child")));
     }
 }
