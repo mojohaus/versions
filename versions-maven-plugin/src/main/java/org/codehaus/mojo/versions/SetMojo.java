@@ -345,7 +345,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             // so that the main project can be selected
             Model rootModel = reactorModels.get(session.getCurrentProject().getFile());
             if (groupId == null) {
-                groupId = rootModel.getGroupId();
+                groupId = PomHelper.getGroupId(rootModel);
             }
             if (artifactId == null) {
                 artifactId = rootModel.getArtifactId();
