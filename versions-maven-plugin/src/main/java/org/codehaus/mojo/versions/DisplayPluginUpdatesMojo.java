@@ -632,7 +632,9 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 PomHelper.createProjectBuilderRequest(
                         session,
                         r -> r.setProcessPlugins(false),
-                        r -> r.setRemoteRepositories(session.getCurrentProject().getPluginArtifactRepositories())));
+                        r -> r.setRemoteRepositories(session.getCurrentProject().getRemoteArtifactRepositories()),
+                        r -> r.setPluginArtifactRepositories(
+                                session.getCurrentProject().getPluginArtifactRepositories())));
         if (!result.getProblems().isEmpty()) {
             getLog().warn("Problems encountered during construction of the plugin POM for " + probe.toString());
             result.getProblems().forEach(p -> getLog().warn("\t" + p.getMessage()));

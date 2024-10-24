@@ -264,7 +264,9 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
                 PomHelper.createProjectBuilderRequest(
                         session,
                         r -> r.setProcessPlugins(false),
-                        r -> r.setRemoteRepositories(session.getCurrentProject().getPluginArtifactRepositories())));
+                        r -> r.setRemoteRepositories(session.getCurrentProject().getRemoteArtifactRepositories()),
+                        r -> r.setPluginArtifactRepositories(
+                                session.getCurrentProject().getPluginArtifactRepositories())));
         if (!result.getProblems().isEmpty()) {
             getLog().warn("Problems encountered during construction of the POM for " + remoteArtifact.toString());
             result.getProblems().forEach(p -> getLog().warn("\t" + p.getMessage()));
