@@ -364,4 +364,15 @@ public class DependencyUpdatesReportMojoTest {
         String output = os.toString();
         assertThat(output, Matchers.stringContainsInOrder("artifactA", "1.0.0", "artifactB", "1.2.3"));
     }
+
+    @Test
+    public void testVersionlessDependency() throws IOException, MavenReportException {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        new TestDependencyUpdatesReportMojo()
+                .withOriginalDependencyManagement(dependencyOf("artifactA", null))
+                .withProcessDependencyManagement(true)
+                .withProcessDependencyManagementTransitive(false)
+                .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
+    }
 }
