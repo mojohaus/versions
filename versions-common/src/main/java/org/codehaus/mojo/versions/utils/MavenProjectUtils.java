@@ -32,6 +32,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 /**
  * Utility methods for extracting dependencies from a {@link org.apache.maven.project.MavenProject}
@@ -39,6 +40,7 @@ import static java.util.Optional.ofNullable;
 public class MavenProjectUtils {
     /**
      * Retrieves dependencies from the plugins section
+     *
      * @param project {@link MavenProject} instance
      * @return set of {@link Dependency} objects
      * or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
@@ -56,9 +58,10 @@ public class MavenProjectUtils {
 
     /**
      * Retrieves dependencies from plugin management
+     *
      * @param project {@link MavenProject} instance
      * @return set of {@link Dependency} objects
-     * or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
+     *         or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
      */
     public static Set<Dependency> extractDependenciesFromPlugins(MavenProject project) {
         return project.getBuildPlugins().stream()
@@ -71,14 +74,15 @@ public class MavenProjectUtils {
      * Retrieves dependencies from the dependency management of the project
      * as well as its immediate parent project.
      *
-     * @param project {@link MavenProject} instance
+     * @param project                               {@link MavenProject} instance
      * @param processDependencyManagementTransitive if {@code true}, the original model will be considered
      *                                              instead of the interpolated model, which does not contain
      *                                              imported dependencies
-     * @param log {@link Log} instance (may not be null)
+     * @param log                                   {@link Log} instance (may not be null)
      * @return set of {@link Dependency} objects
      * @throws VersionRetrievalException thrown if version information retrieval fails
-     * or an empty set if none have been retrieveddependencies or an empty set if none have been retrieved
+     *                                   or an empty set if none have been retrieveddependencies or an empty set if none
+     *                                   have been retrieved
      */
     public static Set<Dependency> extractDependenciesFromDependencyManagement(
             MavenProject project, boolean processDependencyManagementTransitive, Log log)
@@ -119,8 +123,8 @@ public class MavenProjectUtils {
                         throw new VersionRetrievalException(message);
                     }
                 } else {
-                    dependency = interpolateVersion(dependency, project);
-                    dependencyManagement.add(dependency);
+                    dependencyManagement.remove(dependency);
+                    dependencyManagement.add(interpolateVersion(dependency, project));
                 }
             }
         }
@@ -131,22 +135,24 @@ public class MavenProjectUtils {
      * Attempts to interpolate the version from model properties.
      *
      * @param dependency the dependency
-     * @param project the maven project
+     * @param project    the maven project
      * @return the dependency with interpolated property (as far as possible)
      * @since 2.14.0
      */
     public static Dependency interpolateVersion(final Dependency dependency, final MavenProject project) {
-
         // resolve version from model properties if necessary (e.g. "${mycomponent.myversion}"
-        if (dependency.getVersion().startsWith("${")) {
-            final String resolvedVersion = project.getOriginalModel()
-                    .getProperties()
-                    .getProperty(dependency
-                            .getVersion()
-                            .substring(2, dependency.getVersion().length() - 1));
-            if (resolvedVersion != null && !resolvedVersion.isEmpty()) {
-                dependency.setVersion(resolvedVersion);
-            }
+        if (startsWith(dependency.getVersion(), "${")) {
+            return ofNullable(project.getOriginalModel()
+                            .getProperties()
+                            .getProperty(dependency
+                                    .getVersion()
+                                    .substring(2, dependency.getVersion().length() - 1)))
+                    .map(v -> {
+                        Dependency result = dependency.clone();
+                        result.setVersion(v);
+                        return result;
+                    })
+                    .orElse(dependency);
         }
         return dependency;
     }
