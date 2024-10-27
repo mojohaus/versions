@@ -33,6 +33,7 @@ import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
@@ -47,6 +48,7 @@ import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.interpolateVersion;
 import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 
@@ -189,29 +191,29 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
             MavenProject project, Set<Dependency> dependencyManagementCollector) throws MavenReportException {
         if (processDependencyManagementTransitive) {
             if (hasDependencyManagement(project)) {
-                for (Dependency dep : project.getDependencyManagement().getDependencies()) {
-                    getLog().debug("Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion()
-                            + ":" + dep.getType() + ":" + dep.getScope());
+                if (getLog().isDebugEnabled()) {
+                    project.getDependencyManagement().getDependencies().forEach(dep -> getLog().debug(
+                                    "Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion()
+                                            + ":" + dep.getType() + ":" + dep.getScope()));
                 }
                 dependencyManagementCollector.addAll(
                         project.getDependencyManagement().getDependencies());
             }
         } else {
-            if (project.getOriginalModel().getDependencyManagement() != null
-                    && project.getOriginalModel().getDependencyManagement().getDependencies() != null) {
-                // Using the original model to getModel the original dependencyManagement entries and
-                // not the interpolated model.
-                // TODO: I'm not 100% sure if this will work correctly in all cases.
-                for (Dependency dep :
-                        project.getOriginalModel().getDependencyManagement().getDependencies()) {
-                    dep = interpolateVersion(dep, project);
-
-                    getLog().debug("Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":"
-                            + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope());
-                }
-                dependencyManagementCollector.addAll(
-                        project.getOriginalModel().getDependencyManagement().getDependencies());
-            }
+            // Using the original model to getModel the original dependencyManagement entries and
+            // not the interpolated model.
+            // TODO: I'm not 100% sure if this will work correctly in all cases.
+            ofNullable(project.getOriginalModel().getDependencyManagement())
+                    .map(DependencyManagement::getDependencies)
+                    .ifPresent(list -> list.stream()
+                            .map(dep -> interpolateVersion(dep, project))
+                            .peek(dep -> {
+                                if (getLog().isDebugEnabled()) {
+                                    getLog().debug("Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId()
+                                            + ":" + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope());
+                                }
+                            })
+                            .forEach(dependencyManagementCollector::add));
         }
     }
 
