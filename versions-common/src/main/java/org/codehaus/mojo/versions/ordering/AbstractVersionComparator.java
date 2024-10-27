@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 /**
@@ -35,7 +36,7 @@ public abstract class AbstractVersionComparator implements VersionComparator {
         if (v == null) {
             return 0;
         }
-        if (VersionComparators.isSnapshot(v)) {
+        if (ArtifactUtils.isSnapshot(v.toString())) {
             return innerGetSegmentCount(VersionComparators.stripSnapshot(v));
         }
         return innerGetSegmentCount(v);

@@ -80,8 +80,14 @@ public class UseNextReleasesMojoTest {
                                 setVersion("1.0.0-SNAPSHOT");
                             }
                         });
-                        setDependencies(Collections.singletonList(DependencyBuilder.dependencyWith(
-                                "default-group", "dependency-artifact", "1.1.0", "default", "pom", SCOPE_COMPILE)));
+                        setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("dependency-artifact")
+                                .withVersion("1.1.0")
+                                .withClassifier("default")
+                                .withType("pom")
+                                .withScope(SCOPE_COMPILE)
+                                .build()));
                     }
                 };
             }

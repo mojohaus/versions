@@ -112,10 +112,6 @@ public final class VersionComparators {
         }
     }
 
-    static boolean isSnapshot(ArtifactVersion v) {
-        return v != null && SNAPSHOT_PATTERN.matcher(v.toString()).find();
-    }
-
     static ArtifactVersion stripSnapshot(ArtifactVersion v) {
         final String version = v.toString();
         final Matcher matcher = SNAPSHOT_PATTERN.matcher(version);
@@ -123,17 +119,5 @@ public final class VersionComparators {
             return DefaultArtifactVersionCache.of(version.substring(0, matcher.start(1) - 1));
         }
         return v;
-    }
-
-    static ArtifactVersion copySnapshot(ArtifactVersion source, ArtifactVersion destination) {
-        if (isSnapshot(destination)) {
-            destination = stripSnapshot(destination);
-        }
-        final Matcher matcher = SNAPSHOT_PATTERN.matcher(source.toString());
-        if (matcher.find()) {
-            return DefaultArtifactVersionCache.of(destination.toString() + "-" + matcher.group(0));
-        } else {
-            return DefaultArtifactVersionCache.of(destination.toString() + "-SNAPSHOT");
-        }
     }
 }

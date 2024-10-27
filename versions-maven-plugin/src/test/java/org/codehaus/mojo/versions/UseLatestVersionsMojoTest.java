@@ -86,24 +86,26 @@ public class UseLatestVersionsMojoTest {
                                         setArtifactId("project-artifact");
                                         setVersion("1.0.0-SNAPSHOT");
 
-                                        setDependencies(Collections.singletonList(DependencyBuilder.dependencyWith(
-                                                "default-group",
-                                                "dependency-artifact",
-                                                "1.1.1-SNAPSHOT",
-                                                "default",
-                                                "pom",
-                                                SCOPE_COMPILE)));
+                                        setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
+                                                .withGroupId("default-group")
+                                                .withArtifactId("dependency-artifact")
+                                                .withVersion("1.1.1-SNAPSHOT")
+                                                .withType("pom")
+                                                .withClassifier("default")
+                                                .withScope(SCOPE_COMPILE)
+                                                .build()));
 
                                         setDependencyManagement(new DependencyManagement());
                                         getDependencyManagement()
                                                 .setDependencies(
-                                                        Collections.singletonList(DependencyBuilder.dependencyWith(
-                                                                "default-group",
-                                                                "dependency-artifact",
-                                                                "1.1.1-SNAPSHOT",
-                                                                "default",
-                                                                "pom",
-                                                                SCOPE_COMPILE)));
+                                                        Collections.singletonList(DependencyBuilder.newBuilder()
+                                                                .withGroupId("default-group")
+                                                                .withArtifactId("dependency-artifact")
+                                                                .withVersion("1.1.1-SNAPSHOT")
+                                                                .withType("pom")
+                                                                .withClassifier("default")
+                                                                .withScope(SCOPE_COMPILE)
+                                                                .build()));
                                     }
                                 });
                             }
@@ -152,8 +154,14 @@ public class UseLatestVersionsMojoTest {
 
         mojo.getProject()
                 .getModel()
-                .setDependencies(Collections.singletonList(DependencyBuilder.dependencyWith(
-                        "default-group", "dependency-artifact", "1.1.0-SNAPSHOT", "default", "pom", SCOPE_COMPILE)));
+                .setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withVersion("1.1.0-SNAPSHOT")
+                        .withType("pom")
+                        .withClassifier("default")
+                        .withScope(SCOPE_COMPILE)
+                        .build()));
 
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
@@ -259,20 +267,22 @@ public class UseLatestVersionsMojoTest {
         mojo.getProject()
                 .getModel()
                 .setDependencies(Arrays.asList(
-                        DependencyBuilder.dependencyWith(
-                                "default-group",
-                                "dependency-artifact",
-                                "1.1.1-SNAPSHOT",
-                                "default",
-                                "pom",
-                                SCOPE_COMPILE),
-                        DependencyBuilder.dependencyWith(
-                                "default-group",
-                                "poison-artifact",
-                                "1.1.1.1-SNAPSHOT",
-                                "default",
-                                "pom",
-                                SCOPE_COMPILE)));
+                        DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("dependency-artifact")
+                                .withVersion("1.1.1-SNAPSHOT")
+                                .withType("pom")
+                                .withClassifier("default")
+                                .withScope(SCOPE_COMPILE)
+                                .build(),
+                        DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("poison-artifact")
+                                .withVersion("1.1.1.1-SNAPSHOT")
+                                .withType("pom")
+                                .withClassifier("default")
+                                .withScope(SCOPE_COMPILE)
+                                .build()));
 
         setVariableValueToObject(mojo, "processDependencies", true);
         setVariableValueToObject(mojo, "allowSnapshots", false);
@@ -318,10 +328,22 @@ public class UseLatestVersionsMojoTest {
         mojo.getProject()
                 .getModel()
                 .setDependencies(Arrays.asList(
-                        DependencyBuilder.dependencyWith(
-                                "default-group", "dependency-artifact", "0.9.0", "default", "pom", SCOPE_COMPILE),
-                        DependencyBuilder.dependencyWith(
-                                "default-group", "other-artifact", "1.0", "default", "pom", SCOPE_COMPILE)));
+                        DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("dependency-artifact")
+                                .withVersion("0.9.0")
+                                .withType("pom")
+                                .withClassifier("default")
+                                .withScope(SCOPE_COMPILE)
+                                .build(),
+                        DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("other-artifact")
+                                .withVersion("1.0")
+                                .withType("pom")
+                                .withClassifier("default")
+                                .withScope(SCOPE_COMPILE)
+                                .build()));
         setVariableValueToObject(mojo, "processDependencies", true);
         setVariableValueToObject(mojo, "includes", new String[] {"default-group:other-artifact"});
 
@@ -344,10 +366,22 @@ public class UseLatestVersionsMojoTest {
         mojo.getProject()
                 .getModel()
                 .setDependencies(Arrays.asList(
-                        DependencyBuilder.dependencyWith(
-                                "default-group", "dependency-artifact", "0.9.0", "default", "pom", SCOPE_COMPILE),
-                        DependencyBuilder.dependencyWith(
-                                "default-group", "other-artifact", "1.0", "default", "pom", SCOPE_COMPILE)));
+                        DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("dependency-artifact")
+                                .withVersion("0.9.0")
+                                .withType("pom")
+                                .withClassifier("default")
+                                .withScope(SCOPE_COMPILE)
+                                .build(),
+                        DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("other-artifact")
+                                .withVersion("1.0")
+                                .withType("pom")
+                                .withClassifier("default")
+                                .withScope(SCOPE_COMPILE)
+                                .build()));
         setVariableValueToObject(mojo, "processDependencies", true);
         setVariableValueToObject(mojo, "excludes", new String[] {"default-group:other-artifact"});
 

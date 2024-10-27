@@ -18,8 +18,9 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,9 +55,9 @@ import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.ModelNode;
-import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.aether.RepositorySystem;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
@@ -226,19 +227,27 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
         if (node.getModifiedPomXMLEventReader().isModified()) {
             if (generateBackupPoms) {
-                File backupFile = new File(
-                        node.getModel().getPomFile().getParentFile(),
-                        node.getModel().getPomFile().getName() + ".versionsBackup");
-                if (!backupFile.exists()) {
-                    getLog().debug("Backing up " + node.getModel().getPomFile() + " to " + backupFile);
+                Objects.requireNonNull(node.getModel().getPomFile());
+                Objects.requireNonNull(node.getModel().getPomFile().toPath().getParent());
+                Path backupFile = node.getModel()
+                        .getPomFile()
+                        .toPath()
+                        .getParent()
+                        .resolve(node.getModel().getPomFile().toPath().getFileName() + ".versionsBackup");
+                if (!Files.exists(backupFile)) {
+                    if (getLog().isDebugEnabled()) {
+                        getLog().debug("Backing up " + node.getModel().getPomFile() + " to " + backupFile);
+                    }
                     try {
-                        FileUtils.copyFile(node.getModel().getPomFile(), backupFile);
+                        Files.copy(node.getModel().getPomFile().toPath(), backupFile, REPLACE_EXISTING);
                     } catch (IOException e) {
                         throw new MojoFailureException(
                                 "Error backing up the " + node.getModel().getPomFile(), e);
                     }
                 } else {
-                    getLog().debug("Leaving existing backup " + backupFile + " unmodified");
+                    if (getLog().isDebugEnabled()) {
+                        getLog().debug("Leaving existing backup " + backupFile + " unmodified");
+                    }
                 }
             } else {
                 getLog().debug("Skipping the generation of a backup file");

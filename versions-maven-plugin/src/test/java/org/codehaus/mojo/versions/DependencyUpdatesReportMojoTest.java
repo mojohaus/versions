@@ -148,11 +148,18 @@ public class DependencyUpdatesReportMojoTest {
     }
 
     private static Dependency dependencyOf(String artifactId) {
-        return DependencyBuilder.dependencyWith("groupA", artifactId, "1.0.0", "default", "pom", SCOPE_COMPILE);
+        return dependencyOf(artifactId, "1.0.0");
     }
 
     private static Dependency dependencyOf(String artifactId, String version) {
-        return DependencyBuilder.dependencyWith("groupA", artifactId, version, "default", "pom", SCOPE_COMPILE);
+        return DependencyBuilder.newBuilder()
+                .withGroupId("groupA")
+                .withArtifactId(artifactId)
+                .withVersion(version)
+                .withClassifier("default")
+                .withType("pom")
+                .withScope(SCOPE_COMPILE)
+                .build();
     }
 
     @Test
@@ -342,7 +349,7 @@ public class DependencyUpdatesReportMojoTest {
         assertThat(
                 "Did not generate summary correctly",
                 output,
-                containsString("groupA test-artifact 1.1 compile pom default 1.1.0-2 1.1.3 1.3 3.0"));
+                containsString("groupA test-artifact 1.1 compile default pom 1.1.0-2 1.1.3 1.3 3.0"));
     }
 
     @Test

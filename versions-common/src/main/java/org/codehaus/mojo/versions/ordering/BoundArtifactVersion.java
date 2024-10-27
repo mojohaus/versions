@@ -18,12 +18,12 @@ package org.codehaus.mojo.versions.ordering;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * <p>Represents an <b>immutable</b> artifact version with all segments <em>major</em> to the given segment

@@ -26,6 +26,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,11 +58,12 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.eclipse.aether.RepositorySystem;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -321,7 +323,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
                     File backupFile = new File(outFile.getParentFile(), outFile.getName() + ".versionsBackup");
                     if (!backupFile.exists()) {
                         getLog().debug("Backing up " + outFile + " to " + backupFile);
-                        FileUtils.copyFile(outFile, backupFile);
+                        Files.copy(outFile.toPath(), backupFile.toPath(), REPLACE_EXISTING);
                     } else {
                         getLog().debug("Leaving existing backup " + backupFile + " unmodified");
                     }
@@ -366,6 +368,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @throws IOException when things go wrong.
      */
     protected final void writeFile(File outFile, StringBuilder input) throws IOException {
+
         try (Writer writer = WriterFactory.newXmlWriter(outFile)) {
             IOUtil.copy(input.toString(), writer);
         }

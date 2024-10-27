@@ -78,7 +78,11 @@ public class PluginUpdatesXmlRendererTest {
                                                 .collect(Collectors.toList()),
                                         new MavenVersionComparator()),
                                 singletonMap(
-                                        DependencyBuilder.dependencyWith("default-group", "artifactB", "1.0.0"),
+                                        DependencyBuilder.newBuilder()
+                                                .withGroupId("default-group")
+                                                .withArtifactId("artifactB")
+                                                .withVersion("1.0.0")
+                                                .build(),
                                         new ArtifactVersions(
                                                 artifactOf("default-group", "artifactB", "1.0.0"),
                                                 Stream.of("1.0.0", "1.0.1-SNAPSHOT", "1.1.0-rc1", "2.0.0")
