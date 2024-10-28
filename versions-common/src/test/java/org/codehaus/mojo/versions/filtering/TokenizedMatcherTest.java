@@ -19,7 +19,14 @@ class TokenizedMatcherTest {
 
         @Test
         void acceptsExactMatch() {
-            Dependency input = DependencyBuilder.dependencyWith("group", "artifact", "1.0", "jar", "tests", "compile");
+            Dependency input = DependencyBuilder.newBuilder()
+                    .withGroupId("group")
+                    .withArtifactId("artifact")
+                    .withVersion("1.0")
+                    .withType("jar")
+                    .withClassifier("tests")
+                    .withScope("compile")
+                    .build();
 
             boolean actual = matcher.test(input);
 
@@ -38,7 +45,14 @@ class TokenizedMatcherTest {
         void rejectsDifferingFields(
                 String group, String artifact, String version, String type, String classifier, String scope) {
 
-            Dependency input = DependencyBuilder.dependencyWith(group, artifact, version, type, classifier, scope);
+            Dependency input = DependencyBuilder.newBuilder()
+                    .withGroupId(group)
+                    .withArtifactId(artifact)
+                    .withVersion(version)
+                    .withType(type)
+                    .withClassifier(classifier)
+                    .withScope(scope)
+                    .build();
 
             boolean actual = matcher.test(input);
 
@@ -51,7 +65,14 @@ class TokenizedMatcherTest {
 
         @Test
         void acceptsWildcards() {
-            Dependency input = DependencyBuilder.dependencyWith("foo", "my-api", "foo", "foo", "foo", "foo");
+            Dependency input = DependencyBuilder.newBuilder()
+                    .withGroupId("foo")
+                    .withArtifactId("my-api")
+                    .withVersion("foo")
+                    .withType("foo")
+                    .withClassifier("foo")
+                    .withScope("foo")
+                    .build();
 
             TokenizedMatcher matcher = TokenizedMatcher.parse("*:my-api");
 

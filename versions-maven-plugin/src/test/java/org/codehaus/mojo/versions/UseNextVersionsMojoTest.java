@@ -56,6 +56,7 @@ import static org.mockito.Mockito.mockStatic;
 public class UseNextVersionsMojoTest {
 
     private UseNextVersionsMojo mojo;
+
     private TestChangeRecorder changeRecorder;
 
     @Before
@@ -80,13 +81,14 @@ public class UseNextVersionsMojoTest {
                                 setVersion("1.0.0-SNAPSHOT");
                             }
                         });
-                        setDependencies(Collections.singletonList(DependencyBuilder.dependencyWith(
-                                "default-group",
-                                "dependency-artifact",
-                                "1.1.0-SNAPSHOT",
-                                "default",
-                                "pom",
-                                SCOPE_COMPILE)));
+                        setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("dependency-artifact")
+                                .withVersion("1.1.0-SNAPSHOT")
+                                .withClassifier("default")
+                                .withType("pom")
+                                .withScope(SCOPE_COMPILE)
+                                .build()));
                     }
                 };
             }

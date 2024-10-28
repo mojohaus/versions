@@ -96,9 +96,12 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
     // standard semantic versioning with an optional 'v' prefix
     protected static final Pattern TAG_VERSION_PATTERN = Pattern.compile("refs/tags/(?:v)?((\\d+\\.\\d+\\.\\d+)(.*))");
 
+    // created to mitigate LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE
+    private static final Logger JGIT_LOGGER = Logger.getLogger("org.eclipse.jgit");
+
     public void execute() throws MojoExecutionException {
         // limit JGits excessive logging
-        Logger.getLogger("org.eclipse.jgit").setLevel(Level.INFO);
+        JGIT_LOGGER.setLevel(Level.INFO);
 
         VersionInformation vi;
 
@@ -200,7 +203,7 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
     }
 
     protected Optional<VersionInformation> findHighestVersion(List<String> versionTags) {
-        Optional<String> highestVersionString = versionTags.stream().max(this.new VersionComparator());
+        Optional<String> highestVersionString = versionTags.stream().max(new VersionComparator());
 
         return highestVersionString.map(VersionInformation::new);
     }
@@ -230,7 +233,7 @@ public class DynamicVersioningSCMPlugin extends AbstractMojo {
         return vi;
     }
 
-    protected class VersionComparator implements Comparator<String> {
+    protected static class VersionComparator implements Comparator<String> {
 
         @Override
         public int compare(String version1, String version2) {

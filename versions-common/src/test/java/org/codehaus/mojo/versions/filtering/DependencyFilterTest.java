@@ -39,9 +39,21 @@ class DependencyFilterTest {
     @Nested
     class RemoveFromTest {
         private final Set<Dependency> input = new HashSet<>(asList(
-                DependencyBuilder.dependencyWith("foo", "bar", "1"),
-                DependencyBuilder.dependencyWith("localhost", "my-api", "2"),
-                DependencyBuilder.dependencyWith("localhost", "my-impl", "3")));
+                DependencyBuilder.newBuilder()
+                        .withGroupId("foo")
+                        .withArtifactId("bar")
+                        .withVersion("1")
+                        .build(),
+                DependencyBuilder.newBuilder()
+                        .withGroupId("localhost")
+                        .withArtifactId("my-api")
+                        .withVersion("2")
+                        .build(),
+                DependencyBuilder.newBuilder()
+                        .withGroupId("localhost")
+                        .withArtifactId("my-impl")
+                        .withVersion("3")
+                        .build()));
 
         @Test
         void removesExcludedDepsWithExactMatch() {
@@ -98,9 +110,21 @@ class DependencyFilterTest {
     @Nested
     class RetainingInTest {
         private final Set<Dependency> input = new HashSet<>(asList(
-                DependencyBuilder.dependencyWith("foo", "bar", "1"),
-                DependencyBuilder.dependencyWith("localhost", "my-api", "2"),
-                DependencyBuilder.dependencyWith("localhost", "my-impl", "3")));
+                DependencyBuilder.newBuilder()
+                        .withGroupId("foo")
+                        .withArtifactId("bar")
+                        .withVersion("1")
+                        .build(),
+                DependencyBuilder.newBuilder()
+                        .withGroupId("localhost")
+                        .withArtifactId("my-api")
+                        .withVersion("2")
+                        .build(),
+                DependencyBuilder.newBuilder()
+                        .withGroupId("localhost")
+                        .withArtifactId("my-impl")
+                        .withVersion("3")
+                        .build()));
 
         @Test
         void retainsOnlyDepsWithExactMatch() {

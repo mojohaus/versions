@@ -100,15 +100,14 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo {
 
             List<String> failures = new ArrayList<>();
             if (!isBlank(newTag)) {
-                getLog().info("Updating tag: " + (scm != null && scm.getTag() != null ? scm.getTag() : "(empty)")
-                        + " -> " + newTag);
+                getLog().info("Updating tag: " + (scm.getTag() != null ? scm.getTag() : "(empty)") + " -> " + newTag);
                 if (!PomHelper.setElementValue(pom, "/project/scm", "tag", newTag)) {
                     failures.add("tag: " + newTag);
                 }
             }
             if (!isBlank(connection)) {
                 getLog().info("Updating connection: "
-                        + (scm != null && scm.getConnection() != null ? scm.getConnection() : "(empty)") + " -> "
+                        + (scm.getConnection() != null ? scm.getConnection() : "(empty)") + " -> "
                         + connection);
                 if (!PomHelper.setElementValue(pom, "/project/scm", "connection", connection)) {
                     failures.add("connection: " + connection);
@@ -116,9 +115,7 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo {
             }
             if (!isBlank(developerConnection)) {
                 getLog().info("Updating developerConnection: "
-                        + (scm != null && scm.getDeveloperConnection() != null
-                                ? scm.getDeveloperConnection()
-                                : "(empty)")
+                        + (scm.getDeveloperConnection() != null ? scm.getDeveloperConnection() : "(empty)")
                         + " -> "
                         + developerConnection);
                 if (!PomHelper.setElementValue(pom, "/project/scm", "developerConnection", developerConnection)) {
@@ -126,8 +123,7 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo {
                 }
             }
             if (!isBlank(url)) {
-                getLog().info("Updating url: " + (scm != null && scm.getUrl() != null ? scm.getUrl() : "(empty)")
-                        + " -> " + url);
+                getLog().info("Updating url: " + (scm.getUrl() != null ? scm.getUrl() : "(empty)") + " -> " + url);
                 if (!PomHelper.setElementValue(pom, "/project/scm", "url", url)) {
                     failures.add("url: " + url);
                 }

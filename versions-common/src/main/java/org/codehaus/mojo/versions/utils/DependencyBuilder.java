@@ -127,47 +127,6 @@ public class DependencyBuilder {
     }
 
     /**
-     * Convenience builder method
-     * @param groupId groupId of the dependency
-     * @param artifactId artifactId of the dependency
-     * @param version version of the dependency
-     * @return new instance of {@linkplain Dependency}
-     * @deprecated please use the {@link #newBuilder()} method instead
-     */
-    @Deprecated
-    public static Dependency dependencyWith(String groupId, String artifactId, String version) {
-        return newBuilder()
-                .withGroupId(groupId)
-                .withArtifactId(artifactId)
-                .withVersion(version)
-                .build();
-    }
-
-    /**
-     * Convenience builder method
-     * @param groupId groupId of the dependency
-     * @param artifactId artifactId of the dependency
-     * @param version version of the dependency
-     * @param type type of the dependency
-     * @param classifier classifier of the dependency
-     * @param scope scope of the dependency
-     * @return new instance of {@linkplain Dependency}
-     * @deprecated please use the {@link #newBuilder()} method instead
-     */
-    @Deprecated
-    public static Dependency dependencyWith(
-            String groupId, String artifactId, String version, String type, String classifier, String scope) {
-        return newBuilder()
-                .withGroupId(groupId)
-                .withArtifactId(artifactId)
-                .withVersion(version)
-                .withType(type)
-                .withClassifier(classifier)
-                .withScope(scope)
-                .build();
-    }
-
-    /**
      * Builds the {@linkplain Dependency} instance
      * @return {@linkplain Dependency} instance
      */

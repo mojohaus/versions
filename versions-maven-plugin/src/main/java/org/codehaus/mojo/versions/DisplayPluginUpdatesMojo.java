@@ -785,6 +785,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                     }
                 }
 
+                assert curState != null;
                 pathStack.push(curState);
                 curState = new StackState(curState.path + "/" + elementName);
             } else if (event.isEndElement()) {

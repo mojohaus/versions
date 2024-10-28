@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,6 +28,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 
 import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 
 /**
  * Details of a plugin's updates.
@@ -45,6 +48,10 @@ public class PluginUpdatesDetails extends ArtifactVersions {
 
         this.dependencyVersions = dependencyVersions;
         this.includeSnapshots = includeSnapshots;
+    }
+
+    public boolean isIncludeSnapshots() {
+        return includeSnapshots;
     }
 
     public Map<Dependency, ArtifactVersions> getDependencyVersions() {
@@ -84,5 +91,46 @@ public class PluginUpdatesDetails extends ArtifactVersions {
      */
     public boolean isUpdateAvailable() {
         return isArtifactUpdateAvailable() || isDependencyUpdateAvailable();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof PluginUpdatesDetails)) {
+            return false;
+        }
+        PluginUpdatesDetails other = (PluginUpdatesDetails) o;
+        return includeSnapshots == other.includeSnapshots
+                && Objects.equals(dependencyVersions, other.dependencyVersions)
+                && super.equals(o);
+    }
+
+    public int hashCode() {
+        return Objects.hash(
+                getArtifact(),
+                Arrays.hashCode(getVersions(true)),
+                getVersionComparator(),
+                includeSnapshots,
+                dependencyVersions);
+    }
+
+    // added an arbitrary comparison just to be able to differentiate objects having different includeSnapshots
+    // and dependencyVersions while their super.compareTo() returns 0
+    @SuppressWarnings("checkstyle:InnerAssignment")
+    public int compareTo(PluginUpdatesDetails that) {
+        int r;
+        return (r = super.compareTo(that)) != 0
+                ? r
+                : Comparator.comparing(PluginUpdatesDetails::isIncludeSnapshots)
+                        .thenComparing(p -> ofNullable(p.dependencyVersions)
+                                .map(Map::values)
+                                .map(c -> ofNullable(that.dependencyVersions)
+                                        .map(Map::values)
+                                        .map(c::containsAll)
+                                        .orElse(true))
+                                .orElse(false))
+                        .compare(this, that);
     }
 }

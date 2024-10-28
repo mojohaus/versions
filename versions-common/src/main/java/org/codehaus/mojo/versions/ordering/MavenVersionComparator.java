@@ -19,11 +19,11 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * A comparator which uses Maven's version rules, i.e. 1.3.34 &gt; 1.3.9 but 1.3.4.3.2.34 &lt; 1.3.4.3.2.9.

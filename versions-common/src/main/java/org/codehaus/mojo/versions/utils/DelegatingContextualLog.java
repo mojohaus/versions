@@ -19,8 +19,9 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
+import java.util.Objects;
+
 import org.apache.maven.plugin.logging.Log;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Created by IntelliJ IDEA.
@@ -46,7 +47,7 @@ public class DelegatingContextualLog implements ContextualLog {
     }
 
     public synchronized void setContext(String context) {
-        if (StringUtils.equals(currentContext, context)) {
+        if (Objects.equals(currentContext, context)) {
             return;
         }
         if (currentContext != null) {

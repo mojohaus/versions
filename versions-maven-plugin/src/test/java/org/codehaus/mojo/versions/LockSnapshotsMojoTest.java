@@ -61,8 +61,11 @@ public class LockSnapshotsMojoTest {
 
                     @Override
                     public void setDependencies(List<Dependency> dependencies) {
-                        super.setDependencies(singletonList(
-                                DependencyBuilder.dependencyWith("default-group", "default-artifact", "1.0-SNAPSHOT")));
+                        super.setDependencies(singletonList(DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("default-artifact")
+                                .withVersion("1.0-SNAPSHOT")
+                                .build()));
                     }
                 });
                 session = MockUtils.mockMavenSession();

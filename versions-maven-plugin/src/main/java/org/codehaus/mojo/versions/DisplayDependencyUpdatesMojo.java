@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -48,12 +49,10 @@ import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
-import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
-import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.codehaus.mojo.versions.filtering.DependencyFilter.filterDependencies;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromDependencyManagement;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
@@ -499,7 +498,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     static void validateGAVList(List<String> gavList, int numSections, String argumentName)
             throws MojoExecutionException {
-        if (gavList != null && gavList.stream().anyMatch(gav -> countMatches(gav, ":") >= numSections)) {
+        if (gavList != null && gavList.stream().anyMatch(gav -> StringUtils.countMatches(gav, ":") >= numSections)) {
             throw new MojoExecutionException(argumentName + " should not contain more than 6 segments");
         }
     }

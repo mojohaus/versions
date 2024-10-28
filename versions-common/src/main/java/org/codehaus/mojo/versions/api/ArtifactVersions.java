@@ -19,20 +19,20 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
-
-import static org.apache.commons.lang3.StringUtils.compare;
 
 /**
  * Holds the results of a search for versions of an artifact.
@@ -65,8 +65,8 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
     /**
      * Creates a new {@link ArtifactVersions} instance.
      *
-     * @param artifact The artifact.
-     * @param versions The versions.
+     * @param artifact          The artifact.
+     * @param versions          The versions.
      * @param versionComparator The version comparison rule.
      * @since 1.0-alpha-3
      */
@@ -93,18 +93,13 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
         setCurrentVersionRange(other.getCurrentVersionRange());
     }
 
-    @SuppressWarnings("checkstyle:InnerAssignment")
     public int compareTo(ArtifactVersions that) {
-        int rv;
         return this == that
                 ? 0
-                : that == null || getClass() != that.getClass()
-                        ? 1
-                        : (rv = compare(getGroupId(), that.getGroupId())) != 0
-                                ? rv
-                                : (rv = compare(getArtifactId(), that.getArtifactId())) != 0
-                                        ? rv
-                                        : compare(getVersion(), that.getVersion());
+                : Comparator.nullsLast(Comparator.comparing(ArtifactVersions::getGroupId)
+                                .thenComparing(ArtifactVersions::getArtifactId)
+                                .thenComparing(ArtifactVersions::getVersion))
+                        .compare(this, that);
     }
 
     @Override
@@ -132,11 +127,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getArtifact())
-                .append(getVersions(true))
-                .append(getVersionComparator())
-                .toHashCode();
+        return Objects.hash(getArtifact(), Arrays.hashCode(getVersions(true)), getVersionComparator());
     }
 
     /**
@@ -144,7 +135,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
      * any qualifiers from range boundaries).
      *
      * @param version the version to check.
-     * @param range the range to check.
+     * @param range   the range to check.
      * @return <code>true</code> if and only if the version is in the range.
      * @since 1.3
      */
@@ -227,9 +218,9 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
      * the method will only count release versions.
      *
      * @param includeSnapshots {@code includeSnapshots} is {@code true}, snapshots will not counted, which means that
-     *      * the method will only count release versions.
+     *                         * the method will only count release versions.
      * @return if {@code includeSnapshots} is {@code true}, returns {@code true} if there are no versions.
-     * if {@code includeSnapshots} is {@code false}, returns {@code true} if there are no releases.
+     *         if {@code includeSnapshots} is {@code false}, returns {@code true} if there are no releases.
      */
     public boolean isEmpty(boolean includeSnapshots) {
         return includeSnapshots

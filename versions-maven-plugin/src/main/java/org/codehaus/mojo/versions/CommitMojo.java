@@ -19,8 +19,9 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -28,7 +29,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Removes the initial backup of the pom, thereby accepting the changes.
@@ -47,13 +47,13 @@ public class CommitMojo extends AbstractMojo {
     private MavenProject project;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        File outFile = project.getFile();
-        File backupFile = new File(outFile.getParentFile(), outFile.getName() + ".versionsBackup");
+        Path outFile = project.getFile().toPath();
+        Path backupFile = outFile.getParent().resolve(outFile.getFileName() + ".versionsBackup");
 
-        if (backupFile.exists()) {
+        if (Files.exists(backupFile)) {
             getLog().info("Accepting all changes to " + outFile);
             try {
-                FileUtils.forceDelete(backupFile);
+                Files.delete(backupFile);
             } catch (IOException e) {
                 throw new MojoExecutionException(e.getMessage(), e);
             }
