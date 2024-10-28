@@ -19,13 +19,14 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -126,11 +127,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getArtifact())
-                .append(getVersions(true))
-                .append(getVersionComparator())
-                .toHashCode();
+        return Objects.hash(getArtifact(), Arrays.hashCode(getVersions(true)), getVersionComparator());
     }
 
     /**

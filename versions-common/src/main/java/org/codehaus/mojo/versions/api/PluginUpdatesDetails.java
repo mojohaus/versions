@@ -19,11 +19,11 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 
@@ -108,13 +108,12 @@ public class PluginUpdatesDetails extends ArtifactVersions {
     }
 
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getArtifact())
-                .append(getVersions(true))
-                .append(getVersionComparator())
-                .append(includeSnapshots)
-                .append(dependencyVersions)
-                .toHashCode();
+        return Objects.hash(
+                getArtifact(),
+                Arrays.hashCode(getVersions(true)),
+                getVersionComparator(),
+                includeSnapshots,
+                dependencyVersions);
     }
 
     // added an arbitrary comparison just to be able to differentiate objects having different includeSnapshots
