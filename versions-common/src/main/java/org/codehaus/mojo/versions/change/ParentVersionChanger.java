@@ -21,14 +21,14 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
  *
  */
 public class ParentVersionChanger extends AbstractVersionChanger {
 
-    public ParentVersionChanger(Model model, ModifiedPomXMLEventReader pom, Log reporter) {
+    public ParentVersionChanger(Model model, MutableXMLStreamReader pom, Log reporter) {
         super(model, pom, reporter);
     }
 

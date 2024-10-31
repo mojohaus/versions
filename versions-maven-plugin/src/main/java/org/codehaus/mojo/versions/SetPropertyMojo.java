@@ -37,7 +37,7 @@ import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.PropertiesVersionsFileReader;
 import org.eclipse.aether.RepositorySystem;
 
@@ -108,9 +108,9 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @throws XMLStreamException     when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      */
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         Property[] propertiesConfig;
         String properties;
@@ -144,7 +144,7 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
         update(pom, propertiesConfig, properties);
     }
 
-    private void update(ModifiedPomXMLEventReader pom, Property[] propertiesConfig, String properties)
+    private void update(MutableXMLStreamReader pom, Property[] propertiesConfig, String properties)
             throws MojoExecutionException, XMLStreamException {
         Map<Property, PropertyVersions> propertyVersions = this.getHelper()
                 .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()

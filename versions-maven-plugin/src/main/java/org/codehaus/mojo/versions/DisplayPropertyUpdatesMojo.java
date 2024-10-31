@@ -42,7 +42,7 @@ import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Optional.empty;
@@ -267,5 +267,5 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
     }
 
     @Override
-    protected void update(ModifiedPomXMLEventReader pom) {}
+    protected void update(MutableXMLStreamReader pom) {}
 }

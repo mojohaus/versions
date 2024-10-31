@@ -20,12 +20,10 @@ package org.codehaus.mojo.versions;
 
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.After;
@@ -72,9 +70,9 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase 
         T mojo = (T) mojoRule.lookupConfiguredMojo(pomDir.toFile(), goal);
         setVariableValueToObject(mojo, "repositorySystem", repositorySystem);
         setVariableValueToObject(mojo, "generateBackupPoms", false);
-        setVariableValueToObject(mojo, "changeRecorderFormat", "test");
-        changeRecorder = (TestChangeRecorder)
-                ((Map<String, ChangeRecorder>) getVariableValueFromObject(mojo, "changeRecorders")).get("test");
+        setVariableValueToObject(mojo, "changeRecorderFormat", "none");
+        changeRecorder = new TestChangeRecorder();
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
         return (T) mojo;
     }

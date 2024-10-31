@@ -39,7 +39,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.singletonList;
@@ -103,9 +103,9 @@ public class UseNextSnapshotsMojo extends UseLatestVersionsMojoBase {
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
      * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      */
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
         try {
             DependencyManagement dependencyManagement =
@@ -128,7 +128,7 @@ public class UseNextSnapshotsMojo extends UseLatestVersionsMojoBase {
     }
 
     private void useNextSnapshots(
-            ModifiedPomXMLEventReader pom,
+            MutableXMLStreamReader pom,
             Collection<Dependency> dependencies,
             DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
@@ -141,18 +141,17 @@ public class UseNextSnapshotsMojo extends UseLatestVersionsMojoBase {
             log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
         }
 
-        Optional<Segment> unchangedSegment1 = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
+        Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
                 ? empty()
                 : allowMinorUpdates && allowIncrementalUpdates
                         ? of(MAJOR)
                         : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
         if (log != null && log.isDebugEnabled()) {
-            log.debug(unchangedSegment1
+            log.debug(unchangedSegment
                             .map(Segment::minorTo)
                             .map(Segment::toString)
                             .orElse("ALL") + " version changes allowed");
         }
-        Optional<Segment> unchangedSegment = unchangedSegment1;
 
         useLatestVersions(
                 pom,

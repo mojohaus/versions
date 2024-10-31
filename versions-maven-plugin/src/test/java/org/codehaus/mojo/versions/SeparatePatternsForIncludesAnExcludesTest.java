@@ -2,7 +2,7 @@ package org.codehaus.mojo.versions;
 
 import java.util.List;
 
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ public class SeparatePatternsForIncludesAnExcludesTest {
     public void setUp() throws Exception {
         mojo = new AbstractVersionsDependencyUpdaterMojo(null, null, null, null) {
             @Override
-            protected void update(ModifiedPomXMLEventReader pom) {}
+            protected void update(MutableXMLStreamReader pom) {}
         };
     }
 

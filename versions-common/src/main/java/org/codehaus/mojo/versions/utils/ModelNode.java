@@ -21,7 +21,7 @@ package org.codehaus.mojo.versions.utils;
 import java.util.Optional;
 
 import org.apache.maven.model.Model;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
  * Represents a navigable tree of {@link Model} instances.
@@ -29,15 +29,15 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 public class ModelNode {
     private ModelNode parent;
     private Model item;
-    private ModifiedPomXMLEventReader pom;
+    private MutableXMLStreamReader pom;
 
     /**
      * Creates a root node (without a parent).
      *
      * @param model {@link Model} instance
-     * @param pom {@link ModifiedPomXMLEventReader} instance
+     * @param pom {@link MutableXMLStreamReader} instance
      */
-    public ModelNode(Model model, ModifiedPomXMLEventReader pom) {
+    public ModelNode(Model model, MutableXMLStreamReader pom) {
         this(null, model, pom);
     }
 
@@ -46,9 +46,9 @@ public class ModelNode {
      *
      * @param parent parent node
      * @param model {@link Model} instance
-     * @param pom {@link ModifiedPomXMLEventReader} instance
+     * @param pom {@link MutableXMLStreamReader} instance
      */
-    public ModelNode(ModelNode parent, Model model, ModifiedPomXMLEventReader pom) {
+    public ModelNode(ModelNode parent, Model model, MutableXMLStreamReader pom) {
         this.parent = parent;
         this.item = model;
         this.pom = pom;
@@ -73,11 +73,11 @@ public class ModelNode {
     }
 
     /**
-     * Gets the {@link ModifiedPomXMLEventReader} instance
+     * Gets the {@link MutableXMLStreamReader} instance
      *
-     * @return the {@link ModifiedPomXMLEventReader} instance
+     * @return the {@link MutableXMLStreamReader} instance
      */
-    public ModifiedPomXMLEventReader getModifiedPomXMLEventReader() {
+    public MutableXMLStreamReader getMutableXMLStreamReader() {
         return pom;
     }
 

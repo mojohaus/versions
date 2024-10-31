@@ -27,6 +27,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.eclipse.aether.RepositorySystem;
@@ -120,7 +121,7 @@ public class LockSnapshotsMojoTest {
         LockSnapshotsMojo mojo = createMojo(repositorySystem);
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
+                    .when(() -> PomHelper.setProjectParentVersion(any(MutableXMLStreamReader.class), any()))
                     .thenThrow(new RuntimeException("Not supposed to modify the parent"));
             mojo.lockParentSnapshot(
                     null,
@@ -153,7 +154,7 @@ public class LockSnapshotsMojoTest {
         LockSnapshotsMojo mojo = createMojo(repositorySystem);
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
-                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
+                    .when(() -> PomHelper.setProjectParentVersion(any(MutableXMLStreamReader.class), any()))
                     .thenThrow(new RuntimeException("Not supposed to modify the parent"));
             mojo.lockParentSnapshot(
                     null,

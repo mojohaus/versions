@@ -17,7 +17,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 import static org.apache.commons.lang3.StringUtils.isAllBlank;
@@ -90,10 +90,11 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo {
     }
 
     @Override
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         try {
-            Scm scm = PomHelper.getRawModel(pom).getScm();
+            Scm scm = PomHelper.getRawModel(pom.getSource(), pom.getFileName().toFile())
+                    .getScm();
             if (scm == null) {
                 throw new MojoFailureException("No <scm> was present");
             }

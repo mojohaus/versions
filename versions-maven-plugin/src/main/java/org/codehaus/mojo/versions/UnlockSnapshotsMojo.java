@@ -37,7 +37,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 /**
@@ -75,9 +75,9 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @throws XMLStreamException     when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      */
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         try {
             if (isProcessingDependencyManagement()) {
@@ -102,7 +102,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
     }
 
     private void unlockSnapshots(
-            ModifiedPomXMLEventReader pom, List<Dependency> dependencies, DependencyChangeRecord.ChangeKind changeKind)
+            MutableXMLStreamReader pom, List<Dependency> dependencies, DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException {
         for (Dependency dep : dependencies) {
             if (isExcludeReactor() && isProducedByReactor(dep)) {
@@ -144,7 +144,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
-    private void unlockParentSnapshot(ModifiedPomXMLEventReader pom, MavenProject parent)
+    private void unlockParentSnapshot(MutableXMLStreamReader pom, MavenProject parent)
             throws XMLStreamException, MojoExecutionException {
         if (parent == null) {
             getLog().info("Project does not have a parent");

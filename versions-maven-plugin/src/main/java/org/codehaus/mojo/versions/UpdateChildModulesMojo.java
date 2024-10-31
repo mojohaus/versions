@@ -38,7 +38,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 /**
@@ -172,7 +172,7 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
      * @throws MojoFailureException   when things go wrong.
      * @throws XMLStreamException     when things go wrong.
      */
-    protected synchronized void update(ModifiedPomXMLEventReader pom)
+    protected synchronized void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         getLog().debug("Updating parent to " + sourceVersion);
 

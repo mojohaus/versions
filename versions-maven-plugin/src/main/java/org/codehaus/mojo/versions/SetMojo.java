@@ -54,7 +54,7 @@ import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.change.VersionChanger;
 import org.codehaus.mojo.versions.change.VersionChangerFactory;
 import org.codehaus.mojo.versions.ordering.ReactorDepthComparator;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ContextualLog;
 import org.codehaus.mojo.versions.utils.DelegatingContextualLog;
 import org.codehaus.mojo.versions.utils.RegexUtils;
@@ -542,11 +542,12 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong.
      * @throws javax.xml.stream.XMLStreamException            when things go wrong.
      */
-    protected synchronized void update(ModifiedPomXMLEventReader pom)
+    protected synchronized void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         ContextualLog log = new DelegatingContextualLog(getLog());
         try {
-            Model model = PomHelper.getRawModel(pom);
+            Model model =
+                    PomHelper.getRawModel(pom.getSource(), pom.getFileName().toFile());
             log.setContext("Processing " + PomHelper.getGroupId(model) + ":" + PomHelper.getArtifactId(model));
 
             VersionChangerFactory versionChangerFactory = new VersionChangerFactory();
@@ -573,7 +574,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
         log.clearContext();
     }
 
-    private void updateBuildOutputTimestamp(ModifiedPomXMLEventReader pom, Model model) throws XMLStreamException {
+    private void updateBuildOutputTimestamp(MutableXMLStreamReader pom, Model model) throws XMLStreamException {
         String buildOutputTimestamp = model.getProperties().getProperty("project.build.outputTimestamp");
 
         if (buildOutputTimestamp == null || isEmpty(buildOutputTimestamp)) {
