@@ -42,7 +42,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.eclipse.aether.RepositorySystem;
@@ -285,7 +285,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
         buf.append(':');
         buf.append(project.getArtifactId());
 
-        if (project.getVersion() != null && project.getVersion().length() > 0) {
+        if (project.getVersion() != null && !project.getVersion().isEmpty()) {
             buf.append(":");
             buf.append(project.getVersion());
         }
@@ -298,17 +298,17 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
         buf.append(d.getGroupId());
         buf.append(':');
         buf.append(d.getArtifactId());
-        if (d.getType() != null && d.getType().length() > 0) {
+        if (d.getType() != null && !d.getType().isEmpty()) {
             buf.append(':');
             buf.append(d.getType());
         } else {
             buf.append(":jar");
         }
-        if (d.getClassifier() != null && d.getClassifier().length() > 0) {
+        if (d.getClassifier() != null && !d.getClassifier().isEmpty()) {
             buf.append(':');
             buf.append(d.getClassifier());
         }
-        if (d.getVersion() != null && d.getVersion().length() > 0) {
+        if (d.getVersion() != null && !d.getVersion().isEmpty()) {
             buf.append(":");
             buf.append(d.getVersion());
         }
@@ -405,7 +405,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
             List<String> patterns = new ArrayList<>();
             if (this.includesList != null) {
                 patterns.addAll(separatePatterns(includesList));
-            } else if (includes != null) {
+            } else {
                 patterns.addAll(Arrays.asList(includes));
             }
             includesFilter = new PatternIncludesArtifactFilter(patterns);
@@ -418,7 +418,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
             List<String> patterns = new ArrayList<>();
             if (excludesList != null) {
                 patterns.addAll(separatePatterns(excludesList));
-            } else if (excludes != null) {
+            } else {
                 patterns.addAll(Arrays.asList(excludes));
             }
             excludesFilter = new PatternExcludesArtifactFilter(patterns);
@@ -494,7 +494,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * Attempts to update the dependency {@code dep} to the given {@code newVersion}. The dependency can either
      * be the parent project or any given dependency.
      *
-     * @param pom {@link ModifiedPomXMLEventReader} instance to update the POM XML document
+     * @param pom {@link MutableXMLStreamReader} instance to update the POM XML document
      * @param dep dependency to be updated (can also be a dependency made from the parent)
      * @param newVersion new version to update the dependency to
      * @param changeKind title for the {@link ChangeRecorder} log
@@ -502,10 +502,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @throws XMLStreamException thrown if updating the XML doesn't succeed
      */
     protected boolean updateDependencyVersion(
-            ModifiedPomXMLEventReader pom,
-            Dependency dep,
-            String newVersion,
-            DependencyChangeRecord.ChangeKind changeKind)
+            MutableXMLStreamReader pom, Dependency dep, String newVersion, DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException {
         boolean updated = false;
         if (isProcessingParent()

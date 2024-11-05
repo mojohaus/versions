@@ -34,7 +34,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.eclipse.aether.RepositorySystem;
 
@@ -67,7 +67,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      */
     @SafeVarargs
     protected final void useLatestVersions(
-            ModifiedPomXMLEventReader pom,
+            MutableXMLStreamReader pom,
             Collection<Dependency> dependencies,
             BiFunction<Dependency, ArtifactVersions, Optional<ArtifactVersion>> newestVersionProducer,
             DependencyChangeRecord.ChangeKind changeKind,

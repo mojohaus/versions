@@ -20,12 +20,13 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.TransformerException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
@@ -57,13 +58,11 @@ import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.WriterFactory;
-import org.codehaus.stax2.XMLInputFactory2;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.Optional.ofNullable;
 
 /**
  * Abstract base class for Versions Mojos.
@@ -313,8 +312,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      */
     protected void process(File outFile) throws MojoExecutionException, MojoFailureException {
         try {
-            StringBuilder input = PomHelper.readXmlFile(outFile);
-            ModifiedPomXMLEventReader newPom = newModifiedPomXER(input, outFile.getAbsolutePath());
+            MutableXMLStreamReader newPom = new MutableXMLStreamReader(outFile.toPath());
 
             update(newPom);
 
@@ -330,47 +328,17 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
                 } else {
                     getLog().debug("Skipping generation of backup file");
                 }
-                writeFile(outFile, input);
+                try (Writer writer = Files.newBufferedWriter(
+                        outFile.toPath(),
+                        ofNullable(newPom.getEncoding()).map(Charset::forName).orElse(Charset.defaultCharset()))) {
+                    writer.write(newPom.getSource());
+                }
             }
-
             saveChangeRecorderResults();
-        } catch (IOException | XMLStreamException e) {
+        } catch (IOException e) {
             getLog().error(e);
-        } catch (VersionRetrievalException e) {
+        } catch (VersionRetrievalException | XMLStreamException | TransformerException e) {
             throw new MojoExecutionException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Creates a {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader} from a StringBuilder.
-     *
-     * @param input The XML to read and modify.
-     * @param path  Path pointing to the source of the XML
-     * @return The {@link org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader}.
-     */
-    protected final ModifiedPomXMLEventReader newModifiedPomXER(StringBuilder input, String path) {
-        ModifiedPomXMLEventReader newPom = null;
-        try {
-            XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-            inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
-            newPom = new ModifiedPomXMLEventReader(input, inputFactory, path);
-        } catch (XMLStreamException e) {
-            getLog().error(e);
-        }
-        return newPom;
-    }
-
-    /**
-     * Writes a StringBuilder into a file.
-     *
-     * @param outFile The file to read.
-     * @param input   The contents of the file.
-     * @throws IOException when things go wrong.
-     */
-    protected final void writeFile(File outFile, StringBuilder input) throws IOException {
-
-        try (Writer writer = WriterFactory.newXmlWriter(outFile)) {
-            IOUtil.copy(input.toString(), writer);
         }
     }
 
@@ -384,7 +352,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @throws VersionRetrievalException           if version retrieval goes wrong
      * @since 1.0-alpha-1
      */
-    protected abstract void update(ModifiedPomXMLEventReader pom)
+    protected abstract void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException;
 
     /**
@@ -452,13 +420,13 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @param allowDowngrade    if downgrades should be allowed if snapshots are not allowed
      * @param unchangedSegment  most major segment not to be changed
      * @return new version of the artifact, if the property was updated; {@code null} if there was no update
-     * @throws XMLStreamException thrown from {@link ModifiedPomXMLEventReader} if the update doesn't succeed
+     * @throws XMLStreamException thrown from {@link MutableXMLStreamReader} if the update doesn't succeed
      * @throws InvalidVersionSpecificationException thrown if {@code unchangedSegment} doesn't match the version
      * @throws InvalidSegmentException thrown if {@code unchangedSegment} is invalid
      * @throws MojoExecutionException thrown if any other error occurs
      */
     protected ArtifactVersion updatePropertyToNewestVersion(
-            ModifiedPomXMLEventReader pom,
+            MutableXMLStreamReader pom,
             Property property,
             PropertyVersions version,
             String currentVersion,
@@ -510,8 +478,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
         this.getLog().debug("writing change record to " + this.changeRecorderOutputFile);
         getChangeRecorder()
-                .writeReport(Optional.ofNullable(changeRecorderOutputFile)
-                        .map(File::toPath)
-                        .orElse(null));
+                .writeReport(
+                        ofNullable(changeRecorderOutputFile).map(File::toPath).orElse(null));
     }
 }

@@ -47,7 +47,7 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.eclipse.aether.RepositorySystem;
 
@@ -139,9 +139,9 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
      * @throws org.apache.maven.plugin.MojoExecutionException Something wrong with the plugin itself
      * @throws org.apache.maven.plugin.MojoFailureException   The plugin detected an error in the build
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      */
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         if (this.ignoreRemoteDependencies && this.ignoreRemoteDependencyManagement) {
             throw new MojoFailureException(" ignoreRemoteDependencies and ignoreRemoteDependencyManagement "
@@ -219,7 +219,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
 
         if (reportMode) {
             getLog().info("The following differences were found:");
-            if (totalDiffs.size() == 0) {
+            if (totalDiffs.isEmpty()) {
                 getLog().info("  none");
             } else {
                 for (String totalDiff : totalDiffs) {
@@ -227,7 +227,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
                 }
             }
             getLog().info("The following property differences were found:");
-            if (propertyDiffs.size() == 0) {
+            if (propertyDiffs.isEmpty()) {
                 getLog().info("  none");
             } else {
                 for (String propertyDiff : propertyDiffs) {
@@ -281,7 +281,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
      * @throws MojoExecutionException
      */
     private List<String> compareVersions(
-            ModifiedPomXMLEventReader pom,
+            MutableXMLStreamReader pom,
             List<Dependency> dependencies,
             Map<String, Dependency> remoteDependencies,
             DependencyChangeRecord.ChangeKind changeKind)
@@ -313,7 +313,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
      * Updates the properties holding a version if necessary.
      */
     private List<String> updatePropertyVersions(
-            ModifiedPomXMLEventReader pom,
+            MutableXMLStreamReader pom,
             Map<Property, PropertyVersions> versionProperties,
             Map<String, Dependency> remoteDependencies)
             throws XMLStreamException {
@@ -383,7 +383,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
                 PrintWriter pw = new PrintWriter(fw)) {
             pw.println("The following differences were found:");
             pw.println();
-            if (dependenciesUpdate.size() == 0) {
+            if (dependenciesUpdate.isEmpty()) {
                 pw.println("  none");
             } else {
                 for (String dependencyUpdate : dependenciesUpdate) {
@@ -393,7 +393,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
             pw.println();
             pw.println("The following property differences were found:");
             pw.println();
-            if (propertiesUpdate.size() == 0) {
+            if (propertiesUpdate.isEmpty()) {
                 pw.println("  none");
             } else {
                 for (String propertyUpdate : propertiesUpdate) {

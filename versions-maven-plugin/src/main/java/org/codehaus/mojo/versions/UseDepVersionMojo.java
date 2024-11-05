@@ -17,8 +17,11 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.TransformerException;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
@@ -52,7 +56,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind;
 import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.eclipse.aether.RepositorySystem;
@@ -114,7 +118,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     @Override
     protected void validateInput() throws MojoExecutionException {
         super.validateInput();
-        if (depVersion == null || depVersion.equals("")) {
+        if (StringUtils.isBlank(depVersion)) {
             throw new IllegalArgumentException(
                     "depVersion must be supplied with use-specific-version, and cannot be blank.");
         }
@@ -128,7 +132,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     }
 
     @Override
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
         // not used
     }
@@ -139,26 +143,28 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
         List<ModelNode> rawModels;
 
         try {
-            ModifiedPomXMLEventReader pomReader = newModifiedPomXER(
-                    PomHelper.readXmlFile(getProject().getFile()),
-                    getProject().getFile().toPath().toString());
-            ModelNode rootNode = new ModelNode(PomHelper.getRawModel(pomReader), pomReader);
+            MutableXMLStreamReader pomReader =
+                    new MutableXMLStreamReader(getProject().getFile().toPath());
+            ModelNode rootNode = new ModelNode(
+                    PomHelper.getRawModel(pomReader.getSource(), getProject().getFile()), pomReader);
             rawModels = PomHelper.getRawModelTree(rootNode, getLog());
             // reversing to process depth-first
             Collections.reverse(rawModels);
-        } catch (IOException e) {
-            throw new MojoFailureException(e.getMessage(), e);
-        }
 
-        try {
             Set<String> propertyBacklog = new HashSet<>();
             Map<String, Set<Dependency>> propertyConflicts = new HashMap<>();
             for (ModelNode node : rawModels) {
-                processModel(node, propertyBacklog, propertyConflicts);
+                processModel(
+                        node,
+                        propertyBacklog,
+                        propertyConflicts,
+                        ofNullable(pomReader.getEncoding())
+                                .map(Charset::forName)
+                                .orElse(Charset.defaultCharset()));
             }
-            propertyBacklog.forEach(p -> {
-                getLog().warn("Not updating property ${" + p + "}: defined in parent");
-            });
+            propertyBacklog.forEach(p -> getLog().warn("Not updating property ${" + p + "}: defined in parent"));
+        } catch (IOException | XMLStreamException | TransformerException e) {
+            throw new MojoFailureException(e.getMessage(), e);
         } catch (RuntimeException e) {
             if (e.getCause() instanceof MojoFailureException) {
                 throw (MojoFailureException) e.getCause();
@@ -179,10 +185,14 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      *                          which are associated with dependencies which do not fit the filter and thus may not
      *                          be changed. This is then used for conflict detection if a dependency to be changed
      *                          used one of these properties. Such a change is not allowed and must be reported instead.
+     * @param charset           charset for file writing
      * @return {@code true} if the file has been changed
      */
     protected boolean processModel(
-            ModelNode node, Set<String> propertyBacklog, Map<String, Set<Dependency>> propertyConflicts)
+            ModelNode node,
+            Set<String> propertyBacklog,
+            Map<String, Set<Dependency>> propertyConflicts,
+            Charset charset)
             throws MojoFailureException, MojoExecutionException {
         // 1) process the properties carried over from children
         propertyBacklog.removeIf(p -> updatePropertyValue(node, p));
@@ -225,7 +235,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                     e);
         }
 
-        if (node.getModifiedPomXMLEventReader().isModified()) {
+        if (node.getMutableXMLStreamReader().isModified()) {
             if (generateBackupPoms) {
                 Objects.requireNonNull(node.getModel().getPomFile());
                 Objects.requireNonNull(node.getModel().getPomFile().toPath().getParent());
@@ -252,10 +262,9 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
             } else {
                 getLog().debug("Skipping the generation of a backup file");
             }
-            try {
-                writeFile(
-                        node.getModel().getPomFile(),
-                        node.getModifiedPomXMLEventReader().asStringBuilder());
+            try (Writer writer =
+                    Files.newBufferedWriter(node.getModel().getPomFile().toPath(), charset)) {
+                writer.write(node.getMutableXMLStreamReader().getSource());
             } catch (IOException e) {
                 throw new MojoFailureException(
                         "Unable to write the changed file " + node.getModel().getPomFile(), e);
@@ -271,7 +280,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                             e);
         }
 
-        return node.getModifiedPomXMLEventReader().isModified();
+        return node.getMutableXMLStreamReader().isModified();
     }
 
     private static List<Dependency> getDependencies(Model model) {
@@ -288,7 +297,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     }
 
     /**
-     * <p>Will process the given module tree node, updating the {@link ModifiedPomXMLEventReader} associated with the
+     * <p>Will process the given module tree node, updating the {@link MutableXMLStreamReader} associated with the
      * node if it finds a dependency matching the filter that needs to be changed or, if {@link #processProperties}
      * is {@code true}, a property value that can be updated.</p>
      * <p>The method will use the set passed as the {@code backlog} argument to store the properties which it needs
@@ -311,7 +320,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      *                          be changed. This is then used for conflict detection if a dependency to be changed
      *                          used one of these properties. Such a change is not allowed and must be reported instead.
      * @throws MojoExecutionException thrown if a version may not be changed
-     * @throws XMLStreamException thrown if a {@link ModifiedPomXMLEventReader} can't be updated
+     * @throws XMLStreamException thrown if a {@link MutableXMLStreamReader} can't be updated
      * @throws VersionRetrievalException thrown if dependency versions cannot be retrieved
      */
     private void useDepVersion(
@@ -377,7 +386,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                         }
                     }
                     if (!propertyName.isPresent()) {
-                        updateDependencyVersion(node.getModifiedPomXMLEventReader(), dep, depVersion, changeKind);
+                        updateDependencyVersion(node.getMutableXMLStreamReader(), dep, depVersion, changeKind);
                     } else {
                         // propertyName is present
                         ofNullable(propertyConflicts.get(propertyName.get()))
@@ -427,14 +436,14 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                         node.getModel().getProfiles().stream()
                                 .map(profile -> new ImmutablePair<>(profile, profile.getProperties()))
                                 .map(pair -> ofNullable(pair.getRight().getProperty(property))
-                                        .map(value -> new ImmutablePair<Profile, String>(pair.getLeft(), value))
+                                        .map(value -> new ImmutablePair<>(pair.getLeft(), value))
                                         .orElse(null)))
                 // and processing them
                 .filter(Objects::nonNull)
                 .map(pair -> {
                     try {
                         boolean result = PomHelper.setPropertyVersion(
-                                node.getModifiedPomXMLEventReader(),
+                                node.getMutableXMLStreamReader(),
                                 ofNullable(pair.getLeft()).map(Profile::getId).orElse(null),
                                 property,
                                 depVersion);

@@ -19,10 +19,11 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.TransformerException;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -42,16 +43,16 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ModelNode;
-import org.codehaus.stax2.XMLInputFactory2;
 import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.codehaus.mojo.versions.utils.ModifiedPomXMLEventReaderUtils.matches;
-import static org.codehaus.stax2.XMLInputFactory2.P_PRESERVE_LOCATION;
+import static java.nio.charset.Charset.defaultCharset;
+import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,12 +67,7 @@ import static org.mockito.Mockito.mock;
 class PomHelperTest {
     private static final int NUMBER_OF_CHILD_PROJECTS = 30;
 
-    private static final XMLInputFactory INPUT_FACTORY = XMLInputFactory2.newInstance();
-
-    @BeforeAll
-    static void setUpClass() {
-        INPUT_FACTORY.setProperty(P_PRESERVE_LOCATION, Boolean.TRUE);
-    }
+    private static final Path PATH = Paths.get("dummy-file");
 
     /**
      * Tests what happens when changing a long property substitution pattern, e.g.
@@ -84,12 +80,8 @@ class PomHelperTest {
         URL url = getClass().getResource("PomHelperTest.testLongProperties.pom.xml");
         assert url != null;
         File file = new File(url.getPath());
-        StringBuilder input = PomHelper.readXmlFile(file);
 
-        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-        inputFactory.setProperty(P_PRESERVE_LOCATION, Boolean.TRUE);
-
-        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader(input, inputFactory, file.getAbsolutePath());
+        MutableXMLStreamReader pom = new MutableXMLStreamReader(file.toPath());
 
         String oldVersion = PomHelper.getProjectVersion(pom);
 
@@ -106,9 +98,9 @@ class PomHelperTest {
     void testGroupIdNotOnChildPom() throws Exception {
         URL url = getClass().getResource("PomHelperTest.noGroupIdOnChild.pom.xml");
         assert url != null;
-        StringBuilder input = PomHelper.readXmlFile(new File(url.getPath()));
+        String input = PomHelper.readXml(new File(url.getPath())).getLeft();
         MavenXpp3Reader reader = new MavenXpp3Reader();
-        Model model = reader.read(new StringReader(input.toString()));
+        Model model = reader.read(new StringReader(input));
 
         assertEquals("org.myorg", PomHelper.getGroupId(model));
     }
@@ -174,57 +166,60 @@ class PomHelperTest {
     }
 
     @Test
-    void testSetElementValueExistingValue() throws XMLStreamException {
-        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder("<super-parent><parent><child>test</child></parent></super-parent>"),
-                INPUT_FACTORY,
-                null);
+    void testSetElementValueExistingValue() throws XMLStreamException, IOException, TransformerException {
+        MutableXMLStreamReader xmlEventReader = new MutableXMLStreamReader(
+                toInputStream("<super-parent><parent><child>test</child></parent></super-parent>", defaultCharset()),
+                PATH);
 
         assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
         MatcherAssert.assertThat(
-                xmlEventReader, matches("<super-parent><parent><child>value</child></parent></super-parent>"));
+                xmlEventReader.getSource().replaceAll("\\s", ""),
+                is("<super-parent><parent><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    void testSetElementValueEmptyChild() throws XMLStreamException {
-        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder("<super-parent><parent><child/></parent></super-parent>"), INPUT_FACTORY, null);
+    void testSetElementValueEmptyChild() throws XMLStreamException, IOException, TransformerException {
+        MutableXMLStreamReader xmlEventReader = new MutableXMLStreamReader(
+                toInputStream("<super-parent><parent><child/></parent></super-parent>", defaultCharset()), PATH);
 
         assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
         MatcherAssert.assertThat(
-                xmlEventReader, matches("<super-parent><parent><child>value</child></parent></super-parent>"));
+                xmlEventReader.getSource().replaceAll("\\s", ""),
+                is("<super-parent><parent><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    void testSetElementValueNewValueEmptyParent() throws XMLStreamException {
-        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder("<super-parent><parent/></super-parent>"), INPUT_FACTORY, null);
+    void testSetElementValueNewValueEmptyParent() throws XMLStreamException, IOException, TransformerException {
+        MutableXMLStreamReader xmlEventReader = new MutableXMLStreamReader(
+                toInputStream("<super-parent><parent/></super-parent>", defaultCharset()), PATH);
 
         assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
         MatcherAssert.assertThat(
-                xmlEventReader, matches("<super-parent><parent><child>value</child></parent></super-parent>"));
+                xmlEventReader.getSource().replaceAll("\\s", ""),
+                is("<super-parent><parent><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    void testSetElementValueNewValueNoChild() throws XMLStreamException {
-        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder("<super-parent><parent><child2/></parent></super-parent>"), INPUT_FACTORY, null);
+    void testSetElementValueNewValueNoChild() throws XMLStreamException, IOException, TransformerException {
+        MutableXMLStreamReader xmlEventReader = new MutableXMLStreamReader(
+                toInputStream("<super-parent><parent><child2/></parent></super-parent>", defaultCharset()), PATH);
 
         assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
         MatcherAssert.assertThat(
-                xmlEventReader, matches("<super-parent><parent><child2/><child>value</child></parent></super-parent>"));
+                xmlEventReader.getSource().replaceAll("\\s", ""),
+                is("<super-parent><parent><child2/><child>value</child></parent></super-parent>"));
     }
 
     @Test
-    void testSetProjectValueNewValueNonEmptyParent() throws XMLStreamException {
-        ModifiedPomXMLEventReader xmlEventReader = new ModifiedPomXMLEventReader(
-                new StringBuilder("<super-parent><parent><child>test</child></parent></super-parent>"),
-                INPUT_FACTORY,
-                null);
+    void testSetProjectValueNewValueNonEmptyParent() throws XMLStreamException, IOException, TransformerException {
+        MutableXMLStreamReader xmlEventReader = new MutableXMLStreamReader(
+                toInputStream("<super-parent><parent><child>test</child></parent></super-parent>", defaultCharset()),
+                PATH);
 
         assertThat(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"), is(true));
         MatcherAssert.assertThat(
-                xmlEventReader, matches("<super-parent><parent><child>value</child></parent></super-parent>"));
+                xmlEventReader.getSource().replaceAll("\\s", ""),
+                is("<super-parent><parent><child>value</child></parent></super-parent>"));
     }
 
     @Test
@@ -284,13 +279,10 @@ class PomHelperTest {
     @Test
     void testGetRawModelTree() throws Exception {
         Log log = mock(Log.class);
-        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-        inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
         Path path = Paths.get("src/test/resources/org/codehaus/mojo/versions/api/getRawModelTree/pom.xml");
-        ModifiedPomXMLEventReader pomReader = new ModifiedPomXMLEventReader(
-                new StringBuilder(new String(Files.readAllBytes(path))), inputFactory, path.toString());
-        List<ModelNode> rawModelTree =
-                PomHelper.getRawModelTree(new ModelNode(PomHelper.getRawModel(pomReader), pomReader), log);
+        MutableXMLStreamReader pomReader = new MutableXMLStreamReader(path);
+        List<ModelNode> rawModelTree = PomHelper.getRawModelTree(
+                new ModelNode(PomHelper.getRawModel(pomReader.getSource(), path.toFile()), pomReader), log);
         assertThat(
                 rawModelTree.stream()
                         .map(ModelNode::getModel)
@@ -302,13 +294,10 @@ class PomHelperTest {
     @Test
     void testFindProperty() throws Exception {
         Log log = mock(Log.class);
-        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-        inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
         Path path = Paths.get("src/test/resources/org/codehaus/mojo/versions/api/findProperty/pom.xml");
-        ModifiedPomXMLEventReader pomReader = new ModifiedPomXMLEventReader(
-                new StringBuilder(new String(Files.readAllBytes(path))), inputFactory, path.toString());
-        List<ModelNode> rawModelTree =
-                PomHelper.getRawModelTree(new ModelNode(PomHelper.getRawModel(pomReader), pomReader), log);
+        MutableXMLStreamReader pomReader = new MutableXMLStreamReader(path);
+        List<ModelNode> rawModelTree = PomHelper.getRawModelTree(
+                new ModelNode(PomHelper.getRawModel(pomReader.getSource(), path.toFile()), pomReader), log);
 
         ModelNode grandparent = rawModelTree.get(0);
         assertThat(grandparent.getModel().getArtifactId(), is("grandparent"));
@@ -323,5 +312,16 @@ class PomHelperTest {
         assertThat(PomHelper.findProperty("a", grandparent).get(), is(grandparent));
         assertThat(PomHelper.findProperty("a", childB).get(), is(grandparent));
         assertThat(PomHelper.findProperty("b", childB).get(), is(childB));
+    }
+
+    @Test
+    // The reason for this is that XMLStreamReader overrides the preamble with its own detected encoding,
+    // which is especially visible for files with a BOM
+    void testReadXmlFileUtf16() throws IOException, XMLStreamException, TransformerException {
+        String string = PomHelper.readXml(
+                        new File("src/test/resources/org/codehaus/mojo/versions/api/PomHelperTest.utf16.xml"))
+                .toString();
+        assertThat(string, containsStringIgnoringCase("\"utf-16\""));
+        assertThat(string, containsString("ąęśćńźĄŚĘŻĆ"));
     }
 }

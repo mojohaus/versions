@@ -36,7 +36,7 @@ import org.codehaus.mojo.versions.ordering.VersionComparator;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-class PropertyVersionsBuilder {
+public class PropertyVersionsBuilder {
     private final String name;
 
     private final String profileId;

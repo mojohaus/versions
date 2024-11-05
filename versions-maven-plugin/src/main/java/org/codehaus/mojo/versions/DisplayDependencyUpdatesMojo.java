@@ -46,7 +46,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
@@ -582,11 +582,11 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * @param pom the pom to update.
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      * @since 1.0-alpha-1
      */
     @Override
-    protected void update(ModifiedPomXMLEventReader pom) {
+    protected void update(MutableXMLStreamReader pom) {
         // do nothing
     }
 }

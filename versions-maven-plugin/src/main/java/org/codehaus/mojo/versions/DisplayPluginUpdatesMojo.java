@@ -21,13 +21,14 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.TransformerException;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,17 +82,16 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.PluginComparator;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.ReaderFactory;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
+import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 
 /**
  * Displays all plugins that have newer versions available, taking care of Maven version prerequisites.
@@ -127,6 +127,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     public static final Pattern PATTERN_PROJECT_PLUGIN = Pattern.compile(
             "/project(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin");
+    public static final String SUPERPOM_PATH = "org/apache/maven/model/pom-4.0.0.xml";
 
     /**
      * @since 1.0-alpha-1
@@ -197,65 +198,57 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                         .stream()
                         .collect(LinkedHashMap::new, (m, p) -> m.put(p.getKey(), p.getVersion()), Map::putAll);
 
-        URL superPom = getClass().getClassLoader().getResource("org/apache/maven/model/pom-4.0.0.xml");
-        if (superPom != null) {
-            try {
-                try (Reader reader = ReaderFactory.newXmlReader(superPom)) {
-                    StringBuilder buf = new StringBuilder(IOUtil.toString(reader));
-                    ModifiedPomXMLEventReader pom = newModifiedPomXER(buf, superPom.toString());
+        try (InputStream superPomIs = getClass().getClassLoader().getResourceAsStream(SUPERPOM_PATH)) {
+            Objects.requireNonNull(superPomIs);
+            MutableXMLStreamReader pomReader = new MutableXMLStreamReader(superPomIs, Paths.get(SUPERPOM_PATH));
 
-                    Stack<StackState> pathStack = new Stack<>();
-                    StackState curState = null;
-                    while (pom.hasNext()) {
-                        XMLEvent event = pom.nextEvent();
-                        if (event.isStartDocument()) {
-                            curState = new StackState("");
-                            pathStack.clear();
-                        } else if (event.isStartElement()) {
-                            if (curState != null) {
-                                String elementName =
-                                        event.asStartElement().getName().getLocalPart();
-                                if (PATTERN_PROJECT_PLUGIN
-                                        .matcher(curState.path)
-                                        .matches()) {
-                                    if ("groupId".equals(elementName)) {
-                                        curState.groupId = pom.getElementText().trim();
-                                        continue;
-                                    } else if ("artifactId".equals(elementName)) {
-                                        curState.artifactId =
-                                                pom.getElementText().trim();
-                                        continue;
+            Stack<StackState> pathStack = new Stack<>();
+            StackState curState = new StackState("");
 
-                                    } else if ("version".equals(elementName)) {
-                                        curState.version = pom.getElementText().trim();
-                                        continue;
-                                    }
-                                }
-
-                                pathStack.push(curState);
-                                curState = new StackState(curState.path + "/" + elementName);
+            for (int event = pomReader.getEventType();
+                    event != END_DOCUMENT && pomReader.hasNext();
+                    event = pomReader.next()) {
+                if (pomReader.isStartElement()) {
+                    if (curState != null) {
+                        String elementName = pomReader.getLocalName();
+                        if (PATTERN_PROJECT_PLUGIN.matcher(curState.path).matches()) {
+                            switch (elementName) {
+                                case "groupId":
+                                    curState.groupId =
+                                            pomReader.getElementText().trim();
+                                    break;
+                                case "artifactId":
+                                    curState.artifactId =
+                                            pomReader.getElementText().trim();
+                                    break;
+                                case "version":
+                                    curState.version =
+                                            pomReader.getElementText().trim();
+                                    break;
+                                default:
+                                    break;
                             }
-                        } else if (event.isEndElement()) {
-                            if (curState != null
-                                    && curState.artifactId != null
-                                    && PATTERN_PROJECT_PLUGIN
-                                            .matcher(curState.path)
-                                            .matches()) {
-                                result.putIfAbsent(
-                                        Plugin.constructKey(
-                                                curState.groupId == null
-                                                        ? PomHelper.APACHE_MAVEN_PLUGINS_GROUPID
-                                                        : curState.groupId,
-                                                curState.artifactId),
-                                        curState.version);
-                            }
-                            curState = pathStack.pop();
                         }
+                        pathStack.push(curState);
+                        curState = new StackState(curState.path + "/" + elementName);
                     }
+                } else if (pomReader.isEndElement()) {
+                    if (curState != null
+                            && curState.artifactId != null
+                            && PATTERN_PROJECT_PLUGIN.matcher(curState.path).matches()) {
+                        result.putIfAbsent(
+                                Plugin.constructKey(
+                                        curState.groupId == null
+                                                ? PomHelper.APACHE_MAVEN_PLUGINS_GROUPID
+                                                : curState.groupId,
+                                        curState.artifactId),
+                                curState.version);
+                    }
+                    curState = pathStack.pop();
                 }
-            } catch (IOException | XMLStreamException e) {
-                // ignore
             }
+        } catch (IOException | XMLStreamException | TransformerException e) {
+            // ignore
         }
 
         return result;
@@ -318,11 +311,10 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         logInit();
         Set<String> pluginsWithVersionsSpecified;
-        try {
-            MavenProject project1 = getProject();
-            pluginsWithVersionsSpecified = findPluginsWithVersionsSpecified(
-                    PomHelper.readXmlFile(project1.getFile()), getSafeProjectPathInfo(project1));
-        } catch (XMLStreamException | IOException e) {
+        try (MutableXMLStreamReader pomReader =
+                new MutableXMLStreamReader(getProject().getFile().toPath())) {
+            pluginsWithVersionsSpecified = findPluginsWithVersionsSpecified(pomReader);
+        } catch (XMLStreamException | IOException | TransformerException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
 
@@ -685,22 +677,28 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             interpolatedModel = modelInterpolator.interpolateModel(
                     originalModel, null, modelBuildingRequest, new IgnoringModelProblemCollector());
             if (havePom) {
-                try {
-                    Set<String> withVersionSpecified = findPluginsWithVersionsSpecified(
-                            new StringBuilder(writer.toString()), getSafeProjectPathInfo(parentProject));
+                try (ByteArrayInputStream bais =
+                        new ByteArrayInputStream(writer.toString().getBytes())) {
+                    try (MutableXMLStreamReader pomReader = new MutableXMLStreamReader(
+                            bais,
+                            ofNullable(parentProject.getFile())
+                                    .map(File::toPath)
+                                    .orElse(null))) {
+                        Set<String> withVersionSpecified = findPluginsWithVersionsSpecified(pomReader);
 
-                    Map<String, String> map = getPluginManagement(interpolatedModel);
-                    map.keySet().retainAll(withVersionSpecified);
-                    parentPlugins.putAll(map);
+                        Map<String, String> map = getPluginManagement(interpolatedModel);
+                        map.keySet().retainAll(withVersionSpecified);
+                        parentPlugins.putAll(map);
 
-                    map = getBuildPlugins(interpolatedModel, true);
-                    map.keySet().retainAll(withVersionSpecified);
-                    parentPlugins.putAll(map);
+                        map = getBuildPlugins(interpolatedModel, true);
+                        map.keySet().retainAll(withVersionSpecified);
+                        parentPlugins.putAll(map);
 
-                    map = getReportPlugins(interpolatedModel, true);
-                    map.keySet().retainAll(withVersionSpecified);
-                    parentPlugins.putAll(map);
-                } catch (XMLStreamException e) {
+                        map = getReportPlugins(interpolatedModel, true);
+                        map.keySet().retainAll(withVersionSpecified);
+                        parentPlugins.putAll(map);
+                    }
+                } catch (XMLStreamException | TransformerException | IOException e) {
                     throw new MojoExecutionException(e.getMessage(), e);
                 }
             } else {
@@ -710,14 +708,6 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             }
         }
         return parentPlugins;
-    }
-
-    private String getSafeProjectPathInfo(MavenProject project) {
-        return ofNullable(project.getFile())
-                .map(File::getAbsolutePath)
-                // path is used only as information in error message,
-                // we can fallback to project artifact info here
-                .orElse(project.toString());
     }
 
     private boolean isMavenPluginProject() {
@@ -752,34 +742,28 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Returns a set of Strings which correspond to the plugin coordinates where there is a version specified.
      *
-     * @param pomContents The project to get the plugins with versions specified.
-     * @param path        Path that points to the source of the XML
+     * @param pom a {@link MutableXMLStreamReader} instance for the pom project to get the plugins with versions specified.
      * @return a set of Strings which correspond to the plugin coordinates where there is a version specified.
      */
-    private Set<String> findPluginsWithVersionsSpecified(StringBuilder pomContents, String path)
-            throws XMLStreamException {
+    private Set<String> findPluginsWithVersionsSpecified(MutableXMLStreamReader pom)
+            throws XMLStreamException, IOException, TransformerException {
         Set<String> result = new HashSet<>();
-        ModifiedPomXMLEventReader pom = newModifiedPomXER(pomContents, path);
-
         Stack<StackState> pathStack = new Stack<>();
-        StackState curState = null;
+        StackState curState = new StackState("");
+
         while (pom.hasNext()) {
-            XMLEvent event = pom.nextEvent();
-            if (event.isStartDocument()) {
-                curState = new StackState("");
-                pathStack.clear();
-            } else if (event.isStartElement()) {
-                String elementName = event.asStartElement().getName().getLocalPart();
+            pom.next();
+            if (pom.isStartElement()) {
                 if (curState != null
                         && PATTERN_PROJECT_PLUGIN.matcher(curState.path).matches()) {
-                    if ("groupId".equals(elementName)) {
+                    if ("groupId".equals(pom.getLocalName())) {
                         curState.groupId = pom.getElementText().trim();
                         continue;
-                    } else if ("artifactId".equals(elementName)) {
+                    } else if ("artifactId".equals(pom.getLocalName())) {
                         curState.artifactId = pom.getElementText().trim();
                         continue;
 
-                    } else if ("version".equals(elementName)) {
+                    } else if ("version".equals(pom.getLocalName())) {
                         curState.version = pom.getElementText().trim();
                         continue;
                     }
@@ -787,8 +771,10 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
 
                 assert curState != null;
                 pathStack.push(curState);
-                curState = new StackState(curState.path + "/" + elementName);
-            } else if (event.isEndElement()) {
+                curState = new StackState(curState.path + "/" + pom.getLocalName());
+            }
+            // for empty elements, pom can be both start- and end element
+            if (pom.isEndElement()) {
                 if (curState != null
                         && PATTERN_PROJECT_PLUGIN.matcher(curState.path).matches()) {
                     if (curState.artifactId != null && curState.version != null) {
@@ -810,10 +796,10 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Get the minimum required Maven version of the given plugin
      * Same logic as in
-     * @see <a href="https://github.com/apache/maven-plugin-tools/blob/c8ddcdcb10d342a5a5e2f38245bb569af5730c7c/maven-plugin-plugin/src/main/java/org/apache/maven/plugin/plugin/PluginReport.java#L711">PluginReport</a>
      *
      * @param pluginProject the plugin for which to retrieve the minimum Maven version which is required
      * @return The minimally required Maven version (never {@code null})
+     * @see <a href="https://github.com/apache/maven-plugin-tools/blob/c8ddcdcb10d342a5a5e2f38245bb569af5730c7c/maven-plugin-plugin/src/main/java/org/apache/maven/plugin/plugin/PluginReport.java#L711">PluginReport</a>
      */
     private ArtifactVersion getPrerequisitesMavenVersion(MavenProject pluginProject) {
         return ofNullable(pluginProject.getPrerequisites())
@@ -875,7 +861,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * Gets the plugins that are bound to the defined phases. This does not find plugins bound in the pom to a phase
      * later than the plugin is executing.
      *
-     * @param project   the project
+     * @param project the project
      * @return the bound plugins
      */
     // pilfered this from enforcer-rules
@@ -1154,10 +1140,10 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * @param pom the pom to update.
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      * @since 1.0-alpha-1
      */
-    protected void update(ModifiedPomXMLEventReader pom) {
+    protected void update(MutableXMLStreamReader pom) {
         // do nothing
     }
 

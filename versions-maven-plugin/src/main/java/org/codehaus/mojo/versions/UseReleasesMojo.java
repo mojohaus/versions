@@ -40,7 +40,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.singletonList;
@@ -90,9 +90,9 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
      * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      */
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
         try {
             if (isProcessingDependencyManagement()) {
@@ -117,7 +117,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
     }
 
     private void useReleases(
-            ModifiedPomXMLEventReader pom,
+            MutableXMLStreamReader pom,
             Collection<Dependency> dependencies,
             DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
@@ -165,7 +165,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
     }
 
     private Optional<String> findReleaseVersion(
-            ModifiedPomXMLEventReader pom,
+            MutableXMLStreamReader pom,
             Dependency dep,
             String version,
             String releaseVersion,

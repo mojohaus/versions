@@ -39,7 +39,7 @@ import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 /**
@@ -67,9 +67,9 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
      * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
      * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      */
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
         try {
             if (isProcessingParent() && getProject().hasParent()) {
@@ -90,7 +90,7 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
-    private void useReactor(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+    private void useReactor(MutableXMLStreamReader pom, Collection<Dependency> dependencies)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
 
         for (Dependency dep : dependencies) {
@@ -100,19 +100,18 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
             }
 
             for (MavenProject reactorProject : reactorProjects) {
-                MavenProject project = reactorProject;
-                if (StringUtils.equals(project.getGroupId(), dep.getGroupId())
-                        && StringUtils.equals(project.getArtifactId(), dep.getArtifactId())
-                        && !StringUtils.equals(project.getVersion(), dep.getVersion())) {
+                if (StringUtils.equals(reactorProject.getGroupId(), dep.getGroupId())
+                        && StringUtils.equals(reactorProject.getArtifactId(), dep.getArtifactId())
+                        && !StringUtils.equals(reactorProject.getVersion(), dep.getVersion())) {
                     if (PomHelper.setDependencyVersion(
                             pom,
                             dep.getGroupId(),
                             dep.getArtifactId(),
                             dep.getVersion(),
-                            project.getVersion(),
+                            reactorProject.getVersion(),
                             getProject().getModel(),
                             getLog())) {
-                        getLog().info("Updated " + toString(dep) + " to version " + project.getVersion());
+                        getLog().info("Updated " + toString(dep) + " to version " + reactorProject.getVersion());
                     }
                     break;
                 }
@@ -120,7 +119,7 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
-    private void useReactor(ModifiedPomXMLEventReader pom, MavenProject parent)
+    private void useReactor(MutableXMLStreamReader pom, MavenProject parent)
             throws XMLStreamException, VersionRetrievalException {
         for (MavenProject project : reactorProjects) {
             if (StringUtils.equals(project.getGroupId(), parent.getGroupId())

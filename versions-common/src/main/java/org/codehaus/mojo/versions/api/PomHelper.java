@@ -19,17 +19,20 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.TransformerException;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -53,6 +56,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
@@ -71,18 +75,20 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.apache.maven.shared.utils.io.IOUtil;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.xml.XmlStreamReader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.codehaus.stax2.XMLInputFactory2;
 
 import static java.util.Collections.singletonMap;
-import static java.util.stream.IntStream.range;
+import static java.util.Optional.ofNullable;
+import static org.codehaus.mojo.versions.api.PomHelper.Marks.CHILD_START;
+import static org.codehaus.mojo.versions.api.PomHelper.Marks.END_ELEMENT;
+import static org.codehaus.mojo.versions.api.PomHelper.Marks.PARENT_START;
 
 /**
  * Helper class for modifying pom files.
@@ -153,15 +159,15 @@ public final class PomHelper {
     /**
      * Gets the current raw model before any interpolation what-so-ever.
      *
-     * @param modifiedPomXMLEventReader The {@link ModifiedPomXMLEventReader} to getModel the raw model for.
+     * @param modelString a string containing the raw model
+     * @param modelPath the File containing the model
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
-    public static Model getRawModel(ModifiedPomXMLEventReader modifiedPomXMLEventReader) throws IOException {
-        try (Reader reader =
-                new StringReader(modifiedPomXMLEventReader.asStringBuilder().toString())) {
+    public static Model getRawModel(String modelString, File modelPath) throws IOException {
+        try (Reader reader = new StringReader(modelString)) {
             Model result = getRawModel(reader);
-            result.setPomFile(new File(modifiedPomXMLEventReader.getPath()));
+            result.setPomFile(modelPath);
             return result;
         }
     }
@@ -192,7 +198,7 @@ public final class PomHelper {
      * @throws XMLStreamException if somethinh went wrong.
      */
     public static boolean setPropertyVersion(
-            final ModifiedPomXMLEventReader pom, final String profileId, final String property, final String value)
+            final MutableXMLStreamReader pom, final String profileId, final String property, final String value)
             throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
@@ -212,12 +218,11 @@ public final class PomHelper {
         }
 
         pom.rewind();
-
         while (pom.hasNext()) {
-            XMLEvent event = pom.nextEvent();
-            if (event.isStartElement()) {
+            pom.next();
+            if (pom.isStartElement()) {
                 stack.push(path);
-                path = path + "/" + event.asStartElement().getName().getLocalPart();
+                path = path + "/" + pom.getLocalName();
 
                 if (propertyRegex.matcher(path).matches()) {
                     pom.mark(0);
@@ -229,12 +234,12 @@ public final class PomHelper {
                     pom.clearMark(1);
                 } else if (profileId != null && projectProfileId.matcher(path).matches()) {
                     String candidateId = pom.getElementText();
-                    path = stack.pop(); // since getElementText will be after the end element
 
                     inMatchScope = profileId.trim().equals(candidateId.trim());
                 }
             }
-            if (event.isEndElement()) {
+            // for empty elements, pom can be both start- and end element
+            if (pom.isEndElement()) {
                 if (propertyRegex.matcher(path).matches()) {
                     pom.mark(1);
                 } else if (matchScopeRegex.matcher(path).matches()) {
@@ -260,7 +265,7 @@ public final class PomHelper {
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
-    public static boolean setProjectVersion(final ModifiedPomXMLEventReader pom, final String value)
+    public static boolean setProjectVersion(final MutableXMLStreamReader pom, final String value)
             throws XMLStreamException {
         return setElementValue(pom, "/project", "version", value, false);
     }
@@ -270,18 +275,23 @@ public final class PomHelper {
      * Will only consider the first found occurrence of the parent element.
      * If the element is not found in the parent element, the method will create the element.
      *
-     * @param pom           pom to modify
-     * @param parentPath    path of the parent element
-     * @param elementName   name of the element to set or create
-     * @param value         the new value of the element
-     * @return              {@code true} if the element was created or replaced
+     * @param pom         pom to modify
+     * @param parentPath  path of the parent element
+     * @param elementName name of the element to set or create
+     * @param value       the new value of the element
+     * @return {@code true} if the element was created or replaced
      * @throws XMLStreamException if something went wrong
      */
     public static boolean setElementValue(
-            ModifiedPomXMLEventReader pom, String parentPath, String elementName, String value)
-            throws XMLStreamException {
+            MutableXMLStreamReader pom, String parentPath, String elementName, String value) throws XMLStreamException {
         pom.rewind();
         return setElementValue(pom, parentPath, elementName, value, true);
+    }
+
+    enum Marks {
+        CHILD_START,
+        PARENT_START,
+        END_ELEMENT
     }
 
     /**
@@ -290,25 +300,21 @@ public final class PomHelper {
      * If the element is not found in the parent element, the method will create the element
      * if {@code shouldCreate} is {@code true}.
      *
-     * @param pom           pom to modify
-     * @param parentPath    path of the parent element
-     * @param elementName   name of the element to set or create
-     * @param value         the new value of the element
-     * @param shouldCreate  should the element be created if it's not found in the first encountered parent element
-     *                      matching the parentPath
-     * @return              {@code true} if the element was created or replaced
+     * @param pom          pom to modify
+     * @param parentPath   path of the parent element
+     * @param elementName  name of the element to set or create
+     * @param value        the new value of the element
+     * @param shouldCreate should the element be created if it's not found in the first encountered parent element
+     *                     matching the parentPath
+     * @return {@code true} if the element was created or replaced
      * @throws XMLStreamException if something went wrong
      */
     public static boolean setElementValue(
-            ModifiedPomXMLEventReader pom, String parentPath, String elementName, String value, boolean shouldCreate)
+            MutableXMLStreamReader pom, String parentPath, String elementName, String value, boolean shouldCreate)
             throws XMLStreamException {
         class ElementValueInternal {
             private final String parentName;
             private final String superParentPath;
-
-            private static final int MARK_CHILD_BEGIN = 0;
-            private static final int MARK_OPTION = 1;
-            private static final int PARENT_BEGIN = 2;
 
             ElementValueInternal() {
                 int lastDelimeterIndex = parentPath.lastIndexOf('/');
@@ -319,20 +325,18 @@ public final class PomHelper {
             boolean process(String currentPath) throws XMLStreamException {
                 boolean replacementMade = false;
                 while (!replacementMade && pom.hasNext()) {
-                    XMLEvent event = pom.nextEvent();
-                    if (event.isStartElement()) {
-                        String currentElementName =
-                                event.asStartElement().getName().getLocalPart();
-
+                    pom.next();
+                    if (pom.isStartElement()) {
                         // here, we will only mark the beginning of the child or the parent element
-                        if (currentPath.equals(parentPath) && elementName.equals(currentElementName)) {
-                            pom.mark(MARK_CHILD_BEGIN);
-                        } else if (currentPath.equals(superParentPath) && currentElementName.equals(parentName)) {
-                            pom.mark(PARENT_BEGIN);
+                        if (currentPath.equals(parentPath) && elementName.equals(pom.getLocalName())) {
+                            pom.mark(CHILD_START);
+                        } else if (currentPath.equals(superParentPath)
+                                && pom.getLocalName().equals(parentName)) {
+                            pom.mark(PARENT_START);
                         }
                         // process child element
-                        replacementMade = process(currentPath + "/" + currentElementName);
-                    } else if (event.isEndElement()) {
+                        replacementMade = process(currentPath + "/" + pom.getLocalName());
+                    } else if (pom.isEndElement()) {
                         // here we're doing the replacement
                         if (currentPath.equals(parentPath + "/" + elementName)) {
                             // end of the child
@@ -351,18 +355,18 @@ public final class PomHelper {
             }
 
             private void replaceValueInChild() {
-                pom.mark(MARK_OPTION);
-                if (pom.getBetween(MARK_CHILD_BEGIN, MARK_OPTION).length() > 0) {
-                    pom.replaceBetween(0, 1, value);
+                pom.mark(END_ELEMENT);
+                if (!pom.getBetween(CHILD_START, END_ELEMENT).isEmpty()) {
+                    pom.replaceBetween(CHILD_START, END_ELEMENT, value);
                 } else {
                     pom.replace(String.format("<%1$s>%2$s</%1$s>", elementName, value));
                 }
             }
 
             private void replaceValueInParent() {
-                pom.mark(MARK_OPTION);
-                if (pom.hasMark(PARENT_BEGIN)) {
-                    if (pom.getBetween(PARENT_BEGIN, MARK_OPTION).length() > 0) {
+                pom.mark(END_ELEMENT);
+                if (pom.hasMark(PARENT_START)) {
+                    if (!pom.getBetween(PARENT_START, END_ELEMENT).isEmpty()) {
                         pom.replace(String.format("<%2$s>%3$s</%2$s></%1$s>", parentName, elementName, value));
                     } else {
                         pom.replace(String.format("<%1$s><%2$s>%3$s</%2$s></%1$s>", parentName, elementName, value));
@@ -373,12 +377,8 @@ public final class PomHelper {
             }
         }
 
-        try {
-            pom.rewind();
-            return new ElementValueInternal().process("");
-        } finally {
-            range(0, 3).forEach(pom::clearMark);
-        }
+        pom.rewind();
+        return new ElementValueInternal().process("");
     }
 
     /**
@@ -389,23 +389,23 @@ public final class PomHelper {
      * parent version).
      * @throws XMLStreamException if something went wrong.
      */
-    public static String getProjectVersion(final ModifiedPomXMLEventReader pom) throws XMLStreamException {
+    public static String getProjectVersion(final MutableXMLStreamReader pom) throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
 
         pom.rewind();
-
         while (pom.hasNext()) {
-            XMLEvent event = pom.nextEvent();
-            if (event.isStartElement()) {
+            pom.next();
+            if (pom.isStartElement()) {
                 stack.push(path);
-                path = path + "/" + event.asStartElement().getName().getLocalPart();
+                path = path + "/" + pom.getLocalName();
 
                 if (PATTERN_PROJECT_VERSION.matcher(path).matches()) {
                     pom.mark(0);
                 }
             }
-            if (event.isEndElement()) {
+            // for empty elements, pom can be both start- and end element
+            if (pom.isEndElement()) {
                 if (PATTERN_PROJECT_VERSION.matcher(path).matches()) {
                     pom.mark(1);
                     if (pom.hasMark(0) && pom.hasMark(1)) {
@@ -428,25 +428,25 @@ public final class PomHelper {
      * @return <code>true</code> if a replacement was made.
      * @throws XMLStreamException if somethinh went wrong.
      */
-    public static boolean setProjectParentVersion(final ModifiedPomXMLEventReader pom, final String value)
+    public static boolean setProjectParentVersion(final MutableXMLStreamReader pom, final String value)
             throws XMLStreamException {
         Stack<String> stack = new Stack<>();
         String path = "";
         boolean madeReplacement = false;
 
         pom.rewind();
-
         while (pom.hasNext()) {
-            XMLEvent event = pom.nextEvent();
-            if (event.isStartElement()) {
+            pom.next();
+            if (pom.isStartElement()) {
                 stack.push(path);
-                path = path + "/" + event.asStartElement().getName().getLocalPart();
+                path = path + "/" + pom.getLocalName();
 
                 if (PATTERN_PROJECT_PARENT_VERSION.matcher(path).matches()) {
                     pom.mark(0);
                 }
             }
-            if (event.isEndElement()) {
+            // for empty elements, pom can be both start- and end element
+            if (pom.isEndElement()) {
                 if (PATTERN_PROJECT_PARENT_VERSION.matcher(path).matches()) {
                     pom.mark(1);
                     if (pom.hasMark(0) && pom.hasMark(1)) {
@@ -477,7 +477,7 @@ public final class PomHelper {
      */
     @SuppressWarnings("checkstyle:MethodLength")
     public static boolean setDependencyVersion(
-            final ModifiedPomXMLEventReader pom,
+            final MutableXMLStreamReader pom,
             final String groupId,
             final String artifactId,
             final String oldVersion,
@@ -499,29 +499,23 @@ public final class PomHelper {
         }
 
         pom.rewind();
-
         while (pom.hasNext()) {
-            while (pom.hasNext()) {
-                XMLEvent event = pom.nextEvent();
-                if (event.isStartElement()) {
-                    stack.push(path);
-                    final String elementName = event.asStartElement().getName().getLocalPart();
-                    path = path + "/" + elementName;
+            pom.next();
+            if (pom.isStartElement()) {
+                stack.push(path);
+                path = path + "/" + pom.getLocalName();
 
-                    if (implicitPaths.contains(path)) {
-                        final String elementText = pom.getElementText().trim();
-                        implicitProperties.put(path.substring(1).replace('/', '.'), elementText);
-                        path = stack.pop();
-                    }
+                if (implicitPaths.contains(path)) {
+                    final String elementText = pom.getElementText().trim();
+                    implicitProperties.put(path.substring(1).replace('/', '.'), elementText);
                 }
-                if (event.isEndElement()) {
-                    path = stack.pop();
-                }
+            }
+            if (pom.isEndElement()) {
+                path = stack.pop();
             }
         }
 
-        boolean modified = true;
-        while (modified) {
+        for (boolean modified = true; modified; ) {
             modified = false;
             for (Map.Entry<String, String> entry : implicitProperties.entrySet()) {
                 if (entry.getKey().contains(".parent")) {
@@ -544,13 +538,11 @@ public final class PomHelper {
         boolean haveOldVersion = false;
 
         pom.rewind();
-
         while (pom.hasNext()) {
-            XMLEvent event = pom.nextEvent();
-            if (event.isStartElement()) {
+            pom.next();
+            if (pom.isStartElement()) {
                 stack.push(path);
-                final String elementName = event.asStartElement().getName().getLocalPart();
-                path = path + "/" + elementName;
+                path = path + "/" + pom.getLocalName();
 
                 if (PATTERN_PROJECT_DEPENDENCY.matcher(path).matches()) {
                     // we're in a new match scope
@@ -564,22 +556,21 @@ public final class PomHelper {
                     haveOldVersion = false;
                 } else if (inMatchScope
                         && PATTERN_PROJECT_DEPENDENCY_VERSION.matcher(path).matches()) {
-                    if ("groupId".equals(elementName)) {
+                    if ("groupId".equals(pom.getLocalName())) {
                         haveGroupId =
                                 groupId.equals(evaluate(pom.getElementText().trim(), implicitProperties, logger));
-                        path = stack.pop();
-                    } else if ("artifactId".equals(elementName)) {
+                    } else if ("artifactId".equals(pom.getLocalName())) {
                         haveArtifactId =
                                 artifactId.equals(evaluate(pom.getElementText().trim(), implicitProperties, logger));
-                        path = stack.pop();
-                    } else if ("version".equals(elementName)) {
+                    } else if ("version".equals(pom.getLocalName())) {
                         pom.mark(0);
                     }
                 }
             }
-            if (event.isEndElement()) {
+            // for empty elements, pom can be both start- and end element
+            if (pom.isEndElement()) {
                 if (PATTERN_PROJECT_DEPENDENCY_VERSION.matcher(path).matches()
-                        && "version".equals(event.asEndElement().getName().getLocalPart())) {
+                        && "version".equals(pom.getLocalName())) {
                     pom.mark(1);
                     String compressedPomVersion =
                             StringUtils.deleteWhitespace(pom.getBetween(0, 1).trim());
@@ -619,7 +610,7 @@ public final class PomHelper {
      *
      * @param expr       The expression to evaluate.
      * @param properties The properties to substitute.
-     * @param logger  The logger to use.
+     * @param logger     The logger to use.
      * @return The evaluated expression.
      */
     public static String evaluate(String expr, Map<String, String> properties, Log logger) {
@@ -684,7 +675,7 @@ public final class PomHelper {
      * otherwise
      */
     public static Optional<String> extractExpression(String expr) {
-        return Optional.ofNullable(expr)
+        return ofNullable(expr)
                 .map(String::trim)
                 .filter(e -> e.startsWith("${") && e.indexOf("}") == e.length() - 1)
                 .map(e -> e.substring(2, e.length() - 1));
@@ -734,7 +725,7 @@ public final class PomHelper {
      * @throws XMLStreamException if somethinh went wrong.
      */
     public static boolean setPluginVersion(
-            final ModifiedPomXMLEventReader pom,
+            final MutableXMLStreamReader pom,
             final String groupId,
             final String artifactId,
             final String oldVersion,
@@ -750,12 +741,11 @@ public final class PomHelper {
         boolean haveOldVersion = false;
 
         pom.rewind();
-
         while (pom.hasNext()) {
-            XMLEvent event = pom.nextEvent();
-            if (event.isStartElement()) {
+            pom.next();
+            if (pom.isStartElement()) {
                 stack.push(path);
-                final String elementName = event.asStartElement().getName().getLocalPart();
+                final String elementName = pom.getLocalName();
                 path = path + "/" + elementName;
 
                 if (PATTERN_PROJECT_PLUGIN.matcher(path).matches()) {
@@ -772,18 +762,16 @@ public final class PomHelper {
                         && PATTERN_PROJECT_PLUGIN_VERSION.matcher(path).matches()) {
                     if ("groupId".equals(elementName)) {
                         haveGroupId = pom.getElementText().trim().equals(groupId);
-                        path = stack.pop();
                     } else if ("artifactId".equals(elementName)) {
                         haveArtifactId = artifactId.equals(pom.getElementText().trim());
-                        path = stack.pop();
                     } else if ("version".equals(elementName)) {
                         pom.mark(0);
                     }
                 }
             }
-            if (event.isEndElement()) {
-                if (PATTERN_PROJECT_PLUGIN_VERSION.matcher(path).matches()
-                        && "version".equals(event.asEndElement().getName().getLocalPart())) {
+            // for empty elements, pom can be both start- and end element
+            if (pom.isEndElement()) {
+                if (PATTERN_PROJECT_PLUGIN_VERSION.matcher(path).matches() && "version".equals(pom.getLocalName())) {
                     pom.mark(1);
 
                     try {
@@ -842,8 +830,8 @@ public final class PomHelper {
     /**
      * Examines the project to find any properties which are associated with versions of artifacts in the project.
      *
-     * @param helper  Our versions helper.
-     * @param project The project to examine.
+     * @param helper        Our versions helper.
+     * @param project       The project to examine.
      * @param includeParent whether parent POMs should be included
      * @return An array of properties that are associated within the project.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
@@ -1020,14 +1008,14 @@ public final class PomHelper {
                     final String propertyRef = "${" + property.getName() + "}";
                     if (version.contains(propertyRef)) {
                         String groupId = plugin.getGroupId();
-                        if (groupId == null || groupId.trim().length() == 0) {
-                            // group Id has a special default
+                        if (StringUtils.isBlank(groupId)) {
+                            // groupId has a special default
                             groupId = APACHE_MAVEN_PLUGINS_GROUPID;
                         } else {
                             groupId = (String) expressionEvaluator.evaluate(groupId);
                         }
                         String artifactId = plugin.getArtifactId();
-                        if (artifactId == null || artifactId.trim().length() == 0) {
+                        if (StringUtils.isBlank(artifactId)) {
                             // malformed pom
                             continue;
                         } else {
@@ -1065,14 +1053,14 @@ public final class PomHelper {
                     if (version.contains(propertyRef)) {
                         // any of these could be defined by a property
                         String groupId = plugin.getGroupId();
-                        if (groupId == null || groupId.trim().length() == 0) {
-                            // group Id has a special default
+                        if (StringUtils.isBlank(groupId)) {
+                            // groupId has a special default
                             groupId = APACHE_MAVEN_PLUGINS_GROUPID;
                         } else {
                             groupId = (String) expressionEvaluator.evaluate(groupId);
                         }
                         String artifactId = plugin.getArtifactId();
-                        if (artifactId == null || artifactId.trim().length() == 0) {
+                        if (StringUtils.isBlank(artifactId)) {
                             // malformed pom
                             continue;
                         } else {
@@ -1110,14 +1098,14 @@ public final class PomHelper {
                     if (version.contains(propertyRef)) {
                         // Any of these could be defined by a property
                         String groupId = dependency.getGroupId();
-                        if (groupId == null || groupId.trim().length() == 0) {
+                        if (StringUtils.isBlank(groupId)) {
                             // malformed pom
                             continue;
                         } else {
                             groupId = (String) expressionEvaluator.evaluate(groupId);
                         }
                         String artifactId = dependency.getArtifactId();
-                        if (artifactId == null || artifactId.trim().length() == 0) {
+                        if (StringUtils.isBlank(artifactId)) {
                             // malformed pom
                             continue;
                         } else {
@@ -1285,9 +1273,9 @@ public final class PomHelper {
     /**
      * Finds the local root of the current project of the {@link MavenSession} instance.
      *
-     * @param projectBuilder       {@link ProjectBuilder} instance
-     * @param mavenSession         {@link MavenSession} instance
-     * @param logger               The logger to log tog
+     * @param projectBuilder {@link ProjectBuilder} instance
+     * @param mavenSession   {@link MavenSession} instance
+     * @param logger         The logger to log tog
      * @return The local root (note this may be the project passed as an argument).
      */
     public static MavenProject getLocalRoot(ProjectBuilder projectBuilder, MavenSession mavenSession, Log logger) {
@@ -1328,6 +1316,7 @@ public final class PomHelper {
      * <p>Convenience method for creating a {@link ProjectBuildingRequest} instance based on maven session.</p>
      * <p><u>Note:</u> The method initializes the remote repositories with the remote artifact repositories.
      * Please use the initializers if you need to override this.</p>
+     *
      * @param mavenSession {@link MavenSession} instance
      * @param initializers optional additional initializers, which will be executed after the object is initialized
      * @return constructed builder request
@@ -1357,18 +1346,10 @@ public final class PomHelper {
      * ordered depth-first visiting order. The root node is always the first node of the list.
      *
      * @param rootNode The root node of the reactor
-     * @param logger logger to log parsing errors to
+     * @param logger   logger to log parsing errors to
      * @return the root node of the {@link ModelNode} of raw models relative to the project's basedir.
-     * @throws UncheckedIOException thrown if reading one of the models down the tree fails
      */
     public static List<ModelNode> getRawModelTree(ModelNode rootNode, Log logger) throws UncheckedIOException {
-        XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-        inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
-        return getRawModelTree(rootNode, logger, inputFactory);
-    }
-
-    private static List<ModelNode> getRawModelTree(ModelNode rootNode, Log logger, XMLInputFactory inputFactory)
-            throws UncheckedIOException {
         Path baseDir = rootNode.getModel().getPomFile().getParentFile().toPath();
         List<ModelNode> result = new ArrayList<>();
         result.add(rootNode);
@@ -1377,16 +1358,15 @@ public final class PomHelper {
                 .map(path -> Files.isDirectory(path) ? path.resolve("pom.xml") : path)
                 .map(pomFile -> {
                     try {
-                        ModifiedPomXMLEventReader pom = new ModifiedPomXMLEventReader(
-                                readXmlFile(pomFile.toFile()), inputFactory, pomFile.toString());
-                        return new ModelNode(rootNode, getRawModel(pom), pom);
+                        MutableXMLStreamReader pom = new MutableXMLStreamReader(pomFile);
+                        return new ModelNode(rootNode, getRawModel(pom.getSource(), pomFile.toFile()), pom);
                     } catch (IOException e) {
                         throw new UncheckedIOException("Could not open " + pomFile, e);
-                    } catch (XMLStreamException e) {
+                    } catch (XMLStreamException | TransformerException e) {
                         throw new RuntimeException("Could not parse " + pomFile, e);
                     }
                 })
-                .flatMap(node -> getRawModelTree(node, logger, inputFactory).stream())
+                .flatMap(node -> getRawModelTree(node, logger).stream())
                 .collect(Collectors.toList()));
         return result;
     }
@@ -1395,12 +1375,12 @@ public final class PomHelper {
      * Traverses the module tree upwards searching for the closest definition of a property with the given name.
      *
      * @param propertyName name of the property to be found
-     * @param node model tree node at which the search should be started
+     * @param node         model tree node at which the search should be started
      * @return {@link Optional} object containing the model tree node containing the closest
      * property definition, or {@link Optional#empty()} if none has been found
      */
     public static Optional<ModelNode> findProperty(String propertyName, ModelNode node) {
-        if (Optional.ofNullable(node.getModel().getProperties())
+        if (ofNullable(node.getModel().getProperties())
                 .map(properties -> properties.getProperty(propertyName))
                 .isPresent()) {
             return Optional.of(node);
@@ -1427,8 +1407,8 @@ public final class PomHelper {
     /**
      * Builds a sub-map of raw models keyed by module path.
      *
-     * @param model   The root model
-     * @param logger  The logger for logging.
+     * @param model  The root model
+     * @param logger The logger for logging.
      * @return A map of raw models keyed by path relative to the project's basedir.
      */
     private static Map<File, Model> getChildModels(Model model, Log logger) {
@@ -1531,15 +1511,43 @@ public final class PomHelper {
     }
 
     /**
-     * Reads a file into a String.
+     * Reads an XML from the given InputStream.
      *
-     * @param outFile The file to read.
-     * @return String The content of the file.
+     * @param inputStream The input stream to read.
+     * @return Pair&lt;String, Charset&gt; The (mutable) content of the file with the charset of the file
      * @throws java.io.IOException when things go wrong.
      */
-    public static StringBuilder readXmlFile(File outFile) throws IOException {
-        try (Reader reader = new XmlStreamReader(outFile)) {
-            return new StringBuilder(IOUtil.toString(reader));
+    public static Pair<String, Charset> readXml(InputStream inputStream) throws IOException, XMLStreamException {
+        try (BufferedInputStream buffer = new BufferedInputStream(inputStream)) {
+            // XMLStreamReader is only used to discover the encoding
+            // NB. We can't use a Transformer because XMLStreamReader will override
+            // the preamble with its own detected encoding, which is not always what the original file has
+
+            buffer.mark(0x4000);
+            XMLInputFactory2 factory = (XMLInputFactory2) XMLInputFactory2.newInstance();
+            factory.configureForLowMemUsage();
+            XMLStreamReader xmlStreamReader = factory.createXMLStreamReader(buffer);
+            xmlStreamReader.close();
+            Charset encoding = ofNullable(xmlStreamReader.getEncoding())
+                    .map(Charset::forName)
+                    .orElse(Charset.defaultCharset());
+
+            buffer.reset();
+            return Pair.of(IOUtil.toString(buffer, encoding.toString()), encoding);
+        }
+    }
+
+    /**
+     * Reads an XML from a file.
+     *
+     * @param file The file to read.
+     * @return Pair&lt;String, Charset&gt; The contents of the file with the charset of the file
+     * @throws java.io.IOException when things go wrong.
+     */
+    public static Pair<String, Charset> readXml(File file)
+            throws IOException, XMLStreamException, TransformerException {
+        try (InputStream is = Files.newInputStream(file.toPath())) {
+            return readXml(is);
         }
     }
 

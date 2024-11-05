@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
@@ -50,7 +49,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Optional.empty;
@@ -145,9 +144,9 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @throws XMLStreamException     when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      */
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
         // Note we have to getModel the dependencies from the model because the dependencies in the
         // project may have already had their range resolved [MNG-4138]
@@ -183,7 +182,7 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
         return getProject().getModel().getDependencyManagement() != null;
     }
 
-    private void resolveRangesInParent(ModifiedPomXMLEventReader pom)
+    private void resolveRangesInParent(MutableXMLStreamReader pom)
             throws MojoExecutionException, VersionRetrievalException, XMLStreamException {
         Matcher versionMatcher =
                 matchRangeRegex.matcher(getProject().getModel().getParent().getVersion());
@@ -218,7 +217,7 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
-    private void resolveRanges(ModifiedPomXMLEventReader pom, Collection<Dependency> dependencies)
+    private void resolveRanges(MutableXMLStreamReader pom, Collection<Dependency> dependencies)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
 
         for (Dependency dep : dependencies) {
@@ -277,13 +276,11 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
-    private void resolvePropertyRanges(ModifiedPomXMLEventReader pom)
-            throws XMLStreamException, MojoExecutionException {
+    private void resolvePropertyRanges(MutableXMLStreamReader pom) throws XMLStreamException, MojoExecutionException {
 
         if (includeProperties == null) {
             Properties originalProperties = getProject().getOriginalModel().getProperties();
-            includeProperties =
-                    originalProperties.stringPropertyNames().stream().collect(Collectors.joining(","));
+            includeProperties = String.join(",", originalProperties.stringPropertyNames());
         }
         Map<Property, PropertyVersions> propertyVersions = this.getHelper()
                 .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
@@ -323,10 +320,9 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
                                 .map(Segment::toString)
                                 .orElse("ALL") + " version changes allowed");
             }
-            Optional<Segment> unchangedSegment = unchangedSegment1;
             // TODO: Check if we could add allowDowngrade ?
             try {
-                updatePropertyToNewestVersion(pom, property, version, currentVersion, false, unchangedSegment);
+                updatePropertyToNewestVersion(pom, property, version, currentVersion, false, unchangedSegment1);
             } catch (InvalidSegmentException | InvalidVersionSpecificationException e) {
                 getLog().warn(String.format(
                         "Skipping the processing of %s:%s due to: %s",

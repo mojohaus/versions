@@ -42,7 +42,7 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
@@ -145,10 +145,10 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo {
      * @throws MojoExecutionException when things go wrong
      * @throws MojoFailureException   when things go wrong in a very bad way
      * @throws XMLStreamException     when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      * @since 1.0-alpha-1
      */
-    protected void update(ModifiedPomXMLEventReader pom)
+    protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
         if (getProject().getParent() == null) {
             getLog().info("Project does not have a parent");

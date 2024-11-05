@@ -21,7 +21,7 @@ package org.codehaus.mojo.versions.change;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.logging.Log;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,11 +32,11 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 public abstract class AbstractVersionChanger implements VersionChanger {
     private final Model model;
 
-    private final ModifiedPomXMLEventReader pom;
+    private final MutableXMLStreamReader pom;
 
     protected final Log log;
 
-    public AbstractVersionChanger(Model model, ModifiedPomXMLEventReader pom, Log log) {
+    public AbstractVersionChanger(Model model, MutableXMLStreamReader pom, Log log) {
         this.model = model;
         this.pom = pom;
         this.log = log;
@@ -46,7 +46,7 @@ public abstract class AbstractVersionChanger implements VersionChanger {
         return model;
     }
 
-    public ModifiedPomXMLEventReader getPom() {
+    public MutableXMLStreamReader getPom() {
         return pom;
     }
 

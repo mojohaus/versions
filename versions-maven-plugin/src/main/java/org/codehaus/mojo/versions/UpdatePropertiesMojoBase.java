@@ -36,7 +36,7 @@ import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
 import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Optional.empty;
@@ -115,7 +115,7 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
     }
 
-    protected void update(ModifiedPomXMLEventReader pom, Map<Property, PropertyVersions> propertyVersions)
+    protected void update(MutableXMLStreamReader pom, Map<Property, PropertyVersions> propertyVersions)
             throws XMLStreamException {
         for (Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet()) {
             Property property = entry.getKey();
@@ -148,18 +148,17 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
                     log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
                 }
 
-                Optional<Segment> unchangedSegment1 = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
+                Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
                         ? empty()
                         : allowMinorUpdates && allowIncrementalUpdates
                                 ? of(MAJOR)
                                 : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
                 if (log != null && log.isDebugEnabled()) {
-                    log.debug(unchangedSegment1
+                    log.debug(unchangedSegment
                                     .map(Segment::minorTo)
                                     .map(Segment::toString)
                                     .orElse("ALL") + " version changes allowed");
                 }
-                Optional<Segment> unchangedSegment = unchangedSegment1;
                 try {
                     ArtifactVersion targetVersion = updatePropertyToNewestVersion(
                             pom, property, version, currentVersion, allowDowngrade, unchangedSegment);

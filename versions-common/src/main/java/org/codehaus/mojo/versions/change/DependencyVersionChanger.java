@@ -21,7 +21,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,7 +31,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
  */
 public class DependencyVersionChanger extends AbstractVersionChanger {
 
-    public DependencyVersionChanger(Model model, ModifiedPomXMLEventReader pom, Log reporter) {
+    public DependencyVersionChanger(Model model, MutableXMLStreamReader pom, Log reporter) {
         super(model, pom, reporter);
     }
 

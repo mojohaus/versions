@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.logging.Log;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
  * Created by IntelliJ IDEA.
@@ -35,7 +35,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 public class VersionChangerFactory {
     private Model model = null;
 
-    private ModifiedPomXMLEventReader pom = null;
+    private MutableXMLStreamReader pom = null;
 
     private Log log = null;
 
@@ -47,11 +47,11 @@ public class VersionChangerFactory {
         this.model = model;
     }
 
-    public synchronized ModifiedPomXMLEventReader getPom() {
+    public synchronized MutableXMLStreamReader getPom() {
         return pom;
     }
 
-    public synchronized void setPom(ModifiedPomXMLEventReader pom) {
+    public synchronized void setPom(MutableXMLStreamReader pom) {
         this.pom = pom;
     }
 

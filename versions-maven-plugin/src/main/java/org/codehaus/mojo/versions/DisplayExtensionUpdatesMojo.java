@@ -16,9 +16,10 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.TransformerException;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +51,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.CoreExtensionUtils;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.ExtensionBuilder;
@@ -269,13 +270,12 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     private List<ModelNode> getRawModels() throws MojoFailureException {
         List<ModelNode> rawModels;
         try {
-            ModifiedPomXMLEventReader pomReader = newModifiedPomXER(
-                    new StringBuilder(
-                            new String(Files.readAllBytes(getProject().getFile().toPath()))),
-                    getProject().getFile().toPath().toString());
-            ModelNode rootNode = new ModelNode(PomHelper.getRawModel(pomReader), pomReader);
+            MutableXMLStreamReader pomReader =
+                    new MutableXMLStreamReader(getProject().getFile().toPath());
+            ModelNode rootNode = new ModelNode(
+                    PomHelper.getRawModel(pomReader.getSource(), getProject().getFile()), pomReader);
             rawModels = PomHelper.getRawModelTree(rootNode, getLog());
-        } catch (IOException e) {
+        } catch (IOException | XMLStreamException | TransformerException e) {
             throw new MojoFailureException(e.getMessage(), e);
         }
         return rawModels;
@@ -354,11 +354,11 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * @param pom the pom to update.
-     * @see AbstractVersionsUpdaterMojo#update(ModifiedPomXMLEventReader)
+     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      * @since 1.0-alpha-1
      */
     @Override
-    protected void update(ModifiedPomXMLEventReader pom) {
+    protected void update(MutableXMLStreamReader pom) {
         // do nothing
     }
 }
