@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.xml;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +42,7 @@ import org.codehaus.mojo.versions.reporting.model.PropertyInfo;
 import org.codehaus.mojo.versions.reporting.model.PropertyReportSummary;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesReport;
-import org.codehaus.mojo.versions.reporting.model.io.xpp3.PropertyUpdatesReportXpp3Writer;
+import org.codehaus.mojo.versions.reporting.model.io.stax.PropertyUpdatesReportStaxWriter;
 import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 import static java.util.Optional.empty;
@@ -89,7 +91,7 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
     @Override
     public void render() {
         try (BufferedWriter writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8)) {
-            new PropertyUpdatesReportXpp3Writer().write(writer, new PropertyUpdatesReport() {
+            new PropertyUpdatesReportStaxWriter().write(writer, new PropertyUpdatesReport() {
                 {
                     setSummary(new PropertyReportSummary() {
                         {
@@ -105,7 +107,7 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
                     setProperties(createPropertyInfo(model.getAllUpdates(), allowSnapshots));
                 }
             });
-        } catch (IOException e) {
+        } catch (IOException | XMLStreamException e) {
             throw new RuntimeException(e);
         }
     }

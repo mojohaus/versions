@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.xml;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +40,7 @@ import org.codehaus.mojo.versions.reporting.model.PluginInfo;
 import org.codehaus.mojo.versions.reporting.model.PluginReportSummary;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesReport;
-import org.codehaus.mojo.versions.reporting.model.io.xpp3.PluginUpdatesReportXpp3Writer;
+import org.codehaus.mojo.versions.reporting.model.io.stax.PluginUpdatesReportStaxWriter;
 import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 import static java.util.Optional.empty;
@@ -91,7 +93,7 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
     @Override
     public void render() {
         try (BufferedWriter writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8)) {
-            new PluginUpdatesReportXpp3Writer().write(writer, new PluginUpdatesReport() {
+            new PluginUpdatesReportStaxWriter().write(writer, new PluginUpdatesReport() {
                 {
                     setSummary(new PluginReportSummary() {
                         {
@@ -109,7 +111,7 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
                     setPlugins(createPluginInfo(model.getArtifactUpdates(), isAllowSnapshots()));
                 }
             });
-        } catch (IOException e) {
+        } catch (IOException | XMLStreamException e) {
             throw new RuntimeException(e);
         }
     }

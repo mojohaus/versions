@@ -34,9 +34,6 @@ under the License.
       <value>org.codehaus.mojo.versions.model</value>
     </default>
   </defaults>
-  <versionDefinition>
-    <type>namespace</type>
-  </versionDefinition>
   <classes>
     <class xml.tagName="rule">
       <name>Rule</name>
