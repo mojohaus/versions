@@ -25,26 +25,25 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
-import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 
 /**
- * Generates a report of available updates for the dependencies of a project.
+ * Generates a report of available updates for the plugins of a project.
  *
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo(name = "dependency-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
-public class DependencyUpdatesReportMojo extends AbstractDependencyUpdatesReportMojo {
+@Mojo(name = "plugin-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+public class PluginUpdatesReport extends AbstractPluginUpdatesReport {
 
     @Inject
-    protected DependencyUpdatesReportMojo(
+    protected PluginUpdatesReport(
             I18N i18n,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -57,30 +56,28 @@ public class DependencyUpdatesReportMojo extends AbstractDependencyUpdatesReport
      * {@inheritDoc}
      * */
     @Override
-    protected void populateDependencies(Set<Dependency> dependenciesCollector) {
-        getLog().debug(String.format(
-                "Collecting dependencies for project %s", getProject().getName()));
-        dependenciesCollector.addAll(getProject().getDependencies());
+    protected void populatePluginManagement(Set<Plugin> pluginManagementCollector) {
+        if (haveBuildPluginManagementPlugins(getProject())) {
+            pluginManagementCollector.addAll(
+                    getProject().getBuild().getPluginManagement().getPlugins());
+        }
     }
 
     /**
      * {@inheritDoc}
      * */
     @Override
-    protected void populateDependencyManagement(
-            Set<Dependency> dependencyManagementCollector, Set<Dependency> dependencies) throws MavenReportException {
-        if (hasDependencyManagement(getProject())) {
-            getLog().debug(String.format(
-                    "Collecting managed dependencies for project %s",
-                    getProject().getName()));
-            handleDependencyManagementTransitive(getProject(), dependencyManagementCollector);
+    protected void populatePlugins(Set<Plugin> pluginsCollector) {
+        if (haveBuildPlugins(getProject())) {
+            pluginsCollector.addAll(getProject().getBuild().getPlugins());
         }
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getOutputName() {
-        return "dependency-updates-report";
+        return "plugin-updates-report";
     }
 }

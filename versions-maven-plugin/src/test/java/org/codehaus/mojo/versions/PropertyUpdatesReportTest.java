@@ -39,9 +39,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 
 /**
- * Unit tests for {@link PropertyUpdatesReportMojo}
+ * Unit tests for {@link PropertyUpdatesReport}
  */
-public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase {
+public class PropertyUpdatesReportTest extends AbstractMojoTestCase {
     @Rule
     public MojoRule mojoRule = new MojoRule(this);
 
@@ -53,7 +53,7 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
 
-        PropertyUpdatesReportMojo mojo = (PropertyUpdatesReportMojo) mojoRule.lookupConfiguredMojo(
+        PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojoRule.lookupConfiguredMojo(
                 new File("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child"),
                 "property-updates-report");
         setVariableValueToObject(mojo, "siteTool", SITE_TOOL);
@@ -73,7 +73,7 @@ public class PropertyUpdatesReportMojoTest extends AbstractMojoTestCase {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
 
-        PropertyUpdatesReportMojo mojo = (PropertyUpdatesReportMojo) mojoRule.lookupConfiguredMojo(
+        PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojoRule.lookupConfiguredMojo(
                 new File("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child"),
                 "property-updates-report");
         setVariableValueToObject(mojo, "siteTool", SITE_TOOL);

@@ -46,7 +46,7 @@ import org.eclipse.aether.RepositorySystem;
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
  * plugins of a project.
  */
-public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersionsReport<PropertyUpdatesModel> {
+public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsReport<PropertyUpdatesModel> {
 
     private static final PropertyComparator PROPERTIES_COMPARATOR = PropertyComparator.INSTANCE;
 
@@ -98,7 +98,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
     @Parameter(property = "propertyUpdatesReportFormats", defaultValue = "html")
     protected String[] formats = new String[] {"html"};
 
-    public AbstractPropertyUpdatesReportMojo(
+    protected AbstractPropertyUpdatesReport(
             I18N i18n,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -110,6 +110,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isExternalReport() {
         return false;
     }
@@ -117,6 +118,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canGenerateReport() {
         return haveBuildProperties();
     }
@@ -128,7 +130,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
 
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
         try {
-            final Map updateSet = new TreeMap<>(PROPERTIES_COMPARATOR);
+            final Map<Property, PropertyVersions> updateSet = new TreeMap<>(PROPERTIES_COMPARATOR);
             populateUpdateSet(updateSet);
 
             renderReport(locale, sink, getPropertyUpdatesModel(updateSet));
@@ -154,7 +156,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
         for (String format : this.formats) {
             if ("html".equals(format)) {
                 this.rendererFactory
-                        .createReportRenderer(getOutputName(), sink, locale, propertyUpdatesModel, allowSnapshots)
+                        .createReportRenderer(getOutputPath(), sink, locale, propertyUpdatesModel, allowSnapshots)
                         .render();
             } else if ("xml".equals(format)) {
                 Path outputDir = Paths.get(getProject().getBuild().getDirectory());
@@ -165,7 +167,7 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
                         throw new MavenReportException("Could not create the output directory");
                     }
                 }
-                Path outputFile = outputDir.resolve(getOutputName() + ".xml");
+                Path outputFile = outputDir.resolve(getOutputPath() + ".xml");
                 new PropertyUpdatesXmlReportRenderer(propertyUpdatesModel, outputFile, allowSnapshots).render();
             }
         }
@@ -184,12 +186,5 @@ public abstract class AbstractPropertyUpdatesReportMojo extends AbstractVersions
                 .withIncludeParent(this.includeParent)
                 .withAutoLinkItems(this.autoLinkItems)
                 .build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getOutputName() {
-        return "property-updates-report";
     }
 }

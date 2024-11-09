@@ -47,18 +47,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 
 /**
- * Basic tests for {@linkplain ParentUpdatesReportMojo}.
+ * Basic tests for {@linkplain ParentUpdatesReport}.
  *
  * @author Andrzej Jarmoniuk
  */
-public class ParentUpdatesReportMojoTest {
+public class ParentUpdatesReportTest {
     private static final I18N MOCK_I18N = mockI18N();
 
     @Test
     public void testAllowSnapshots() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new ParentUpdatesReportMojo(
+        new ParentUpdatesReport(
                 MOCK_I18N,
                 mockArtifactHandlerManager(),
                 mockAetherRepositorySystem(new HashMap<String, String[]>() {

@@ -1,5 +1,5 @@
 
-propertyUpdatesReport = new File( basedir, "target/site/property-updates-report.html" ).text
+propertyUpdatesReport = new File( basedir, "target/reports/property-updates-report.html" ).text
         .replaceAll( '<[^>]+>', ' ' )
         .replaceAll( '&[^;]+;', ' ' )
         .replaceAll( '\\s+', ' ' )
@@ -12,7 +12,7 @@ assert propertyUpdatesReport =~ / \[1\.1\.2,3\.0\] 1\.1\.3 1\.3 3/
 assert propertyUpdatesReport =~ /Newer versions 1\.1\.3 Latest Incremental/
 assert propertyUpdatesReport =~ /\b1\.2\.2 1\.3 Latest Minor 2\.0 2\.1 3\.0\b/
 
-dependencyUpdatesReport = new File( basedir, "target/site/dependency-updates-report.html" ).text
+dependencyUpdatesReport = new File( basedir, "target/reports/dependency-updates-report.html" ).text
         .replaceAll( '<[^>]+>', ' ' )
         .replaceAll( '&[^;]+;', ' ' )
         .replaceAll( '\\s+', ' ' )

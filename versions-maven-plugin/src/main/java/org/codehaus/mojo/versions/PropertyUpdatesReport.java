@@ -43,9 +43,9 @@ import org.eclipse.aether.RepositorySystem;
  * @since 1.0-beta-1
  */
 @Mojo(name = "property-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
-public class PropertyUpdatesReportMojo extends AbstractPropertyUpdatesReportMojo {
+public class PropertyUpdatesReport extends AbstractPropertyUpdatesReport {
     @Inject
-    protected PropertyUpdatesReportMojo(
+    protected PropertyUpdatesReport(
             I18N i18n,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -66,6 +66,7 @@ public class PropertyUpdatesReportMojo extends AbstractPropertyUpdatesReportMojo
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getOutputName() {
         return "property-updates-report";
     }

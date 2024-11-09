@@ -52,7 +52,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
 
     @Override
     protected void renderSummaryTable() {
-        renderTable("report.overview.property", model.getAllUpdates(), "report.overview.noProperty");
+        renderTable(model.getAllUpdates());
     }
 
     /**
@@ -63,25 +63,19 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         model.getAllUpdates().forEach(this::renderPropertyDetail);
     }
 
-    protected void renderTable(String titleKey, Map<Property, PropertyVersions> contents, String emptyKey) {
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text(getText(titleKey));
-        sink.sectionTitle2_();
+    protected void renderTable(Map<Property, PropertyVersions> contents) {
+        startSection(getText("report.overview.property"));
 
         if (contents.isEmpty()) {
-            sink.paragraph();
-            sink.text(getText(emptyKey));
-            sink.paragraph_();
+            paragraph(getText("report.overview.noProperty"));
         } else {
             renderSummaryTable(contents);
         }
-        sink.section2_();
+        endSection();
     }
 
     protected void renderSummaryTable(Map<Property, PropertyVersions> contents) {
-        sink.table();
-        sink.tableRows(null, false);
+        startTable();
 
         sink.tableRow();
         renderSummaryTableHeader(false, false);
@@ -93,8 +87,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         renderSummaryTableHeader(false, false);
         sink.tableRow_();
 
-        sink.tableRows_();
-        sink.table_();
+        endTable();
     }
 
     private void renderPropertySummaryTableRow(Property property, PropertyVersions details) {
@@ -117,8 +110,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
-        sink.table();
-        sink.tableRows(new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false);
+        startTable(new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false);
 
         renderTwoCellsRow("report.status", () -> renderStatus(details));
         renderTwoCellsRow("report.property", "${" + property.getName() + "}");
@@ -133,8 +125,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         renderTwoCellsRow("report.searchReactor", property.isSearchReactor());
         renderTwoCellsRow("report.preferReactor", property.isPreferReactor());
 
-        sink.tableRows_();
-        sink.table_();
+        endTable();
     }
 
     /**
@@ -174,11 +165,8 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
     }
 
     private void renderPropertyDetail(Property property, PropertyVersions details) {
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text("${" + property.getName() + "}");
-        sink.sectionTitle2_();
+        startSection("${" + property.getName() + "}");
         renderPropertyDetailTable(property, details);
-        sink.section2_();
+        endSection();
     }
 }

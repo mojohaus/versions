@@ -25,12 +25,9 @@ import java.util.Set;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
@@ -119,9 +116,6 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
      */
     @Parameter(defaultValue = "${session}", required = true, readonly = true)
     protected MavenSession session;
-
-    @Parameter(defaultValue = "${mojoExecution}", required = true, readonly = true)
-    private MojoExecution mojoExecution;
 
     /**
      * <p>Allows specifying the {@linkplain RuleSet} object describing rules
@@ -226,16 +220,6 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
             throws MavenReportException, MojoExecutionException;
 
     @Override
-    protected MavenProject getProject() {
-        return project;
-    }
-
-    @Override
-    protected Renderer getSiteRenderer() {
-        return siteRenderer;
-    }
-
-    @Override
     public String getDescription(Locale locale) {
         return getText(locale, "report.description");
     }
@@ -253,7 +237,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
      * @return the message.
      */
     public String getText(Locale locale, String key) {
-        return i18n.getString(getOutputName(), locale, key);
+        return i18n.getString(getOutputPath(), locale, key);
     }
 
     public Boolean getAllowSnapshots() {

@@ -48,7 +48,7 @@ import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 /**
  * Generates a report of available updates for the plugins of a project.
  */
-public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsReport<PluginUpdatesModel> {
+public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport<PluginUpdatesModel> {
 
     private static final PluginComparator PLUGIN_COMPARATOR = PluginComparator.INSTANCE;
 
@@ -75,7 +75,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
     @Parameter(property = "onlyUpgradable", defaultValue = "false")
     protected boolean onlyUpgradable;
 
-    public AbstractPluginUpdatesReportMojo(
+    protected AbstractPluginUpdatesReport(
             I18N i18n,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -87,6 +87,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isExternalReport() {
         return false;
     }
@@ -94,6 +95,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canGenerateReport() {
         return haveBuildPlugins(getProject()) || haveBuildPluginManagementPlugins(getProject());
     }
@@ -117,6 +119,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
      * @param locale the locale to generate the report for.
      * @param sink   the report formatting tool
      */
+    @Override
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
 
         Set<Plugin> pluginManagement = getPluginManagement();
@@ -163,7 +166,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
     }
 
     /**
-     * Implementations of {@link AbstractPluginUpdatesReportMojo} may use this to supply the main processing logic
+     * Implementations of {@link AbstractPluginUpdatesReport} may use this to supply the main processing logic
      * with desired pluginManagement data, which will be used in the creation of the report.
      *
      * @param pluginManagementCollector, a set initialized with a {@link PluginComparator} comparator.
@@ -184,7 +187,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
     }
 
     /**
-     * Implementations of {@link  AbstractPluginUpdatesReportMojo} may use this to supply the main processing logic
+     * Implementations of {@link  AbstractPluginUpdatesReport} may use this to supply the main processing logic
      * with desired build plugin information, which will be used to create the report.
      *
      *@param pluginsCollector, a set initialized with a {@link PluginComparator} comparator.
@@ -195,7 +198,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
         for (String format : formats) {
             if ("html".equals(format)) {
                 rendererFactory
-                        .createReportRenderer(getOutputName(), sink, locale, model, allowSnapshots)
+                        .createReportRenderer(getOutputPath(), sink, locale, model, allowSnapshots)
                         .render();
             } else if ("xml".equals(format)) {
                 Path outputDir = Paths.get(getProject().getBuild().getDirectory());
@@ -206,7 +209,7 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
                         throw new MavenReportException("Could not create the output directory");
                     }
                 }
-                Path outputFile = outputDir.resolve(getOutputName() + ".xml");
+                Path outputFile = outputDir.resolve(getOutputPath() + ".xml");
                 new PluginUpdatesXmlReportRenderer(model, outputFile, allowSnapshots).render();
             }
         }
@@ -224,9 +227,4 @@ public abstract class AbstractPluginUpdatesReportMojo extends AbstractVersionsRe
                     pmPlugin -> plugins.stream().noneMatch(plugin -> PLUGIN_COMPARATOR.compare(plugin, pmPlugin) == 0));
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public abstract String getOutputName();
 }

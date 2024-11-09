@@ -1,4 +1,4 @@
-output = new File( basedir, 'target/site/plugin-updates-report.html' ).text
+output = new File( basedir, 'target/reports/plugin-updates-report.html' ).text
         .replaceAll( '<[^>]+>', ' ' )
         .replaceAll( '&[^;]+;', ' ' )
         .replaceAll( '\\s+', ' ' )
