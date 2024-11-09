@@ -132,7 +132,7 @@
     <profile>
       <!-- run integration tests
                 to use this profile:
-                or run integration tests: ./mvnw -Prun-its
+                or run integration tests: mvn -Prun-its
             -->
       <id>run-its</id>
       <build>

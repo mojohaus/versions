@@ -79,45 +79,33 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      * {@inheritDoc}
      */
     protected void renderBody() {
-        sink.section1();
-        sink.sectionTitle1();
-        sink.text(getText("report.overview.title"));
-        sink.sectionTitle1_();
-        sink.paragraph();
-        sink.text(getText("report.overview.text"));
-        sink.paragraph_();
+        startSection(getText("report.overview.title"));
+        paragraph(getText("report.overview.text"));
 
         renderOverview();
 
         renderManagementSummaryTable();
         renderSummaryTable();
 
-        sink.section1_();
+        endSection();
 
-        sink.section1();
-        sink.sectionTitle1();
-        sink.text(getText("report.detail.title"));
-        sink.sectionTitle1_();
-        sink.paragraph();
-        sink.text(getText("report.detail.text"));
-        sink.paragraph_();
+        startSection(getText("report.detail.title"));
+        paragraph(getText("report.detail.text"));
 
         renderDetails();
 
-        sink.section1_();
+        endSection();
     }
 
     /**
      * Renders the "Overview" table
      */
     protected void renderOverview() {
-        sink.table();
-        sink.tableRows(null, false);
+        startTable();
         sink.tableRow();
         renderOverviewTableRow(computeOverviewStats());
         sink.tableRow_();
-        sink.tableRows_();
-        sink.table_();
+        endTable();
     }
 
     /**
@@ -188,8 +176,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     protected abstract void renderDetails();
 
     protected void renderSummaryTable(Map<Dependency, ArtifactVersions> contents, boolean hasScope) {
-        sink.table();
-        sink.tableRows(null, false);
+        startTable();
 
         sink.tableRow();
         renderSummaryTableHeader(hasScope, true);
@@ -201,8 +188,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         renderSummaryTableHeader(hasScope, true);
         sink.tableRow_();
 
-        sink.tableRows_();
-        sink.table_();
+        endTable();
     }
 
     protected void renderSummaryTableHeader(boolean hasScope, boolean hasType) {
@@ -253,8 +239,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
-        sink.table();
-        sink.tableRows(new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false);
+        startTable(new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false);
 
         renderTwoCellsRow("report.status", () -> renderStatus(details));
         renderTwoCellsRow("report.groupId", artifact.getGroupId());
@@ -269,8 +254,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
             renderTwoCellsRow("report.updateVersions", () -> renderVersions(allUpdates, details));
         }
 
-        sink.tableRows_();
-        sink.table_();
+        endTable();
     }
 
     /**
@@ -347,7 +331,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         } catch (InvalidVersionSpecificationException ignored) {
             ignored.printStackTrace(System.err);
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     /**

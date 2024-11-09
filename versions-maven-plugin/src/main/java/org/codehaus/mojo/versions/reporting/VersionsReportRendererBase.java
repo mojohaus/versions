@@ -55,7 +55,8 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      */
     protected String bundleName;
 
-    public VersionsReportRendererBase(Sink sink, I18N i18n, Locale locale, String bundleName, boolean allowSnapshots) {
+    protected VersionsReportRendererBase(
+            Sink sink, I18N i18n, Locale locale, String bundleName, boolean allowSnapshots) {
         super(sink);
         this.i18n = i18n;
         this.locale = locale;
@@ -102,11 +103,7 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      *             headers from
      */
     protected void renderTableHeaderCells(String... keys) {
-        Arrays.stream(keys).map(this::getText).forEachOrdered(str -> {
-            sink.tableHeaderCell();
-            sink.text(str);
-            sink.tableHeaderCell_();
-        });
+        Arrays.stream(keys).map(this::getText).forEachOrdered(this::tableHeaderCell);
     }
 
     /**

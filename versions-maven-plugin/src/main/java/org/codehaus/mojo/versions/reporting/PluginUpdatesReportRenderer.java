@@ -65,35 +65,26 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     }
 
     private void renderDependencyDetail(Dependency dependency, ArtifactVersions details) {
-        sink.section3();
-        sink.sectionTitle3();
-        sink.text(MessageFormat.format(
+        startSection(MessageFormat.format(
                 getText("report.pluginDependency"),
                 ArtifactUtils.versionlessKey(dependency.getGroupId(), dependency.getArtifactId())));
-        sink.sectionTitle3_();
         renderDependencyDetailTable(dependency, details, false);
-        sink.section3_();
+        endSection();
     }
 
     private void renderTable(String titleKey, Map<Dependency, PluginUpdatesDetails> contents, String emptyKey) {
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text(getText(titleKey));
-        sink.sectionTitle2_();
+        startSection(getText(titleKey));
 
         if (contents.isEmpty()) {
-            sink.paragraph();
-            sink.text(getText(emptyKey));
-            sink.paragraph_();
+            paragraph(getText(emptyKey));
         } else {
             renderSummaryTable(contents);
         }
-        sink.section2_();
+        endSection();
     }
 
     protected void renderSummaryTable(Map<Dependency, PluginUpdatesDetails> contents) {
-        sink.table();
-        sink.tableRows(null, false);
+        startTable();
 
         sink.tableRow();
         renderSummaryTableHeader(false, false);
@@ -105,8 +96,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         renderSummaryTableHeader(false, false);
         sink.tableRow_();
 
-        sink.tableRows_();
-        sink.table_();
+        endTable();
     }
 
     /**
@@ -153,29 +143,21 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
     }
 
     private void renderPluginDetail(Dependency artifact, PluginUpdatesDetails details) {
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text(MessageFormat.format(
+        startSection(MessageFormat.format(
                 getText("report.plugin"), ArtifactUtils.versionlessKey(details.getGroupId(), details.getArtifactId())));
-        sink.sectionTitle2_();
-
         renderPluginDetailTable(details);
 
         if (!details.getDependencyVersions().isEmpty()) {
-            sink.section3();
-            sink.sectionTitle3();
-            sink.text(MessageFormat.format(
+            startSection(MessageFormat.format(
                     getText("report.pluginDependencies"),
                     ArtifactUtils.versionlessKey(details.getGroupId(), details.getArtifactId())));
-            sink.sectionTitle3_();
 
             renderSummaryTable(details.getDependencyVersions(), false);
-
-            sink.section3_();
+            endSection();
 
             details.getDependencyVersions().forEach(this::renderDependencyDetail);
         }
-        sink.section2_();
+        endSection();
     }
 
     private void renderPluginDetailTable(PluginUpdatesDetails details) {
@@ -183,8 +165,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         ArtifactVersion[] allUpdates = details.getAllUpdates(empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
 
-        sink.table();
-        sink.tableRows(new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false);
+        startTable(new int[] {Sink.JUSTIFY_RIGHT, Sink.JUSTIFY_LEFT}, false);
 
         renderTwoCellsRow("report.status", () -> renderStatus(details));
         renderTwoCellsRow("report.groupId", details.getGroupId());
@@ -194,7 +175,6 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
             renderTwoCellsRow("report.updateVersions", () -> renderVersions(allUpdates, details));
         }
 
-        sink.tableRows_();
-        sink.table_();
+        endTable();
     }
 }

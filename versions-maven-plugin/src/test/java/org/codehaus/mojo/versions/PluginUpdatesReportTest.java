@@ -53,15 +53,15 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.matchesPattern;
 
 /**
- * Basic tests for {@linkplain PluginUpdatesReportMojo}.
+ * Basic tests for {@linkplain PluginUpdatesReport}.
  *
  * @author Andrzej Jarmoniuk
  */
-public class PluginUpdatesReportMojoTest {
-    private static class TestPluginUpdatesReportMojo extends PluginUpdatesReportMojo {
+public class PluginUpdatesReportTest {
+    private static class TestPluginUpdatesReport extends PluginUpdatesReport {
         static final I18N MOCK_I18N = mockI18N();
 
-        TestPluginUpdatesReportMojo() {
+        TestPluginUpdatesReport() {
             super(
                     MOCK_I18N,
                     mockArtifactHandlerManager(),
@@ -77,37 +77,37 @@ public class PluginUpdatesReportMojoTest {
             session = mockMavenSession();
         }
 
-        public TestPluginUpdatesReportMojo withPlugins(Plugin... plugins) {
+        public TestPluginUpdatesReport withPlugins(Plugin... plugins) {
             project.getBuild().setPlugins(Arrays.asList(plugins));
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withAetherRepositorySystem(RepositorySystem repositorySystem) {
+        public TestPluginUpdatesReport withAetherRepositorySystem(RepositorySystem repositorySystem) {
             this.repositorySystem = repositorySystem;
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withPluginManagement(Plugin... pluginManagement) {
+        public TestPluginUpdatesReport withPluginManagement(Plugin... pluginManagement) {
             project.getBuild().getPluginManagement().setPlugins(Arrays.asList(pluginManagement));
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withOnlyUpgradable(boolean onlyUpgradable) {
+        public TestPluginUpdatesReport withOnlyUpgradable(boolean onlyUpgradable) {
             this.onlyUpgradable = onlyUpgradable;
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withOnlyProjectPlugins(boolean onlyProjectPlugins) {
+        public TestPluginUpdatesReport withOnlyProjectPlugins(boolean onlyProjectPlugins) {
             this.onlyProjectPlugins = onlyProjectPlugins;
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withRuleSet(RuleSet ruleSet) {
+        public TestPluginUpdatesReport withRuleSet(RuleSet ruleSet) {
             this.ruleSet = ruleSet;
             return this;
         }
 
-        public TestPluginUpdatesReportMojo withIgnoredVersions(Set<String> ignoredVersions) {
+        public TestPluginUpdatesReport withIgnoredVersions(Set<String> ignoredVersions) {
             this.ignoredVersions = ignoredVersions;
             return this;
         }
@@ -131,7 +131,7 @@ public class PluginUpdatesReportMojoTest {
     public void testOnlyUpgradablePlugins() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestPluginUpdatesReportMojo()
+        new TestPluginUpdatesReport()
                 .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
                     {
                         put("artifactA", new String[] {"1.0.0", "2.0.0"});
@@ -154,7 +154,7 @@ public class PluginUpdatesReportMojoTest {
     public void testOnlyUpgradableWithPluginManagement() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestPluginUpdatesReportMojo()
+        new TestPluginUpdatesReport()
                 .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
                     {
                         put("artifactA", new String[] {"1.0.0", "2.0.0"});
@@ -177,7 +177,7 @@ public class PluginUpdatesReportMojoTest {
     public void testOnlyProjectPlugins() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestPluginUpdatesReportMojo()
+        new TestPluginUpdatesReport()
                 .withPlugins(pluginOf("artifactA"))
                 .withPluginManagement(pluginOf("artifactA"), pluginOf("artifactB"), pluginOf("artifactC"))
                 .withOnlyUpgradable(true)
@@ -193,7 +193,7 @@ public class PluginUpdatesReportMojoTest {
     public void testOnlyProjectPluginsWithIgnoredVersions() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestPluginUpdatesReportMojo()
+        new TestPluginUpdatesReport()
                 .withPlugins(pluginOf("artifactA"))
                 .withPluginManagement(pluginOf("artifactA"), pluginOf("artifactB"), pluginOf("artifactC"))
                 .withOnlyUpgradable(true)

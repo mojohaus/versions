@@ -23,10 +23,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
-import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.util.AggregateReportUtils;
@@ -34,19 +35,19 @@ import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 
 /**
- * Generates an aggregated report of available updates for the plugins of a project.
+ * Generates an aggregate report of available updates for the dependencies of a project.
  *
  * @since 2.14.0
  */
 @Mojo(
-        name = "plugin-updates-aggregate-report",
+        name = "dependency-updates-aggregate-report",
         requiresDependencyResolution = ResolutionScope.RUNTIME,
         threadSafe = true,
         aggregator = true)
-public class PluginUpdatesAggregateReportMojo extends AbstractPluginUpdatesReportMojo {
+public class DependencyUpdatesAggregateReport extends AbstractDependencyUpdatesReport {
 
     @Inject
-    protected PluginUpdatesAggregateReportMojo(
+    protected DependencyUpdatesAggregateReport(
             I18N i18n,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -55,13 +56,14 @@ public class PluginUpdatesAggregateReportMojo extends AbstractPluginUpdatesRepor
         super(i18n, artifactHandlerManager, repositorySystem, wagonMap, rendererFactory);
     }
 
+    /**
+     * {@inheritDoc}
+     * */
     @Override
-    protected void populatePluginManagement(Set<Plugin> pluginManagementCollector) {
+    protected void populateDependencies(Set<Dependency> dependenciesCollector) {
+        getLog().debug(String.format("Collecting dependencies for project %s", project.getName()));
         for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
-            if (haveBuildPluginManagementPlugins(project)) {
-                pluginManagementCollector.addAll(
-                        project.getBuild().getPluginManagement().getPlugins());
-            }
+            dependenciesCollector.addAll(project.getDependencies());
         }
     }
 
@@ -69,18 +71,19 @@ public class PluginUpdatesAggregateReportMojo extends AbstractPluginUpdatesRepor
      * {@inheritDoc}
      * */
     @Override
-    protected void populatePlugins(Set<Plugin> pluginsCollector) {
+    protected void populateDependencyManagement(
+            Set<Dependency> dependencyManagementCollector, Set<Dependency> dependencies) throws MavenReportException {
         for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
-            if (haveBuildPluginManagementPlugins(project)) {
-                pluginsCollector.addAll(project.getBuild().getPlugins());
-            }
+            getLog().debug(String.format("Collecting managed dependencies for project %s", project.getName()));
+            handleDependencyManagementTransitive(project, dependencyManagementCollector);
         }
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getOutputName() {
-        return "plugin-updates-aggregate-report";
+        return "dependency-updates-aggregate-report";
     }
 }

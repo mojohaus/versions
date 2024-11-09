@@ -20,34 +20,37 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
-import org.apache.maven.model.Dependency;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
+import org.codehaus.mojo.versions.api.Property;
+import org.codehaus.mojo.versions.api.PropertyVersions;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.util.AggregateReportUtils;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 
 /**
- * Generates an aggregate report of available updates for the dependencies of a project.
+ * Generates an aggregate report of available updates for properties of a project which are linked to the dependencies
+ * and/or plugins of a project.
  *
  * @since 2.14.0
  */
 @Mojo(
-        name = "dependency-updates-aggregate-report",
+        name = "property-updates-aggregate-report",
         requiresDependencyResolution = ResolutionScope.RUNTIME,
         threadSafe = true,
         aggregator = true)
-public class DependencyUpdatesAggregateReportMojo extends AbstractDependencyUpdatesReportMojo {
+public class PropertyUpdatesAggregateReport extends AbstractPropertyUpdatesReport {
 
     @Inject
-    protected DependencyUpdatesAggregateReportMojo(
+    protected PropertyUpdatesAggregateReport(
             I18N i18n,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -60,10 +63,11 @@ public class DependencyUpdatesAggregateReportMojo extends AbstractDependencyUpda
      * {@inheritDoc}
      * */
     @Override
-    protected void populateDependencies(Set<Dependency> dependenciesCollector) {
-        getLog().debug(String.format("Collecting dependencies for project %s", project.getName()));
+    protected void populateUpdateSet(Map<Property, PropertyVersions> propertyCollector)
+            throws MojoExecutionException, MavenReportException {
+        VersionsHelper helper = getHelper();
         for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
-            dependenciesCollector.addAll(project.getDependencies());
+            propertyCollector.putAll(helper.getVersionPropertiesMap(getRequest(project)));
         }
     }
 
@@ -71,12 +75,14 @@ public class DependencyUpdatesAggregateReportMojo extends AbstractDependencyUpda
      * {@inheritDoc}
      * */
     @Override
-    protected void populateDependencyManagement(
-            Set<Dependency> dependencyManagementCollector, Set<Dependency> dependencies) throws MavenReportException {
+    protected boolean haveBuildProperties() {
         for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
-            getLog().debug(String.format("Collecting managed dependencies for project %s", project.getName()));
-            handleDependencyManagementTransitive(project, dependencyManagementCollector);
+            if (project.getProperties() != null && !project.getProperties().isEmpty()) {
+                return true;
+            }
         }
+
+        return false;
     }
 
     /**
@@ -84,6 +90,6 @@ public class DependencyUpdatesAggregateReportMojo extends AbstractDependencyUpda
      */
     @Override
     public String getOutputName() {
-        return "dependency-updates-aggregate-report";
+        return "property-updates-aggregate-report";
     }
 }

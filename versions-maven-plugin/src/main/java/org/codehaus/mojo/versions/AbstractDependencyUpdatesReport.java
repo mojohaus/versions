@@ -55,7 +55,7 @@ import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 /**
  * Generates a report of available updates for the dependencies of a project.
  */
-public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersionsReport<DependencyUpdatesModel> {
+public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsReport<DependencyUpdatesModel> {
 
     private static final DependencyComparator DEPENDENCY_COMPARATOR = DependencyComparator.INSTANCE;
 
@@ -103,7 +103,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
     @Parameter(property = "onlyUpgradable", defaultValue = "false")
     protected boolean onlyUpgradable;
 
-    public AbstractDependencyUpdatesReportMojo(
+    protected AbstractDependencyUpdatesReport(
             I18N i18n,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -115,6 +115,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isExternalReport() {
         return false;
     }
@@ -122,6 +123,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canGenerateReport() {
         return true;
     }
@@ -132,7 +134,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
      * @param locale the locale to generate the report for.
      * @param sink   the report formatting tool
      */
-    @SuppressWarnings("deprecation")
+    @Override
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
 
         Set<Dependency> dependencies = getDependencies();
@@ -188,7 +190,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
     }
 
     protected void handleDependencyManagementTransitive(
-            MavenProject project, Set<Dependency> dependencyManagementCollector) throws MavenReportException {
+            MavenProject project, Set<Dependency> dependencyManagementCollector) {
         if (processDependencyManagementTransitive) {
             if (hasDependencyManagement(project)) {
                 if (getLog().isDebugEnabled()) {
@@ -242,7 +244,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
     }
 
     /**
-     * Implementations of {@link AbstractDependencyUpdatesReportMojo} may use this to supply the main processing logic
+     * Implementations of {@link AbstractDependencyUpdatesReport} may use this to supply the main processing logic
      * (see {@link #getDependencyManagement(Set)}) with desired dependency data, which will be used
      * in the creation of the report.
      *
@@ -266,7 +268,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
     }
 
     /**
-     * Implementations of {@link AbstractDependencyUpdatesReportMojo} may use this to supply the main processing logic
+     * Implementations of {@link AbstractDependencyUpdatesReport} may use this to supply the main processing logic
      * (see {@link #getDependencyManagement(Set)}) with desired managed dependencies data, which will be used
      * in the creation of the report.
      *
@@ -283,7 +285,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
         for (String format : formats) {
             if ("html".equals(format)) {
                 rendererFactory
-                        .createReportRenderer(getOutputName(), sink, locale, model, allowSnapshots)
+                        .createReportRenderer(getOutputPath(), sink, locale, model, allowSnapshots)
                         .render();
             } else if ("xml".equals(format)) {
                 Path outputDir = Paths.get(getProject().getBuild().getDirectory());
@@ -294,7 +296,7 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
                         throw new MavenReportException("Could not create the output directory");
                     }
                 }
-                Path outputFile = outputDir.resolve(getOutputName() + ".xml");
+                Path outputFile = outputDir.resolve(getOutputPath() + ".xml");
                 new DependencyUpdatesXmlReportRenderer(model, outputFile, allowSnapshots).render();
             }
         }
@@ -321,12 +323,5 @@ public abstract class AbstractDependencyUpdatesReportMojo extends AbstractVersio
         }
         return project.getDependencyManagement() != null
                 && project.getDependencyManagement().getDependencies() != null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getOutputName() {
-        return "dependency-updates-report";
     }
 }

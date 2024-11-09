@@ -21,16 +21,13 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
@@ -48,12 +45,10 @@ import org.eclipse.aether.RepositorySystem;
  * @since 2.13.0
  */
 @Mojo(name = "parent-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
-public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdatesModel> {
-    @Parameter(defaultValue = "${reactorProjects}", required = true, readonly = true)
-    protected List<MavenProject> reactorProjects;
+public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesModel> {
 
     @Inject
-    protected ParentUpdatesReportMojo(
+    protected ParentUpdatesReport(
             I18N i18n,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -65,6 +60,7 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isExternalReport() {
         return false;
     }
@@ -72,6 +68,7 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean canGenerateReport() {
         if (getProject().getParent() == null) {
             getLog().warn("Project does not have a parent.");
@@ -93,6 +90,7 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
      * @param sink   the report formatting tool
      */
     @SuppressWarnings("deprecation")
+    @Override
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
         try {
             ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions(project.getParentArtifact(), false);
@@ -129,6 +127,7 @@ public class ParentUpdatesReportMojo extends AbstractVersionsReport<ParentUpdate
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getOutputName() {
         return "parent-updates-report";
     }

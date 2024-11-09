@@ -57,15 +57,15 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.matchesPattern;
 
 /**
- * Basic tests for {@linkplain DependencyUpdatesReportMojo}.
+ * Basic tests for {@linkplain DependencyUpdatesReport}.
  *
  * @author Andrzej Jarmoniuk
  */
-public class DependencyUpdatesReportMojoTest {
-    private static class TestDependencyUpdatesReportMojo extends DependencyUpdatesReportMojo {
+public class DependencyUpdatesReportTest {
+    private static class TestDependencyUpdatesReport extends DependencyUpdatesReport {
         private static final I18N MOCK_I18N = mockI18N();
 
-        TestDependencyUpdatesReportMojo() {
+        TestDependencyUpdatesReport() {
             super(
                     MOCK_I18N,
                     mockArtifactHandlerManager(),
@@ -82,17 +82,17 @@ public class DependencyUpdatesReportMojoTest {
             session = mockMavenSession();
         }
 
-        public TestDependencyUpdatesReportMojo withDependencies(Dependency... dependencies) {
+        public TestDependencyUpdatesReport withDependencies(Dependency... dependencies) {
             project.setDependencies(Arrays.asList(dependencies));
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withAetherRepositorySystem(RepositorySystem repositorySystem) {
+        public TestDependencyUpdatesReport withAetherRepositorySystem(RepositorySystem repositorySystem) {
             this.repositorySystem = repositorySystem;
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withOriginalDependencyManagement(
+        public TestDependencyUpdatesReport withOriginalDependencyManagement(
                 Dependency... originalDependencyManagement) {
             project.getOriginalModel()
                     .getDependencyManagement()
@@ -100,48 +100,48 @@ public class DependencyUpdatesReportMojoTest {
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withDependencyManagement(Dependency... dependencyManagement) {
+        public TestDependencyUpdatesReport withDependencyManagement(Dependency... dependencyManagement) {
             project.getModel().getDependencyManagement().setDependencies(Arrays.asList(dependencyManagement));
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withOnlyUpgradable(boolean onlyUpgradable) {
+        public TestDependencyUpdatesReport withOnlyUpgradable(boolean onlyUpgradable) {
             this.onlyUpgradable = onlyUpgradable;
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withProcessDependencyManagement(boolean processDependencyManagement) {
+        public TestDependencyUpdatesReport withProcessDependencyManagement(boolean processDependencyManagement) {
             this.processDependencyManagement = processDependencyManagement;
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withProcessDependencyManagementTransitive(
+        public TestDependencyUpdatesReport withProcessDependencyManagementTransitive(
                 boolean processDependencyManagementTransitive) {
             this.processDependencyManagementTransitive = processDependencyManagementTransitive;
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withOnlyProjectDependencies(boolean onlyProjectDependencies) {
+        public TestDependencyUpdatesReport withOnlyProjectDependencies(boolean onlyProjectDependencies) {
             this.onlyProjectDependencies = onlyProjectDependencies;
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withRuleSet(RuleSet ruleSet) {
+        public TestDependencyUpdatesReport withRuleSet(RuleSet ruleSet) {
             this.ruleSet = ruleSet;
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withIgnoredVersions(Set<String> ignoredVersions) {
+        public TestDependencyUpdatesReport withIgnoredVersions(Set<String> ignoredVersions) {
             this.ignoredVersions = ignoredVersions;
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withAllowSnapshots(boolean allowSnapshots) {
+        public TestDependencyUpdatesReport withAllowSnapshots(boolean allowSnapshots) {
             this.allowSnapshots = allowSnapshots;
             return this;
         }
 
-        public TestDependencyUpdatesReportMojo withOriginalProperty(String name, String value) {
+        public TestDependencyUpdatesReport withOriginalProperty(String name, String value) {
             project.getOriginalModel().getProperties().put(name, value);
             return this;
         }
@@ -166,7 +166,7 @@ public class DependencyUpdatesReportMojoTest {
     public void testOnlyUpgradableDependencies() throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withOnlyUpgradable(true)
                 .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
                     {
@@ -192,7 +192,7 @@ public class DependencyUpdatesReportMojoTest {
             throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withOriginalDependencyManagement(
                         dependencyOf("artifactA"), dependencyOf("artifactB"), dependencyOf("artifactC"))
                 .withProcessDependencyManagement(true)
@@ -209,7 +209,7 @@ public class DependencyUpdatesReportMojoTest {
             throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withDependencyManagement(
                         dependencyOf("artifactA"), dependencyOf("artifactB"), dependencyOf("artifactC"))
                 .withProcessDependencyManagement(true)
@@ -226,7 +226,7 @@ public class DependencyUpdatesReportMojoTest {
     public void testOnlyProjectDependencies() throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withDependencies(dependencyOf("artifactA"))
                 .withDependencyManagement(
                         dependencyOf("artifactA"), dependencyOf("artifactB"), dependencyOf("artifactC"))
@@ -244,7 +244,7 @@ public class DependencyUpdatesReportMojoTest {
             throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withDependencies(dependencyOf("artifactA"))
                 .withDependencyManagement(
                         dependencyOf("artifactA"), dependencyOf("artifactB"), dependencyOf("artifactC"))
@@ -264,7 +264,7 @@ public class DependencyUpdatesReportMojoTest {
     public void testDependenciesInAlphabeticalOrder() throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
                     {
                         put("amstrad", new String[] {"1.0.0", "2.0.0"});
@@ -292,7 +292,7 @@ public class DependencyUpdatesReportMojoTest {
             throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withProcessDependencyManagement(true)
                 .withProcessDependencyManagementTransitive(true)
                 .withDependencies(dependencyOf("artifactA", "2.0.0"), dependencyOf("artifactB"))
@@ -307,7 +307,7 @@ public class DependencyUpdatesReportMojoTest {
     public void testWrongReportBounds() throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withOnlyUpgradable(true)
                 .withDependencies(dependencyOf("test-artifact"))
                 .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -329,7 +329,7 @@ public class DependencyUpdatesReportMojoTest {
     public void testIt001Overview() throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withOnlyUpgradable(true)
                 .withDependencies(dependencyOf("test-artifact", "1.1"))
                 .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -357,7 +357,7 @@ public class DependencyUpdatesReportMojoTest {
             throws IOException, MavenReportException, IllegalAccessException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withOriginalDependencyManagement(
                         dependencyOf("artifactA", "1.0.0"), dependencyOf("artifactB", "${mycomponent.version}"))
                 .withDependencyManagement(
@@ -376,7 +376,7 @@ public class DependencyUpdatesReportMojoTest {
     public void testVersionlessDependency() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
-        new TestDependencyUpdatesReportMojo()
+        new TestDependencyUpdatesReport()
                 .withOriginalDependencyManagement(dependencyOf("artifactA", null))
                 .withProcessDependencyManagement(true)
                 .withProcessDependencyManagementTransitive(false)

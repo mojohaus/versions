@@ -1,4 +1,4 @@
-dependencyUpdatesReport = new File( basedir, "target/site/dependency-updates-report.html" ).text
+dependencyUpdatesReport = new File( basedir, "target/reports/dependency-updates-report.html" ).text
         .replaceAll( '<[^>]+>', ' ' )
         .replaceAll( '&[^;]+;', ' ' )
         .replaceAll( '\\s+', ' ' )
@@ -7,7 +7,7 @@ dependencyUpdatesReport = new File( basedir, "target/site/dependency-updates-rep
 assert dependencyUpdatesReport =~ /\b1\.1\.0-2\b/  // current version of the dependency
 assert dependencyUpdatesReport =~ /\b3\.0\b/       // latest major available version
 
-pluginUpdatesReport = new File( basedir, "target/site/plugin-updates-report.html" ).text
+pluginUpdatesReport = new File( basedir, "target/reports/plugin-updates-report.html" ).text
         .replaceAll( '<[^>]+>', ' ' )
         .replaceAll( '&[^;]+;', ' ' )
         .replaceAll( '\\s+', ' ' )

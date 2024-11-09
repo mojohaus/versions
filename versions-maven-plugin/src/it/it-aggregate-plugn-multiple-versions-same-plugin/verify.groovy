@@ -17,10 +17,10 @@
  * under the License.
  */
 
-def dependenciesUpgradeReport = new File( basedir, 'target/site/dependency-updates-aggregate-report.html')
+def dependenciesUpgradeReport = new File( basedir, 'target/reports/dependency-updates-aggregate-report.html')
 
 assert dependenciesUpgradeReport.exists()
 
-def pluginsUpgradeReport = new File( basedir, 'target/site/dependency-updates-aggregate-report.html')
+def pluginsUpgradeReport = new File( basedir, 'target/reports/dependency-updates-aggregate-report.html')
 
 assert pluginsUpgradeReport.exists()

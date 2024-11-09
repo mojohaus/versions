@@ -62,19 +62,14 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel>
     }
 
     protected void renderTable(String titleKey, Map<Dependency, ArtifactVersions> contents, String emptyKey) {
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text(getText(titleKey));
-        sink.sectionTitle2_();
+        startSection(getText(titleKey));
 
         if (contents.isEmpty()) {
-            sink.paragraph();
-            sink.text(getText(emptyKey));
-            sink.paragraph_();
+            paragraph(getText(emptyKey));
         } else {
             renderSummaryTable(contents, true);
         }
-        sink.section2_();
+        endSection();
     }
 
     @Override
@@ -83,11 +78,8 @@ public class DependencyUpdatesReportRenderer<K extends DependencyUpdatesModel>
     }
 
     protected void renderDependencyDetail(Dependency artifact, ArtifactVersions details) {
-        sink.section2();
-        sink.sectionTitle2();
-        sink.text(ArtifactUtils.versionlessKey(artifact.getGroupId(), artifact.getArtifactId()));
-        sink.sectionTitle2_();
+        startSection(ArtifactUtils.versionlessKey(artifact.getGroupId(), artifact.getArtifactId()));
         renderDependencyDetailTable(artifact, details, true);
-        sink.section2_();
+        endSection();
     }
 }
