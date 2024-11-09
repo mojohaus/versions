@@ -19,9 +19,12 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -75,7 +78,7 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.mojo.versions.model.IgnoreVersion;
 import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
-import org.codehaus.mojo.versions.model.io.xpp3.RuleXpp3Reader;
+import org.codehaus.mojo.versions.model.io.stax.RuleStaxReader;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
@@ -85,7 +88,6 @@ import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.repository.AuthenticationContext;
 import org.eclipse.aether.repository.RemoteRepository;
@@ -101,6 +103,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.apache.maven.RepositoryUtils.toArtifact;
+;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -740,10 +743,10 @@ public class DefaultVersionsHelper implements VersionsHelper {
             }
 
             try (BufferedInputStream bis = new BufferedInputStream(url.openStream())) {
-                RuleSet result = new RuleXpp3Reader().read(bis);
+                RuleSet result = new RuleStaxReader().read(bis);
                 logger.debug("Loaded rules from \"" + uri + "\" successfully");
                 return result;
-            } catch (IOException | XmlPullParserException e) {
+            } catch (IOException | XMLStreamException e) {
                 throw new MojoExecutionException("Could not load specified rules from " + uri, e);
             }
         }
@@ -905,8 +908,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
                             try {
                                 Path tempFile = Files.createTempFile("rules-", ".xml");
                                 wagon.get(uri.resource, tempFile.toFile());
-                                try (BufferedInputStream is = new BufferedInputStream(Files.newInputStream(tempFile))) {
-                                    return new RuleXpp3Reader().read(is);
+                                try (InputStream is = Files.newInputStream(tempFile)) {
+                                    return new RuleStaxReader().read(is);
                                 } finally {
                                     Files.deleteIfExists(tempFile);
                                 }
@@ -915,8 +918,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                                 wagon.disconnect();
                             }
                         } catch (Exception e) {
-                            log.warn(e.getMessage());
-                            return null;
+                            throw new RuntimeException(e);
                         }
                     })
                     .orElseThrow(() -> new MojoExecutionException("Could not load specified rules from " + rulesUri));

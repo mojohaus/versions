@@ -15,6 +15,8 @@ package org.codehaus.mojo.versions.utils;
  * limitations under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -24,7 +26,6 @@ import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Extension;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.when;
 class CoreExtensionUtilsTest {
 
     @Test
-    void testNoExtensions() throws XmlPullParserException, IOException {
+    void testNoExtensions() throws IOException, XMLStreamException {
         MavenProject project = mock(MavenProject.class);
         when(project.getBasedir())
                 .thenReturn(
@@ -52,7 +53,7 @@ class CoreExtensionUtilsTest {
     }
 
     @Test
-    void testExtensionsFound() throws XmlPullParserException, IOException {
+    void testExtensionsFound() throws IOException, XMLStreamException {
         MavenProject project = mock(MavenProject.class);
         when(project.getBasedir())
                 .thenReturn(new File("src/test/resources/org/codehaus/mojo/versions/utils/core-extensions"));

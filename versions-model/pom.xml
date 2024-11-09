@@ -12,14 +12,16 @@
   <name>Versions Model</name>
   <description>Modello models used in plugin</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-xml</artifactId>
-    </dependency>
-  </dependencies>
-
   <build>
+    <resources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>${project.basedir}/src/main/mdo</directory>
+        <includes>
+          <include>*.mdo</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.codehaus.modello</groupId>
@@ -29,14 +31,13 @@
             <model>src/main/mdo/rule.mdo</model>
           </models>
           <version>${modelloNamespaceRuleVersion}</version>
+          <domAsXpp3>false</domAsXpp3>
         </configuration>
         <executions>
           <execution>
             <id>generate-rule</id>
             <goals>
-              <!-- Generate the xpp3 reader code -->
-              <goal>xpp3-reader</goal>
-              <!-- Generate the Java sources for the model itself -->
+              <goal>stax-reader</goal>
               <goal>java</goal>
             </goals>
             <phase>generate-sources</phase>

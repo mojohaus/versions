@@ -16,6 +16,8 @@ package org.codehaus.mojo.versions.utils;
  * limitations under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,8 +28,7 @@ import java.util.stream.Stream;
 
 import org.apache.maven.model.Extension;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.model.io.xpp3.CoreExtensionsXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.codehaus.mojo.versions.model.io.stax.CoreExtensionsStaxReader;
 
 /**
  * Utilities for reading and handling core extensions.
@@ -43,17 +44,17 @@ public final class CoreExtensionUtils {
      * @param project {@link MavenProject} instance
      * @return stream of core extensions defined in the {@code ${project}/.mvn/extensions.xml} file
      * @throws IOException thrown if a file I/O operation fails
-     * @throws XmlPullParserException thrown if the file cannot be parsed
+     * @throws XMLStreamException thrown if the file cannot be parsed
      * @since 2.15.0
      */
-    public static Stream<Extension> getCoreExtensions(MavenProject project) throws IOException, XmlPullParserException {
+    public static Stream<Extension> getCoreExtensions(MavenProject project) throws IOException, XMLStreamException {
         Path extensionsFile = project.getBasedir().toPath().resolve(".mvn/extensions.xml");
         if (!Files.isRegularFile(extensionsFile)) {
             return Stream.empty();
         }
 
         try (Reader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(extensionsFile)))) {
-            return new CoreExtensionsXpp3Reader()
+            return new CoreExtensionsStaxReader()
                     .read(reader).getExtensions().stream().map(ex -> ExtensionBuilder.newBuilder()
                             .withGroupId(ex.getGroupId())
                             .withArtifactId(ex.getArtifactId())

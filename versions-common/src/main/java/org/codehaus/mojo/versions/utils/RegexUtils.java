@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
+import static java.util.Optional.ofNullable;
+
 /**
  * Utility methods to help with regex manipulation.
  *
@@ -105,23 +107,21 @@ public final class RegexUtils {
     /**
      * Converts a wildcard rule to a regex rule.
      *
-     * @param wildcardRule the wildcard rule.
+     * @param wildcardRule the wildcard rule, may be {@code null}
      * @param exactMatch <code>true</code> results in an regex that will match the entire string, while
      *            <code>false</code> will match the start of the string.
      * @return The regex rule.
      */
     public static String convertWildcardsToRegex(String wildcardRule, boolean exactMatch) {
         StringBuilder regex = new StringBuilder();
-        int index = 0;
-        final int len = wildcardRule.length();
-        while (index < len) {
+        final int wildcardLength = ofNullable(wildcardRule).map(String::length).orElse(0);
+        for (int index = 0, nextIndex = 0; index < wildcardLength; index = nextIndex + 1) {
             final int nextQ = wildcardRule.indexOf('?', index);
             final int nextS = wildcardRule.indexOf('*', index);
             if (nextQ == -1 && nextS == -1) {
                 regex.append(quote(wildcardRule.substring(index)));
                 break;
             }
-            int nextIndex;
             if (nextQ == -1) {
                 nextIndex = nextS;
             } else if (nextS == -1) {
@@ -139,7 +139,6 @@ public final class RegexUtils {
             } else {
                 regex.append(".*");
             }
-            index = nextIndex + 1;
         }
         if (!exactMatch) {
             regex.append(".*");

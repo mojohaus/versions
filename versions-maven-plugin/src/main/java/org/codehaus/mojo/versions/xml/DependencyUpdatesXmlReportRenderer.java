@@ -19,6 +19,8 @@ package org.codehaus.mojo.versions.xml;
  * under the License.
  */
 
+import javax.xml.stream.XMLStreamException;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +40,7 @@ import org.codehaus.mojo.versions.reporting.model.DependencyInfo;
 import org.codehaus.mojo.versions.reporting.model.DependencyReportSummary;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesReport;
-import org.codehaus.mojo.versions.reporting.model.io.xpp3.DependencyUpdatesReportXpp3Writer;
+import org.codehaus.mojo.versions.reporting.model.io.stax.DependencyUpdatesReportStaxWriter;
 import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
 
 import static java.util.Optional.empty;
@@ -91,7 +93,7 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
     @Override
     public void render() {
         try (BufferedWriter writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8)) {
-            new DependencyUpdatesReportXpp3Writer().write(writer, new DependencyUpdatesReport() {
+            new DependencyUpdatesReportStaxWriter().write(writer, new DependencyUpdatesReport() {
                 {
                     setSummary(new DependencyReportSummary() {
                         {
@@ -109,7 +111,7 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
                     setDependencies(createDependencyInfo(model.getArtifactUpdates(), isAllowSnapshots()));
                 }
             });
-        } catch (IOException e) {
+        } catch (IOException | XMLStreamException e) {
             throw new RuntimeException(e);
         }
     }

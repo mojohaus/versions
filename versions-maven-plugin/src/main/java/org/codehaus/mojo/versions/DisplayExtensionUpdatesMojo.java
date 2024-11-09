@@ -57,7 +57,6 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.ExtensionBuilder;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Optional.of;
@@ -252,7 +251,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                     .filter(includeFilter::matchersMatch)
                     .filter(excludeFilter::matchersDontMatch)
                     .collect(Collectors.toSet());
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IOException | XMLStreamException e) {
             throw new MojoExecutionException(e.getMessage());
         }
         if (dependencies.isEmpty()) {
