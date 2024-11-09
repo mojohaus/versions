@@ -71,14 +71,14 @@ hard or to be honest impossible.
 ## Releasing
 
 * Make sure `gpg-agent` is running.
-* Execute `./mvnw -B release:prepare release:perform`
+* Execute `mvn -B release:prepare release:perform`
 
 For publishing the site do the following:
 
 ```
 cd target/checkout
-../mvnw site
-../mvnw scm-publish:publish-scm
+mvn site
+mvn scm-publish:publish-scm
 ```
 
 for multi module site - we need two executions
