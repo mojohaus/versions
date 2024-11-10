@@ -48,6 +48,7 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
 
+import static java.util.stream.StreamSupport.stream;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -164,12 +165,9 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo {
             throw new MojoExecutionException("skipResolution is only valid if parentVersion is set");
         }
 
-        String initialVersion = Optional.ofNullable(parentVersion)
-                .orElse(getProject().getParent().getVersion());
         try {
-            ArtifactVersion artifactVersion = skipResolution
-                    ? DefaultArtifactVersionCache.of(parentVersion)
-                    : resolveTargetVersion(initialVersion);
+            ArtifactVersion artifactVersion =
+                    skipResolution ? DefaultArtifactVersionCache.of(parentVersion) : resolveTargetVersion();
             if (artifactVersion != null) {
                 getLog().info("Updating parent from " + getProject().getParent().getVersion() + " to "
                         + artifactVersion);
@@ -190,25 +188,25 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo {
                 }
             }
         } catch (InvalidVersionSpecificationException e) {
-            throw new MojoExecutionException("Invalid version range specification: " + initialVersion, e);
+            throw new MojoExecutionException("Invalid version range specification: " + parentVersion, e);
         } catch (InvalidSegmentException e) {
-            throw new MojoExecutionException("Invalid segment specification for version " + initialVersion, e);
+            throw new MojoExecutionException("Invalid segment specification for version " + parentVersion, e);
         }
     }
 
-    protected ArtifactVersion resolveTargetVersion(String initialVersion)
+    protected ArtifactVersion resolveTargetVersion()
             throws MojoExecutionException, VersionRetrievalException, InvalidVersionSpecificationException,
                     InvalidSegmentException {
         Artifact artifact = getHelper()
                 .createDependencyArtifact(DependencyBuilder.newBuilder()
                         .withGroupId(getProject().getParent().getGroupId())
                         .withArtifactId(getProject().getParent().getArtifactId())
-                        .withVersion(initialVersion)
+                        .withVersion(getProject().getParent().getVersion())
                         .withType("pom")
                         .build());
 
-        VersionRange targetVersionRange = VersionRange.createFromVersionSpec(initialVersion);
-        if (targetVersionRange.getRecommendedVersion() != null) {
+        VersionRange targetVersionRange = VersionRange.createFromVersionSpec(parentVersion);
+        if (targetVersionRange != null && targetVersionRange.getRecommendedVersion() != null) {
             targetVersionRange = targetVersionRange.restrict(
                     VersionRange.createFromVersionSpec("[" + targetVersionRange.getRecommendedVersion() + ",)"));
         }
@@ -219,27 +217,35 @@ public class UpdateParentMojo extends AbstractVersionsUpdaterMojo {
 
         // currentVersion (set to parentVersion here) is not included in the version range for searching upgrades
         // unless we set allowDowngrade to true
-        for (ArtifactVersion candidate : reverse(versions.getNewerVersions(
-                initialVersion, unchangedSegment, allowSnapshots, !isBlank(parentVersion) || allowDowngrade))) {
-            if (allowDowngrade
-                    || targetVersionRange == null
-                    || ArtifactVersions.isVersionInRange(candidate, targetVersionRange)) {
-                if (shouldApplyUpdate(artifact, getProject().getParent().getVersion(), candidate, forceUpdate)) {
-                    return candidate;
-                } else {
-                    getLog().debug("Update not applied. Exiting.");
+
+        VersionRange finalTargetVersionRange = targetVersionRange;
+        return stream(
+                        reverse(versions.getNewerVersions(
+                                        getProject().getParent().getVersion(),
+                                        unchangedSegment,
+                                        allowSnapshots,
+                                        allowDowngrade))
+                                .spliterator(),
+                        false)
+                .filter(v -> finalTargetVersionRange == null
+                        || ArtifactVersions.isVersionInRange(v, finalTargetVersionRange))
+                .findFirst()
+                .map(candidate -> {
+                    if (shouldApplyUpdate(artifact, getProject().getParent().getVersion(), candidate, forceUpdate)) {
+                        return candidate;
+                    } else {
+                        getLog().debug("Update not applied. Exiting.");
+                        return null;
+                    }
+                })
+                .orElseGet(() -> {
+                    if (versions.isEmpty(allowSnapshots)) {
+                        getLog().info("No versions found");
+                    } else {
+                        getLog().info("The parent project is the latest version");
+                    }
                     return null;
-                }
-            }
-        }
-
-        if (versions.isEmpty(allowSnapshots)) {
-            getLog().info("No versions found");
-        } else {
-            getLog().info("The parent project is the latest version");
-        }
-
-        return null;
+                });
     }
 
     private static <T> Iterable<T> reverse(T[] array) {

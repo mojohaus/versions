@@ -76,6 +76,7 @@ public class UpdateParentMojoTest {
                 put("dummy-parent2", new String[] {"1.0", "2.0", "3.0", "3.0-alpha-1", "3.0-beta-1"});
                 put("test-incremental", new String[] {"1.0.0", "1.1.0", "1.1.1", "2.0.0"});
                 put("unknown-artifact", new String[0]);
+                put("mojo-parent", new String[] {"70", "78", "86"});
             }
         });
     }
@@ -186,10 +187,10 @@ public class UpdateParentMojoTest {
             {
                 setGroupId("default-group");
                 setArtifactId("parent-artifact");
+                setVersion("[1.0.1-SNAPSHOT,)");
             }
         });
-
-        ArtifactVersion newVersion = mojo.resolveTargetVersion("[1.0.1-SNAPSHOT,)");
+        ArtifactVersion newVersion = mojo.resolveTargetVersion();
         assertThat(newVersion, notNullValue());
         assertThat(newVersion.toString(), is("1.0.0"));
     }
@@ -199,7 +200,8 @@ public class UpdateParentMojoTest {
             throws MojoExecutionException, VersionRetrievalException, InvalidVersionSpecificationException,
                     InvalidSegmentException {
         mojo.allowDowngrade = false;
-        ArtifactVersion newVersion = mojo.resolveTargetVersion("[1.0.1-SNAPSHOT,)");
+        mojo.parentVersion = "[1.0.1-SNAPSHOT,)";
+        ArtifactVersion newVersion = mojo.resolveTargetVersion();
         assertThat(newVersion, nullValue());
     }
 
@@ -212,10 +214,11 @@ public class UpdateParentMojoTest {
             {
                 setGroupId("default-group");
                 setArtifactId("issue-670-artifact");
+                setVersion("0.0.1-1");
             }
         });
 
-        ArtifactVersion newVersion = mojo.resolveTargetVersion("0.0.1-1");
+        ArtifactVersion newVersion = mojo.resolveTargetVersion();
         assertThat(newVersion, notNullValue());
         assertThat(newVersion.toString(), is("0.0.1-1-impl-SNAPSHOT"));
     }
@@ -253,10 +256,11 @@ public class UpdateParentMojoTest {
             {
                 setGroupId("default-group");
                 setArtifactId("parent-artifact");
+                setVersion("0.9.0");
             }
         });
         setVariableValueToObject(mojo, "ignoredVersions", singleton("1.0.0"));
-        assertThat(mojo.resolveTargetVersion("0.9.0"), nullValue());
+        assertThat(mojo.resolveTargetVersion(), nullValue());
     }
 
     @Test
@@ -337,8 +341,8 @@ public class UpdateParentMojoTest {
         mojo.allowMajorUpdates = false;
         mojo.allowMinorUpdates = true;
         mojo.allowIncrementalUpdates = true;
-
-        ArtifactVersion newVersion = mojo.resolveTargetVersion("0.8.0");
+        mojo.parentVersion = "0.8.0";
+        ArtifactVersion newVersion = mojo.resolveTargetVersion();
 
         assertThat(newVersion, notNullValue());
         assertThat(newVersion.toString(), is("0.9.0"));
@@ -352,13 +356,13 @@ public class UpdateParentMojoTest {
             {
                 setGroupId("default-group");
                 setArtifactId("test-incremental");
+                setVersion("1.1.0");
             }
         });
         mojo.allowMajorUpdates = false;
         mojo.allowMinorUpdates = false;
         mojo.allowIncrementalUpdates = true;
-
-        ArtifactVersion newVersion = mojo.resolveTargetVersion("1.1.0");
+        ArtifactVersion newVersion = mojo.resolveTargetVersion();
 
         assertThat(newVersion, notNullValue());
         assertThat(newVersion.toString(), is("1.1.1"));
@@ -399,6 +403,54 @@ public class UpdateParentMojoTest {
         });
         mojo.allowSnapshots = true;
         mojo.parentVersion = "[,3.0-!)";
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
+        }
+        assertThat(changeRecorder.getChanges(), empty());
+    }
+
+    /*
+     * Reproduces issue 1060
+     */
+    @Test
+    public void testIssue1060VersionRangeAllowDowngradeFalse()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        mojo.getProject().setParent(new MavenProject() {
+            {
+                setGroupId("default-group");
+                setArtifactId("dummy-parent2");
+                setVersion("2.0");
+            }
+        });
+        mojo.parentVersion = "[,2.9-!)";
+        mojo.allowDowngrade = false;
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.setProjectParentVersion(any(), any()))
+                    .thenReturn(true);
+            mojo.update(null);
+        }
+        assertThat(changeRecorder.getChanges(), empty());
+    }
+
+    /*
+     * Reproduces issue 1060
+     */
+    @Test
+    public void testIssue1060VersionRangeAllowDowngradeTrue()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+        mojo.getProject().setParent(new MavenProject() {
+            {
+                setGroupId("default-group");
+                setArtifactId("mojo-parent");
+                setVersion("78");
+            }
+        });
+        mojo.parentVersion = "[,79-!)";
+        mojo.allowDowngrade = true;
         try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
             pomHelper
                     .when(() -> PomHelper.setProjectParentVersion(any(), any()))
