@@ -28,7 +28,6 @@ import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.plexus.i18n.I18N;
@@ -67,8 +66,7 @@ public class DependencyUpdatesReport extends AbstractDependencyUpdatesReport {
      * {@inheritDoc}
      * */
     @Override
-    protected void populateDependencyManagement(
-            Set<Dependency> dependencyManagementCollector, Set<Dependency> dependencies) throws MavenReportException {
+    protected void populateDependencyManagement(Set<Dependency> dependencyManagementCollector) {
         if (hasDependencyManagement(getProject())) {
             getLog().debug(String.format(
                     "Collecting managed dependencies for project %s",
