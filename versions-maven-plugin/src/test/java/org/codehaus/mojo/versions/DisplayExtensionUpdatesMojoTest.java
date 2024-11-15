@@ -181,4 +181,81 @@ public class DisplayExtensionUpdatesMojoTest {
 
         assertThat(Files.readAllLines(tempPath), empty());
     }
+
+    @Test
+    public void testMajorUpdates()
+            throws MojoExecutionException, MojoFailureException, IOException, IllegalAccessException {
+        setVariableValueToObject(mojo, "extensionExcludes", emptyList());
+        setVariableValueToObject(mojo, "extensionIncludes", singletonList("*"));
+        mojo.getProject().setBuild(new Build());
+        mojo.getProject()
+                .getBuild()
+                .setExtensions(Collections.singletonList(ExtensionBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactA")
+                        .withVersion("1.0.0")
+                        .build()));
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.getChildModels(ArgumentMatchers.any(MavenProject.class), any()))
+                    .then(i -> Collections.singletonMap(null, ((MavenProject) i.getArgument(0)).getModel()));
+            mojo.execute();
+        }
+
+        assertThat(String.join("", Files.readAllLines(tempPath)), containsString("1.0.0 -> 2.0.0"));
+    }
+
+    @Test
+    public void testMinorUpdates()
+            throws MojoExecutionException, MojoFailureException, IOException, IllegalAccessException {
+        setVariableValueToObject(mojo, "extensionExcludes", emptyList());
+        setVariableValueToObject(mojo, "extensionIncludes", singletonList("*"));
+        mojo.getProject().setBuild(new Build());
+        mojo.getProject()
+                .getBuild()
+                .setExtensions(Collections.singletonList(ExtensionBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactB")
+                        .withVersion("1.0.0")
+                        .build()));
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.getChildModels(ArgumentMatchers.any(MavenProject.class), any()))
+                    .then(i -> Collections.singletonMap(null, ((MavenProject) i.getArgument(0)).getModel()));
+            mojo.execute();
+        }
+
+        assertThat(String.join("", Files.readAllLines(tempPath)), containsString("1.0.0 -> 1.1.0"));
+    }
+
+    @Test
+    public void testIncrementalUpdates()
+            throws MojoExecutionException, MojoFailureException, IOException, IllegalAccessException {
+        setVariableValueToObject(mojo, "extensionExcludes", emptyList());
+        setVariableValueToObject(mojo, "extensionIncludes", singletonList("*"));
+        mojo.getProject().setBuild(new Build());
+        mojo.getProject()
+                .getBuild()
+                .setExtensions(Collections.singletonList(ExtensionBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactD")
+                        .withVersion("1.0.0")
+                        .build()));
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("artifactD", new String[] {"1.0.0", "1.0.1"});
+            }
+        });
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.getChildModels(ArgumentMatchers.any(MavenProject.class), any()))
+                    .then(i -> Collections.singletonMap(null, ((MavenProject) i.getArgument(0)).getModel()));
+            mojo.execute();
+        }
+
+        assertThat(String.join("", Files.readAllLines(tempPath)), containsString("1.0.0 -> 1.0.1"));
+    }
 }
