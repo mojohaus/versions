@@ -25,16 +25,28 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.Restriction;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.eclipse.aether.RepositorySystem;
+
+import static java.util.Optional.empty;
 
 /**
  * Abstract base class for the Display___ mojos.
@@ -45,6 +57,13 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
     static final String NL = System.getProperty("line.separator");
 
     private static final int DEFAULT_OUTPUT_LINE_WIDTH = 80;
+
+    /**
+     * The width to pad info messages.
+     *
+     * @since 1.0-alpha-1
+     */
+    static final int INFO_PAD_SIZE = 72;
 
     /**
      * If specified then the display output will be sent to the specified file.
@@ -160,5 +179,89 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
      */
     protected int getOutputLineWidthOffset() {
         return this.outputLineWidth - DEFAULT_OUTPUT_LINE_WIDTH;
+    }
+
+    /**
+     * Defines the list of dependencies using current versions and the list of dependencies having updates
+     */
+    protected interface DependencyUpdatesResult {
+
+        /**
+         * @return Dependencies using the latest version
+         */
+        List<String> getUsingLatest();
+
+        /**
+         * @return Dependencies with updates available
+         */
+        List<String> getWithUpdates();
+    }
+
+    /**
+     * Compiles a {@link DependencyUpdatesResult} object containing dependency updates for the given dependency map
+     * and the given unchanged segment.
+     * @param updates map of available versions per dependency
+     * @param unchangedSegment the most major segment not allowed to be updated or {@code Optional.empty()} if
+     *                        all segments are allowed to be updated
+     * @return a {@link DependencyUpdatesResult} object containing the result
+     */
+    protected DependencyUpdatesResult getDependencyUpdates(
+            Map<Dependency, ArtifactVersions> updates, Optional<Segment> unchangedSegment) {
+        List<String> withUpdates = new ArrayList<>();
+        List<String> usingCurrent = new ArrayList<>();
+        for (ArtifactVersions versions : updates.values()) {
+            String left = "  " + ArtifactUtils.versionlessKey(versions.getArtifact()) + " ";
+            String currentVersion;
+            Optional<ArtifactVersion> latestVersion;
+            if (versions.getCurrentVersion() != null) {
+                currentVersion = versions.getCurrentVersion().toString();
+                try {
+                    latestVersion = versions.getNewestVersion(currentVersion, unchangedSegment, allowSnapshots, false);
+                } catch (InvalidSegmentException e) {
+                    latestVersion = empty();
+                }
+            } else {
+                currentVersion = versions.getArtifact().getVersionRange().toString();
+                ArtifactVersion actualVersion =
+                        versions.getNewestVersion(versions.getArtifact().getVersionRange(), allowSnapshots);
+                Restriction newVersionRestriction;
+                try {
+                    Restriction segmentRestriction =
+                            versions.restrictionForUnchangedSegment(actualVersion, unchangedSegment, false);
+                    newVersionRestriction = new Restriction(
+                            actualVersion,
+                            false,
+                            segmentRestriction.getUpperBound(),
+                            segmentRestriction.isUpperBoundInclusive());
+                } catch (InvalidSegmentException e) {
+                    throw new RuntimeException(e);
+                }
+                latestVersion = Optional.of(newVersionRestriction)
+                        .map(restriction -> versions.getNewestVersion(restriction, allowSnapshots));
+            }
+            String right =
+                    " " + latestVersion.map(v -> currentVersion + " -> " + v).orElse(currentVersion);
+            List<String> t = latestVersion.isPresent() ? withUpdates : usingCurrent;
+            if (right.length() + left.length() + 3 > INFO_PAD_SIZE + getOutputLineWidthOffset()) {
+                t.add(left + "...");
+                t.add(StringUtils.leftPad(right, INFO_PAD_SIZE + getOutputLineWidthOffset()));
+
+            } else {
+                t.add(StringUtils.rightPad(left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), ".")
+                        + right);
+            }
+        }
+
+        return new DependencyUpdatesResult() {
+            @Override
+            public List<String> getUsingLatest() {
+                return usingCurrent;
+            }
+
+            @Override
+            public List<String> getWithUpdates() {
+                return withUpdates;
+            }
+        };
     }
 }

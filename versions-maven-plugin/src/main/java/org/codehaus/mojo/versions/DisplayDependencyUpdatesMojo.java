@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,10 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -45,14 +41,12 @@ import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
-import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptySet;
-import static java.util.Optional.empty;
 import static org.codehaus.mojo.versions.filtering.DependencyFilter.filterDependencies;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromDependencyManagement;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
@@ -70,13 +64,6 @@ import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDe
 public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     // ------------------------------ FIELDS ------------------------------
-
-    /**
-     * The width to pad info messages.
-     *
-     * @since 1.0-alpha-1
-     */
-    private static final int INFO_PAD_SIZE = 72;
 
     /**
      * Whether to process the dependencyManagement section of the project.
@@ -503,79 +490,32 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
         }
     }
 
-    private void logUpdates(Map<Dependency, ArtifactVersions> updates, String section) {
-        List<String> withUpdates = new ArrayList<>();
-        List<String> usingCurrent = new ArrayList<>();
-        for (ArtifactVersions versions : updates.values()) {
-            String left = "  " + ArtifactUtils.versionlessKey(versions.getArtifact()) + " ";
-            String currentVersion;
-            Optional<ArtifactVersion> latestVersion;
-            Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
-                    allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
-            if (versions.getCurrentVersion() != null) {
-                currentVersion = versions.getCurrentVersion().toString();
-                try {
-                    latestVersion = versions.getNewestVersion(currentVersion, unchangedSegment, allowSnapshots, false);
-                } catch (InvalidSegmentException e) {
-                    latestVersion = empty();
-                }
-            } else {
-                currentVersion = versions.getArtifact().getVersionRange().toString();
-                ArtifactVersion actualVersion =
-                        versions.getNewestVersion(versions.getArtifact().getVersionRange(), allowSnapshots);
-                Restriction newVersionRestriction;
-                try {
-                    Restriction segmentRestriction =
-                            versions.restrictionForUnchangedSegment(actualVersion, unchangedSegment, false);
-                    newVersionRestriction = new Restriction(
-                            actualVersion,
-                            false,
-                            segmentRestriction.getUpperBound(),
-                            segmentRestriction.isUpperBoundInclusive());
-                } catch (InvalidSegmentException e) {
-                    throw new RuntimeException(e);
-                }
-                latestVersion = Optional.of(newVersionRestriction)
-                        .map(restriction -> versions.getNewestVersion(restriction, allowSnapshots));
-            }
-            String right =
-                    " " + latestVersion.map(v -> currentVersion + " -> " + v).orElse(currentVersion);
-            List<String> t = latestVersion.isPresent() ? withUpdates : usingCurrent;
-            if (right.length() + left.length() + 3 > INFO_PAD_SIZE + getOutputLineWidthOffset()) {
-                t.add(left + "...");
-                t.add(StringUtils.leftPad(right, INFO_PAD_SIZE + getOutputLineWidthOffset()));
-
-            } else {
-                t.add(StringUtils.rightPad(left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), ".")
-                        + right);
-            }
-        }
+    private void logUpdates(Map<Dependency, ArtifactVersions> versionMap, String section) {
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
+        DependencyUpdatesResult updates = getDependencyUpdates(versionMap, unchangedSegment);
 
         if (isVerbose()) {
-            if (usingCurrent.isEmpty()) {
-                if (!withUpdates.isEmpty()) {
+            if (updates.getUsingLatest().isEmpty()) {
+                if (!updates.getWithUpdates().isEmpty()) {
                     logLine(false, "No dependencies in " + section + " are using the newest version.");
                     logLine(false, "");
                 }
             } else {
                 logLine(false, "The following dependencies in " + section + " are using the newest version:");
-                for (String s : usingCurrent) {
-                    logLine(false, s);
-                }
+                updates.getUsingLatest().forEach(s -> logLine(false, s));
                 logLine(false, "");
             }
         }
 
-        if (withUpdates.isEmpty()) {
-            if (!usingCurrent.isEmpty()) {
+        if (updates.getWithUpdates().isEmpty()) {
+            if (!updates.getUsingLatest().isEmpty()) {
                 logLine(false, "No dependencies in " + section + " have newer versions.");
                 logLine(false, "");
             }
         } else {
             logLine(false, "The following dependencies in " + section + " have newer versions:");
-            for (String withUpdate : withUpdates) {
-                logLine(false, withUpdate);
-            }
+            updates.getWithUpdates().forEach(s -> logLine(false, s));
             logLine(false, "");
         }
     }
