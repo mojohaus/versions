@@ -50,6 +50,8 @@ import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptySet;
 import static org.codehaus.mojo.versions.filtering.DependencyFilter.filterDependencies;
+import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.ARTIFACT_ID;
+import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.VERSION;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromDependencyManagement;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDependenciesFromPluginsInPluginManagement;
@@ -73,7 +75,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 1.2
      */
     @Parameter(property = "processDependencyManagement", defaultValue = "true")
-    private boolean processDependencyManagement;
+    protected boolean processDependencyManagement = true;
 
     /**
      * Whether to process the dependencyManagement part transitive or not.
@@ -86,13 +88,23 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.11
      */
     @Parameter(property = "processDependencyManagementTransitive", defaultValue = "true")
-    private boolean processDependencyManagementTransitive;
+    protected boolean processDependencyManagementTransitive = true;
+
+    /**
+     * <p>Include dependencies with version set in a parent or in a BOM.</p>
+     * <p>This is similar to {@code processDependencyManagementTransitive}, but will
+     * report updates on dependencies.</p>
+     * <p>Default is {@code false}.</p>
+     *
+     * @since 2.18.1
+     */
+    @Parameter(property = "showVersionless", defaultValue = "true")
+    protected boolean showVersionless = true;
 
     /**
      * Only take these artifacts into consideration.
      * <p>
      * Comma-separated list of extended GAV patterns.
-     *
      * <p>
      * Extended GAV: groupId:artifactId:version:type:classifier:scope
      * </p>
@@ -100,7 +112,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
-     *
      * <p>
      * Example: {@code "mygroup:artifact:*,*:*:*:*:*:compile"}
      * </p>
@@ -114,7 +125,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * Exclude these artifacts from consideration.
      * <p>
      * Comma-separated list of extended GAV patterns.
-     *
      * <p>
      * Extended GAV: groupId:artifactId:version:type:classifier:scope
      * </p>
@@ -122,7 +132,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
-     *
      * <p>
      * Example: {@code "mygroup:artifact:*,*:*:*:*:*:provided,*:*:*:*:*:system"}
      * </p>
@@ -138,7 +147,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 1.2
      */
     @Parameter(property = "processDependencies", defaultValue = "true")
-    private boolean processDependencies;
+    protected boolean processDependencies;
 
     /**
      * <p>Only take the specified <u>input</u> dependencies into account.</p>
@@ -146,7 +155,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * To filter <u>output</u> versions, please use {@link #ruleSet} or {@link #ignoredVersions}.</p>
      * <p>
      * Comma-separated list of extended GAV patterns.
-     *
      * <p>
      * Extended GAV: groupId:artifactId:version:type:classifier:scope
      * </p>
@@ -154,7 +162,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
-     *
      * <p>
      * Example: {@code "mygroup:artifact:*,*:*:*:*:*:compile"}
      * </p>
@@ -162,7 +169,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.12.0
      */
     @Parameter(property = "dependencyIncludes", defaultValue = WildcardMatcher.WILDCARD)
-    private List<String> dependencyIncludes;
+    protected List<String> dependencyIncludes;
 
     /**
      * <p>Do not take the specified <u>input</u> dependencies into account.</p>
@@ -170,7 +177,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * To filter <u>output</u> versions, please use {@link #ruleSet} or {@link #ignoredVersions}.</p>
      * <p>
      * Comma-separated list of extended GAV patterns.
-     *
      * <p>
      * Extended GAV: groupId:artifactId:version:type:classifier:scope
      * </p>
@@ -178,7 +184,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * The wildca<u>Note:</u>rd "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
-     *
      * <p>
      * Example: {@code "mygroup:artifact:*,*:*:*:*:*:provided,*:*:*:*:*:system"}
      * </p>
@@ -186,7 +191,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.12.0
      */
     @Parameter(property = "dependencyExcludes")
-    private List<String> dependencyExcludes;
+    protected List<String> dependencyExcludes;
 
     /**
      * Whether to process the dependencies sections of plugins.
@@ -210,17 +215,16 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.5
      */
     @Parameter(property = "allowMajorUpdates", defaultValue = "true")
-    private boolean allowMajorUpdates = true;
+    protected boolean allowMajorUpdates = true;
 
     /**
      * <p>Whether to allow the minor version number to be changed.</p>
-     *
      * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates} to be {@code false}</b></p>
      *
      * @since 2.5
      */
     @Parameter(property = "allowMinorUpdates", defaultValue = "true")
-    private boolean allowMinorUpdates = true;
+    protected boolean allowMinorUpdates = true;
 
     /**
      * <p>Whether to allow the incremental version number to be changed.</p>
@@ -231,25 +235,25 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.5
      */
     @Parameter(property = "allowIncrementalUpdates", defaultValue = "true")
-    private boolean allowIncrementalUpdates = true;
+    protected boolean allowIncrementalUpdates = true;
 
     /**
-     * Whether to show additional information such as dependencies that do not need updating. Defaults to false.
+     * <p>If {@code true}, shows dependencies that do not have updates. Also, with dependencies with
+     * versions managed outside the reactor, will show the location of the pom.xml managing the version.</p>
+     * <p>Default is {@code false}.</p>
      *
      * @since 2.1
      */
     @Parameter(property = "verbose", defaultValue = "false")
-    private boolean verbose;
+    protected boolean verbose;
 
     /**
      * <p>Only take these artifacts into consideration:<br/>
      * Comma-separated list of {@code groupId:[artifactId[:version]]} patterns</p>
-     *
      * <p>
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
-     *
      * <p>
      * Example: {@code "mygroup:artifact:*,othergroup:*,anothergroup"}
      * </p>
@@ -262,12 +266,10 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * <p>Exclude these artifacts into consideration:<br/>
      * Comma-separated list of {@code groupId:[artifactId[:version]]} patterns</p>
-     *
      * <p>
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
-     *
      * <p>
      * Example: {@code "mygroup:artifact:*,othergroup:*,anothergroup"}
      * </p>
@@ -284,7 +286,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
-     *
      * <p>
      * Example: {@code "mygroup:artifact:*,othergroup:*,anothergroup"}
      * </p>
@@ -297,12 +298,10 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * <p>Exclude these artifacts into consideration:<br/>
      * Comma-separated list of {@code groupId:[artifactId[:version]]} patterns</p>
-     *
      * <p>
      * The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.
      * </p>
-     *
      * <p>
      * Example: {@code "mygroup:artifact:*,othergroup:*,anothergroup"}
      * </p>
@@ -373,6 +372,14 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     // --------------------- Interface Mojo ---------------------
 
     /**
+     * @return {@code true} if the version of the dependency is definned locally in the same project
+     */
+    private static boolean dependencyVersionLocalToReactor(Dependency dependency) {
+        return dependency.getLocation(VERSION.toString()).getSource()
+                == dependency.getLocation(ARTIFACT_ID.toString()).getSource();
+    }
+
+    /**
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
      * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()
@@ -413,6 +420,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                                                                 .filter(dep -> finalDependencyManagement.stream()
                                                                         .noneMatch(depMan ->
                                                                                 dependenciesMatch(dep, depMan)))
+                                                                .filter(dep -> showVersionless
+                                                                        || dependencyVersionLocalToReactor(dep))
                                                                 .collect(
                                                                         () -> new TreeSet<>(
                                                                                 DependencyComparator.INSTANCE),
@@ -480,6 +489,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * Validates a list of GAV strings
+     *
      * @param gavList      list of the input GAV strings
      * @param numSections  number of sections in the GAV to verify against
      * @param argumentName argument name to indicate in the exception
@@ -496,7 +506,12 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
         Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
                 allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
         DependencyUpdatesResult updates = DependencyUpdatesLoggingHelper.getDependencyUpdates(
-                versionMap, allowSnapshots, unchangedSegment, INFO_PAD_SIZE + getOutputLineWidthOffset());
+                getProject(),
+                versionMap,
+                allowSnapshots,
+                unchangedSegment,
+                INFO_PAD_SIZE + getOutputLineWidthOffset(),
+                verbose);
 
         if (isVerbose()) {
             if (updates.getUsingLatest().isEmpty()) {

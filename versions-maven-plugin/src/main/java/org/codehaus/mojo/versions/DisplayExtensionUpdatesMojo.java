@@ -202,7 +202,12 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                 allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
         DependencyUpdatesLoggingHelper.DependencyUpdatesResult updates =
                 DependencyUpdatesLoggingHelper.getDependencyUpdates(
-                        versionMap, allowSnapshots, unchangedSegment, INFO_PAD_SIZE + getOutputLineWidthOffset());
+                        getProject(),
+                        versionMap,
+                        allowSnapshots,
+                        unchangedSegment,
+                        INFO_PAD_SIZE + getOutputLineWidthOffset(),
+                        verbose);
 
         if (verbose) {
             if (updates.getUsingLatest().isEmpty()) {

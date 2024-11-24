@@ -15,26 +15,42 @@ package org.codehaus.mojo.versions.utils;
  *  limitations under the License.
  */
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.maven.model.Dependency;
-
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
+import org.apache.maven.model.InputLocation;
 
 /**
  * Builder class for {@linkplain Dependency}
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class DependencyBuilder {
-    private Optional<String> groupId = empty();
-    private Optional<String> artifactId = empty();
-    private Optional<String> version = empty();
-    private Optional<String> type = empty();
-    private Optional<String> classifier = empty();
-    private Optional<String> scope = empty();
-    private Optional<String> optional = empty();
+    public enum Location {
+        GROUP_ID("groupId"),
+        ARTIFACT_ID("artifactId"),
+        VERSION("version");
+
+        private final String stringValue;
+
+        Location(String stringValue) {
+            this.stringValue = stringValue;
+        }
+
+        @Override
+        public String toString() {
+            return stringValue;
+        }
+    }
+
+    private static final Dependency TEMPLATE = new Dependency();
+    private String groupId = TEMPLATE.getGroupId();
+    private String artifactId = TEMPLATE.getArtifactId();
+    private String version = TEMPLATE.getVersion();
+    private String type = TEMPLATE.getType();
+    private String classifier = TEMPLATE.getClassifier();
+    private String scope = TEMPLATE.getScope();
+    private String optional = TEMPLATE.getOptional();
+    private final Map<String, InputLocation> inputLocationMap = new HashMap<>();
 
     private DependencyBuilder() {}
 
@@ -44,7 +60,7 @@ public class DependencyBuilder {
      * @return builder instance
      */
     public DependencyBuilder withGroupId(String groupId) {
-        this.groupId = ofNullable(groupId);
+        this.groupId = groupId;
         return this;
     }
 
@@ -54,7 +70,7 @@ public class DependencyBuilder {
      * @return builder instance
      */
     public DependencyBuilder withArtifactId(String artifactId) {
-        this.artifactId = ofNullable(artifactId);
+        this.artifactId = artifactId;
         return this;
     }
 
@@ -64,7 +80,7 @@ public class DependencyBuilder {
      * @return builder instance
      */
     public DependencyBuilder withVersion(String version) {
-        this.version = ofNullable(version);
+        this.version = version;
         return this;
     }
 
@@ -74,7 +90,7 @@ public class DependencyBuilder {
      * @return builder instance
      */
     public DependencyBuilder withType(String type) {
-        this.type = ofNullable(type);
+        this.type = type;
         return this;
     }
 
@@ -84,7 +100,7 @@ public class DependencyBuilder {
      * @return builder instance
      */
     public DependencyBuilder withClassifier(String classifier) {
-        this.classifier = ofNullable(classifier);
+        this.classifier = classifier;
         return this;
     }
 
@@ -94,7 +110,7 @@ public class DependencyBuilder {
      * @return builder instance
      */
     public DependencyBuilder withScope(String scope) {
-        this.scope = ofNullable(scope);
+        this.scope = scope;
         return this;
     }
 
@@ -104,7 +120,7 @@ public class DependencyBuilder {
      * @return builder instance
      */
     public DependencyBuilder withOptional(String optional) {
-        this.optional = ofNullable(optional);
+        this.optional = optional;
         return this;
     }
 
@@ -114,7 +130,12 @@ public class DependencyBuilder {
      * @return builder instance
      */
     public DependencyBuilder withOptional(boolean optional) {
-        this.optional = of(String.valueOf(optional));
+        this.optional = String.valueOf(optional);
+        return this;
+    }
+
+    public DependencyBuilder withLocation(String element, InputLocation location) {
+        this.inputLocationMap.put(element, location);
         return this;
     }
 
@@ -132,14 +153,14 @@ public class DependencyBuilder {
      */
     public Dependency build() {
         Dependency inst = new Dependency();
-        groupId.ifPresent(inst::setGroupId);
-        artifactId.ifPresent(inst::setArtifactId);
-        version.ifPresent(inst::setVersion);
-        type.ifPresent(inst::setType);
-        classifier.ifPresent(inst::setClassifier);
-        scope.ifPresent(inst::setScope);
-        optional.ifPresent(inst::setOptional);
-
+        inst.setGroupId(groupId);
+        inst.setArtifactId(artifactId);
+        inst.setVersion(version);
+        inst.setType(type);
+        inst.setClassifier(classifier);
+        inst.setScope(scope);
+        inst.setOptional(optional);
+        inputLocationMap.forEach(inst::setLocation);
         return inst;
     }
 }
