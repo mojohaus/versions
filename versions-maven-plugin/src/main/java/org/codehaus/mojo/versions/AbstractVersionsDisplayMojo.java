@@ -47,6 +47,13 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
     private static final int DEFAULT_OUTPUT_LINE_WIDTH = 80;
 
     /**
+     * The width to pad info messages.
+     *
+     * @since 1.0-alpha-1
+     */
+    static final int INFO_PAD_SIZE = 72;
+
+    /**
      * If specified then the display output will be sent to the specified file.
      *
      * @since 2.2

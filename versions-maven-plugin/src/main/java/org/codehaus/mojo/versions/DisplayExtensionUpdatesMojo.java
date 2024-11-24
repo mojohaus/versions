@@ -20,47 +20,33 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Extension;
-import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
+import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
-import org.codehaus.mojo.versions.utils.CoreExtensionUtils;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.codehaus.mojo.versions.utils.ExtensionBuilder;
-import org.codehaus.mojo.versions.utils.ModelNode;
+import org.codehaus.mojo.versions.utils.ExtensionUtils;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
-
-import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 
 /**
  * Displays all build and core extensions that have newer versions available.
@@ -74,19 +60,10 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     // ------------------------------ FIELDS ------------------------------
 
     /**
-     * The width to pad info messages.
-     *
-     * @since 1.0-alpha-1
-     */
-    private static final int INFO_PAD_SIZE = 72;
-
-    /**
      * <p>Specifies a comma-separated list of GAV patterns to consider
      * when looking for updates. If the trailing parts of the GAV are omitted, then can assume any value.</p>
-     *
      * <p>The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.</p>
-     *
      * Examples: {@code "mygroup:artifact:*"}, {@code "mygroup:artifact"}, {@code "mygroup"}
      *
      * @since 2.15.0
@@ -97,12 +74,9 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * <p>Specifies a comma-separated list of GAV patterns to <b>NOT</b> consider
      * when looking for updates. If the trailing parts of the GAV are omitted, then can assume any value.</p>
-     *
      * <p>This list is taken into account <u>after</u> {@link #extensionIncludes}</p>.
-     *
      * <p>The wildcard "*" can be used as the only, first, last or both characters in each token.
      * The version token does support version ranges.</p>
-     *
      * Examples: {@code "mygroup:artifact:*"}, {@code "mygroup:artifact"}, {@code "mygroup"}
      *
      * @since 2.15.0
@@ -120,7 +94,6 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * <p>Whether to allow the minor version number to be changed.</p>
-     *
      * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
      * to be {@code false}</b></p>
      *
@@ -131,7 +104,6 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * <p>Whether to allow the incremental version number to be changed.</p>
-     *
      * <p><b>Note: {@code false} also implies {@linkplain #allowMajorUpdates}
      * and {@linkplain #allowMinorUpdates} to be {@code false}</b></p>
      *
@@ -142,6 +114,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * <p>Whether to process core extensions. Default is {@code true}.</p>
+     *
      * @since 2.15.0
      */
     @Parameter(property = "processCoreExtensions", defaultValue = "true")
@@ -149,6 +122,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     /**
      * <p>Whether to process build extensions. Default is {@code true}.</p>
+     *
      * @since 2.15.0
      */
     @Parameter(property = "processBuildExtensions", defaultValue = "true")
@@ -193,56 +167,14 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
         DependencyFilter includeFilter = DependencyFilter.parseFrom(extensionIncludes);
         DependencyFilter excludeFilter = DependencyFilter.parseFrom(extensionExcludes);
 
-        Set<Dependency> dependencies;
         try {
-            Stream<Extension> extensions;
-            if (processCoreExtensions) {
-                extensions = CoreExtensionUtils.getCoreExtensions(project);
-            } else {
-                extensions = Stream.empty();
-            }
-            if (processBuildExtensions) {
-                if (!interpolateProperties) {
-                    extensions = Stream.concat(
-                            extensions,
-                            PomHelper.getChildModels(session.getCurrentProject(), getLog()).values().stream()
-                                    .map(Model::getBuild)
-                                    .filter(Objects::nonNull)
-                                    .map(Build::getExtensions)
-                                    .map(List::stream)
-                                    .reduce(Stream::concat)
-                                    .orElse(Stream.empty()));
-                } else {
-                    List<ModelNode> rawModels = getRawModels();
-                    for (ModelNode node : rawModels) {
-                        if (node.getModel() == null) {
-                            // unlikely
-                            continue;
-                        }
-                        Map<String, String> properties = new HashMap<>();
-                        for (ModelNode p = node; p != null; p = p.getParent().orElse(null)) {
-                            p.getModel()
-                                    .getProperties()
-                                    .forEach((key, value) ->
-                                            properties.putIfAbsent(String.valueOf(key), String.valueOf(value)));
-                        }
-                        extensions = Stream.concat(
-                                extensions,
-                                Optional.ofNullable(node.getModel().getBuild())
-                                        .map(Build::getExtensions)
-                                        .orElse(Collections.emptyList())
-                                        .stream()
-                                        .map(e -> ExtensionBuilder.newBuilder()
-                                                .withGroupId(PomHelper.evaluate(e.getGroupId(), properties, getLog()))
-                                                .withArtifactId(
-                                                        PomHelper.evaluate(e.getArtifactId(), properties, getLog()))
-                                                .withVersion(PomHelper.evaluate(e.getVersion(), properties, getLog()))
-                                                .build()));
-                    }
-                }
-            }
+            Stream<Extension> coreExtensions =
+                    processCoreExtensions ? ExtensionUtils.getCoreExtensions(project) : Stream.empty();
+            Stream<Extension> buildExtensions = processBuildExtensions
+                    ? ExtensionUtils.getBuildExtensions(getProject(), getLog(), interpolateProperties)
+                    : Stream.empty();
 
-            dependencies = extensions
+            Collection<Dependency> dependencies = Stream.concat(coreExtensions, buildExtensions)
                     .map(e -> DependencyBuilder.newBuilder()
                             .withGroupId(e.getGroupId())
                             .withArtifactId(e.getArtifactId())
@@ -251,102 +183,48 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                     .filter(includeFilter::matchersMatch)
                     .filter(excludeFilter::matchersDontMatch)
                     .collect(Collectors.toSet());
-        } catch (IOException | XMLStreamException e) {
-            throw new MojoExecutionException(e.getMessage());
-        }
-        if (dependencies.isEmpty()) {
-            getLog().info("Extensions set filtered by include- and exclude-filters is empty. Nothing to do.");
-            return;
-        }
 
-        try {
+            if (dependencies.isEmpty()) {
+                getLog().info("Extensions set filtered by include- and exclude-filters is empty. Nothing to do.");
+                return;
+            }
+
             logUpdates(getHelper().lookupDependenciesUpdates(dependencies.stream(), true, true, allowSnapshots));
+        } catch (IOException | XMLStreamException | TransformerException e) {
+            throw new MojoExecutionException(e.getMessage());
         } catch (VersionRetrievalException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private List<ModelNode> getRawModels() throws MojoFailureException {
-        List<ModelNode> rawModels;
-        try {
-            MutableXMLStreamReader pomReader =
-                    new MutableXMLStreamReader(getProject().getFile().toPath());
-            ModelNode rootNode = new ModelNode(
-                    PomHelper.getRawModel(pomReader.getSource(), getProject().getFile()), pomReader);
-            rawModels = PomHelper.getRawModelTree(rootNode, getLog());
-        } catch (IOException | XMLStreamException | TransformerException e) {
-            throw new MojoFailureException(e.getMessage(), e);
-        }
-        return rawModels;
-    }
-
-    private Optional<Segment> calculateUpdateScope() {
-        return of(SegmentUtils.determineUnchangedSegment(
-                        allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog())
-                .map(Segment::minorTo)
-                .orElse(MAJOR));
-    }
-
-    private void logUpdates(Map<Dependency, ArtifactVersions> updates) {
-        List<String> withUpdates = new ArrayList<>();
-        List<String> usingCurrent = new ArrayList<>();
-        for (ArtifactVersions versions : updates.values()) {
-            String left = "  " + ArtifactUtils.versionlessKey(versions.getArtifact()) + " ";
-            final String current;
-            ArtifactVersion latest;
-            if (versions.getCurrentVersion() != null) {
-                current = versions.getCurrentVersion().toString();
-                latest = versions.getNewestUpdateWithinSegment(calculateUpdateScope(), allowSnapshots);
-            } else {
-                ArtifactVersion newestVersion =
-                        versions.getNewestVersion(versions.getArtifact().getVersionRange(), allowSnapshots);
-                current = versions.getArtifact().getVersionRange().toString();
-                latest = newestVersion == null
-                        ? null
-                        : versions.getNewestUpdateWithinSegment(newestVersion, calculateUpdateScope(), allowSnapshots);
-                if (latest != null
-                        && ArtifactVersions.isVersionInRange(
-                                latest, versions.getArtifact().getVersionRange())) {
-                    latest = null;
-                }
-            }
-            String right = " " + (latest == null ? current : current + " -> " + latest);
-            List<String> t = latest == null ? usingCurrent : withUpdates;
-            if (right.length() + left.length() + 3 > INFO_PAD_SIZE + getOutputLineWidthOffset()) {
-                t.add(left + "...");
-                t.add(StringUtils.leftPad(right, INFO_PAD_SIZE + getOutputLineWidthOffset()));
-
-            } else {
-                t.add(StringUtils.rightPad(left, INFO_PAD_SIZE + getOutputLineWidthOffset() - right.length(), ".")
-                        + right);
-            }
-        }
+    private void logUpdates(Map<Dependency, ArtifactVersions> versionMap) {
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
+        DependencyUpdatesLoggingHelper.DependencyUpdatesResult updates =
+                DependencyUpdatesLoggingHelper.getDependencyUpdates(
+                        versionMap, allowSnapshots, unchangedSegment, INFO_PAD_SIZE + getOutputLineWidthOffset());
 
         if (verbose) {
-            if (usingCurrent.isEmpty()) {
-                if (!withUpdates.isEmpty()) {
+            if (updates.getUsingLatest().isEmpty()) {
+                if (!updates.getWithUpdates().isEmpty()) {
                     logLine(false, "No extensions are using the newest version.");
                     logLine(false, "");
                 }
             } else {
                 logLine(false, "The following extensions are using the newest version:");
-                for (String s : usingCurrent) {
-                    logLine(false, s);
-                }
+                updates.getUsingLatest().forEach(s -> logLine(false, s));
                 logLine(false, "");
             }
         }
 
-        if (withUpdates.isEmpty()) {
-            if (!usingCurrent.isEmpty()) {
+        if (updates.getWithUpdates().isEmpty()) {
+            if (!updates.getUsingLatest().isEmpty()) {
                 logLine(false, "No extensions have newer versions.");
                 logLine(false, "");
             }
         } else {
             logLine(false, "The following extensions have newer versions:");
-            for (String withUpdate : withUpdates) {
-                logLine(false, withUpdate);
-            }
+            updates.getWithUpdates().forEach(s -> logLine(false, s));
             logLine(false, "");
         }
     }

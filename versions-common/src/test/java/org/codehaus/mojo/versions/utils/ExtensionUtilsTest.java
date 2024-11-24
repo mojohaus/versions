@@ -35,11 +35,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link CoreExtensionUtils}
+ * Unit tests for {@link ExtensionUtils}
  *
  * @author Andrzej Jarmoniuk
  */
-class CoreExtensionUtilsTest {
+class ExtensionUtilsTest {
 
     @Test
     void testNoExtensions() throws IOException, XMLStreamException {
@@ -49,7 +49,7 @@ class CoreExtensionUtilsTest {
                         new File("src/test/resources/org/codehaus/mojo/versions/utils/core-extensions/no-extensions"));
         MavenSession session = mock(MavenSession.class);
         when(session.getCurrentProject()).thenReturn(project);
-        assertThat(CoreExtensionUtils.getCoreExtensions(project).findAny(), is(Optional.empty()));
+        assertThat(ExtensionUtils.getCoreExtensions(project).findAny(), is(Optional.empty()));
     }
 
     @Test
@@ -59,8 +59,7 @@ class CoreExtensionUtilsTest {
                 .thenReturn(new File("src/test/resources/org/codehaus/mojo/versions/utils/core-extensions"));
         MavenSession session = mock(MavenSession.class);
         when(session.getCurrentProject()).thenReturn(project);
-        Set<Extension> extensions =
-                CoreExtensionUtils.getCoreExtensions(project).collect(Collectors.toSet());
+        Set<Extension> extensions = ExtensionUtils.getCoreExtensions(project).collect(Collectors.toSet());
         assertThat(
                 extensions,
                 hasItems(

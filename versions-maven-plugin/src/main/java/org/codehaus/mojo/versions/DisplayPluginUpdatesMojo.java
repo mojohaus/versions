@@ -24,9 +24,11 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -38,11 +40,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -55,6 +59,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.model.BuildBase;
+import org.apache.maven.model.Extension;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
@@ -85,6 +90,7 @@ import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.ExtensionUtils;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.eclipse.aether.RepositorySystem;
 
@@ -127,6 +133,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     public static final Pattern PATTERN_PROJECT_PLUGIN = Pattern.compile(
             "/project(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin");
+
     public static final String SUPERPOM_PATH = "org/apache/maven/model/pom-4.0.0.xml";
 
     /**
@@ -330,12 +337,17 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         Map<String, String> parentBuildPlugins = new HashMap<>();
         Map<String, String> parentReportPlugins = new HashMap<>();
 
-        Set<Plugin> plugins = getPluginManagementPlugins(
-                superPomPluginManagement,
-                parentPlugins,
-                parentBuildPlugins,
-                parentReportPlugins,
-                pluginsWithVersionsSpecified);
+        Set<Plugin> plugins;
+        try {
+            plugins = getPluginManagementPlugins(
+                    superPomPluginManagement,
+                    parentPlugins,
+                    parentBuildPlugins,
+                    parentReportPlugins,
+                    pluginsWithVersionsSpecified);
+        } catch (XMLStreamException | TransformerException | IOException e) {
+            throw new MojoFailureException(e.getMessage(), e);
+        }
 
         List<String> pluginUpdates = new ArrayList<>();
         List<String> pluginLockdowns = new ArrayList<>();
@@ -742,7 +754,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Returns a set of Strings which correspond to the plugin coordinates where there is a version specified.
      *
-     * @param pom a {@link MutableXMLStreamReader} instance for the pom project to get the plugins with versions specified.
+     * @param pom a {@link MutableXMLStreamReader} instance for the pom project to get the plugins with versions
+     *            specified.
      * @return a set of Strings which correspond to the plugin coordinates where there is a version specified.
      */
     private Set<String> findPluginsWithVersionsSpecified(MutableXMLStreamReader pom)
@@ -799,7 +812,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      *
      * @param pluginProject the plugin for which to retrieve the minimum Maven version which is required
      * @return The minimally required Maven version (never {@code null})
-     * @see <a href="https://github.com/apache/maven-plugin-tools/blob/c8ddcdcb10d342a5a5e2f38245bb569af5730c7c/maven-plugin-plugin/src/main/java/org/apache/maven/plugin/plugin/PluginReport.java#L711">PluginReport</a>
+     * @see <a
+     *         href="https://github.com/apache/maven-plugin-tools/blob/c8ddcdcb10d342a5a5e2f38245bb569af5730c7c/maven-plugin-plugin/src/main/java/org/apache/maven/plugin/plugin/PluginReport.java#L711">PluginReport</a>
      */
     private ArtifactVersion getPrerequisitesMavenVersion(MavenProject pluginProject) {
         return ofNullable(pluginProject.getPrerequisites())
@@ -911,19 +925,36 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             Map<String, String> parentPluginManagement,
             Map<String, String> parentBuildPlugins,
             Map<String, String> parentReportPlugins,
-            Set<String> pluginsWithVersionsSpecified) {
+            Set<String> pluginsWithVersionsSpecified)
+            throws XMLStreamException, IOException, TransformerException {
+
         getLog().debug("Building list of project plugins...");
 
         if (getLog().isDebugEnabled()) {
-            StringWriter origModel = new StringWriter();
-            try {
-                origModel.write("Original model:\n");
-                getProject().writeOriginalModel(origModel);
-                getLog().debug(origModel.toString());
+            try (OutputStream outputStream = new ByteArrayOutputStream()) {
+                new MavenXpp3Writer().write(outputStream, getProject().getOriginalModel());
+                getLog().debug("Original model:\n" + outputStream);
             } catch (IOException e) {
-                // ignore
+                getLog().debug(e);
             }
         }
+
+        Set<Extension> extensions = Stream.concat(
+                        ExtensionUtils.getCoreExtensions(getProject()),
+                        ExtensionUtils.getBuildExtensions(getProject(), getLog(), false))
+                .collect(Collectors.toSet());
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("Extensions:"
+                    + (extensions.isEmpty()
+                            ? "(none)"
+                            : extensions.stream()
+                                    .map(e -> "\n\t" + e.getGroupId() + ":" + e.getArtifactId()
+                                            + Optional.ofNullable(e.getVersion())
+                                                    .map(v -> ":")
+                                                    .orElse(""))
+                                    .collect(Collectors.joining("\n"))));
+        }
+
         ModelBuildingRequest modelBuildingRequest = new DefaultModelBuildingRequest();
         modelBuildingRequest.setUserProperties(getProject().getProperties());
         Model originalModel = modelInterpolator.interpolateModel(
@@ -952,7 +983,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         debugPluginMap("after adding lifecycle plugins", plugins);
 
         ofNullable(originalModel.getBuild())
-                .map(b -> getBuildPlugins(b, parentPluginManagement))
+                .map(b -> getBuildPlugins(b, parentPluginManagement, extensions))
                 .ifPresent(p -> mergePluginsMap(plugins, p, parentPluginManagement));
         debugPluginMap("after adding build plugins", plugins);
 
@@ -971,7 +1002,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             debugPluginMap("after adding profile " + profile.getId() + " pluginManagement", plugins);
 
             ofNullable(profile.getBuild())
-                    .map(b -> getBuildPlugins(b, parentPluginManagement))
+                    .map(b -> getBuildPlugins(b, parentPluginManagement, extensions))
                     .ifPresent(p -> mergePluginsMap(plugins, p, parentBuildPlugins));
             debugPluginMap("after adding profile " + profile.getId() + " build plugins", plugins);
 
@@ -1000,11 +1031,18 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 .orElse(Stream.empty());
     }
 
-    private static Stream<Plugin> getBuildPlugins(BuildBase buildBase, Map<String, String> parentPluginManagement) {
+    private static Stream<Plugin> getBuildPlugins(
+            BuildBase buildBase, Map<String, String> parentPluginManagement, Set<Extension> extensions) {
         return buildBase.getPlugins().stream()
                 // removing plugins without a version
                 // and with the parent also not defining it for them
-                .filter(plugin -> plugin.getVersion() != null || parentPluginManagement.get(plugin.getKey()) == null);
+                .filter(plugin -> plugin.getVersion() != null || parentPluginManagement.get(plugin.getKey()) == null)
+                .filter(plugin -> extensions.stream()
+                        .noneMatch(e -> Objects.equals(plugin.getGroupId(), e.getGroupId())
+                                && Objects.equals(plugin.getArtifactId(), e.getArtifactId())
+                                && ofNullable(e.getVersion())
+                                        .map(v -> v.equals(plugin.getVersion()))
+                                        .orElseGet(() -> Objects.isNull(plugin.getVersion()))));
     }
 
     private Stream<Plugin> getLifecyclePlugins(Map<String, String> parentPluginManagement) {
