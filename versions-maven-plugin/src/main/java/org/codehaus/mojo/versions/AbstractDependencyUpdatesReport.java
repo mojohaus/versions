@@ -33,7 +33,6 @@ import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
@@ -43,13 +42,12 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.MavenProjectUtils;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptyMap;
-import static java.util.Optional.ofNullable;
-import static org.codehaus.mojo.versions.utils.MavenProjectUtils.interpolateVersion;
 import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 
 /**
@@ -191,31 +189,11 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
 
     protected void handleDependencyManagementTransitive(
             MavenProject project, Set<Dependency> dependencyManagementCollector) {
-        if (processDependencyManagementTransitive) {
-            if (hasDependencyManagement(project)) {
-                if (getLog().isDebugEnabled()) {
-                    project.getDependencyManagement().getDependencies().forEach(dep -> getLog().debug(
-                                    "Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersion()
-                                            + ":" + dep.getType() + ":" + dep.getScope()));
-                }
-                dependencyManagementCollector.addAll(
-                        project.getDependencyManagement().getDependencies());
-            }
-        } else {
-            // Using the original model to getModel the original dependencyManagement entries and
-            // not the interpolated model.
-            // TODO: I'm not 100% sure if this will work correctly in all cases.
-            ofNullable(project.getOriginalModel().getDependencyManagement())
-                    .map(DependencyManagement::getDependencies)
-                    .ifPresent(list -> list.stream()
-                            .map(dep -> interpolateVersion(dep, project))
-                            .peek(dep -> {
-                                if (getLog().isDebugEnabled()) {
-                                    getLog().debug("Original Dpmg: " + dep.getGroupId() + ":" + dep.getArtifactId()
-                                            + ":" + dep.getVersion() + ":" + dep.getType() + ":" + dep.getScope());
-                                }
-                            })
-                            .forEach(dependencyManagementCollector::add));
+        try {
+            dependencyManagementCollector.addAll(MavenProjectUtils.extractDependenciesFromDependencyManagement(
+                    project, processDependencyManagementTransitive, getLog()));
+        } catch (VersionRetrievalException e) {
+            throw new RuntimeException(e);
         }
     }
 
