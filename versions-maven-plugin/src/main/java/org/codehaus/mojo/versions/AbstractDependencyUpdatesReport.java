@@ -43,6 +43,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.MavenProjectUtils;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
@@ -79,6 +80,16 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
      */
     @Parameter(property = "processDependencyManagementTransitive", defaultValue = "true")
     protected boolean processDependencyManagementTransitive;
+
+    /**
+     * <p>Include dependencies with version set in a parent or in a BOM.</p>
+     * <p>This is similar to {@code processDependencyManagementTransitive}, but will
+     * report updates on dependencies.</p>
+     *
+     * @since 2.19.0
+     */
+    @Parameter(property = "showVersionless", defaultValue = "true")
+    protected boolean showVersionless = true;
 
     /**
      * Report formats (html and/or xml). HTML by default.
@@ -142,17 +153,21 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
         Set<Dependency> dependencyManagement;
 
         if (processDependencyManagement) {
-            dependencyManagement = getDependencyManagement(dependencies);
+            dependencyManagement = getDependencyManagement();
             handleOnlyProjectDependencies(dependencyManagement, dependencies);
         } else {
             dependencyManagement = Collections.emptySet();
         }
 
         try {
-
             Map<Dependency, ArtifactVersions> dependencyUpdates = getHelper()
                     .lookupDependenciesUpdates(
-                            dependencies.stream().filter(d -> d.getVersion() != null), false, allowSnapshots);
+                            dependencies.stream()
+                                    .filter(d -> d.getVersion() != null)
+                                    .filter(d ->
+                                            showVersionless || MavenProjectUtils.dependencyVersionLocalToReactor(d)),
+                            false,
+                            allowSnapshots);
 
             Map<Dependency, ArtifactVersions> dependencyManagementUpdates = processDependencyManagement
                     ? getHelper()
@@ -245,7 +260,7 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
 
     /**
      * Implementations of {@link AbstractDependencyUpdatesReport} may use this to supply the main processing logic
-     * (see {@link #getDependencyManagement(Set)}) with desired dependency data, which will be used
+     * (see {@link #getDependencyManagement()}) with desired dependency data, which will be used
      * in the creation of the report.
      *
      * @param dependenciesCollector, a Set, initialized with a DependencyComparator
@@ -259,27 +274,26 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
      * in projects dependencyManagement section.
      *
      * @return a {@link Set<Dependency>} that can be additionally populated by
-     * {@link #populateDependencyManagement(Set, Set)}. If not, an empty set is returned
+     * {@link #populateDependencyManagement(Set)}. If not, an empty set is returned
      * */
-    private Set<Dependency> getDependencyManagement(Set<Dependency> dependencies) throws MavenReportException {
+    private Set<Dependency> getDependencyManagement() throws MavenReportException {
         final Set<Dependency> dependencyManagementCollector = new TreeSet<>(DEPENDENCY_COMPARATOR);
-        populateDependencyManagement(dependencyManagementCollector, dependencies);
+        populateDependencyManagement(dependencyManagementCollector);
         return dependencyManagementCollector;
     }
 
     /**
      * Implementations of {@link AbstractDependencyUpdatesReport} may use this to supply the main processing logic
-     * (see {@link #getDependencyManagement(Set)}) with desired managed dependencies data, which will be used
+     * (see {@link #getDependencyManagement()}) with desired managed dependencies data, which will be used
      * in the creation of the report.
      *
      * @param dependencyManagementCollector, a Set initialized with a DependencyComparator
-     * @param dependencies an already populated set of dependencies(non-managed)
      * comparator.
      *
      * @throws MavenReportException when things go wrong.
      * */
-    protected abstract void populateDependencyManagement(
-            Set<Dependency> dependencyManagementCollector, Set<Dependency> dependencies) throws MavenReportException;
+    protected abstract void populateDependencyManagement(Set<Dependency> dependencyManagementCollector)
+            throws MavenReportException;
 
     private void renderReport(Locale locale, Sink sink, DependencyUpdatesModel model) throws MavenReportException {
         for (String format : formats) {

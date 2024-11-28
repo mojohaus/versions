@@ -45,13 +45,12 @@ import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper;
 import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper.DependencyUpdatesResult;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.MavenProjectUtils;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptySet;
 import static org.codehaus.mojo.versions.filtering.DependencyFilter.filterDependencies;
-import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.ARTIFACT_ID;
-import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.VERSION;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromDependencyManagement;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDependenciesFromPluginsInPluginManagement;
@@ -96,7 +95,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * report updates on dependencies.</p>
      * <p>Default is {@code false}.</p>
      *
-     * @since 2.18.1
+     * @since 2.19.0
      */
     @Parameter(property = "showVersionless", defaultValue = "true")
     protected boolean showVersionless = true;
@@ -372,14 +371,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     // --------------------- Interface Mojo ---------------------
 
     /**
-     * @return {@code true} if the version of the dependency is definned locally in the same project
-     */
-    private static boolean dependencyVersionLocalToReactor(Dependency dependency) {
-        return dependency.getLocation(VERSION.toString()).getSource()
-                == dependency.getLocation(ARTIFACT_ID.toString()).getSource();
-    }
-
-    /**
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
      * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
      * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#execute()
@@ -421,7 +412,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                                                                         .noneMatch(depMan ->
                                                                                 dependenciesMatch(dep, depMan)))
                                                                 .filter(dep -> showVersionless
-                                                                        || dependencyVersionLocalToReactor(dep))
+                                                                        || MavenProjectUtils
+                                                                                .dependencyVersionLocalToReactor(dep))
                                                                 .collect(
                                                                         () -> new TreeSet<>(
                                                                                 DependencyComparator.INSTANCE),

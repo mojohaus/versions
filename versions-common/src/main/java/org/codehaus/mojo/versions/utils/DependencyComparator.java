@@ -21,8 +21,9 @@ package org.codehaus.mojo.versions.utils;
 
 import java.util.Comparator;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Dependency;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * A comparator used to sort dependencies by group id, artifact id and finally version.
@@ -41,17 +42,15 @@ public enum DependencyComparator implements Comparator<Dependency> {
      */
     @SuppressWarnings("checkstyle:InnerAssignment")
     public int compare(Dependency d1, Dependency d2) {
-        int r;
         return d1 == d2
                 ? 0
-                : d1 == null
-                        ? 1
-                        : d2 == null
-                                ? -1
-                                : (r = StringUtils.compare(d1.getGroupId(), d2.getGroupId())) != 0
-                                        ? r
-                                        : (r = StringUtils.compare(d1.getArtifactId(), d2.getArtifactId())) != 0
-                                                ? r
-                                                : StringUtils.compare(d1.getVersion(), d2.getVersion());
+                : Comparator.nullsLast(Comparator.comparing(Dependency::getGroupId)
+                                .thenComparing(
+                                        dep -> ofNullable(dep.getArtifactId()).orElse(""))
+                                .thenComparing(
+                                        dep -> ofNullable(dep.getClassifier()).orElse(""))
+                                .thenComparing(
+                                        dep -> ofNullable(dep.getVersion()).orElse("")))
+                        .compare(d1, d2);
     }
 }

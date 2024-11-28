@@ -33,6 +33,8 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.ARTIFACT_ID;
+import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.VERSION;
 
 /**
  * Utility methods for extracting dependencies from a {@link org.apache.maven.project.MavenProject}
@@ -155,5 +157,13 @@ public class MavenProjectUtils {
                     .orElse(dependency);
         }
         return dependency;
+    }
+
+    /**
+     * @return {@code true} if the version of the dependency is definned locally in the same project
+     */
+    public static boolean dependencyVersionLocalToReactor(Dependency dependency) {
+        return dependency.getLocation(VERSION.toString()).getSource()
+                == dependency.getLocation(ARTIFACT_ID.toString()).getSource();
     }
 }
