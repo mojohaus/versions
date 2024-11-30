@@ -8,16 +8,15 @@
     <version>1.0</version>
   </parent>
 
-  <groupId>localhost</groupId>
   <artifactId>it-plugin-updates-aggregate-report-333-child-two</artifactId>
   <version>1.0</version>
-  <packaging>jar</packaging>
-  <url>http://localhost/</url>
 
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-deploy-plugin</artifactId>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-maven-plugin</artifactId>
+        <version>3.0</version>
       </plugin>
     </plugins>
   </build>

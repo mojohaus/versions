@@ -2,60 +2,26 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>localhost</groupId>
-    <artifactId>dummy-aggregate-child</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
-  </parent>
-
   <groupId>localhost</groupId>
   <artifactId>it-property-updates-aggregate-report-333</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <url>http://localhost/</url>
 
   <properties>
     <version.dummy-lib>2.12.0.0</version.dummy-lib>
   </properties>
 
-  <build>
-      <pluginManagement>
-          <plugins>
-              <plugin>
-                  <artifactId>maven-site-plugin</artifactId>
-                  <version>@sitePluginVersion@</version>
-              </plugin>
-          </plugins>
-      </pluginManagement>
-  </build>
+  <modules>
+    <module>child-one</module>
+    <module>child-two</module>
+  </modules>
 
   <dependencies>
     <dependency>
       <groupId>test.bigversion</groupId>
       <artifactId>dummy-lib</artifactId>
+      <version>${version.dummy-lib}</version>
     </dependency>
   </dependencies>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>@project.groupId@</groupId>
-        <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
-        <inherited>false</inherited>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>property-updates-aggregate-report</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    </plugins>
-  </reporting>
-
-  <modules>
-    <module>child-one</module>
-    <module>child-two</module>
-  </modules>
 </project>
