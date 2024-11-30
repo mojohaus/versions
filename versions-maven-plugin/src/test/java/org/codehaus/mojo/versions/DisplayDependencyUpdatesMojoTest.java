@@ -56,8 +56,6 @@ import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * Basic tests for {@linkplain DisplayDependencyUpdatesMojo}.
- *
- * @author Andrzej Jarmoniuk
  */
 public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     @Rule
@@ -534,6 +532,31 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             });
             mojo.execute();
+            String output = String.join("", Files.readAllLines(tempFile.getPath()));
+            assertThat(output, containsString("1.0.0 -> 2.0.0"));
+        }
+    }
+
+    /*
+     * dependencyManagement in active profiles should be processed with processDependencyManagementTransitive false
+     */
+    @Test
+    public void testProcessDependencyManagementTransitiveWithProfiles() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
+                    new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/" + "profiles"),
+                    "display-dependency-updates");
+            mojo.setPluginContext(new HashMap<>());
+            mojo.processDependencyManagementTransitive = false;
+            mojo.outputFile = tempFile.getPath().toFile();
+            mojo.outputEncoding = Charset.defaultCharset().toString();
+            mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                {
+                    put("dummy-api", new String[] {"1.0.0", "2.0.0"});
+                }
+            });
+            mojo.execute();
+            assertThat(Files.exists(tempFile.getPath()), is(true));
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
             assertThat(output, containsString("1.0.0 -> 2.0.0"));
         }

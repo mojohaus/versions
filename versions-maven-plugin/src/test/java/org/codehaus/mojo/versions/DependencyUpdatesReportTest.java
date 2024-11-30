@@ -372,6 +372,9 @@ public class DependencyUpdatesReportTest {
         assertThat(output, Matchers.stringContainsInOrder("artifactA", "1.0.0", "artifactB", "1.2.3"));
     }
 
+    /*
+     * Possible NPE if dependencyManagement has an entry without a version (issue 1066)
+     */
     @Test
     public void testVersionlessDependency() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
