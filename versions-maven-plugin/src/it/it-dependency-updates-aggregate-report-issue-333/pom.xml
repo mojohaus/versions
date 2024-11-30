@@ -5,15 +5,17 @@
   <parent>
     <groupId>localhost</groupId>
     <artifactId>dummy-aggregate-child</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
   </parent>
 
-  <groupId>localhost</groupId>
   <artifactId>it-dependency-updates-aggregate-report-333</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <url>http://localhost/</url>
 
+  <modules>
+    <module>child-one</module>
+    <module>child-two</module>
+  </modules>
 
   <dependencyManagement>
     <dependencies>
@@ -29,40 +31,5 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>@sitePluginVersion@</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
-
-
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>@project.groupId@</groupId>
-        <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
-        <inherited>false</inherited>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>dependency-updates-aggregate-report</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    </plugins>
-  </reporting>
-
-  <modules>
-    <module>child-one</module>
-    <module>child-two</module>
-  </modules>
 
 </project>

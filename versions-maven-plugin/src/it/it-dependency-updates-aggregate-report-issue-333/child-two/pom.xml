@@ -8,10 +8,7 @@
     <version>1.0</version>
   </parent>
 
-  <groupId>localhost</groupId>
   <artifactId>it-dependency-updates-aggregate-report-333-child-two</artifactId>
   <version>1.0</version>
-  <packaging>jar</packaging>
-  <url>http://localhost/</url>
 
 </project>
