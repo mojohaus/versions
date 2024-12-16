@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
@@ -52,6 +53,7 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.singletonList;
+import static java.util.Optional.ofNullable;
 
 /**
  * Compare dependency versions of the current project to dependencies or dependency management of a remote repository
@@ -296,7 +298,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
             Dependency remoteDep = remoteDependencies.get(dep.getManagementKey());
             if (remoteDep != null) {
                 String remoteVersion = remoteDep.getVersion();
-                if (!dep.getVersion().equals(remoteVersion)) {
+                if (!Objects.equals(remoteVersion, dep.getVersion())) {
                     StringBuilder buf = writeDependencyDiffMessage(dep, remoteVersion);
                     updates.add(buf.toString());
                     if (!reportMode) {
@@ -414,7 +416,10 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
      */
     private StringBuilder writeDependencyDiffMessage(Dependency dep, String remoteVersion) {
         String id = dep.getGroupId() + ":" + dep.getArtifactId();
-        return writeDiffMessage(id, dep.getVersion(), remoteVersion);
+        return writeDiffMessage(
+                id,
+                ofNullable(dep.getVersion()).orElse("(no version)"),
+                ofNullable(remoteVersion).orElse("(no version)"));
     }
 
     private StringBuilder writeDiffMessage(String id, String originalVersion, String targetVersion) {
