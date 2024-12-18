@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>localhost</groupId>
+    <artifactId>dummy-aggregate-parent</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+  </parent>
+
+  <groupId>localhost</groupId>
+  <artifactId>dummy-aggregate-child</artifactId>
+  <version>1.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <version.dummy-lib>2.0.0.0</version.dummy-lib>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>test.bigversion</groupId>
+        <artifactId>dummy-lib</artifactId>
+        <version>${version.dummy-lib}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>test.package</groupId>
+      <artifactId>module</artifactId>
+      <version>0.0.2.19</version>
+    </dependency>
+  </dependencies>
+
+</project>
