@@ -35,6 +35,7 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
@@ -64,6 +65,19 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
      * The version that we are updating to. Guarded by this.
      */
     private transient String sourceVersion = null;
+
+    /**
+     * Whether to allow snapshots when searching for the latest version of an artifact.
+     *
+     * @since 1.0-alpha-1
+     */
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
+    protected boolean allowSnapshots;
+
+    @Override
+    protected boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
 
     @Inject
     public UpdateChildModulesMojo(

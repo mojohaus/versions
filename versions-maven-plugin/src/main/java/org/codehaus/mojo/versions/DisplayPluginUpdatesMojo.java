@@ -171,6 +171,19 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Parameter(property = "processUnboundPlugins", defaultValue = "false")
     protected boolean processUnboundPlugins;
 
+    /**
+     * Whether to allow snapshots when searching for the latest version of an artifact.
+     *
+     * @since 1.0-alpha-1
+     */
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
+    protected boolean allowSnapshots;
+
+    @Override
+    protected boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     @Inject

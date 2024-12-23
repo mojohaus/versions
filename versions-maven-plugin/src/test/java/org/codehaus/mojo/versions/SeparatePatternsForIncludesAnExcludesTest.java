@@ -16,6 +16,11 @@ public class SeparatePatternsForIncludesAnExcludesTest {
     public void setUp() throws Exception {
         mojo = new AbstractVersionsDependencyUpdaterMojo(null, null, null, null) {
             @Override
+            protected boolean isAllowSnapshots() {
+                return false;
+            }
+
+            @Override
             protected void update(MutableXMLStreamReader pom) {}
         };
     }

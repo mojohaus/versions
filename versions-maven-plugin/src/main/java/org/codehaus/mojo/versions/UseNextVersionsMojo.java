@@ -16,34 +16,19 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
-import javax.xml.stream.XMLStreamException;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
-import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
-
-import static java.util.Collections.singletonList;
-import static org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind.DEPENDENCY;
-import static org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT;
-import static org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind.PARENT;
 
 /**
  * Replaces any version with the latest version.
@@ -64,6 +49,19 @@ public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
     @Parameter(property = "allowDowngrade", defaultValue = "false")
     protected boolean allowDowngrade;
 
+    /**
+     * Whether to allow snapshots when searching for the latest version of an artifact.
+     *
+     * @since 1.0-alpha-1
+     */
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
+    protected boolean allowSnapshots;
+
+    @Override
+    protected boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
+
     // ------------------------------ METHODS --------------------------
 
     @Inject
@@ -75,51 +73,38 @@ public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
     }
 
-    /**
-     * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
-     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
-     */
-    protected void update(MutableXMLStreamReader pom)
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
-        try {
-            if (isProcessingDependencyManagement()) {
-                DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel(getProject()).getDependencyManagement();
-                if (dependencyManagement != null) {
-                    useNextVersions(pom, dependencyManagement.getDependencies(), DEPENDENCY_MANAGEMENT);
-                }
-            }
-            if (getProject().getDependencies() != null && isProcessingDependencies()) {
-                useNextVersions(pom, getProject().getDependencies(), DEPENDENCY);
-            }
-            if (getProject().getParent() != null && isProcessingParent()) {
-                useNextVersions(pom, singletonList(getParentDependency()), PARENT);
-            }
-        } catch (IOException e) {
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
+    @Override
+    protected boolean isAllowMajorUpdates() {
+        return true;
     }
 
-    private void useNextVersions(
-            MutableXMLStreamReader pom,
-            Collection<Dependency> dependencies,
-            DependencyChangeRecord.ChangeKind changeKind)
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
-        useLatestVersions(
-                pom,
-                dependencies,
-                (dep, versions) -> {
-                    try {
-                        return Arrays.stream(versions.getNewerVersions(
-                                        dep.getVersion(), Optional.empty(), allowSnapshots, allowDowngrade))
-                                .findFirst();
-                    } catch (InvalidSegmentException e) {
-                        throw new RuntimeException(e);
-                    }
-                },
-                changeKind);
+    @Override
+    protected boolean isAllowMinorUpdates() {
+        return true;
+    }
+
+    @Override
+    protected boolean isAllowIncrementalUpdates() {
+        return true;
+    }
+
+    @Override
+    protected boolean isAllowDowngrade() {
+        return allowDowngrade;
+    }
+
+    @Override
+    protected boolean updateFilter(Dependency dep) {
+        return true;
+    }
+
+    @Override
+    protected boolean artifactVersionsFilter(ArtifactVersion ver) {
+        return true;
+    }
+
+    @Override
+    protected Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream) {
+        return stream.findFirst();
     }
 }

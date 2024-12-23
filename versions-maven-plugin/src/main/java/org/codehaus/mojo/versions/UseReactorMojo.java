@@ -34,6 +34,7 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -50,6 +51,19 @@ import org.eclipse.aether.RepositorySystem;
  */
 @Mojo(name = "use-reactor", threadSafe = true)
 public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
+
+    /**
+     * Whether to allow snapshots when searching for the latest version of an artifact.
+     *
+     * @since 1.0-alpha-1
+     */
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
+    protected boolean allowSnapshots;
+
+    @Override
+    protected boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
 
     // ------------------------------ METHODS --------------------------
 

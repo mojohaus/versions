@@ -17,26 +17,34 @@ package org.codehaus.mojo.versions;
 
 import javax.xml.stream.XMLStreamException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
+import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Common base class for {@link UseLatestVersionsMojo}
@@ -51,58 +59,102 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
     }
 
+    protected abstract boolean isAllowMajorUpdates();
+
+    protected abstract boolean isAllowMinorUpdates();
+
+    protected abstract boolean isAllowIncrementalUpdates();
+
+    protected abstract boolean isAllowDowngrade();
+
+    protected abstract boolean updateFilter(Dependency dep);
+
+    protected abstract boolean artifactVersionsFilter(ArtifactVersion ver);
+
+    protected abstract Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream);
+
     /**
-     * Updates the pom, given a set of dependencies, a function retrieving the newest version,
-     * and an optional array of filters against which the input dependencies are matched.
-     *
-     * @param pom POM to be modified
-     * @param dependencies collection of dependencies with the dependency versions before the change
-     * @param newestVersionProducer function providing the newest version given a dependency and
-     *                              an {@link ArtifactVersions} instance
-     * @param changeKind title for the change recorder records
-     * @param filters optional array of filters
-     * @throws XMLStreamException thrown if the POM update doesn't succeed
-     * @throws MojoExecutionException if something goes wrong.
-     * @throws VersionRetrievalException thrown if an artifact versions cannot be retrieved
+     * @param pom the pom to update.
+     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
+     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
+     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
+     * @see org.codehaus.mojo.versions.AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
      */
-    @SafeVarargs
-    protected final void useLatestVersions(
+    protected void update(MutableXMLStreamReader pom)
+            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
+        if (isAllowDowngrade() && isAllowSnapshots()) {
+            throw new MojoExecutionException("allowDowngrade is only valid with allowSnapshots equal to false");
+        }
+
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                isAllowMajorUpdates(), isAllowMinorUpdates(), isAllowIncrementalUpdates(), getLog());
+        try {
+            if (isProcessingDependencyManagement()) {
+                DependencyManagement dependencyManagement =
+                        PomHelper.getRawModel(getProject()).getDependencyManagement();
+                if (dependencyManagement != null) {
+                    update(
+                            pom,
+                            dependencyManagement.getDependencies(),
+                            DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT,
+                            unchangedSegment);
+                }
+            }
+            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+                update(
+                        pom,
+                        getProject().getDependencies(),
+                        DependencyChangeRecord.ChangeKind.DEPENDENCY,
+                        unchangedSegment);
+            }
+            if (getProject().getParent() != null && isProcessingParent()) {
+                update(
+                        pom,
+                        singletonList(getParentDependency()),
+                        DependencyChangeRecord.ChangeKind.PARENT,
+                        unchangedSegment);
+            }
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
+        }
+    }
+
+    protected final void update(
             MutableXMLStreamReader pom,
             Collection<Dependency> dependencies,
-            BiFunction<Dependency, ArtifactVersions, Optional<ArtifactVersion>> newestVersionProducer,
             DependencyChangeRecord.ChangeKind changeKind,
-            Predicate<Dependency>... filters)
+            Optional<Segment> unchangedSegment)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
         for (Dependency dep : dependencies) {
-            if (!Arrays.stream(filters)
-                    .map(f -> f.test(dep))
-                    .reduce(Boolean::logicalAnd)
-                    .orElse(true)) {
+            if (!updateFilter(dep)) {
                 continue;
-            }
-
-            if (isExcludeReactor() && isProducedByReactor(dep)) {
+            } else if (isExcludeReactor() && isProducedByReactor(dep)) {
                 getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
-            }
-
-            if (isHandledByProperty(dep)) {
+            } else if (isHandledByProperty(dep)) {
                 getLog().debug("Ignoring dependency with property as version: " + toString(dep));
                 continue;
             }
-
             Artifact artifact = toArtifact(dep);
             if (!isIncluded(artifact)) {
                 continue;
             }
+            if (getLog().isDebugEnabled()) {
+                ArtifactVersion selectedVersion = DefaultArtifactVersionCache.of(dep.getVersion());
+                getLog().debug("Selected version:" + selectedVersion);
+                getLog().debug("Looking for newer versions of " + toString(dep));
+            }
 
-            ArtifactVersion selectedVersion = DefaultArtifactVersionCache.of(dep.getVersion());
-            getLog().debug("Selected version:" + selectedVersion);
-            getLog().debug("Looking for newer versions of " + toString(dep));
             ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
-            Optional<ArtifactVersion> newestVer = newestVersionProducer.apply(dep, versions);
-            if (newestVer.isPresent()) {
-                updateDependencyVersion(pom, dep, newestVer.get().toString(), changeKind);
+            try {
+                Optional<ArtifactVersion> newestVer = versionProducer(Arrays.stream(versions.getNewerVersions(
+                                dep.getVersion(), unchangedSegment, isAllowSnapshots(), isAllowDowngrade()))
+                        .filter(this::artifactVersionsFilter));
+                if (newestVer.isPresent()) {
+                    updateDependencyVersion(pom, dep, newestVer.get().toString(), changeKind);
+                }
+            } catch (InvalidSegmentException e) {
+                getLog().warn("Ignoring " + this.toString(dep) + " as the version number is too short");
             }
         }
     }

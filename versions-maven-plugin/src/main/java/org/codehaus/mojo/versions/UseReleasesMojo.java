@@ -74,6 +74,11 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
     @Parameter(property = "failIfNotReplaced", defaultValue = "false")
     protected boolean failIfNotReplaced;
 
+    @Override
+    protected boolean isAllowSnapshots() {
+        return false;
+    }
+
     // ------------------------------ METHODS --------------------------
 
     @Inject
