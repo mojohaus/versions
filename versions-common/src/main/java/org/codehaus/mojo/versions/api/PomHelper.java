@@ -24,15 +24,14 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.TransformerException;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -148,8 +147,7 @@ public final class PomHelper {
      * @throws IOException if the file is not found or if the file does not parse.
      */
     public static Model getRawModel(File moduleProjectFile) throws IOException {
-        try (Reader reader =
-                new BufferedReader(new InputStreamReader(Files.newInputStream(moduleProjectFile.toPath())))) {
+        try (Reader reader = Files.newBufferedReader(moduleProjectFile.toPath(), StandardCharsets.UTF_8)) {
             Model result = getRawModel(reader);
             result.setPomFile(moduleProjectFile);
             return result;

@@ -19,10 +19,9 @@ package org.codehaus.mojo.versions.utils;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -47,6 +46,12 @@ import static java.util.Optional.ofNullable;
  * Utilities for reading and handling extensions.
  */
 public final class ExtensionUtils {
+
+    /**
+     * A private constructor for utils class.
+     */
+    ExtensionUtils() {}
+
     /**
      * Reads the core extensions configured for the given project
      * from the {@code ${project}/.mvn/extensions.xml} file.
@@ -63,7 +68,7 @@ public final class ExtensionUtils {
             return Stream.empty();
         }
 
-        try (Reader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(extensionsFile)))) {
+        try (Reader reader = Files.newBufferedReader(extensionsFile, StandardCharsets.UTF_8)) {
             return new CoreExtensionsStaxReader()
                     .read(reader).getExtensions().stream().map(ex -> ExtensionBuilder.newBuilder()
                             .withGroupId(ex.getGroupId())
