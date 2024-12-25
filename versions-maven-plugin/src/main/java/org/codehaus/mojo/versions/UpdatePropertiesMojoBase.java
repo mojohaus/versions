@@ -115,10 +115,29 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
+
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
 
     public UpdatePropertiesMojoBase(
             ArtifactHandlerManager artifactHandlerManager,
@@ -126,6 +145,11 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
     }
 
     protected void update(MutableXMLStreamReader pom, Map<Property, PropertyVersions> propertyVersions)

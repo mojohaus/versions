@@ -123,8 +123,6 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     @Parameter(property = "generateBackupPoms", defaultValue = "true")
     protected boolean generateBackupPoms;
 
-    protected abstract boolean isAllowSnapshots();
-
     /**
      * Our versions helper.
      */
@@ -209,6 +207,8 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         this.changeRecorders = changeRecorders;
     }
 
+    protected abstract boolean getAllowSnapshots();
+
     public VersionsHelper getHelper() throws MojoExecutionException {
         if (helper == null) {
             helper = new DefaultVersionsHelper.Builder()
@@ -290,7 +290,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected ArtifactVersion findLatestVersion(
             Artifact artifact, VersionRange versionRange, Boolean allowingSnapshots, boolean usePluginRepositories)
             throws MojoExecutionException, VersionRetrievalException {
-        boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : isAllowSnapshots();
+        boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : getAllowSnapshots();
         final ArtifactVersions artifactVersions =
                 getHelper().lookupArtifactVersions(artifact, versionRange, usePluginRepositories);
         return artifactVersions.getNewestVersion(versionRange, null, includeSnapshots, false);
@@ -431,7 +431,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         ArtifactVersion winner = version.getNewestVersion(
                 currentVersion,
                 property,
-                isAllowSnapshots(),
+                getAllowSnapshots(),
                 this.reactorProjects,
                 this.getHelper(),
                 allowDowngrade,

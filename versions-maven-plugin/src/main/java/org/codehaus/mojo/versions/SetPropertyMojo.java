@@ -102,11 +102,6 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
-
     @Inject
     public SetPropertyMojo(
             ArtifactHandlerManager artifactHandlerManager,
@@ -114,6 +109,11 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
     }
 
     /**

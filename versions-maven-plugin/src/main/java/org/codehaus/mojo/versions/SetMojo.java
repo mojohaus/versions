@@ -247,11 +247,6 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
-
     /**
      * The changes to module coordinates. Guarded by this.
      */
@@ -275,6 +270,11 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
         this.projectBuilder = projectBuilder;
         this.prompter = prompter;
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
     }
 
     private synchronized void addChange(String groupId, String artifactId, String oldVersion, String newVersion) {

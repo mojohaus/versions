@@ -68,6 +68,30 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase {
     @Parameter(property = "excludeProperties")
     private String excludeProperties = null;
 
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
+
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
+
     @Inject
     public UpdatePropertiesMojo(
             ArtifactHandlerManager artifactHandlerManager,
@@ -75,6 +99,21 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase {
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+    }
+
+    @Override
+    protected boolean getProcessDependencies() {
+        return processDependencies;
+    }
+
+    @Override
+    protected boolean getProcessDependencyManagement() {
+        return processDependencyManagement;
+    }
+
+    @Override
+    public boolean getProcessParent() {
+        return processParent;
     }
 
     /**

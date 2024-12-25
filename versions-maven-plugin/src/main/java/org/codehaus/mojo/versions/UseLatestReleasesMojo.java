@@ -85,6 +85,30 @@ public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
     @Parameter(property = "allowDowngrade", defaultValue = "false")
     protected boolean allowDowngrade;
 
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
+
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
+
     // ------------------------------ METHODS --------------------------
 
     @Inject
@@ -97,33 +121,48 @@ public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
     }
 
     @Override
-    protected final boolean isAllowMajorUpdates() {
+    protected boolean getProcessDependencies() {
+        return processDependencies;
+    }
+
+    @Override
+    protected boolean getProcessDependencyManagement() {
+        return processDependencyManagement;
+    }
+
+    @Override
+    public boolean getProcessParent() {
+        return processParent;
+    }
+
+    @Override
+    protected final boolean getAllowMajorUpdates() {
         return allowMajorUpdates;
     }
 
     @Override
-    protected final boolean isAllowMinorUpdates() {
+    protected final boolean getAllowMinorUpdates() {
         return allowMinorUpdates;
     }
 
     @Override
-    protected final boolean isAllowIncrementalUpdates() {
+    protected final boolean getAllowIncrementalUpdates() {
         return allowIncrementalUpdates;
     }
 
     @Override
-    protected final boolean isAllowSnapshots() {
+    protected final boolean getAllowSnapshots() {
         return false;
     }
 
     @Override
-    protected final boolean isAllowDowngrade() {
+    protected final boolean getAllowDowngrade() {
         return allowDowngrade;
     }
 
     @Override
     protected boolean updateFilter(Dependency dep) {
-        return isAllowDowngrade() || !ArtifactUtils.isSnapshot(dep.getVersion());
+        return getAllowDowngrade() || !ArtifactUtils.isSnapshot(dep.getVersion());
     }
 
     @Override

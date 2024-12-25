@@ -84,8 +84,32 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
+
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
+
     @Override
-    protected boolean isAllowSnapshots() {
+    protected boolean getAllowSnapshots() {
         return allowSnapshots;
     }
 
@@ -101,22 +125,37 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
     }
 
     @Override
-    protected final boolean isAllowMajorUpdates() {
+    protected boolean getProcessDependencies() {
+        return processDependencies;
+    }
+
+    @Override
+    protected boolean getProcessDependencyManagement() {
+        return processDependencyManagement;
+    }
+
+    @Override
+    public boolean getProcessParent() {
+        return processParent;
+    }
+
+    @Override
+    protected boolean getAllowMajorUpdates() {
         return allowMajorUpdates;
     }
 
     @Override
-    protected final boolean isAllowMinorUpdates() {
+    protected boolean getAllowMinorUpdates() {
         return allowMinorUpdates;
     }
 
     @Override
-    protected final boolean isAllowIncrementalUpdates() {
+    protected boolean getAllowIncrementalUpdates() {
         return allowIncrementalUpdates;
     }
 
     @Override
-    protected boolean isAllowDowngrade() {
+    protected boolean getAllowDowngrade() {
         return allowDowngrade;
     }
 

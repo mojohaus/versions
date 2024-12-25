@@ -129,10 +129,29 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
+
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
 
     // ------------------------------ FIELDS ------------------------------
 
@@ -152,6 +171,26 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
     }
 
+    @Override
+    protected boolean getProcessDependencies() {
+        return processDependencies;
+    }
+
+    @Override
+    protected boolean getProcessDependencyManagement() {
+        return processDependencyManagement;
+    }
+
+    @Override
+    public boolean getProcessParent() {
+        return processParent;
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
+    }
+
     /**
      * @param pom the pom to update.
      * @throws MojoExecutionException when things go wrong
@@ -163,17 +202,15 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
         // Note we have to getModel the dependencies from the model because the dependencies in the
         // project may have already had their range resolved [MNG-4138]
-        if (hasDependencyManagement()
-                && hasDependenciesInDependencyManagement()
-                && isProcessingDependencyManagement()) {
+        if (hasDependencyManagement() && hasDependenciesInDependencyManagement() && getProcessDependencyManagement()) {
             getLog().debug("processing dependencyManagement of " + getProject().getId());
             resolveRanges(pom, getProject().getModel().getDependencyManagement().getDependencies());
         }
-        if (getProject().getDependencies() != null && isProcessingDependencies()) {
+        if (getProject().getDependencies() != null && getProcessDependencies()) {
             getLog().debug("processing dependencies of " + getProject().getId());
             resolveRanges(pom, getProject().getModel().getDependencies());
         }
-        if (hasParent() && isProcessingParent()) {
+        if (hasParent() && getProcessParent()) {
             getLog().debug("processing parent " + getProject().getId());
             resolveRangesInParent(pom);
         }
@@ -234,7 +271,7 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
 
         for (Dependency dep : dependencies) {
-            if (isExcludeReactor() && isProducedByReactor(dep)) {
+            if (getExcludeReactor() && isProducedByReactor(dep)) {
                 continue;
             }
 

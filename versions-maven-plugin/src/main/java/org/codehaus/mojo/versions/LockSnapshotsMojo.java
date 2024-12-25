@@ -37,6 +37,7 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -67,13 +68,31 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
      */
     private static final Pattern TIMESTAMPED_SNAPSHOT_REGEX = Pattern.compile("-" + Artifact.SNAPSHOT_VERSION);
 
-    // ------------------------------ METHODS --------------------------
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        // used by base method; must be true so that it's able to select snapshots
-        return true;
-    }
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
+
+    // ------------------------------ METHODS --------------------------
 
     @Inject
     public LockSnapshotsMojo(
@@ -82,6 +101,27 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        // used by base method; must be true so that it's able to select snapshots
+        return true;
+    }
+
+    @Override
+    protected boolean getProcessDependencies() {
+        return processDependencies;
+    }
+
+    @Override
+    protected boolean getProcessDependencyManagement() {
+        return processDependencyManagement;
+    }
+
+    @Override
+    public boolean getProcessParent() {
+        return processParent;
     }
 
     /**
@@ -94,17 +134,17 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
     protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         try {
-            if (isProcessingDependencyManagement()) {
+            if (getProcessDependencyManagement()) {
                 DependencyManagement dependencyManagement =
                         PomHelper.getRawModel(getProject()).getDependencyManagement();
                 if (dependencyManagement != null) {
                     lockSnapshots(pom, dependencyManagement.getDependencies());
                 }
             }
-            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+            if (getProject().getDependencies() != null && getProcessDependencies()) {
                 lockSnapshots(pom, getProject().getDependencies());
             }
-            if (getProject().getParent() != null && isProcessingParent()) {
+            if (getProject().getParent() != null && getProcessParent()) {
                 lockParentSnapshot(pom, getProject().getParent());
             }
         } catch (IOException | VersionResolutionException e) {
@@ -115,7 +155,7 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
     protected void lockSnapshots(MutableXMLStreamReader pom, Collection<Dependency> dependencies)
             throws XMLStreamException, MojoExecutionException, VersionResolutionException {
         for (Dependency dep : dependencies) {
-            if (isExcludeReactor() && isProducedByReactor(dep)) {
+            if (getExcludeReactor() && isProducedByReactor(dep)) {
                 getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
             }
