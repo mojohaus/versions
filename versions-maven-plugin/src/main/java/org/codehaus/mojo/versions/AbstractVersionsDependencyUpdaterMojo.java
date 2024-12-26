@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -228,15 +229,12 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @since 1.0-alpha-3
      */
     protected Artifact findArtifact(Dependency dependency) {
-        if (getProject().getDependencyArtifacts() == null) {
-            return null;
-        }
-        for (Artifact artifact : getProject().getDependencyArtifacts()) {
-            if (compare(artifact, dependency)) {
-                return artifact;
-            }
-        }
-        return null;
+        return Optional.ofNullable(getProject().getDependencyArtifacts())
+                // no mutation, so parallelStream is safe
+                .flatMap(artifacts -> artifacts.parallelStream()
+                        .filter(artifact -> compare(artifact, dependency))
+                        .findAny())
+                .orElse(null);
     }
 
     /**

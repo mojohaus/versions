@@ -123,13 +123,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     @Parameter(property = "generateBackupPoms", defaultValue = "true")
     protected boolean generateBackupPoms;
 
-    /**
-     * Whether to allow snapshots when searching for the latest version of an artifact.
-     *
-     * @since 1.0-alpha-1
-     */
-    @Parameter(property = "allowSnapshots", defaultValue = "false")
-    protected boolean allowSnapshots;
+    protected abstract boolean isAllowSnapshots();
 
     /**
      * Our versions helper.
@@ -296,7 +290,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected ArtifactVersion findLatestVersion(
             Artifact artifact, VersionRange versionRange, Boolean allowingSnapshots, boolean usePluginRepositories)
             throws MojoExecutionException, VersionRetrievalException {
-        boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : this.allowSnapshots;
+        boolean includeSnapshots = allowingSnapshots != null ? allowingSnapshots : isAllowSnapshots();
         final ArtifactVersions artifactVersions =
                 getHelper().lookupArtifactVersions(artifact, versionRange, usePluginRepositories);
         return artifactVersions.getNewestVersion(versionRange, null, includeSnapshots, false);
@@ -437,7 +431,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         ArtifactVersion winner = version.getNewestVersion(
                 currentVersion,
                 property,
-                this.allowSnapshots,
+                isAllowSnapshots(),
                 this.reactorProjects,
                 this.getHelper(),
                 allowDowngrade,

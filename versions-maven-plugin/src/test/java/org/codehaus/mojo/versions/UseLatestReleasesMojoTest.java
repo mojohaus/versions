@@ -19,21 +19,16 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.HashMap;
 
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.codehaus.mojo.versions.utils.TestChangeRecorder;
-import org.eclipse.aether.RepositorySystem;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockedStatic;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -45,53 +40,42 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mockStatic;
 
-public class UseLatestReleasesMojoTest {
-    private UseLatestReleasesMojo mojo;
-    private TestChangeRecorder changeRecorder;
+public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
 
     @Before
     public void setUp() throws Exception {
-        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
-        RepositorySystem repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
-            {
-                put("dependency-artifact", new String[] {"0.9.0", "1.0.0-beta"});
-            }
-        });
-
-        changeRecorder = new TestChangeRecorder();
-
-        mojo = new UseLatestReleasesMojo(artifactHandlerManager, repositorySystem, null, changeRecorder.asTestMap()) {
-            {
-                reactorProjects = emptyList();
-                MavenProject project = new MavenProject() {
+        changeRecorder = createChangeRecorder();
+        mojo =
+                new UseLatestReleasesMojo(
+                        mockArtifactHandlerManager(), createRepositorySystem(), null, changeRecorder.asTestMap()) {
                     {
-                        setModel(new Model() {
+                        reactorProjects = emptyList();
+                        MavenProject project = new MavenProject() {
                             {
-                                setGroupId("default-group");
-                                setArtifactId("project-artifact");
-                                setVersion("1.0.0-SNAPSHOT");
+                                setModel(new Model() {
+                                    {
+                                        setGroupId("default-group");
+                                        setArtifactId("project-artifact");
+                                        setVersion("1.0.0-SNAPSHOT");
 
-                                setDependencies(singletonList(DependencyBuilder.newBuilder()
-                                        .withGroupId("default-group")
-                                        .withArtifactId("dependency-artifact")
-                                        .withVersion("0.9.0")
-                                        .withScope(SCOPE_COMPILE)
-                                        .withType("jar")
-                                        .withClassifier("default")
-                                        .build()));
+                                        setDependencies(singletonList(DependencyBuilder.newBuilder()
+                                                .withGroupId("default-group")
+                                                .withArtifactId("dependency-artifact")
+                                                .withVersion("0.9.0")
+                                                .withScope(SCOPE_COMPILE)
+                                                .withType("jar")
+                                                .withClassifier("default")
+                                                .build()));
+                                    }
+                                });
                             }
-                        });
+                        };
+                        setProject(project);
+
+                        session = mockMavenSession();
                     }
                 };
-                setProject(project);
-
-                session = mockMavenSession();
-            }
-        };
     }
 
     @Test
@@ -99,26 +83,18 @@ public class UseLatestReleasesMojoTest {
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
                     VersionRetrievalException {
         setVariableValueToObject(mojo, "processDependencies", true);
-        setVariableValueToObject(mojo, "allowSnapshots", false);
         setVariableValueToObject(mojo, "allowMajorUpdates", false);
         setVariableValueToObject(mojo, "allowMinorUpdates", true);
         setVariableValueToObject(mojo, "allowIncrementalUpdates", false);
 
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(any(), any(), any(), any(), any(), any(), any()))
-                    .thenReturn(true);
-            pomHelper
-                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
-                    .thenReturn(mojo.getProject().getModel());
-            mojo.update(null);
-        }
+        tryUpdate();
         assertThat(changeRecorder.getChanges(), Matchers.empty());
     }
 
     @Test
     public void testAllowDowngrade()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException {
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, VersionRetrievalException,
+                    IllegalAccessException {
         mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
                 put("artifactA", new String[] {"1.0.0", "1.0.1-SNAPSHOT"});
@@ -130,18 +106,9 @@ public class UseLatestReleasesMojoTest {
                         .withArtifactId("artifactA")
                         .withVersion("1.0.1-SNAPSHOT")
                         .build()));
-        mojo.allowDowngrade = true;
+        setVariableValueToObject(mojo, "allowDowngrade", true);
 
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(
-                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class), any()))
-                    .thenReturn(true);
-            pomHelper
-                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
-                    .thenReturn(mojo.getProject().getModel());
-            mojo.update(null);
-        }
+        tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
@@ -164,16 +131,7 @@ public class UseLatestReleasesMojoTest {
                         .withVersion("1.0.1-SNAPSHOT")
                         .build()));
 
-        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
-            pomHelper
-                    .when(() -> PomHelper.setDependencyVersion(
-                            any(), anyString(), anyString(), anyString(), anyString(), any(Model.class), any()))
-                    .thenReturn(true);
-            pomHelper
-                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
-                    .thenReturn(mojo.getProject().getModel());
-            mojo.update(null);
-        }
+        tryUpdate();
         assertThat(changeRecorder.getChanges(), empty());
     }
 }

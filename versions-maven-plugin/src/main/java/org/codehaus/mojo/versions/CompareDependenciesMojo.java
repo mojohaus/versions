@@ -116,6 +116,12 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
     @Parameter(property = "reportOutputFile")
     protected File reportOutputFile;
 
+    @Override
+    protected boolean isAllowSnapshots() {
+        // this parameter is used by base class, but shouldn't affect comparison; setting to true
+        return true;
+    }
+
     /**
      * The (injected) instance of {@link ProjectBuilder}
      *

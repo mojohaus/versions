@@ -61,6 +61,12 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     // ------------------------------ METHODS --------------------------
 
+    @Override
+    protected boolean isAllowSnapshots() {
+        // used by base class; must be true so that it can select snapshots
+        return true;
+    }
+
     @Inject
     public UnlockSnapshotsMojo(
             ArtifactHandlerManager artifactHandlerManager,

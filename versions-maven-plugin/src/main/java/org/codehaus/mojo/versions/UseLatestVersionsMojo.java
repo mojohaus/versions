@@ -16,37 +16,20 @@ package org.codehaus.mojo.versions;
  */
 
 import javax.inject.Inject;
-import javax.xml.stream.XMLStreamException;
 
-import java.io.IOException;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
-import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.api.Segment;
-import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.eclipse.aether.RepositorySystem;
-
-import static java.util.Collections.singletonList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
-import static org.codehaus.mojo.versions.api.Segment.MAJOR;
-import static org.codehaus.mojo.versions.api.Segment.MINOR;
 
 /**
  * Replaces any version with the latest version found in the artifactory.
@@ -93,6 +76,19 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
     @Parameter(property = "allowDowngrade", defaultValue = "false")
     private boolean allowDowngrade;
 
+    /**
+     * Whether to allow snapshots when searching for the latest version of an artifact.
+     *
+     * @since 1.0-alpha-1
+     */
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
+    protected boolean allowSnapshots;
+
+    @Override
+    protected boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
+
     // ------------------------------ METHODS --------------------------
 
     @Inject
@@ -105,84 +101,37 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
     }
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        if (allowDowngrade && allowSnapshots) {
-            throw new MojoExecutionException("allowDowngrade is only valid with allowSnapshots equal to false");
-        }
-        super.execute();
+    protected final boolean isAllowMajorUpdates() {
+        return allowMajorUpdates;
     }
 
-    /**
-     * @param pom the pom to update.
-     * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong
-     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong in a very bad way
-     * @throws javax.xml.stream.XMLStreamException            when things go wrong with XML streaming
-     * @see AbstractVersionsUpdaterMojo#update(MutableXMLStreamReader)
-     */
-    protected void update(MutableXMLStreamReader pom)
-            throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
-        try {
-            if (isProcessingDependencyManagement()) {
-                DependencyManagement dependencyManagement =
-                        PomHelper.getRawModel(getProject()).getDependencyManagement();
-                if (dependencyManagement != null) {
-                    useLatestVersions(
-                            pom,
-                            dependencyManagement.getDependencies(),
-                            DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
-                }
-            }
-            if (getProject().getDependencies() != null && isProcessingDependencies()) {
-                useLatestVersions(pom, getProject().getDependencies(), DependencyChangeRecord.ChangeKind.DEPENDENCY);
-            }
-            if (getProject().getParent() != null && isProcessingParent()) {
-                useLatestVersions(pom, singletonList(getParentDependency()), DependencyChangeRecord.ChangeKind.PARENT);
-            }
-        } catch (IOException e) {
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
+    @Override
+    protected final boolean isAllowMinorUpdates() {
+        return allowMinorUpdates;
     }
 
-    private void useLatestVersions(
-            MutableXMLStreamReader pom,
-            Collection<Dependency> dependencies,
-            DependencyChangeRecord.ChangeKind changeKind)
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
-        Log log = getLog();
-        if (log != null && !allowIncrementalUpdates) {
-            log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
-        }
+    @Override
+    protected final boolean isAllowIncrementalUpdates() {
+        return allowIncrementalUpdates;
+    }
 
-        if (log != null && !allowMinorUpdates) {
-            log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
-        }
+    @Override
+    protected boolean isAllowDowngrade() {
+        return allowDowngrade;
+    }
 
-        Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
-                ? empty()
-                : allowMinorUpdates && allowIncrementalUpdates
-                        ? of(MAJOR)
-                        : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
-        if (log != null && log.isDebugEnabled()) {
-            log.debug(unchangedSegment
-                            .map(Segment::minorTo)
-                            .map(Segment::toString)
-                            .orElse("ALL") + " version changes allowed");
-        }
+    @Override
+    protected boolean updateFilter(Dependency dep) {
+        return true;
+    }
 
-        useLatestVersions(
-                pom,
-                dependencies,
-                (dep, versions) -> {
-                    try {
-                        return versions.getNewestVersion(
-                                dep.getVersion(), unchangedSegment, allowSnapshots, allowDowngrade);
-                    } catch (InvalidSegmentException e) {
-                        getLog().warn(String.format(
-                                "Skipping the processing of %s:%s:%s due to: %s",
-                                dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), e.getMessage()));
-                    }
-                    return empty();
-                },
-                changeKind);
+    @Override
+    protected boolean artifactVersionsFilter(ArtifactVersion ver) {
+        return true;
+    }
+
+    @Override
+    protected Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream) {
+        return stream.max(Comparator.naturalOrder());
     }
 }

@@ -107,6 +107,19 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
     @Parameter(property = "includeParent", defaultValue = "true")
     protected boolean includeParent = true;
 
+    /**
+     * Whether to allow snapshots when searching for the latest version of an artifact.
+     *
+     * @since 1.0-alpha-1
+     */
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
+    protected boolean allowSnapshots;
+
+    @Override
+    protected boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
+
     public UpdatePropertiesMojoBase(
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,

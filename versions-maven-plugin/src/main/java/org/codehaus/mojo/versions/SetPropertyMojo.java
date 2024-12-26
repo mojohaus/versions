@@ -94,6 +94,19 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
     @Parameter(property = "profileId")
     private String profileId = null;
 
+    /**
+     * Whether to allow snapshots when searching for the latest version of an artifact.
+     *
+     * @since 1.0-alpha-1
+     */
+    @Parameter(property = "allowSnapshots", defaultValue = "false")
+    protected boolean allowSnapshots;
+
+    @Override
+    protected boolean isAllowSnapshots() {
+        return allowSnapshots;
+    }
+
     @Inject
     public SetPropertyMojo(
             ArtifactHandlerManager artifactHandlerManager,
