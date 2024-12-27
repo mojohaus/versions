@@ -147,11 +147,6 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
-
     // -------------------------- STATIC METHODS --------------------------
 
     // -------------------------- OTHER METHODS --------------------------
@@ -163,6 +158,11 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {

@@ -16,7 +16,22 @@ public class SeparatePatternsForIncludesAnExcludesTest {
     public void setUp() throws Exception {
         mojo = new AbstractVersionsDependencyUpdaterMojo(null, null, null, null) {
             @Override
-            protected boolean isAllowSnapshots() {
+            protected boolean getProcessDependencies() {
+                return true;
+            }
+
+            @Override
+            protected boolean getProcessDependencyManagement() {
+                return true;
+            }
+
+            @Override
+            public boolean getProcessParent() {
+                return false;
+            }
+
+            @Override
+            protected boolean getAllowSnapshots() {
                 return false;
             }
 

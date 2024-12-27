@@ -74,11 +74,6 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
-
     @Inject
     public UpdateChildModulesMojo(
             ArtifactHandlerManager artifactHandlerManager,
@@ -86,6 +81,11 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
     }
 
     /**

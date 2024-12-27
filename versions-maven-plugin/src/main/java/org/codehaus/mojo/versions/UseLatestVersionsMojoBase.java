@@ -51,6 +51,21 @@ import static java.util.Collections.singletonList;
  * and {@link UseLatestReleasesMojo}
  */
 public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependencyUpdaterMojo {
+
+    protected abstract boolean getAllowMajorUpdates();
+
+    protected abstract boolean getAllowMinorUpdates();
+
+    protected abstract boolean getAllowIncrementalUpdates();
+
+    protected abstract boolean getAllowDowngrade();
+
+    protected abstract boolean updateFilter(Dependency dep);
+
+    protected abstract boolean artifactVersionsFilter(ArtifactVersion ver);
+
+    protected abstract Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream);
+
     public UseLatestVersionsMojoBase(
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
@@ -58,20 +73,6 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
     }
-
-    protected abstract boolean isAllowMajorUpdates();
-
-    protected abstract boolean isAllowMinorUpdates();
-
-    protected abstract boolean isAllowIncrementalUpdates();
-
-    protected abstract boolean isAllowDowngrade();
-
-    protected abstract boolean updateFilter(Dependency dep);
-
-    protected abstract boolean artifactVersionsFilter(ArtifactVersion ver);
-
-    protected abstract Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream);
 
     /**
      * @param pom the pom to update.
@@ -82,14 +83,14 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      */
     protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
-        if (isAllowDowngrade() && isAllowSnapshots()) {
+        if (getAllowDowngrade() && getAllowSnapshots()) {
             throw new MojoExecutionException("allowDowngrade is only valid with allowSnapshots equal to false");
         }
 
         Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
-                isAllowMajorUpdates(), isAllowMinorUpdates(), isAllowIncrementalUpdates(), getLog());
+                getAllowMajorUpdates(), getAllowMinorUpdates(), getAllowIncrementalUpdates(), getLog());
         try {
-            if (isProcessingDependencyManagement()) {
+            if (getProcessDependencyManagement()) {
                 DependencyManagement dependencyManagement =
                         PomHelper.getRawModel(getProject()).getDependencyManagement();
                 if (dependencyManagement != null) {
@@ -100,14 +101,14 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
                             unchangedSegment);
                 }
             }
-            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+            if (getProject().getDependencies() != null && getProcessDependencies()) {
                 update(
                         pom,
                         getProject().getDependencies(),
                         DependencyChangeRecord.ChangeKind.DEPENDENCY,
                         unchangedSegment);
             }
-            if (getProject().getParent() != null && isProcessingParent()) {
+            if (getProject().getParent() != null && getProcessParent()) {
                 update(
                         pom,
                         singletonList(getParentDependency()),
@@ -128,7 +129,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
         for (Dependency dep : dependencies) {
             if (!updateFilter(dep)) {
                 continue;
-            } else if (isExcludeReactor() && isProducedByReactor(dep)) {
+            } else if (getExcludeReactor() && isProducedByReactor(dep)) {
                 getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
             } else if (isHandledByProperty(dep)) {
@@ -148,7 +149,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
             ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
             try {
                 Optional<ArtifactVersion> newestVer = versionProducer(Arrays.stream(versions.getNewerVersions(
-                                dep.getVersion(), unchangedSegment, isAllowSnapshots(), isAllowDowngrade()))
+                                dep.getVersion(), unchangedSegment, getAllowSnapshots(), getAllowDowngrade()))
                         .filter(this::artifactVersionsFilter));
                 if (newestVer.isPresent()) {
                     updateDependencyVersion(pom, dep, newestVer.get().toString(), changeKind);

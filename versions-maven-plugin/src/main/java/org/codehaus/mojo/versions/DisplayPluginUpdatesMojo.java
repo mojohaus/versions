@@ -179,11 +179,6 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
-
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     @Inject
@@ -202,6 +197,11 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;
         this.runtimeInformation = runtimeInformation;
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
     }
 
     /**

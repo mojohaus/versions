@@ -98,8 +98,47 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
+
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
+
     @Override
-    protected boolean isAllowSnapshots() {
+    protected final boolean getProcessDependencies() {
+        return processDependencies;
+    }
+
+    @Override
+    protected final boolean getProcessDependencyManagement() {
+        return processDependencyManagement;
+    }
+
+    @Override
+    public final boolean getProcessParent() {
+        return processParent;
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
         return allowSnapshots;
     }
 
@@ -212,7 +251,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
         // 2) process dependencies and properties from this node
         try {
-            if (isProcessingDependencyManagement() && node.getModel().getDependencyManagement() != null) {
+            if (getProcessDependencyManagement() && node.getModel().getDependencyManagement() != null) {
                 useDepVersion(
                         node,
                         node.getModel().getDependencyManagement().getDependencies(),
@@ -221,7 +260,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                         propertyConflicts);
             }
 
-            if (isProcessingDependencies()) {
+            if (getProcessDependencies()) {
                 useDepVersion(
                         node,
                         getDependencies(node.getModel()),
@@ -230,7 +269,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                         propertyConflicts);
             }
 
-            if (getProject().getParent() != null && isProcessingParent()) {
+            if (getProject().getParent() != null && getProcessParent()) {
                 useDepVersion(
                         node,
                         singletonList(getParentDependency()),
@@ -373,7 +412,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
         // 2nd pass: check dependencies
         for (Dependency dep : dependencies) {
-            if (isExcludeReactor() && isProducedByReactor(dep)) {
+            if (getExcludeReactor() && isProducedByReactor(dep)) {
                 getLog().info("Ignoring a reactor dependency: " + toString(dep));
                 continue;
             }

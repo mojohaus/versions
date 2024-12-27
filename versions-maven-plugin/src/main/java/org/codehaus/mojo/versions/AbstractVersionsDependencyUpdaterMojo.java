@@ -114,30 +114,6 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
     private String scope = null;
 
     /**
-     * Whether to process the dependencies section of the project.
-     *
-     * @since 1.0-alpha-3
-     */
-    @Parameter(property = "processDependencies", defaultValue = "true")
-    private boolean processDependencies = true;
-
-    /**
-     * Whether to process the dependencyManagement section of the project.
-     *
-     * @since 1.0-alpha-3
-     */
-    @Parameter(property = "processDependencyManagement", defaultValue = "true")
-    private boolean processDependencyManagement = true;
-
-    /**
-     * Whether to process the parent section of the project. If not set will default to false.
-     *
-     * @since 2.3
-     */
-    @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
-
-    /**
      * Artifact filter to determine if artifact should be included
      *
      * @since 1.0-alpha-3
@@ -174,9 +150,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @return returns <code>true</code> if the project/dependencies section of the pom should be processed.
      * @since 1.0-alpha-3
      */
-    public boolean isProcessingDependencies() {
-        return processDependencies;
-    }
+    protected abstract boolean getProcessDependencies();
 
     /**
      * Should the project/dependencyManagement section of the pom be processed.
@@ -184,9 +158,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @return returns <code>true</code> if the project/dependencyManagement section of the pom should be processed.
      * @since 1.0-alpha-3
      */
-    public boolean isProcessingDependencyManagement() {
-        return processDependencyManagement;
-    }
+    protected abstract boolean getProcessDependencyManagement();
 
     /**
      * Should the project/parent section of the pom be processed.
@@ -194,9 +166,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @return returns <code>true</code> if the project/parent section of the pom should be processed.
      * @since 2.3
      */
-    public boolean isProcessingParent() {
-        return processParent;
-    }
+    public abstract boolean getProcessParent();
 
     /**
      * Should the artifacts produced in the current reactor be excluded from processing.
@@ -205,7 +175,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * should be excluded from processing.
      * @since 1.0-alpha-3
      */
-    public boolean isExcludeReactor() {
+    public boolean getExcludeReactor() {
         return excludeReactor;
     }
 
@@ -503,7 +473,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
             MutableXMLStreamReader pom, Dependency dep, String newVersion, DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException {
         boolean updated = false;
-        if (isProcessingParent()
+        if (getProcessParent()
                 && getProject().getParent() != null
                 && (DependencyComparator.INSTANCE.compare(
                                         dep,

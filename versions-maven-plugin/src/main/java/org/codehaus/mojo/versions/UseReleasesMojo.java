@@ -74,8 +74,47 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
     @Parameter(property = "failIfNotReplaced", defaultValue = "false")
     protected boolean failIfNotReplaced;
 
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
+
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
+
     @Override
-    protected boolean isAllowSnapshots() {
+    protected boolean getProcessDependencies() {
+        return processDependencies;
+    }
+
+    @Override
+    protected boolean getProcessDependencyManagement() {
+        return processDependencyManagement;
+    }
+
+    @Override
+    public boolean getProcessParent() {
+        return processParent;
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
         return false;
     }
 
@@ -100,7 +139,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
     protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
         try {
-            if (isProcessingDependencyManagement()) {
+            if (getProcessDependencyManagement()) {
                 DependencyManagement dependencyManagement =
                         PomHelper.getRawModel(getProject()).getDependencyManagement();
                 if (dependencyManagement != null) {
@@ -110,10 +149,10 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                             DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
                 }
             }
-            if (getProject().getDependencies() != null && isProcessingDependencies()) {
+            if (getProject().getDependencies() != null && getProcessDependencies()) {
                 useReleases(pom, getProject().getDependencies(), DependencyChangeRecord.ChangeKind.DEPENDENCY);
             }
-            if (getProject().getParent() != null && isProcessingParent()) {
+            if (getProject().getParent() != null && getProcessParent()) {
                 useReleases(pom, singletonList(getParentDependency()), DependencyChangeRecord.ChangeKind.PARENT);
             }
         } catch (IOException e) {
@@ -127,7 +166,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
             DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
         for (Dependency dep : dependencies) {
-            if (isExcludeReactor() && isProducedByReactor(dep)) {
+            if (getExcludeReactor() && isProducedByReactor(dep)) {
                 getLog().info("Ignoring reactor dependency: " + toString(dep));
                 continue;
             }

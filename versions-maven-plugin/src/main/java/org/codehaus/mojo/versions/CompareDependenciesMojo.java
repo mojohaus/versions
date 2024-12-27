@@ -116,11 +116,29 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
     @Parameter(property = "reportOutputFile")
     protected File reportOutputFile;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        // this parameter is used by base class, but shouldn't affect comparison; setting to true
-        return true;
-    }
+    /**
+     * Whether to process the dependencies section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencies", defaultValue = "true")
+    private boolean processDependencies = true;
+
+    /**
+     * Whether to process the dependencyManagement section of the project.
+     *
+     * @since 1.0-alpha-3
+     */
+    @Parameter(property = "processDependencyManagement", defaultValue = "true")
+    private boolean processDependencyManagement = true;
+
+    /**
+     * Whether to process the parent section of the project. If not set will default to false.
+     *
+     * @since 2.3
+     */
+    @Parameter(property = "processParent", defaultValue = "false")
+    private boolean processParent = false;
 
     /**
      * The (injected) instance of {@link ProjectBuilder}
@@ -140,6 +158,27 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
         this.projectBuilder = projectBuilder;
+    }
+
+    @Override
+    protected boolean getProcessDependencies() {
+        return processDependencies;
+    }
+
+    @Override
+    protected boolean getProcessDependencyManagement() {
+        return processDependencyManagement;
+    }
+
+    @Override
+    public boolean getProcessParent() {
+        return processParent;
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        // this parameter is used by base class, but shouldn't affect comparison; setting to true
+        return true;
     }
 
     /**
@@ -187,14 +226,14 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
 
         List<String> totalDiffs = new ArrayList<>();
         List<String> propertyDiffs = new ArrayList<>();
-        if (getProject().getDependencyManagement() != null && isProcessingDependencyManagement()) {
+        if (getProject().getDependencyManagement() != null && getProcessDependencyManagement()) {
             totalDiffs.addAll(compareVersions(
                     pom,
                     getProject().getDependencyManagement().getDependencies(),
                     remoteDepsMap,
                     DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT));
         }
-        if (getProject().getDependencies() != null && isProcessingDependencies()) {
+        if (getProject().getDependencies() != null && getProcessDependencies()) {
             totalDiffs.addAll(compareVersions(
                     pom, getProject().getDependencies(), remoteDepsMap, DependencyChangeRecord.ChangeKind.DEPENDENCY));
         }
@@ -205,7 +244,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
                             .build());
             propertyDiffs.addAll(updatePropertyVersions(pom, versionProperties, remoteDepsMap));
         }
-        if (getProject().getParent() != null && remoteMavenProject.getParent() != null && isProcessingParent()) {
+        if (getProject().getParent() != null && remoteMavenProject.getParent() != null && getProcessParent()) {
             Dependency parent = DependencyBuilder.newBuilder()
                     .withGroupId(remoteMavenProject.getParentArtifact().getGroupId())
                     .withArtifactId(remoteMavenProject.getParentArtifact().getArtifactId())

@@ -139,11 +139,6 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
-
     // -------------------------- OTHER METHODS --------------------------
 
     @Inject
@@ -153,6 +148,11 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
     }
 
     @Override

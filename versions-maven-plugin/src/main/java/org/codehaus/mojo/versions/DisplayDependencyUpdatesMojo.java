@@ -318,11 +318,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
-    @Override
-    protected boolean isAllowSnapshots() {
-        return allowSnapshots;
-    }
-
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     @Inject
@@ -332,6 +327,11 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders) {
         super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+    }
+
+    @Override
+    protected boolean getAllowSnapshots() {
+        return allowSnapshots;
     }
 
     // open for tests

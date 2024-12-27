@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 
 public abstract class UseLatestVersionsMojoTestBase {
@@ -62,6 +63,9 @@ public abstract class UseLatestVersionsMojoTestBase {
             pomHelper
                     .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
                     .thenReturn(mojo.getProject().getModel());
+            pomHelper
+                    .when(() -> PomHelper.setProjectParentVersion(any(), anyString()))
+                    .thenReturn(true);
             mojo.update(null);
         }
     }
