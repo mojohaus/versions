@@ -221,7 +221,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private boolean processFromLocalAggregationRoot;
 
     /**
-     * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
+     * Whether to update the <code>project.build.outputTimestamp</code> property in the POM when setting version.
      *
      * @since 2.10
      * @deprecated please use {@link #updateBuildOutputTimestampPolicy} instead
@@ -230,7 +230,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private boolean updateBuildOutputTimestamp;
 
     /**
-     * Whether to update the <code>project.build.outputTimestamp<code> property in the POM when setting version.
+     * Whether to update the <code>project.build.outputTimestamp</code> property in the POM when setting version.
      * Valid values are: <code>onchange</code>, which will only change <code>outputTimestamp</code> for changed POMs,
      * <code>always</code>, <code>never</code>.
      *
