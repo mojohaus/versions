@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -44,6 +43,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.resolution.VersionRequest;
 import org.eclipse.aether.resolution.VersionResolutionException;
@@ -96,11 +96,12 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     @Inject
     public LockSnapshotsMojo(
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders) {
-        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+            Map<String, ChangeRecorder> changeRecorders)
+            throws MojoExecutionException {
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
     }
 
     @Override
@@ -248,6 +249,6 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
      */
     private Optional<String> resolveSnapshotVersion(Dependency dep)
             throws MojoExecutionException, VersionResolutionException {
-        return resolveSnapshotVersion(getHelper().createDependencyArtifact(dep));
+        return resolveSnapshotVersion(artifactFactory.createArtifact(dep));
     }
 }

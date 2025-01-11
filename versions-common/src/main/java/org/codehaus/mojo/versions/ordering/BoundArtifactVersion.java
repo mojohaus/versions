@@ -15,6 +15,8 @@ package org.codehaus.mojo.versions.ordering;
  * limitations under the License.
  */
 
+import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +25,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.Segment;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 
 /**
  * <p>Represents an <b>immutable</b> artifact version with all segments <em>major</em> to the given segment
@@ -68,7 +70,7 @@ public class BoundArtifactVersion implements ArtifactVersion {
             }
         }
         versionBuilder.append(Integer.MAX_VALUE);
-        comparable = DefaultArtifactVersionCache.of(versionBuilder.toString());
+        comparable = ArtifactVersionService.getArtifactVersion(versionBuilder.toString());
     }
 
     /**
@@ -128,7 +130,7 @@ public class BoundArtifactVersion implements ArtifactVersion {
     }
 
     @Override
-    public int compareTo(ArtifactVersion other) {
+    public int compareTo(@Nullable ArtifactVersion other) {
         if (other == null) {
             return -1;
         }
@@ -201,9 +203,6 @@ public class BoundArtifactVersion implements ArtifactVersion {
 
     /**
      * {@inheritDoc}
-     *
-     * Quasi-contract: {@link #toString()} must produce the textual representation of the version, without any
-     * additional items, this is required by the implementation of {@link NumericVersionComparator}.
      */
     @Override
     public String toString() {

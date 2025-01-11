@@ -24,7 +24,6 @@ import javax.inject.Inject;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -34,6 +33,7 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.ParentUpdatesModel;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
@@ -50,11 +50,11 @@ public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesMod
     @Inject
     protected ParentUpdatesReport(
             I18N i18n,
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
-        super(i18n, artifactHandlerManager, repositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactFactory, repositorySystem, wagonMap, rendererFactory);
     }
 
     /**
@@ -89,14 +89,12 @@ public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesMod
      * @param locale the locale to generate the report for.
      * @param sink   the report formatting tool
      */
-    @SuppressWarnings("deprecation")
-    @Override
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
         try {
             ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions(project.getParentArtifact(), false);
             rendererFactory
                     .createReportRenderer(
-                            getOutputName(),
+                            getBundleName(),
                             sink,
                             locale,
                             new ParentUpdatesModel(
@@ -128,7 +126,7 @@ public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesMod
      * {@inheritDoc}
      */
     @Override
-    public String getOutputName() {
+    public String getBundleName() {
         return "parent-updates-report";
     }
 }

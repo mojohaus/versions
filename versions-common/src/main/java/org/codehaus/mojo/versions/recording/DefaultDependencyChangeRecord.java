@@ -46,39 +46,71 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
         return new Builder();
     }
 
+    /**
+     * A builder object for {@link DependencyChangeRecord} instances
+     */
     public static class Builder {
-
         private ChangeKind kind;
         private String groupId;
         private String artifactId;
         private String oldVersion;
         private String newVersion;
 
+        /**
+         * Supplies the kind
+         * @param kind requested kind
+         * @return builder instance
+         */
         public Builder withKind(ChangeKind kind) {
             this.kind = kind;
             return this;
         }
 
+        /**
+         * Supplies the groupId
+         * @param groupId requested groupId
+         * @return builder instance
+         */
         public Builder withGroupId(String groupId) {
             this.groupId = groupId;
             return this;
         }
 
+        /**
+         * Supplies the artifactId
+         * @param artifactId requested artifactId
+         * @return builder instance
+         */
         public Builder withArtifactId(String artifactId) {
             this.artifactId = artifactId;
             return this;
         }
 
+        /**
+         * Supplies the version from before the change
+         * @param oldVersion version from before the change
+         * @return builder instance
+         */
         public Builder withOldVersion(String oldVersion) {
             this.oldVersion = oldVersion;
             return this;
         }
 
+        /**
+         * Supplies the version from after the change
+         * @param newVersion version from after the change
+         * @return builder instance
+         */
         public Builder withNewVersion(String newVersion) {
             this.newVersion = newVersion;
             return this;
         }
 
+        /**
+         * Supplies the dependency
+         * @param dependency requested dependency
+         * @return builder instance
+         */
         public Builder withDependency(Dependency dependency) {
             groupId = dependency.getGroupId();
             artifactId = dependency.getArtifactId();
@@ -86,6 +118,11 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
             return this;
         }
 
+        /**
+         * Supplies the artifact
+         * @param artifact requested artifact
+         * @return builder instance
+         */
         public Builder withArtifact(Artifact artifact) {
             groupId = artifact.getGroupId();
             artifactId = artifact.getArtifactId();
@@ -93,6 +130,10 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
             return this;
         }
 
+        /**
+         * Builds the {@link DependencyChangeRecord} instance
+         * @return {@link DependencyChangeRecord} instance
+         */
         public DependencyChangeRecord build() {
             return new DefaultDependencyChangeRecord(
                     kind, new DefaultDependencyVersionChange(groupId, artifactId, oldVersion, newVersion));

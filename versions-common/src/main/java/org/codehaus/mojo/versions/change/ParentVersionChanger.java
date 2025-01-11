@@ -24,21 +24,33 @@ import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
- *
+ * Version changer for the parent
  */
 public class ParentVersionChanger extends AbstractVersionChanger {
 
+    /**
+     * Constructs a new instance
+     * @param model {@link Model} instance
+     * @param pom {@link MutableXMLStreamReader} representing the pom file to be modified
+     * @param reporter {@link Log} object
+     */
     public ParentVersionChanger(Model model, MutableXMLStreamReader pom, Log reporter) {
         super(model, pom, reporter);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void apply(DependencyVersionChange versionChange) throws XMLStreamException {
         if (getModel().getParent() != null
                 && versionChange.getGroupId().equals(getModel().getParent().getGroupId())
                 && versionChange.getArtifactId().equals(getModel().getParent().getArtifactId())) {
             if (PomHelper.setProjectParentVersion(getPom(), versionChange.getNewVersion())) {
-                info("    Updating parent " + versionChange.getGroupId() + ":" + versionChange.getArtifactId());
-                info("        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion());
+                getLog().info("    Updating parent " + versionChange.getGroupId() + ":"
+                        + versionChange.getArtifactId());
+                getLog().info("        from version " + versionChange.getOldVersion() + " to "
+                        + versionChange.getNewVersion());
             }
         }
     }

@@ -34,7 +34,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -59,6 +58,10 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.rule.RuleService;
+import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -70,9 +73,6 @@ import static java.util.Optional.ofNullable;
  * @author Stephen Connolly
  */
 public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
-
-    // ------------------------------ FIELDS ------------------------------
-
     /**
      * The Maven Project.
      *
@@ -80,11 +80,6 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     protected MavenProject project;
-
-    /**
-     * The (injected) {@link ArtifactHandlerManager} instance.
-     */
-    protected final ArtifactHandlerManager artifactHandlerManager;
 
     /**
      * The (injected) {@link org.eclipse.aether.RepositorySystem} instance.
@@ -137,7 +132,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected MavenSession session;
 
     @Parameter(defaultValue = "${mojoExecution}", required = true, readonly = true)
-    private MojoExecution mojoExecution;
+    protected MojoExecution mojoExecution;
 
     /**
      * The format used to record changes. If "none" is specified, no changes are recorded.
@@ -193,15 +188,18 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      */
     protected final Map<String, Wagon> wagonMap;
 
+    protected final ArtifactFactory artifactFactory;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     @Inject
     protected AbstractVersionsUpdaterMojo(
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders) {
-        this.artifactHandlerManager = artifactHandlerManager;
+            Map<String, ChangeRecorder> changeRecorders)
+            throws MojoExecutionException {
+        this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
         this.wagonMap = wagonMap;
         this.changeRecorders = changeRecorders;
@@ -211,17 +209,24 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     public VersionsHelper getHelper() throws MojoExecutionException {
         if (helper == null) {
-            helper = new DefaultVersionsHelper.Builder()
-                    .withArtifactHandlerManager(artifactHandlerManager)
-                    .withRepositorySystem(repositorySystem)
+            RuleService ruleService = new RulesServiceBuilder()
+                    .withMavenSession(session)
                     .withWagonMap(wagonMap)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)
                     .withIgnoredVersions(ignoredVersions)
                     .withLog(getLog())
+                    .build();
+            PomHelper pomHelper =
+                    new PomHelper(artifactFactory, new VersionsExpressionEvaluator(session, mojoExecution));
+            helper = new DefaultVersionsHelper.Builder()
+                    .withArtifactCreationService(artifactFactory)
+                    .withRepositorySystem(repositorySystem)
+                    .withLog(getLog())
                     .withMavenSession(session)
-                    .withMojoExecution(mojoExecution)
+                    .withPomHelper(pomHelper)
+                    .withRuleService(ruleService)
                     .build();
         }
         return helper;
@@ -429,13 +434,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
             throws XMLStreamException, InvalidVersionSpecificationException, InvalidSegmentException,
                     MojoExecutionException {
         ArtifactVersion winner = version.getNewestVersion(
-                currentVersion,
-                property,
-                getAllowSnapshots(),
-                this.reactorProjects,
-                this.getHelper(),
-                allowDowngrade,
-                unchangedSegment);
+                currentVersion, property, getAllowSnapshots(), this.reactorProjects, allowDowngrade, unchangedSegment);
 
         if (winner == null || currentVersion.equals(winner.toString())) {
             getLog().info("Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion);

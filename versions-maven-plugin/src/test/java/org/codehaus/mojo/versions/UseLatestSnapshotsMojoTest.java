@@ -8,52 +8,49 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.junit.Before;
 import org.junit.Test;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
+import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 
 public class UseLatestSnapshotsMojoTest extends UseLatestVersionsMojoTestBase {
-    @Before
-    public void setUp() throws Exception {
-        changeRecorder = createChangeRecorder();
-        mojo =
-                new UseLatestSnapshotsMojo(
-                        mockArtifactHandlerManager(), createRepositorySystem(), null, changeRecorder.asTestMap()) {
+    @Override
+    protected UseLatestVersionsMojoBase createMojo() throws IllegalAccessException, MojoExecutionException {
+        return new UseLatestSnapshotsMojo(artifactFactory, createRepositorySystem(), null, changeRecorder.asTestMap()) {
+            {
+                reactorProjects = emptyList();
+                MavenProject project = new MavenProject() {
                     {
-                        reactorProjects = emptyList();
-                        MavenProject project = new MavenProject() {
+                        setModel(new Model() {
                             {
-                                setModel(new Model() {
-                                    {
-                                        setGroupId("default-group");
-                                        setArtifactId("project-artifact");
-                                        setVersion("1.0.0-SNAPSHOT");
+                                setGroupId("default-group");
+                                setArtifactId("project-artifact");
+                                setVersion("1.0.0-SNAPSHOT");
 
-                                        setDependencies(singletonList(DependencyBuilder.newBuilder()
-                                                .withGroupId("default-group")
-                                                .withArtifactId("dependency-artifact")
-                                                .withVersion("0.9.0")
-                                                .withScope(SCOPE_COMPILE)
-                                                .withType("jar")
-                                                .withClassifier("default")
-                                                .build()));
-                                    }
-                                });
+                                setDependencies(singletonList(DependencyBuilder.newBuilder()
+                                        .withGroupId("default-group")
+                                        .withArtifactId("dependency-artifact")
+                                        .withVersion("0.9.0")
+                                        .withScope(SCOPE_COMPILE)
+                                        .withType("jar")
+                                        .withClassifier("default")
+                                        .build()));
                             }
-                        };
-                        setProject(project);
-
-                        session = mockMavenSession();
-                        allowMajorUpdates = true;
-                        allowMinorUpdates = true;
-                        allowIncrementalUpdates = true;
+                        });
                     }
                 };
+                setProject(project);
+
+                session = mockMavenSession();
+                allowMajorUpdates = true;
+                allowMinorUpdates = true;
+                allowIncrementalUpdates = true;
+                setVariableValueToObject(this, "processDependencyManagement", false);
+            }
+        };
     }
 
     @Test

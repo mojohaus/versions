@@ -33,10 +33,12 @@ import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.codehaus.plexus.i18n.I18N;
@@ -55,6 +57,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.mockito.Mockito.mock;
 
 /**
  * Basic tests for {@linkplain DependencyUpdatesReport}.
@@ -68,7 +71,7 @@ public class DependencyUpdatesReportTest {
         TestDependencyUpdatesReport() {
             super(
                     MOCK_I18N,
-                    mockArtifactHandlerManager(),
+                    new ArtifactFactory(mockArtifactHandlerManager()),
                     mockAetherRepositorySystem(),
                     null,
                     new ReportRendererFactoryImpl(MOCK_I18N));
@@ -80,6 +83,7 @@ public class DependencyUpdatesReportTest {
             project.getModel().setDependencyManagement(new DependencyManagement());
 
             session = mockMavenSession();
+            mojoExecution = mock(MojoExecution.class);
         }
 
         public TestDependencyUpdatesReport withDependencies(Dependency... dependencies) {
