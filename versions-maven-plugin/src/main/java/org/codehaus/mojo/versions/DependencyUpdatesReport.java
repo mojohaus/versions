@@ -79,7 +79,7 @@ public class DependencyUpdatesReport extends AbstractDependencyUpdatesReport {
      * {@inheritDoc}
      */
     @Override
-    public String getOutputName() {
+    public String getBundleName() {
         return "dependency-updates-report";
     }
 }

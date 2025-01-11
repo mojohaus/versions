@@ -61,22 +61,24 @@ public class ReportRendererFactoryImpl implements ReportRendererFactory {
     public <T extends ReportRenderer, U> T createReportRenderer(
             String reportName, Sink sink, Locale locale, U model, boolean allowSnapshots)
             throws IllegalArgumentException {
-        if (DEPENDENCY_UPDATES_REPORT.equals(reportName) || DEPENDENCY_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
-            return (T) new DependencyUpdatesReportRenderer<>(
-                    i18N, sink, locale, reportName, (DependencyUpdatesModel) model, allowSnapshots);
+        switch (reportName) {
+            case DEPENDENCY_UPDATES_REPORT:
+            case DEPENDENCY_UPDATES_AGGREGATE_REPORT:
+                return (T) new DependencyUpdatesReportRenderer<>(
+                        i18N, sink, locale, reportName, (DependencyUpdatesModel) model, allowSnapshots);
+            case PLUGIN_UPDATES_REPORT:
+            case PLUGIN_UPDATES_AGGREGATE_REPORT:
+                return (T) new PluginUpdatesReportRenderer(
+                        i18N, sink, locale, reportName, (PluginUpdatesModel) model, allowSnapshots);
+            case PROPERTY_UPDATES_REPORT:
+            case PROPERTY_UPDATES_AGGREGATE_REPORT:
+                return (T) new PropertyUpdatesReportRenderer(
+                        i18N, sink, locale, reportName, (PropertyUpdatesModel) model, allowSnapshots);
+            case PARENT_UPDATES_REPORT:
+                return (T) new ParentUpdatesReportRenderer(
+                        i18N, sink, locale, reportName, (ParentUpdatesModel) model, allowSnapshots);
+            default:
+                throw new IllegalArgumentException("Invalid report name: " + reportName);
         }
-        if (PLUGIN_UPDATES_REPORT.equals(reportName) || PLUGIN_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
-            return (T) new PluginUpdatesReportRenderer(
-                    i18N, sink, locale, reportName, (PluginUpdatesModel) model, allowSnapshots);
-        }
-        if (PROPERTY_UPDATES_REPORT.equals(reportName) || PROPERTY_UPDATES_AGGREGATE_REPORT.equals(reportName)) {
-            return (T) new PropertyUpdatesReportRenderer(
-                    i18N, sink, locale, reportName, (PropertyUpdatesModel) model, allowSnapshots);
-        }
-        if (PARENT_UPDATES_REPORT.equals(reportName)) {
-            return (T) new ParentUpdatesReportRenderer(
-                    i18N, sink, locale, reportName, (ParentUpdatesModel) model, allowSnapshots);
-        }
-        throw new IllegalArgumentException("Invalid report name: " + reportName);
     }
 }

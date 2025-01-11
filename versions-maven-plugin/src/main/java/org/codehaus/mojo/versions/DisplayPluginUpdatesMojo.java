@@ -85,7 +85,6 @@ import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ArtifactVersionService;
@@ -371,7 +370,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
         // if Maven prerequisite upgraded to a version, Map<plugin compact key, latest compatible plugin vesion>
-        Map<ArtifactVersion, Map<String, String>> mavenUpgrades = new TreeMap<>(new MavenVersionComparator());
+        Map<ArtifactVersion, Map<String, String>> mavenUpgrades = new TreeMap<>();
 
         for (Plugin plugin : plugins) {
             String coords = ArtifactUtils.versionlessKey(plugin.getGroupId(), plugin.getArtifactId());

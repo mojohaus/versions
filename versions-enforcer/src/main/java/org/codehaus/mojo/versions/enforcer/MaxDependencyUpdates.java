@@ -38,16 +38,21 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
+import org.codehaus.mojo.versions.rule.RuleService;
+import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptyList;
@@ -295,17 +300,25 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
     private VersionsHelper createVersionsHelper(String serverId, String rulesUri, RuleSet ruleSet)
             throws EnforcerRuleError {
         try {
-            return new DefaultVersionsHelper.Builder()
-                    .withArtifactFactory(artifactFactory)
-                    .withRepositorySystem(repositorySystem)
+            Log log = new PluginLogWrapper(getLog());
+            RuleService ruleService = new RulesServiceBuilder()
                     .withWagonMap(wagonMap)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)
                     .withIgnoredVersions(null)
-                    .withLog(new PluginLogWrapper(getLog()))
+                    .withLog(log)
                     .withMavenSession(mavenSession)
-                    .withMojoExecution(mojoExecution)
+                    .build();
+            PomHelper pomHelper =
+                    new PomHelper(artifactFactory, new VersionsExpressionEvaluator(mavenSession, mojoExecution));
+            return new DefaultVersionsHelper.Builder()
+                    .withArtifactFactory(artifactFactory)
+                    .withRepositorySystem(repositorySystem)
+                    .withLog(log)
+                    .withMavenSession(mavenSession)
+                    .withPomHelper(pomHelper)
+                    .withRuleService(ruleService)
                     .build();
         } catch (MojoExecutionException e) {
             throw new EnforcerRuleError("Cannot resolve dependency", e);

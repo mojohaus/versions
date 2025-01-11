@@ -31,10 +31,14 @@ import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
+import org.codehaus.mojo.versions.rule.RuleService;
+import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 
@@ -83,16 +87,6 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
      */
     @Parameter(property = "maven.version.rules")
     private String rulesUri;
-
-    /**
-     * The versioning rule to use when comparing versions. Valid values are <code>maven</code>, <code>numeric</code>
-     * which will handle long version numbers provided all components are numeric, or <code>mercury</code> which will
-     * use the mercury version number comparison rules.
-     *
-     * @since 1.0-alpha-1
-     */
-    @Parameter(property = "comparisonMethod")
-    protected String comparisonMethod;
 
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
@@ -176,9 +170,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     public VersionsHelper getHelper() throws MavenReportException {
         if (helper == null) {
             try {
-                helper = new DefaultVersionsHelper.Builder()
-                        .withArtifactFactory(artifactFactory)
-                        .withRepositorySystem(repositorySystem)
+                RuleService ruleService = new RulesServiceBuilder()
                         .withWagonMap(wagonMap)
                         .withServerId(serverId)
                         .withRulesUri(rulesUri)
@@ -186,7 +178,16 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
                         .withIgnoredVersions(ignoredVersions)
                         .withLog(getLog())
                         .withMavenSession(session)
-                        .withMojoExecution(mojoExecution)
+                        .build();
+                PomHelper pomHelper =
+                        new PomHelper(artifactFactory, new VersionsExpressionEvaluator(session, mojoExecution));
+                helper = new DefaultVersionsHelper.Builder()
+                        .withArtifactFactory(artifactFactory)
+                        .withRepositorySystem(repositorySystem)
+                        .withLog(getLog())
+                        .withMavenSession(session)
+                        .withPomHelper(pomHelper)
+                        .withRuleService(ruleService)
                         .build();
             } catch (MojoExecutionException e) {
                 throw new MavenReportException(e.getMessage(), e);
@@ -209,6 +210,12 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     }
 
     /**
+     * Returns the bundle name for the underlying report renderers
+     * @return bundle name for the underlying report renderers
+     */
+    protected abstract String getBundleName();
+
+    /**
      * generates the report.
      *
      * @param locale the locale to generate the report for.
@@ -222,6 +229,16 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     @Override
     public String getDescription(Locale locale) {
         return getText(locale, "report.description");
+    }
+
+    /**
+     * Deprecated because the method is being deprecated in Maven 4 and because the plugin was using it to get
+     * {@link #getBundleName()}
+     */
+    @Override
+    @Deprecated
+    public String getOutputName() {
+        return getBundleName();
     }
 
     @Override
@@ -242,10 +259,6 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
 
     public Boolean getAllowSnapshots() {
         return this.allowSnapshots;
-    }
-
-    public String getComparisonMethod() {
-        return comparisonMethod;
     }
 
     public I18N getI18n() {
