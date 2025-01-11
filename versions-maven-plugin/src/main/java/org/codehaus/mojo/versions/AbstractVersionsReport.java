@@ -225,6 +225,16 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         return getText(locale, "report.description");
     }
 
+    /**
+     * Deprecated because the method is being deprecated in Maven 4 and because the plugin was using it to get
+     * {@link #getOutputPath()} ()}
+     */
+    @Override
+    @Deprecated
+    public String getOutputName() {
+        return getOutputPath();
+    }
+
     @Override
     public String getName(Locale locale) {
         return getText(locale, "report.title");

@@ -81,7 +81,7 @@ public class PluginUpdatesAggregateReport extends AbstractPluginUpdatesReport {
      * {@inheritDoc}
      */
     @Override
-    public String getOutputName() {
+    public String getOutputPath() {
         return "plugin-updates-aggregate-report";
     }
 }

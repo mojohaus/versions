@@ -8,6 +8,6 @@ Versions - XML schemas for ruleSet
 ==================================
 
 - [rule-3.0.0.xsd](rule-3.0.0.xsd)
-- [rule-2.1.0.xsd](https://www.mojohaus.org/versions-maven-plugin/xsd/rule-2.1.0.xsd)
-- [rule-2.0.0.xsd](https://www.mojohaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd)
+- [rule-2.1.0.xsd](rule-2.1.0.xsd)
+- [rule-2.0.0.xsd](rule-2.0.0.xsd)
 
