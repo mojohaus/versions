@@ -89,7 +89,7 @@ public class PropertyUpdatesAggregateReport extends AbstractPropertyUpdatesRepor
      * {@inheritDoc}
      */
     @Override
-    public String getOutputName() {
+    public String getBundleName() {
         return "property-updates-aggregate-report";
     }
 }

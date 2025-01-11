@@ -156,7 +156,7 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
         for (String format : this.formats) {
             if ("html".equals(format)) {
                 this.rendererFactory
-                        .createReportRenderer(getOutputPath(), sink, locale, propertyUpdatesModel, allowSnapshots)
+                        .createReportRenderer(getBundleName(), sink, locale, propertyUpdatesModel, allowSnapshots)
                         .render();
             } else if ("xml".equals(format)) {
                 Path outputDir = Paths.get(getProject().getBuild().getDirectory());

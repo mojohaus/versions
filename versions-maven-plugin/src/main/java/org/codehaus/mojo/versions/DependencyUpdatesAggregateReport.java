@@ -81,7 +81,7 @@ public class DependencyUpdatesAggregateReport extends AbstractDependencyUpdatesR
      * {@inheritDoc}
      */
     @Override
-    public String getOutputName() {
+    public String getBundleName() {
         return "dependency-updates-aggregate-report";
     }
 }
