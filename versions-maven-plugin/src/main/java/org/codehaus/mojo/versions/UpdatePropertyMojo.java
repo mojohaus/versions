@@ -24,7 +24,6 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Map;
 
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -34,6 +33,7 @@ import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
 
 /**
@@ -97,11 +97,12 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
 
     @Inject
     public UpdatePropertyMojo(
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders) {
-        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+            Map<String, ChangeRecorder> changeRecorders)
+            throws MojoExecutionException {
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
     }
 
     @Override

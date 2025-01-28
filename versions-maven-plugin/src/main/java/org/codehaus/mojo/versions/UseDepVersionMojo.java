@@ -41,7 +41,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.ModelBase;
@@ -57,6 +56,7 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind;
 import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.eclipse.aether.RepositorySystem;
@@ -160,11 +160,12 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     @Inject
     public UseDepVersionMojo(
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders) {
-        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+            Map<String, ChangeRecorder> changeRecorders)
+            throws MojoExecutionException {
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
     }
 
     @Override

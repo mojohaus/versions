@@ -2,19 +2,42 @@ package org.codehaus.mojo.versions;
 
 import java.util.List;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.plugin.logging.Log;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class SeparatePatternsForIncludesAnExcludesTest {
 
     AbstractVersionsDependencyUpdaterMojo mojo;
 
+    @Mock
+    private Log log;
+
+    private PomHelper pomHelper;
+
+    private ArtifactFactory artifactFactory;
+
+    @Mock
+    private ExpressionEvaluator expressionEvaluator;
+
     @Before
     public void setUp() throws Exception {
-        mojo = new AbstractVersionsDependencyUpdaterMojo(null, null, null, null) {
+        openMocks(this);
+        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
+        artifactFactory = new ArtifactFactory(artifactHandlerManager);
+        pomHelper = new PomHelper(artifactFactory, expressionEvaluator);
+
+        mojo = new AbstractVersionsDependencyUpdaterMojo(artifactFactory, null, null, null) {
             @Override
             protected boolean getProcessDependencies() {
                 return true;

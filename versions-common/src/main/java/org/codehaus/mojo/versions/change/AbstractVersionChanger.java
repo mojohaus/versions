@@ -30,27 +30,54 @@ import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
  * @since 15-Sep-2010 15:59:46
  */
 public abstract class AbstractVersionChanger implements VersionChanger {
+    /**
+     * {@link Model} instance
+     */
     private final Model model;
 
+    /**
+     * {@link MutableXMLStreamReader} instance
+     */
     private final MutableXMLStreamReader pom;
 
-    protected final Log log;
+    /**
+     * {@link Log} instance
+     */
+    private final Log log;
 
+    /**
+     * Creates a new instance providing the model, mutable pom, and a logger.
+     * @param model {@link Model} instance
+     * @param pom {@link MutableXMLStreamReader} instance representing the parsed (mutable) pom file
+     * @param log {@link Log} instance for logging
+     */
     public AbstractVersionChanger(Model model, MutableXMLStreamReader pom, Log log) {
         this.model = model;
         this.pom = pom;
         this.log = log;
     }
 
-    public Model getModel() {
+    /**
+     * Returns the Maven Model instance
+     * @return {@link Model} instance
+     */
+    protected Model getModel() {
         return model;
     }
 
-    public MutableXMLStreamReader getPom() {
+    /**
+     * Returns the {@link MutableXMLStreamReader} instance representing the parsed and possibly modified POM file.
+     * @return {@link MutableXMLStreamReader} instance under changes
+     */
+    protected MutableXMLStreamReader getPom() {
         return pom;
     }
 
-    public void info(CharSequence charSequence) {
-        log.info(charSequence);
+    /**
+     * Returns the {@link Log} instance
+     * @return {@link Log} instance
+     */
+    protected Log getLog() {
+        return log;
     }
 }
