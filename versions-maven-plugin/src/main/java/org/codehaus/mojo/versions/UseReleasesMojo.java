@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -41,6 +40,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.singletonList;
@@ -122,11 +122,12 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     @Inject
     public UseReleasesMojo(
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders) {
-        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+            Map<String, ChangeRecorder> changeRecorders)
+            throws MojoExecutionException {
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
     }
 
     /**

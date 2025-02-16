@@ -19,8 +19,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,11 +40,6 @@ class AbstractVersionDetailsTest {
     @BeforeEach
     void setUp() {
         instance = new AbstractVersionDetails() {
-            @Override
-            public VersionComparator getVersionComparator() {
-                return new MavenVersionComparator();
-            }
-
             @Override
             public ArtifactVersion[] getVersions(boolean includeSnapshots) {
                 return new ArtifactVersion[0];

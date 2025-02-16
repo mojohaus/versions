@@ -3,18 +3,25 @@ package org.codehaus.mojo.versions;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 
 import static java.util.Collections.emptyList;
@@ -29,7 +36,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 /*
  * Copyright MojoHaus and Contributors
@@ -53,11 +62,26 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
     private TestChangeRecorder changeRecorder;
     private ForceReleasesMojo mojo;
 
+    @Mock
+    private Log log;
+
+    private PomHelper pomHelper;
+
+    private ArtifactFactory artifactFactory;
+
+    @Mock
+    private ExpressionEvaluator expressionEvaluator;
+
     @Before
-    public void setUp() throws IllegalAccessException {
+    public void setUp() throws Exception {
+        super.setUp();
+        openMocks(this);
+        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
+        artifactFactory = new ArtifactFactory(artifactHandlerManager);
+        MavenSession session = mockMavenSession();
+
         changeRecorder = new TestChangeRecorder();
-        mojo = new ForceReleasesMojo(
-                mockArtifactHandlerManager(), mockAetherRepositorySystem(), null, changeRecorder.asTestMap());
+        mojo = new ForceReleasesMojo(artifactFactory, mockAetherRepositorySystem(), null, changeRecorder.asTestMap());
         setVariableValueToObject(mojo, "reactorProjects", emptyList());
         mojo.project = new MavenProject() {
             {
@@ -70,7 +94,8 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
                 });
             }
         };
-        mojo.session = mockMavenSession();
+        mojo.session = session;
+        mojo.mojoExecution = mock(MojoExecution.class);
     }
 
     @Test
