@@ -18,20 +18,22 @@ package org.codehaus.mojo.versions.enforcer;
  * under the License.
  */
 
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.enforcer.rule.api.EnforcerLogger;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -60,13 +62,27 @@ class MaxDependencyUpdatesTest {
     @Mock
     private RepositorySystem repositorySystem;
 
-    private ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
+    @Mock
+    private MojoExecution mojoExecution;
 
-    @InjectMocks
+    private ArtifactFactory artifactFactory;
+
+    private ArtifactHandlerManager artifactHandlerManager;
+
     private MaxDependencyUpdates maxDependencyUpdates;
 
     @BeforeEach
     public void setup() {
+        artifactHandlerManager = mockArtifactHandlerManager();
+        artifactFactory = new ArtifactFactory(artifactHandlerManager);
+        maxDependencyUpdates = new MaxDependencyUpdates(
+                project,
+                artifactFactory,
+                artifactHandlerManager,
+                repositorySystem,
+                Collections.emptyMap(),
+                mavenSession,
+                mojoExecution);
         maxDependencyUpdates.setLog(enforcerLogger);
     }
 

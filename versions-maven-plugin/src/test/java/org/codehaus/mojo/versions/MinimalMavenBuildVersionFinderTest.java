@@ -2,8 +2,9 @@ package org.codehaus.mojo.versions;
 
 import java.util.Optional;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -16,7 +17,7 @@ public class MinimalMavenBuildVersionFinderTest {
 
     @Test
     public void testValidVersionRanges() {
-        DefaultArtifactVersion expectedMinimumVersion = DefaultArtifactVersionCache.of("1.0");
+        ArtifactVersion expectedMinimumVersion = ArtifactVersionService.getArtifactVersion("1.0");
         assertEquals(expectedMinimumVersion, MinimalMavenBuildVersionFinder.getMinimumVersionFromRange("1.0"));
         assertEquals(expectedMinimumVersion, MinimalMavenBuildVersionFinder.getMinimumVersionFromRange("[1.0]"));
         assertEquals(expectedMinimumVersion, MinimalMavenBuildVersionFinder.getMinimumVersionFromRange("[1.0,)"));

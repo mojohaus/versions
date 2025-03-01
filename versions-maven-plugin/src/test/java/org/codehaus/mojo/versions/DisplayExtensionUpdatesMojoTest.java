@@ -22,12 +22,14 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ExtensionBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -47,6 +49,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
  * Basic tests for {@linkplain DisplayExtensionUpdatesMojo}.
@@ -57,9 +60,16 @@ public class DisplayExtensionUpdatesMojoTest {
     private DisplayExtensionUpdatesMojo mojo;
     private Path tempPath;
 
+    private PomHelper pomHelper;
+
+    private ArtifactFactory artifactFactory;
+
     @Before
-    public void setUp() throws IllegalAccessException, IOException {
-        mojo = new DisplayExtensionUpdatesMojo(mockArtifactHandlerManager(), mockAetherRepositorySystem(), null, null);
+    public void setUp() throws IllegalAccessException, IOException, MojoExecutionException {
+        openMocks(this);
+        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
+        artifactFactory = new ArtifactFactory(artifactHandlerManager);
+        mojo = new DisplayExtensionUpdatesMojo(artifactFactory, mockAetherRepositorySystem(), null, null);
         mojo.project = new MavenProject() {
             {
                 setModel(new Model() {

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -28,17 +29,20 @@ import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.resolution.VersionRequest;
 import org.eclipse.aether.resolution.VersionResolutionException;
 import org.eclipse.aether.resolution.VersionResult;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -49,8 +53,16 @@ import static org.mockito.Mockito.when;
  */
 public class LockSnapshotsMojoTest {
 
-    private LockSnapshotsMojo createMojo(RepositorySystem repositorySystem) {
-        return new LockSnapshotsMojo(null, repositorySystem, null, null) {
+    private ArtifactFactory artifactFactory;
+
+    @Before
+    public void setUp() throws MojoExecutionException {
+        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
+        artifactFactory = new ArtifactFactory(artifactHandlerManager);
+    }
+
+    private LockSnapshotsMojo createMojo(RepositorySystem repositorySystem) throws MojoExecutionException {
+        return new LockSnapshotsMojo(artifactFactory, repositorySystem, null, null) {
             {
                 reactorProjects = emptyList();
                 project = new MavenProject(new Model() {

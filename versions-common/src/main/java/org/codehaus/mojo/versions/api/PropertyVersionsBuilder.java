@@ -29,6 +29,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 
 /**
  * Builds {@link org.codehaus.mojo.versions.api.PropertyVersions} instances.
@@ -60,7 +61,7 @@ public class PropertyVersionsBuilder {
      * @param name The property name.
      * @param helper The {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper}.
      */
-    PropertyVersionsBuilder(String profileId, String name, VersionsHelper helper) {
+    PropertyVersionsBuilder(VersionsHelper helper, String profileId, String name) {
         this.profileId = profileId;
         this.name = name;
         this.associations = new TreeSet<>();
@@ -103,7 +104,7 @@ public class PropertyVersionsBuilder {
         ArtifactVersion lowerBound = null;
         boolean includeLower = true;
         for (Map.Entry<String, Boolean> entry : lowerBounds.entrySet()) {
-            ArtifactVersion candidate = helper.createArtifactVersion(entry.getKey());
+            ArtifactVersion candidate = ArtifactVersionService.getArtifactVersion(entry.getKey());
             if (lowerBound == null) {
                 lowerBound = candidate;
                 includeLower = entry.getValue();
@@ -120,7 +121,7 @@ public class PropertyVersionsBuilder {
         ArtifactVersion upperBound = null;
         boolean includeUpper = true;
         for (Map.Entry<String, Boolean> entry : upperBounds.entrySet()) {
-            ArtifactVersion candidate = helper.createArtifactVersion(entry.getKey());
+            ArtifactVersion candidate = ArtifactVersionService.getArtifactVersion(entry.getKey());
             if (upperBound == null) {
                 upperBound = candidate;
                 includeUpper = entry.getValue();

@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -43,6 +42,7 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.eclipse.aether.RepositorySystem;
 
@@ -143,11 +143,12 @@ public class UpdateParentMojo extends UseLatestVersionsMojoBase {
 
     @Inject
     public UpdateParentMojo(
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders) {
-        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+            Map<String, ChangeRecorder> changeRecorders)
+            throws MojoExecutionException {
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
     }
 
     @Override
@@ -187,7 +188,7 @@ public class UpdateParentMojo extends UseLatestVersionsMojoBase {
 
     @Override
     protected Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream) {
-        Artifact artifact = helper.createDependencyArtifact(DependencyBuilder.newBuilder()
+        Artifact artifact = artifactFactory.createArtifact(DependencyBuilder.newBuilder()
                 .withGroupId(getProject().getParent().getGroupId())
                 .withArtifactId(getProject().getParent().getArtifactId())
                 .withVersion(getProject().getParent().getVersion())

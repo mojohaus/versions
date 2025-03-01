@@ -22,12 +22,13 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.collections4.map.LRUMap;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 /**
  * Simple cache for {@link org.apache.maven.artifact.versioning.ArtifactVersion}
  */
-public class DefaultArtifactVersionCache {
+public class ArtifactVersionService {
     private static final int MAX_CACHE_SIZE = 512;
     private static final Map<String, DefaultArtifactVersion> CACHE = new LRUMap<>(MAX_CACHE_SIZE);
     private static final ReentrantReadWriteLock CACHE_LOCK = new ReentrantReadWriteLock();
@@ -35,7 +36,7 @@ public class DefaultArtifactVersionCache {
     /**
      * Get a ComparableVersion representing the version in a string.
      */
-    public static DefaultArtifactVersion of(String version) {
+    public static ArtifactVersion getArtifactVersion(String version) {
         try {
             CACHE_LOCK.readLock().lock();
             DefaultArtifactVersion result = CACHE.get(version);

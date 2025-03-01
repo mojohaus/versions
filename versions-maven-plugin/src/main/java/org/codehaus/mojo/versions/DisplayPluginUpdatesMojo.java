@@ -54,7 +54,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.lifecycle.LifecycleExecutor;
@@ -88,7 +87,8 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.ExtensionUtils;
 import org.codehaus.mojo.versions.utils.PluginComparator;
@@ -184,15 +184,16 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Inject
     @SuppressWarnings("checkstyle:ParameterNumber")
     public DisplayPluginUpdatesMojo(
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             ProjectBuilder projectBuilder,
             Map<String, Wagon> wagonMap,
             LifecycleExecutor lifecycleExecutor,
             ModelInterpolator modelInterpolator,
             RuntimeInformation runtimeInformation,
-            Map<String, ChangeRecorder> changeRecorders) {
-        super(artifactHandlerManager, repositorySystem, wagonMap, changeRecorders);
+            Map<String, ChangeRecorder> changeRecorders)
+            throws MojoExecutionException {
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
         this.projectBuilder = projectBuilder;
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;
@@ -364,7 +365,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
 
         List<String> pluginUpdates = new ArrayList<>();
         List<String> pluginLockdowns = new ArrayList<>();
-        ArtifactVersion curMavenVersion = DefaultArtifactVersionCache.of(runtimeInformation.getMavenVersion());
+        ArtifactVersion curMavenVersion =
+                ArtifactVersionService.getArtifactVersion(runtimeInformation.getMavenVersion());
         ArtifactVersion specMavenVersion = MinimalMavenBuildVersionFinder.find(getProject(), getLog());
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
@@ -452,8 +454,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                     && artifactVersion != null
                     && newVersion != null
                     && effectiveVersion != null
-                    && DefaultArtifactVersionCache.of(effectiveVersion)
-                                    .compareTo(DefaultArtifactVersionCache.of(newVersion))
+                    && ArtifactVersionService.getArtifactVersion(effectiveVersion)
+                                    .compareTo(ArtifactVersionService.getArtifactVersion(newVersion))
                             < 0) {
                 pluginUpdates.add(pad(
                         compactKey(plugin.getGroupId(), plugin.getArtifactId()),
@@ -564,8 +566,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             ArtifactVersion curMavenVersion,
             Map<ArtifactVersion, Map<String, String>> mavenUpgrades)
             throws MojoExecutionException, VersionRetrievalException {
-        Artifact artifactRange =
-                getHelper().createPluginArtifact(plugin.getGroupId(), plugin.getArtifactId(), effectiveVersion);
+        Artifact artifactRange = artifactFactory.createMavenPluginArtifact(
+                plugin.getGroupId(), plugin.getArtifactId(), effectiveVersion);
         ArtifactVersion[] newerVersions =
                 getHelper().lookupArtifactVersions(artifactRange, true).getVersions(this.allowSnapshots);
         ArtifactVersion minRequires = null;
@@ -634,14 +636,13 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     private MavenProject getPluginProject(String groupId, String artifactId, String version)
             throws MojoExecutionException, ProjectBuildingException, ArtifactResolutionException {
-        Artifact probe = getHelper()
-                .createDependencyArtifact(DependencyBuilder.newBuilder()
-                        .withGroupId(groupId)
-                        .withArtifactId(artifactId)
-                        .withVersion(version)
-                        .withType("pom")
-                        .withScope(Artifact.SCOPE_RUNTIME)
-                        .build());
+        Artifact probe = artifactFactory.createArtifact(DependencyBuilder.newBuilder()
+                .withGroupId(groupId)
+                .withArtifactId(artifactId)
+                .withVersion(version)
+                .withType("pom")
+                .withScope(Artifact.SCOPE_RUNTIME)
+                .build());
         getHelper().resolveArtifact(probe, true);
         ProjectBuildingResult result = projectBuilder.build(
                 probe,
@@ -831,7 +832,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     private ArtifactVersion getPrerequisitesMavenVersion(MavenProject pluginProject) {
         return ofNullable(pluginProject.getPrerequisites())
                 .map(Prerequisites::getMaven)
-                .map(DefaultArtifactVersionCache::of)
+                .map(ArtifactVersionService::getArtifactVersion)
                 .orElse(null);
     }
 

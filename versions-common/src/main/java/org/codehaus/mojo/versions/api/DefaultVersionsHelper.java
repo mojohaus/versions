@@ -22,7 +22,6 @@ package org.codehaus.mojo.versions.api;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -34,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,10 +55,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -81,7 +76,8 @@ import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.stax.RuleStaxReader;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.ordering.VersionComparators;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.utils.RegexUtils;
@@ -99,6 +95,7 @@ import org.eclipse.aether.resolution.VersionRangeResolutionException;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -128,7 +125,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
      */
     private RuleSet ruleSet;
 
-    private final ArtifactHandlerManager artifactHandlerManager;
+    private final ArtifactFactory artifactFactory;
 
     private final RepositorySystem repositorySystem;
 
@@ -166,12 +163,12 @@ public class DefaultVersionsHelper implements VersionsHelper {
      * Private constructor used by the builder
      */
     private DefaultVersionsHelper(
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             MavenSession mavenSession,
             MojoExecution mojoExecution,
             Log log) {
-        this.artifactHandlerManager = artifactHandlerManager;
+        this.artifactFactory = requireNonNull(artifactFactory);
         this.repositorySystem = repositorySystem;
         this.mavenSession = mavenSession;
         this.mojoExecution = mojoExecution;
@@ -310,7 +307,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
                                 return false;
                             }))
-                            .map(v -> DefaultArtifactVersionCache.of(v.toString()))
+                            .map(v -> ArtifactVersionService.getArtifactVersion(v.toString()))
                             .collect(Collectors.toList()),
                     getVersionComparator(artifact));
         } catch (VersionRangeResolutionException e) {
@@ -451,68 +448,6 @@ public class DefaultVersionsHelper implements VersionsHelper {
         return bestFit;
     }
 
-    @Override
-    public Artifact createPluginArtifact(String groupId, String artifactId, String version) {
-        return createDependencyArtifact(groupId, artifactId, version, "maven-plugin", null, "runtime", false);
-    }
-
-    @Override
-    public Artifact createDependencyArtifact(
-            String groupId,
-            String artifactId,
-            String version,
-            String type,
-            String classifier,
-            String scope,
-            boolean optional) {
-        try {
-            return new DefaultArtifact(
-                    groupId,
-                    artifactId,
-                    VersionRange.createFromVersionSpec(StringUtils.isNotBlank(version) ? version : "[0,]"),
-                    scope,
-                    type,
-                    classifier,
-                    artifactHandlerManager.getArtifactHandler(type),
-                    optional);
-        } catch (InvalidVersionSpecificationException e) {
-            // version should have a proper format
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Artifact createDependencyArtifact(Dependency dependency) {
-        Artifact artifact = createDependencyArtifact(
-                dependency.getGroupId(),
-                dependency.getArtifactId(),
-                dependency.getVersion(),
-                dependency.getType(),
-                dependency.getClassifier(),
-                dependency.getScope(),
-                false);
-
-        if (Artifact.SCOPE_SYSTEM.equals(dependency.getScope()) && dependency.getSystemPath() != null) {
-            artifact.setFile(new File(dependency.getSystemPath()));
-        }
-        return artifact;
-    }
-
-    @Override
-    public Set<Artifact> extractArtifacts(Collection<MavenProject> mavenProjects) {
-        Set<Artifact> result = new HashSet<>();
-        for (MavenProject project : mavenProjects) {
-            result.add(project.getArtifact());
-        }
-
-        return result;
-    }
-
-    @Override
-    public ArtifactVersion createArtifactVersion(String version) {
-        return DefaultArtifactVersionCache.of(version);
-    }
-
     public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
             Stream<Dependency> dependencies,
             boolean usePluginRepositories,
@@ -557,7 +492,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
             boolean allowSnapshots)
             throws VersionRetrievalException {
         ArtifactVersions allVersions = lookupArtifactVersions(
-                createDependencyArtifact(dependency), null, usePluginRepositories, useProjectRepositories);
+                artifactFactory.createArtifact(dependency), null, usePluginRepositories, useProjectRepositories);
         return new ArtifactVersions(
                 allVersions.getArtifact(),
                 Arrays.stream(allVersions.getAllUpdates(allowSnapshots)).collect(Collectors.toList()),
@@ -600,7 +535,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 lookupDependenciesUpdates(pluginDependencies.stream(), false, allowSnapshots);
 
         ArtifactVersions allVersions = lookupArtifactVersions(
-                createPluginArtifact(plugin.getGroupId(), plugin.getArtifactId(), version), true);
+                artifactFactory.createMavenPluginArtifact(plugin.getGroupId(), plugin.getArtifactId(), version), true);
         ArtifactVersions updatedVersions = new ArtifactVersions(
                 allVersions.getArtifact(),
                 Arrays.stream(allVersions.getAllUpdates(allowSnapshots)).collect(Collectors.toList()),
@@ -617,15 +552,19 @@ public class DefaultVersionsHelper implements VersionsHelper {
     public Map<Property, PropertyVersions> getVersionPropertiesMap(VersionPropertiesMapRequest request)
             throws MojoExecutionException {
         Map<String, Property> properties = new HashMap<>();
+        // Populate properties map from request
         if (request.getPropertyDefinitions() != null) {
             Arrays.stream(request.getPropertyDefinitions()).forEach(p -> properties.put(p.getName(), p));
         }
+
         Map<String, PropertyVersionsBuilder> builders = new HashMap<>();
+
+        // Auto-link items if required
         if (request.isAutoLinkItems()) {
             final PropertyVersionsBuilder[] propertyVersionsBuilders;
             try {
                 propertyVersionsBuilders = PomHelper.getPropertyVersionsBuilders(
-                        this, request.getMavenProject(), request.isIncludeParent());
+                        this, artifactFactory, request.getMavenProject(), request.isIncludeParent());
             } catch (ExpressionEvaluationException | IOException e) {
                 throw new MojoExecutionException(e.getMessage(), e);
             }
@@ -674,7 +613,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
             if (builder == null || !builder.isAssociated()) {
                 getLog().debug("Property ${" + property.getName() + "}: Looks like this property is not "
                         + "associated with any dependency...");
-                builder = new PropertyVersionsBuilder(null, property.getName(), this);
+                builder = new PropertyVersionsBuilder(this, null, property.getName());
             }
             if (!property.isAutoLinkDependencies()) {
                 getLog().debug("Property ${" + property.getName() + "}: Removing any autoLinkDependencies");
@@ -684,7 +623,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
             if (dependencies != null) {
                 for (Dependency dependency : dependencies) {
                     getLog().debug("Property ${" + property.getName() + "}: Adding association to " + dependency);
-                    builder.withAssociation(this.createDependencyArtifact(dependency), false);
+                    builder.withAssociation(artifactFactory.createArtifact(dependency), false);
                 }
             }
             try {
@@ -701,7 +640,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 final PropertyVersions versions;
                 try {
                     if (currentVersion != null) {
-                        builder.withCurrentVersion(DefaultArtifactVersionCache.of(currentVersion))
+                        builder.withCurrentVersion(ArtifactVersionService.getArtifactVersion(currentVersion))
                                 .withCurrentVersionRange(VersionRange.createFromVersionSpec(currentVersion));
                     }
                 } catch (InvalidVersionSpecificationException e) {
@@ -720,7 +659,6 @@ public class DefaultVersionsHelper implements VersionsHelper {
      * Builder class for {@linkplain DefaultVersionsHelper}
      */
     public static class Builder {
-        private ArtifactHandlerManager artifactHandlerManager;
         private Collection<String> ignoredVersions;
         private RuleSet ruleSet;
         private String serverId;
@@ -729,7 +667,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
         private MavenSession mavenSession;
         private MojoExecution mojoExecution;
         private RepositorySystem repositorySystem;
-
+        private ArtifactFactory artifactFactory;
         private Map<String, Wagon> wagonMap;
 
         public Builder() {}
@@ -929,11 +867,6 @@ public class DefaultVersionsHelper implements VersionsHelper {
             return pos == -1 ? empty() : of(url.substring(0, pos).trim());
         }
 
-        public Builder withArtifactHandlerManager(ArtifactHandlerManager artifactHandlerManager) {
-            this.artifactHandlerManager = artifactHandlerManager;
-            return this;
-        }
-
         public Builder withIgnoredVersions(Collection<String> ignoredVersions) {
             this.ignoredVersions = ignoredVersions;
             return this;
@@ -979,14 +912,19 @@ public class DefaultVersionsHelper implements VersionsHelper {
             return this;
         }
 
+        public Builder withArtifactFactory(ArtifactFactory artifactFactory) {
+            this.artifactFactory = artifactFactory;
+            return this;
+        }
+
         /**
          * Builds the constructed {@linkplain DefaultVersionsHelper} object
          * @return constructed {@linkplain DefaultVersionsHelper}
          * @throws MojoExecutionException should the constructor with the RuleSet retrieval doesn't succeed
          */
         public DefaultVersionsHelper build() throws MojoExecutionException {
-            DefaultVersionsHelper instance = new DefaultVersionsHelper(
-                    artifactHandlerManager, repositorySystem, mavenSession, mojoExecution, log);
+            DefaultVersionsHelper instance =
+                    new DefaultVersionsHelper(artifactFactory, repositorySystem, mavenSession, mojoExecution, log);
             if (ruleSet != null) {
                 if (!isBlank(rulesUri)) {
                     log.warn("rulesUri is ignored if rules are specified in pom or as parameters");

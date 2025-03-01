@@ -20,7 +20,7 @@ package org.codehaus.mojo.versions;
  */
 
 import org.codehaus.mojo.versions.ordering.NumericVersionComparator;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -36,7 +36,8 @@ public class AbstractVersionsUpdaterMojoTest {
     private NumericVersionComparator instance = new NumericVersionComparator();
 
     private int instanceCompare(String v1, String v2) {
-        return instance.compare(DefaultArtifactVersionCache.of(v1), DefaultArtifactVersionCache.of(v2));
+        return instance.compare(
+                ArtifactVersionService.getArtifactVersion(v1), ArtifactVersionService.getArtifactVersion(v2));
     }
 
     /**

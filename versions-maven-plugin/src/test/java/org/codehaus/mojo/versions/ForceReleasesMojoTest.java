@@ -3,6 +3,7 @@ package org.codehaus.mojo.versions;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -11,6 +12,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.junit.Before;
@@ -30,6 +32,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 /*
  * Copyright MojoHaus and Contributors
@@ -53,11 +56,16 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
     private TestChangeRecorder changeRecorder;
     private ForceReleasesMojo mojo;
 
+    private ArtifactFactory artifactFactory;
+
     @Before
-    public void setUp() throws IllegalAccessException {
+    public void setUp() throws Exception {
+        super.setUp();
+        openMocks(this);
+        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
+        artifactFactory = new ArtifactFactory(artifactHandlerManager);
         changeRecorder = new TestChangeRecorder();
-        mojo = new ForceReleasesMojo(
-                mockArtifactHandlerManager(), mockAetherRepositorySystem(), null, changeRecorder.asTestMap());
+        mojo = new ForceReleasesMojo(artifactFactory, mockAetherRepositorySystem(), null, changeRecorder.asTestMap());
         setVariableValueToObject(mojo, "reactorProjects", emptyList());
         mojo.project = new MavenProject() {
             {

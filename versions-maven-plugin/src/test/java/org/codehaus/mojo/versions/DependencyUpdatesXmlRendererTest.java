@@ -28,7 +28,7 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
 import org.codehaus.mojo.versions.reporting.model.DependencyUpdatesModel;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.junit.After;
@@ -81,10 +81,10 @@ public class DependencyUpdatesXmlRendererTest {
                                                         "default",
                                                         null),
                                                 Arrays.asList(
-                                                        DefaultArtifactVersionCache.of("1.0.0"),
-                                                        DefaultArtifactVersionCache.of("1.0.1"),
-                                                        DefaultArtifactVersionCache.of("1.1.0"),
-                                                        DefaultArtifactVersionCache.of("2.0.0")),
+                                                        ArtifactVersionService.getArtifactVersion("1.0.0"),
+                                                        ArtifactVersionService.getArtifactVersion("1.0.1"),
+                                                        ArtifactVersionService.getArtifactVersion("1.1.0"),
+                                                        ArtifactVersionService.getArtifactVersion("2.0.0")),
                                                 new MavenVersionComparator())),
                                 emptyMap()),
                         tempFile,

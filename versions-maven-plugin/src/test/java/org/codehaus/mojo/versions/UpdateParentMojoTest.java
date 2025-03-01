@@ -33,9 +33,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.eclipse.aether.RepositorySystem;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -52,8 +50,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
 public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
-    private TestChangeRecorder changeRecorder;
-
     private static ArtifactHandlerManager artifactHandlerManager;
 
     private static RepositorySystem repositorySystem;
@@ -73,11 +69,9 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         });
     }
 
-    @Before
-    public void setUp() throws IllegalAccessException {
-        changeRecorder = new TestChangeRecorder();
-
-        mojo = new UpdateParentMojo(artifactHandlerManager, repositorySystem, null, changeRecorder.asTestMap()) {
+    @Override
+    protected UseLatestVersionsMojoBase createMojo() throws IllegalAccessException, MojoExecutionException {
+        return new UpdateParentMojo(artifactFactory, repositorySystem, null, changeRecorder.asTestMap()) {
             {
                 setProject(createProject());
                 reactorProjects = Collections.emptyList();

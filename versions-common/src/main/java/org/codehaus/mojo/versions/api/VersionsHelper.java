@@ -19,15 +19,11 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
@@ -69,68 +65,6 @@ public interface VersionsHelper {
      * @since 1.0-alpha-3
      */
     VersionComparator getVersionComparator(String groupId, String artifactId);
-
-    /**
-     * Shorthand method for <code>repositorySystem.createPluginArtifact(...)</code>.
-     *
-     * @param groupId The group Id.
-     * @param artifactId The artifact Id.
-     * @param version The version range.
-     * @return the corresponding plugin artifact.
-     * @since 1.0-alpha-3
-     */
-    Artifact createPluginArtifact(String groupId, String artifactId, String version);
-
-    /**
-     * Shorthand method for <code>repositorySystem.createDependencyArtifact(...)</code>.
-     *
-     * @param groupId The group id.
-     * @param artifactId The artifact id.
-     * @param version The version (possibly a range)
-     * @param type The type.
-     * @param classifier The classifier.
-     * @param scope The scope.
-     * @param optional If optional or not.
-     * @return The corresponding dependency artifact.
-     * @since 1.0-alpha-3
-     */
-    Artifact createDependencyArtifact(
-            String groupId,
-            String artifactId,
-            String version,
-            String type,
-            String classifier,
-            String scope,
-            boolean optional);
-
-    /**
-     * Shorthand method for <code>repositorySystem.createDependencyArtifact(...)</code> which extracts the
-     * parameters from the Dependency instance.
-     *
-     * @param dependency The dependency to create the artifact for.
-     * @return The corresponding dependency artifact.
-     * @since 1.0-alpha-3
-     */
-    Artifact createDependencyArtifact(Dependency dependency);
-
-    /**
-     * Takes a {@link List} of {@link org.apache.maven.project.MavenProject} instances and converts it into a
-     * {@link Set} of {@link Artifact} instances.
-     *
-     * @param mavenProjects the {@link List} of {@link org.apache.maven.project.MavenProject} instances.
-     * @return a {@link Set} of {@link Artifact} instances.
-     * @since 1.0-alpha-3
-     */
-    Set<Artifact> extractArtifacts(Collection<MavenProject> mavenProjects);
-
-    /**
-     * Creates an {@link ArtifactVersion} instance from a string.
-     *
-     * @param version the string representation of the version.
-     * @return The artifact version.
-     * @since 1.0-beta-1
-     */
-    ArtifactVersion createArtifactVersion(String version);
 
     /**
      * Looks up the versions of the specified artifact that are available in either the local repository, or the
