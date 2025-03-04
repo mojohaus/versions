@@ -27,8 +27,9 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.model.IgnoreVersion;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
 import org.eclipse.aether.version.Version;
+
+import static org.codehaus.mojo.versions.utils.ArtifactVersionService.getArtifactVersion;
 
 /**
  * Helper class for {@link IgnoreVersion}
@@ -81,7 +82,7 @@ public class IgnoreVersionHelper {
 
     private static boolean isVersionIgnoredRange(Version version, IgnoreVersion ignoreVersion) {
         try {
-            ArtifactVersion aVersion = DefaultArtifactVersionCache.of(version.toString());
+            ArtifactVersion aVersion = getArtifactVersion(version.toString());
             VersionRange versionRange = VersionRange.createFromVersionSpec(ignoreVersion.getVersion());
             if (versionRange.hasRestrictions()) {
                 return versionRange.containsVersion(aVersion);

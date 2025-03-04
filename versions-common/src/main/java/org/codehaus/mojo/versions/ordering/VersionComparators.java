@@ -23,7 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+
+import static org.codehaus.mojo.versions.utils.ArtifactVersionService.getArtifactVersion;
 
 /**
  * Utility.
@@ -116,7 +117,7 @@ public final class VersionComparators {
         final String version = v.toString();
         final Matcher matcher = SNAPSHOT_PATTERN.matcher(version);
         if (matcher.find()) {
-            return DefaultArtifactVersionCache.of(version.substring(0, matcher.start(1) - 1));
+            return getArtifactVersion(version.substring(0, matcher.start(1) - 1));
         }
         return v;
     }

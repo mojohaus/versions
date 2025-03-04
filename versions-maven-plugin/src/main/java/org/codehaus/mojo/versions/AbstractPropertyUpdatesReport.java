@@ -25,7 +25,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -37,6 +36,7 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper.VersionPropertiesMapRequest;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.PropertyComparator;
 import org.codehaus.mojo.versions.xml.PropertyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
@@ -100,11 +100,11 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
 
     protected AbstractPropertyUpdatesReport(
             I18N i18n,
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
-        super(i18n, artifactHandlerManager, repositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactFactory, repositorySystem, wagonMap, rendererFactory);
     }
 
     /**

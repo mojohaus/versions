@@ -35,16 +35,17 @@ import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.plexus.i18n.I18N;
 import org.junit.Test;
 
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
-import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.mockito.Mockito.mock;
 
 /**
  * Basic tests for {@linkplain ParentUpdatesReport}.
@@ -60,7 +61,7 @@ public class ParentUpdatesReportTest {
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new ParentUpdatesReport(
                 MOCK_I18N,
-                mockArtifactHandlerManager(),
+                mock(ArtifactFactory.class),
                 mockAetherRepositorySystem(new HashMap<String, String[]>() {
                     {
                         put("default-artifact", new String[] {"1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT"});

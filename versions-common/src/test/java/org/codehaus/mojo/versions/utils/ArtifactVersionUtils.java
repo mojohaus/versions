@@ -30,7 +30,7 @@ public class ArtifactVersionUtils {
      * @return {@link ArtifactVersion} from the given version string
      */
     public static ArtifactVersion version(String version) {
-        return DefaultArtifactVersionCache.of(version);
+        return ArtifactVersionService.getArtifactVersion(version);
     }
 
     /**
@@ -39,6 +39,8 @@ public class ArtifactVersionUtils {
      * @return array of {@link ArtifactVersion} objects based on the input array of version strings
      */
     public static ArtifactVersion[] versions(String... versions) {
-        return Arrays.stream(versions).map(DefaultArtifactVersionCache::of).toArray(ArtifactVersion[]::new);
+        return Arrays.stream(versions)
+                .map(ArtifactVersionService::getArtifactVersion)
+                .toArray(ArtifactVersion[]::new);
     }
 }

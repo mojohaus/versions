@@ -241,7 +241,7 @@
           <pomExcludes>
             <!--
               ! This test is not really intended as part of regular integration test suite
-              ! as it highly depends on the minute conditions of the build cluster,
+              ! as it highly depends on the state of the build cluster,
               ! internet connection speed (since retrieval times are included in the timeout)
               ! or individual machine where it's being tested.
               ! Not deleting as it might be helpful with assessing performance measurements.

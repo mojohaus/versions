@@ -24,7 +24,8 @@ import java.util.StringTokenizer;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.Segment;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+
+import static org.codehaus.mojo.versions.utils.ArtifactVersionService.getArtifactVersion;
 
 /**
  * A comparator which will compare all segments of a dot separated version string as numbers if possible, i.e. 1.3.34
@@ -243,6 +244,6 @@ public class NumericVersionComparator extends AbstractVersionComparator {
             tok.nextToken();
             buf.append("0");
         }
-        return DefaultArtifactVersionCache.of(buf.toString());
+        return getArtifactVersion(buf.toString());
     }
 }

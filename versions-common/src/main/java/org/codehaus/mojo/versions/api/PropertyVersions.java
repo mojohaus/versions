@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
@@ -41,9 +42,8 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 
-import static java.util.Optional.empty;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
 /**
@@ -262,16 +262,6 @@ public class PropertyVersions extends AbstractVersionDetails {
                 + '\'' + ", associations=" + associations + '}';
     }
 
-    public ArtifactVersion getNewestVersion(
-            String currentVersion,
-            Property property,
-            boolean allowSnapshots,
-            List<MavenProject> reactorProjects,
-            VersionsHelper helper)
-            throws InvalidVersionSpecificationException, InvalidSegmentException {
-        return getNewestVersion(currentVersion, property, allowSnapshots, reactorProjects, helper, false, empty());
-    }
-
     /**
      * Retrieves the newest artifact version for the given property-denoted artifact or {@code null} if no newer
      * version could be found.
@@ -306,10 +296,10 @@ public class PropertyVersions extends AbstractVersionDetails {
                 property.getVersion() != null ? VersionRange.createFromVersionSpec(property.getVersion()) : null;
         helper.getLog().debug("Property ${" + property.getName() + "}: Restricting results to " + range);
 
-        ArtifactVersion currentVersion = DefaultArtifactVersionCache.of(versionString);
+        ArtifactVersion currentVersion = ArtifactVersionService.getArtifactVersion(versionString);
         ArtifactVersion lowerBound = allowDowngrade
                 ? getLowerBound(currentVersion, upperBoundSegment)
-                        .map(DefaultArtifactVersionCache::of)
+                        .map(ArtifactVersionService::getArtifactVersion)
                         .orElse(null)
                 : currentVersion;
         if (helper.getLog().isDebugEnabled()) {
@@ -333,7 +323,8 @@ public class PropertyVersions extends AbstractVersionDetails {
 
         if (property.isSearchReactor()) {
             helper.getLog().debug("Property ${" + property.getName() + "}: Searching reactor for a valid version...");
-            Set<Artifact> reactorArtifacts = helper.extractArtifacts(reactorProjects);
+            Set<Artifact> reactorArtifacts =
+                    reactorProjects.stream().map(MavenProject::getArtifact).collect(Collectors.toSet());
             ArtifactVersion[] reactorVersions = getVersions(reactorArtifacts);
             helper.getLog()
                     .debug("Property ${" + property.getName()

@@ -77,6 +77,7 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.shared.utils.io.IOUtil;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
@@ -96,7 +97,7 @@ import static org.codehaus.mojo.versions.api.PomHelper.Marks.PARENT_START;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public final class PomHelper {
+public class PomHelper {
     public static final String APACHE_MAVEN_PLUGINS_GROUPID = "org.apache.maven.plugins";
 
     public static final Pattern PATTERN_PROJECT_PROPERTIES = Pattern.compile("/project/properties");
@@ -839,7 +840,7 @@ public final class PomHelper {
      * @since 1.0-alpha-3
      */
     public static PropertyVersionsBuilder[] getPropertyVersionsBuilders(
-            VersionsHelper helper, MavenProject project, boolean includeParent)
+            VersionsHelper helper, ArtifactFactory artifactFactory, MavenProject project, boolean includeParent)
             throws ExpressionEvaluationException, IOException {
         ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator(project);
         Map<MavenProject, Model> reactorModels =
@@ -863,30 +864,31 @@ public final class PomHelper {
                 addProperties(helper, propertiesMap, profile.getId(), profile.getProperties());
                 if (profile.getDependencyManagement() != null) {
                     addDependencyAssocations(
-                            helper,
+                            artifactFactory,
                             expressionEvaluator,
                             propertiesMap,
                             profile.getDependencyManagement().getDependencies(),
                             false);
                 }
-                addDependencyAssocations(helper, expressionEvaluator, propertiesMap, profile.getDependencies(), false);
+                addDependencyAssocations(
+                        artifactFactory, expressionEvaluator, propertiesMap, profile.getDependencies(), false);
                 if (profile.getBuild() != null) {
                     if (profile.getBuild().getPluginManagement() != null) {
                         addPluginAssociations(
-                                helper,
+                                artifactFactory,
                                 expressionEvaluator,
                                 propertiesMap,
                                 profile.getBuild().getPluginManagement().getPlugins());
                     }
                     addPluginAssociations(
-                            helper,
+                            artifactFactory,
                             expressionEvaluator,
                             propertiesMap,
                             profile.getBuild().getPlugins());
                 }
                 if (profile.getReporting() != null) {
                     addReportPluginAssociations(
-                            helper,
+                            artifactFactory,
                             expressionEvaluator,
                             propertiesMap,
                             profile.getReporting().getPlugins());
@@ -906,30 +908,31 @@ public final class PomHelper {
 
             if (model.getDependencyManagement() != null) {
                 addDependencyAssocations(
-                        helper,
+                        artifactFactory,
                         expressionEvaluator,
                         propertiesMap,
                         model.getDependencyManagement().getDependencies(),
                         false);
             }
-            addDependencyAssocations(helper, expressionEvaluator, propertiesMap, model.getDependencies(), false);
+            addDependencyAssocations(
+                    artifactFactory, expressionEvaluator, propertiesMap, model.getDependencies(), false);
             if (model.getBuild() != null) {
                 if (model.getBuild().getPluginManagement() != null) {
                     addPluginAssociations(
-                            helper,
+                            artifactFactory,
                             expressionEvaluator,
                             propertiesMap,
                             model.getBuild().getPluginManagement().getPlugins());
                 }
                 addPluginAssociations(
-                        helper,
+                        artifactFactory,
                         expressionEvaluator,
                         propertiesMap,
                         model.getBuild().getPlugins());
             }
             if (model.getReporting() != null) {
                 addReportPluginAssociations(
-                        helper,
+                        artifactFactory,
                         expressionEvaluator,
                         propertiesMap,
                         model.getReporting().getPlugins());
@@ -942,30 +945,31 @@ public final class PomHelper {
                 }
                 if (profile.getDependencyManagement() != null) {
                     addDependencyAssocations(
-                            helper,
+                            artifactFactory,
                             expressionEvaluator,
                             propertiesMap,
                             profile.getDependencyManagement().getDependencies(),
                             false);
                 }
-                addDependencyAssocations(helper, expressionEvaluator, propertiesMap, profile.getDependencies(), false);
+                addDependencyAssocations(
+                        artifactFactory, expressionEvaluator, propertiesMap, profile.getDependencies(), false);
                 if (profile.getBuild() != null) {
                     if (profile.getBuild().getPluginManagement() != null) {
                         addPluginAssociations(
-                                helper,
+                                artifactFactory,
                                 expressionEvaluator,
                                 propertiesMap,
                                 profile.getBuild().getPluginManagement().getPlugins());
                     }
                     addPluginAssociations(
-                            helper,
+                            artifactFactory,
                             expressionEvaluator,
                             propertiesMap,
                             profile.getBuild().getPlugins());
                 }
                 if (profile.getReporting() != null) {
                     addReportPluginAssociations(
-                            helper,
+                            artifactFactory,
                             expressionEvaluator,
                             propertiesMap,
                             profile.getReporting().getPlugins());
@@ -983,7 +987,6 @@ public final class PomHelper {
      * Takes a list of {@link org.apache.maven.model.Plugin} instances and adds associations to properties used to
      * define versions of the plugin artifact or any of the plugin dependencies specified in the pom.
      *
-     * @param helper              Our helper.
      * @param expressionEvaluator Our expression evaluator.
      * @param result              The map of {@link org.codehaus.mojo.versions.api.PropertyVersionsBuilder} keyed by
      *                            property name.
@@ -991,7 +994,7 @@ public final class PomHelper {
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      */
     private static void addPluginAssociations(
-            VersionsHelper helper,
+            ArtifactFactory artifactFactory,
             ExpressionEvaluator expressionEvaluator,
             Map<String, PropertyVersionsBuilder> result,
             List<Plugin> plugins)
@@ -1024,19 +1027,19 @@ public final class PomHelper {
                         // might as well capture the current value
                         String evaluatedVersion = (String) expressionEvaluator.evaluate(plugin.getVersion());
                         property.withAssociation(
-                                helper.createPluginArtifact(groupId, artifactId, evaluatedVersion), true);
+                                artifactFactory.createMavenPluginArtifact(groupId, artifactId, evaluatedVersion), true);
                         if (!propertyRef.equals(version)) {
                             addBounds(property, version, propertyRef);
                         }
                     }
                 }
             }
-            addDependencyAssocations(helper, expressionEvaluator, result, plugin.getDependencies(), true);
+            addDependencyAssocations(artifactFactory, expressionEvaluator, result, plugin.getDependencies(), true);
         }
     }
 
     private static void addReportPluginAssociations(
-            VersionsHelper helper,
+            ArtifactFactory artifactFactory,
             ExpressionEvaluator expressionEvaluator,
             Map<String, PropertyVersionsBuilder> result,
             List<ReportPlugin> reportPlugins)
@@ -1069,7 +1072,7 @@ public final class PomHelper {
                         // might as well capture the current value
                         String versionEvaluated = (String) expressionEvaluator.evaluate(plugin.getVersion());
                         property.withAssociation(
-                                helper.createPluginArtifact(groupId, artifactId, versionEvaluated), true);
+                                artifactFactory.createMavenPluginArtifact(groupId, artifactId, versionEvaluated), true);
                         if (!propertyRef.equals(version)) {
                             addBounds(property, version, propertyRef);
                         }
@@ -1080,7 +1083,7 @@ public final class PomHelper {
     }
 
     private static void addDependencyAssocations(
-            VersionsHelper helper,
+            ArtifactFactory artifactFactory,
             ExpressionEvaluator expressionEvaluator,
             Map<String, PropertyVersionsBuilder> result,
             List<Dependency> dependencies,
@@ -1114,7 +1117,7 @@ public final class PomHelper {
                         // might as well capture the current value
                         String versionEvaluated = (String) expressionEvaluator.evaluate(dependency.getVersion());
                         property.withAssociation(
-                                helper.createDependencyArtifact(
+                                artifactFactory.createArtifact(
                                         groupId,
                                         artifactId,
                                         versionEvaluated,
@@ -1163,7 +1166,7 @@ public final class PomHelper {
         }
         for (String propertyName : properties.stringPropertyNames()) {
             if (!result.containsKey(propertyName)) {
-                result.put(propertyName, new PropertyVersionsBuilder(profileId, propertyName, helper));
+                result.put(propertyName, new PropertyVersionsBuilder(helper, profileId, propertyName));
             }
         }
     }

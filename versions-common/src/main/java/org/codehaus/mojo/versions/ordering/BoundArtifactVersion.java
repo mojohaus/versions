@@ -23,7 +23,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.Segment;
-import org.codehaus.mojo.versions.utils.DefaultArtifactVersionCache;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 
 /**
  * <p>Represents an <b>immutable</b> artifact version with all segments <em>major</em> to the given segment
@@ -68,7 +68,7 @@ public class BoundArtifactVersion implements ArtifactVersion {
             }
         }
         versionBuilder.append(Integer.MAX_VALUE);
-        comparable = DefaultArtifactVersionCache.of(versionBuilder.toString());
+        comparable = ArtifactVersionService.getArtifactVersion(versionBuilder.toString());
     }
 
     /**

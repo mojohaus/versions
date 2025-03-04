@@ -37,6 +37,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
@@ -64,7 +65,7 @@ public class PluginUpdatesReportTest {
         TestPluginUpdatesReport() {
             super(
                     MOCK_I18N,
-                    mockArtifactHandlerManager(),
+                    new ArtifactFactory(mockArtifactHandlerManager()),
                     mockAetherRepositorySystem(),
                     null,
                     new ReportRendererFactoryImpl(MOCK_I18N));

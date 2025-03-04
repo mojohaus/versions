@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -35,6 +34,7 @@ import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
+import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 
@@ -52,8 +52,6 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
      * @since 1.0-alpha-3
      */
     protected I18N i18n;
-
-    protected ArtifactHandlerManager artifactHandlerManager;
 
     /**
      * Skip entire check.
@@ -158,16 +156,18 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
      */
     protected Map<String, Wagon> wagonMap;
 
+    private final ArtifactFactory artifactFactory;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     protected AbstractVersionsReport(
             I18N i18n,
-            ArtifactHandlerManager artifactHandlerManager,
+            ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
         this.i18n = i18n;
-        this.artifactHandlerManager = artifactHandlerManager;
+        this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
         this.wagonMap = wagonMap;
         this.rendererFactory = rendererFactory;
@@ -177,7 +177,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         if (helper == null) {
             try {
                 helper = new DefaultVersionsHelper.Builder()
-                        .withArtifactHandlerManager(artifactHandlerManager)
+                        .withArtifactFactory(artifactFactory)
                         .withRepositorySystem(repositorySystem)
                         .withWagonMap(wagonMap)
                         .withServerId(serverId)
