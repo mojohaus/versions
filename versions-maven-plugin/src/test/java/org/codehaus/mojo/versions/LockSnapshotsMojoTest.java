@@ -22,43 +22,61 @@ import java.util.function.UnaryOperator;
 
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.codehaus.mojo.versions.utils.MockUtils;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.resolution.VersionRequest;
 import org.eclipse.aether.resolution.VersionResolutionException;
 import org.eclipse.aether.resolution.VersionResult;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
+import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
  * Unit tests for {@link LockSnapshotsMojo}
  */
 public class LockSnapshotsMojoTest {
 
+    @Mock
+    private Log log;
+
+    private PomHelper pomHelper;
+
     private ArtifactFactory artifactFactory;
+
+    @Mock
+    private ExpressionEvaluator expressionEvaluator;
+
+    private MavenSession mavenSession;
 
     @Before
     public void setUp() throws MojoExecutionException {
+        openMocks(this);
+        mavenSession = mockMavenSession();
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
+        pomHelper = new PomHelper(artifactFactory, expressionEvaluator);
     }
 
     private LockSnapshotsMojo createMojo(RepositorySystem repositorySystem) throws MojoExecutionException {
@@ -81,7 +99,7 @@ public class LockSnapshotsMojoTest {
                                 .build()));
                     }
                 });
-                session = MockUtils.mockMavenSession();
+                session = mavenSession;
             }
         };
     }

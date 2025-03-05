@@ -15,6 +15,8 @@ package org.codehaus.mojo.versions.ordering;
  * limitations under the License.
  */
 
+import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,7 +130,7 @@ public class BoundArtifactVersion implements ArtifactVersion {
     }
 
     @Override
-    public int compareTo(ArtifactVersion other) {
+    public int compareTo(@Nullable ArtifactVersion other) {
         if (other == null) {
             return -1;
         }
@@ -201,9 +203,6 @@ public class BoundArtifactVersion implements ArtifactVersion {
 
     /**
      * {@inheritDoc}
-     *
-     * Quasi-contract: {@link #toString()} must produce the textual representation of the version, without any
-     * additional items, this is required by the implementation of {@link NumericVersionComparator}.
      */
     @Override
     public String toString() {

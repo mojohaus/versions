@@ -14,9 +14,11 @@ import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.TestLog;
 import org.codehaus.mojo.versions.utils.TestUtils;
@@ -24,6 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
@@ -40,6 +43,11 @@ public class SetMojoTest extends AbstractMojoTestCase {
     public MojoRule mojoRule = new MojoRule(this);
 
     private Path tempDir;
+
+    @Mock
+    protected Log log;
+
+    protected PomHelper pomHelper;
 
     protected ArtifactFactory artifactFactory;
 
@@ -59,7 +67,7 @@ public class SetMojoTest extends AbstractMojoTestCase {
 
     @Test
     public void testGetIncrementedVersion() throws MojoExecutionException {
-        new SetMojo(null, null, null, null, null, null) {
+        new SetMojo(artifactFactory, null, null, null, null, null) {
             {
                 assertThat(getIncrementedVersion("1", null), is("2-SNAPSHOT"));
                 assertThat(getIncrementedVersion("1.0", null), is("1.1-SNAPSHOT"));

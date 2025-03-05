@@ -35,37 +35,42 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.Reporting;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.logging.Log;
@@ -85,49 +90,60 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.codehaus.stax2.XMLInputFactory2;
 
-import static java.util.Collections.singletonMap;
 import static java.util.Optional.ofNullable;
 import static org.codehaus.mojo.versions.api.PomHelper.Marks.CHILD_START;
+import static org.codehaus.mojo.versions.api.PomHelper.Marks.END;
 import static org.codehaus.mojo.versions.api.PomHelper.Marks.END_ELEMENT;
 import static org.codehaus.mojo.versions.api.PomHelper.Marks.PARENT_START;
+import static org.codehaus.mojo.versions.api.PomHelper.Marks.START;
 
-/**
- * Helper class for modifying pom files.
- *
- * @author Stephen Connolly
- * @since 1.0-alpha-3
- */
 public class PomHelper {
     public static final String APACHE_MAVEN_PLUGINS_GROUPID = "org.apache.maven.plugins";
 
-    public static final Pattern PATTERN_PROJECT_PROPERTIES = Pattern.compile("/project/properties");
+    private static final Set<String> IMPLICIT_PATHS = new HashSet<>(Arrays.asList(
+            "/project/parent/groupId", "/project/parent/artifactId",
+            "/project/parent/version", "/project/groupId",
+            "/project/artifactId", "/project/version"));
 
-    public static final Pattern PATTERN_PROJECT_PROFILE = Pattern.compile("/project/profiles/profile");
+    private static final Pattern PATTERN_PROJECT_VERSION = Pattern.compile("/project/version");
 
-    public static final Pattern PATTERN_PROJECT_PROFILE_ID = Pattern.compile("/project/profiles/profile/id");
+    private static final Pattern PATTERN_PROJECT_PARENT_VERSION = Pattern.compile("/project/parent/version");
 
-    public static final Pattern PATTERN_PROJECT_VERSION = Pattern.compile("/project/version");
-
-    public static final Pattern PATTERN_PROJECT_PARENT_VERSION = Pattern.compile("/project/parent/version");
-
-    public static final Pattern PATTERN_PROJECT_DEPENDENCY = Pattern.compile("/project" + "(/profiles/profile)?"
+    private static final Pattern PATTERN_PROJECT_DEPENDENCY = Pattern.compile("/project" + "(/profiles/profile)?"
             + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
             + "/dependencies/dependency");
 
-    public static final Pattern PATTERN_PROJECT_DEPENDENCY_VERSION = Pattern.compile("/project" + "(/profiles/profile)?"
-            + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
-            + "/dependencies/dependency"
-            + "((/groupId)|(/artifactId)|(/version))");
+    private static final Pattern PATTERN_PROJECT_DEPENDENCY_VERSION =
+            Pattern.compile("/project" + "(/profiles/profile)?"
+                    + "((/dependencyManagement)|(/build(/pluginManagement)?/plugins/plugin))?"
+                    + "/dependencies/dependency"
+                    + "((/groupId)|(/artifactId)|(/version))");
 
-    public static final Pattern PATTERN_PROJECT_PLUGIN = Pattern.compile(
+    private static final Pattern PATTERN_PROJECT_PLUGIN = Pattern.compile(
             "/project" + "(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin");
 
-    public static final Pattern PATTERN_PROJECT_PLUGIN_VERSION = Pattern.compile("/project" + "(/profiles/profile)?"
+    private static final Pattern PATTERN_PROJECT_PLUGIN_VERSION = Pattern.compile("/project" + "(/profiles/profile)?"
             + "((/build(/pluginManagement)?)|(/reporting))/plugins/plugin"
             + "((/groupId)|(/artifactId)|(/version))");
 
-    private PomHelper() {
-        // utility class
+    private final ArtifactFactory artifactFactory;
+
+    private final ExpressionEvaluator expressionEvaluator;
+
+    enum Marks {
+        CHILD_START,
+        PARENT_START,
+        END_ELEMENT,
+        START,
+        END
+    }
+
+    /**
+     * Creates a new instance
+     */
+    public PomHelper(ArtifactFactory artifactFactory, ExpressionEvaluator expressionEvaluator) {
+        this.artifactFactory = artifactFactory;
+        this.expressionEvaluator = expressionEvaluator;
     }
 
     /**
@@ -199,63 +215,60 @@ public class PomHelper {
      * @throws XMLStreamException if somethinh went wrong.
      */
     public static boolean setPropertyVersion(
-            final MutableXMLStreamReader pom, final String profileId, final String property, final String value)
-            throws XMLStreamException {
-        Stack<String> stack = new Stack<>();
-        String path = "";
-        final Pattern propertyRegex;
-        final Pattern matchScopeRegex;
-        final Pattern projectProfileId;
-        boolean inMatchScope = false;
-        boolean madeReplacement = false;
-        if (profileId == null) {
-            propertyRegex = Pattern.compile("/project/properties/" + RegexUtils.quote(property));
-            matchScopeRegex = PATTERN_PROJECT_PROPERTIES;
-            projectProfileId = null;
-        } else {
-            propertyRegex = Pattern.compile("/project/profiles/profile/properties/" + RegexUtils.quote(property));
-            matchScopeRegex = PATTERN_PROJECT_PROFILE;
-            projectProfileId = PATTERN_PROJECT_PROFILE_ID;
+            MutableXMLStreamReader pom, String profileId, String property, String value) throws XMLStreamException {
+        class PropertyVersionInternal {
+            final Pattern propertyRegex = Pattern.compile(
+                    (profileId == null ? "/project/properties/" : "/project/profiles/profile/properties/")
+                            + RegexUtils.quote(property));
+            final Pattern matchScopeRegex = profileId == null
+                    ? Pattern.compile("/project/properties")
+                    : Pattern.compile("/project/profiles/profile");
+            final Pattern profileIdRegex = profileId == null ? null : Pattern.compile("/project/profiles/profile/id");
+
+            boolean setPropertyVersion(String path, boolean inMatchScope) throws XMLStreamException {
+                boolean replaced = false;
+                while (!replaced && pom.hasNext()) {
+                    pom.next();
+                    if (pom.isStartElement()) {
+                        String elementPath = path + "/" + pom.getLocalName();
+                        if (propertyRegex.matcher(elementPath).matches()) {
+                            pom.mark(START);
+                        } else if (matchScopeRegex.matcher(elementPath).matches()) {
+                            // we're in a new match scope -> reset any previous partial matches
+                            inMatchScope = profileId == null;
+                            pom.clearMark(START);
+                            pom.clearMark(END);
+                        } else if (profileId != null
+                                && profileIdRegex.matcher(elementPath).matches()) {
+                            inMatchScope =
+                                    profileId.trim().equals(pom.getElementText().trim());
+                        }
+
+                        // getElementText could've pushed the pointer to END_ELEMENT
+                        if (!pom.isEndElement()) {
+                            // inMatchScope will not change in the child element
+                            replaced = setPropertyVersion(elementPath, inMatchScope);
+                        }
+                    } else if (pom.isEndElement()) {
+                        if (propertyRegex.matcher(path).matches()) {
+                            pom.mark(END);
+                        } else if (matchScopeRegex.matcher(path).matches()) {
+                            if (inMatchScope && pom.hasMark(START) && pom.hasMark(END)) {
+                                pom.replaceBetween(START, END, value);
+                                replaced = true;
+                            }
+                            pom.clearMark(START);
+                            pom.clearMark(END);
+                        }
+                        return replaced;
+                    }
+                }
+                return replaced;
+            }
         }
 
         pom.rewind();
-        while (pom.hasNext()) {
-            pom.next();
-            if (pom.isStartElement()) {
-                stack.push(path);
-                path = path + "/" + pom.getLocalName();
-
-                if (propertyRegex.matcher(path).matches()) {
-                    pom.mark(0);
-                } else if (matchScopeRegex.matcher(path).matches()) {
-                    // we're in a new match scope
-                    // reset any previous partial matches
-                    inMatchScope = profileId == null;
-                    pom.clearMark(0);
-                    pom.clearMark(1);
-                } else if (profileId != null && projectProfileId.matcher(path).matches()) {
-                    String candidateId = pom.getElementText();
-
-                    inMatchScope = profileId.trim().equals(candidateId.trim());
-                }
-            }
-            // for empty elements, pom can be both start- and end element
-            if (pom.isEndElement()) {
-                if (propertyRegex.matcher(path).matches()) {
-                    pom.mark(1);
-                } else if (matchScopeRegex.matcher(path).matches()) {
-                    if (inMatchScope && pom.hasMark(0) && pom.hasMark(1)) {
-                        pom.replaceBetween(0, 1, value);
-                        madeReplacement = true;
-                    }
-                    pom.clearMark(0);
-                    pom.clearMark(1);
-                    inMatchScope = false;
-                }
-                path = stack.pop();
-            }
-        }
-        return madeReplacement;
+        return new PropertyVersionInternal().setPropertyVersion("", false);
     }
 
     /**
@@ -287,12 +300,6 @@ public class PomHelper {
             MutableXMLStreamReader pom, String parentPath, String elementName, String value) throws XMLStreamException {
         pom.rewind();
         return setElementValue(pom, parentPath, elementName, value, true);
-    }
-
-    enum Marks {
-        CHILD_START,
-        PARENT_START,
-        END_ELEMENT
     }
 
     /**
@@ -382,6 +389,33 @@ public class PomHelper {
         return new ElementValueInternal().process("");
     }
 
+    static <T> T executeOnPatternFound(
+            String path, final MutableXMLStreamReader pom, Pattern pattern, Supplier<T> onPatternFound)
+            throws XMLStreamException {
+        T result = null;
+        while (result == null && pom.hasNext()) {
+            pom.next();
+            if (pom.isStartElement()) {
+                String elementPath = path + "/" + pom.getLocalName();
+                if (pattern.matcher(elementPath).matches()) {
+                    pom.mark(START);
+                }
+                result = executeOnPatternFound(elementPath, pom, pattern, onPatternFound);
+            } else if (pom.isEndElement()) {
+                if (pattern.matcher(path).matches()) {
+                    pom.mark(END);
+                    if (pom.hasMark(START)) {
+                        return onPatternFound.get();
+                    }
+                    pom.clearMark(START);
+                    pom.clearMark(END);
+                }
+                break;
+            }
+        }
+        return result;
+    }
+
     /**
      * Retrieves the project version from the pom.
      *
@@ -391,34 +425,9 @@ public class PomHelper {
      * @throws XMLStreamException if something went wrong.
      */
     public static String getProjectVersion(final MutableXMLStreamReader pom) throws XMLStreamException {
-        Stack<String> stack = new Stack<>();
-        String path = "";
-
         pom.rewind();
-        while (pom.hasNext()) {
-            pom.next();
-            if (pom.isStartElement()) {
-                stack.push(path);
-                path = path + "/" + pom.getLocalName();
-
-                if (PATTERN_PROJECT_VERSION.matcher(path).matches()) {
-                    pom.mark(0);
-                }
-            }
-            // for empty elements, pom can be both start- and end element
-            if (pom.isEndElement()) {
-                if (PATTERN_PROJECT_VERSION.matcher(path).matches()) {
-                    pom.mark(1);
-                    if (pom.hasMark(0) && pom.hasMark(1)) {
-                        return pom.getBetween(0, 1).trim();
-                    }
-                    pom.clearMark(0);
-                    pom.clearMark(1);
-                }
-                path = stack.pop();
-            }
-        }
-        return null;
+        return executeOnPatternFound("", pom, PATTERN_PROJECT_VERSION, () -> pom.getBetween(START, END)
+                .trim());
     }
 
     /**
@@ -431,36 +440,12 @@ public class PomHelper {
      */
     public static boolean setProjectParentVersion(final MutableXMLStreamReader pom, final String value)
             throws XMLStreamException {
-        Stack<String> stack = new Stack<>();
-        String path = "";
-        boolean madeReplacement = false;
-
         pom.rewind();
-        while (pom.hasNext()) {
-            pom.next();
-            if (pom.isStartElement()) {
-                stack.push(path);
-                path = path + "/" + pom.getLocalName();
-
-                if (PATTERN_PROJECT_PARENT_VERSION.matcher(path).matches()) {
-                    pom.mark(0);
-                }
-            }
-            // for empty elements, pom can be both start- and end element
-            if (pom.isEndElement()) {
-                if (PATTERN_PROJECT_PARENT_VERSION.matcher(path).matches()) {
-                    pom.mark(1);
-                    if (pom.hasMark(0) && pom.hasMark(1)) {
-                        pom.replaceBetween(0, 1, value);
-                        madeReplacement = true;
-                    }
-                    pom.clearMark(0);
-                    pom.clearMark(1);
-                }
-                path = stack.pop();
-            }
-        }
-        return madeReplacement;
+        return ofNullable(executeOnPatternFound("", pom, PATTERN_PROJECT_PARENT_VERSION, () -> {
+                    pom.replaceBetween(START, END, value);
+                    return true;
+                }))
+                .orElse(false);
     }
 
     /**
@@ -486,52 +471,9 @@ public class PomHelper {
             final Model model,
             final Log logger)
             throws XMLStreamException {
-        Stack<String> stack = new Stack<>();
+        Map<String, String> implicitProperties = getImplicitProperties(pom, model);
+
         String path = "";
-
-        Set<String> implicitPaths = new HashSet<>(Arrays.asList(
-                "/project/parent/groupId", "/project/parent/artifactId",
-                "/project/parent/version", "/project/groupId",
-                "/project/artifactId", "/project/version"));
-        Map<String, String> implicitProperties = new HashMap<>();
-
-        for (Map.Entry<Object, Object> entry : model.getProperties().entrySet()) {
-            implicitProperties.put((String) entry.getKey(), (String) entry.getValue());
-        }
-
-        pom.rewind();
-        while (pom.hasNext()) {
-            pom.next();
-            if (pom.isStartElement()) {
-                stack.push(path);
-                path = path + "/" + pom.getLocalName();
-
-                if (implicitPaths.contains(path)) {
-                    final String elementText = pom.getElementText().trim();
-                    implicitProperties.put(path.substring(1).replace('/', '.'), elementText);
-                }
-            }
-            if (pom.isEndElement()) {
-                path = stack.pop();
-            }
-        }
-
-        for (boolean modified = true; modified; ) {
-            modified = false;
-            for (Map.Entry<String, String> entry : implicitProperties.entrySet()) {
-                if (entry.getKey().contains(".parent")) {
-                    String child = entry.getKey().replace(".parent", "");
-                    if (!implicitProperties.containsKey(child)) {
-                        implicitProperties.put(child, entry.getValue());
-                        modified = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        stack = new Stack<>();
-        path = "";
         boolean inMatchScope = false;
         boolean madeReplacement = false;
         boolean haveGroupId = false;
@@ -539,18 +481,17 @@ public class PomHelper {
         boolean haveOldVersion = false;
 
         pom.rewind();
-        while (pom.hasNext()) {
+        for (Deque<String> stack = new ArrayDeque<>(); pom.hasNext(); ) {
             pom.next();
             if (pom.isStartElement()) {
                 stack.push(path);
                 path = path + "/" + pom.getLocalName();
-
                 if (PATTERN_PROJECT_DEPENDENCY.matcher(path).matches()) {
                     // we're in a new match scope
                     // reset any previous partial matches
                     inMatchScope = true;
-                    pom.clearMark(0);
-                    pom.clearMark(1);
+                    pom.clearMark(START);
+                    pom.clearMark(END);
 
                     haveGroupId = false;
                     haveArtifactId = false;
@@ -564,7 +505,7 @@ public class PomHelper {
                         haveArtifactId =
                                 artifactId.equals(evaluate(pom.getElementText().trim(), implicitProperties, logger));
                     } else if ("version".equals(pom.getLocalName())) {
-                        pom.mark(0);
+                        pom.mark(START);
                     }
                 }
             }
@@ -572,9 +513,9 @@ public class PomHelper {
             if (pom.isEndElement()) {
                 if (PATTERN_PROJECT_DEPENDENCY_VERSION.matcher(path).matches()
                         && "version".equals(pom.getLocalName())) {
-                    pom.mark(1);
-                    String compressedPomVersion =
-                            StringUtils.deleteWhitespace(pom.getBetween(0, 1).trim());
+                    pom.mark(END);
+                    String compressedPomVersion = StringUtils.deleteWhitespace(
+                            pom.getBetween(START, END).trim());
                     String compressedOldVersion = StringUtils.deleteWhitespace(oldVersion);
 
                     try {
@@ -585,16 +526,16 @@ public class PomHelper {
                     }
                 } else if (PATTERN_PROJECT_DEPENDENCY.matcher(path).matches()) {
                     if (inMatchScope
-                            && pom.hasMark(0)
-                            && pom.hasMark(1)
+                            && pom.hasMark(START)
+                            && pom.hasMark(END)
                             && haveGroupId
                             && haveArtifactId
                             && haveOldVersion) {
-                        pom.replaceBetween(0, 1, newVersion);
+                        pom.replaceBetween(START, END, newVersion);
                         madeReplacement = true;
                     }
-                    pom.clearMark(0);
-                    pom.clearMark(1);
+                    pom.clearMark(START);
+                    pom.clearMark(END);
                     haveArtifactId = false;
                     haveGroupId = false;
                     haveOldVersion = false;
@@ -604,6 +545,43 @@ public class PomHelper {
             }
         }
         return madeReplacement;
+    }
+
+    static Map<String, String> getImplicitProperties(MutableXMLStreamReader pom, Model model)
+            throws XMLStreamException {
+
+        Map<String, String> implicitProperties = model.getProperties().entrySet().stream()
+                .collect(Collectors.toMap(e -> (String) e.getKey(), e -> (String) e.getValue()));
+
+        pom.rewind();
+        getImplicitProperties("", pom, implicitProperties);
+
+        List<Pair<String, String>> parentProperties = implicitProperties.entrySet().stream()
+                .filter(e -> e.getKey().contains(".parent"))
+                .map(e -> Pair.of(e.getKey().replace(".parent", ""), e.getValue()))
+                .collect(Collectors.toList());
+        parentProperties.forEach(p -> implicitProperties.putIfAbsent(p.getLeft(), p.getRight()));
+        return implicitProperties;
+    }
+
+    private static void getImplicitProperties(String path, MutableXMLStreamReader pom, Map<String, String> acc)
+            throws XMLStreamException {
+        while (pom.hasNext()) {
+            pom.next();
+            if (pom.isStartElement()) {
+                String elementPath = path + "/" + pom.getLocalName();
+                if (IMPLICIT_PATHS.contains(elementPath)) {
+                    final String elementText = pom.getElementText().trim();
+                    acc.put(elementPath.substring(1).replace('/', '.'), elementText);
+                    // getElementText pushed the pointer to END_ELEMENT, we should NOT descend
+                } else {
+                    // only descend if state != END_ELEMENT at this point
+                    getImplicitProperties(elementPath, pom, acc);
+                }
+            } else if (pom.isEndElement()) {
+                return;
+            }
+        }
     }
 
     /**
@@ -622,17 +600,11 @@ public class PomHelper {
         return extractExpression(expr)
                 .map(expression -> {
                     String value = properties.get(expression);
-
                     if (value != null) {
                         int exprStartDelimiter = value.indexOf("${");
-
                         if (exprStartDelimiter >= 0) {
-                            if (exprStartDelimiter > 0) {
-                                value = value.substring(0, exprStartDelimiter)
-                                        + evaluate(value.substring(exprStartDelimiter), properties, logger);
-                            } else {
-                                value = evaluate(value.substring(exprStartDelimiter), properties, logger);
-                            }
+                            value = value.substring(0, exprStartDelimiter)
+                                    + evaluate(value.substring(exprStartDelimiter), properties, logger);
                         }
                     } else {
                         // Because we work with the raw model, without interpolation, unevaluatable expressions are not
@@ -646,25 +618,16 @@ public class PomHelper {
                     if (index >= 0) {
                         int lastIndex = expr.indexOf("}", index);
                         if (lastIndex >= 0) {
-                            String retVal = expr.substring(0, index);
-
+                            String retVal = expr.substring(0, index)
+                                    + evaluate(expr.substring(index, lastIndex + 1), properties, logger)
+                                    + evaluate(expr.substring(lastIndex + 1), properties, logger);
                             if (index > 0 && expr.charAt(index - 1) == '$') {
-                                retVal += expr.substring(index + 1, lastIndex + 1);
-                            } else {
-                                retVal += evaluate(expr.substring(index, lastIndex + 1), properties, logger);
+                                retVal = expr.substring(0, index - 1) + retVal;
                             }
-
-                            retVal += evaluate(expr.substring(lastIndex + 1), properties, logger);
                             return retVal;
                         }
                     }
-
-                    // Was not an expression
-                    if (expr.contains("$$")) {
-                        return expr.replaceAll("\\$\\$", "\\$");
-                    } else {
-                        return expr;
-                    }
+                    return expr.contains("$$") ? expr.replaceAll("\\$\\$", "\\$") : expr;
                 });
     }
 
@@ -690,7 +653,7 @@ public class PomHelper {
      * @return true if both versions have an overlap
      * @throws InvalidVersionSpecificationException if the versions can't be parsed to a range
      */
-    public static boolean isVersionOverlap(String leftVersionOrRange, String rightVersionOrRange)
+    static boolean isVersionOverlap(String leftVersionOrRange, String rightVersionOrRange)
             throws InvalidVersionSpecificationException {
         VersionRange pomVersionRange = createVersionRange(leftVersionOrRange);
         if (!pomVersionRange.hasRestrictions()) {
@@ -732,7 +695,7 @@ public class PomHelper {
             final String oldVersion,
             final String newVersion)
             throws XMLStreamException {
-        Stack<String> stack = new Stack<>();
+        Deque<String> stack = new ArrayDeque<>();
         String path = "";
         boolean inMatchScope = false;
         boolean madeReplacement = false;
@@ -753,8 +716,8 @@ public class PomHelper {
                     // we're in a new match scope
                     // reset any previous partial matches
                     inMatchScope = true;
-                    pom.clearMark(0);
-                    pom.clearMark(1);
+                    pom.clearMark(START);
+                    pom.clearMark(END);
 
                     haveGroupId = false;
                     haveArtifactId = false;
@@ -766,33 +729,34 @@ public class PomHelper {
                     } else if ("artifactId".equals(elementName)) {
                         haveArtifactId = artifactId.equals(pom.getElementText().trim());
                     } else if ("version".equals(elementName)) {
-                        pom.mark(0);
+                        pom.mark(START);
                     }
                 }
             }
             // for empty elements, pom can be both start- and end element
             if (pom.isEndElement()) {
                 if (PATTERN_PROJECT_PLUGIN_VERSION.matcher(path).matches() && "version".equals(pom.getLocalName())) {
-                    pom.mark(1);
+                    pom.mark(END);
 
                     try {
                         haveOldVersion = isVersionOverlap(
-                                oldVersion, pom.getBetween(0, 1).trim());
+                                oldVersion, pom.getBetween(START, END).trim());
                     } catch (InvalidVersionSpecificationException e) {
                         // fall back to string comparison
-                        haveOldVersion = oldVersion.equals(pom.getBetween(0, 1).trim());
+                        haveOldVersion =
+                                oldVersion.equals(pom.getBetween(START, END).trim());
                     }
                 } else if (PATTERN_PROJECT_PLUGIN.matcher(path).matches()) {
                     if (inMatchScope
-                            && pom.hasMark(0)
-                            && pom.hasMark(1)
+                            && pom.hasMark(START)
+                            && pom.hasMark(END)
                             && (haveGroupId || !needGroupId)
                             && haveArtifactId
                             && haveOldVersion) {
-                        pom.replaceBetween(0, 1, newVersion);
+                        pom.replaceBetween(START, END, newVersion);
                         madeReplacement = true;
-                        pom.clearMark(0);
-                        pom.clearMark(1);
+                        pom.clearMark(START);
+                        pom.clearMark(END);
                         haveArtifactId = false;
                         haveGroupId = false;
                         haveOldVersion = false;
@@ -811,7 +775,7 @@ public class PomHelper {
      * @param project maven project of the child for which the models need to be gathered
      * @return gathered map of raw models per project
      */
-    private static Map<MavenProject, Model> getRawModelWithParents(MavenProject project) throws IOException {
+    static Map<MavenProject, Model> getRawModelWithParents(MavenProject project) throws IOException {
         // constructs a tree sorted from children to parents
         Map<MavenProject, Model> models = new TreeMap<>((p1, p2) -> {
             for (MavenProject p = p1; p != null; p = p.getParent()) {
@@ -831,7 +795,7 @@ public class PomHelper {
     /**
      * Examines the project to find any properties which are associated with versions of artifacts in the project.
      *
-     * @param helper        Our versions helper.
+     * @param helper        {@link VersionsHelper} instance
      * @param project       The project to examine.
      * @param includeParent whether parent POMs should be included
      * @return An array of properties that are associated within the project.
@@ -839,165 +803,118 @@ public class PomHelper {
      * @throws IOException                   if the project's pom file cannot be parsed.
      * @since 1.0-alpha-3
      */
-    public static PropertyVersionsBuilder[] getPropertyVersionsBuilders(
-            VersionsHelper helper, ArtifactFactory artifactFactory, MavenProject project, boolean includeParent)
+    public PropertyVersionsBuilder[] getPropertyVersionsBuilders(
+            VersionsHelper helper, Log log, MavenProject project, boolean includeParent)
             throws ExpressionEvaluationException, IOException {
-        ExpressionEvaluator expressionEvaluator = helper.getExpressionEvaluator(project);
-        Map<MavenProject, Model> reactorModels =
-                includeParent ? getRawModelWithParents(project) : singletonMap(project, getRawModel(project));
+
+        Map<MavenProject, Model> reactorModels = includeParent
+                ? getRawModelWithParents(project)
+                : Collections.singletonMap(project, getRawModel(project));
+
+        Set<String> activeProfileIds =
+                project.getActiveProfiles().stream().map(Profile::getId).collect(Collectors.toSet());
 
         Map<String, PropertyVersionsBuilder> propertiesMap = new TreeMap<>();
+        reactorModels.values().forEach(model -> {
+            processProfiles(helper, log, propertiesMap, model, activeProfileIds);
+            putPropertiesIfAbsent(helper, log, propertiesMap, null, model.getProperties());
+        });
 
-        Set<String> activeProfiles = new TreeSet<>();
-        for (Profile profile : project.getActiveProfiles()) {
-            activeProfiles.add(profile.getId());
-        }
+        // Process the project and its parent hierarchy
+        for (MavenProject currentProject = project;
+                currentProject != null;
+                currentProject = includeParent ? currentProject.getParent() : null) {
 
-        // add any properties from profiles first (as they override properties from the project
-        for (Iterator<Profile> it = reactorModels.values().stream()
-                        .flatMap(model -> model.getProfiles().stream())
-                        .filter(profile -> activeProfiles.contains(profile.getId()))
-                        .iterator();
-                it.hasNext(); ) {
-            Profile profile = it.next();
-            try {
-                addProperties(helper, propertiesMap, profile.getId(), profile.getProperties());
-                if (profile.getDependencyManagement() != null) {
-                    addDependencyAssocations(
-                            artifactFactory,
-                            expressionEvaluator,
-                            propertiesMap,
-                            profile.getDependencyManagement().getDependencies(),
-                            false);
-                }
-                addDependencyAssocations(
-                        artifactFactory, expressionEvaluator, propertiesMap, profile.getDependencies(), false);
-                if (profile.getBuild() != null) {
-                    if (profile.getBuild().getPluginManagement() != null) {
-                        addPluginAssociations(
-                                artifactFactory,
-                                expressionEvaluator,
-                                propertiesMap,
-                                profile.getBuild().getPluginManagement().getPlugins());
-                    }
-                    addPluginAssociations(
-                            artifactFactory,
-                            expressionEvaluator,
-                            propertiesMap,
-                            profile.getBuild().getPlugins());
-                }
-                if (profile.getReporting() != null) {
-                    addReportPluginAssociations(
-                            artifactFactory,
-                            expressionEvaluator,
-                            propertiesMap,
-                            profile.getReporting().getPlugins());
-                }
-            } catch (ExpressionEvaluationException e) {
-                throw new RuntimeException(e);
+            Model model = reactorModels.get(currentProject);
+            if (model != null) {
+                processModel(propertiesMap, model, activeProfileIds);
             }
         }
 
-        // second, we add all the properties in the pom
-        reactorModels.values().forEach(model -> addProperties(helper, propertiesMap, null, model.getProperties()));
-
-        for (MavenProject currentPrj = project;
-                currentPrj != null;
-                currentPrj = includeParent ? currentPrj.getParent() : null) {
-            Model model = reactorModels.get(currentPrj);
-
-            if (model.getDependencyManagement() != null) {
-                addDependencyAssocations(
-                        artifactFactory,
-                        expressionEvaluator,
-                        propertiesMap,
-                        model.getDependencyManagement().getDependencies(),
-                        false);
-            }
-            addDependencyAssocations(
-                    artifactFactory, expressionEvaluator, propertiesMap, model.getDependencies(), false);
-            if (model.getBuild() != null) {
-                if (model.getBuild().getPluginManagement() != null) {
-                    addPluginAssociations(
-                            artifactFactory,
-                            expressionEvaluator,
-                            propertiesMap,
-                            model.getBuild().getPluginManagement().getPlugins());
-                }
-                addPluginAssociations(
-                        artifactFactory,
-                        expressionEvaluator,
-                        propertiesMap,
-                        model.getBuild().getPlugins());
-            }
-            if (model.getReporting() != null) {
-                addReportPluginAssociations(
-                        artifactFactory,
-                        expressionEvaluator,
-                        propertiesMap,
-                        model.getReporting().getPlugins());
-            }
-
-            // third, we add any associations from the active profiles
-            for (Profile profile : model.getProfiles()) {
-                if (!activeProfiles.contains(profile.getId())) {
-                    continue;
-                }
-                if (profile.getDependencyManagement() != null) {
-                    addDependencyAssocations(
-                            artifactFactory,
-                            expressionEvaluator,
-                            propertiesMap,
-                            profile.getDependencyManagement().getDependencies(),
-                            false);
-                }
-                addDependencyAssocations(
-                        artifactFactory, expressionEvaluator, propertiesMap, profile.getDependencies(), false);
-                if (profile.getBuild() != null) {
-                    if (profile.getBuild().getPluginManagement() != null) {
-                        addPluginAssociations(
-                                artifactFactory,
-                                expressionEvaluator,
-                                propertiesMap,
-                                profile.getBuild().getPluginManagement().getPlugins());
-                    }
-                    addPluginAssociations(
-                            artifactFactory,
-                            expressionEvaluator,
-                            propertiesMap,
-                            profile.getBuild().getPlugins());
-                }
-                if (profile.getReporting() != null) {
-                    addReportPluginAssociations(
-                            artifactFactory,
-                            expressionEvaluator,
-                            propertiesMap,
-                            profile.getReporting().getPlugins());
-                }
-            }
-        }
-
-        // finally, remove any properties without associations
-        purgeProperties(propertiesMap);
+        // Finally, remove any properties without associations
+        propertiesMap.values().removeIf(versions -> !versions.isAssociated());
 
         return propertiesMap.values().toArray(new PropertyVersionsBuilder[0]);
+    }
+
+    private void processProfiles(
+            VersionsHelper helper,
+            Log log,
+            Map<String, PropertyVersionsBuilder> propertiesMap,
+            Model model,
+            Set<String> activeProfileIds) {
+
+        model.getProfiles().stream()
+                .filter(profile -> activeProfileIds.contains(profile.getId()))
+                .forEach(profile -> {
+                    try {
+                        putPropertiesIfAbsent(helper, log, propertiesMap, profile.getId(), profile.getProperties());
+                        processDependencies(
+                                propertiesMap, profile.getDependencyManagement(), profile.getDependencies());
+                        processBuild(propertiesMap, profile.getBuild());
+                        processReporting(propertiesMap, profile.getReporting());
+                    } catch (ExpressionEvaluationException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
+    private void processModel(
+            Map<String, PropertyVersionsBuilder> propertiesMap, Model model, Set<String> activeProfileIds)
+            throws ExpressionEvaluationException {
+
+        processDependencies(propertiesMap, model.getDependencyManagement(), model.getDependencies());
+        processBuild(propertiesMap, model.getBuild());
+        processReporting(propertiesMap, model.getReporting());
+
+        // Process active profiles within the model
+        for (Profile profile : model.getProfiles()) {
+            if (activeProfileIds.contains(profile.getId())) {
+                processDependencies(propertiesMap, profile.getDependencyManagement(), profile.getDependencies());
+            }
+        }
+    }
+
+    private void processDependencies(
+            Map<String, PropertyVersionsBuilder> propertiesMap,
+            DependencyManagement depMgmt,
+            List<Dependency> dependencies)
+            throws ExpressionEvaluationException {
+        if (depMgmt != null) {
+            addDependencyAssocations(propertiesMap, depMgmt.getDependencies(), false);
+        }
+        addDependencyAssocations(propertiesMap, dependencies, false);
+    }
+
+    private void processBuild(Map<String, PropertyVersionsBuilder> propertiesMap, BuildBase build)
+            throws ExpressionEvaluationException {
+
+        if (build != null) {
+            if (build.getPluginManagement() != null) {
+                addPluginAssociations(propertiesMap, build.getPluginManagement().getPlugins());
+            }
+            addPluginAssociations(propertiesMap, build.getPlugins());
+        }
+    }
+
+    private void processReporting(Map<String, PropertyVersionsBuilder> propertiesMap, Reporting reporting)
+            throws ExpressionEvaluationException {
+
+        if (reporting != null) {
+            addReportPluginAssociations(propertiesMap, reporting.getPlugins());
+        }
     }
 
     /**
      * Takes a list of {@link org.apache.maven.model.Plugin} instances and adds associations to properties used to
      * define versions of the plugin artifact or any of the plugin dependencies specified in the pom.
      *
-     * @param expressionEvaluator Our expression evaluator.
      * @param result              The map of {@link org.codehaus.mojo.versions.api.PropertyVersionsBuilder} keyed by
      *                            property name.
      * @param plugins             The list of {@link org.apache.maven.model.Plugin}.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      */
-    private static void addPluginAssociations(
-            ArtifactFactory artifactFactory,
-            ExpressionEvaluator expressionEvaluator,
-            Map<String, PropertyVersionsBuilder> result,
-            List<Plugin> plugins)
+    private void addPluginAssociations(Map<String, PropertyVersionsBuilder> result, List<Plugin> plugins)
             throws ExpressionEvaluationException {
         if (plugins == null) {
             return;
@@ -1034,15 +951,12 @@ public class PomHelper {
                     }
                 }
             }
-            addDependencyAssocations(artifactFactory, expressionEvaluator, result, plugin.getDependencies(), true);
+            addDependencyAssocations(result, plugin.getDependencies(), true);
         }
     }
 
-    private static void addReportPluginAssociations(
-            ArtifactFactory artifactFactory,
-            ExpressionEvaluator expressionEvaluator,
-            Map<String, PropertyVersionsBuilder> result,
-            List<ReportPlugin> reportPlugins)
+    private void addReportPluginAssociations(
+            Map<String, PropertyVersionsBuilder> result, List<ReportPlugin> reportPlugins)
             throws ExpressionEvaluationException {
         if (reportPlugins == null) {
             return;
@@ -1082,12 +996,8 @@ public class PomHelper {
         }
     }
 
-    private static void addDependencyAssocations(
-            ArtifactFactory artifactFactory,
-            ExpressionEvaluator expressionEvaluator,
-            Map<String, PropertyVersionsBuilder> result,
-            List<Dependency> dependencies,
-            boolean usePluginRepositories)
+    private void addDependencyAssocations(
+            Map<String, PropertyVersionsBuilder> result, List<Dependency> dependencies, boolean usePluginRepositories)
             throws ExpressionEvaluationException {
         if (dependencies == null) {
             return;
@@ -1156,23 +1066,16 @@ public class PomHelper {
         }
     }
 
-    private static void addProperties(
+    private void putPropertiesIfAbsent(
             VersionsHelper helper,
+            Log log,
             Map<String, PropertyVersionsBuilder> result,
             String profileId,
             Properties properties) {
-        if (properties == null) {
-            return;
-        }
-        for (String propertyName : properties.stringPropertyNames()) {
-            if (!result.containsKey(propertyName)) {
-                result.put(propertyName, new PropertyVersionsBuilder(helper, profileId, propertyName));
-            }
-        }
-    }
-
-    private static void purgeProperties(Map<String, PropertyVersionsBuilder> result) {
-        result.values().removeIf(versions -> versions.getAssociations().length == 0);
+        ofNullable(properties)
+                .map(Properties::stringPropertyNames)
+                .ifPresent(propertyNames -> propertyNames.forEach(propertyName -> result.putIfAbsent(
+                        propertyName, new PropertyVersionsBuilder(helper, profileId, propertyName, log))));
     }
 
     /**
@@ -1197,8 +1100,10 @@ public class PomHelper {
      */
     public static Set<String> getAllChildModules(Model model, Log logger) {
         logger.debug("Finding child modules of " + model);
-        Set<String> childModules = new TreeSet<>(model.getModules());
-        model.getProfiles().forEach(profile -> childModules.addAll(profile.getModules()));
+        Set<String> childModules = Stream.concat(
+                        model.getModules().stream(),
+                        model.getProfiles().stream().flatMap(profile -> profile.getModules().stream()))
+                .collect(TreeSet::new, Set::add, Set::addAll);
         debugModules(logger, "Child modules:", childModules);
         return childModules;
     }
@@ -1228,11 +1133,8 @@ public class PomHelper {
      * @return The version.
      */
     public static String getVersion(Model model) {
-        String targetVersion = model.getVersion();
-        if (targetVersion == null && model.getParent() != null) {
-            targetVersion = model.getParent().getVersion();
-        }
-        return targetVersion;
+        return ofNullable(model.getVersion())
+                .orElse(ofNullable(model.getParent()).map(Parent::getVersion).orElse(null));
     }
 
     /**
@@ -1252,11 +1154,8 @@ public class PomHelper {
      * @return The artifactId.
      */
     public static String getArtifactId(Model model) {
-        String sourceArtifactId = model.getArtifactId();
-        if (sourceArtifactId == null && model.getParent() != null) {
-            sourceArtifactId = model.getParent().getArtifactId();
-        }
-        return sourceArtifactId;
+        return ofNullable(model.getArtifactId())
+                .orElse(ofNullable(model.getParent()).map(Parent::getArtifactId).orElse(null));
     }
 
     /**
@@ -1266,11 +1165,8 @@ public class PomHelper {
      * @return The groupId.
      */
     public static String getGroupId(Model model) {
-        String targetGroupId = model.getGroupId();
-        if (targetGroupId == null && model.getParent() != null) {
-            targetGroupId = model.getParent().getGroupId();
-        }
-        return targetGroupId;
+        return ofNullable(model.getGroupId())
+                .orElse(ofNullable(model.getParent()).map(Parent::getGroupId).orElse(null));
     }
 
     /**

@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -16,11 +18,14 @@ import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
@@ -34,22 +39,34 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public abstract class UseLatestVersionsMojoTestBase {
     protected UseLatestVersionsMojoBase mojo;
 
     protected TestChangeRecorder changeRecorder;
 
+    @Mock
+    protected Log log;
+
+    protected PomHelper pomHelper;
+
     protected ArtifactFactory artifactFactory;
+
+    @Mock
+    protected ExpressionEvaluator expressionEvaluator;
 
     protected abstract UseLatestVersionsMojoBase createMojo() throws IllegalAccessException, MojoExecutionException;
 
     @Before
     public void setUp() throws Exception {
+        openMocks(this);
         changeRecorder = new TestChangeRecorder();
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
+        pomHelper = new PomHelper(artifactFactory, expressionEvaluator);
         mojo = createMojo();
+        mojo.mojoExecution = Mockito.mock(MojoExecution.class);
     }
 
     protected RepositorySystem createRepositorySystem() {

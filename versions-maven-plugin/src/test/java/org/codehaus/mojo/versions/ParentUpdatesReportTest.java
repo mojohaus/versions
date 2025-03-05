@@ -31,6 +31,7 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Model;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
@@ -96,6 +97,7 @@ public class ParentUpdatesReportTest {
                         new DefaultArtifactHandlerStub("default")));
 
                 session = mockMavenSession();
+                mojoExecution = mock(MojoExecution.class);
             }
         }.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 

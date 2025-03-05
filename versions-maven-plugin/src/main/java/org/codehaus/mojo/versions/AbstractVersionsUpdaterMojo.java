@@ -58,7 +58,10 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.rule.RuleService;
+import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -206,17 +209,24 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     public VersionsHelper getHelper() throws MojoExecutionException {
         if (helper == null) {
-            helper = new DefaultVersionsHelper.Builder()
-                    .withArtifactFactory(artifactFactory)
-                    .withRepositorySystem(repositorySystem)
+            RuleService ruleService = new RulesServiceBuilder()
+                    .withMavenSession(session)
                     .withWagonMap(wagonMap)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)
                     .withIgnoredVersions(ignoredVersions)
                     .withLog(getLog())
+                    .build();
+            PomHelper pomHelper =
+                    new PomHelper(artifactFactory, new VersionsExpressionEvaluator(session, mojoExecution));
+            helper = new DefaultVersionsHelper.Builder()
+                    .withArtifactFactory(artifactFactory)
+                    .withRepositorySystem(repositorySystem)
+                    .withLog(getLog())
                     .withMavenSession(session)
-                    .withMojoExecution(mojoExecution)
+                    .withPomHelper(pomHelper)
+                    .withRuleService(ruleService)
                     .build();
         }
         return helper;
@@ -424,13 +434,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
             throws XMLStreamException, InvalidVersionSpecificationException, InvalidSegmentException,
                     MojoExecutionException {
         ArtifactVersion winner = version.getNewestVersion(
-                currentVersion,
-                property,
-                getAllowSnapshots(),
-                this.reactorProjects,
-                this.getHelper(),
-                allowDowngrade,
-                unchangedSegment);
+                currentVersion, property, getAllowSnapshots(), this.reactorProjects, allowDowngrade, unchangedSegment);
 
         if (winner == null || currentVersion.equals(winner.toString())) {
             getLog().info("Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion);

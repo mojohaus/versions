@@ -113,11 +113,11 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
 
     protected AbstractDependencyUpdatesReport(
             I18N i18n,
-            ArtifactFactory artifactFactory,
+            ArtifactFactory artifactCreationService,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
-        super(i18n, artifactFactory, repositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactCreationService, repositorySystem, wagonMap, rendererFactory);
     }
 
     /**

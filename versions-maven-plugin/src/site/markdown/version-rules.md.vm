@@ -47,10 +47,8 @@ If your version numbers do not match this scheme, you may face issues with
 - goals in this plugin that sort versions, for example update-properties (you can do things to help with these
   kinds of problems)
 
-The `versions-maven-plugin` knows three rules for comparing version numbers:
-- *maven*, The standard Maven 2.x and 3.x version numbering scheme.
-- *numeric*, An alternative version numbering scheme with no "special" qualifiers.
-- *mercury*, An alternative version numbering scheme, now defunct.
+Since version 2.19.0, `versions-maven-plugin` only uses the Maven version numbering scheme, explained above.
+*numeric* and *mercury* version schemes have been abandoned.
 
 The `versions-maven-plugin` will assume that all version numbers follow the `maven` scheme unless you tell
 it otherwise.
@@ -58,7 +56,7 @@ it otherwise.
 rules.xml
 ---------
 
-To specify the version schemes to use, you may define a [rule-set xml file](../versions-model/rule.html), use the `ruleSet`
+To specify ignored versions, you may define a [rule-set xml file](../versions-model/rule.html), use the `ruleSet`
 element in the `versions-maven-plugin` plugin configuration, or specify ignored versions via
 the `maven.version.ignore` property.
 
@@ -67,15 +65,22 @@ $h3 Using the `rules.xml` file
 The `rules.xml` file should conform to the xsd specified in the example below.
 
 ```xml
-<ruleset comparisonMethod="maven"
-         xmlns="https://www.mojohaus.org/VERSIONS/RULE/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://www.mojohaus.org/VERSIONS/RULE/2.1.0 https://www.mojohaus.org/versions/versions-model/xsd/rule-2.1.0.xsd">
+<ruleset xmlns="https://www.mojohaus.org/VERSIONS/RULE/3.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://www.mojohaus.org/VERSIONS/RULE/3.0.0 https://www.mojohaus.org/versions/versions-model/xsd/rule-3.0.0.xsd">
   <rules>
-    <rule groupId="*.maven" comparisonMethod="mercury"/>
-    <rule groupId="com.mycompany" comparisonMethod="numeric"/>
-    <rule groupId="com.mycompany.maven" comparisonMethod="maven"/>
-    <rule groupId="com.mycompany.maven" artifactId="old-maven-plugin" comparisonMethod="mercury"/>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>versions-maven-plugin</artifactId>
+    <ignoreVersions>
+      <type>range</type>
+      <version>(,2.16.0]</version>
+    </ignoreVersions>
   </rules>
+  <ignoreVersions>
+    <ignoreVersion>
+      <type>regex</type>
+      <version>(.+-SNAPSHOT|.+-M\d)</version>
+    </ignoreVersion>
+  </ignoreVersions>
 </ruleset>
 ```
 
@@ -141,9 +146,6 @@ the `rules.xml` file:
               <ignoreVersions>
                 ...
               </ignoreVersions>
-
-              <!-- optional, comparison method for the rule, one of: maven (default), numeric, mercury -->
-              <comparisonMethod>maven</comparisonMethod>
             </rule>
           </rules>
       </ruleSet>
@@ -167,14 +169,13 @@ The other methods (via the `<ruleSet>` element and via the `maven.version.ignore
 explained above. The described
 
 ```xml
-<ruleset comparisonMethod="maven"
-         xmlns="https://www.mojohaus.org/VERSIONS/RULE/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<ruleset xmlns="https://www.mojohaus.org/VERSIONS/RULE/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://www.mojohaus.org/VERSIONS/RULE/2.1.0 https://www.mojohaus.org/versions/versions-model/xsd/rule-2.1.0.xsd">
   <ignoreVersions>
     <ignoreVersion type="regex">.*-beta</ignoreVersion>
   </ignoreVersions>
   <rules>
-    <rule groupId="com.mycompany.maven" comparisonMethod="maven">
+    <rule groupId="com.mycompany.maven">
       <ignoreVersions>
         <ignoreVersion type="regex">.*-RELEASE</ignoreVersion>
         <ignoreVersion type="range">[2.0.0,)</ignoreVersion>
