@@ -159,20 +159,24 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
     private final List<RemoteRepository> remoteRepositories;
 
+    private final PomHelper pomHelper;
+
     /**
      * Private constructor used by the builder
      */
     private DefaultVersionsHelper(
+            PomHelper pomHelper,
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             MavenSession mavenSession,
             MojoExecution mojoExecution,
             Log log) {
+        this.pomHelper = requireNonNull(pomHelper);
         this.artifactFactory = requireNonNull(artifactFactory);
         this.repositorySystem = repositorySystem;
         this.mavenSession = mavenSession;
         this.mojoExecution = mojoExecution;
-        this.log = log;
+        this.log = requireNonNull(log);
 
         this.remoteProjectRepositories = Optional.ofNullable(mavenSession)
                 .map(MavenSession::getCurrentProject)
@@ -244,11 +248,6 @@ public class DefaultVersionsHelper implements VersionsHelper {
     }
 
     @Override
-    public Log getLog() {
-        return log;
-    }
-
-    @Override
     public ArtifactVersions lookupArtifactVersions(
             Artifact artifact, VersionRange versionRange, boolean usePluginRepositories)
             throws VersionRetrievalException {
@@ -261,8 +260,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
             throws VersionRetrievalException {
         try {
             Collection<IgnoreVersion> ignoredVersions = getIgnoredVersions(artifact);
-            if (!ignoredVersions.isEmpty() && getLog().isDebugEnabled()) {
-                getLog().debug("Found ignored versions: " + ignoredVersions + " for artifact" + artifact);
+            if (!ignoredVersions.isEmpty() && log.isDebugEnabled()) {
+                log.debug("Found ignored versions: " + ignoredVersions + " for artifact" + artifact);
             }
 
             final List<RemoteRepository> repositories;
@@ -296,8 +295,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
                             .stream()
                             .filter(v -> ignoredVersions.stream().noneMatch(i -> {
                                 if (IgnoreVersionHelper.isVersionIgnored(v, i)) {
-                                    if (getLog().isDebugEnabled()) {
-                                        getLog().debug("Version " + v + " for artifact "
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Version " + v + " for artifact "
                                                 + ArtifactUtils.versionlessKey(artifact)
                                                 + " found on ignore list: "
                                                 + i);
@@ -334,7 +333,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
             if (IgnoreVersionHelper.isValidType(ignoreVersion)) {
                 ret.add(ignoreVersion);
             } else {
-                getLog().warn("The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion["
+                log.warn("The type attribute '" + ignoreVersion.getType() + "' for global ignoreVersion["
                         + ignoreVersion + "] is not valid. Please use one of '" + IgnoreVersionHelper.VALID_TYPES
                         + "'.");
             }
@@ -347,7 +346,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 if (IgnoreVersionHelper.isValidType(ignoreVersion)) {
                     ret.add(ignoreVersion);
                 } else {
-                    getLog().warn("The type attribute '" + ignoreVersion.getType() + "' for " + rule + " is not valid."
+                    log.warn("The type attribute '" + ignoreVersion.getType() + "' for " + rule + " is not valid."
                             + " Please use one of '" + IgnoreVersionHelper.VALID_TYPES + "'.");
                 }
             }
@@ -561,24 +560,25 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
         // Auto-link items if required
         if (request.isAutoLinkItems()) {
-            final PropertyVersionsBuilder[] propertyVersionsBuilders;
             try {
-                propertyVersionsBuilders = PomHelper.getPropertyVersionsBuilders(
-                        this, artifactFactory, request.getMavenProject(), request.isIncludeParent());
+                PropertyVersionsBuilder[] propertyVersionsBuilders = pomHelper.getPropertyVersionsBuilders(
+                        this, log, request.getMavenProject(), request.isIncludeParent());
+
+                for (PropertyVersionsBuilder builder : propertyVersionsBuilders) {
+                    String propertyName = builder.getName();
+                    builders.put(propertyName, builder);
+
+                    properties.computeIfAbsent(propertyName, name -> {
+                        Property property = new Property(name);
+                        log.debug(String.format(
+                                "Property ${%s}: Adding inferred version range of %s",
+                                name, builder.getVersionRange()));
+                        property.setVersion(builder.getVersionRange());
+                        return property;
+                    });
+                }
             } catch (ExpressionEvaluationException | IOException e) {
                 throw new MojoExecutionException(e.getMessage(), e);
-            }
-
-            for (PropertyVersionsBuilder propertyVersionsBuilder : propertyVersionsBuilders) {
-                final String propertyName = propertyVersionsBuilder.getName();
-                builders.put(propertyName, propertyVersionsBuilder);
-                if (!properties.containsKey(propertyName)) {
-                    final Property property = new Property(propertyName);
-                    getLog().debug("Property ${" + propertyName + "}: Adding inferred version range of "
-                            + propertyVersionsBuilder.getVersionRange());
-                    property.setVersion(propertyVersionsBuilder.getVersionRange());
-                    properties.put(propertyName, property);
-                }
             }
         }
 
@@ -589,18 +589,18 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 ? Arrays.asList(request.getExcludeProperties().split("\\s*,\\s*"))
                 : Collections.emptyList();
 
-        getLog().debug("Searching for properties associated with builders");
+        log.debug("Searching for properties associated with builders");
         Iterator<Property> i = properties.values().iterator();
         while (i.hasNext()) {
             Property property = i.next();
 
-            getLog().debug("includePropertiesList:" + includePropertiesList + " property: " + property.getName());
-            getLog().debug("excludePropertiesList:" + excludePropertiesList + " property: " + property.getName());
+            log.debug("includePropertiesList:" + includePropertiesList + " property: " + property.getName());
+            log.debug("excludePropertiesList:" + excludePropertiesList + " property: " + property.getName());
             if (!includePropertiesList.isEmpty() && !includePropertiesList.contains(property.getName())) {
-                getLog().debug("Skipping property ${" + property.getName() + "}");
+                log.debug("Skipping property ${" + property.getName() + "}");
                 i.remove();
             } else if (!excludePropertiesList.isEmpty() && excludePropertiesList.contains(property.getName())) {
-                getLog().debug("Ignoring property ${" + property.getName() + "}");
+                log.debug("Ignoring property ${" + property.getName() + "}");
                 i.remove();
             }
         }
@@ -608,21 +608,21 @@ public class DefaultVersionsHelper implements VersionsHelper {
         Map<Property, PropertyVersions> propertyVersions = new LinkedHashMap<>(properties.size());
         while (i.hasNext()) {
             Property property = i.next();
-            getLog().debug("Property ${" + property.getName() + "}");
+            log.debug("Property ${" + property.getName() + "}");
             PropertyVersionsBuilder builder = builders.get(property.getName());
             if (builder == null || !builder.isAssociated()) {
-                getLog().debug("Property ${" + property.getName() + "}: Looks like this property is not "
+                log.debug("Property ${" + property.getName() + "}: Looks like this property is not "
                         + "associated with any dependency...");
-                builder = new PropertyVersionsBuilder(this, null, property.getName());
+                builder = new PropertyVersionsBuilder(this, null, property.getName(), log);
             }
             if (!property.isAutoLinkDependencies()) {
-                getLog().debug("Property ${" + property.getName() + "}: Removing any autoLinkDependencies");
+                log.debug("Property ${" + property.getName() + "}: Removing any autoLinkDependencies");
                 builder.clearAssociations();
             }
             Dependency[] dependencies = property.getDependencies();
             if (dependencies != null) {
                 for (Dependency dependency : dependencies) {
-                    getLog().debug("Property ${" + property.getName() + "}: Adding association to " + dependency);
+                    log.debug("Property ${" + property.getName() + "}: Adding association to " + dependency);
                     builder.withAssociation(artifactFactory.createArtifact(dependency), false);
                 }
             }
@@ -630,7 +630,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 if (property.isAutoLinkDependencies()
                         && StringUtils.isEmpty(property.getVersion())
                         && !StringUtils.isEmpty(builder.getVersionRange())) {
-                    getLog().debug("Property ${" + property.getName() + "}: Adding inferred version range of "
+                    log.debug("Property ${" + property.getName() + "}: Adding inferred version range of "
                             + builder.getVersionRange());
                     property.setVersion(builder.getVersionRange());
                 }
@@ -660,14 +660,25 @@ public class DefaultVersionsHelper implements VersionsHelper {
      */
     public static class Builder {
         private Collection<String> ignoredVersions;
+
         private RuleSet ruleSet;
+
         private String serverId;
+
         private String rulesUri;
+
         private Log log;
+
         private MavenSession mavenSession;
+
         private MojoExecution mojoExecution;
+
         private RepositorySystem repositorySystem;
+
         private ArtifactFactory artifactFactory;
+
+        private PomHelper pomHelper;
+
         private Map<String, Wagon> wagonMap;
 
         public Builder() {}
@@ -917,14 +928,20 @@ public class DefaultVersionsHelper implements VersionsHelper {
             return this;
         }
 
+        public Builder withPomHelper(PomHelper pomHelper) {
+            this.pomHelper = pomHelper;
+            return this;
+        }
+
         /**
          * Builds the constructed {@linkplain DefaultVersionsHelper} object
+         *
          * @return constructed {@linkplain DefaultVersionsHelper}
          * @throws MojoExecutionException should the constructor with the RuleSet retrieval doesn't succeed
          */
         public DefaultVersionsHelper build() throws MojoExecutionException {
-            DefaultVersionsHelper instance =
-                    new DefaultVersionsHelper(artifactFactory, repositorySystem, mavenSession, mojoExecution, log);
+            DefaultVersionsHelper instance = new DefaultVersionsHelper(
+                    pomHelper, artifactFactory, repositorySystem, mavenSession, mojoExecution, log);
             if (ruleSet != null) {
                 if (!isBlank(rulesUri)) {
                     log.warn("rulesUri is ignored if rules are specified in pom or as parameters");

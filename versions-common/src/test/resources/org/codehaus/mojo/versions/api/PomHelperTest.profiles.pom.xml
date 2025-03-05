@@ -1,0 +1,23 @@
+<project>
+    <properties>
+        <propertyA>propertyAValue</propertyA>
+        <propertyB>propertyBValue</propertyB>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>profileA</id>
+            <properties>
+                <profileAPropertyA>profileAPropertyAValue</profileAPropertyA>
+                <profileAPropertyB>profileAPropertyBValue</profileAPropertyB>
+            </properties>
+        </profile>
+        <profile>
+            <id>profileB</id>
+            <properties>
+                <profileBPropertyA>profileBPropertyAValue</profileBPropertyA>
+                <profileBPropertyB>profileBPropertyBValue</profileBPropertyB>
+            </properties>
+        </profile>
+    </profiles>
+</project>

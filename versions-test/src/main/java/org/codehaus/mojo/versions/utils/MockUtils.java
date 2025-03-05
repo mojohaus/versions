@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
@@ -184,6 +185,9 @@ public class MockUtils {
         MavenSession session = mock(MavenSession.class);
         when(session.getRepositorySession()).thenReturn(mock(RepositorySystemSession.class));
         when(session.getCurrentProject()).thenReturn(project);
+        Properties emptyProperties = new Properties();
+        when(session.getUserProperties()).thenReturn(emptyProperties);
+        when(session.getSystemProperties()).thenReturn(emptyProperties);
         return session;
     }
 }

@@ -1,8 +1,7 @@
 package org.codehaus.mojo.versions.api;
 
 import org.apache.maven.artifact.Artifact;
-import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,11 +12,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class PropertyVersionsBuilderTest {
+
+    @Mock
+    private Log log;
 
     @Mock
     private VersionsHelper versionsHelper;
@@ -29,9 +29,7 @@ public class PropertyVersionsBuilderTest {
 
     @BeforeEach
     public void beforeEach() {
-        builder = new PropertyVersionsBuilder(versionsHelper, null, "property").withAssociation(artifact, false);
-        VersionComparator comparator = new MavenVersionComparator();
-        when(versionsHelper.getVersionComparator(any(Artifact.class))).thenReturn(comparator);
+        builder = new PropertyVersionsBuilder(versionsHelper, null, "property", log).withAssociation(artifact, false);
     }
 
     @ParameterizedTest

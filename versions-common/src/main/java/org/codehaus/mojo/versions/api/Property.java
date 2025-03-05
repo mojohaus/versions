@@ -78,11 +78,9 @@ public class Property {
     private boolean searchReactor;
 
     /**
-     * When {@link #searchReactor} is <code>true</code> and a property version can be entirely satisfied from the
-     * reactor and this setting is <code>true</code> then the reactor version will be specified irrespective of any
-     * other settings (including {@link #banSnapshots}).
-     *
-     * @parameter default-value="true"
+     * When {@link #searchReactor} is {@code true} and a property version can be entirely satisfied from the
+     * reactor and this setting is {@code true} then the reactor version will be specified irrespective of any
+     * other settings (including {@link #isBanSnapshots}).
      * @since 1.0-alpha-3
      */
     private boolean preferReactor;
@@ -97,10 +95,17 @@ public class Property {
 
     private static final Dependency[] EMPTY_DEPENDENCY_ARRAY = new Dependency[0];
 
+    /**
+     * Creates a new instance without any set name
+     */
     public Property() {
         this.autoLinkDependencies = true;
     }
 
+    /**
+     * Creates a new {@link Property} with the given name
+     * @param name name of the property
+     */
     public Property(String name) {
         this.name = name;
         this.autoLinkDependencies = true;
@@ -112,46 +117,86 @@ public class Property {
         this.value = null;
     }
 
+    /**
+     * @return name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * @param name name to be set
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * @return version
+     */
     public String getVersion() {
         return version;
     }
 
+    /**
+     * @param version version to be set
+     */
     public void setVersion(String version) {
         this.version = version;
     }
 
+    /**
+     * @return if properties linking versions should be auto-detected or not
+     */
     public boolean isAutoLinkDependencies() {
         return autoLinkDependencies;
     }
 
+    /**
+     * @param autoLinkDependencies whether properties indicating dependency versions should
+     *                             be linked automatically
+     */
     public void setAutoLinkDependencies(boolean autoLinkDependencies) {
         this.autoLinkDependencies = autoLinkDependencies;
     }
 
+    /**
+     * Dependencies that must be available for this property. If {@link #isAutoLinkDependencies} is {@code true} then
+     * these dependencies will be considered in addition to the automatically linked dependencies.
+     * @return dependencies
+     */
     public Dependency[] getDependencies() {
         return dependencies;
     }
 
+    /**
+     * Dependencies that must be available for this property. If {@link #isAutoLinkDependencies} is {@code true} then
+     * these dependencies will be considered in addition to the automatically linked dependencies.
+     * @param dependencies to be set
+     */
     public void setDependencies(Dependency[] dependencies) {
         this.dependencies = dependencies;
     }
 
+    /**
+     * @return whether reactor should be searched for the artifact version
+     */
     public boolean isSearchReactor() {
         return searchReactor;
     }
 
+    /**
+     * @param searchReactor whether reactor should be searched for the artifact version
+     */
     public void setSearchReactor(boolean searchReactor) {
         this.searchReactor = searchReactor;
     }
 
+    /**
+     * @return when {@link #searchReactor} is {@code true} and a property version can be entirely satisfied from the
+     * reactor and this setting is {@code true} then the reactor version will be specified irrespective of any
+     * other settings (including {@link #isBanSnapshots}).
+     */
     public boolean isPreferReactor() {
         return preferReactor;
     }

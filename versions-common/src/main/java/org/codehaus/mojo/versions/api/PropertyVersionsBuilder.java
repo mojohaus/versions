@@ -19,17 +19,23 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
+import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.utils.ArtifactVersionService;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * Builds {@link org.codehaus.mojo.versions.api.PropertyVersions} instances.
@@ -44,11 +50,13 @@ public class PropertyVersionsBuilder {
 
     private final Set<ArtifactAssociation> associations;
 
-    private final VersionsHelper helper;
-
     private final Map<String, Boolean> upperBounds = new LinkedHashMap<>();
 
     private final Map<String, Boolean> lowerBounds = new LinkedHashMap<>();
+
+    private final Log log;
+
+    private final VersionsHelper helper;
 
     private ArtifactVersion currentVersion;
 
@@ -61,11 +69,12 @@ public class PropertyVersionsBuilder {
      * @param name The property name.
      * @param helper The {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper}.
      */
-    PropertyVersionsBuilder(VersionsHelper helper, String profileId, String name) {
+    PropertyVersionsBuilder(VersionsHelper helper, String profileId, String name, Log log) {
+        this.helper = helper;
         this.profileId = profileId;
         this.name = name;
         this.associations = new TreeSet<>();
-        this.helper = helper;
+        this.log = log;
     }
 
     public PropertyVersionsBuilder withAssociation(Artifact artifact, boolean usePluginRepositories) {
@@ -81,12 +90,9 @@ public class PropertyVersionsBuilder {
         return !associations.isEmpty();
     }
 
-    public ArtifactAssociation[] getAssociations() {
-        return associations.toArray(new ArtifactAssociation[0]);
-    }
-
     public PropertyVersions build() throws VersionRetrievalException {
-        PropertyVersions instance = new PropertyVersions(profileId, name, helper, associations);
+        SortedSet<ArtifactVersion> resolvedVersions = resolveAssociatedVersions(helper, associations);
+        PropertyVersions instance = new PropertyVersions(profileId, name, log, helper, associations, resolvedVersions);
         instance.setCurrentVersion(currentVersion);
         instance.setCurrentVersionRange(currentVersionRange);
         return instance;
@@ -97,118 +103,35 @@ public class PropertyVersionsBuilder {
     }
 
     public String getVersionRange() {
-        Comparator<ArtifactVersion> comparator = new PropertyVersionComparator();
         if (lowerBounds.isEmpty() && upperBounds.isEmpty()) {
             return null;
         }
-        ArtifactVersion lowerBound = null;
-        boolean includeLower = true;
-        for (Map.Entry<String, Boolean> entry : lowerBounds.entrySet()) {
-            ArtifactVersion candidate = ArtifactVersionService.getArtifactVersion(entry.getKey());
-            if (lowerBound == null) {
-                lowerBound = candidate;
-                includeLower = entry.getValue();
-            } else {
-                final int result = comparator.compare(lowerBound, candidate);
-                if (result > 0) {
-                    lowerBound = candidate;
-                    includeLower = entry.getValue();
-                } else if (result == 0) {
-                    includeLower = includeLower && entry.getValue();
-                }
-            }
-        }
-        ArtifactVersion upperBound = null;
-        boolean includeUpper = true;
-        for (Map.Entry<String, Boolean> entry : upperBounds.entrySet()) {
-            ArtifactVersion candidate = ArtifactVersionService.getArtifactVersion(entry.getKey());
-            if (upperBound == null) {
-                upperBound = candidate;
-                includeUpper = entry.getValue();
-            } else {
-                final int result = comparator.compare(upperBound, candidate);
-                if (result < 0) {
-                    upperBound = candidate;
-                    includeUpper = entry.getValue();
-                } else if (result == 0) {
-                    includeUpper = includeUpper && entry.getValue();
-                }
-            }
-        }
-        StringBuilder buf = new StringBuilder();
-        if (includeLower) {
-            buf.append('[');
-        } else {
-            buf.append('(');
-        }
-        if (lowerBound != null) {
-            buf.append(lowerBound);
-        }
-        buf.append(',');
-        if (upperBound != null) {
-            buf.append(upperBound);
-        }
-        if (includeUpper) {
-            buf.append(']');
-        } else {
-            buf.append(')');
-        }
-        return buf.toString();
+
+        Optional<Pair<ArtifactVersion, Boolean>> lowerBound = lowerBounds.entrySet().stream()
+                .min(Map.Entry.comparingByKey())
+                .map(e -> Pair.of(e.getKey(), e.getValue()))
+                .map(p -> Pair.of(ArtifactVersionService.getArtifactVersion(p.getKey()), p.getValue()));
+
+        Optional<Pair<ArtifactVersion, Boolean>> upperBound = upperBounds.entrySet().stream()
+                .max(Map.Entry.comparingByKey())
+                .map(e -> Pair.of(e.getKey(), e.getValue()))
+                .map(p -> Pair.of(ArtifactVersionService.getArtifactVersion(p.getKey()), p.getValue()));
+
+        return (lowerBound.map(Pair::getValue).orElse(false) ? '[' : '(')
+                + lowerBound.map(Pair::getKey).map(Object::toString).orElse("")
+                + ','
+                + upperBound.map(Pair::getKey).map(Object::toString).orElse("")
+                + (upperBound.map(Pair::getValue).orElse(false) ? ']' : ')');
     }
 
     public PropertyVersionsBuilder withLowerBound(String lowerBound, boolean includeLower) {
-        Boolean value = lowerBounds.get(lowerBound);
-        if (value == null) {
-            value = includeLower;
-        } else {
-            value = includeLower && value;
-        }
-        lowerBounds.put(lowerBound, value);
+        lowerBounds.compute(lowerBound, (__, oldValue) -> ofNullable(oldValue).orElse(true) && includeLower);
         return this;
     }
 
     public PropertyVersionsBuilder withUpperBound(String upperBound, boolean includeUpper) {
-        Boolean value = upperBounds.get(upperBound);
-        if (value == null) {
-            value = includeUpper;
-        } else {
-            value = includeUpper && value;
-        }
-        upperBounds.put(upperBound, value);
+        upperBounds.compute(upperBound, (__, oldValue) -> ofNullable(oldValue).orElse(true) && includeUpper);
         return this;
-    }
-
-    private VersionComparator[] lookupComparators() {
-        return associations.stream()
-                .map(association -> helper.getVersionComparator(association.getArtifact()))
-                .distinct()
-                .toArray(VersionComparator[]::new);
-    }
-
-    private final class PropertyVersionComparator implements Comparator<ArtifactVersion> {
-        public int compare(ArtifactVersion v1, ArtifactVersion v2) {
-            return innerCompare(v1, v2);
-        }
-
-        private int innerCompare(ArtifactVersion v1, ArtifactVersion v2) {
-            if (!isAssociated()) {
-                throw new IllegalStateException("Cannot compare versions for a property with no associations");
-            }
-            VersionComparator[] comparators = lookupComparators();
-            assert comparators.length >= 1 : "we have at least one association => at least one comparator";
-            int result = comparators[0].compare(v1, v2);
-            for (int i = 1; i < comparators.length; i++) {
-                int alt = comparators[i].compare(v1, v2);
-                if (result != alt && (result >= 0 && alt < 0) || (result <= 0 && alt > 0)) {
-                    throw new IllegalStateException("Property " + name + " is associated with multiple artifacts"
-                            + " and these artifacts use different version sorting rules and these rules are effectively"
-                            + " incompatible for the two of versions being compared.\nFirst rule says compare(\"" + v1
-                            + "\", \"" + v2 + "\") = " + result + "\nSecond rule says compare(\"" + v1 + "\", \"" + v2
-                            + "\") = " + alt);
-                }
-            }
-            return result;
-        }
     }
 
     public PropertyVersionsBuilder withCurrentVersion(ArtifactVersion currentVersion) {
@@ -219,5 +142,21 @@ public class PropertyVersionsBuilder {
     public PropertyVersionsBuilder withCurrentVersionRange(VersionRange currentVersionRange) {
         this.currentVersionRange = currentVersionRange;
         return this;
+    }
+
+    private SortedSet<ArtifactVersion> resolveAssociatedVersions(
+            VersionsHelper helper, Set<ArtifactAssociation> associations) throws VersionRetrievalException {
+        SortedSet<ArtifactVersion> result = new TreeSet<>();
+        for (ArtifactAssociation association : associations) {
+            ArtifactVersions artifactVersions =
+                    helper.lookupArtifactVersions(association.getArtifact(), association.isUsePluginRepositories());
+            List<ArtifactVersion> associatedVersions = Arrays.asList(artifactVersions.getVersions(true));
+            if (result.isEmpty()) {
+                result.addAll(associatedVersions);
+            } else {
+                result.retainAll(associatedVersions);
+            }
+        }
+        return result;
     }
 }

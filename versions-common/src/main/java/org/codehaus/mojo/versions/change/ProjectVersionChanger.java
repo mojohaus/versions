@@ -31,16 +31,28 @@ import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
  */
 public class ProjectVersionChanger extends AbstractVersionChanger {
 
+    /**
+     * Constructs a new instance
+     * @param model {@link Model} instance
+     * @param pom {@link MutableXMLStreamReader} representing the pom file to be modified
+     * @param reporter {@link Log} object
+     */
     public ProjectVersionChanger(Model model, MutableXMLStreamReader pom, Log reporter) {
         super(model, pom, reporter);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void apply(DependencyVersionChange versionChange) throws XMLStreamException {
         if (versionChange.getGroupId().equals(PomHelper.getGroupId(getModel()))
                 && versionChange.getArtifactId().equals(PomHelper.getArtifactId(getModel()))) {
             if (PomHelper.setProjectVersion(getPom(), versionChange.getNewVersion())) {
-                info("    Updating project " + versionChange.getGroupId() + ":" + versionChange.getArtifactId());
-                info("        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion());
+                getLog().info("    Updating project " + versionChange.getGroupId() + ":"
+                        + versionChange.getArtifactId());
+                getLog().info("        from version " + versionChange.getOldVersion() + " to "
+                        + versionChange.getNewVersion());
             }
         }
     }

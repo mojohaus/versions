@@ -96,6 +96,12 @@ class DefaultVersionsHelperTest {
     @Mock
     ArtifactFactory artifactFactory;
 
+    @Mock
+    PomHelper pomHelper;
+
+    @Mock
+    Log log;
+
     @BeforeEach
     public void beforeEach() {
         MockitoAnnotations.openMocks(this);
@@ -274,11 +280,12 @@ class DefaultVersionsHelperTest {
 
         return new DefaultVersionsHelper.Builder()
                 .withArtifactFactory(artifactFactory)
+                .withPomHelper(pomHelper)
                 .withRepositorySystem(repositorySystem)
+                .withLog(log)
                 .withWagonMap(singletonMap("file", mockFileWagon(new URI(rulesUri))))
                 .withServerId("")
                 .withRulesUri(rulesUri)
-                .withLog(mock(Log.class))
                 .withMavenSession(mavenSession)
                 .withMojoExecution(mock(MojoExecution.class))
                 .build();
@@ -288,6 +295,7 @@ class DefaultVersionsHelperTest {
     void testIgnoredVersionsShouldBeTheOnlyPresentInAnEmptyRuleSet() throws MojoExecutionException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
                 .withArtifactFactory(artifactFactory)
+                .withPomHelper(pomHelper)
                 .withLog(new SystemStreamLog())
                 .withIgnoredVersions(Arrays.asList(".*-M.", ".*-SNAPSHOT"))
                 .build();
@@ -304,6 +312,7 @@ class DefaultVersionsHelperTest {
     void testDefaultsShouldBePresentInAnEmptyRuleSet() throws MojoExecutionException, IllegalAccessException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
                 .withArtifactFactory(artifactFactory)
+                .withPomHelper(pomHelper)
                 .withLog(new SystemStreamLog())
                 .withIgnoredVersions(singletonList(".*-M."))
                 .build();
@@ -315,6 +324,7 @@ class DefaultVersionsHelperTest {
     void testIgnoredVersionsShouldExtendTheRuleSet() throws MojoExecutionException, IllegalAccessException {
         DefaultVersionsHelper versionsHelper = new DefaultVersionsHelper.Builder()
                 .withArtifactFactory(artifactFactory)
+                .withPomHelper(pomHelper)
                 .withLog(new SystemStreamLog())
                 .withRuleSet(new RuleSet() {
                     {

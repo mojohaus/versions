@@ -28,7 +28,6 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
@@ -40,12 +39,6 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
  * @since 1.0-alpha-3
  */
 public interface VersionsHelper {
-    /**
-     * Gets the logger used by this helper.
-     *
-     * @return the logger used by this helper.
-     */
-    Log getLog();
 
     /**
      * Returns the version comparator to use for the specified artifact.
