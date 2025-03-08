@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.enforcer;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.enforcer.rule.api.EnforcerLogger;
@@ -73,6 +74,9 @@ class MaxDependencyUpdatesTest {
 
     @BeforeEach
     public void setup() {
+        Properties emptyProperties = new Properties();
+        when(mavenSession.getUserProperties()).thenReturn(emptyProperties);
+        when(mavenSession.getSystemProperties()).thenReturn(emptyProperties);
         artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
         maxDependencyUpdates = new MaxDependencyUpdates(

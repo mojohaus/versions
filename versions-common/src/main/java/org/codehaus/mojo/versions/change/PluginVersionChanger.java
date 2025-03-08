@@ -31,10 +31,20 @@ import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
  */
 public class PluginVersionChanger extends AbstractVersionChanger {
 
+    /**
+     * Constructs a new instance
+     * @param model {@link Model} instance
+     * @param pom {@link MutableXMLStreamReader} representing the pom file to be modified
+     * @param reporter {@link Log} object
+     */
     public PluginVersionChanger(Model model, MutableXMLStreamReader pom, Log reporter) {
         super(model, pom, reporter);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void apply(DependencyVersionChange versionChange) throws XMLStreamException {
         if (PomHelper.setPluginVersion(
                 getPom(),
@@ -42,8 +52,9 @@ public class PluginVersionChanger extends AbstractVersionChanger {
                 versionChange.getArtifactId(),
                 versionChange.getOldVersion(),
                 versionChange.getNewVersion())) {
-            info("    Updating plugin " + versionChange.getGroupId() + ":" + versionChange.getArtifactId());
-            info("        from version " + versionChange.getOldVersion() + " to " + versionChange.getNewVersion());
+            getLog().info("    Updating plugin " + versionChange.getGroupId() + ":" + versionChange.getArtifactId());
+            getLog().info("        from version " + versionChange.getOldVersion() + " to "
+                    + versionChange.getNewVersion());
         }
     }
 }

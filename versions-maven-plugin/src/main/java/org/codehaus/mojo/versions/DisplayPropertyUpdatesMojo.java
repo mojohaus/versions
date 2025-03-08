@@ -212,13 +212,7 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
             Optional<Segment> unchangedSegment = unchangedSegment1;
             try {
                 ArtifactVersion winner = version.getNewestVersion(
-                        currentVersion,
-                        property,
-                        this.allowSnapshots,
-                        this.reactorProjects,
-                        this.getHelper(),
-                        false,
-                        unchangedSegment);
+                        currentVersion, property, this.allowSnapshots, this.reactorProjects, false, unchangedSegment);
                 if (winner != null && !currentVersion.equals(winner.toString())) {
                     StringBuilder buf = new StringBuilder();
                     buf.append("${");

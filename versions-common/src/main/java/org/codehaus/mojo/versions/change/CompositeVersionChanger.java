@@ -24,22 +24,32 @@ import java.util.List;
 import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 
 /**
- * Created by IntelliJ IDEA.
- *
- * @author Stephen Connolly
- * @since 15-Sep-2010 16:01:35
+ * A composite version changer, which chains version changers together and executes the chain
+ * in {@link #apply(DependencyVersionChange)} until an exception occurs or the chain is through.
  */
 public class CompositeVersionChanger implements VersionChanger {
     private final List<VersionChanger> composites;
 
+    /**
+     * Construct a new composite version changed based on an array of version changers
+     * @param composites array of version changes to compose from
+     */
     public CompositeVersionChanger(VersionChanger[] composites) {
         this.composites = new ArrayList<>(Arrays.asList(composites));
     }
 
+    /**
+     * Construct a new composite version changed based on a {@link List} of version changers
+     * @param composites list of version changes to compose from
+     */
     public CompositeVersionChanger(List<VersionChanger> composites) {
         this.composites = new ArrayList<>(composites);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void apply(DependencyVersionChange versionChange) throws XMLStreamException {
         for (VersionChanger delegate : composites) {
             delegate.apply(versionChange);

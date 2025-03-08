@@ -42,12 +42,14 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.emptyList;
@@ -295,6 +297,8 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
     private VersionsHelper createVersionsHelper(String serverId, String rulesUri, RuleSet ruleSet)
             throws EnforcerRuleError {
         try {
+            PomHelper pomHelper =
+                    new PomHelper(artifactFactory, new VersionsExpressionEvaluator(mavenSession, mojoExecution));
             return new DefaultVersionsHelper.Builder()
                     .withArtifactFactory(artifactFactory)
                     .withRepositorySystem(repositorySystem)
@@ -305,6 +309,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
                     .withIgnoredVersions(null)
                     .withLog(new PluginLogWrapper(getLog()))
                     .withMavenSession(mavenSession)
+                    .withPomHelper(pomHelper)
                     .withMojoExecution(mojoExecution)
                     .build();
         } catch (MojoExecutionException e) {

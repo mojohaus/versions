@@ -59,6 +59,7 @@ import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -206,6 +207,8 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     public VersionsHelper getHelper() throws MojoExecutionException {
         if (helper == null) {
+            PomHelper pomHelper =
+                    new PomHelper(artifactFactory, new VersionsExpressionEvaluator(session, mojoExecution));
             helper = new DefaultVersionsHelper.Builder()
                     .withArtifactFactory(artifactFactory)
                     .withRepositorySystem(repositorySystem)
@@ -216,6 +219,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
                     .withIgnoredVersions(ignoredVersions)
                     .withLog(getLog())
                     .withMavenSession(session)
+                    .withPomHelper(pomHelper)
                     .withMojoExecution(mojoExecution)
                     .build();
         }
@@ -424,13 +428,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
             throws XMLStreamException, InvalidVersionSpecificationException, InvalidSegmentException,
                     MojoExecutionException {
         ArtifactVersion winner = version.getNewestVersion(
-                currentVersion,
-                property,
-                getAllowSnapshots(),
-                this.reactorProjects,
-                this.getHelper(),
-                allowDowngrade,
-                unchangedSegment);
+                currentVersion, property, getAllowSnapshots(), this.reactorProjects, allowDowngrade, unchangedSegment);
 
         if (winner == null || currentVersion.equals(winner.toString())) {
             getLog().info("Property ${" + property.getName() + "}: Leaving unchanged as " + currentVersion);

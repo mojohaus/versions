@@ -60,8 +60,6 @@ public class DisplayExtensionUpdatesMojoTest {
     private DisplayExtensionUpdatesMojo mojo;
     private Path tempPath;
 
-    private PomHelper pomHelper;
-
     private ArtifactFactory artifactFactory;
 
     @Before

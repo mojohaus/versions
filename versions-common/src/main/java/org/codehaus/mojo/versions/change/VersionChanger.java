@@ -20,11 +20,14 @@ import javax.xml.stream.XMLStreamException;
 import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 
 /**
- * Created by IntelliJ IDEA.
- *
- * @author Stephen Connolly
- * @since 15-Sep-2010 15:59:00
+ * An abstract version changer, capable of changing versions of a given dependency.
  */
 public interface VersionChanger {
+    /**
+     * Applies the implemented change on the given dependency.
+     *
+     * @param versionChange dependency to be changed
+     * @throws XMLStreamException thrown if the underlying XML operation does not succeed
+     */
     void apply(DependencyVersionChange versionChange) throws XMLStreamException;
 }
