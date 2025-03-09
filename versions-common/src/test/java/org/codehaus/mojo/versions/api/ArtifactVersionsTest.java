@@ -25,13 +25,9 @@ import java.util.Optional;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.ordering.MavenVersionComparator;
-import org.codehaus.mojo.versions.ordering.MercuryVersionComparator;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Optional.of;
@@ -53,7 +49,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ArtifactVersionsTest {
 
-    private void test4DigitVersion(VersionComparator comparator) throws InvalidVersionSpecificationException {
+    @Test
+    void test4DigitVersionsMaven() throws Exception {
         ArtifactVersions instance = new ArtifactVersions(
                 new DefaultArtifact(
                         "group",
@@ -63,9 +60,8 @@ class ArtifactVersionsTest {
                         "bar",
                         "jar",
                         new DefaultArtifactHandler()),
-                Arrays.asList(
-                        versions("1.0.0.1", "1.0.0.2", "2.121.2.1", "2.100.0.1", "3.1.0.1", "1.1.1", "2.0.0-SNAPSHOT")),
-                comparator);
+                Arrays.asList(versions(
+                        "1.0.0.1", "1.0.0.2", "2.121.2.1", "2.100.0.1", "3.1.0.1", "1.1.1", "2.0.0-SNAPSHOT")));
         assertEquals("artifact", instance.getArtifactId());
         assertEquals("group", instance.getGroupId());
         assertThat(
@@ -101,16 +97,6 @@ class ArtifactVersionsTest {
     }
 
     @Test
-    void test4DigitVersionsMercury() throws Exception {
-        test4DigitVersion(new MercuryVersionComparator());
-    }
-
-    @Test
-    void test4DigitVersionsMaven() throws Exception {
-        test4DigitVersion(new MavenVersionComparator());
-    }
-
-    @Test
     void testIsEmpty() throws Exception {
         ArtifactVersions instance = new ArtifactVersions(
                 new DefaultArtifact(
@@ -121,8 +107,7 @@ class ArtifactVersionsTest {
                         "bar",
                         "jar",
                         new DefaultArtifactHandler()),
-                Arrays.asList(versions("1.0.1-SNAPSHOT", "1.0.2-SNAPSHOT")),
-                new MavenVersionComparator());
+                Arrays.asList(versions("1.0.1-SNAPSHOT", "1.0.2-SNAPSHOT")));
         assertThat(instance.isEmpty(false), is(true));
         assertThat(instance.isEmpty(true), is(false));
     }
@@ -138,8 +123,7 @@ class ArtifactVersionsTest {
                         "bar",
                         "jar",
                         new DefaultArtifactHandler()),
-                Arrays.asList(versions("1.0", "3.0", "1.1", "1.0", "1.0.1")),
-                new MavenVersionComparator());
+                Arrays.asList(versions("1.0", "3.0", "1.1", "1.0", "1.0.1")));
         assertEquals("artifact", instance.getArtifactId());
         assertEquals("group", instance.getGroupId());
         assertArrayEquals(versions("1.0", "1.0.1", "1.1", "3.0"), instance.getVersions(true));
@@ -180,8 +164,7 @@ class ArtifactVersionsTest {
                         "3.0",
                         "3.1.1-SNAPSHOT",
                         "3.1.5-SNAPSHOT",
-                        "3.4.0-SNAPSHOT")),
-                new MavenVersionComparator());
+                        "3.4.0-SNAPSHOT")));
 
         assertThat(instance.getNewestUpdateWithinSegment(of(SUBINCREMENTAL), false), hasToString("1.1.0-2"));
         assertThat(instance.getNewestUpdateWithinSegment(of(INCREMENTAL), false), hasToString("1.1.3"));
@@ -191,8 +174,7 @@ class ArtifactVersionsTest {
     void testGetNewerVersionsWithSnapshot() throws InvalidSegmentException {
         ArtifactVersions instance = new ArtifactVersions(
                 new DefaultArtifact("default-group", "dummy-api", "1.0.0-SNAPSHOT", "foo", "bar", "jar", null),
-                Arrays.asList(versions("1.0.0-SNAPSHOT", "1.0.0")),
-                new MavenVersionComparator());
+                Arrays.asList(versions("1.0.0-SNAPSHOT", "1.0.0")));
 
         assertThat(
                 instance.getNewerVersions("1.0.0-SNAPSHOT", of(SUBINCREMENTAL), false, false),
@@ -202,8 +184,7 @@ class ArtifactVersionsTest {
     private static ArtifactVersions createInstance(ArtifactVersion[] versions) {
         return new ArtifactVersions(
                 new DefaultArtifact("default-group", "dummy-api", "1.0.0", "foo", "bar", "jar", null),
-                Arrays.asList(versions),
-                new MavenVersionComparator());
+                Arrays.asList(versions));
     }
 
     @Test

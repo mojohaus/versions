@@ -29,8 +29,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
-import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -39,25 +37,6 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
  * @since 1.0-alpha-3
  */
 public interface VersionsHelper {
-
-    /**
-     * Returns the version comparator to use for the specified artifact.
-     *
-     * @param artifact the artifact.
-     * @return the version comparator to use.
-     * @since 1.0-alpha-3
-     */
-    VersionComparator getVersionComparator(Artifact artifact);
-
-    /**
-     * Returns the version comparator to use for the specified groupId and artifactId.
-     *
-     * @param groupId the groupId.
-     * @param artifactId the artifactId.
-     * @return the version comparator to use.
-     * @since 1.0-alpha-3
-     */
-    VersionComparator getVersionComparator(String groupId, String artifactId);
 
     /**
      * Looks up the versions of the specified artifact that are available in either the local repository, or the
@@ -179,15 +158,6 @@ public interface VersionsHelper {
      * @since 1.0-beta-1
      */
     PluginUpdatesDetails lookupPluginUpdates(Plugin plugin, boolean allowSnapshots) throws VersionRetrievalException;
-
-    /**
-     * Returns an {@link ExpressionEvaluator} for the specified project.
-     *
-     * @param project The project.
-     * @return an {@link ExpressionEvaluator} for the specified project.
-     * @since 1.0-beta-1
-     */
-    ExpressionEvaluator getExpressionEvaluator(MavenProject project);
 
     /**
      * Returns a map of {@link org.codehaus.mojo.versions.api.PropertyVersions} values keyed by

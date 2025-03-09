@@ -92,7 +92,7 @@ public class PropertyVersionsBuilder {
 
     public PropertyVersions build() throws VersionRetrievalException {
         SortedSet<ArtifactVersion> resolvedVersions = resolveAssociatedVersions(helper, associations);
-        PropertyVersions instance = new PropertyVersions(profileId, name, log, helper, associations, resolvedVersions);
+        PropertyVersions instance = new PropertyVersions(profileId, name, log, associations, resolvedVersions);
         instance.setCurrentVersion(currentVersion);
         instance.setCurrentVersionRange(currentVersionRange);
         return instance;

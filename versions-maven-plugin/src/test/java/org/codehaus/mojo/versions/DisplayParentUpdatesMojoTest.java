@@ -30,19 +30,23 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Model;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.TestUtils;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
@@ -55,6 +59,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class DisplayParentUpdatesMojoTest {
@@ -66,12 +71,18 @@ public class DisplayParentUpdatesMojoTest {
 
     private static ArtifactFactory artifactFactory;
 
+    @Mock
+    private static ExpressionEvaluator expressionEvaluator;
+
+    @Mock
+    private static Log log;
+
     private Path tempDir;
 
     private Path tempFile;
 
     @BeforeClass
-    public static void setUpStatic() {
+    public static void setUpStatic() throws MojoExecutionException {
         artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
         repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -94,6 +105,7 @@ public class DisplayParentUpdatesMojoTest {
                 setProject(createProject());
                 reactorProjects = Collections.emptyList();
                 session = mockMavenSession();
+                mojoExecution = mock(MojoExecution.class);
             }
         };
         mojo.outputFile = tempFile.toFile();

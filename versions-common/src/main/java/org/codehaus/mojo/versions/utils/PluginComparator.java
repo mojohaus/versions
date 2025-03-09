@@ -32,6 +32,10 @@ import org.apache.maven.model.ReportPlugin;
 public enum PluginComparator implements Comparator<Object> {
     INSTANCE;
 
+    private static boolean isPluginOrReportPlugin(Object o) {
+        return o instanceof Plugin || o instanceof ReportPlugin;
+    }
+
     /**
      * Compares to {@link Plugin} or {@link ReportPlugin} instances.
      *
@@ -42,14 +46,11 @@ public enum PluginComparator implements Comparator<Object> {
      * @since 1.0-beta-1
      */
     public int compare(Object o1, Object o2) {
-        if (!(o1 instanceof Plugin || o1 instanceof ReportPlugin)) {
+        if (!isPluginOrReportPlugin(o1) || !isPluginOrReportPlugin(o2)) {
             throw new IllegalArgumentException(
                     "This comparator can only be used to compare Plugin and ReportPlugin instances");
         }
-        if (!(o2 instanceof Plugin || o2 instanceof ReportPlugin)) {
-            throw new IllegalArgumentException(
-                    "This comparator can only be used to compare Plugin and ReportPlugin instances");
-        }
+
         String g1 = o1 instanceof Plugin ? ((Plugin) o1).getGroupId() : ((ReportPlugin) o1).getGroupId();
         String g2 = o2 instanceof Plugin ? ((Plugin) o2).getGroupId() : ((ReportPlugin) o2).getGroupId();
 

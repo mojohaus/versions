@@ -108,12 +108,7 @@ public class PluginUpdatesDetails extends ArtifactVersions {
     }
 
     public int hashCode() {
-        return Objects.hash(
-                getArtifact(),
-                Arrays.hashCode(getVersions(true)),
-                getVersionComparator(),
-                includeSnapshots,
-                dependencyVersions);
+        return Objects.hash(getArtifact(), Arrays.hashCode(getVersions(true)), includeSnapshots, dependencyVersions);
     }
 
     // added an arbitrary comparison just to be able to differentiate objects having different includeSnapshots

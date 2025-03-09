@@ -76,13 +76,6 @@ under the License.
             A rule with ? wildcards will override a rule with * wildcards.
           </description>
         </field>
-        <field xml.attribute="true">
-          <name>comparisonMethod</name>
-          <version>1.0+</version>
-          <required>true</required>
-          <type>String</type>
-          <description>The comparison method that this rule specifies.</description>
-        </field>
       </fields>
       <codeSegments>
         <codeSegment>
@@ -95,7 +88,6 @@ under the License.
     {
         // enables no-arg construction
         artifactId = "*";
-        comparisonMethod = "maven";
     }
 
           ]]></code>
@@ -110,8 +102,6 @@ under the License.
         buf.append( groupId );
         buf.append( "\", artifactId = \"" );
         buf.append( artifactId );
-        buf.append( "\", comparisonMethod = \"" );
-        buf.append( comparisonMethod );
         buf.append( "\", ignoreVersions = \"" );
         buf.append( ignoreVersions );
         buf.append( "\"]" );
@@ -148,29 +138,8 @@ under the License.
             <multiplicity>*</multiplicity>
           </association>
         </field>
-        <field xml.attribute="true">
-          <name>comparisonMethod</name>
-          <version>1.0+</version>
-          <required>true</required>
-          <type>String</type>
-          <description>The comparison method to use when no rule matches.</description>
-        </field>
       </fields>
       <codeSegments>
-        <codeSegment>
-          <version>1.0+</version>
-          <code><![CDATA[
-    /**
-     * Creates a new empty rule set.
-     */
-    public RuleSet()
-    {
-        // enables no-arg construction
-        comparisonMethod = "maven";
-    }
-
-          ]]></code>
-        </codeSegment>
         <codeSegment>
           <version>1.0+</version>
           <code><![CDATA[
@@ -179,9 +148,7 @@ under the License.
         StringBuilder buf = new StringBuilder( 128 );
         buf.append( "RuleSet[rules = " );
         buf.append( rules );
-        buf.append( ", comparisonMethod = \"" );
-        buf.append( comparisonMethod );
-        buf.append( "\"]" );
+        buf.append( "]" );
         return buf.toString();
     }
           ]]></code>

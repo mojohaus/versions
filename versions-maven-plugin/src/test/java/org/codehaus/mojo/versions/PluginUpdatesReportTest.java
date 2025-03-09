@@ -33,6 +33,7 @@ import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.model.RuleSet;
@@ -52,6 +53,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.mockito.Mockito.mock;
 
 /**
  * Basic tests for {@linkplain PluginUpdatesReport}.
@@ -76,6 +78,7 @@ public class PluginUpdatesReportTest {
             project.getBuild().setPluginManagement(new PluginManagement());
 
             session = mockMavenSession();
+            mojoExecution = mock(MojoExecution.class);
         }
 
         public TestPluginUpdatesReport withPlugins(Plugin... plugins) {
