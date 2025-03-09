@@ -19,17 +19,26 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.Optional;
+
+import org.apache.maven.artifact.Artifact;
+
 /**
  * Exception thrown if version information cannot be retrieved
  */
 public class VersionRetrievalException extends Exception {
+
+    private final Artifact artifact;
+
     /**
      * Constructs a new exception with {@code null} as its detail message.
      * The cause is not initialized, and may subsequently be initialized by a
      * call to {@link #initCause}.
+     *
+     * @param artifact {@link Artifact} instance causing the problem
      */
-    public VersionRetrievalException() {
-        super();
+    public VersionRetrievalException(Artifact artifact) {
+        this(null, artifact);
     }
 
     /**
@@ -37,11 +46,13 @@ public class VersionRetrievalException extends Exception {
      * cause is not initialized, and may subsequently be initialized by
      * a call to {@link #initCause}.
      *
+     * @param artifact {@link Artifact} instance causing the problem
      * @param   message   the detail message. The detail message is saved for
      *          later retrieval by the {@link #getMessage()} method.
      */
-    public VersionRetrievalException(String message) {
+    public VersionRetrievalException(String message, Artifact artifact) {
         super(message);
+        this.artifact = artifact;
     }
 
     /**
@@ -52,13 +63,14 @@ public class VersionRetrievalException extends Exception {
      * wrappers for other throwables (for example, {@link
      * java.security.PrivilegedActionException}).
      *
+     * @param artifact {@link Artifact} instance causing the problem
      * @param  cause the cause (which is saved for later retrieval by the
      *         {@link #getCause()} method).  (A {@code null} value is
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public VersionRetrievalException(Throwable cause) {
-        super(cause);
+    public VersionRetrievalException(Artifact artifact, Throwable cause) {
+        this(null, artifact, cause);
     }
 
     /**
@@ -69,12 +81,22 @@ public class VersionRetrievalException extends Exception {
      *
      * @param  message the detail message (which is saved for later retrieval
      *         by the {@link #getMessage()} method).
+     * @param artifact {@link Artifact} instance causing the problem
      * @param  cause the cause (which is saved for later retrieval by the
      *         {@link #getCause()} method).  (A {@code null} value is
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public VersionRetrievalException(String message, Throwable cause) {
+    public VersionRetrievalException(String message, Artifact artifact, Throwable cause) {
         super(message, cause);
+        this.artifact = artifact;
+    }
+
+    /**
+     * Returns the artifact causing the problem with version retrieval, if available
+     * @return {@link Optional} object containing artifact causing the problem with version retrieval, or empty
+     */
+    public Optional<Artifact> getArtifact() {
+        return Optional.ofNullable(artifact);
     }
 }

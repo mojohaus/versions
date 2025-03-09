@@ -14,13 +14,17 @@ package org.codehaus.mojo.versions;
  * limitations under the License.
  */
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +35,8 @@ import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 
@@ -130,5 +136,24 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
     @Test
     public void testAllowUpdatesFromLesserSegmentsSubIncremental() throws Exception {
         testAllowUpdatesFromLesserSegments("1.0.0-1");
+    }
+
+    @Test
+    public void testProblemCausingArtifact() throws Exception {
+        try {
+            File projectDir = new File("src/test/resources/org/codehaus/mojo/update-properties/problem-causing");
+            DisplayPropertyUpdatesMojo mojo =
+                    (DisplayPropertyUpdatesMojo) mojoRule.lookupConfiguredMojo(projectDir, "display-property-updates");
+            mojo.outputEncoding = UTF_8;
+            mojo.outputFile = tempFile.toFile();
+            mojo.setPluginContext(new HashMap<>());
+            mojo.repositorySystem = mockAetherRepositorySystem();
+            mojo.execute();
+            fail("Should throw an exception");
+        } catch (MojoExecutionException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }

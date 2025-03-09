@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Prerequisites;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
@@ -30,6 +31,7 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -40,7 +42,9 @@ import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -161,5 +165,22 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
 
         List<String> output = Files.readAllLines(outputPath);
         assertThat(output, hasItem(containsString("Using the minimum version of Maven: 3.3.9")));
+    }
+
+    @Test
+    public void testProblemCausingArtifact() throws Exception {
+        Files.copy(
+                Paths.get("src/test/resources/org/codehaus/mojo/display-plugin-updates/problem-causing.xml"),
+                tempDir.resolve("pom.xml"));
+
+        DisplayPluginUpdatesMojo mojo = createMojo();
+        try {
+            mojo.execute();
+            fail("Should throw an exception");
+        } catch (MojoExecutionException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }

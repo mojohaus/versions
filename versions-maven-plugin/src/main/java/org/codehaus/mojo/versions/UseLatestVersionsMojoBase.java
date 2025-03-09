@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,6 +61,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
 
     /**
      * Number of executor threads for update retrieval.
+     *
      * @since 2.19.0
      */
     @Parameter(property = "numThreads", defaultValue = "5")
@@ -95,10 +97,12 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      */
     private abstract static class ArtifactVersionChange {
         private final DependencyChangeRecord.ChangeKind changeKind;
+
         private final String newVersion;
 
         /**
          * Creates a new instance
+         *
          * @param changeKind change kind
          * @param newVersion new version
          */
@@ -130,6 +134,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
 
         /**
          * Constructs a new instance
+         *
          * @param changeKind change kind
          * @param dependency {@code Dependency} instance
          * @param newVersion new version
@@ -199,12 +204,15 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
             }
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage(), e);
-        } catch (IllegalStateException e) {
-            if (e.getCause() instanceof MojoExecutionException) {
-                throw (MojoExecutionException) e.getCause();
-            }
-            if (e.getCause() instanceof VersionRetrievalException) {
-                throw (VersionRetrievalException) e.getCause();
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof IllegalStateException) {
+                IllegalStateException ise = (IllegalStateException) e.getCause();
+                if (ise.getCause() instanceof MojoExecutionException) {
+                    throw (MojoExecutionException) ise.getCause();
+                }
+                if (ise.getCause() instanceof VersionRetrievalException) {
+                    throw (VersionRetrievalException) ise.getCause();
+                }
             }
             throw e;
         }

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Dependency;
@@ -36,6 +37,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -56,7 +58,10 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -388,5 +393,27 @@ public class DependencyUpdatesReportTest {
                 .withProcessDependencyManagement(true)
                 .withProcessDependencyManagementTransitive(false)
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
+    }
+
+    /*
+     * error while attempting a retrieval of a problematic artifact should be reported citing the artifact
+     * causing the problem
+     */
+    @Test
+    public void testProblemCausingArtifact() throws IOException, MavenReportException {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        try {
+            new TestDependencyUpdatesReport()
+                    .withOriginalDependencyManagement(dependencyOf("problem-causing-artifact", "1"))
+                    .withProcessDependencyManagement(true)
+                    .withProcessDependencyManagementTransitive(false)
+                    .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
+            fail("Should throw an exception");
+        } catch (MavenReportException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }

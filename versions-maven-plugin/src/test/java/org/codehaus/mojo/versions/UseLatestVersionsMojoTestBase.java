@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -27,12 +29,14 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import static java.util.Collections.singletonList;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
@@ -197,5 +201,35 @@ public abstract class UseLatestVersionsMojoTestBase {
             throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
                     VersionRetrievalException {
         testExcludeFilter("2.0");
+    }
+
+    @Test
+    public void testBreakingDependency() throws Exception {
+        mojo.setProject(new MavenProject() {
+            {
+                setModel(new Model() {
+                    {
+                        setGroupId("default-group");
+                        setArtifactId("project-artifact");
+                        setVersion("1.0.0-SNAPSHOT");
+
+                        setDependencies(singletonList(DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("problem-causing-artifact")
+                                .withVersion("1.0.0")
+                                .withScope(SCOPE_COMPILE)
+                                .withType("jar")
+                                .withClassifier("default")
+                                .build()));
+                    }
+                });
+            }
+        });
+
+        try {
+            tryUpdate();
+        } catch (VersionRetrievalException e) {
+            assertThat(e.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }

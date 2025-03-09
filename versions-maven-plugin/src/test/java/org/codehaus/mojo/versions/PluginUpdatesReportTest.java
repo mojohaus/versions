@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.model.Build;
@@ -36,6 +37,7 @@ import org.apache.maven.model.PluginManagement;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -52,7 +54,10 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -208,5 +213,23 @@ public class PluginUpdatesReportTest {
         String output =
                 os.toString().replaceAll("\\s", " ").replaceAll("<[^>]+>", " ").replaceAll("&[^;]+;", " ");
         assertThat(output, matchesPattern(".*\\breport.overview.numNewerVersionAvailable\\s+0\\b.*"));
+    }
+
+    @Test
+    public void testProblemCausingArtifact() throws IOException {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        try {
+            new TestPluginUpdatesReport()
+                    .withPlugins(pluginOf("problem-causing-artifact"))
+                    .withOnlyUpgradable(true)
+                    .withOnlyProjectPlugins(true)
+                    .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
+            fail("Should throw an exception");
+        } catch (MavenReportException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }

@@ -35,6 +35,7 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.plexus.i18n.I18N;
@@ -46,6 +47,9 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -110,5 +114,53 @@ public class ParentUpdatesReportTest {
                         containsString("1.1.0"),
                         containsString("2.0.0"),
                         containsString("2.0.1-SNAPSHOT")));
+    }
+
+    @Test
+    public void testProblemCausingArtifact() throws IOException, MavenReportException {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        try {
+            new ParentUpdatesReport(
+                    MOCK_I18N,
+                    mock(ArtifactFactory.class),
+                    mockAetherRepositorySystem(),
+                    null,
+                    new ReportRendererFactoryImpl(MOCK_I18N)) {
+                {
+                    project = new MavenProject(new Model() {
+                        {
+                            setGroupId("default-group");
+                            setArtifactId("child-artifact");
+                            setVersion("1.0.0");
+                        }
+                    });
+                    project.setParent(new MavenProject(new Model() {
+                        {
+                            setGroupId("default-group");
+                            setArtifactId("problem-causing-artifact");
+                            setVersion("1.0.0");
+                        }
+                    }));
+                    reactorProjects = new ArrayList<>();
+                    project.setParentArtifact(new DefaultArtifact(
+                            project.getParent().getGroupId(),
+                            project.getParent().getArtifactId(),
+                            project.getParent().getVersion(),
+                            Artifact.SCOPE_COMPILE,
+                            "pom",
+                            "default",
+                            new DefaultArtifactHandlerStub("default")));
+
+                    session = mockMavenSession();
+                    mojoExecution = mock(MojoExecution.class);
+                }
+            }.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
+            fail("Should throw an exception");
+        } catch (MavenReportException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }

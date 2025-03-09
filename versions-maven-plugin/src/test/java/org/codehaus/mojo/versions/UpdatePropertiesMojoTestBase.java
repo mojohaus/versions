@@ -18,12 +18,18 @@ package org.codehaus.mojo.versions;
  * under the License.
  */
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.Mojo;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.After;
@@ -33,6 +39,9 @@ import org.junit.Rule;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.TestUtils.createTempDir;
 import static org.codehaus.mojo.versions.utils.TestUtils.tearDownTempDir;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 
 /**
  * Base class for {@link UpdatePropertiesMojo} and {@link UpdatePropertyMojo} test suites
@@ -75,5 +84,21 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase 
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
         return (T) mojo;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T extends Mojo> void testProblemCausingArtifact(String goal, Consumer<Mojo>... initializers)
+            throws Exception {
+        File projectDir = new File("src/test/resources/org/codehaus/mojo/update-properties/problem-causing");
+        T mojo = (T) mojoRule.lookupConfiguredMojo(projectDir, goal);
+        Stream.of(initializers).forEach(m -> m.accept(mojo));
+        try {
+            mojo.execute();
+            fail("Should throw an exception");
+        } catch (MojoExecutionException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }

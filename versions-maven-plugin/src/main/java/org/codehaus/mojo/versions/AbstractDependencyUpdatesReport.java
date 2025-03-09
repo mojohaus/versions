@@ -197,17 +197,17 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
 
             renderReport(locale, sink, model);
         } catch (VersionRetrievalException e) {
-            throw new RuntimeException(e);
+            throw new MavenReportException(e.getMessage(), e);
         }
     }
 
     protected void handleDependencyManagementTransitive(
-            MavenProject project, Set<Dependency> dependencyManagementCollector) {
+            MavenProject project, Set<Dependency> dependencyManagementCollector) throws MavenReportException {
         try {
             dependencyManagementCollector.addAll(MavenProjectUtils.extractDependenciesFromDependencyManagement(
                     project, processDependencyManagementTransitive, getLog()));
         } catch (VersionRetrievalException e) {
-            throw new RuntimeException(e);
+            throw new MavenReportException(e.getMessage(), e);
         }
     }
 

@@ -2,6 +2,7 @@ package org.codehaus.mojo.versions;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.execution.MavenSession;
@@ -33,6 +34,7 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySys
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
@@ -226,6 +228,27 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase {
             fail("MojoExecutionException is expected");
         } catch (MojoExecutionException e) {
             assertThat(e.getMessage(), startsWith("No matching"));
+        }
+    }
+
+    @Test
+    public void testBreakingDependency() throws Exception {
+        mojo.repositorySystem = mockAetherRepositorySystem();
+        mojo.getProject()
+                .setDependencies(singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("problem-causing-artifact")
+                        .withVersion("1.0.0-SNAPSHOT")
+                        .build()));
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.getRawModel(any(MavenProject.class)))
+                    .thenReturn(mojo.getProject().getModel());
+            mojo.update(null);
+            fail("VersionRetrievalException is expected");
+        } catch (VersionRetrievalException e) {
+            assertThat(e.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
         }
     }
 }

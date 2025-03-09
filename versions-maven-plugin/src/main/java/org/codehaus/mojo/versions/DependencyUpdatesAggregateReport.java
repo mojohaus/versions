@@ -26,6 +26,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.util.AggregateReportUtils;
@@ -70,7 +71,8 @@ public class DependencyUpdatesAggregateReport extends AbstractDependencyUpdatesR
      * {@inheritDoc}
      * */
     @Override
-    protected void populateDependencyManagement(Set<Dependency> dependencyManagementCollector) {
+    protected void populateDependencyManagement(Set<Dependency> dependencyManagementCollector)
+            throws MavenReportException {
         for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
             getLog().debug(String.format("Collecting managed dependencies for project %s", project.getName()));
             handleDependencyManagementTransitive(project, dependencyManagementCollector);

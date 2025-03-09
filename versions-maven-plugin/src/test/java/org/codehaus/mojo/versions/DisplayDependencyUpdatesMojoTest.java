@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.InputLocation;
 import org.apache.maven.model.InputSource;
@@ -32,6 +33,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.model.TestIgnoreVersions;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -56,7 +58,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -591,6 +595,29 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             assertThat(Files.exists(tempFile.getPath()), is(true));
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
             assertThat(output, containsString("1.0.0 -> 2.0.0"));
+        }
+    }
+
+    /*
+     * error while attempting a retrieval of a problematic artifact should be reported citing the artifact
+     * causing the problem
+     */
+    @Test
+    public void testProblemCausingArtifact() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
+                    new File("src/test/resources/org/codehaus/mojo/display-dependency-updates/problem-causing"),
+                    "display-dependency-updates");
+            mojo.setPluginContext(new HashMap<>());
+            mojo.outputFile = tempFile.getPath().toFile();
+            mojo.outputEncoding = Charset.defaultCharset().toString();
+            mojo.repositorySystem = mockAetherRepositorySystem();
+            mojo.execute();
+            fail("Should throw an exception");
+        } catch (MojoExecutionException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
         }
     }
 }

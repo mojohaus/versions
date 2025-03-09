@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.lessThan;
  * Unit tests for {@link BoundArtifactVersion}
  */
 class BoundArtifactVersionTest {
+
     @Test
     void testMajorUpperBoundGreaterThanNextMajor() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.2.3", MAJOR);

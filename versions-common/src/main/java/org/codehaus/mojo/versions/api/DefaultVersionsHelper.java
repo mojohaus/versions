@@ -216,7 +216,11 @@ public class DefaultVersionsHelper implements VersionsHelper {
                             .map(v -> ArtifactVersionService.getArtifactVersion(v.toString()))
                             .collect(Collectors.toList()));
         } catch (VersionRangeResolutionException e) {
-            throw new VersionRetrievalException(e.getMessage(), e);
+            throw new VersionRetrievalException(e.getMessage(), artifact, e);
+        } catch (RuntimeException e) {
+            // log the dependency should any runtime exception occur (e.x. broken comparison contract)
+            throw new VersionRetrievalException(
+                    "Unable to retrieve versions for " + artifact + " for version range " + versionRange, artifact, e);
         }
     }
 
@@ -266,9 +270,12 @@ public class DefaultVersionsHelper implements VersionsHelper {
             }
 
             return dependencyUpdates;
-        } catch (ExecutionException | InterruptedException ie) {
+        } catch (ExecutionException | InterruptedException e) {
+            if (e.getCause() instanceof VersionRetrievalException) {
+                throw (VersionRetrievalException) e.getCause();
+            }
             throw new VersionRetrievalException(
-                    "Unable to acquire metadata for dependencies " + dependencies + ": " + ie.getMessage(), ie);
+                    "Unable to acquire metadata for dependencies " + dependencies + ": " + e.getMessage(), null, e);
         } finally {
             executor.shutdown();
         }
@@ -310,9 +317,12 @@ public class DefaultVersionsHelper implements VersionsHelper {
             }
 
             return pluginUpdates;
-        } catch (ExecutionException | InterruptedException ie) {
+        } catch (ExecutionException | InterruptedException e) {
+            if (e.getCause() instanceof VersionRetrievalException) {
+                throw (VersionRetrievalException) e.getCause();
+            }
             throw new VersionRetrievalException(
-                    "Unable to acquire metadata for plugins " + plugins + ": " + ie.getMessage(), ie);
+                    "Unable to acquire metadata for plugins " + plugins + ": " + e.getMessage(), null, e);
         } finally {
             executor.shutdown();
         }

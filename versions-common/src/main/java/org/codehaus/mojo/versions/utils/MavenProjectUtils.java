@@ -113,19 +113,15 @@ public class MavenProjectUtils {
                                 .orElse(Stream.empty()));
 
         // log and try to correct versions where they don't appear in the original pom.xml
-        try {
-            return dependencies
-                    .peek(dependency -> log.debug("dependency from pom: "
-                            + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion()
-                            + ":" + dependency.getScope()))
-                    .map(dependency -> dependency.getVersion() != null
-                            ? interpolateVersion(dependency, project)
-                            : getVersionFromParent(dependency, project, processDependencyManagementTransitive, log)
-                                    .orElse(dependency))
-                    .collect(() -> new TreeSet<>(DependencyComparator.INSTANCE), Set::add, Set::addAll);
-        } catch (IllegalArgumentException e) {
-            throw new VersionRetrievalException(e.getMessage());
-        }
+        return dependencies
+                .peek(dependency -> log.debug("dependency from pom: "
+                        + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion()
+                        + ":" + dependency.getScope()))
+                .map(dependency -> dependency.getVersion() != null
+                        ? interpolateVersion(dependency, project)
+                        : getVersionFromParent(dependency, project, processDependencyManagementTransitive, log)
+                                .orElse(dependency))
+                .collect(() -> new TreeSet<>(DependencyComparator.INSTANCE), Set::add, Set::addAll);
     }
 
     /**
