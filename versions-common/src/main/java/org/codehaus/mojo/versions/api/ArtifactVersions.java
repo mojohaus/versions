@@ -32,7 +32,6 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
  * Holds the results of a search for versions of an artifact.
@@ -56,24 +55,15 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
     private final SortedSet<ArtifactVersion> versions;
 
     /**
-     * The version comparison rule that is used for this artifact.
-     *
-     * @since 1.0-alpha-3
-     */
-    private final VersionComparator versionComparator;
-
-    /**
      * Creates a new {@link ArtifactVersions} instance.
      *
      * @param artifact          The artifact.
      * @param versions          The versions.
-     * @param versionComparator The version comparison rule.
      * @since 1.0-alpha-3
      */
-    public ArtifactVersions(Artifact artifact, List<ArtifactVersion> versions, VersionComparator versionComparator) {
+    public ArtifactVersions(Artifact artifact, List<ArtifactVersion> versions) {
         this.artifact = artifact;
-        this.versionComparator = versionComparator;
-        this.versions = new TreeSet<>(versionComparator);
+        this.versions = new TreeSet<>();
         this.versions.addAll(versions);
         setCurrentVersion(artifact.getVersion());
         setCurrentVersionRange(artifact.getVersionRange());
@@ -87,7 +77,6 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
      */
     public ArtifactVersions(ArtifactVersions other) {
         artifact = other.artifact;
-        versionComparator = other.versionComparator;
         versions = other.versions;
         setCurrentVersion(other.getCurrentVersion());
         setCurrentVersionRange(other.getCurrentVersionRange());
@@ -121,13 +110,12 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
                 .append(getArtifact().getVersion(), that.getArtifact().getVersion())
                 .append(getArtifact().getScope(), that.getArtifact().getScope())
                 .append(getVersions(true), that.getVersions(true))
-                .append(getVersionComparator(), that.getVersionComparator())
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getArtifact(), Arrays.hashCode(getVersions(true)), getVersionComparator());
+        return Objects.hash(getArtifact(), Arrays.hashCode(getVersions(true)));
     }
 
     /**
@@ -230,15 +218,10 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
                 : versions.stream().map(Object::toString).allMatch(ArtifactUtils::isSnapshot);
     }
 
-    public VersionComparator getVersionComparator() {
-        return versionComparator;
-    }
-
     /**
      * {@inheritDoc}
      */
     public String toString() {
-        return "ArtifactVersions" + "{artifact=" + artifact + ", versions=" + versions + ", versionComparator="
-                + versionComparator + '}';
+        return "ArtifactVersions" + "{artifact=" + artifact + ", versions=" + versions + '}';
     }
 }

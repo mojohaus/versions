@@ -21,6 +21,7 @@ package org.codehaus.mojo.versions.api;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,13 +35,14 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
+import org.codehaus.mojo.versions.ordering.DefaultSegmentCounter;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 
 import static java.util.Collections.reverseOrder;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
@@ -85,7 +87,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         return getCurrentVersionRange().getRestrictions().stream()
                 .map(Restriction::getLowerBound)
                 .filter(Objects::nonNull)
-                .max(getVersionComparator())
+                .max(Comparator.naturalOrder())
                 .orElse(lowerBoundVersion);
     }
 
@@ -269,7 +271,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         return Arrays.stream(getVersions(includeSnapshots))
                 .filter(candidate -> isVersionInRestriction(lookupRestriction, candidate))
                 .filter(candidate -> includeSnapshots || !ArtifactUtils.isSnapshot(candidate.toString()))
-                .max(getVersionComparator());
+                .max(Comparator.naturalOrder());
     }
 
     @Override
@@ -284,7 +286,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
                 .filter(candidate -> versionRange == null || ArtifactVersions.isVersionInRange(candidate, versionRange))
                 .filter(candidate -> restriction == null || isVersionInRestriction(restriction, candidate))
                 .filter(candidate -> includeSnapshots || !ArtifactUtils.isSnapshot(candidate.toString()))
-                .sorted(getVersionComparator())
+                .sorted(Comparator.naturalOrder())
                 .distinct()
                 .toArray(ArtifactVersion[]::new);
     }
@@ -345,7 +347,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
             return empty();
         }
 
-        int segmentCount = getVersionComparator().getSegmentCount(version);
+        int segmentCount = DefaultSegmentCounter.INSTANCE.getSegmentCount(version);
         if (unchangedSegment.get().value() > segmentCount) {
             throw new InvalidSegmentException(unchangedSegment.get(), segmentCount, version);
         }
@@ -382,9 +384,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         ArtifactVersion upperBound = restriction.getUpperBound();
         boolean includeLower = restriction.isLowerBoundInclusive();
         boolean includeUpper = restriction.isUpperBoundInclusive();
-        final VersionComparator versionComparator = getVersionComparator();
-        int lower = lowerBound == null ? -1 : versionComparator.compare(lowerBound, candidate);
-        int upper = upperBound == null ? +1 : versionComparator.compare(upperBound, candidate);
+        int lower = ofNullable(lowerBound).map(b -> b.compareTo(candidate)).orElse(-1);
+        int upper = ofNullable(upperBound).map(b -> b.compareTo(candidate)).orElse(1);
         if (lower > 0 || upper < 0) {
             return false;
         }
@@ -401,7 +402,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      */
     public final ArtifactVersion getReportNewestUpdate(Optional<Segment> updateScope, boolean includeSnapshots) {
         return getArtifactVersionStream(updateScope, includeSnapshots)
-                .min(Collections.reverseOrder(getVersionComparator()))
+                .min(Collections.reverseOrder())
                 .orElse(null);
     }
 
@@ -412,8 +413,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      * @return all versions after currentVersion within the specified update scope.
      */
     public final ArtifactVersion[] getReportUpdates(Optional<Segment> updateScope, boolean includeSnapshots) {
-        TreeSet<ArtifactVersion> versions = getArtifactVersionStream(updateScope, includeSnapshots)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(getVersionComparator())));
+        TreeSet<ArtifactVersion> versions =
+                getArtifactVersionStream(updateScope, includeSnapshots).collect(Collectors.toCollection(TreeSet::new));
         // filter out intermediate minor versions.
         if (!verboseDetail) {
             int major = 0;

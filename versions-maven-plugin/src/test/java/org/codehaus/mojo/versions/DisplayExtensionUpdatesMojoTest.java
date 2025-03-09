@@ -25,16 +25,20 @@ import java.util.HashMap;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ExtensionBuilder;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 
 import static java.util.Collections.emptyList;
@@ -48,6 +52,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -60,7 +65,15 @@ public class DisplayExtensionUpdatesMojoTest {
     private DisplayExtensionUpdatesMojo mojo;
     private Path tempPath;
 
+    @Mock
+    private Log log;
+
+    private PomHelper pomHelper;
+
     private ArtifactFactory artifactFactory;
+
+    @Mock
+    private ExpressionEvaluator expressionEvaluator;
 
     @Before
     public void setUp() throws IllegalAccessException, IOException, MojoExecutionException {
@@ -88,6 +101,7 @@ public class DisplayExtensionUpdatesMojoTest {
         setVariableValueToObject(mojo, "processCoreExtensions", false);
         // turning interpolateExtensions off so that we don't need to bother with the model tree
         mojo.interpolateProperties = false;
+        mojo.mojoExecution = mock(MojoExecution.class);
 
         mojo.setPluginContext(new HashMap<String, Object>() {
             {

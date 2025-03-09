@@ -20,49 +20,21 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
+import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.core.Is.is;
 
-class MavenVersionComparatorTest extends VersionComparatorTestBase {
-    MavenVersionComparatorTest() {
-        super(new MavenVersionComparator());
-    }
+class DefaultSegmentCounterTest {
+    protected SegmentCounter instance;
 
-    @Test
-    void testSegmentCounting() {
-        assertThat(3, is(instance.getSegmentCount(version("5"))));
-        assertThat(3, is(instance.getSegmentCount(version("5.0"))));
-        assertThat(4, is(instance.getSegmentCount(version("5-0"))));
-        assertThat(1, is(instance.getSegmentCount(version("5.3.a"))));
-        assertThat(1, is(instance.getSegmentCount(version("5.0.a.1.4.5"))));
-        assertThat(3, is(instance.getSegmentCount(version(""))));
-    }
-
-    @Test
-    void testUpperBoundaryCustom() {
-        assertThat(
-                instance.compare(new BoundArtifactVersion(version("1.2.3"), INCREMENTAL), version("1.2.3-ANDRZEJ")),
-                greaterThan(0));
-    }
-
-    @Test
-    void testUpperBoundaryRelease() {
-        assertThat(
-                instance.compare(new BoundArtifactVersion(version("1.1.0"), INCREMENTAL), version("1.1.0")),
-                greaterThan(0));
-    }
-
-    @Test
-    void testUpperBoundarySnapshot() {
-        assertThat(
-                instance.compare(new BoundArtifactVersion(version("1.1.0"), INCREMENTAL), version("1.1.0-SNAPSHOT")),
-                greaterThan(0));
+    @BeforeEach
+    void beforeEach() {
+        this.instance = new DefaultSegmentCounter();
     }
 
     @Test

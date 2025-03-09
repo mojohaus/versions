@@ -58,6 +58,8 @@ import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.rule.RuleService;
+import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
@@ -207,20 +209,24 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     public VersionsHelper getHelper() throws MojoExecutionException {
         if (helper == null) {
-            PomHelper pomHelper =
-                    new PomHelper(artifactFactory, new VersionsExpressionEvaluator(session, mojoExecution));
-            helper = new DefaultVersionsHelper.Builder()
-                    .withArtifactFactory(artifactFactory)
-                    .withRepositorySystem(repositorySystem)
+            RuleService ruleService = new RulesServiceBuilder()
+                    .withMavenSession(session)
                     .withWagonMap(wagonMap)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)
                     .withIgnoredVersions(ignoredVersions)
                     .withLog(getLog())
+                    .build();
+            PomHelper pomHelper =
+                    new PomHelper(artifactFactory, new VersionsExpressionEvaluator(session, mojoExecution));
+            helper = new DefaultVersionsHelper.Builder()
+                    .withArtifactFactory(artifactFactory)
+                    .withRepositorySystem(repositorySystem)
+                    .withLog(getLog())
                     .withMavenSession(session)
                     .withPomHelper(pomHelper)
-                    .withMojoExecution(mojoExecution)
+                    .withRuleService(ruleService)
                     .build();
         }
         return helper;

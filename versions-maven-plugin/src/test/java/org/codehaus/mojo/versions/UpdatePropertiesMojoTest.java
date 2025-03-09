@@ -20,7 +20,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
-import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.codehaus.mojo.versions.utils.TestUtils;
 import org.junit.Test;
@@ -102,11 +101,6 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
                 put("artifactA", new String[] {"6.2.5.Final", "8.0.0.Final"});
             }
         });
-        mojo.ruleSet = new RuleSet() {
-            {
-                setComparisonMethod("numeric");
-            }
-        };
 
         mojo.execute();
         assertThat(changeRecorder.getChanges(), is(empty()));

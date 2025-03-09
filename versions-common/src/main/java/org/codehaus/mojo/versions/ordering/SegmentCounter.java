@@ -19,14 +19,12 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
-import java.util.Comparator;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 /**
- * A rule for comparing and manipulating versions.
+ * Counts the number of segments
  */
-public interface VersionComparator extends Comparator<ArtifactVersion> {
+public interface SegmentCounter {
     /**
      * Returns the number of segments specified or specifiable in the supplied artifact version.
      *

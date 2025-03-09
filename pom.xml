@@ -135,7 +135,7 @@
     <sitePluginVersion>${maven-site-plugin.version}</sitePluginVersion>
     <sisuMavenPluginVersion>${sisu-maven-plugin.version}</sisuMavenPluginVersion>
     <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
-    <modelloNamespaceRuleVersion>2.1.0</modelloNamespaceRuleVersion>
+    <modelloNamespaceRuleVersion>3.0.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
     <byteBuddyVersion>1.17.2</byteBuddyVersion>
 

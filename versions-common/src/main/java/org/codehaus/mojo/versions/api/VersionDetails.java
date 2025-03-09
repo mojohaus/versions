@@ -25,7 +25,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.ordering.VersionComparator;
 
 /**
  * Created by IntelliJ IDEA.
@@ -80,14 +79,6 @@ public interface VersionDetails {
      * @since 2.16.0
      */
     void setCurrentVersionRange(VersionRange versionRange);
-
-    /**
-     * Gets the rule for version comparison of this artifact.
-     *
-     * @return the rule for version comparison of this artifact.
-     * @since 1.0-beta-1
-     */
-    VersionComparator getVersionComparator();
 
     /**
      * Returns all available versions in increasing order.
