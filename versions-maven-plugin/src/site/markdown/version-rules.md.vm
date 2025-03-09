@@ -169,8 +169,8 @@ The other methods (via the `<ruleSet>` element and via the `maven.version.ignore
 explained above. The described
 
 ```xml
-<ruleset xmlns="https://www.mojohaus.org/VERSIONS/RULE/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://www.mojohaus.org/VERSIONS/RULE/2.1.0 https://www.mojohaus.org/versions/versions-model/xsd/rule-2.1.0.xsd">
+<ruleset xmlns="https://www.mojohaus.org/VERSIONS/RULE/3.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://www.mojohaus.org/VERSIONS/RULE/3.0.0 https://www.mojohaus.org/versions/versions-model/xsd/rule-3.0.0.xsd">
   <ignoreVersions>
     <ignoreVersion type="regex">.*-beta</ignoreVersion>
   </ignoreVersions>
