@@ -89,14 +89,12 @@ public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesMod
      * @param locale the locale to generate the report for.
      * @param sink   the report formatting tool
      */
-    @SuppressWarnings("deprecation")
-    @Override
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
         try {
             ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions(project.getParentArtifact(), false);
             rendererFactory
                     .createReportRenderer(
-                            getOutputName(),
+                            getBundleName(),
                             sink,
                             locale,
                             new ParentUpdatesModel(
@@ -128,7 +126,7 @@ public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesMod
      * {@inheritDoc}
      */
     @Override
-    public String getOutputName() {
+    public String getBundleName() {
         return "parent-updates-report";
     }
 }
