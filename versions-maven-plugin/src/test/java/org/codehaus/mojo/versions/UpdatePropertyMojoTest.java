@@ -76,4 +76,9 @@ public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
                 Matchers.hasItem(
                         new DefaultDependencyVersionChange("default-group", "default-artifact", "1.0.0", "1.0.1-rc1")));
     }
+
+    @Test
+    public void testProblemCausingArtifact() throws Exception {
+        testProblemCausingArtifact("update-property", m -> ((UpdatePropertyMojo) m).property = "artifact-version");
+    }
 }

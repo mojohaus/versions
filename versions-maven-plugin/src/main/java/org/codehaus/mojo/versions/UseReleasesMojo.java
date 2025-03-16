@@ -194,8 +194,8 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                 // Force releaseVersion version because org.apache.maven.artifact.metadata.MavenMetadataSource does not
                 // retrieve release version if provided snapshot version.
                 artifact.setVersion(releaseVersion);
-                Optional<String> targetVersion = findReleaseVersion(
-                        pom, dep, version, releaseVersion, getHelper().lookupArtifactVersions(artifact, false));
+                Optional<String> targetVersion =
+                        findReleaseVersion(releaseVersion, getHelper().lookupArtifactVersions(artifact, false));
                 if (targetVersion.isPresent()) {
                     updateDependencyVersion(pom, dep, targetVersion.get(), changeKind);
                 } else {
@@ -209,12 +209,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
-    private Optional<String> findReleaseVersion(
-            MutableXMLStreamReader pom,
-            Dependency dep,
-            String version,
-            String releaseVersion,
-            ArtifactVersions versions) {
+    private Optional<String> findReleaseVersion(String releaseVersion, ArtifactVersions versions) {
         return !allowRangeMatching
                 ? versions.containsVersion(releaseVersion) ? Optional.of(releaseVersion) : Optional.empty()
                 : Arrays.stream(versions.getVersions(false))

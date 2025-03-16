@@ -283,7 +283,9 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                     "Unable to parse the pom " + node.getModel().getPomFile(), e);
         } catch (VersionRetrievalException e) {
             throw new MojoFailureException(
-                    "Unable to retrieve a dependency version while processing "
+                    "Unable to retrieve dependency versions "
+                            + e.getArtifact().map(a -> "of " + a).orElse("")
+                            + " while processing "
                             + node.getModel().getPomFile(),
                     e);
         }

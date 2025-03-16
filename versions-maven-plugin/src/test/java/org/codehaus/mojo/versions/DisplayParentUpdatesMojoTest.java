@@ -55,10 +55,13 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySys
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -388,5 +391,24 @@ public class DisplayParentUpdatesMojoTest {
         assertThat(
                 String.join("", Files.readAllLines(tempFile)),
                 stringContainsInOrder("The parent project is the latest version:", "dummy-parent2", "[,3.0-!)"));
+    }
+
+    @Test
+    public void testProblemCausingArtifact() throws MojoFailureException {
+        mojo.getProject().setParent(new MavenProject() {
+            {
+                setGroupId("default-group");
+                setArtifactId("problem-causing-artifact");
+                setVersion("1.0.0");
+            }
+        });
+        try {
+            mojo.execute();
+            fail("Should throw an exception");
+        } catch (MojoExecutionException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }

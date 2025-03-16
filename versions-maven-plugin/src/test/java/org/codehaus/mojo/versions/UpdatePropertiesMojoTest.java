@@ -105,4 +105,9 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
         mojo.execute();
         assertThat(changeRecorder.getChanges(), is(empty()));
     }
+
+    @Test
+    public void testProblemCausingArtifact() throws Exception {
+        testProblemCausingArtifact("update-properties");
+    }
 }

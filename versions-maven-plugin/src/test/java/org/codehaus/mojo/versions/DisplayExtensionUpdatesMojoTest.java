@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
@@ -31,6 +32,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ExtensionBuilder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
@@ -51,6 +53,9 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -279,5 +284,32 @@ public class DisplayExtensionUpdatesMojoTest {
         }
 
         assertThat(String.join("", Files.readAllLines(tempPath)), containsString("1.0.0 -> 1.0.1"));
+    }
+
+    @Test
+    public void testProblemCausingArtifact()
+            throws MojoExecutionException, MojoFailureException, IOException, IllegalAccessException {
+        setVariableValueToObject(mojo, "extensionExcludes", emptyList());
+        setVariableValueToObject(mojo, "extensionIncludes", singletonList("*"));
+        mojo.getProject().setBuild(new Build());
+        mojo.getProject()
+                .getBuild()
+                .setExtensions(Collections.singletonList(ExtensionBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("problem-causing-artifact")
+                        .withVersion("1.0.0")
+                        .build()));
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.getChildModels(ArgumentMatchers.any(MavenProject.class), any()))
+                    .then(i -> Collections.singletonMap(null, ((MavenProject) i.getArgument(0)).getModel()));
+            mojo.execute();
+            fail("Should throw an exception");
+        } catch (MojoExecutionException e) {
+            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
+            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
     }
 }
