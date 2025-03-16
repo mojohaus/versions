@@ -77,7 +77,7 @@ public class PluginUpdatesReport extends AbstractPluginUpdatesReport {
      * {@inheritDoc}
      */
     @Override
-    public String getOutputName() {
+    public String getOutputPath() {
         return "plugin-updates-report";
     }
 }
