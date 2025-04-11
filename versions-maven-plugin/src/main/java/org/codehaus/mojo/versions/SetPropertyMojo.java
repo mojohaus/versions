@@ -43,6 +43,7 @@ import org.eclipse.aether.RepositorySystem;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.split;
 
 /**
@@ -172,7 +173,14 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
             PropertyVersions version = entry.getValue();
             String newVersionGiven = currentProperty.getVersion();
             final String profileToApply = isEmpty(profileId) ? version.getProfileId() : profileId;
-            final String currentVersion = getProject().getProperties().getProperty(currentProperty.getName());
+            String currentVersion = getProject().getProperties().getProperty(currentProperty.getName());
+            if (currentVersion == null && isNotEmpty(profileId)) {
+                currentVersion = getProject().getModel().getProfiles().stream()
+                        .filter(profile -> profileId.equals(profile.getId()))
+                        .findFirst()
+                        .map(profile -> profile.getProperties().getProperty(currentProperty.getName()))
+                        .orElse(null);
+            }
             if (currentVersion == null) {
                 continue;
             }
