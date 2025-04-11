@@ -128,11 +128,22 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase {
     }
 
     @Test
-    public void testChangeOnlyPropertiesInTheProfile() throws Exception {
-        final String newVersion = UUID.randomUUID().toString();
-        final Model model = getModelForProfile("test-profile", true, newVersion);
+    public void testChangeOnlyPropertiesInTheProfileWithPropertyAlsoInTheModule() throws Exception {
+        testChangeOnlyPropertiesInTheProfile(true);
+    }
 
-        assertThat(model.getProperties().getProperty("dummy-api-version"), is("1.0.0"));
+    @Test
+    public void testChangeOnlyPropertiesInTheProfileWithPropertyOnlyInProfile() throws Exception {
+        testChangeOnlyPropertiesInTheProfile(false);
+    }
+
+    private void testChangeOnlyPropertiesInTheProfile(boolean withPropertyInTheModule) throws Exception {
+        final String newVersion = UUID.randomUUID().toString();
+        final Model model = getModelForProfile("test-profile", true, newVersion, withPropertyInTheModule);
+
+        if (withPropertyInTheModule) {
+            assertThat(model.getProperties().getProperty("dummy-api-version"), is("1.0.0"));
+        }
         assertThat(
                 model.getProfiles().stream()
                         .filter(profile -> "test-profile".equals(profile.getId()))
@@ -181,7 +192,15 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase {
     }
 
     private Model getModelForProfile(String profileName, Boolean setProfile, String newVersion) throws Exception {
-        copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/profiled-new-version"), pomDir);
+        return getModelForProfile(profileName, setProfile, newVersion, true);
+    }
+
+    private Model getModelForProfile(
+            String profileName, Boolean setProfile, String newVersion, Boolean withPropsInModule) throws Exception {
+        final String srcModule = withPropsInModule
+                ? "src/test/resources/org/codehaus/mojo/set-property/profiled-new-version"
+                : "src/test/resources/org/codehaus/mojo/set-property/profiled-new-version-without-props";
+        copyDir(Paths.get(srcModule), pomDir);
         SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(pomDir.toFile(), "set-property");
 
         mojo.repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);

@@ -171,8 +171,19 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
             Property currentProperty = entry.getKey();
             PropertyVersions version = entry.getValue();
             String newVersionGiven = currentProperty.getVersion();
-            final String profileToApply = isEmpty(profileId) ? version.getProfileId() : profileId;
-            final String currentVersion = getProject().getProperties().getProperty(currentProperty.getName());
+            String profileToApply;
+            String currentVersion;
+            if (isEmpty(profileId)) {
+                profileToApply = version.getProfileId();
+                currentVersion = getProject().getProperties().getProperty(currentProperty.getName());
+            } else {
+                profileToApply = profileId;
+                currentVersion = getProject().getModel().getProfiles().stream()
+                        .filter(profile -> profileId.equals(profile.getId()))
+                        .findFirst()
+                        .map(profile -> profile.getProperties().getProperty(currentProperty.getName()))
+                        .orElse(null);
+            }
             if (currentVersion == null) {
                 continue;
             }
