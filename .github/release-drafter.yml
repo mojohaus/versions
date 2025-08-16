@@ -1,19 +1,1 @@
 _extends: .github
-name-template: '$RESOLVED_VERSION'
-tag-template: 'versions-maven-plugin-$RESOLVED_VERSION'
-version-resolver:
-  major:
-    labels:
-      - major
-  minor:
-    labels:
-      - minor
-      - enhancement
-  patch:
-    labels:
-      - patch
-  default: patch
-template: |
-  ## Changes
-
-  $CHANGES
