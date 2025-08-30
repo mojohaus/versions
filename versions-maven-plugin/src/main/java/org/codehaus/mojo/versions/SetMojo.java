@@ -23,10 +23,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +33,8 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.ArtifactUtils;
@@ -201,9 +201,11 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     /**
      * <p>Specifies the version index to increment when using <code>nextSnapshot</code>.
      * Will increment the (1-based, counting from the left, or the most major component) index
-     * of the snapshot version, e.g. for <code>-DnextSnapshotIndexToIncrement=1</code>
-     * and the version being <code>1.2.3-SNAPSHOT</code>, the new version will become <code>2.2.3-SNAPSHOT.</code></p>
-     * <p>Only valid with <code>nextSnapshot</code>.</p>
+     * of the snapshot version, e.g. for @{code -DnextSnapshotIndexToIncrement=1} whilst
+     * all lesser components will become 0's.</p>
+     * <p>For example, the version being @{code 1.2.3-SNAPSHOT}, the new version will
+     * become {@code 2.0.0-SNAPSHOT}.</p>
+     * <p>Only valid with {@code nextSnapshot}.</p>
      *
      * @since 2.12
      */
@@ -434,20 +436,29 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             throws MojoExecutionException {
         String versionWithoutSnapshot =
                 version.endsWith(SNAPSHOT) ? version.substring(0, version.indexOf(SNAPSHOT)) : version;
-        List<String> numbers = new LinkedList<>(Arrays.asList(versionWithoutSnapshot.split("\\.")));
+        String[] versionComponents = versionWithoutSnapshot.split("\\.");
 
         if (nextSnapshotIndexToIncrement == null) {
-            nextSnapshotIndexToIncrement = numbers.size();
+            nextSnapshotIndexToIncrement = versionComponents.length;
         } else if (nextSnapshotIndexToIncrement < 1) {
             throw new MojoExecutionException("nextSnapshotIndexToIncrement cannot be less than 1");
-        } else if (nextSnapshotIndexToIncrement > numbers.size()) {
+        } else if (nextSnapshotIndexToIncrement > versionComponents.length) {
             throw new MojoExecutionException(
                     "nextSnapshotIndexToIncrement cannot be greater than the last version index");
         }
-        int snapshotVersionToIncrement = Integer.parseInt(numbers.remove(nextSnapshotIndexToIncrement - 1));
-        numbers.add(nextSnapshotIndexToIncrement - 1, String.valueOf(snapshotVersionToIncrement + 1));
 
-        return StringUtils.join(numbers.toArray(new String[0]), ".") + "-SNAPSHOT";
+        int finalNextSnapshotIndexToIncrement = nextSnapshotIndexToIncrement;
+        return IntStream.range(0, versionComponents.length)
+                        .mapToObj(i -> {
+                            if (i + 1 < finalNextSnapshotIndexToIncrement) {
+                                return versionComponents[i];
+                            } else if (i + 1 == finalNextSnapshotIndexToIncrement) {
+                                return String.valueOf(Integer.parseInt(versionComponents[i]) + 1);
+                            }
+                            return "0";
+                        })
+                        .collect(Collectors.joining("."))
+                + "-SNAPSHOT";
     }
 
     private void applyChange(

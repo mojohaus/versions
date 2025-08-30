@@ -265,4 +265,16 @@ public class SetMojoTest extends AbstractMojoTestCase {
                 testLog.getLoggedMessages().stream().map(Triple::getMiddle).collect(Collectors.joining("\n")),
                 not(containsString("Processing change of null:child")));
     }
+
+    @Test
+    public void testNextSnapshotIndexToIncrement() throws MojoExecutionException {
+        new SetMojo(artifactFactory, null, null, null, null, null) {
+            {
+                nextSnapshot = true;
+                assertThat(getIncrementedVersion("1.1.1-SNAPSHOT", 1), is("2.0.0-SNAPSHOT"));
+                assertThat(getIncrementedVersion("1.1.1-SNAPSHOT", 2), is("1.2.0-SNAPSHOT"));
+                assertThat(getIncrementedVersion("1.1.1-SNAPSHOT", 3), is("1.1.2-SNAPSHOT"));
+            }
+        };
+    }
 }
