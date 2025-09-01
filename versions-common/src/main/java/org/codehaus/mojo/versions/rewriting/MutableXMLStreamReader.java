@@ -211,9 +211,23 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
         validateMarks(mark1, mark2);
         validateMarkOffsets(mark1, mark2);
 
-        int start = marks.get(mark1).getEnd(), end = marks.get(mark2).getStart();
-        if (source.substring(start, end).equals(replacement)) {
-            return;
+        MarkInfo startMark = marks.get(mark1), endMark = marks.get(mark2);
+        int start, end;
+        if (!startMark.equals(endMark)) {
+            start = startMark.getEnd();
+            end = endMark.getStart();
+            if (source.substring(start, end).equals(replacement)) {
+                return;
+            }
+        } else {
+            // Special case: property has no value (self-closing tag)
+            String elementWithTags = source.substring(startMark.getStart(), startMark.getEnd());
+            int closingTagIndex = elementWithTags.lastIndexOf("/>");
+            String elementName = source.substring(
+                    startMark.getStart() + elementWithTags.indexOf('<') + 1, startMark.getStart() + closingTagIndex);
+            start = startMark.getStart() + closingTagIndex;
+            end = startMark.getEnd();
+            replacement = ">" + replacement + "</" + elementName + ">";
         }
 
         source.replace(start, end, replacement);

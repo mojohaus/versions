@@ -29,6 +29,7 @@
     <properties>
         <api>2.0</api>
         <impl>1.0</impl>
+        <empty/>
     </properties>
 
     <dependencies>

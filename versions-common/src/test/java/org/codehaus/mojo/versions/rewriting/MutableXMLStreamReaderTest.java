@@ -176,13 +176,20 @@ class MutableXMLStreamReaderTest {
         assertThat(goToStartElement(reader, "properties"), is(true));
         reader.mark("<properties>");
 
+        // move the cursor to <empty/>
+        assertThat(goToStartElement(reader, "empty"), is(true));
+        reader.mark("<empty/>");
+
         // move the cursor to </properties>
         assertThat(goToEndElement(reader, "properties"), is(true));
         reader.mark("</properties>");
 
         assertThat(
                 reader.getBetween("<properties>", "</properties>"),
-                allOf(containsString("<api>2.0</api>"), containsString("<impl>1.0</impl>")));
+                allOf(
+                        containsString("<api>2.0</api>"),
+                        containsString("<impl>1.0</impl>"),
+                        containsString("<empty/>")));
 
         reader.replaceBetween("<version>", "</version>", "1.1.0-SNAPSHOT");
         assertThat(reader.getSource(), containsString("<version>1.1.0-SNAPSHOT</version>"));
@@ -191,7 +198,20 @@ class MutableXMLStreamReaderTest {
         // after the replacement, offsets between marks should have been adjusted
         assertThat(
                 reader.getBetween("<properties>", "</properties>"),
-                allOf(containsString("<api>2.0</api>"), containsString("<impl>1.0</impl>")));
+                allOf(
+                        containsString("<api>2.0</api>"),
+                        containsString("<impl>1.0</impl>"),
+                        containsString("<empty/>")));
+
+        reader.replaceBetween("<empty/>", "<empty/>", "1.0.0");
+
+        // after the replacement, offsets between marks should have been adjusted
+        assertThat(
+                reader.getBetween("<properties>", "</properties>"),
+                allOf(
+                        containsString("<api>2.0</api>"),
+                        containsString("<impl>1.0</impl>"),
+                        containsString("<empty>1.0.0</empty>")));
 
         // offsets outside marks should also be correct
         assertThat(goToStartElement(reader, "groupId"), is(true));

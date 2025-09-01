@@ -171,6 +171,27 @@ public class SetPropertyMojoTest extends AbstractMojoTestCase {
     }
 
     @Test
+    public void testEmptyValue() throws Exception {
+        copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/empty-value"), pomDir);
+        SetPropertyMojo mojo = (SetPropertyMojo) mojoRule.lookupConfiguredMojo(pomDir.toFile(), "set-property");
+
+        mojo.repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        when(mojo.repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> new VersionRangeResult(i.getArgument(1)));
+
+        setVariableValueToObject(mojo, "newVersion", "1.0.0");
+
+        mojo.execute();
+
+        String output = String.join(
+                        "", Files.readAllLines(mojo.getProject().getFile().toPath()))
+                .replaceAll("\\s*", "");
+        assertThat(
+                output,
+                matchesPattern(".*<properties>.*<dummy-api-version>1.0.0</dummy-api-version>.*</properties>.*"));
+    }
+
+    @Test
     public void testDoNotChangePropertyIfTheProfileNotfound() throws Exception {
         final Model model =
                 getModelForProfile("new-profile", true, UUID.randomUUID().toString());
