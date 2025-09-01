@@ -113,7 +113,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     private boolean allowIncrementalUpdates = true;
 
     /**
-     * <p>Whether to process core extensions. Default is {@code true}.</p>
+     * <p>Whether to process core extensions.</p>
      *
      * @since 2.15.0
      */
@@ -121,7 +121,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     private boolean processCoreExtensions = true;
 
     /**
-     * <p>Whether to process build extensions. Default is {@code true}.</p>
+     * <p>Whether to process build extensions.</p>
      *
      * @since 2.15.0
      */
