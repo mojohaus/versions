@@ -82,6 +82,9 @@ public class RevertMojo extends AbstractMojo {
                 ? PomHelper.getLocalRoot(projectBuilder, session, getLog())
                 : session.getCurrentProject();
 
+        // this may be necessary in case of a non-standard pom file name (not pom.xml)
+        Path projectFileName = projectToProcess.getFile().toPath().getFileName();
+
         getLog().info("Local aggregation root: " + projectToProcess.getBasedir());
         Set<String> reactor = PomHelper.getAllChildModules(projectToProcess, getLog());
         reactor.add(".");
@@ -91,7 +94,7 @@ public class RevertMojo extends AbstractMojo {
                     .getBasedir()
                     .toPath()
                     .resolve(entry)
-                    .resolve("pom.xml")
+                    .resolve(projectFileName)
                     .normalize();
             getLog().debug("Processing:" + pomFile);
             Path backupFile = Paths.get(pomFile + ".versionsBackup");
