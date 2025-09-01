@@ -93,7 +93,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * <p>Include dependencies with version set in a parent or in a BOM.</p>
      * <p>This is similar to {@code processDependencyManagementTransitive}, but will
      * report updates on dependencies.</p>
-     * <p>Default is {@code false}.</p>
      *
      * @since 2.19.0
      */
@@ -239,7 +238,6 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * <p>If {@code true}, shows dependencies that do not have updates. Also, with dependencies with
      * versions managed outside the reactor, will show the location of the pom.xml managing the version.</p>
-     * <p>Default is {@code false}.</p>
      *
      * @since 2.1
      */

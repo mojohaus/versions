@@ -151,7 +151,6 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      * the value of another dependency, will not update that property value, and log a warning instead.
      * Finally, if the property value is specified in a parent file which is outside of the project, will log
      * a message.</p>
-     * <p>Default is {@code false}.</p>
      *
      * @since 2.15.0
      */
