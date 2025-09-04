@@ -1,5 +1,6 @@
 org.codehaus.mojo.versions
 org.codehaus.mojo.versions_maven_plugin
+org.codehaus.mojo.versions.internal
 org.codehaus.mojo.versions.reporting
 org.codehaus.mojo.versions.reporting.model
 org.codehaus.mojo.versions.reporting.util
