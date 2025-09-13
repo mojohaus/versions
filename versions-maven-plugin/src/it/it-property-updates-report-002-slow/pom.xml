@@ -10,7 +10,7 @@
 
   <properties>
     <spring.version>4.3.30.RELEASE</spring.version>
-    <hibernate-validator.version>6.2.0.Final</hibernate-validator.version>
+    <hibernate-validator.version>4.3.2.Final</hibernate-validator.version>
     <slf4j.version>1.7.10</slf4j.version>
     <jaxb.version>2.2.11</jaxb.version>
     <jaxb2-basics.version>0.11.1</jaxb2-basics.version>
