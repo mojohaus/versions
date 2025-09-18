@@ -167,7 +167,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         this.rendererFactory = rendererFactory;
     }
 
-    public VersionsHelper getHelper() throws MavenReportException {
+    public synchronized VersionsHelper getHelper() throws MavenReportException {
         if (helper == null) {
             try {
                 RuleService ruleService = new RulesServiceBuilder()

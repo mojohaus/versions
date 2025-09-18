@@ -297,7 +297,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
      * Creates the VersionsHelper object
      * @return VersionsHelper object
      */
-    private VersionsHelper createVersionsHelper(String serverId, String rulesUri, RuleSet ruleSet)
+    private synchronized VersionsHelper createVersionsHelper(String serverId, String rulesUri, RuleSet ruleSet)
             throws EnforcerRuleError {
         try {
             Log log = new PluginLogWrapper(getLog());
