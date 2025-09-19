@@ -163,69 +163,55 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
             if (currentVersion == null) {
                 continue;
             }
-            boolean canUpdateProperty = true;
-            for (ArtifactAssociation association : version.getAssociations()) {
-                if (!(isIncluded(association.getArtifact()))) {
-                    getLog().info("Not updating the property ${" + property.getName()
-                            + "} because it is used by artifact "
-                            + association.getArtifact().toString()
-                            + " and that artifact is not included in the list of "
-                            + " allowed artifacts to be updated.");
-                    canUpdateProperty = false;
-                    break;
-                }
+
+            Log log = getLog();
+            if (log != null && !allowIncrementalUpdates) {
+                log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
             }
 
-            if (canUpdateProperty) {
-                Log log = getLog();
-                if (log != null && !allowIncrementalUpdates) {
-                    log.info("Assuming allowMinorUpdates false because allowIncrementalUpdates is false.");
-                }
+            if (log != null && !allowMinorUpdates) {
+                log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
+            }
 
-                if (log != null && !allowMinorUpdates) {
-                    log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
-                }
+            Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
+                    ? empty()
+                    : allowMinorUpdates && allowIncrementalUpdates
+                            ? of(MAJOR)
+                            : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
+            if (log != null && log.isDebugEnabled()) {
+                log.debug(unchangedSegment
+                                .map(Segment::minorTo)
+                                .map(Segment::toString)
+                                .orElse("ALL") + " version changes allowed");
+            }
+            try {
+                ArtifactVersion targetVersion = updatePropertyToNewestVersion(
+                        pom, property, version, currentVersion, allowDowngrade, unchangedSegment);
 
-                Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
-                        ? empty()
-                        : allowMinorUpdates && allowIncrementalUpdates
-                                ? of(MAJOR)
-                                : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
-                if (log != null && log.isDebugEnabled()) {
-                    log.debug(unchangedSegment
-                                    .map(Segment::minorTo)
-                                    .map(Segment::toString)
-                                    .orElse("ALL") + " version changes allowed");
-                }
-                try {
-                    ArtifactVersion targetVersion = updatePropertyToNewestVersion(
-                            pom, property, version, currentVersion, allowDowngrade, unchangedSegment);
+                if (targetVersion != null) {
+                    getChangeRecorder()
+                            .recordChange(DefaultPropertyChangeRecord.builder()
+                                    .withProperty(property.getName())
+                                    .withOldValue(currentVersion)
+                                    .withNewValue(targetVersion.toString())
+                                    .build());
 
-                    if (targetVersion != null) {
-                        getChangeRecorder()
-                                .recordChange(DefaultPropertyChangeRecord.builder()
-                                        .withProperty(property.getName())
-                                        .withOldValue(currentVersion)
-                                        .withNewValue(targetVersion.toString())
-                                        .build());
-
-                        for (final ArtifactAssociation association : version.getAssociations()) {
-                            if ((isIncluded(association.getArtifact()))) {
-                                getChangeRecorder()
-                                        .recordChange(DefaultDependencyChangeRecord.builder()
-                                                .withKind(DependencyChangeRecord.ChangeKind.PROPERTY)
-                                                .withArtifact(association.getArtifact())
-                                                .withOldVersion(currentVersion)
-                                                .withNewVersion(targetVersion.toString())
-                                                .build());
-                            }
+                    for (final ArtifactAssociation association : version.getAssociations()) {
+                        if ((isIncluded(association.getArtifact()))) {
+                            getChangeRecorder()
+                                    .recordChange(DefaultDependencyChangeRecord.builder()
+                                            .withKind(DependencyChangeRecord.ChangeKind.PROPERTY)
+                                            .withArtifact(association.getArtifact())
+                                            .withOldVersion(currentVersion)
+                                            .withNewVersion(targetVersion.toString())
+                                            .build());
                         }
                     }
-                } catch (InvalidSegmentException | InvalidVersionSpecificationException | MojoExecutionException e) {
-                    getLog().warn(String.format(
-                            "Skipping the processing of %s:%s due to: %s",
-                            property.getName(), property.getVersion(), e.getMessage()));
                 }
+            } catch (InvalidSegmentException | InvalidVersionSpecificationException | MojoExecutionException e) {
+                getLog().warn(String.format(
+                        "Skipping the processing of %s:%s due to: %s",
+                        property.getName(), property.getVersion(), e.getMessage()));
             }
         }
     }

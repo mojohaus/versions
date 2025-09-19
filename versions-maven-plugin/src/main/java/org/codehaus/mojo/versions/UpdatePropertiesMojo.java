@@ -137,6 +137,7 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase {
                                 .withExcludeProperties(excludeProperties)
                                 .withAutoLinkItems(autoLinkItems)
                                 .withIncludeParent(includeParent)
+                                .withIncludeFilter(this::isIncluded)
                                 .build()));
     }
 }

@@ -433,6 +433,23 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 }
             }
 
+            if (request.getIncludeFilter() != null
+                    && builder.getAssociations().stream()
+                            .map(ArtifactAssociation::getArtifact)
+                            .anyMatch(artifact -> {
+                                if (!request.getIncludeFilter().test(artifact)) {
+                                    log.info("Skipping the property ${" + property.getName()
+                                            + "} because it is used by artifact "
+                                            + artifact.toString()
+                                            + " and that artifact is not included in the list of "
+                                            + " allowed artifacts to be updated.");
+                                    return true;
+                                }
+                                return false;
+                            })) {
+                continue;
+            }
+
             try {
                 String currentVersion =
                         request.getMavenProject().getProperties().getProperty(propertyName);
