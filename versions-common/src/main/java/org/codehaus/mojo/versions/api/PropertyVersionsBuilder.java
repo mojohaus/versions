@@ -82,10 +82,25 @@ public class PropertyVersionsBuilder {
         return this;
     }
 
+    /**
+     * Clears the set of artifacts with which the property is associated
+     */
     public void clearAssociations() {
         associations.clear();
     }
 
+    /**
+     * Returns a set of {@link ArtifactAssociation}, listing artifacts with which the property is associated
+     * @return a set of {@link ArtifactAssociation}, listing artifacts with which the property is associated
+     */
+    public Set<ArtifactAssociation> getAssociations() {
+        return associations;
+    }
+
+    /**
+     * Returns {@code true} is the property is associated with any artifact
+     * @return {@code true} is the property is associated with any artifact
+     */
     public boolean isAssociated() {
         return !associations.isEmpty();
     }

@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
@@ -43,9 +44,9 @@ public interface VersionsHelper {
      * appropriate remote repositories.
      * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
      *
-     * @param artifact The artifact to look for versions of.
+     * @param artifact              The artifact to look for versions of.
      * @param usePluginRepositories {@code true} will consult the pluginRepositories, while {@code false} will
-     *            consult the repositories for normal dependencies.
+     *                              consult the repositories for normal dependencies.
      * @return The details of the available artifact versions.
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-alpha-3
@@ -58,9 +59,9 @@ public interface VersionsHelper {
      * appropriate remote repositories.
      * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
      *
-     * @param artifact The artifact to look for versions of.
-     * @param versionRange versionRange to restrict the search, may be {@code null}
-     * @param usePluginRepositories {@code true} will consult the pluginRepositories
+     * @param artifact               The artifact to look for versions of.
+     * @param versionRange           versionRange to restrict the search, may be {@code null}
+     * @param usePluginRepositories  {@code true} will consult the pluginRepositories
      * @param useProjectRepositories {@code true} will consult regular project repositories
      * @return The details of the available artifact versions.
      * @throws VersionRetrievalException thrown if version resolution fails
@@ -75,10 +76,10 @@ public interface VersionsHelper {
      * appropriate remote repositories.
      * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
      *
-     * @param artifact The artifact to look for versions of.
-     * @param versionRange versionRange to restrict the search, may be {@code null}
+     * @param artifact              The artifact to look for versions of.
+     * @param versionRange          versionRange to restrict the search, may be {@code null}
      * @param usePluginRepositories <code>true</code> will consult the pluginRepositories, while <code>false</code> will
-     *            consult the repositories for normal dependencies.
+     *                              consult the repositories for normal dependencies.
      * @return The details of the available artifact versions.
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-alpha-3
@@ -90,9 +91,9 @@ public interface VersionsHelper {
      * Returns a map of all possible updates per dependency. The lookup is done in parallel using
      * {@code LOOKUP_PARALLEL_THREADS} threads.
      *
-     * @param dependencyStream a stream of {@link Dependency} instances to look up.
+     * @param dependencyStream      a stream of {@link Dependency} instances to look up.
      * @param usePluginRepositories Search the plugin repositories.
-     * @param allowSnapshots whether snapshots should be included
+     * @param allowSnapshots        whether snapshots should be included
      * @return map containing the ArtifactVersions object per dependency
      * @throws VersionRetrievalException thrown if a version cannot be retrieved
      */
@@ -104,10 +105,10 @@ public interface VersionsHelper {
      * Returns a map of all possible updates per dependency. The lookup is done in parallel using
      * {@code LOOKUP_PARALLEL_THREADS} threads.
      *
-     * @param dependencies stream of {@link Dependency} instances to look up.
-     * @param usePluginRepositories Search the plugin repositories.
+     * @param dependencies           stream of {@link Dependency} instances to look up.
+     * @param usePluginRepositories  Search the plugin repositories.
      * @param useProjectRepositories whether to use regular project repositories
-     * @param allowSnapshots whether snapshots should be included
+     * @param allowSnapshots         whether snapshots should be included
      * @return map containing the ArtifactVersions object per dependency
      * @throws VersionRetrievalException thrown if a version cannot be retrieved
      */
@@ -121,10 +122,10 @@ public interface VersionsHelper {
     /**
      * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency.
      *
-     * @param dependency The dependency.
-     * @param usePluginRepositories Search the plugin repositories.
+     * @param dependency             The dependency.
+     * @param usePluginRepositories  Search the plugin repositories.
      * @param useProjectRepositories whether to use regular project repositories
-     * @param allowSnapshots whether snapshots should be included
+     * @param allowSnapshots         whether snapshots should be included
      * @return The details of updates to the dependency.
      * @throws VersionRetrievalException thrown if version resolution fails
      * @since 1.0-beta-1
@@ -139,7 +140,7 @@ public interface VersionsHelper {
     /**
      * Looks up the updates for a set of plugins.
      *
-     * @param plugins A stream of {@link Plugin} instances to look up.
+     * @param plugins        A stream of {@link Plugin} instances to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return A map, keyed by plugin, with values of type {@link org.codehaus.mojo.versions.api.PluginUpdatesDetails}.
      * @throws VersionRetrievalException thrown if version resolution fails
@@ -151,7 +152,7 @@ public interface VersionsHelper {
     /**
      * Looks up the updates for a plugin.
      *
-     * @param plugin The {@link Plugin} instance to look up.
+     * @param plugin         The {@link Plugin} instance to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
      * @return The plugin update details.
      * @throws VersionRetrievalException thrown if version resolution fails
@@ -178,14 +179,22 @@ public interface VersionsHelper {
      */
     class VersionPropertiesMapRequest {
         private MavenProject mavenProject;
+
         private Property[] propertyDefinitions;
+
         private String includeProperties;
+
         private String excludeProperties;
+
         private boolean includeParent;
+
         private boolean autoLinkItems;
+
+        private Predicate<Artifact> includeFilter;
 
         /**
          * Returns the {@link MavenProject} object
+         *
          * @return {@link MavenProject} object
          */
         protected MavenProject getMavenProject() {
@@ -194,6 +203,7 @@ public interface VersionsHelper {
 
         /**
          * Returns the {@link Property} array
+         *
          * @return {@link Property} array
          */
         protected Property[] getPropertyDefinitions() {
@@ -202,6 +212,7 @@ public interface VersionsHelper {
 
         /**
          * Returns the value of {@link #includeProperties}
+         *
          * @return value of {@link #includeProperties}
          */
         protected String getIncludeProperties() {
@@ -210,10 +221,20 @@ public interface VersionsHelper {
 
         /**
          * Returns the value of {@link #excludeProperties}
+         *
          * @return value of {@link #excludeProperties}
          */
         protected String getExcludeProperties() {
             return excludeProperties;
+        }
+
+        /**
+         * A {@link Predicate<Artifact>} telling if an artifact that the
+         * property is associated with is to be taken into account.
+         * @return returns the value of {@link #includeFilter}
+         */
+        protected Predicate<Artifact> getIncludeFilter() {
+            return includeFilter;
         }
 
         /**
@@ -229,6 +250,7 @@ public interface VersionsHelper {
         /**
          * Returns the value of {@link #autoLinkItems}
          * If not set, it is assumed to be {@code true}
+         *
          * @return value of {@link #autoLinkItems}
          */
         protected boolean isAutoLinkItems() {
@@ -237,6 +259,7 @@ public interface VersionsHelper {
 
         /**
          * Returns a new {@link Builder} instance
+         *
          * @return new {@link Builder} instance
          */
         public static Builder builder() {
@@ -248,16 +271,24 @@ public interface VersionsHelper {
          */
         public static class Builder {
             private MavenProject mavenProject;
+
             private Property[] propertyDefinitions;
+
             private String includeProperties;
+
             private String excludeProperties;
+
             private Boolean includeParent;
+
             private Boolean autoLinkItems;
+
+            private Predicate<Artifact> includeFilter;
 
             private Builder() {}
 
             /**
              * Supplies the {@link MavenProject} instance
+             *
              * @param mavenProject {@link MavenProject} instance
              * @return {@link Builder} instance
              */
@@ -268,6 +299,7 @@ public interface VersionsHelper {
 
             /**
              * Supplies the {@link MavenProject} instance
+             *
              * @param propertyDefinitions array of property definitions
              * @return {@link Builder} instance
              */
@@ -278,6 +310,7 @@ public interface VersionsHelper {
 
             /**
              * Supplies the properties to include
+             *
              * @param includeProperties comma-delimited properties to include
              * @return {@link Builder} instance
              */
@@ -288,6 +321,7 @@ public interface VersionsHelper {
 
             /**
              * Supplies the properties to exclude
+             *
              * @param excludeProperties comma-delimited properties to exclude
              * @return {@link Builder} instance
              */
@@ -298,6 +332,7 @@ public interface VersionsHelper {
 
             /**
              * Supplies the includeParent parameter (whether parent POMs should be included)
+             *
              * @param includeParent whether parent POMs should be included
              * @return {@link Builder} instance
              */
@@ -308,6 +343,7 @@ public interface VersionsHelper {
 
             /**
              * Supplies the information whether to automatically infer associations
+             *
              * @param autoLinkItems whether to automatically infer associations
              * @return {@link Builder} instance
              */
@@ -317,7 +353,20 @@ public interface VersionsHelper {
             }
 
             /**
+             * Supplies the include artifact filter
+             *
+             * @param includeFilter {@link Predicate<Artifact>} telling if an artifact that the
+             *                      property is associated with is to be taken into account
+             * @return {@link Builder} instance
+             */
+            public Builder withIncludeFilter(Predicate<Artifact> includeFilter) {
+                this.includeFilter = includeFilter;
+                return this;
+            }
+
+            /**
              * Returns the {@link VersionPropertiesMapRequest} instance
+             *
              * @return {@link VersionPropertiesMapRequest} instance
              */
             public VersionPropertiesMapRequest build() {
@@ -328,6 +377,7 @@ public interface VersionsHelper {
                 instance.excludeProperties = excludeProperties;
                 instance.includeParent = includeParent == null || includeParent;
                 instance.autoLinkItems = autoLinkItems == null || autoLinkItems;
+                instance.includeFilter = this.includeFilter;
                 return instance;
             }
         }
@@ -336,7 +386,7 @@ public interface VersionsHelper {
     /**
      * Attempts to resolve the artifact.
      *
-     * @param artifact The artifact to resolve.
+     * @param artifact              The artifact to resolve.
      * @param usePluginRepositories whether to resolve from the plugin repositories or the regular repositories.
      * @throws ArtifactResolutionException if resolution is unsuccessful
      * @since 1.3
