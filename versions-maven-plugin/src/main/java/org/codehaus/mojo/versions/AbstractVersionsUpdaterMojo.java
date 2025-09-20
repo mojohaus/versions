@@ -207,7 +207,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     protected abstract boolean getAllowSnapshots();
 
-    public VersionsHelper getHelper() throws MojoExecutionException {
+    public synchronized VersionsHelper getHelper() throws MojoExecutionException {
         if (helper == null) {
             RuleService ruleService = new RulesServiceBuilder()
                     .withMavenSession(session)

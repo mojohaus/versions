@@ -32,6 +32,9 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.repository.AuthenticationSelector;
+import org.eclipse.aether.repository.MirrorSelector;
+import org.eclipse.aether.repository.ProxySelector;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
@@ -183,11 +186,18 @@ public class MockUtils {
      */
     public static MavenSession mockMavenSession(MavenProject project) {
         MavenSession session = mock(MavenSession.class);
-        when(session.getRepositorySession()).thenReturn(mock(RepositorySystemSession.class));
+        RepositorySystemSession repositorySystemSession = mock(RepositorySystemSession.class);
+        when(session.getRepositorySession()).thenReturn(repositorySystemSession);
         when(session.getCurrentProject()).thenReturn(project);
         Properties emptyProperties = new Properties();
         when(session.getUserProperties()).thenReturn(emptyProperties);
         when(session.getSystemProperties()).thenReturn(emptyProperties);
+        ProxySelector proxySelector = mock(ProxySelector.class);
+        when(repositorySystemSession.getProxySelector()).thenReturn(proxySelector);
+        AuthenticationSelector authenticationSelector = mock(AuthenticationSelector.class);
+        when(repositorySystemSession.getAuthenticationSelector()).thenReturn(authenticationSelector);
+        MirrorSelector mirrorSelector = mock(MirrorSelector.class);
+        when(repositorySystemSession.getMirrorSelector()).thenReturn(mirrorSelector);
         return session;
     }
 }
