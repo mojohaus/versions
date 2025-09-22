@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Model;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.logging.Log;
@@ -36,7 +37,6 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.ARTIFACT_ID;
 import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.VERSION;
 
@@ -117,10 +117,21 @@ public class MavenProjectUtils {
                 .peek(dependency -> log.debug("dependency from pom: "
                         + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion()
                         + ":" + dependency.getScope()))
-                .map(dependency -> dependency.getVersion() != null
-                        ? interpolateVersion(dependency, project)
-                        : getVersionFromParent(dependency, project, processDependencyManagementTransitive, log)
-                                .orElse(dependency))
+                .map(
+                        dependency -> { // resolve version from model properties if necessary (e.g.
+                            // "${mycomponent.myversion}"
+                            return dependency.getVersion() != null
+                                    ? interpolateVersion(dependency.getVersion(), project)
+                                            .map(v -> {
+                                                Dependency result = dependency.clone();
+                                                result.setVersion(v);
+                                                return result;
+                                            })
+                                            .orElse(dependency)
+                                    : getVersionFromParent(
+                                                    dependency, project, processDependencyManagementTransitive, log)
+                                            .orElse(dependency);
+                        })
                 .collect(() -> new TreeSet<>(DependencyComparator.INSTANCE), Set::add, Set::addAll);
     }
 
@@ -160,27 +171,22 @@ public class MavenProjectUtils {
     /**
      * Attempts to interpolate the version from model properties.
      *
-     * @param dependency the dependency
+     * @param versionString string value of the version to interpolate
      * @param project    the maven project
-     * @return the dependency with interpolated property (as far as possible)
-     * @since 2.14.0
+     * @return an {@link Optional} object containing the interpolated string or {@link Optional#empty()} if no
+     * interpolation could take place
+     * @since 2.19.1
      */
-    public static Dependency interpolateVersion(final Dependency dependency, final MavenProject project) {
+    public static Optional<String> interpolateVersion(String versionString, final MavenProject project) {
         // resolve version from model properties if necessary (e.g. "${mycomponent.myversion}"
-        if (startsWith(dependency.getVersion(), "${")) {
-            return ofNullable(project.getOriginalModel()
-                            .getProperties()
-                            .getProperty(dependency
-                                    .getVersion()
-                                    .substring(2, dependency.getVersion().length() - 1)))
-                    .map(v -> {
-                        Dependency result = dependency.clone();
-                        result.setVersion(v);
-                        return result;
-                    })
-                    .orElse(dependency);
+        while (versionString != null && versionString.startsWith("${")) {
+            String propertyName = versionString.substring(2, versionString.length() - 1);
+            versionString = ofNullable(project.getOriginalModel())
+                    .map(Model::getProperties)
+                    .map(p -> p.getProperty(propertyName))
+                    .orElse(null);
         }
-        return dependency;
+        return ofNullable(versionString);
     }
 
     /**
