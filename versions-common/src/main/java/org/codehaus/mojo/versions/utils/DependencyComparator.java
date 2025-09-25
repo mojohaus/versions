@@ -40,7 +40,6 @@ public enum DependencyComparator implements Comparator<Dependency> {
      * @see java.util.Comparator#compare(Object, Object)
      * @since 1.0-alpha-1
      */
-    @SuppressWarnings("checkstyle:InnerAssignment")
     public int compare(Dependency d1, Dependency d2) {
         return d1 == d2
                 ? 0
@@ -49,8 +48,7 @@ public enum DependencyComparator implements Comparator<Dependency> {
                                         dep -> ofNullable(dep.getArtifactId()).orElse(""))
                                 .thenComparing(
                                         dep -> ofNullable(dep.getClassifier()).orElse(""))
-                                .thenComparing(
-                                        dep -> ofNullable(dep.getVersion()).orElse("")))
+                                .thenComparing(Dependency::getVersion, VersionStringComparator.STRICT))
                         .compare(d1, d2);
     }
 }
