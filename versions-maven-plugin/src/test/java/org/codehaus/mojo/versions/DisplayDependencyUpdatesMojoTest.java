@@ -513,7 +513,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             });
             mojo.execute();
-            assertThat(Files.exists(tempFile.getPath()), is(false));
+            assertThat(Files.readAllBytes(tempFile.getPath()).length, is(0));
         }
     }
 
@@ -618,6 +618,54 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
             assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+        }
+    }
+
+    @Test
+    public void testOverwriteOutput() throws Exception {
+        testOutputFileOverwrite(true);
+    }
+
+    @Test
+    public void testOverwriteOutputFalse() throws Exception {
+        testOutputFileOverwrite(false);
+    }
+
+    private void testOutputFileOverwrite(boolean overwrite) throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            for (int i = 0; i < 2; ++i) {
+                new DisplayDependencyUpdatesMojo(
+                        artifactFactory,
+                        mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                            {
+                                put("default-dependency", new String[] {"1.0.0", "2.0.0"});
+                            }
+                        }),
+                        null,
+                        null) {
+                    {
+                        setProject(createProject());
+                        processDependencies = true;
+                        processDependencyManagement = false;
+                        dependencyIncludes = singletonList(WildcardMatcher.WILDCARD);
+                        dependencyExcludes = emptyList();
+                        outputFile = tempFile.getPath().toFile();
+                        overwriteOutput = overwrite;
+                        setPluginContext(new HashMap<>());
+
+                        session = mockMavenSession();
+                        mojoExecution = mock(MojoExecution.class);
+                    }
+                }.execute();
+            }
+
+            List<String> output = Files.readAllLines(tempFile.getPath());
+            assertThat(
+                    output + " should contain 2 strings matching 1.0.0 -> 2.0.0",
+                    output.stream()
+                            .filter(line -> line.contains("1.0.0 -> 2.0.0"))
+                            .count(),
+                    is(overwrite ? 1L : 2L));
         }
     }
 }
