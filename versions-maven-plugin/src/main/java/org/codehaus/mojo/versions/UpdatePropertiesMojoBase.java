@@ -30,11 +30,10 @@ import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
+import org.codehaus.mojo.versions.model.PropertyVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
-import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
-import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
@@ -44,6 +43,7 @@ import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.MINOR;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.PROPERTY_UPDATE;
 
 /**
  * Common base class for {@link UpdatePropertiesMojo}
@@ -152,9 +152,9 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     @Override
@@ -205,25 +205,26 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
 
                 if (targetVersion != null) {
                     getChangeRecorder()
-                            .recordChange(DefaultPropertyChangeRecord.builder()
+                            .recordChange(new PropertyVersionChange()
                                     .withProperty(property.getName())
                                     .withOldValue(currentVersion)
-                                    .withNewValue(targetVersion.toString())
-                                    .build());
+                                    .withNewValue(targetVersion.toString()));
 
                     for (final ArtifactAssociation association : version.getAssociations()) {
                         if ((isIncluded(association.getArtifact()))) {
                             getChangeRecorder()
-                                    .recordChange(DefaultDependencyChangeRecord.builder()
-                                            .withKind(DependencyChangeRecord.ChangeKind.PROPERTY)
-                                            .withArtifact(association.getArtifact())
+                                    .recordChange(new DependencyVersionChange()
+                                            .withKind(PROPERTY_UPDATE)
+                                            .withGroupId(
+                                                    association.getArtifact().getGroupId())
+                                            .withArtifactId(
+                                                    association.getArtifact().getArtifactId())
                                             .withOldVersion(currentVersion)
-                                            .withNewVersion(targetVersion.toString())
-                                            .build());
+                                            .withNewVersion(targetVersion.toString()));
                         }
                     }
                 }
-            } catch (InvalidSegmentException | InvalidVersionSpecificationException | MojoExecutionException e) {
+            } catch (InvalidSegmentException | InvalidVersionSpecificationException e) {
                 getLog().warn(String.format(
                         "Skipping the processing of %s:%s due to: %s",
                         property.getName(), property.getVersion(), e.getMessage()));

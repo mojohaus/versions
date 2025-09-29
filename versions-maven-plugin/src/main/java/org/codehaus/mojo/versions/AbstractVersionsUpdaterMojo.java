@@ -27,10 +27,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -53,7 +56,8 @@ import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
@@ -138,32 +142,65 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected MojoExecution mojoExecution;
 
     /**
-     * The format used to record changes. If "none" is specified, no changes are recorded.
+     * <p>The format used to record changes. The following formats are supported:</p>
+     * <ul>
+     *     <li>{@code none}: will not output any changes</li>
+     *     <li>{@code xml}: outputs changes to an XML format.
+     *     <p>If no {@link #changeRecorderOptions} are provided
+     *     or {@code legacy=true} is provided as options, the "legacy" format conforming to the
+     *     {@code "http://www.mojohaus.org/versions-maven-plugin/schema/updates/2.0"} namespace will be selected.</p>
+     *     <p>If the options contain {@code legacy=false}, the new renderer is used, conforming to
+     *     {@code "http://www.mojohaus.org/versions-maven-plugin/schema/updates/3.0"}</p>
+     *     </li>
+     *     <li>{@code json} outputs changes to a Json file</li>
+     *     <li>{@code csv} outputs changes to a CSV file</li>
+     * </ul>
      *
      * @since 2.11
      */
     @Parameter(property = "changeRecorderFormat", defaultValue = "none")
     private String changeRecorderFormat = "none";
+
+    /**
+     * <p>Optional options to be passed to the selected change recorder.</p>
+     * <p>The format of the options is a string consisting of a {@code key=value} pairs divided by colon ({@code :})
+     * signs, e.g. {@code key0=value0:key1=value1:key2=value2}.
+     *
+     * @since 2.20
+     */
+    @Parameter(property = "changeRecorderOptions")
+    private String changeRecorderOptions;
+
     /**
      * The output file used to record changes.
+     * Default value is {@code ${project.build.directory}/versions-changes.<ext>},
+     * where {@code <ext>} is provided by the respective format handler.
      *
      * @since 2.11
+     * @deprecated use #changeRecorderOutputFileName
      */
-    @Parameter(property = "changeRecorderOutputFile", defaultValue = "${project.build.directory}/versions-changes.xml")
+    @Parameter(property = "changeRecorderOutputFile")
+    @Deprecated
     private File changeRecorderOutputFile;
 
     /**
-     * The change recorders implementation.
+     * The output file <em>name</em> used to create a change recorder file within {@code ${project.build.directory}}
+     * (which usually resolves to {@code target}).
+     * Default value is {@code versions-changes.<ext>},
+     * where {@code <ext>} is provided by the respective format handler.
+     *
+     * @since 2.20
      */
-    private Map<String, ChangeRecorder> changeRecorders;
+    @Parameter(property = "changeRecorderOutputFileName")
+    private String changeRecorderOutputFileName;
 
     /**
      * <p>Allows specifying the {@linkplain RuleSet} object describing rules
      * on artifact versions to ignore when considering updates.</p>
      *
-     * @see <a href="https://www.mojohaus.org/versions/versions-maven-plugin/version-rules.html#Using_the_ruleSet_element_in_the_POM">
-     *     Using the ruleSet element in the POM</a>
-     *
+     * @see <a
+     *         href="https://www.mojohaus.org/versions/versions-maven-plugin/version-rules.html#Using_the_ruleSet_element_in_the_POM">
+     *         Using the ruleSet element in the POM</a>
      * @since 2.13.0
      */
     @Parameter
@@ -173,12 +210,11 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * <p>Allows specifying ignored versions directly as an alternative
      * to providing the {@linkplain #ruleSet} parameter; mainly created
      * for {@code -D} property usage.</p>
-     *
      * <p>
      * Example: {@code "1\.0\.1,.+-M.,.*-SNAPSHOT"}
      * </p>
-     *
      * <p><em>Currently, this parameter will override the defined {@link #ruleSet}</em></p>
+     *
      * @since 2.13.0
      */
     @Parameter(property = "maven.version.ignore")
@@ -196,6 +232,10 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      */
     protected final ArtifactFactory artifactFactory;
 
+    private final Map<String, VersionChangeRecorderFactory> changeRecorderFactories;
+
+    private VersionChangeRecorder changeRecorder;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
@@ -212,12 +252,13 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
         this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
         this.wagonMap = wagonMap;
-        this.changeRecorders = changeRecorders;
+        // the actual factory is only known in the child class
+        this.changeRecorderFactories = changeRecorderFactories;
     }
 
     /**
@@ -317,6 +358,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @throws MojoExecutionException thrown if any of input parameters is invalid
      */
     protected void validateInput() throws MojoExecutionException {}
+
     /**
      * Finds the latest version of the specified artifact that matches the version range.
      *
@@ -325,9 +367,9 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @param allowingSnapshots     <code>null</code> for no override, otherwise the local override to apply.
      * @param usePluginRepositories Use plugin repositories
      * @return The latest version of the specified artifact that matches the specified version range or
-     * <code>null</code> if no matching version could be found.
+     *         <code>null</code> if no matching version could be found.
      * @throws VersionRetrievalException If the artifact metadata could not be found.
-     * @throws MojoExecutionException             if something goes wrong.
+     * @throws MojoExecutionException    if something goes wrong.
      * @since 1.0-alpha-1
      */
     protected ArtifactVersion findLatestVersion(
@@ -399,10 +441,10 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @return <code>true</code> if the update should be applied.
      * @since 1.0-alpha-1
      * @deprecated This method no longer supported.
-     * use shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean
-     * forceUpdate )
-     * <p>
-     * Returns <code>true</code> if the update should be applied.
+     *         use shouldApplyUpdate( Artifact artifact, String currentVersion, ArtifactVersion updateVersion, Boolean
+     *         forceUpdate )
+     *         <p>
+     *         Returns <code>true</code> if the update should be applied.
      */
     @Deprecated
     protected boolean shouldApplyUpdate(Artifact artifact, String currentVersion, ArtifactVersion updateVersion) {
@@ -450,17 +492,18 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     /**
      * Attempts to update the property to a newer version, if that exists
-     * @param pom               pom to update
-     * @param property          property to update
-     * @param version           {@link PropertyVersions} object
-     * @param currentVersion    current version
-     * @param allowDowngrade    if downgrades should be allowed if snapshots are not allowed
-     * @param unchangedSegment  most major segment not to be changed
+     *
+     * @param pom              pom to update
+     * @param property         property to update
+     * @param version          {@link PropertyVersions} object
+     * @param currentVersion   current version
+     * @param allowDowngrade   if downgrades should be allowed if snapshots are not allowed
+     * @param unchangedSegment most major segment not to be changed
      * @return new version of the artifact, if the property was updated; {@code null} if there was no update
-     * @throws XMLStreamException thrown from {@link MutableXMLStreamReader} if the update doesn't succeed
+     * @throws XMLStreamException                   thrown from {@link MutableXMLStreamReader} if the update doesn't
+     *                                              succeed
      * @throws InvalidVersionSpecificationException thrown if {@code unchangedSegment} doesn't match the version
-     * @throws InvalidSegmentException thrown if {@code unchangedSegment} is invalid
-     * @throws MojoExecutionException thrown if any other error occurs
+     * @throws InvalidSegmentException              thrown if {@code unchangedSegment} is invalid
      */
     protected ArtifactVersion updatePropertyToNewestVersion(
             MutableXMLStreamReader pom,
@@ -469,8 +512,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
             String currentVersion,
             boolean allowDowngrade,
             Optional<Segment> unchangedSegment)
-            throws XMLStreamException, InvalidVersionSpecificationException, InvalidSegmentException,
-                    MojoExecutionException {
+            throws XMLStreamException, InvalidVersionSpecificationException, InvalidSegmentException {
         ArtifactVersion winner = version.getNewestVersion(
                 currentVersion, property, getAllowSnapshots(), this.reactorProjects, allowDowngrade, unchangedSegment);
 
@@ -484,32 +526,71 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         return null;
     }
 
+    protected Map<String, String> getChangeRecorderOptions() {
+        if (changeRecorderOptions == null) {
+            return null;
+        }
+        return Arrays.stream(changeRecorderOptions.split(":"))
+                .map(option -> {
+                    String[] kv = option.split("=");
+                    if (kv.length != 2) {
+                        throw new IllegalArgumentException("Invalid value of changeRecorderOptions ("
+                                + changeRecorderOptions + "): each option must"
+                                + " be a key=value pair, but \"" + option + "\" isn't.");
+                    }
+                    return kv;
+                })
+                .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
+    }
+
     /**
      * Configure and return the change recorder.
      *
      * @return The change recorder
-     * @throws MojoExecutionException if something goes wrong.
      */
-    protected ChangeRecorder getChangeRecorder() throws MojoExecutionException {
-        ChangeRecorder changeRecorder = changeRecorders.get(changeRecorderFormat);
+    protected synchronized VersionChangeRecorder getChangeRecorder() {
         if (changeRecorder == null) {
-            throw new MojoExecutionException(
-                    "Only " + changeRecorders.keySet() + " formats are supported for change recordings");
+            VersionChangeRecorderFactory factory = changeRecorderFactories.get(changeRecorderFormat);
+            if (factory == null) {
+                throw new IllegalStateException(
+                        "Only " + changeRecorderFactories.keySet() + " formats are supported for change recordings");
+            }
+            changeRecorder = factory.create(session, mojoExecution, getChangeRecorderOptions());
         }
         return changeRecorder;
     }
 
     /**
-     * Save all of the changes recorded by the change recorder.
+     * Provides the effective change recorder output file name
      *
-     * @throws IOException On I/O errors
-     * @throws MojoExecutionException if something goes wrong.
+     * @return effective change recorder output file name
      */
-    protected void saveChangeRecorderResults() throws IOException, MojoExecutionException {
+    protected Path getChangeRecorderOutputFile() {
+        if (changeRecorderOutputFileName != null) {
+            return getProject()
+                    .getBasedir()
+                    .toPath()
+                    .resolve(getProject().getBuild().getDirectory())
+                    .resolve(changeRecorderOutputFileName);
+        } else if (changeRecorderOutputFile != null) {
+            return changeRecorderOutputFile.toPath();
+        }
+        return getProject()
+                .getBasedir()
+                .toPath()
+                .resolve(getProject().getBuild().getDirectory())
+                .resolve(getChangeRecorder().getDefaultFileName());
+    }
 
-        this.getLog().debug("writing change record to " + this.changeRecorderOutputFile);
-        getChangeRecorder()
-                .writeReport(
-                        ofNullable(changeRecorderOutputFile).map(File::toPath).orElse(null));
+    /**
+     * Save all the changes recorded by the change recorder.
+     *
+     * @throws IOException           On I/O errors
+     * @throws IllegalStateException if the selected change recorder is not supported
+     */
+    protected void saveChangeRecorderResults() throws IOException {
+        Path outputFile = getChangeRecorderOutputFile();
+        this.getLog().debug("writing change record to " + outputFile);
+        getChangeRecorder().writeReport(outputFile);
     }
 }

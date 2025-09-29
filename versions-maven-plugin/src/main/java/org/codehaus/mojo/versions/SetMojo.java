@@ -22,10 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -48,10 +47,9 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
-import org.codehaus.mojo.versions.change.VersionChanger;
-import org.codehaus.mojo.versions.change.VersionChangerFactory;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.ordering.ReactorDepthComparator;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -71,7 +69,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * @author Stephen Connolly
  * @since 1.0-beta-1
  */
-@Mojo(name = "set", aggregator = true, threadSafe = true)
+@Mojo(name = "set", aggregator = true, threadSafe = false)
 public class SetMojo extends AbstractVersionsUpdaterMojo {
 
     private static final String SNAPSHOT = "-SNAPSHOT";
@@ -250,9 +248,9 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     protected boolean allowSnapshots;
 
     /**
-     * The changes to module coordinates. Guarded by this.
+     * Dependencies to be checked/updated stored as DependencyVersionChange entities with {@code null} kind
      */
-    private final transient List<DefaultDependencyVersionChange> sourceChanges = new ArrayList<>();
+    private final Set<DependencyVersionChange> sourceChanges = new HashSet<>();
 
     /**
      * The (injected) instance of {@link ProjectBuilder}
@@ -278,10 +276,10 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             RepositorySystem repositorySystem,
             ProjectBuilder projectBuilder,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders,
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories,
             Prompter prompter)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
         this.projectBuilder = projectBuilder;
         this.prompter = prompter;
     }
@@ -289,12 +287,6 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     @Override
     protected boolean getAllowSnapshots() {
         return allowSnapshots;
-    }
-
-    private synchronized void addChange(String groupId, String artifactId, String oldVersion, String newVersion) {
-        if (!newVersion.equals(oldVersion)) {
-            sourceChanges.add(new DefaultDependencyVersionChange(groupId, artifactId, oldVersion, newVersion));
-        }
     }
 
     /**
@@ -477,7 +469,11 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
 
         getLog().debug("Applying change " + groupId + ":" + artifactId + ":" + oldVersion + " -> " + newVersion);
         // this is a triggering change
-        addChange(groupId, artifactId, oldVersion, newVersion);
+        sourceChanges.add(new DependencyVersionChange()
+                .withGroupId(groupId)
+                .withArtifactId(artifactId)
+                .withOldVersion(oldVersion)
+                .withNewVersion(newVersion));
         // now fake out the triggering change
 
         Map.Entry<File, Model> current = PomHelper.getModelEntry(reactor, groupId, artifactId);
@@ -553,11 +549,12 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                             + ArtifactUtils.versionlessKey(
                                     PomHelper.getGroupId(targetModel), PomHelper.getArtifactId(targetModel))
                             + ":" + sourceVersion);
-                    addChange(
-                            PomHelper.getGroupId(targetModel),
-                            PomHelper.getArtifactId(targetModel),
-                            PomHelper.getVersion(targetModel),
-                            sourceVersion);
+                    sourceChanges.add(new DependencyVersionChange()
+                            .withGroupId(PomHelper.getGroupId(targetModel))
+                            .withArtifactId(PomHelper.getArtifactId(targetModel))
+                            .withOldVersion(PomHelper.getVersion(targetModel))
+                            .withNewVersion(sourceVersion));
+
                     targetModel.setVersion(sourceVersion);
                 } else {
                     getLog().debug("    module is "
@@ -586,16 +583,19 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                     PomHelper.getRawModel(pom.getSource(), pom.getFileName().toFile());
             log.setContext("Processing " + PomHelper.getGroupId(model) + ":" + PomHelper.getArtifactId(model));
 
-            VersionChangerFactory versionChangerFactory = new VersionChangerFactory();
-            versionChangerFactory.setPom(pom);
-            versionChangerFactory.setLog(log);
-            versionChangerFactory.setModel(model);
-
-            VersionChanger changer = versionChangerFactory.newVersionChanger(
-                    processParent, processProject, processDependencies, processPlugins);
-
-            for (DefaultDependencyVersionChange versionChange : sourceChanges) {
-                changer.apply(versionChange);
+            for (DependencyVersionChange versionChange : sourceChanges) {
+                if (processParent) {
+                    processParent(pom, model, versionChange);
+                }
+                if (processProject) {
+                    processProject(pom, model, versionChange);
+                }
+                if (processDependencies) {
+                    processDependency(pom, model, versionChange);
+                }
+                if (processPlugins) {
+                    processPlugin(pom, versionChange);
+                }
             }
 
             if (updateBuildOutputTimestamp && !"never".equals(updateBuildOutputTimestampPolicy)) {
@@ -608,6 +608,94 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             throw new MojoExecutionException(e.getMessage(), e);
         }
         log.clearContext();
+    }
+
+    private void processParent(MutableXMLStreamReader pom, Model model, DependencyVersionChange versionChange)
+            throws XMLStreamException {
+        if (model.getParent() != null
+                && versionChange.getGroupId().equals(model.getParent().getGroupId())
+                && versionChange.getArtifactId().equals(model.getParent().getArtifactId())) {
+            if (PomHelper.setProjectParentVersion(pom, versionChange.getNewVersion())) {
+                getLog().info("    Updating parent " + versionChange.getGroupId() + ":"
+                        + versionChange.getArtifactId());
+                getLog().info("        from version " + versionChange.getOldVersion() + " to "
+                        + versionChange.getNewVersion());
+                getChangeRecorder()
+                        .recordChange(new DependencyVersionChange()
+                                .withKind(DependencyChangeKind.PARENT_UPDATE)
+                                .withGroupId(versionChange.getGroupId())
+                                .withArtifactId(versionChange.getArtifactId())
+                                .withOldVersion(versionChange.getOldVersion())
+                                .withNewVersion(versionChange.getNewVersion()));
+            }
+        } else {
+            getLog().warn("Not processing parent: there is no parent.");
+        }
+    }
+
+    private void processProject(MutableXMLStreamReader pom, Model model, DependencyVersionChange versionChange)
+            throws XMLStreamException {
+        if (versionChange.getGroupId().equals(PomHelper.getGroupId(model))
+                && versionChange.getArtifactId().equals(PomHelper.getArtifactId(model))) {
+            if (PomHelper.setProjectVersion(pom, versionChange.getNewVersion())) {
+                getLog().info("    Updating project " + versionChange.getGroupId() + ":"
+                        + versionChange.getArtifactId());
+                getLog().info("        from version " + versionChange.getOldVersion() + " to "
+                        + versionChange.getNewVersion());
+                getChangeRecorder()
+                        .recordChange(new DependencyVersionChange()
+                                .withKind(DependencyChangeKind.PROJECT_UPDATE)
+                                .withGroupId(versionChange.getGroupId())
+                                .withArtifactId(versionChange.getArtifactId())
+                                .withOldVersion(versionChange.getOldVersion())
+                                .withNewVersion(versionChange.getNewVersion()));
+            }
+        }
+    }
+
+    private void processDependency(MutableXMLStreamReader pom, Model model, DependencyVersionChange versionChange)
+            throws XMLStreamException {
+        if (PomHelper.setDependencyVersion(
+                pom,
+                versionChange.getGroupId(),
+                versionChange.getArtifactId(),
+                versionChange.getOldVersion(),
+                versionChange.getNewVersion(),
+                model,
+                getLog())) {
+            getLog().info("    Updating dependency " + versionChange.getGroupId() + ":"
+                    + versionChange.getArtifactId());
+            getLog().info("        from version " + versionChange.getOldVersion() + " to "
+                    + versionChange.getNewVersion());
+            getChangeRecorder()
+                    .recordChange(new DependencyVersionChange()
+                            .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                            .withGroupId(versionChange.getGroupId())
+                            .withArtifactId(versionChange.getArtifactId())
+                            .withOldVersion(versionChange.getOldVersion())
+                            .withNewVersion(versionChange.getNewVersion()));
+        }
+    }
+
+    private void processPlugin(MutableXMLStreamReader pom, DependencyVersionChange versionChange)
+            throws XMLStreamException {
+        if (PomHelper.setPluginVersion(
+                pom,
+                versionChange.getGroupId(),
+                versionChange.getArtifactId(),
+                versionChange.getOldVersion(),
+                versionChange.getNewVersion())) {
+            getLog().info("    Updating plugin " + versionChange.getGroupId() + ":" + versionChange.getArtifactId());
+            getLog().info("        from version " + versionChange.getOldVersion() + " to "
+                    + versionChange.getNewVersion());
+            getChangeRecorder()
+                    .recordChange(new DependencyVersionChange()
+                            .withKind(DependencyChangeKind.PLUGIN_UPDATE)
+                            .withGroupId(versionChange.getGroupId())
+                            .withArtifactId(versionChange.getArtifactId())
+                            .withOldVersion(versionChange.getOldVersion())
+                            .withNewVersion(versionChange.getNewVersion()));
+        }
     }
 
     private void updateBuildOutputTimestamp(MutableXMLStreamReader pom, Model model) throws XMLStreamException {

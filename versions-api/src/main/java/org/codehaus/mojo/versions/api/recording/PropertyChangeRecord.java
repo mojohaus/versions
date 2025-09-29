@@ -24,5 +24,7 @@ import org.codehaus.mojo.versions.api.change.PropertyVersionChange;
  *
  * @author Slawomir Jaranowski
  * @since 2.14.0
+ * @deprecated use classes from {@code versions-model}
  */
+@Deprecated
 public interface PropertyChangeRecord extends ChangeRecord<PropertyVersionChange> {}

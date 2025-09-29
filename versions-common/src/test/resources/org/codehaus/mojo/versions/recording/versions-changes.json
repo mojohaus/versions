@@ -1,0 +1,17 @@
+{
+  "updates": [
+    {
+      "versionChanges": [
+        {
+          "kind": "DEPENDENCY_UPDATE",
+          "groupId": "org.codehaus",
+          "artifactId": "example0",
+          "oldVersion": "0.0.1-SNAPSHOT",
+          "newVersion": "0.0.1"
+        }
+      ],
+      "goal": "test",
+      "date": "2025-10-03T07:05:38.437013556+02:00"
+    }
+  ]
+}

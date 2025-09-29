@@ -148,6 +148,17 @@
     <invoker.parallelThreads>0.75C</invoker.parallelThreads>
     <!-- mono-module doesn't require site:stage for scm-publish -->
     <project.build.outputTimestamp>2025-09-22T06:07:04Z</project.build.outputTimestamp>
+
+    <!-- dependencies for version changes model -->
+    <jaxbApi.version>2.3.1</jaxbApi.version>
+    <jaxbRuntime.version>2.3.9</jaxbRuntime.version>
+    <jacksonDatabind.version>2.20.0</jacksonDatabind.version>
+    <jacksonDataformatXml.version>2.20.0</jacksonDataformatXml.version>
+    <jaxb2MavenPlugin.version>2.5.0</jaxb2MavenPlugin.version>
+    <jaxb2FluentApi.version>3.0</jaxb2FluentApi.version>
+    <jaxb2BasicsAnnotate.version>1.1.0</jaxb2BasicsAnnotate.version>
+    <jacksonDataformatCsv.version>2.17.2</jacksonDataformatCsv.version>
+    <jacksonDatatypeJsr310.version>2.19.0</jacksonDatatypeJsr310.version>
   </properties>
 
   <dependencyManagement>
@@ -387,6 +398,37 @@
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-api</artifactId>
         <version>3.5.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>${jaxbRuntime.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jacksonDatabind.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+        <version>${jacksonDataformatXml.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${jaxbApi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-csv</artifactId>
+        <version>${jacksonDataformatCsv.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${jacksonDatatypeJsr310.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

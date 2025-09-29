@@ -34,12 +34,16 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
+
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.DEPENDENCY_MANAGEMENT_UPDATE;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.DEPENDENCY_UPDATE;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.PARENT_UPDATE;
 
 /**
  * Attempts to resolve unlocked snapshot dependency versions to the locked timestamp versions used in the build. For
@@ -100,9 +104,9 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     @Override
@@ -137,17 +141,15 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         try {
             if (getProcessDependencyManagement()) {
+                // TODO: Perhaps we can use original model instead?
                 DependencyManagement dependencyManagement =
                         PomHelper.getRawModel(getProject()).getDependencyManagement();
                 if (dependencyManagement != null) {
-                    unlockSnapshots(
-                            pom,
-                            dependencyManagement.getDependencies(),
-                            DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
+                    unlockSnapshots(pom, dependencyManagement.getDependencies(), DEPENDENCY_MANAGEMENT_UPDATE);
                 }
             }
             if (getProject().getDependencies() != null && getProcessDependencies()) {
-                unlockSnapshots(pom, getProject().getDependencies(), DependencyChangeRecord.ChangeKind.DEPENDENCY);
+                unlockSnapshots(pom, getProject().getDependencies(), DEPENDENCY_UPDATE);
             }
             if (getProject().getParent() != null && getProcessParent()) {
                 unlockParentSnapshot(pom, getProject().getParent());
@@ -158,7 +160,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
     }
 
     private void unlockSnapshots(
-            MutableXMLStreamReader pom, List<Dependency> dependencies, DependencyChangeRecord.ChangeKind changeKind)
+            MutableXMLStreamReader pom, List<Dependency> dependencies, DependencyChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException {
         for (Dependency dep : dependencies) {
             if (getExcludeReactor() && isProducedByReactor(dep)) {
@@ -189,11 +191,12 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
                         getLog())) {
 
                     getChangeRecorder()
-                            .recordChange(DefaultDependencyChangeRecord.builder()
+                            .recordChange(new DependencyVersionChange()
                                     .withKind(changeKind)
-                                    .withDependency(dep)
-                                    .withNewVersion(unlockedVersion)
-                                    .build());
+                                    .withGroupId(dep.getGroupId())
+                                    .withArtifactId(dep.getArtifactId())
+                                    .withOldVersion(dep.getVersion())
+                                    .withNewVersion(unlockedVersion));
                     getLog().info("Unlocked " + toString(dep) + " to version " + unlockedVersion);
                 }
             }
@@ -221,11 +224,12 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
             if (PomHelper.setProjectParentVersion(pom, unlockedParentVersion)) {
                 getLog().info("Unlocked parent " + parentArtifact + " to version " + unlockedParentVersion);
                 getChangeRecorder()
-                        .recordChange(DefaultDependencyChangeRecord.builder()
-                                .withKind(DependencyChangeRecord.ChangeKind.PARENT)
-                                .withArtifact(parentArtifact)
-                                .withNewVersion(unlockedParentVersion)
-                                .build());
+                        .recordChange(new DependencyVersionChange()
+                                .withKind(PARENT_UPDATE)
+                                .withGroupId(parentArtifact.getGroupId())
+                                .withArtifactId(parentArtifact.getGroupId())
+                                .withOldVersion(parentVersion)
+                                .withNewVersion(unlockedParentVersion));
             }
         }
     }
