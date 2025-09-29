@@ -63,6 +63,14 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
     protected File outputFile;
 
     /**
+     * If {@code true}, output file will be overwritten if it already exists
+     *
+     * @since 2.20
+     */
+    @Parameter(property = "versions.overwriteOutput", defaultValue = "false")
+    protected boolean overwriteOutput;
+
+    /**
      * Controls whether the display output is logged to the console.
      *
      * @since 2.2
@@ -118,7 +126,7 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
                     files = new LinkedHashSet<>(files);
                 }
                 if (!files.contains(outputFileName)) {
-                    if (!outputFile.delete()) {
+                    if (overwriteOutput && !outputFile.delete()) {
                         getLog().error("Cannot delete " + outputFile + " will append instead");
                     }
                 }
