@@ -26,7 +26,8 @@
       <item name="Replacing -SNAPSHOT versions with their corresponding releases" href="examples/use-releases.html"/>
       <item name="Changing the project version" href="examples/set.html"/>
       <item name="Changing aggregator project version" href="examples/setaggregator.html"/>
-      <item name="Recording Changes" href="examples/resolve-changes.html"/>
+      <item name="Recording Changes" href="examples/recording-changes.html"/>
+      <item name="Providing a custom change recorder" href="../versions-api/change-recorder.html"/>
     </menu>
 
     <menu name="Reference">

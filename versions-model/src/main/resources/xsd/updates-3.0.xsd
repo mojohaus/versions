@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.mojohaus.org/versions-maven-plugin/schema/updates/3.0"
+           xmlns="http://www.mojohaus.org/versions-maven-plugin/schema/updates/3.0"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <!-- Root elements -->
+  <xs:element name="changeRecorderLog" type="ChangeRecorderLog"/>
+  <xs:element name="updates" type="VersionsExecution"/>
+
+  <!-- Root type -->
+  <xs:complexType name="ChangeRecorderLog">
+    <xs:sequence>
+      <xs:element ref="updates" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Execution -->
+  <xs:complexType name="VersionsExecution">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="dependencyUpdate" type="DependencyVersionChange"/>
+        <xs:element name="propertyUpdate" type="PropertyVersionChange"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="goal" type="xs:string" use="optional"/>
+    <xs:attribute name="date" type="xs:dateTime" use="optional"/>
+  </xs:complexType>
+
+  <!-- Abstract base type -->
+  <xs:complexType name="VersionChange" abstract="true"/>
+
+  <!-- Standalone type for change kinds -->
+  <xs:simpleType name="DependencyChangeKind">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="project-update">
+        <xs:annotation>
+          <xs:documentation>Represents a MavenProject (pom.xml) version update</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="dependency-update">
+        <xs:annotation>
+          <xs:documentation>Represents a regular dependency version update</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="dependency-management-update">
+        <xs:annotation>
+          <xs:documentation>Represents a dependencyManagement version update</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="parent-update">
+        <xs:annotation>
+          <xs:documentation>Represents a version update of the parent MavenProject</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="plugin-update">
+        <xs:annotation>
+          <xs:documentation>Represents a plugin version update</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="plugin-management-update">
+        <xs:annotation>
+          <xs:documentation>Represents a pluginManagement version update</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="property-update">
+        <xs:annotation>
+          <xs:documentation>Represents a version update of a dependency associated with a property</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="extension-update">
+        <xs:annotation>
+          <xs:documentation>Represents an extension version update</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Dependency update -->
+  <xs:complexType name="DependencyVersionChange">
+    <xs:complexContent>
+      <xs:extension base="VersionChange">
+        <xs:attribute name="kind" type="DependencyChangeKind" use="required"/>
+        <xs:attribute name="groupId" type="xs:string" use="required"/>
+        <xs:attribute name="artifactId" type="xs:string" use="required"/>
+        <xs:attribute name="oldVersion" type="xs:string" use="required"/>
+        <xs:attribute name="newVersion" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Property update -->
+  <xs:complexType name="PropertyVersionChange">
+    <xs:complexContent>
+      <xs:extension base="VersionChange">
+        <xs:attribute name="property" type="xs:string" use="required"/>
+        <xs:attribute name="oldValue" type="xs:string" use="required"/>
+        <xs:attribute name="newValue" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

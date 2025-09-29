@@ -18,7 +18,8 @@ package org.codehaus.mojo.versions;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -40,8 +41,12 @@ public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
         mojo.execute();
         assertThat(
                 changeRecorder.getChanges(),
-                Matchers.hasItem(
-                        new DefaultDependencyVersionChange("default-group", "default-artifact", "1.0.0", "2.0.0-M1")));
+                Matchers.hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PROPERTY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("default-artifact")
+                        .withOldVersion("1.0.0")
+                        .withNewVersion("2.0.0-M1")));
     }
 
     @Test
@@ -56,8 +61,12 @@ public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
         mojo.execute();
         assertThat(
                 changeRecorder.getChanges(),
-                Matchers.hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "default-artifact", "1.0.0", "1.1.0-alpha")));
+                Matchers.hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PROPERTY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("default-artifact")
+                        .withOldVersion("1.0.0")
+                        .withNewVersion("1.1.0-alpha")));
     }
 
     @Test
@@ -73,8 +82,12 @@ public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
         mojo.execute();
         assertThat(
                 changeRecorder.getChanges(),
-                Matchers.hasItem(
-                        new DefaultDependencyVersionChange("default-group", "default-artifact", "1.0.0", "1.0.1-rc1")));
+                Matchers.hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PROPERTY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("default-artifact")
+                        .withOldVersion("1.0.0")
+                        .withNewVersion("1.0.1-rc1")));
     }
 
     @Test
