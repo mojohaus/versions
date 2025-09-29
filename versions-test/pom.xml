@@ -37,6 +37,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.mojo.versions</groupId>
+      <artifactId>versions-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
     </dependency>
@@ -67,6 +72,10 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
     </dependency>
   </dependencies>
 

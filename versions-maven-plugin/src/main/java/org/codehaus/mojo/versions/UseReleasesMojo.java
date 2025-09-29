@@ -19,8 +19,10 @@ import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -37,13 +39,17 @@ import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.singletonList;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.DEPENDENCY_MANAGEMENT_UPDATE;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.DEPENDENCY_UPDATE;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.PARENT_UPDATE;
 
 /**
  * Replaces any -SNAPSHOT versions with the corresponding release version (if it has been released).
@@ -126,7 +132,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @param artifactFactory   the artifact factory
      * @param repositorySystem  the repository system
      * @param wagonMap          the map of wagon implementations
-     * @param changeRecorders   the change recorders
+     * @param changeRecorderFactories   the change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -134,9 +140,9 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     /**
@@ -148,33 +154,34 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
      */
     protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException, VersionRetrievalException {
-        try {
-            if (getProcessDependencyManagement()) {
+        List<DependencyVersionChange> versionChanges = new ArrayList<>();
+        if (getProcessDependencyManagement()) {
+            try {
                 DependencyManagement dependencyManagement =
                         PomHelper.getRawModel(getProject()).getDependencyManagement();
                 if (dependencyManagement != null) {
-                    useReleases(
-                            pom,
-                            dependencyManagement.getDependencies(),
-                            DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT);
+                    versionChanges.addAll(getReleaseVersionChanges(
+                            dependencyManagement.getDependencies(), DEPENDENCY_MANAGEMENT_UPDATE));
                 }
+            } catch (IOException e) {
+                throw new MojoExecutionException(e.getMessage(), e);
             }
-            if (getProject().getDependencies() != null && getProcessDependencies()) {
-                useReleases(pom, getProject().getDependencies(), DependencyChangeRecord.ChangeKind.DEPENDENCY);
-            }
-            if (getProject().getParent() != null && getProcessParent()) {
-                useReleases(pom, singletonList(getParentDependency()), DependencyChangeRecord.ChangeKind.PARENT);
-            }
-        } catch (IOException e) {
-            throw new MojoExecutionException(e.getMessage(), e);
+        }
+        if (getProject().getDependencies() != null && getProcessDependencies()) {
+            versionChanges.addAll(getReleaseVersionChanges(getProject().getDependencies(), DEPENDENCY_UPDATE));
+        }
+        if (getProject().getParent() != null && getProcessParent()) {
+            versionChanges.addAll(getReleaseVersionChanges(singletonList(getParentDependency()), PARENT_UPDATE));
+        }
+        for (DependencyVersionChange change : versionChanges) {
+            updateDependencyVersion(pom, change);
         }
     }
 
-    private void useReleases(
-            MutableXMLStreamReader pom,
-            Collection<Dependency> dependencies,
-            DependencyChangeRecord.ChangeKind changeKind)
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
+    private List<DependencyVersionChange> getReleaseVersionChanges(
+            Collection<Dependency> dependencies, DependencyChangeKind dependencyChangeKind)
+            throws MojoExecutionException, VersionRetrievalException {
+        List<DependencyVersionChange> versionChanges = new ArrayList<>();
         for (Dependency dep : dependencies) {
             if (getExcludeReactor() && isProducedByReactor(dep)) {
                 getLog().info("Ignoring reactor dependency: " + toString(dep));
@@ -194,7 +201,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
             Matcher versionMatcher = SNAPSHOT_REGEX.matcher(version);
             if (versionMatcher.matches()) {
                 String releaseVersion = versionMatcher.group(1);
-                Artifact artifact = this.toArtifact(dep);
+                Artifact artifact = toArtifact(dep);
                 if (!isIncluded(artifact)) {
                     continue;
                 }
@@ -205,8 +212,14 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                 artifact.setVersion(releaseVersion);
                 Optional<String> targetVersion =
                         findReleaseVersion(releaseVersion, getHelper().lookupArtifactVersions(artifact, false));
+
                 if (targetVersion.isPresent()) {
-                    updateDependencyVersion(pom, dep, targetVersion.get(), changeKind);
+                    versionChanges.add(new DependencyVersionChange()
+                            .withKind(dependencyChangeKind)
+                            .withGroupId(artifact.getGroupId())
+                            .withArtifactId(artifact.getArtifactId())
+                            .withOldVersion(version)
+                            .withNewVersion(targetVersion.get()));
                 } else {
                     getLog().info("No matching release of " + toString(dep) + " to update.");
                     if (failIfNotReplaced) {
@@ -216,6 +229,8 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                 }
             }
         }
+
+        return versionChanges;
     }
 
     private Optional<String> findReleaseVersion(String releaseVersion, ArtifactVersions versions) {

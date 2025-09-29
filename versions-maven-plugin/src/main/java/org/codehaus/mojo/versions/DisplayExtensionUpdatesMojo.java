@@ -42,10 +42,12 @@ import org.codehaus.mojo.versions.api.ResolverAdapter;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.internal.DefaultResolverAdapter;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper;
+import org.codehaus.mojo.versions.model.ExtensionVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.rule.RuleService;
 import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
@@ -167,7 +169,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param artifactFactory an {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
      * @param wagonMap       a map of wagon providers per protocol
-     * @param changeRecorders a map of change recorders
+     * @param changeRecorderFactories a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -175,9 +177,9 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     @Override
@@ -252,8 +254,8 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                                 (v1, v2) -> v1,
                                 () -> new TreeMap<>(DependencyComparator.INSTANCE)));
             }
-
-            logUpdates(loggingHelper, versionMap);
+            logUpdates(loggingHelper, versionMap, getChangeRecorder());
+            saveChangeRecorderResults();
         } catch (IOException | XMLStreamException | TransformerException e) {
             throw new MojoExecutionException(e.getMessage());
         } catch (VersionRetrievalException e) {
@@ -262,8 +264,15 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     }
 
     private void logUpdates(
-            DependencyUpdatesLoggingHelper loggingHelper, SortedMap<Dependency, ArtifactVersions> versionMap) {
-        DependencyUpdatesLoggingHelper.DependencyUpdatesResult updates = loggingHelper.getDependencyUpdates(versionMap);
+            DependencyUpdatesLoggingHelper loggingHelper,
+            SortedMap<Dependency, ArtifactVersions> versionMap,
+            VersionChangeRecorder changeRecorder) {
+        DependencyUpdatesLoggingHelper.DependencyUpdatesResult updates = loggingHelper.getDependencyUpdates(
+                versionMap, (ext, oldVersion, newVersion) -> new ExtensionVersionChange()
+                        .withGroupId(ext.getGroupId())
+                        .withArtifactId(ext.getArtifactId())
+                        .withOldVersion(oldVersion)
+                        .withNewVersion(newVersion));
 
         if (verbose) {
             if (updates.getUsingLatest().isEmpty()) {
@@ -288,6 +297,8 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
             updates.getWithUpdates().forEach(s -> logLine(false, s));
             logLine(false, "");
         }
+
+        updates.getVersionChanges().forEach(changeRecorder::recordChange);
     }
 
     /**
