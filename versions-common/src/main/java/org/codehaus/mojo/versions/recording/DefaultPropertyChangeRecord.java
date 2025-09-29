@@ -22,6 +22,12 @@ import org.codehaus.mojo.versions.api.change.PropertyVersionChange;
 import org.codehaus.mojo.versions.api.recording.PropertyChangeRecord;
 import org.codehaus.mojo.versions.change.DefaultPropertyVersionChange;
 
+/**
+ * Represents a property change.
+ *
+ * @deprecated replaced by {@link org.codehaus.mojo.versions.model.PropertyVersionChange}
+ */
+@Deprecated
 public class DefaultPropertyChangeRecord implements PropertyChangeRecord {
     private final PropertyVersionChange versionChange;
 

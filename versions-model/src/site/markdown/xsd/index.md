@@ -11,3 +11,9 @@ Versions - XML schemas for ruleSet
 - [rule-2.1.0.xsd](rule-2.1.0.xsd)
 - [rule-2.0.0.xsd](rule-2.0.0.xsd)
 
+Change recorder updates
+=======================
+
+- [updates-3.0.xsd](updates-3.0.xsd)
+- [updates-2.0.xsd](updates-2.0.xsd)
+
