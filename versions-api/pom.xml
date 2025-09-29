@@ -12,6 +12,19 @@
   <name>Versions API</name>
   <description>Extension API for Versions Plugin</description>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.mojo.versions</groupId>
+      <artifactId>versions-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
   <reporting>
     <plugins>
       <plugin>

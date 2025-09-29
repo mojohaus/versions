@@ -21,7 +21,9 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,11 +37,16 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
+import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionsHelper;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
+import org.codehaus.mojo.versions.model.PropertyVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -157,7 +164,7 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param artifactFactory an {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
      * @param wagonMap       a map of wagon providers per protocol
-     * @param changeRecorders a map of change recorders
+     * @param changeRecorderFactories a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -165,9 +172,9 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     @Override
@@ -179,6 +186,7 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
         logInit();
         List<String> current = new ArrayList<>();
         List<String> updates = new ArrayList<>();
+        VersionChangeRecorder changeRecorder = getChangeRecorder();
 
         Map<Property, PropertyVersions> propertyVersions = this.getHelper()
                 .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
@@ -207,18 +215,17 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
                 log.info("Assuming allowMajorUpdates false because allowMinorUpdates is false.");
             }
 
-            Optional<Segment> unchangedSegment1 = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
+            Optional<Segment> unchangedSegment = allowMajorUpdates && allowMinorUpdates && allowIncrementalUpdates
                     ? empty()
                     : allowMinorUpdates && allowIncrementalUpdates
                             ? of(MAJOR)
                             : allowIncrementalUpdates ? of(MINOR) : of(INCREMENTAL);
             if (log != null && log.isDebugEnabled()) {
-                log.debug(unchangedSegment1
+                log.debug(unchangedSegment
                                 .map(Segment::minorTo)
                                 .map(Segment::toString)
                                 .orElse("ALL") + " version changes allowed");
             }
-            Optional<Segment> unchangedSegment = unchangedSegment1;
             try {
                 ArtifactVersion winner = version.getNewestVersion(
                         currentVersion, property, this.allowSnapshots, this.reactorProjects, false, unchangedSegment);
@@ -241,6 +248,19 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
                     buf.append(" -> ");
                     buf.append(newVersion);
                     updates.add(buf.toString());
+
+                    changeRecorder.recordChange(new PropertyVersionChange()
+                            .withProperty(property.getName())
+                            .withOldValue(currentVersion)
+                            .withNewValue(newVersion));
+                    Arrays.stream(version.getAssociations())
+                            .map(ArtifactAssociation::getArtifact)
+                            .forEachOrdered(a -> changeRecorder.recordChange(new DependencyVersionChange()
+                                    .withKind(DependencyChangeKind.PROPERTY_UPDATE)
+                                    .withGroupId(a.getGroupId())
+                                    .withArtifactId(a.getArtifactId())
+                                    .withOldVersion(currentVersion)
+                                    .withNewVersion(newVersion)));
                 } else {
                     StringBuilder buf = new StringBuilder();
                     buf.append("${");
@@ -281,6 +301,11 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
             }
         }
         logLine(false, "");
+        try {
+            saveChangeRecorderResults();
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage());
+        }
     }
 
     @Override

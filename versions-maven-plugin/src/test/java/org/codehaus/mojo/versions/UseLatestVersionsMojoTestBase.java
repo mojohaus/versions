@@ -16,10 +16,11 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 import org.hamcrest.core.Is;
@@ -48,7 +49,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 public abstract class UseLatestVersionsMojoTestBase {
     protected UseLatestVersionsMojoBase mojo;
 
-    protected TestChangeRecorder changeRecorder;
+    protected TestVersionChangeRecorder changeRecorder;
 
     @Mock
     protected Log log;
@@ -65,11 +66,11 @@ public abstract class UseLatestVersionsMojoTestBase {
     @Before
     public void setUp() throws Exception {
         openMocks(this);
-        changeRecorder = new TestChangeRecorder();
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
         pomHelper = new PomHelper(artifactFactory, expressionEvaluator);
         mojo = createMojo();
+        changeRecorder = (TestVersionChangeRecorder) mojo.getChangeRecorder();
         mojo.mojoExecution = Mockito.mock(MojoExecution.class);
     }
 
@@ -153,8 +154,12 @@ public abstract class UseLatestVersionsMojoTestBase {
         assertThat(changeRecorder.getChanges(), hasSize(1));
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "other-artifact", "1.0", expectedNewVersion)));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("other-artifact")
+                        .withOldVersion("1.0")
+                        .withNewVersion(expectedNewVersion)));
     }
 
     @Test
@@ -193,8 +198,12 @@ public abstract class UseLatestVersionsMojoTestBase {
         assertThat(changeRecorder.getChanges(), hasSize(1));
         assertThat(
                 changeRecorder.getChanges(),
-                not(hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "other-artifact", "1.0", expectedNewVersion))));
+                not(hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("other-artifact")
+                        .withOldVersion("1.0")
+                        .withNewVersion(expectedNewVersion))));
     }
 
     @Test

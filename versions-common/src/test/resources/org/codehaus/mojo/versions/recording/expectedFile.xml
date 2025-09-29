@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<updates xmlns="http://www.mojohaus.org/versions-maven-plugin/schema/updates/2.0">
-    <dependencyUpdate kind="dependency-update" groupId="org.mojohaus" artifactId="example0" oldVersion="0.0.1" newVersion="0.0.2"/>
-    <dependencyUpdate kind="dependency-update" groupId="org.mojohaus" artifactId="example1" oldVersion="1.0.0" newVersion="2.0.0"/>
-</updates>

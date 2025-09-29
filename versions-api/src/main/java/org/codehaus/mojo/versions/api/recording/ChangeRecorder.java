@@ -25,7 +25,9 @@ import java.nio.file.Path;
  *
  * @author Slawomir Jaranowski
  * @since 2.14.0
+ * @deprecated use {@link VersionChangeRecorder} and {@code versions-model}
  */
+@Deprecated
 public interface ChangeRecorder {
     /**
      * Record that a dependency was updated.

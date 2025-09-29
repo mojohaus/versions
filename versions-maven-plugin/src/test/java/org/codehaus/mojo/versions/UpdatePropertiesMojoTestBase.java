@@ -30,7 +30,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +52,7 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase 
 
     protected Path pomDir;
     protected RepositorySystem repositorySystem;
-    protected TestChangeRecorder changeRecorder;
+    protected TestVersionChangeRecorder changeRecorder;
 
     @Before
     public void setUp() throws Exception {
@@ -80,8 +80,8 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase 
         setVariableValueToObject(mojo, "repositorySystem", repositorySystem);
         setVariableValueToObject(mojo, "generateBackupPoms", false);
         setVariableValueToObject(mojo, "changeRecorderFormat", "none");
-        changeRecorder = new TestChangeRecorder();
-        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+        changeRecorder = new TestVersionChangeRecorder();
+        setVariableValueToObject(mojo, "changeRecorder", changeRecorder);
 
         return (T) mojo;
     }

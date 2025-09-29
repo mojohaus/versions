@@ -22,7 +22,9 @@ package org.codehaus.mojo.versions.api.change;
  *
  * @author Slawomir Jaranowski
  * @since 2.14.0
+ * @deprecated use classes from {@code versions-model}
  */
+@Deprecated
 public interface DependencyVersionChange extends VersionChange {
     /**
      * Returns the groupId of the dependency

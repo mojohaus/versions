@@ -27,7 +27,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
 
@@ -95,7 +95,7 @@ public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
      * @param artifactFactory  the artifact factory
      * @param repositorySystem the repository system
      * @param wagonMap         the map of wagon implementations
-     * @param changeRecorders  the change recorders
+     * @param changeRecorderFactories  the change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -103,9 +103,9 @@ public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     @Override

@@ -25,8 +25,8 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -38,9 +38,10 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.VersionStringComparator;
 import org.eclipse.aether.RepositorySystem;
 
 /**
@@ -112,7 +113,7 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @param artifactFactory   the artifact factory
      * @param repositorySystem  the repository system
      * @param wagonMap          the map of wagon implementations
-     * @param changeRecorders   the change recorders
+     * @param changeRecorderFactories   the change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -120,9 +121,9 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     /**
@@ -153,8 +154,7 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
-    private void useReactor(MutableXMLStreamReader pom, Collection<Dependency> dependencies)
-            throws XMLStreamException, MojoExecutionException, VersionRetrievalException {
+    private void useReactor(MutableXMLStreamReader pom, Collection<Dependency> dependencies) throws XMLStreamException {
 
         for (Dependency dep : dependencies) {
             Artifact artifact = this.toArtifact(dep);
@@ -163,9 +163,9 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
             }
 
             for (MavenProject reactorProject : reactorProjects) {
-                if (StringUtils.equals(reactorProject.getGroupId(), dep.getGroupId())
-                        && StringUtils.equals(reactorProject.getArtifactId(), dep.getArtifactId())
-                        && !StringUtils.equals(reactorProject.getVersion(), dep.getVersion())) {
+                if (Objects.equals(reactorProject.getGroupId(), dep.getGroupId())
+                        && Objects.equals(reactorProject.getArtifactId(), dep.getArtifactId())
+                        && VersionStringComparator.STRICT.compare(reactorProject.getVersion(), dep.getVersion()) != 0) {
                     if (PomHelper.setDependencyVersion(
                             pom,
                             dep.getGroupId(),
@@ -182,12 +182,11 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
-    private void useReactor(MutableXMLStreamReader pom, MavenProject parent)
-            throws XMLStreamException, VersionRetrievalException {
+    private void useReactor(MutableXMLStreamReader pom, MavenProject parent) throws XMLStreamException {
         for (MavenProject project : reactorProjects) {
-            if (StringUtils.equals(project.getGroupId(), parent.getGroupId())
-                    && StringUtils.equals(project.getArtifactId(), parent.getArtifactId())
-                    && !StringUtils.equals(project.getVersion(), parent.getVersion())) {
+            if (Objects.equals(project.getGroupId(), parent.getGroupId())
+                    && Objects.equals(project.getArtifactId(), parent.getArtifactId())
+                    && VersionStringComparator.STRICT.compare(project.getVersion(), parent.getVersion()) != 0) {
                 if (PomHelper.setProjectParentVersion(pom, project.getVersion())) {
                     getLog().info("Updated parent " + toString(parent) + " to version " + project.getVersion());
                 }

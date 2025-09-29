@@ -31,8 +31,10 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -71,7 +73,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
 
     @Override
     protected UseLatestVersionsMojoBase createMojo() throws IllegalAccessException, MojoExecutionException {
-        return new UpdateParentMojo(artifactFactory, repositorySystem, null, changeRecorder.asTestMap()) {
+        return new UpdateParentMojo(artifactFactory, repositorySystem, null, TestVersionChangeRecorder.asTestMap()) {
             {
                 setProject(createProject());
                 reactorProjects = Collections.emptyList();
@@ -224,8 +226,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "parent-artifact", "1.0.1-SNAPSHOT", "1.0.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("parent-artifact")
+                        .withOldVersion("1.0.1-SNAPSHOT")
+                        .withNewVersion("1.0.0")));
     }
 
     @Test
@@ -252,8 +258,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "parent-artifact", "[1.0.1-SNAPSHOT,)", "1.0.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("parent-artifact")
+                        .withOldVersion("[1.0.1-SNAPSHOT,)")
+                        .withNewVersion("1.0.0")));
     }
 
     @Test
@@ -281,8 +291,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "issue-670-artifact", "0.0.1-1", "0.0.1-1-impl-SNAPSHOT")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("issue-670-artifact")
+                        .withOldVersion("0.0.1-1")
+                        .withNewVersion("0.0.1-1-impl-SNAPSHOT")));
     }
 
     @Test
@@ -302,8 +316,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "issue-670-artifact", "0.0.1-1", "0.0.1-1-impl-SNAPSHOT")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("issue-670-artifact")
+                        .withOldVersion("0.0.1-1")
+                        .withNewVersion("0.0.1-1-impl-SNAPSHOT")));
     }
 
     @Test
@@ -343,7 +361,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "parent-artifact", "1.0.0", version)));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("parent-artifact")
+                        .withOldVersion("1.0.0")
+                        .withNewVersion(version)));
     }
 
     @Test
@@ -362,8 +385,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "parent-artifact", "0.9.0", "1.0.1-SNAPSHOT")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("parent-artifact")
+                        .withOldVersion("0.9.0")
+                        .withNewVersion("1.0.1-SNAPSHOT")));
     }
 
     @Test
@@ -384,7 +411,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "parent-artifact", "0.8.0", "0.9.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("parent-artifact")
+                        .withOldVersion("0.8.0")
+                        .withNewVersion("0.9.0")));
     }
 
     @Test
@@ -404,7 +436,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "test-incremental", "1.1.0", "1.1.1")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("test-incremental")
+                        .withOldVersion("1.1.0")
+                        .withNewVersion("1.1.1")));
     }
 
     @Test
@@ -423,7 +460,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "dummy-parent2", "1.0", "2.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("dummy-parent2")
+                        .withOldVersion("1.0")
+                        .withNewVersion("2.0")));
     }
 
     @Test
