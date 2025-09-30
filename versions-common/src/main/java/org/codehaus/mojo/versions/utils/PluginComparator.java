@@ -36,6 +36,24 @@ public enum PluginComparator implements Comparator<Object> {
         return o instanceof Plugin || o instanceof ReportPlugin;
     }
 
+    private static String getGroupId(Object o) {
+        return o instanceof Plugin
+                ? ((Plugin) o).getGroupId()
+                : o instanceof ReportPlugin ? ((ReportPlugin) o).getGroupId() : "";
+    }
+
+    private static String getArtifactId(Object o) {
+        return o instanceof Plugin
+                ? ((Plugin) o).getArtifactId()
+                : o instanceof ReportPlugin ? ((ReportPlugin) o).getArtifactId() : "";
+    }
+
+    private static String getVersion(Object o) {
+        return o instanceof Plugin
+                ? ((Plugin) o).getVersion()
+                : o instanceof ReportPlugin ? ((ReportPlugin) o).getVersion() : "";
+    }
+
     /**
      * Compares to {@link Plugin} or {@link ReportPlugin} instances.
      *
@@ -51,27 +69,12 @@ public enum PluginComparator implements Comparator<Object> {
                     "This comparator can only be used to compare Plugin and ReportPlugin instances");
         }
 
-        String g1 = o1 instanceof Plugin ? ((Plugin) o1).getGroupId() : ((ReportPlugin) o1).getGroupId();
-        String g2 = o2 instanceof Plugin ? ((Plugin) o2).getGroupId() : ((ReportPlugin) o2).getGroupId();
-
-        int r = g1.compareTo(g2);
-        if (r == 0) {
-            String a1 = o1 instanceof Plugin ? ((Plugin) o1).getArtifactId() : ((ReportPlugin) o1).getArtifactId();
-            String a2 = o2 instanceof Plugin ? ((Plugin) o2).getArtifactId() : ((ReportPlugin) o2).getArtifactId();
-            r = a1.compareTo(a2);
+        if (o1 == o2) {
+            return 0;
         }
-        if (r == 0) {
-            String v1 = o1 instanceof Plugin ? ((Plugin) o1).getVersion() : ((ReportPlugin) o1).getVersion();
-            String v2 = o2 instanceof Plugin ? ((Plugin) o2).getVersion() : ((ReportPlugin) o2).getVersion();
-            if (v1 == null) {
-                // hope I got the +1/-1 the right way around
-                return v2 == null ? 0 : -1;
-            }
-            if (v2 == null) {
-                return 1;
-            }
-            r = v1.compareTo(v2);
-        }
-        return r;
+        return Comparator.nullsLast(Comparator.comparing(PluginComparator::getGroupId)
+                        .thenComparing(PluginComparator::getArtifactId)
+                        .thenComparing(PluginComparator::getVersion, VersionStringComparator.STRICT))
+                .compare(o1, o2);
     }
 }
