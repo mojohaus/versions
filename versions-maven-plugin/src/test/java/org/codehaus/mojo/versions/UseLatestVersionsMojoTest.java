@@ -237,4 +237,57 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
                 hasItem(new DefaultDependencyVersionChange(
                         "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
     }
+
+    @Test
+    public void testDontUpgradeToPreReleaseByDefault()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+                    VersionRetrievalException {
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withVersion("0.9.0")
+                        .withType("pom")
+                        .withClassifier("default")
+                        .withScope(SCOPE_COMPILE)
+                        .build()));
+
+        // Use all defaults to test that allowPreReleases=false (default) filters out pre-releases
+
+        tryUpdate();
+        // Should upgrade to 1.1.0, not 1.0.0-beta (pre-release should be filtered out by default)
+        // Available: 1.1.1-SNAPSHOT, 1.1.0, 1.1.0-SNAPSHOT, 1.0.0, 1.0.0-beta, 1.0.0-SNAPSHOT, 0.9.0
+        // With allowSnapshots=false (default) and allowPreReleases=false (default), chooses 1.1.0
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultDependencyVersionChange("default-group", "dependency-artifact", "0.9.0", "1.1.0")));
+    }
+
+    @Test
+    public void testUpgradeToPreReleaseWhenAllowed()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+                    VersionRetrievalException {
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withVersion("0.9.0")
+                        .withType("pom")
+                        .withClassifier("default")
+                        .withScope(SCOPE_COMPILE)
+                        .build()));
+
+        setVariableValueToObject(mojo, "allowSnapshots", true);
+        setVariableValueToObject(mojo, "allowPreReleases", true);
+
+        tryUpdate();
+        // When allowPreReleases is true, pre-releases like 1.0.0-beta are included
+        // With allowSnapshots also true, the highest version is 1.1.1-SNAPSHOT
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultDependencyVersionChange(
+                        "default-group", "dependency-artifact", "0.9.0", "1.1.1-SNAPSHOT")));
+    }
 }
