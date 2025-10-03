@@ -83,6 +83,7 @@ public abstract class UseLatestVersionsMojoTestBase {
                     "1.1.1.1-SNAPSHOT", "1.1.1.0", "1.1.1.0-SNAPSHOT", "1.0.0.0", "1.0.0.0-SNAPSHOT", "0.9.0.0"
                 });
                 put("other-artifact", new String[] {"1.0", "2.0", "2.0-SNAPSHOT"});
+                put("pre-release-artifact", new String[] {"1.2.0-beta1", "1.1.0", "1.0.0"});
             }
         });
     }

@@ -246,8 +246,8 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
                 .getModel()
                 .setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
                         .withGroupId("default-group")
-                        .withArtifactId("dependency-artifact")
-                        .withVersion("0.9.0")
+                        .withArtifactId("pre-release-artifact")
+                        .withVersion("1.0.0")
                         .withType("pom")
                         .withClassifier("default")
                         .withScope(SCOPE_COMPILE)
@@ -256,12 +256,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         // Use all defaults to test that allowPreReleases=false (default) filters out pre-releases
 
         tryUpdate();
-        // Should upgrade to 1.1.0, not 1.0.0-beta (pre-release should be filtered out by default)
-        // Available: 1.1.1-SNAPSHOT, 1.1.0, 1.1.0-SNAPSHOT, 1.0.0, 1.0.0-beta, 1.0.0-SNAPSHOT, 0.9.0
-        // With allowSnapshots=false (default) and allowPreReleases=false (default), chooses 1.1.0
+        // Should upgrade to 1.1.0, not 1.2.0-beta1 (pre-release should be filtered out by default)
+        // Available: 1.2.0-beta1, 1.1.0, 1.0.0
+        // With allowPreReleases=false (default), beta is excluded and 1.1.0 is selected
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "dependency-artifact", "0.9.0", "1.1.0")));
+                hasItem(new DefaultDependencyVersionChange("default-group", "pre-release-artifact", "1.0.0", "1.1.0")));
     }
 
     @Test
@@ -272,22 +272,22 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
                 .getModel()
                 .setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
                         .withGroupId("default-group")
-                        .withArtifactId("dependency-artifact")
-                        .withVersion("0.9.0")
+                        .withArtifactId("pre-release-artifact")
+                        .withVersion("1.0.0")
                         .withType("pom")
                         .withClassifier("default")
                         .withScope(SCOPE_COMPILE)
                         .build()));
 
-        setVariableValueToObject(mojo, "allowSnapshots", true);
         setVariableValueToObject(mojo, "allowPreReleases", true);
 
         tryUpdate();
-        // When allowPreReleases is true, pre-releases like 1.0.0-beta are included
-        // With allowSnapshots also true, the highest version is 1.1.1-SNAPSHOT
+        // When allowPreReleases is true, beta version can be selected
+        // Available: 1.2.0-beta1, 1.1.0, 1.0.0
+        // Beta version 1.2.0-beta1 is highest and will be selected
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "0.9.0", "1.1.1-SNAPSHOT")));
+                        "default-group", "pre-release-artifact", "1.0.0", "1.2.0-beta1")));
     }
 }
