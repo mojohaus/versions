@@ -33,6 +33,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.resolution.VersionRequest;
@@ -80,7 +81,7 @@ public class LockSnapshotsMojoTest {
     }
 
     private LockSnapshotsMojo createMojo(RepositorySystem repositorySystem) throws MojoExecutionException {
-        return new LockSnapshotsMojo(artifactFactory, repositorySystem, null, null) {
+        return new LockSnapshotsMojo(artifactFactory, repositorySystem, null, TestVersionChangeRecorder.asTestMap()) {
             {
                 reactorProjects = emptyList();
                 project = new MavenProject(new Model() {

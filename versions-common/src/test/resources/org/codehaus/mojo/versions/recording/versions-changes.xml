@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<changeRecorderLog xmlns="http://www.mojohaus.org/versions-maven-plugin/schema/updates/3.0">
+  <updates goal="previous" date="2025-09-28T12:59:41.458+02:00">
+    <dependencyUpdate kind="dependency-update" groupId="org.codehaus" artifactId="example0" oldVersion="0.0.1-SNAPSHOT" newVersion="0.0.1"/>
+  </updates>
+</changeRecorderLog>

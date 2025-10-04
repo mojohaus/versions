@@ -22,7 +22,9 @@ package org.codehaus.mojo.versions.api.change;
  *
  * @author Andrzej Jarmoniuk
  * @since 2.15.0
+ * @deprecated use classes from {@code versions-model}
  */
+@Deprecated
 public interface PropertyVersionChange extends VersionChange {
 
     /**
