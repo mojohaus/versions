@@ -26,8 +26,8 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorderRenderer;
 import org.codehaus.mojo.versions.model.ChangeRecorderLog;
+import org.codehaus.mojo.versions.recording.ChangeRecorderRenderer;
 
 /**
  * A JSON renderer for the {@link ChangeRecorderLog}

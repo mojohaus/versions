@@ -26,9 +26,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorderRenderer;
 import org.codehaus.mojo.versions.model.ChangeRecorderLog;
 import org.codehaus.mojo.versions.model.ObjectFactory;
+import org.codehaus.mojo.versions.recording.ChangeRecorderRenderer;
 
 /**
  * A CSV renderer for the {@link ChangeRecorderLog}

@@ -10,10 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.codehaus.mojo.versions.api.recording.ChangeRecorderRenderer;
 import org.codehaus.mojo.versions.model.ChangeRecorderLog;
 import org.codehaus.mojo.versions.model.ObjectFactory;
 import org.codehaus.mojo.versions.model.VersionsExecution;
+import org.codehaus.mojo.versions.recording.ChangeRecorderRenderer;
 
 /**
  * {@link ChangeRecorderRenderer} which renders changes in the legacy
