@@ -15,5 +15,5 @@ Change recorder updates
 =======================
 
 - [updates-3.0.xsd](updates-3.0.xsd)
-- [updates-2.0.xsd](updates-2.0.xsd)
+- [updates-2.0.xsd](updates-2.0.xsd) (deprecated)
 

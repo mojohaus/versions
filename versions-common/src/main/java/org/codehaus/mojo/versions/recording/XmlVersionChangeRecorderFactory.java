@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorderRenderer;
 import org.codehaus.mojo.versions.api.recording.VersionChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.model.ObjectFactory;

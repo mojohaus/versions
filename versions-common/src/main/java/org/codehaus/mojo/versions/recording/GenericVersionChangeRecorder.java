@@ -6,7 +6,6 @@ import java.time.ZonedDateTime;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecution;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorderRenderer;
 import org.codehaus.mojo.versions.api.recording.VersionChangeRecorder;
 import org.codehaus.mojo.versions.model.ChangeRecorderLog;
 import org.codehaus.mojo.versions.model.ObjectFactory;

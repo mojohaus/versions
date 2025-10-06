@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.codehaus.mojo.versions.api.recording.ChangeRecorderRenderer;
 import org.codehaus.mojo.versions.model.ChangeRecorderLog;
 import org.codehaus.mojo.versions.model.ObjectFactory;
+import org.codehaus.mojo.versions.recording.ChangeRecorderRenderer;
 
 public final class XmlVersionChangeRenderer implements ChangeRecorderRenderer {
 
