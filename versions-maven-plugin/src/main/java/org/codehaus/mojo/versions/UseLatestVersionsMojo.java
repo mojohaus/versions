@@ -89,6 +89,8 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
     /**
      * Whether to allow pre-release versions (alpha, beta, milestone, rc) when searching
      * for the latest version of an artifact.
+     *
+     * @since 2.20.0
      */
     @Parameter(property = "allowPreReleases", defaultValue = "false")
     protected boolean allowPreReleases = false;

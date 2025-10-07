@@ -64,6 +64,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      *
      * @param version the version string to check
      * @return true if the version is a pre-release version, false otherwise
+     *
+     * @since 2.20.0
      */
     public static boolean isPreReleaseVersion(String version) {
         return version != null && PREVIEW_PATTERN.matcher(version).matches();
