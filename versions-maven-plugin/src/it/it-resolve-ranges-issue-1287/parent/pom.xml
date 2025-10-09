@@ -17,16 +17,18 @@
 
 	<dependencyManagement>
 		<dependencies>
-				<!-- This versionless dependency management of junit:junit is what this case is about:
+				<!-- This versionless dependency management of test.package:moduleTest is what this case is about:
 				it is valid and useful to have a dependency management entry without version in some cases.
 				Here, it 'resets' the version defined in grandparent, so that child can inherit it through the imported BOM instead.
-				The difference can be seen by running mvn dependency:tree -Dverbose=true with and without it:
-				With it you get   : 'junit:junit:jar:4.13.2:compile' through the imported BOM.
-				Without it you get: 'junit:junit:jar:4.13.1:compile (version managed from 4.13.2)' through grandparent.
+
+				The difference can be seen by running mvn dependency:tree -Dverbose=true with and without it
+				(have the mock repository manager running and configured, or copy the test.package artifacts in your regular local repo).
+				With it you get   : 'test.package:moduleTest:jar:0.0.2.19:compile' through the imported BOM.
+				Without it you get: 'test.package:moduleTest:jar:0.0.2.18:compile (version managed from 0.0.2.19)' through grandparent.
 				-->
 			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
+				<groupId>test.package</groupId>
+				<artifactId>moduleTest</artifactId>
 			</dependency>
 
 			<dependency>

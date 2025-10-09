@@ -12,9 +12,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
+			<groupId>test.package</groupId>
+			<artifactId>moduleTest</artifactId>
+			<version>0.0.2.19</version>
 		</dependency>
 	</dependencies>
 
