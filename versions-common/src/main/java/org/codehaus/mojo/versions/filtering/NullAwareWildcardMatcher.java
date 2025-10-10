@@ -19,9 +19,21 @@ package org.codehaus.mojo.versions.filtering;
  * under the License.
  */
 
+/**
+ * An extended version of the {@link WildcardMatcher} where an additional special keyword {@code null}
+ * will match tokens which are null.
+ */
 public class NullAwareWildcardMatcher extends WildcardMatcher {
+    /**
+     * Null keyword
+     */
     public static final String NULL_KEYWORD = "null";
 
+    /**
+     * Creates a new instance of the given pattern
+     *
+     * @param pattern pattern to be matched against
+     */
     public NullAwareWildcardMatcher(String pattern) {
         super(pattern);
     }

@@ -27,7 +27,11 @@ import org.apache.maven.model.Model;
 import org.codehaus.mojo.versions.api.PomHelper;
 
 /**
- * Compares project paths relative to the base directory based on their depth in a reactor
+ * Compares project paths relative to the base directory based on their depth in a reactor.
+ * <p>
+ * The comparator uses the reactor {@link Model} instances to determine the number of
+ * parent levels for each project and orders shallower projects before deeper ones. If
+ * two projects have the same depth the result falls back to comparing their GAV strings.
  *
  * @author Stephen Connolly
  * @since 15-Sep-2010 14:54:42
@@ -35,10 +39,23 @@ import org.codehaus.mojo.versions.api.PomHelper;
 public class ReactorDepthComparator implements Comparator<File> {
     private final Map<File, Model> reactor;
 
+    /**
+     * Creates a new comparator using the given reactor map.
+     *
+     * @param reactor map of project base directories to their Maven {@link Model} instances; must not be {@code null}
+     */
     public ReactorDepthComparator(Map<File, Model> reactor) {
         this.reactor = reactor;
     }
 
+    /**
+     * Compare two project base directories by their reactor depth, then by their GAV.
+     *
+     * @param o1 the first project base directory to compare
+     * @param o2 the second project base directory to compare
+     * @return negative if {@code o1} is ordered before {@code o2}, positive if after, zero if equal
+     */
+    @Override
     public int compare(File o1, File o2) {
         final Model m1 = reactor.get(o1);
         final Model m2 = reactor.get(o2);

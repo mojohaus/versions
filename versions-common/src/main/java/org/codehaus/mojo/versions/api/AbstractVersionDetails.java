@@ -88,6 +88,9 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      */
     protected boolean verboseDetail = true;
 
+    /**
+     * Creates a new, empty instance.
+     */
     protected AbstractVersionDetails() {}
 
     /**

@@ -1,16 +1,29 @@
 package org.codehaus.mojo.versions.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.maven.plugin.logging.Log;
 
+/**
+ * A simple {@link Log} stub, collecting logged messages in a queryable list.
+ */
 public class TestLog implements Log {
     private final List<Triple<LogLevel, CharSequence, Throwable>> loggedMessages = new ArrayList<>();
 
+    /**
+     * Creates an empty new instance
+     */
+    public TestLog() {}
+
+    /**
+     * Returns an immutable list of logged messages.
+     * @return immutable copy of the logged messages list.
+     */
     public List<Triple<LogLevel, CharSequence, Throwable>> getLoggedMessages() {
-        return loggedMessages;
+        return Collections.unmodifiableList(loggedMessages);
     }
 
     @Override
@@ -93,10 +106,25 @@ public class TestLog implements Log {
         error(null, throwable);
     }
 
+    /**
+     * Defines the log level.
+     */
     public enum LogLevel {
+        /**
+         * {@code DEBUG} log level
+         */
         DEBUG,
+        /**
+         * {@code INFO} log level
+         */
         INFO,
+        /**
+         * {@code WARN} log level
+         */
         WARN,
+        /**
+         * {@code ERROR} log level
+         */
         ERROR
     }
 }

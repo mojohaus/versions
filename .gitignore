@@ -4,5 +4,6 @@ target
 .project
 *.iml
 .idea
+.vscode
 .checkstyle
 /.factorypath

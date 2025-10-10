@@ -34,16 +34,31 @@ import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 
+/**
+ * Extension of the {@linkplain OverviewStats} adding dependency stats
+ */
 public class PluginOverviewStats extends OverviewStats {
     /**
      * Extension of the {@linkplain OverviewStats} adding dependency stats
      */
     private int dependencies;
 
+    /**
+     * Creates a new instance.
+     */
+    public PluginOverviewStats() {}
+
+    /**
+     * Gets the number of plugins with dependency updates available
+     * @return number of plugins with dependency updates available
+     */
     public int getDependencies() {
         return dependencies;
     }
 
+    /**
+     * Increments the number of plugins with dependency updates available
+     */
     public void incrementDependencies() {
         dependencies++;
     }

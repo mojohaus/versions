@@ -45,6 +45,14 @@ import org.eclipse.aether.RepositorySystem;
         aggregator = true)
 public class PluginUpdatesAggregateReport extends AbstractPluginUpdatesReport {
 
+    /**
+     * Creates a new report instance.
+     * @param i18n an {@link I18N} instance
+     * @param artifactFactory a {@link ArtifactFactory} instance
+     * @param repositorySystem a {@link RepositorySystem} instance
+     * @param wagonMap a map of wagon implementations
+     * @param rendererFactory a {@link ReportRendererFactory} instance
+     */
     @Inject
     protected PluginUpdatesAggregateReport(
             I18N i18n,

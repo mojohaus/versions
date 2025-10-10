@@ -22,6 +22,12 @@ import org.codehaus.mojo.versions.api.change.PropertyVersionChange;
 import org.codehaus.mojo.versions.api.recording.PropertyChangeRecord;
 import org.codehaus.mojo.versions.change.DefaultPropertyVersionChange;
 
+/**
+ * Represents a change record of a property version.
+ *
+ * @author Slawomir Jaranowski
+ * @since 2.14.0
+ */
 public class DefaultPropertyChangeRecord implements PropertyChangeRecord {
     private final PropertyVersionChange versionChange;
 
@@ -34,30 +40,58 @@ public class DefaultPropertyChangeRecord implements PropertyChangeRecord {
         return versionChange;
     }
 
+    /**
+     * Returns a new {@link DefaultPropertyChangeRecord.Builder} instance.
+     * @return a new {@link DefaultPropertyChangeRecord.Builder} instance
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * Creates a new {@link Builder} instance
+     */
     public static class Builder {
         private String property;
         private String oldValue;
         private String newValue;
 
+        private Builder() {}
+
+        /**
+         * Provides a property name
+         * @param property property name
+         * @return {@link Builder} instance
+         */
         public Builder withProperty(String property) {
             this.property = property;
             return this;
         }
 
+        /**
+         * Provides the old value of the property
+         * @param oldValue old property value
+         * @return {@link Builder} instance
+         */
         public Builder withOldValue(String oldValue) {
             this.oldValue = oldValue;
             return this;
         }
 
+        /**
+         * Provides the new value of the property
+         * @param newValue new property value
+         * @return {@link Builder} instance
+         */
         public Builder withNewValue(String newValue) {
             this.newValue = newValue;
             return this;
         }
 
+        /**
+         * Builds a new {@link PropertyChangeRecord} instance, based on the values provided to the builder.
+         * @return new {@link PropertyChangeRecord} instance
+         */
         public PropertyChangeRecord build() {
             return new DefaultPropertyChangeRecord(new DefaultPropertyVersionChange(property, oldValue, newValue));
         }

@@ -23,21 +23,27 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.codehaus.mojo.versions.api.Segment;
 
 /**
- * Represents an invalid segment being identified within a version.
+ * Exception thrown when an invalid {@link Segment} is referenced for a particular {@link ArtifactVersion}.
+ *
+ * <p>The constructor requires a non-{@code null} {@link Segment} and {@link ArtifactVersion} and a non-negative
+ * segment count.</p>
  */
 public class InvalidSegmentException extends Exception {
+    /** The invalid segment identified. */
     private final Segment segment;
 
+    /** The number of segments in the version under consideration. */
     private final int segmentCount;
 
+    /** The ArtifactVersion being processed. */
     private final ArtifactVersion version;
 
     /**
-     * Constructs the exception object
+     * Constructs a new {@code InvalidSegmentException}.
      *
-     * @param segment the invalid segment index.
-     * @param segmentCount the number of segments.
-     * @param version the version object.
+     * @param segment the invalid {@link Segment}; must not be {@code null}
+     * @param segmentCount the number of segments in the version; must be non-negative
+     * @param version the {@link ArtifactVersion} instance; must not be {@code null}
      */
     public InvalidSegmentException(Segment segment, int segmentCount, ArtifactVersion version) {
         super(String.format(
@@ -49,21 +55,27 @@ public class InvalidSegmentException extends Exception {
     }
 
     /**
-     * @return segment
+     * Returns the invalid {@link Segment}.
+     *
+     * @return the invalid {@link Segment}; never {@code null} for a correctly constructed exception
      */
     public Segment getSegment() {
         return segment;
     }
 
     /**
-     * @return segment count
+     * Returns the number of segments in the version.
+     *
+     * @return the segment count (non-negative)
      */
     public int getSegmentCount() {
         return segmentCount;
     }
 
     /**
-     * @return version object
+     * Returns the {@link ArtifactVersion} associated with the exception.
+     *
+     * @return the {@link ArtifactVersion}; never {@code null} for a correctly constructed exception
      */
     public ArtifactVersion getVersion() {
         return version;

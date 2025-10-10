@@ -61,14 +61,33 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected T model;
 
+    /**
+     * Cache for newest updates (used for summary rendering)
+     */
     protected final ArtifactVersionsCache newestUpdateCache =
             new ArtifactVersionsCache(AbstractVersionDetails::getReportNewestUpdate);
 
+    /**
+     * Cache for all updates (used for details rendering)
+     */
     protected final ArtifactVersionsCache allUpdatesCache =
             new ArtifactVersionsCache(AbstractVersionDetails::getReportUpdates);
 
+    /**
+     * Table header attributes
+     */
     protected final SinkEventAttributes headerAttributes = new SinkEventAttributeSet(SinkEventAttributes.WIDTH, "30%");
 
+    /**
+     * Creates a new renderer instance.
+     *
+     * @param i18n internationalization helper
+     * @param sink the Doxia sink to write to
+     * @param locale the locale
+     * @param bundleName resource bundle name
+     * @param model the model to render
+     * @param allowSnapshots whether snapshots are allowed in displays
+     */
     protected AbstractVersionsReportRenderer(
             I18N i18n, Sink sink, Locale locale, String bundleName, T model, boolean allowSnapshots) {
         super(sink, i18n, locale, bundleName, allowSnapshots);
@@ -175,6 +194,11 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected abstract void renderDetails();
 
+    /**
+     * Renders the summary table of artifact updates. If there are no artifact updates, nothing is rendered.
+     * @param contents the map of dependencies to their details
+     * @param hasScope whether the artifacts have scopes
+     */
     protected void renderSummaryTable(Map<Dependency, ArtifactVersions> contents, boolean hasScope) {
         startTable();
 
@@ -191,6 +215,11 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         endTable();
     }
 
+    /**
+     * Renders the header row of the summary table.
+     * @param hasScope whether the artifacts have scopes
+     * @param hasType whether the artifacts have types
+     */
     protected void renderSummaryTableHeader(boolean hasScope, boolean hasType) {
         renderTableHeaderCells("report.status", "report.groupId", "report.artifactId", "report.currentVersion");
         if (hasScope) {
@@ -203,6 +232,12 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
                 "report.latestSubIncremental", "report.latestIncremental", "report.latestMinor", "report.latestMajor");
     }
 
+    /**
+     * Renders one summary table row for the given artifact and its details.
+     * @param artifact the artifact to render
+     * @param details the details of the artifact to render
+     * @param includeScope whether to include the scope column
+     */
     protected void renderSummaryTableRow(Dependency artifact, ArtifactVersions details, boolean includeScope) {
         details.setCurrentVersion(artifact.getVersion());
         ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
@@ -225,7 +260,9 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     }
 
     /**
-     * Renders the newest versions for the given artifact.
+     * Renders the newest versions for the given artifact. If there is no newer version for a given segment,
+     * the corresponding cell is left empty.
+     *
      * @param details the artifact for which to render the newest versions.
      */
     protected void renderNewestVersions(AbstractVersionDetails details) {
@@ -235,6 +272,13 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         renderBoldCell(newestUpdateCache.get(details, of(MAJOR), isAllowSnapshots()));
     }
 
+    /**
+     * Renders the details table for an artifact. If there are no updates, only the current version is shown.
+     *
+     * @param artifact the artifact being detailed
+     * @param details the details of the artifact
+     * @param includeScope whether to include the scope row
+     */
     protected void renderDependencyDetailTable(Dependency artifact, ArtifactVersions details, boolean includeScope) {
         ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;
@@ -259,6 +303,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
 
     /**
      * Renders a row of two cells, the first cell being an header and the second cell being a non-header cell.
+     *
      * @param textKey the key of the text to be rendered.
      * @param textValue the value of the text to be rendered.
      */

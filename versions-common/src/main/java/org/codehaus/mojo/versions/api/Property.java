@@ -81,6 +81,7 @@ public class Property {
      * When {@link #searchReactor} is {@code true} and a property version can be entirely satisfied from the
      * reactor and this setting is {@code true} then the reactor version will be specified irrespective of any
      * other settings (including {@link #isBanSnapshots}).
+     *
      * @since 1.0-alpha-3
      */
     private boolean preferReactor;
@@ -118,13 +119,17 @@ public class Property {
     }
 
     /**
-     * @return name
+     * Returns the property name
+     *
+     * @return name of the property
      */
     public String getName() {
         return name;
     }
 
     /**
+     * Sets the name of the property
+     *
      * @param name name to be set
      */
     public void setName(String name) {
@@ -132,6 +137,8 @@ public class Property {
     }
 
     /**
+     * Returns the property version
+     *
      * @return version
      */
     public String getVersion() {
@@ -139,6 +146,8 @@ public class Property {
     }
 
     /**
+     * Sets the property version
+     *
      * @param version version to be set
      */
     public void setVersion(String version) {
@@ -146,14 +155,18 @@ public class Property {
     }
 
     /**
-     * @return if properties linking versions should be auto-detected or not
+     * Whether properties linking versions should be auto-detected or not
+     *
+     * @return {@code true} if properties linking versions should be auto-detected or not
      */
     public boolean isAutoLinkDependencies() {
         return autoLinkDependencies;
     }
 
     /**
-     * @param autoLinkDependencies whether properties indicating dependency versions should
+     * Specifies whether properties indicating dependency versions should be linked automatically
+     *
+     * @param autoLinkDependencies {@code true} if properties indicating dependency versions should
      *                             be linked automatically
      */
     public void setAutoLinkDependencies(boolean autoLinkDependencies) {
@@ -163,6 +176,7 @@ public class Property {
     /**
      * Dependencies that must be available for this property. If {@link #isAutoLinkDependencies} is {@code true} then
      * these dependencies will be considered in addition to the automatically linked dependencies.
+     *
      * @return dependencies
      */
     public Dependency[] getDependencies() {
@@ -172,6 +186,7 @@ public class Property {
     /**
      * Dependencies that must be available for this property. If {@link #isAutoLinkDependencies} is {@code true} then
      * these dependencies will be considered in addition to the automatically linked dependencies.
+     *
      * @param dependencies to be set
      */
     public void setDependencies(Dependency[] dependencies) {
@@ -179,13 +194,17 @@ public class Property {
     }
 
     /**
-     * @return whether reactor should be searched for the artifact version
+     * Says whether reactor should be searched for the artifact version
+     *
+     * @return {@code true} if reactor should be searched for the artifact version
      */
     public boolean isSearchReactor() {
         return searchReactor;
     }
 
     /**
+     * Specifies whether reactor should be searched for the artifact version
+     *
      * @param searchReactor whether reactor should be searched for the artifact version
      */
     public void setSearchReactor(boolean searchReactor) {
@@ -193,30 +212,54 @@ public class Property {
     }
 
     /**
-     * @return when {@link #searchReactor} is {@code true} and a property version can be entirely satisfied from the
-     * reactor and this setting is {@code true} then the reactor version will be specified irrespective of any
+     * Says whether, when {@link #searchReactor} is {@code true} and a property version can be entirely satisfied
+     * from the reactor and this setting is {@code true} then the reactor version will be specified irrespective of any
      * other settings (including {@link #isBanSnapshots}).
+     * @return provided value
      */
     public boolean isPreferReactor() {
         return preferReactor;
     }
 
+    /**
+     * Specifies whether, when {@link #searchReactor} is {@code true} and a property version can be entirely satisfied
+     * from the reactor and this setting is {@code true} then the reactor version will be specified irrespective of any
+     * other settings (including {@link #isBanSnapshots}).
+     *
+     * @param preferReactor required value
+     */
     public void setPreferReactor(boolean preferReactor) {
         this.preferReactor = preferReactor;
     }
 
+    /**
+     * Specifies whether snapshots should not be considered
+     * @return {@code true} if snapshots should not be considered
+     */
     public boolean isBanSnapshots() {
         return banSnapshots;
     }
 
+    /**
+     * Specifies whether snapshots should not be considered
+     * @param banSnapshots {@code true} if snapshots should not be considered
+     */
     public void setBanSnapshots(boolean banSnapshots) {
         this.banSnapshots = banSnapshots;
     }
 
+    /**
+     * Returns the value of the property
+     * @return value of the property
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Sets the value of the property
+     * @param value property value to be set
+     */
     public void setValue(String value) {
         this.value = value;
     }

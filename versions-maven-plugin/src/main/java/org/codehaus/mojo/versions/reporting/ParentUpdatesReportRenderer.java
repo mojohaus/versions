@@ -26,9 +26,20 @@ import org.codehaus.mojo.versions.reporting.model.ParentUpdatesModel;
 import org.codehaus.plexus.i18n.I18N;
 
 /**
+ * A renderer for Parent updates reports, using {@link ParentUpdatesModel} as model.
  * @since 1.0-beta-1
  */
 public class ParentUpdatesReportRenderer extends DependencyUpdatesReportRenderer<ParentUpdatesModel> {
+    /**
+     * Creates a new instance.
+     *
+     * @param i18n an {@link I18N} instance
+     * @param sink the {@link Sink} to render to
+     * @param locale the locale to render in
+     * @param bundleName the resource bundle name to use
+     * @param model object containing the updates model
+     * @param allowSnapshots whether snapshots should be included
+     */
     public ParentUpdatesReportRenderer(
             I18N i18n, Sink sink, Locale locale, String bundleName, ParentUpdatesModel model, boolean allowSnapshots) {
         super(i18n, sink, locale, bundleName, model, allowSnapshots);

@@ -67,9 +67,11 @@ public class PluginUpdatesXmlReportRenderer implements ReportRenderer {
     private final boolean allowSnapshots;
 
     /**
-     * Creates a new instance
+     * Creates a new instance.
+     *
      * @param model object containing the updates model
      * @param outputFile output file for the report
+     * @param allowSnapshots whether snapshots should be included
      */
     public PluginUpdatesXmlReportRenderer(PluginUpdatesModel model, Path outputFile, boolean allowSnapshots) {
         this.model = model;

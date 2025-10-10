@@ -77,6 +77,12 @@ public class PropertyVersionsBuilder {
         this.log = log;
     }
 
+    /**
+     * Provides the associated artifact
+     * @param artifact artifact associated with the property
+     * @param usePluginRepositories whether to use plugin repositories
+     * @return builder instance
+     */
     public PropertyVersionsBuilder withAssociation(Artifact artifact, boolean usePluginRepositories) {
         associations.add(new DefaultArtifactAssociation(artifact, usePluginRepositories));
         return this;
@@ -105,6 +111,12 @@ public class PropertyVersionsBuilder {
         return !associations.isEmpty();
     }
 
+    /**
+     * Creates a new instance of {@link PropertyVersions}, based on the values provided to the builder.
+     * @return new {@link PropertyVersions} instance
+     * @throws VersionRetrievalException thrown if there are problems retrieving versions of artifacts linked
+     * with the property
+     */
     public PropertyVersions build() throws VersionRetrievalException {
         SortedSet<ArtifactVersion> resolvedVersions = resolveAssociatedVersions(helper, associations);
         PropertyVersions instance = new PropertyVersions(profileId, name, log, associations, resolvedVersions);
@@ -113,10 +125,18 @@ public class PropertyVersionsBuilder {
         return instance;
     }
 
+    /**
+     * Returns the property name
+     * @return property name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the version range
+     * @return version range
+     */
     public String getVersionRange() {
         if (lowerBounds.isEmpty() && upperBounds.isEmpty()) {
             return null;
@@ -139,21 +159,43 @@ public class PropertyVersionsBuilder {
                 + (upperBound.map(Pair::getValue).orElse(false) ? ']' : ')');
     }
 
+    /**
+     * Provides the lower bound of the property version and whether the lower bound should be included
+     * @param lowerBound lower bound of the property version
+     * @param includeLower whether the lower bound should be included
+     * @return builder instance
+     */
     public PropertyVersionsBuilder withLowerBound(String lowerBound, boolean includeLower) {
         lowerBounds.compute(lowerBound, (__, oldValue) -> ofNullable(oldValue).orElse(true) && includeLower);
         return this;
     }
 
+    /**
+     * Provides the upper bound of the property version and whether the upper bound should be included
+     * @param upperBound upper bound of the property version
+     * @param includeUpper whether the upper bound should be included
+     * @return builder instance
+     */
     public PropertyVersionsBuilder withUpperBound(String upperBound, boolean includeUpper) {
         upperBounds.compute(upperBound, (__, oldValue) -> ofNullable(oldValue).orElse(true) && includeUpper);
         return this;
     }
 
+    /**
+     * Provides the current version of the linked artifact
+     * @param currentVersion current version of the linked artifact
+     * @return builder instance
+     */
     public PropertyVersionsBuilder withCurrentVersion(ArtifactVersion currentVersion) {
         this.currentVersion = currentVersion;
         return this;
     }
 
+    /**
+     * Provides the current version range of the linked artifact
+     * @param currentVersionRange current version range of the linked artifact
+     * @return builder instance
+     */
     public PropertyVersionsBuilder withCurrentVersionRange(VersionRange currentVersionRange) {
         this.currentVersionRange = currentVersionRange;
         return this;

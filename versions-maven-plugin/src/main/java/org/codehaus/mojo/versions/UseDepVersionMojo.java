@@ -17,7 +17,6 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.TransformerException;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -157,6 +156,15 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     @Parameter(property = "processProperties", defaultValue = "false")
     protected boolean processProperties;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param artifactFactory  the artifact factory
+     * @param repositorySystem the repository system
+     * @param wagonMap         the map of wagon implementations
+     * @param changeRecorders  the change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     @Inject
     public UseDepVersionMojo(
             ArtifactFactory artifactFactory,
@@ -215,7 +223,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                                 .orElse(Charset.defaultCharset()));
             }
             propertyBacklog.forEach(p -> getLog().warn("Not updating property ${" + p + "}: defined in parent"));
-        } catch (IOException | XMLStreamException | TransformerException e) {
+        } catch (IOException | XMLStreamException e) {
             throw new MojoFailureException(e.getMessage(), e);
         } catch (RuntimeException e) {
             if (e.getCause() instanceof MojoFailureException) {
@@ -239,6 +247,8 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      *                          used one of these properties. Such a change is not allowed and must be reported instead.
      * @param charset           charset for file writing
      * @return {@code true} if the file has been changed
+     * @throws MojoFailureException thrown if a version may not be changed
+     * @throws MojoExecutionException thrown if a version may not be changed
      */
     protected boolean processModel(
             ModelNode node,

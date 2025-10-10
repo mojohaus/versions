@@ -42,6 +42,15 @@ import org.eclipse.aether.RepositorySystem;
 @Mojo(name = "plugin-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class PluginUpdatesReport extends AbstractPluginUpdatesReport {
 
+    /**
+     * Creates a new report instance.
+     *
+     * @param i18n an {@link I18N} instance
+     * @param artifactFactory a {@link ArtifactFactory} instance
+     * @param repositorySystem a {@link RepositorySystem} instance
+     * @param wagonMap a map of wagon implementations
+     * @param rendererFactory a {@link ReportRendererFactory} instance
+     */
     @Inject
     protected PluginUpdatesReport(
             I18N i18n,

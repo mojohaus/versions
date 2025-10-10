@@ -29,6 +29,12 @@ import org.codehaus.mojo.versions.reporting.util.ReportRenderer;
  * Model class for using with the {@linkplain ReportRenderer} API
  */
 public class DependencyUpdatesModel extends AbstractUpdatesModel<ArtifactVersions> {
+    /**
+     * Creates a new model instance with the given maps of dependency updates.
+     *
+     * @param dependencyUpdates           the map of dependencies to their updates
+     * @param dependencyManagementUpdates the map of dependency management entries to their updates
+     */
     public DependencyUpdatesModel(
             Map<Dependency, ArtifactVersions> dependencyUpdates,
             Map<Dependency, ArtifactVersions> dependencyManagementUpdates) {

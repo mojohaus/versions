@@ -20,13 +20,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Closeable temporary file
+ * A test utility provided a closeable temporary file, implementing {@link AutoCloseable}, which
+ * deletes the temporary file on {@link #close()}, typically upon completion of a {@code try-finally} block.
  */
 public class CloseableTempFile implements AutoCloseable {
     private final Path path;
 
     /**
-     * @return path of the temporary file
+     * Returns the path of the temporary file.
+     * @return path of the temporary file.
      */
     public Path getPath() {
         return path;

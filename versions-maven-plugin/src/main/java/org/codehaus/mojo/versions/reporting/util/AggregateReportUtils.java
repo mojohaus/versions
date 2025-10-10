@@ -30,6 +30,10 @@ import org.apache.maven.project.MavenProject;
  * */
 public class AggregateReportUtils {
 
+    private AggregateReportUtils() {
+        // utility class
+    }
+
     /**
      * Returns an aggregated list of {@link MavenProject} for the given project.
      *

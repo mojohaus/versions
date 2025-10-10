@@ -25,25 +25,29 @@ package org.codehaus.mojo.versions.api.change;
  */
 public interface DependencyVersionChange extends VersionChange {
     /**
-     * @return a groupId of changed item
+     * Returns the groupId of the dependency
+     * @return groupId of the dependency
      * @since 2.14.0
      */
     String getGroupId();
 
     /**
-     * @return an ArtifactId of change item
+     * Returns the artifactId of the dependency
+     * @return artifactId of the dependency
      * @since 2.14.0
      */
     String getArtifactId();
 
     /**
-     * @return an old version of changed item
+     * Returns the old version of the dependency
+     * @return old version the dependency
      * @since 2.14.0
      */
     String getOldVersion();
 
     /**
-     * @return a new version of changed item
+     * Returns the new version of the dependency
+     * @return new version of the dependency
      * @since 2.14.0
      */
     String getNewVersion();

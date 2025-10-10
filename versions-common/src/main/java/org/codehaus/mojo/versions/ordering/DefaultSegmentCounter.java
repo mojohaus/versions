@@ -33,8 +33,11 @@ import org.codehaus.mojo.versions.utils.ArtifactVersionService;
  * Default implementation of the {@link SegmentCounter} interface, using Maven's version rules, i.e. 1.3.34 &gt; 1.3.9
  * but 1.3.4.3.2.34 &lt; 1.3.4.3.2.9.
  */
-public class DefaultSegmentCounter implements SegmentCounter {
-    public static final SegmentCounter INSTANCE = new DefaultSegmentCounter();
+public enum DefaultSegmentCounter implements SegmentCounter {
+    /**
+     * Singleton instance of the class
+     */
+    INSTANCE;
 
     private static final Pattern SNAPSHOT_PATTERN = Pattern.compile("(-((\\d{8}\\.\\d{6})-(\\d+))|(SNAPSHOT))$");
 

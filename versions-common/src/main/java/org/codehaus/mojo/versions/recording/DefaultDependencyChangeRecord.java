@@ -23,6 +23,12 @@ import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 
+/**
+ * Represents a change record of a dependency version.
+ *
+ * @author Slawomir Jaranowski
+ * @since 2.14.0
+ */
 public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
     private final ChangeKind kind;
     private final DependencyVersionChange versionChange;
@@ -42,6 +48,10 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
         return versionChange;
     }
 
+    /**
+     * Returns a new {@link Builder} instance.
+     * @return a new {@link Builder} instance
+     */
     public static Builder builder() {
         return new Builder();
     }
@@ -55,6 +65,8 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
         private String artifactId;
         private String oldVersion;
         private String newVersion;
+
+        private Builder() {}
 
         /**
          * Supplies the kind

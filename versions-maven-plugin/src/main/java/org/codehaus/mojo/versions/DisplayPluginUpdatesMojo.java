@@ -130,9 +130,15 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     private static final String FROM_SUPER_POM = "(from super-pom) ";
 
+    /**
+     * String to flag a plugin version being forced by a parent pom.
+     */
     public static final Pattern PATTERN_PROJECT_PLUGIN = Pattern.compile(
             "/project(/profiles/profile)?" + "((/build(/pluginManagement)?)|(/reporting))" + "/plugins/plugin");
 
+    /**
+     * The path to the super-pom.
+     */
     public static final String SUPERPOM_PATH = "org/apache/maven/model/pom-4.0.0.xml";
 
     /**
@@ -180,6 +186,19 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
+    /**
+     * Creates a new instance.
+     *
+     * @param artifactFactory   an {@link ArtifactFactory} instance
+     * @param repositorySystem  a {@link RepositorySystem} instance
+     * @param projectBuilder    a {@link ProjectBuilder} instance
+     * @param wagonMap          a map of wagon providers per protocol
+     * @param lifecycleExecutor the (injected) instance of {@link LifecycleExecutor}
+     * @param modelInterpolator the (injected) instance of {@link ModelInterpolator}
+     * @param runtimeInformation the (injected) instance of {@link RuntimeInformation}
+     * @param changeRecorders   a map of change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     @Inject
     @SuppressWarnings("checkstyle:ParameterNumber")
     public DisplayPluginUpdatesMojo(
@@ -267,7 +286,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                     curState = pathStack.pop();
                 }
             }
-        } catch (IOException | XMLStreamException | TransformerException e) {
+        } catch (IOException | XMLStreamException e) {
             // ignore
         }
 

@@ -498,33 +498,66 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
         private PomHelper pomHelper;
 
+        /**
+         * Creates a new instance
+         */
         public Builder() {}
 
+        /**
+         * Provides the {@link Log} instance
+         * @param log {@link Log} instance
+         * @return {@link Builder} instance
+         */
         public Builder withLog(Log log) {
             this.log = log;
             return this;
         }
 
+        /**
+         * Provides the {@link MavenSession} instance
+         * @param mavenSession {@link MavenSession} instance
+         * @return {@link Builder} instance
+         */
         public Builder withMavenSession(MavenSession mavenSession) {
             this.mavenSession = mavenSession;
             return this;
         }
 
+        /**
+         * Provides the {@link RepositorySystem} instance
+         * @param repositorySystem {@link RepositorySystem} instance
+         * @return {@link Builder} instance
+         */
         public Builder withRepositorySystem(RepositorySystem repositorySystem) {
             this.repositorySystem = repositorySystem;
             return this;
         }
 
+        /**
+         * Provides the {@link RuleService} instance
+         * @param ruleService {@link RuleService} instance
+         * @return {@link Builder} instance
+         */
         public Builder withRuleService(RuleService ruleService) {
             this.ruleService = ruleService;
             return this;
         }
 
+        /**
+         * Provides the {@link ArtifactFactory} instance
+         * @param artifactFactory {@link ArtifactFactory} instance
+         * @return {@link Builder} instance
+         */
         public Builder withArtifactFactory(ArtifactFactory artifactFactory) {
             this.artifactFactory = artifactFactory;
             return this;
         }
 
+        /**
+         * Provides the {@link PomHelper} instance
+         * @param pomHelper {@link PomHelper} instance
+         * @return {@link Builder} instance
+         */
         public Builder withPomHelper(PomHelper pomHelper) {
             this.pomHelper = pomHelper;
             return this;

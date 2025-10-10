@@ -139,6 +139,15 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
     @Parameter(property = "processParent", defaultValue = "false")
     private boolean processParent = false;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param artifactFactory   the artifact factory
+     * @param repositorySystem  the repository system
+     * @param wagonMap          the map of wagon implementations
+     * @param changeRecorders   the change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     public UpdatePropertiesMojoBase(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
@@ -153,6 +162,12 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
         return allowSnapshots;
     }
 
+    /**
+     * Update the given POM. This method is called for each POM to be updated.
+     * @param pom the pom to update.
+     * @param propertyVersions the properties to update
+     * @throws XMLStreamException it's not possible to read/write the POM
+     */
     protected void update(MutableXMLStreamReader pom, Map<Property, PropertyVersions> propertyVersions)
             throws XMLStreamException {
         for (Map.Entry<Property, PropertyVersions> entry : propertyVersions.entrySet()) {

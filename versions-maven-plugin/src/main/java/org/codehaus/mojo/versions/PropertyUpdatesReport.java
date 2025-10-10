@@ -44,6 +44,15 @@ import org.eclipse.aether.RepositorySystem;
  */
 @Mojo(name = "property-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class PropertyUpdatesReport extends AbstractPropertyUpdatesReport {
+    /**
+     * Creates a new report instance.
+     *
+     * @param i18n an {@link I18N} instance
+     * @param artifactFactory a {@link ArtifactFactory} instance
+     * @param repositorySystem a {@link RepositorySystem} instance
+     * @param wagonMap a map of wagon implementations
+     * @param rendererFactory a {@link ReportRendererFactory} instance
+     */
     @Inject
     protected PropertyUpdatesReport(
             I18N i18n,

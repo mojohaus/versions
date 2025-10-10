@@ -43,6 +43,15 @@ import org.eclipse.aether.RepositorySystem;
 @Mojo(name = "dependency-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class DependencyUpdatesReport extends AbstractDependencyUpdatesReport {
 
+    /**
+     * Creates a new instance
+     *
+     * @param i18n               an {@link I18N} instance
+     * @param artifactFactory    an {@link ArtifactFactory} instance
+     * @param repositorySystem   a {@link RepositorySystem} instance
+     * @param wagonMap           a map of wagon providers per protocol
+     * @param rendererFactory    a {@link ReportRendererFactory} instance
+     */
     @Inject
     protected DependencyUpdatesReport(
             I18N i18n,

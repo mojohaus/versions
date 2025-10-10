@@ -94,6 +94,15 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     // ------------------------------ METHODS --------------------------
 
+    /**
+     * Creates a new instance.
+     *
+     * @param artifactFactory  an {@link ArtifactFactory} instance
+     * @param repositorySystem a {@link RepositorySystem} instance
+     * @param wagonMap         a map of wagon providers per protocol
+     * @param changeRecorders a map of change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     @Inject
     public LockSnapshotsMojo(
             ArtifactFactory artifactFactory,
@@ -153,6 +162,16 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
+    /**
+     * Lock the snapshot dependency versions if they are timestamped snapshots. If a dependency is part of the reactor
+     * or if the dependency is not a timestamped snapshot, no action is taken.
+     *
+     * @param pom the pom to update
+     * @param dependencies the dependencies to check
+     * @throws XMLStreamException   thrown if XML streaming fails
+     * @throws MojoExecutionException thrown if retrieval of {@link VersionsHelper} fails
+     * @throws VersionResolutionException thrown if version resolution fails
+     */
     protected void lockSnapshots(MutableXMLStreamReader pom, Collection<Dependency> dependencies)
             throws XMLStreamException, MojoExecutionException, VersionResolutionException {
         for (Dependency dep : dependencies) {
@@ -192,6 +211,15 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
     }
 
+    /**
+     * Lock the parent snapshot version if it is a timestamped snapshot. If the parent is part of the reactor
+     * or if the parent is not a timestamped snapshot, no action is taken.
+     *
+     * @param pom the pom to update
+     * @param parent the parent project
+     * @throws XMLStreamException   thrown if XML streaming fails
+     * @throws VersionResolutionException thrown if version resolution fails
+     */
     protected void lockParentSnapshot(MutableXMLStreamReader pom, MavenProject parent)
             throws XMLStreamException, VersionResolutionException {
         if (parent == null) {

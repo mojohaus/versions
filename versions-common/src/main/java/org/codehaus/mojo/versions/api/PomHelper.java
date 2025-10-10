@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions.api;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.TransformerException;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -97,7 +96,13 @@ import static org.codehaus.mojo.versions.api.PomHelper.Marks.END_ELEMENT;
 import static org.codehaus.mojo.versions.api.PomHelper.Marks.PARENT_START;
 import static org.codehaus.mojo.versions.api.PomHelper.Marks.START;
 
+/**
+ * A utility class for parsing and performing operations on pom.xml files
+ */
 public class PomHelper {
+    /**
+     * Static instance of the {@code org.apache.maven.plugins} string
+     */
     public static final String APACHE_MAVEN_PLUGINS_GROUPID = "org.apache.maven.plugins";
 
     private static final Set<String> IMPLICIT_PATHS = new HashSet<>(Arrays.asList(
@@ -140,6 +145,9 @@ public class PomHelper {
 
     /**
      * Creates a new instance
+     *
+     * @param artifactFactory     {@link ArtifactFactory} instance
+     * @param expressionEvaluator {@link ExpressionEvaluator} instance
      */
     public PomHelper(ArtifactFactory artifactFactory, ExpressionEvaluator expressionEvaluator) {
         this.artifactFactory = artifactFactory;
@@ -177,7 +185,7 @@ public class PomHelper {
      * Gets the current raw model before any interpolation what-so-ever.
      *
      * @param modelString a string containing the raw model
-     * @param modelPath the File containing the model
+     * @param modelPath   the File containing the model
      * @return The raw model.
      * @throws IOException if the file is not found or if the file does not parse.
      */
@@ -421,7 +429,7 @@ public class PomHelper {
      *
      * @param pom The pom.
      * @return the project version or <code>null</code> if the project version is not defined (i.e. inherited from
-     * parent version).
+     *         parent version).
      * @throws XMLStreamException if something went wrong.
      */
     public static String getProjectVersion(final MutableXMLStreamReader pom) throws XMLStreamException {
@@ -796,6 +804,7 @@ public class PomHelper {
      * Examines the project to find any properties which are associated with versions of artifacts in the project.
      *
      * @param helper        {@link VersionsHelper} instance
+     * @param log           {@link Log} instance
      * @param project       The project to examine.
      * @param includeParent whether parent POMs should be included
      * @return An array of properties that are associated within the project.
@@ -909,9 +918,9 @@ public class PomHelper {
      * Takes a list of {@link org.apache.maven.model.Plugin} instances and adds associations to properties used to
      * define versions of the plugin artifact or any of the plugin dependencies specified in the pom.
      *
-     * @param result              The map of {@link org.codehaus.mojo.versions.api.PropertyVersionsBuilder} keyed by
-     *                            property name.
-     * @param plugins             The list of {@link org.apache.maven.model.Plugin}.
+     * @param result  The map of {@link org.codehaus.mojo.versions.api.PropertyVersionsBuilder} keyed by
+     *                property name.
+     * @param plugins The list of {@link org.apache.maven.model.Plugin}.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      */
     private void addPluginAssociations(Map<String, PropertyVersionsBuilder> result, List<Plugin> plugins)
@@ -1261,7 +1270,7 @@ public class PomHelper {
                         return new ModelNode(rootNode, getRawModel(pom.getSource(), pomFile.toFile()), pom);
                     } catch (IOException e) {
                         throw new UncheckedIOException("Could not open " + pomFile, e);
-                    } catch (XMLStreamException | TransformerException e) {
+                    } catch (XMLStreamException e) {
                         throw new RuntimeException("Could not parse " + pomFile, e);
                     }
                 })
@@ -1276,7 +1285,7 @@ public class PomHelper {
      * @param propertyName name of the property to be found
      * @param node         model tree node at which the search should be started
      * @return {@link Optional} object containing the model tree node containing the closest
-     * property definition, or {@link Optional#empty()} if none has been found
+     *         property definition, or {@link Optional#empty()} if none has been found
      */
     public static Optional<ModelNode> findProperty(String propertyName, ModelNode node) {
         if (ofNullable(node.getModel().getProperties())
@@ -1413,8 +1422,9 @@ public class PomHelper {
      * Reads an XML from the given InputStream.
      *
      * @param inputStream The input stream to read.
-     * @return Pair&lt;String, Charset&gt; The (mutable) content of the file with the charset of the file
-     * @throws java.io.IOException when things go wrong.
+     * @return a pair representing the (mutable) content of the file with the charset of the file
+     * @throws IOException thrown if it's not possible to read from the provided input stream
+     * @throws XMLStreamException thrown if there are problems parsing the provided input stream
      */
     public static Pair<String, Charset> readXml(InputStream inputStream) throws IOException, XMLStreamException {
         try (BufferedInputStream buffer = new BufferedInputStream(inputStream)) {
@@ -1441,10 +1451,10 @@ public class PomHelper {
      *
      * @param file The file to read.
      * @return Pair&lt;String, Charset&gt; The contents of the file with the charset of the file
-     * @throws java.io.IOException when things go wrong.
+     * @throws IOException thrown on problems with reading from the file
+     * @throws XMLStreamException thrown if there are problems parsing the file
      */
-    public static Pair<String, Charset> readXml(File file)
-            throws IOException, XMLStreamException, TransformerException {
+    public static Pair<String, Charset> readXml(File file) throws IOException, XMLStreamException {
         try (InputStream is = Files.newInputStream(file.toPath())) {
             return readXml(is);
         }

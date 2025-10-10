@@ -18,7 +18,6 @@ package org.codehaus.mojo.versions.rewriting;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.TransformerException;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -73,7 +72,7 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
      * @throws IOException        thrown in case of an I/O problems
      * @throws XMLStreamException thrown if the file cannot be parsed
      */
-    public MutableXMLStreamReader(Path path) throws IOException, XMLStreamException, TransformerException {
+    public MutableXMLStreamReader(Path path) throws IOException, XMLStreamException {
         this(Files.newInputStream(path), path);
     }
 
@@ -85,8 +84,7 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
      * @throws IOException        thrown in case of an I/O problems
      * @throws XMLStreamException thrown if the file cannot be parsed
      */
-    public MutableXMLStreamReader(InputStream inputStream, Path fileName)
-            throws IOException, XMLStreamException, TransformerException {
+    public MutableXMLStreamReader(InputStream inputStream, Path fileName) throws IOException, XMLStreamException {
         super(null);
         this.fileName = fileName;
         init(inputStream);
@@ -320,7 +318,7 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
         marks.remove(markNr);
     }
 
-    private void init(InputStream inputStream) throws IOException, XMLStreamException, TransformerException {
+    private void init(InputStream inputStream) throws IOException, XMLStreamException {
         try (BufferedInputStream buf = new BufferedInputStream(inputStream)) {
             buf.mark(0x4000);
 

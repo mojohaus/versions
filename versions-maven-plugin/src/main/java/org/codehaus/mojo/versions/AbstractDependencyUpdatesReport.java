@@ -52,6 +52,7 @@ import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 
 /**
  * Generates a report of available updates for the dependencies of a project.
+ * Base class, abstracting functionality regardless of whether we're rendering an individual, or an aggregate report.
  */
 public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsReport<DependencyUpdatesModel> {
 
@@ -111,6 +112,15 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
     @Parameter(property = "onlyUpgradable", defaultValue = "false")
     protected boolean onlyUpgradable;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param i18n             {@link I18N} bean instance
+     * @param artifactFactory  {@link ArtifactFactory} bean instance
+     * @param repositorySystem {@link RepositorySystem} bean instance
+     * @param wagonMap         map of {@link Wagon} instances per protocol
+     * @param rendererFactory  {@link ReportRendererFactory} instance
+     */
     protected AbstractDependencyUpdatesReport(
             I18N i18n,
             ArtifactFactory artifactFactory,
@@ -201,6 +211,14 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
         }
     }
 
+    /**
+     * Collects transitive dependency management, storing the dependencies in the provided collector
+     *
+     * @param project                       instance of {@link MavenProject}
+     * @param dependencyManagementCollector a mutable {@link Set} instance, which will be used to collect
+     *                                      dependencies from the project
+     * @throws MavenReportException thrown if it's not possible to retrieve versions for any of the dependencies
+     */
     protected void handleDependencyManagementTransitive(
             MavenProject project, Set<Dependency> dependencyManagementCollector) throws MavenReportException {
         try {
@@ -227,8 +245,8 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
      * in projects direct dependencies section.
      *
      * @return a {@link Set<Dependency>} that can be additionally populated by {@link #populateDependencies(Set)}.
-     * If not, an empty set is returned
-     * */
+     *         If not, an empty set is returned
+     */
     private Set<Dependency> getDependencies() {
         final Set<Dependency> dependenciesCollector = new TreeSet<>(DEPENDENCY_COMPARATOR);
         populateDependencies(dependenciesCollector);
@@ -241,8 +259,8 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
      * in the creation of the report.
      *
      * @param dependenciesCollector, a Set, initialized with a DependencyComparator
-     * comparator.
-     * */
+     *                               comparator.
+     */
     protected abstract void populateDependencies(Set<Dependency> dependenciesCollector);
 
     /**
@@ -251,8 +269,8 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
      * in projects dependencyManagement section.
      *
      * @return a {@link Set<Dependency>} that can be additionally populated by
-     * {@link #populateDependencyManagement(Set)}. If not, an empty set is returned
-     * */
+     *         {@link #populateDependencyManagement(Set)}. If not, an empty set is returned
+     */
     private Set<Dependency> getDependencyManagement() throws MavenReportException {
         final Set<Dependency> dependencyManagementCollector = new TreeSet<>(DEPENDENCY_COMPARATOR);
         populateDependencyManagement(dependencyManagementCollector);
@@ -265,10 +283,9 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
      * in the creation of the report.
      *
      * @param dependencyManagementCollector, a Set initialized with a DependencyComparator
-     * comparator.
-     *
+     *                                       comparator.
      * @throws MavenReportException when things go wrong.
-     * */
+     */
     protected abstract void populateDependencyManagement(Set<Dependency> dependencyManagementCollector)
             throws MavenReportException;
 
@@ -308,6 +325,11 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
                         || dmDep.getVersion().equals(dep.getVersion()));
     }
 
+    /**
+     * Returns {@code true} if the given {@link MavenProject} has a non-empty dependency management section
+     * @param project {@link MavenProject} instance
+     * @return {@code true} if the given {@link MavenProject} has a non-empty dependency management section
+     */
     protected boolean hasDependencyManagement(MavenProject project) {
         if (project == null) {
             return false;

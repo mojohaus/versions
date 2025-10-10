@@ -318,6 +318,15 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
+    /**
+     * Creates a new instance
+     *
+     * @param artifactFactory  an {@link ArtifactFactory} instance
+     * @param repositorySystem a {@link RepositorySystem} instance
+     * @param wagonMap         a map of wagon providers per protocol
+     * @param changeRecorders a map of change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     @Inject
     public DisplayDependencyUpdatesMojo(
             ArtifactFactory artifactFactory,
@@ -333,6 +342,15 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
         return allowSnapshots;
     }
 
+    /**
+     * Whether the given dependency matches the managed dependency. Matching means that
+     * groupId and artifactId are equal, and if scope, classifier or version is set
+     * in the managed dependency, they must be equal, too.
+     *
+     * @param dependency the dependency to check
+     * @param managedDependency the managed dependency to check against
+     * @return true if the dependencies match, false otherwise
+     */
     // open for tests
     protected static boolean dependenciesMatch(Dependency dependency, Dependency managedDependency) {
         if (!managedDependency.getGroupId().equals(dependency.getGroupId())) {

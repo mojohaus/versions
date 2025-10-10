@@ -82,6 +82,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
         setCurrentVersionRange(other.getCurrentVersionRange());
     }
 
+    @Override
     public int compareTo(ArtifactVersions that) {
         return this == that
                 ? 0

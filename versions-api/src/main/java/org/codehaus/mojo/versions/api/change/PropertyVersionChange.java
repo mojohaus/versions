@@ -26,17 +26,20 @@ package org.codehaus.mojo.versions.api.change;
 public interface PropertyVersionChange extends VersionChange {
 
     /**
-     * @return the property that has changed
+     * Returns the name of the property
+     * @return name of the property
      */
     String getProperty();
 
     /**
-     * @return the old value of the property
+     * Returns the old value of the property
+     * @return old value of the property
      */
     String getOldValue();
 
     /**
-     * @return the new value of the property
+     * Returns the new value of the property
+     * @return new value of the property
      */
     String getNewValue();
 }

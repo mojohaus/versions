@@ -6,15 +6,36 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 
+/**
+ * A simple "matcher" object providing a utility whether the given string matches a pattern consisting of
+ * strings containing the wildcard ({@code *}) character. Each occurrence of the wildcard can be expanded
+ * to match any string.
+ */
 public class WildcardMatcher implements Predicate<String> {
+    /**
+     * The wildcard character.
+     */
     public static final String WILDCARD = "*";
 
     private final String pattern;
 
+    /**
+     * Creates a new matcher for the given pattern. Each occurrence of the wildcard ({@code *}) can be expanded
+     * to match any string.
+     *
+     * @param pattern pattern to be matched against.
+     */
     protected WildcardMatcher(String pattern) {
         this.pattern = pattern;
     }
 
+    /**
+     * Creates a new matcher for the given pattern. Each occurrence of the wildcard ({@code *}) can be expanded
+     * to match any string.
+     *
+     * @param pattern pattern to be matched against.
+     * @return a new instance satisfying the provided pattern
+     */
     public static WildcardMatcher parse(String pattern) {
         return new WildcardMatcher(pattern);
     }
@@ -68,6 +89,10 @@ public class WildcardMatcher implements Predicate<String> {
         }
     }
 
+    /**
+     * Returns the pattern to be matched against
+     * @return pattern
+     */
     public String getPattern() {
         return pattern;
     }

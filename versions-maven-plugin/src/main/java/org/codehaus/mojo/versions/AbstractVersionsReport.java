@@ -144,7 +144,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     protected ReportRendererFactory rendererFactory;
 
     /**
-     * (injected) map of {@link Wagon} instances
+     * (injected) map of {@link Wagon} instances per protocol
      *
      * @since 2.14.0
      */
@@ -154,6 +154,14 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
+    /**
+     * Creates a new instance.
+     * @param i18n a {@link I18N} instance
+     * @param artifactFactory a {@link ArtifactFactory} instance
+     * @param repositorySystem a {@link RepositorySystem} instance
+     * @param wagonMap a map of {@link Wagon} instances per protocol
+     * @param rendererFactory a {@link ReportRendererFactory} instance
+     */
     protected AbstractVersionsReport(
             I18N i18n,
             ArtifactFactory artifactFactory,
@@ -167,6 +175,12 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         this.rendererFactory = rendererFactory;
     }
 
+    /**
+     * Returns the configured {@link VersionsHelper} instance, creating it lazily.
+     *
+     * @return the {@link VersionsHelper}
+     * @throws MavenReportException if the helper cannot be created due to a MojoExecutionException
+     */
     public synchronized VersionsHelper getHelper() throws MavenReportException {
         if (helper == null) {
             try {
@@ -195,7 +209,6 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         }
         return helper;
     }
-
     /**
      * {@inheritDoc}
      */
@@ -251,10 +264,20 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         return i18n.getString(getOutputPath(), locale, key);
     }
 
+    /**
+     * Whether to allow snapshots when searching for the latest version of an artifact.
+     *
+     * @return {@code true} if snapshots should be allowed when searching for newer versions of artifacts.
+     */
     public Boolean getAllowSnapshots() {
         return this.allowSnapshots;
     }
 
+    /**
+     * Getter the {@link I18N} instance.
+     *
+     * @return an {@link I18N} instance
+     */
     public I18N getI18n() {
         return i18n;
     }
