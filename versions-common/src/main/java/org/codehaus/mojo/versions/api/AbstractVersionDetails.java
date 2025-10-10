@@ -59,6 +59,19 @@ public abstract class AbstractVersionDetails implements VersionDetails {
                     + "[-.]?(\\d{0,2}[a-z]?|\\d{6}\\.\\d{4})|\\d{8}(?:\\.?\\d{6})?)$");
 
     /**
+     * Checks if the given version string represents a pre-release version.
+     * Pre-release versions include alpha, beta, milestone, preview, and release candidate versions.
+     *
+     * @param version the version string to check
+     * @return true if the version is a pre-release version, false otherwise
+     *
+     * @since 2.20.0
+     */
+    public static boolean isPreReleaseVersion(String version) {
+        return version != null && PREVIEW_PATTERN.matcher(version).matches();
+    }
+
+    /**
      * Current version of the dependency artifact.
      *
      * @since 1.0-beta-1

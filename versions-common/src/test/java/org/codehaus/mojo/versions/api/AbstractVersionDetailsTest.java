@@ -165,4 +165,50 @@ class AbstractVersionDetailsTest {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("[,0]"));
         assertThrows(NullPointerException.class, () -> instance.getSelectedRestriction(null));
     }
+
+    @Test
+    void testIsPreReleaseVersion() {
+        // Stable versions should not be pre-release
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0"), is(false));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("6.2.3"), is(false));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("6.2.4"), is(false));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("2.0.0"), is(false));
+
+        // Alpha versions
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha1"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha12"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-ALPHA"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-a"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-a1"), is(true));
+
+        // Beta versions
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-beta"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-beta1"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-BETA"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-b"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-b1"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("2.0.0-beta"), is(true));
+
+        // Milestone versions
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-M1"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-M2"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("7.0.0-M3"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-milestone"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-milestone1"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-m"), is(true));
+
+        // Release candidate versions
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-rc"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-rc1"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-RC"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-RC1"), is(true));
+
+        // Preview versions
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-preview"), is(true));
+        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-PREVIEW"), is(true));
+
+        // Null should return false
+        assertThat(AbstractVersionDetails.isPreReleaseVersion(null), is(false));
+    }
 }

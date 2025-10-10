@@ -237,4 +237,57 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
                 hasItem(new DefaultDependencyVersionChange(
                         "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
     }
+
+    @Test
+    public void testDontUpgradeToPreReleaseByDefault()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+                    VersionRetrievalException {
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("pre-release-artifact")
+                        .withVersion("1.0.0")
+                        .withType("pom")
+                        .withClassifier("default")
+                        .withScope(SCOPE_COMPILE)
+                        .build()));
+
+        // Use all defaults to test that allowPreReleases=false (default) filters out pre-releases
+
+        tryUpdate();
+        // Should upgrade to 1.1.0, not 1.2.0-beta1 (pre-release should be filtered out by default)
+        // Available: 1.2.0-beta1, 1.1.0, 1.0.0
+        // With allowPreReleases=false (default), beta is excluded and 1.1.0 is selected
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultDependencyVersionChange("default-group", "pre-release-artifact", "1.0.0", "1.1.0")));
+    }
+
+    @Test
+    public void testUpgradeToPreReleaseWhenAllowed()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+                    VersionRetrievalException {
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Collections.singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("pre-release-artifact")
+                        .withVersion("1.0.0")
+                        .withType("pom")
+                        .withClassifier("default")
+                        .withScope(SCOPE_COMPILE)
+                        .build()));
+
+        setVariableValueToObject(mojo, "allowPreReleases", true);
+
+        tryUpdate();
+        // When allowPreReleases is true, beta version can be selected
+        // Available: 1.2.0-beta1, 1.1.0, 1.0.0
+        // Beta version 1.2.0-beta1 is highest and will be selected
+        assertThat(
+                changeRecorder.getChanges(),
+                hasItem(new DefaultDependencyVersionChange(
+                        "default-group", "pre-release-artifact", "1.0.0", "1.2.0-beta1")));
+    }
 }
