@@ -22,6 +22,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.TestLog;
 import org.codehaus.mojo.versions.utils.TestUtils;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -67,7 +68,7 @@ public class SetMojoTest extends AbstractMojoTestCase {
 
     @Test
     public void testGetIncrementedVersion() throws MojoExecutionException {
-        new SetMojo(artifactFactory, null, null, null, null, null) {
+        new SetMojo(artifactFactory, null, null, null, TestVersionChangeRecorder.asTestMap(), null) {
             {
                 assertThat(getIncrementedVersion("1", null), is("2-SNAPSHOT"));
                 assertThat(getIncrementedVersion("1.0", null), is("1.1-SNAPSHOT"));
@@ -83,7 +84,7 @@ public class SetMojoTest extends AbstractMojoTestCase {
 
     @Test
     public void testNextSnapshotIndexLowerBound() throws MojoExecutionException {
-        new SetMojo(artifactFactory, null, null, null, null, null) {
+        new SetMojo(artifactFactory, null, null, null, TestVersionChangeRecorder.asTestMap(), null) {
             {
                 try {
                     getIncrementedVersion("1.0.0", 0);
@@ -97,7 +98,7 @@ public class SetMojoTest extends AbstractMojoTestCase {
 
     @Test
     public void testNextSnapshotIndexUpperBound() throws MojoExecutionException {
-        new SetMojo(artifactFactory, null, null, null, null, null) {
+        new SetMojo(artifactFactory, null, null, null, TestVersionChangeRecorder.asTestMap(), null) {
             {
                 try {
                     getIncrementedVersion("1.0.0", 4);
@@ -115,7 +116,7 @@ public class SetMojoTest extends AbstractMojoTestCase {
     @Test
     public void testNextSnapshotIndexWithoutNextSnapshot() throws MojoFailureException {
         try {
-            new SetMojo(artifactFactory, null, null, null, null, null) {
+            new SetMojo(artifactFactory, null, null, null, TestVersionChangeRecorder.asTestMap(), null) {
                 {
                     project = new MavenProject();
                     project.setParent(new MavenProject());
@@ -268,7 +269,7 @@ public class SetMojoTest extends AbstractMojoTestCase {
 
     @Test
     public void testNextSnapshotIndexToIncrement() throws MojoExecutionException {
-        new SetMojo(artifactFactory, null, null, null, null, null) {
+        new SetMojo(artifactFactory, null, null, null, TestVersionChangeRecorder.asTestMap(), null) {
             {
                 nextSnapshot = true;
                 assertThat(getIncrementedVersion("1.1.1-SNAPSHOT", 1), is("2.0.0-SNAPSHOT"));

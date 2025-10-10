@@ -40,6 +40,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.TestUtils;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.After;
@@ -103,14 +104,16 @@ public class DisplayParentUpdatesMojoTest {
     public void setUp() throws IllegalAccessException, IOException, MojoExecutionException {
         tempDir = TestUtils.createTempDir("display-property-updates");
         tempFile = Files.createTempFile(tempDir, "output", "");
-        mojo = new DisplayParentUpdatesMojo(artifactFactory, repositorySystem, null, null) {
-            {
-                setProject(createProject());
-                reactorProjects = Collections.emptyList();
-                session = mockMavenSession();
-                mojoExecution = mock(MojoExecution.class);
-            }
-        };
+        mojo =
+                new DisplayParentUpdatesMojo(
+                        artifactFactory, repositorySystem, null, TestVersionChangeRecorder.asTestMap()) {
+                    {
+                        setProject(createProject());
+                        reactorProjects = Collections.emptyList();
+                        session = mockMavenSession();
+                        mojoExecution = mock(MojoExecution.class);
+                    }
+                };
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
         openMocks(this);

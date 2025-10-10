@@ -23,6 +23,12 @@ import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 
+/**
+ * Represents a dependency change.
+ *
+ * @deprecated replaced by {@link org.codehaus.mojo.versions.model.DependencyVersionChange}
+ */
+@Deprecated
 public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
     private final ChangeKind kind;
     private final DependencyVersionChange versionChange;

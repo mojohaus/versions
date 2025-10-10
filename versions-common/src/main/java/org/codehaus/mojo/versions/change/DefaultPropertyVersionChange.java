@@ -23,8 +23,9 @@ import org.codehaus.mojo.versions.api.change.PropertyVersionChange;
 /**
  * Represents a change of a property value
  *
- * @author Andrzej Jarmoniuk
+ * @deprecated replaced by {@code versions-model}
  */
+@Deprecated
 public final class DefaultPropertyVersionChange implements PropertyVersionChange {
 
     private final String property;

@@ -1,0 +1,2 @@
+execution;goal;date;kind;groupId;artifactId;oldVersion;newVersion;property;oldValue;newValue
+c0cbf50d-047a-483a-8046-6e5631f94365;test;2025-10-04T11:10:51.765+02:00;DEPENDENCY_UPDATE;org.codehaus;example0;0.0.1-SNAPSHOT;0.0.1;;;

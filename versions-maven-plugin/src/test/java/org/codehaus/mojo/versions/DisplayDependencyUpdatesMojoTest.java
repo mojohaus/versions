@@ -39,6 +39,7 @@ import org.codehaus.mojo.versions.model.TestIgnoreVersions;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.CloseableTempFile;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -180,7 +181,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowMajorUpdates = false;
@@ -217,7 +218,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowMajorUpdates = false;
@@ -251,7 +252,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowMinorUpdates = false;
@@ -286,7 +287,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowIncrementalUpdates = false;
@@ -324,7 +325,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowMinorUpdates = false;
@@ -422,7 +423,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     processDependencies = true;
@@ -454,7 +455,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     processDependencies = true;
@@ -642,7 +643,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                             }
                         }),
                         null,
-                        null) {
+                        TestVersionChangeRecorder.asTestMap()) {
                     {
                         setProject(createProject());
                         processDependencies = true;
