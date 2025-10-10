@@ -277,8 +277,8 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
             }
 
             if (StringUtils.isBlank(dep.getVersion())) {
-                throw new MojoExecutionException(
-                        "Found invalid managed dependency " + toString(dep) + " without a version");
+                getLog().info("Found managed dependency " + toString(dep) + " without a version");
+                continue;
             }
 
             if (isHandledByProperty(dep)) {
