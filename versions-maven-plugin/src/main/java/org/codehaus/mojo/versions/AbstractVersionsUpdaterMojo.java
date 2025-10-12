@@ -244,7 +244,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @param artifactFactory the artifact factory
      * @param repositorySystem the repository system
      * @param wagonMap map of wagon instances
-     * @param changeRecorders map of change recorders
+     * @param changeRecorderFactories map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -526,6 +526,12 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         return null;
     }
 
+    /**
+     * Parses the {@link #changeRecorderOptions} into a map of key-value pairs.
+     *
+     * @return the parsed options or {@code null} if no options were provided
+     * @throws IllegalArgumentException if the options are malformed
+     */
     protected Map<String, String> getChangeRecorderOptions() {
         if (changeRecorderOptions == null) {
             return null;

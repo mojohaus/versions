@@ -103,7 +103,7 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
      * @param artifactFactory a {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
      * @param wagonMap a map of {@link Wagon} instances per protocol
-     * @param changeRecorders a map of change recorders
+     * @param changeRecorderFactories a map of change recorder factories
      * @throws MojoExecutionException thrown if an error occurs
      */
     @Inject

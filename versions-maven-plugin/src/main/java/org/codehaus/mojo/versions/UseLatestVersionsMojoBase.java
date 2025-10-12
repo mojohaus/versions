@@ -132,7 +132,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      * @param artifactFactory   an {@link ArtifactFactory} instance
      * @param repositorySystem  a {@link RepositorySystem} instance
      * @param wagonMap          a map of wagon providers per protocol
-     * @param changeRecorders   a map of change recorders
+     * @param changeRecorderFactories   a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     public UseLatestVersionsMojoBase(

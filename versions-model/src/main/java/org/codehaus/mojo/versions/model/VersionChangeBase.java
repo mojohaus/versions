@@ -5,6 +5,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+/**
+ * Base class for version changes to provide common implementations of Object methods.
+ */
 public abstract class VersionChangeBase {
     @Override
     public String toString() {

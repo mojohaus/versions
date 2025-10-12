@@ -13,8 +13,17 @@ import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.model.PropertyVersionChange;
 import org.codehaus.mojo.versions.model.VersionChange;
 
+/**
+ * A Jackson module for JSON deserialization of {@link VersionChange}.
+ * It registers a deserializer that can handle the polymorphic nature of VersionChange.
+ *
+ * @since 2.20.0
+ */
 public class JsonVersionChangeModule extends SimpleModule {
-    {
+    /**
+     * Creates a new module.
+     */
+    public JsonVersionChangeModule() {
         addDeserializer(VersionChange.class, new JsonDeserializer<VersionChange>() {
             @Override
             public VersionChange deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {

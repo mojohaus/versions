@@ -39,6 +39,11 @@ public class CsvVersionChangeRenderer implements ChangeRecorderRenderer {
 
     private final CsvSchema schema;
 
+    /**
+     * Creates a new instance of CsvVersionChangeRenderer.
+     *
+     * @param objectFactory the object factory to use to create model instances
+     */
     public CsvVersionChangeRenderer(ObjectFactory objectFactory) {
         mapper = new CsvMapper();
         mapper.registerModule(new JavaTimeModule());

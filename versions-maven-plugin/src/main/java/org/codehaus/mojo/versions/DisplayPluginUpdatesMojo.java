@@ -196,7 +196,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param lifecycleExecutor the (injected) instance of {@link LifecycleExecutor}
      * @param modelInterpolator the (injected) instance of {@link ModelInterpolator}
      * @param runtimeInformation the (injected) instance of {@link RuntimeInformation}
-     * @param changeRecorders   a map of change recorders
+     * @param changeRecorderFactories   a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject

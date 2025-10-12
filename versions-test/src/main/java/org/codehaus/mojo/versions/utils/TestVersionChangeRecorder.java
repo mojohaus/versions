@@ -30,10 +30,19 @@ import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.model.VersionChange;
 import org.codehaus.mojo.versions.model.VersionsExecution;
 
+/**
+ * A test implementation of VersionChangeRecorder that stores changes in memory for inspection.
+ * This implementation does not write any report to disk.
+ */
 @Named("test")
 public class TestVersionChangeRecorder implements VersionChangeRecorderFactory, VersionChangeRecorder {
     private final VersionsExecution versionsExecution =
             new VersionsExecution().withDate(ZonedDateTime.now()).withGoal("test-goal");
+
+    /**
+     * Creates a new instance of TestVersionChangeRecorder.
+     */
+    public TestVersionChangeRecorder() {}
 
     @Override
     public void recordChange(VersionChange versionChange) {
@@ -48,10 +57,20 @@ public class TestVersionChangeRecorder implements VersionChangeRecorderFactory, 
         return "versions-changes.xml";
     }
 
+    /**
+     * Gets the list of recorded version changes.
+     * @return the list of version changes
+     */
     public List<VersionChange> getChanges() {
         return versionsExecution.getVersionChanges();
     }
 
+    /**
+     * Provides a map with a single entry mapping "none" to a new instance of TestVersionChangeRecorder.
+     * This can be used in testing scenarios where a VersionChangeRecorderFactory map is required.
+     *
+     * @return a map with "none" mapped to a TestVersionChangeRecorder instance
+     */
     public static Map<String, VersionChangeRecorderFactory> asTestMap() {
         return Collections.singletonMap("none", new TestVersionChangeRecorder());
     }

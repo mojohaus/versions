@@ -16,6 +16,11 @@ import org.codehaus.mojo.versions.recording.json.JsonVersionChangeRenderer;
  */
 @Named("json")
 public class JsonVersionChangeRecorderFactory implements VersionChangeRecorderFactory {
+    /**
+     * Create a new instance
+     */
+    public JsonVersionChangeRecorderFactory() {}
+
     @Override
     public synchronized VersionChangeRecorder create(
             MavenSession mavenSession, MojoExecution mojoExecution, Map<String, String> changeRendererOptions) {

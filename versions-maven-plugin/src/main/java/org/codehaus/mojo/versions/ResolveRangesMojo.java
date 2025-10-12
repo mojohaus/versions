@@ -168,7 +168,7 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @param artifactFactory   the artifact factory
      * @param repositorySystem  the repository system
      * @param wagonMap          the map of wagon implementations
-     * @param changeRecorders   the change recorders
+     * @param changeRecorderFactories   the change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject

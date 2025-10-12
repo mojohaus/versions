@@ -16,10 +16,22 @@ import org.codehaus.mojo.versions.model.PropertyVersionChange;
 import org.codehaus.mojo.versions.model.VersionsExecution;
 import org.codehaus.mojo.versions.model.xjb.ZonedDateTimeXmlAdapter;
 
+/**
+ * A CSV deserializer for {@link ChangeRecorderLog}.
+ *
+ * @since 2.20.0
+ */
 public class ChangeRecorderLogCsvDeserializer extends StdDeserializer<ChangeRecorderLog> {
-
+    /**
+     * The object factory to use to create model instances.
+     */
     private final ObjectFactory objectFactory;
 
+    /**
+     * Creates a new deserializer.
+     *
+     * @param objectFactory the object factory to use to create model instances
+     */
     public ChangeRecorderLogCsvDeserializer(ObjectFactory objectFactory) {
         super(VersionsExecution.class);
         this.objectFactory = objectFactory;

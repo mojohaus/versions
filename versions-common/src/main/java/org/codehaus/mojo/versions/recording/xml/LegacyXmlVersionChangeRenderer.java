@@ -18,6 +18,7 @@ import org.codehaus.mojo.versions.recording.ChangeRecorderRenderer;
 /**
  * {@link ChangeRecorderRenderer} which renders changes in the legacy
  * {@code http://www.mojohaus.org/versions-maven-plugin/schema/updates/2.0} format.
+ * @since 2.20.0
  */
 public final class LegacyXmlVersionChangeRenderer implements ChangeRecorderRenderer {
 

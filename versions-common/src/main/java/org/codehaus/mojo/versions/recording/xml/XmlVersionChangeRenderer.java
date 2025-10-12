@@ -15,6 +15,13 @@ import org.codehaus.mojo.versions.model.ChangeRecorderLog;
 import org.codehaus.mojo.versions.model.ObjectFactory;
 import org.codehaus.mojo.versions.recording.ChangeRecorderRenderer;
 
+/**
+ * An implementation of {@link ChangeRecorderRenderer} that reads and writes XML files using JAXB.
+ * This implementation is compatible with the schema defined at
+ * {@code http://www.mojohaus.org/versions-maven-plugin/schema/updates/3.0}.
+ *
+ * @since 2.20.0
+ */
 public final class XmlVersionChangeRenderer implements ChangeRecorderRenderer {
 
     private static final String SCHEMA_LOCATION =
@@ -24,6 +31,11 @@ public final class XmlVersionChangeRenderer implements ChangeRecorderRenderer {
 
     private final ObjectFactory objectFactory;
 
+    /**
+     * Creates a new instance of XmlVersionChangeRenderer.
+     *
+     * @param objectFactory the object factory to use to create model instances
+     */
     public XmlVersionChangeRenderer(ObjectFactory objectFactory) {
         this.objectFactory = objectFactory;
         try {

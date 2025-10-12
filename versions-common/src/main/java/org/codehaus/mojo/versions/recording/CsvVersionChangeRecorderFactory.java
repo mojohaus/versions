@@ -16,6 +16,11 @@ import org.codehaus.mojo.versions.recording.csv.CsvVersionChangeRenderer;
  */
 @Named("csv")
 public class CsvVersionChangeRecorderFactory implements VersionChangeRecorderFactory {
+    /**
+     * Create a new instance.
+     */
+    public CsvVersionChangeRecorderFactory() {}
+
     @Override
     public synchronized VersionChangeRecorder create(
             MavenSession mavenSession, MojoExecution mojoExecution, Map<String, String> changeRendererOptions) {

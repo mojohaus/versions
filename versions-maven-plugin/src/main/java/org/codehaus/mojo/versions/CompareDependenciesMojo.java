@@ -163,7 +163,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
      * @param repositorySystem a {@link RepositorySystem} instance
      * @param wagonMap a map of wagon providers per protocol
      * @param projectBuilder a {@link ProjectBuilder} instance
-     * @param changeRecorders a map of change recorders
+     * @param changeRecorderFactories a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject

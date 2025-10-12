@@ -35,6 +35,9 @@ import org.codehaus.mojo.versions.recording.ChangeRecorderRenderer;
 public class JsonVersionChangeRenderer implements ChangeRecorderRenderer {
     private final ObjectMapper mapper;
 
+    /**
+     * Creates a new instance of JsonVersionChangeRenderer.
+     */
     public JsonVersionChangeRenderer() {
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());

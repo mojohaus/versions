@@ -81,7 +81,7 @@ public class UseNextReleasesMojo extends UseLatestVersionsMojoBase {
      * @param artifactFactory   the artifact factory
      * @param repositorySystem  the repository system
      * @param wagonMap          the wagon map
-     * @param changeRecorders   the change recorders
+     * @param changeRecorderFactories   the change recorder factories
      * @throws MojoExecutionException if any
      */
     @Inject

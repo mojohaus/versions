@@ -266,7 +266,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      * @param repositorySystem  the repository system
      * @param projectBuilder    the project builder
      * @param wagonMap          the map of wagon implementations
-     * @param changeRecorders   the change recorders
+     * @param changeRecorderFactories   the change recorder factories
      * @param prompter          the prompter
      * @throws MojoExecutionException when things go wrong
      */

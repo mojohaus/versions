@@ -14,7 +14,17 @@ import org.codehaus.mojo.versions.model.VersionChange;
 import org.codehaus.mojo.versions.model.VersionsExecution;
 import org.codehaus.mojo.versions.model.xjb.ZonedDateTimeXmlAdapter;
 
+/**
+ * A CSV serializer for {@link ChangeRecorderLog}.
+ *
+ * @since 2.20.0
+ */
 public class ChangeRecorderLogCsvSerializer extends JsonSerializer<ChangeRecorderLog> {
+
+    /**
+     * Creates a new serializer.
+     */
+    public ChangeRecorderLogCsvSerializer() {}
 
     @Override
     public void serialize(ChangeRecorderLog changeRecorderLog, JsonGenerator gen, SerializerProvider serializers)
