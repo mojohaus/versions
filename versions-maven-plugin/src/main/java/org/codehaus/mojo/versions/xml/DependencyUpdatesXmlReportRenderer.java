@@ -70,6 +70,7 @@ public class DependencyUpdatesXmlReportRenderer implements ReportRenderer {
      * Creates a new instance
      * @param model object containing the updates model
      * @param outputFile output file for the report
+     * @param allowSnapshots whether snapshot versions should be considered
      */
     public DependencyUpdatesXmlReportRenderer(DependencyUpdatesModel model, Path outputFile, boolean allowSnapshots) {
         this.model = model;

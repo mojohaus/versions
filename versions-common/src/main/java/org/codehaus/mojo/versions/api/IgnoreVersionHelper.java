@@ -41,6 +41,9 @@ public class IgnoreVersionHelper {
         }
     }
 
+    /**
+     * Provides an instance of a list of valid types of {@link IgnoreVersion}
+     */
     public static final List<String> VALID_TYPES = Collections.unmodifiableList(
             Arrays.asList(IgnoreVersion.TYPE_EXACT, IgnoreVersion.TYPE_REGEX, IgnoreVersion.TYPE_RANGE));
 
@@ -59,12 +62,19 @@ public class IgnoreVersionHelper {
      * Check if type for given ignoredVersion is valid.
      *
      * @param ignoreVersion an ignored version to check
-     * @return true if type is valid
+     * @return {@code true} if type is valid
      */
     public static boolean isValidType(IgnoreVersion ignoreVersion) {
         return VALID_TYPES.contains(ignoreVersion.getType());
     }
 
+    /**
+     * Check if the provided version is ignored by the provided {@link IgnoreVersion} instance
+     *
+     * @param version version to be checked
+     * @param ignoreVersion {@link IgnoreVersion} instance providing the filter
+     * @return {@code true} if the provided version is ignored
+     */
     public static boolean isVersionIgnored(Version version, IgnoreVersion ignoreVersion) {
         return VERSION_MATCHERS.get(ignoreVersion.getType()).apply(version, ignoreVersion);
     }

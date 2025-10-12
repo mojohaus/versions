@@ -95,6 +95,15 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
     @Parameter(property = "processParent", defaultValue = "false")
     private boolean processParent = false;
 
+    /**
+     * Creates a new instance
+     *
+     * @param artifactFactory   the artifact factory
+     * @param repositorySystem  the repository system
+     * @param wagonMap          the wagon map
+     * @param changeRecorders   the change recorders
+     * @throws MojoExecutionException if any
+     */
     @Inject
     public UpdatePropertyMojo(
             ArtifactFactory artifactFactory,

@@ -29,11 +29,13 @@ import org.apache.maven.artifact.Artifact;
  */
 public interface ArtifactAssociation extends Comparable<ArtifactAssociation> {
     /**
-     * @return whether the current association uses plugin repositories
+     * Tells whether the current association uses plugin repositories
+     * @return {@code true} if the current association uses plugin repositories
      */
     boolean isUsePluginRepositories();
 
     /**
+     * Returns the artifact associated with the property
      * @return associated artifact
      */
     Artifact getArtifact();

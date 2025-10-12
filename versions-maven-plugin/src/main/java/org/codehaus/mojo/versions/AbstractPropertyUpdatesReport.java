@@ -45,6 +45,7 @@ import org.eclipse.aether.RepositorySystem;
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
  * plugins of a project.
+ * Base class, abstracting functionality regardless of whether we're rendering an individual, or an aggregate report.
  */
 public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsReport<PropertyUpdatesModel> {
 
@@ -98,6 +99,15 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
     @Parameter(property = "propertyUpdatesReportFormats", defaultValue = "html")
     protected String[] formats = new String[] {"html"};
 
+    /**
+     * Creates a new instance.
+     *
+     * @param i18n             {@link I18N} bean instance
+     * @param artifactFactory  {@link ArtifactFactory} bean instance
+     * @param repositorySystem {@link RepositorySystem} bean instance
+     * @param wagonMap         map of {@link Wagon} instances per protocol
+     * @param rendererFactory  {@link ReportRendererFactory} instance
+     */
     protected AbstractPropertyUpdatesReport(
             I18N i18n,
             ArtifactFactory artifactFactory,
@@ -123,11 +133,16 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
         return haveBuildProperties();
     }
 
+    /**
+     * Returns whether the current project has any properties defined in its build.
+     * @return {@code true} if the current project has properties, {@code false} otherwise
+     */
     protected boolean haveBuildProperties() {
         return getProject().getProperties() != null
                 && !getProject().getProperties().isEmpty();
     }
 
+    @Override
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
         try {
             final Map<Property, PropertyVersions> updateSet = new TreeMap<>(PROPERTIES_COMPARATOR);
@@ -173,10 +188,24 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
         }
     }
 
-    private PropertyUpdatesModel getPropertyUpdatesModel(Map<Property, PropertyVersions> updateSet) {
-        return new PropertyUpdatesModel(PROPERTIES_COMPARATOR, updateSet);
+    /**
+     * Returns an instance of the {@link PropertyUpdatesModel} given the retrieved map of updates per property.
+     * Does not mutate the map in the argument.
+     * @param updateMap populated map of updates per property
+     * @return generated model, based on the provided map of updates per property
+     */
+    private PropertyUpdatesModel getPropertyUpdatesModel(Map<Property, PropertyVersions> updateMap) {
+        return new PropertyUpdatesModel(PROPERTIES_COMPARATOR, updateMap);
     }
 
+    /**
+     * Creates a new instance of the {@link VersionPropertiesMapRequest} based on the provided {@link MavenProject}.
+     * The created instance is built taking into consideration the provided project as well as parameters of the Mojo
+     * such as {@link #properties}, {@link #includeProperties}, {@link #excludeProperties}, {@link #includeParent},
+     * {@link #autoLinkItems}.
+     * @param project {@link MavenProject} instance for which the request is to be generated
+     * @return an initialised {@link VersionPropertiesMapRequest} instance
+     */
     protected VersionPropertiesMapRequest getRequest(MavenProject project) {
         return VersionPropertiesMapRequest.builder()
                 .withMavenProject(project)

@@ -8,13 +8,28 @@ import java.util.function.Predicate;
 
 import org.apache.maven.model.Dependency;
 
+/**
+ * Predicate that matches a {@link Dependency} against a colon-separated pattern.
+ * <p>
+ * Patterns are of the form {@code groupId:artifactId:version:type:classifier:scope} where
+ * individual tokens may use wildcards. Use {@link #parse(String)} to create an instance.
+ */
 public class TokenizedMatcher implements Predicate<Dependency> {
+    /**
+     * The tokens that may be used in a pattern.
+     */
     public enum Tokens {
+        /** Token representing the dependency groupId. */
         GROUP_ID(Dependency::getGroupId),
+        /** Token representing the dependency artifactId. */
         ARTIFACT_ID(Dependency::getArtifactId),
+        /** Token representing the dependency version. */
         VERSION(Dependency::getVersion),
+        /** Token representing the dependency type. */
         TYPE(Dependency::getType),
+        /** Token representing the dependency classifier. */
         CLASSIFIER(Dependency::getClassifier),
+        /** Token representing the dependency scope. */
         SCOPE(Dependency::getScope);
 
         private final Function<Dependency, String> tokenExtractor;
@@ -23,6 +38,11 @@ public class TokenizedMatcher implements Predicate<Dependency> {
             this.tokenExtractor = tokenExtractor;
         }
 
+        /**
+         * Returns a function that extracts this token's value from a {@link Dependency}.
+         *
+         * @return function extracting the token string from a dependency
+         */
         public Function<Dependency, String> getTokenExtractor() {
             return tokenExtractor;
         }
@@ -30,6 +50,11 @@ public class TokenizedMatcher implements Predicate<Dependency> {
 
     private final Map<Tokens, Predicate<String>> matchers;
 
+    /**
+     * Create a new matcher from the provided token-specific predicates.
+     *
+     * @param matchers the map of token predicates
+     */
     private TokenizedMatcher(Map<Tokens, Predicate<String>> matchers) {
         this.matchers = matchers;
     }
@@ -50,6 +75,12 @@ public class TokenizedMatcher implements Predicate<Dependency> {
         return true;
     }
 
+    /**
+     * Parse a colon-separated pattern into a {@link TokenizedMatcher}.
+     *
+     * @param pattern the pattern to parse (may be {@code null})
+     * @return a matcher for the provided pattern
+     */
     public static TokenizedMatcher parse(String pattern) {
         EnumMap<Tokens, Predicate<String>> matchers = new EnumMap<>(Tokens.class);
 

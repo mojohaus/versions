@@ -24,10 +24,11 @@ import java.util.Optional;
 import org.apache.maven.artifact.Artifact;
 
 /**
- * Exception thrown if version information cannot be retrieved
+ * Exception thrown if version information cannot be retrieved.
  */
 public class VersionRetrievalException extends Exception {
 
+    /** The artifact for which version retrieval failed, may be {@code null}. */
     private final Artifact artifact;
 
     /**

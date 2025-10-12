@@ -33,6 +33,9 @@ import static org.apache.commons.text.CaseUtils.toCamelCase;
  * Auxiliary test utilities
  */
 public class TestUtils {
+
+    private TestUtils() {}
+
     /**
      * Creates a temporary directory with the given name
      *

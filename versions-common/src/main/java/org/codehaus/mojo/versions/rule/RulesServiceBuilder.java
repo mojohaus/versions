@@ -33,8 +33,25 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * Builder for creating a {@link RuleService} instance.
+ * <p>
+ * The builder allows configuring the source of rules (inline {@link org.codehaus.mojo.versions.model.RuleSet},
+ * a URI, or a classpath resource), the server id for remote access, ignored versions and other
+ * optional runtime elements such as the {@link Log} and {@link MavenSession}.
+ */
 public class RulesServiceBuilder {
     private static final String CLASSPATH_PROTOCOL = "classpath";
+
+    /**
+     * Creates a new {@code RulesServiceBuilder}.
+     *
+     * <p>Provided to ensure the generated Javadoc documents the constructor rather than
+     * relying on the default constructor which triggers a javadoc warning.</p>
+     */
+    public RulesServiceBuilder() {
+        // no-op
+    }
 
     private Collection<String> ignoredVersions;
     private RuleSet ruleSet;
@@ -45,41 +62,89 @@ public class RulesServiceBuilder {
 
     private Map<String, Wagon> wagonMap;
 
+    /**
+     * Configure an additional collection of ignored versions to be merged into the resulting rules.
+     *
+     * @param ignoredVersions collection of ignored version patterns
+     * @return this builder
+     */
     public RulesServiceBuilder withIgnoredVersions(Collection<String> ignoredVersions) {
         this.ignoredVersions = ignoredVersions;
         return this;
     }
 
+    /**
+     * Configure a {@link RuleSet} to be used directly (takes precedence over {@code rulesUri}).
+     *
+     * @param ruleSet the rule set to use
+     * @return this builder
+     */
     public RulesServiceBuilder withRuleSet(RuleSet ruleSet) {
         this.ruleSet = ruleSet;
         return this;
     }
 
+    /**
+     * Configure the server id to use when creating remote repository access.
+     *
+     * @param serverId the server id
+     * @return this builder
+     */
     public RulesServiceBuilder withServerId(String serverId) {
         this.serverId = serverId;
         return this;
     }
 
+    /**
+     * Configure a URI that points to an external rules XML document. Can be a classpath resource
+     * (prefix {@code classpath:}) or a remote URI handled via Wagon.
+     *
+     * @param rulesUri the rules URI
+     * @return this builder
+     */
     public RulesServiceBuilder withRulesUri(String rulesUri) {
         this.rulesUri = rulesUri;
         return this;
     }
 
+    /**
+     * Configure the Maven {@link Log} to be used by the built {@link RuleService}.
+     *
+     * @param log the logging instance
+     * @return this builder
+     */
     public RulesServiceBuilder withLog(Log log) {
         this.log = log;
         return this;
     }
 
+    /**
+     * Configure the current {@link MavenSession} used to resolve authentication and proxy information.
+     *
+     * @param mavenSession the maven session
+     * @return this builder
+     */
     public RulesServiceBuilder withMavenSession(MavenSession mavenSession) {
         this.mavenSession = mavenSession;
         return this;
     }
 
+    /**
+     * Configure a map of Wagon implementations keyed by protocol.
+     *
+     * @param wagonMap map of protocol to {@link Wagon}
+     * @return this builder
+     */
     public RulesServiceBuilder withWagonMap(Map<String, Wagon> wagonMap) {
         this.wagonMap = wagonMap;
         return this;
     }
 
+    /**
+     * Creates a new {@link RuleService} instance using the configured inputs.
+     * @return a new {@link RuleService} instance
+     * @throws MojoExecutionException if rules cannot be loaded from the configured URI
+     */
     public RuleService build() throws MojoExecutionException {
         assert mavenSession != null;
         assert log != null;
@@ -102,6 +167,19 @@ public class RulesServiceBuilder {
         }
         return new RuleService(log, ruleSet);
     }
+
+    /**
+     * Build the {@link RuleService} using the configured inputs.
+     *
+     * This method will load rules from the configured {@code ruleSet} if present,
+     * otherwise from the configured {@code rulesUri} (classpath or remote). If
+     * {@code ignoredVersions} are provided they will be merged into the resulting
+     * {@link org.codehaus.mojo.versions.model.RuleSet}.
+     *
+     * @return a new {@link RuleService} instance
+     * @throws MojoExecutionException if rules cannot be loaded from the configured URI
+     */
+    // document the constructor warning in javadoc generation
 
     private static class RulesUri {
         String basePath;

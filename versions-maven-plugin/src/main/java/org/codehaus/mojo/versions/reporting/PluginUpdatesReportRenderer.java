@@ -35,10 +35,21 @@ import org.codehaus.plexus.i18n.I18N;
 import static java.util.Optional.empty;
 
 /**
+ * A renderer for Plugin updates reports, using a {@link PluginUpdatesModel}.
  * @since 1.0-beta-1
  */
 public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<PluginUpdatesModel> {
 
+    /**
+     * Creates a new instance.
+     *
+     * @param i18n an {@link I18N} instance
+     * @param sink the {@link Sink} to render to
+     * @param locale the locale to render in
+     * @param bundleName the resource bundle name to use
+     * @param model object containing the updates model
+     * @param allowSnapshots whether snapshots should be included
+     */
     public PluginUpdatesReportRenderer(
             I18N i18n, Sink sink, Locale locale, String bundleName, PluginUpdatesModel model, boolean allowSnapshots) {
         super(i18n, sink, locale, bundleName, model, allowSnapshots);
@@ -49,6 +60,7 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         renderTable("report.overview.plugin", model.getArtifactUpdates(), "report.overview.noPlugin");
     }
 
+    @Override
     protected void renderManagementSummaryTable() {
         renderTable(
                 "report.overview.pluginManagement",
@@ -83,6 +95,10 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
         endSection();
     }
 
+    /**
+     * Renders the summary table of plugin updates. If there are no plugin updates, nothing is rendered.
+     * @param contents the map of plugins to their details
+     */
     protected void renderSummaryTable(Map<Dependency, PluginUpdatesDetails> contents) {
         startTable();
 
@@ -122,6 +138,12 @@ public class PluginUpdatesReportRenderer extends AbstractVersionsReportRenderer<
                 false);
     }
 
+    /**
+     * Renders a summary table row for a plugin. If there are no plugin updates, nothing is rendered.
+     *
+     * @param artifact the plugin artifact
+     * @param details the plugin update details
+     */
     protected void renderSummaryTableRow(Dependency artifact, PluginUpdatesDetails details) {
         boolean upToDate = !details.isUpdateAvailable();
 

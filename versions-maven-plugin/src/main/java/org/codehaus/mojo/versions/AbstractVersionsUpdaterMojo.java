@@ -21,7 +21,6 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.TransformerException;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,6 +86,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected RepositorySystem repositorySystem;
 
     /**
+     * The reactor projects for the current build.
      * @since 1.0-alpha-1
      */
     @Parameter(defaultValue = "${reactorProjects}", required = true, readonly = true)
@@ -131,6 +131,9 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     @Parameter(defaultValue = "${session}", required = true, readonly = true)
     protected MavenSession session;
 
+    /**
+     * The current mojo execution.
+     */
     @Parameter(defaultValue = "${mojoExecution}", required = true, readonly = true)
     protected MojoExecution mojoExecution;
 
@@ -182,16 +185,28 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected Set<String> ignoredVersions;
 
     /**
-     * (injected) map of {@link Wagon} instances
+     * (injected) map of {@link Wagon} instances per protocol
      *
      * @since 2.14.0
      */
     protected final Map<String, Wagon> wagonMap;
 
+    /**
+     * An {@link ArtifactFactory} instance.
+     */
     protected final ArtifactFactory artifactFactory;
 
     // --------------------- GETTER / SETTER METHODS ---------------------
 
+    /**
+     * Constructor used by Mojos that update versions.
+     *
+     * @param artifactFactory the artifact factory
+     * @param repositorySystem the repository system
+     * @param wagonMap map of wagon instances
+     * @param changeRecorders map of change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     @Inject
     protected AbstractVersionsUpdaterMojo(
             ArtifactFactory artifactFactory,
@@ -205,8 +220,25 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         this.changeRecorders = changeRecorders;
     }
 
+    /**
+     * {@code true} if snapshots should be allowed when searching for newer versions of artifacts. This can be
+     * overridden on a per-call basis by passing a non-{@code null} value to the
+     * {@link #findLatestVersion(Artifact, VersionRange, Boolean, boolean)} method.
+     *
+     * Default is {@code false} for all Mojos except {@code versions:use-latest-versions} and
+     * {@code versions:use-latest-releases} where it is {@code true}
+     * @return {@code true} if snapshots should be allowed when searching for newer versions of artifacts.
+     * @since 1.0-alpha-1
+     * @see #findLatestVersion(Artifact, VersionRange, Boolean, boolean)
+     */
     protected abstract boolean getAllowSnapshots();
 
+    /**
+     * Returns the configured {@link VersionsHelper} instance, creating it lazily.
+     *
+     * @return the {@link VersionsHelper}
+     * @throws MojoExecutionException if the helper cannot be created
+     */
     public synchronized VersionsHelper getHelper() throws MojoExecutionException {
         if (helper == null) {
             RuleService ruleService = new RulesServiceBuilder()
@@ -252,6 +284,12 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         this.project = project;
     }
 
+    /**
+     * Gets the version of the project being processed.
+     *
+     * @return the version of the project being processed or {@code null} if no project is set
+     * @since 1.0-alpha-1
+     */
     public String getVersion() {
         return getProject() == null ? null : getProject().getVersion();
     }
@@ -336,7 +374,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
             saveChangeRecorderResults();
         } catch (IOException e) {
             getLog().error(e);
-        } catch (VersionRetrievalException | XMLStreamException | TransformerException e) {
+        } catch (VersionRetrievalException | XMLStreamException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }

@@ -261,6 +261,17 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      */
     protected final ProjectBuilder projectBuilder;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param artifactFactory   the artifact factory
+     * @param repositorySystem  the repository system
+     * @param projectBuilder    the project builder
+     * @param wagonMap          the map of wagon implementations
+     * @param changeRecorders   the change recorders
+     * @param prompter          the prompter
+     * @throws MojoExecutionException when things go wrong
+     */
     @Inject
     public SetMojo(
             ArtifactFactory artifactFactory,

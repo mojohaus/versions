@@ -33,11 +33,17 @@ import static java.util.Optional.ofNullable;
 /**
  * Details of a plugin's updates.
  */
-public class PluginUpdatesDetails extends ArtifactVersions {
+public class PluginUpdatesDetails extends ArtifactVersions implements Comparable<ArtifactVersions> {
     private final Map<Dependency, ArtifactVersions> dependencyVersions;
 
     private final boolean includeSnapshots;
 
+    /**
+     * Creates a new instance
+     * @param artifactVersions {@link ArtifactVersion} instance
+     * @param dependencyVersions map of dependencies and available versions
+     * @param includeSnapshots whether snapshots should be included
+     */
     public PluginUpdatesDetails(
             ArtifactVersions artifactVersions,
             Map<Dependency, ArtifactVersions> dependencyVersions,
@@ -50,14 +56,27 @@ public class PluginUpdatesDetails extends ArtifactVersions {
         this.includeSnapshots = includeSnapshots;
     }
 
+    /**
+     * Returns whether snapshots should be considered in version searches
+     * @return {@code true} if snapshots are included in version searches
+     */
     public boolean isIncludeSnapshots() {
         return includeSnapshots;
     }
 
+    /**
+     * Returns a map of dependencies and associated available dependency versions
+     * @return map of dependencies and associated available dependency versions
+     */
     public Map<Dependency, ArtifactVersions> getDependencyVersions() {
         return dependencyVersions;
     }
 
+    /**
+     * Merges in the provided map of dependencies and associated available dependency versions
+     * @param dependencyVersions map of dependencies and associated available dependency versions to be merged
+     *                           with the map in the {@link PluginUpdatesDetails} instance
+     */
     public void addDependencyVersions(Map<Dependency, ArtifactVersions> dependencyVersions) {
         this.dependencyVersions.putAll(dependencyVersions);
     }
@@ -107,14 +126,20 @@ public class PluginUpdatesDetails extends ArtifactVersions {
                 && super.equals(o);
     }
 
+    @Override
     public int hashCode() {
         return Objects.hash(getArtifact(), Arrays.hashCode(getVersions(true)), includeSnapshots, dependencyVersions);
     }
 
     // added an arbitrary comparison just to be able to differentiate objects having different includeSnapshots
     // and dependencyVersions while their super.compareTo() returns 0
+    @Override
     @SuppressWarnings("checkstyle:InnerAssignment")
-    public int compareTo(PluginUpdatesDetails that) {
+    public int compareTo(ArtifactVersions other) {
+        if (!(other instanceof PluginUpdatesDetails)) {
+            return -1;
+        }
+        PluginUpdatesDetails that = (PluginUpdatesDetails) other;
         int r;
         return (r = super.compareTo(that)) != 0
                 ? r

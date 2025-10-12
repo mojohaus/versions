@@ -27,14 +27,32 @@ import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
  */
 public interface DependencyChangeRecord extends ChangeRecord<DependencyVersionChange> {
     /**
-     * Describe where version item is updated.
+     * Describes where version item is updated.
      */
     enum ChangeKind {
+        /**
+         * A dependency change
+         */
         DEPENDENCY("dependency-update"),
+        /**
+         * A dependency management change
+         */
         DEPENDENCY_MANAGEMENT("dependency-management-update"),
+        /**
+         * A parent change
+         */
         PARENT("parent-update"),
+        /**
+         * A plugin change
+         */
         PLUGIN("plugin-update"),
+        /**
+         * A plugin management change
+         */
         PLUGIN_MANAGEMENT("plugin-management-update"),
+        /**
+         * A dependency set by a property change
+         */
         PROPERTY("property-update");
 
         private final String label;
@@ -43,12 +61,19 @@ public interface DependencyChangeRecord extends ChangeRecord<DependencyVersionCh
             this.label = label;
         }
 
+        /**
+         * Returns the type of the change.
+         * @return type of the change
+         *
+         * @see ChangeKind
+         */
         public String getLabel() {
             return label;
         }
     }
 
     /**
+     * Returns the version item change kind
      * @return a version item change kind
      * @since 2.14.0
      */

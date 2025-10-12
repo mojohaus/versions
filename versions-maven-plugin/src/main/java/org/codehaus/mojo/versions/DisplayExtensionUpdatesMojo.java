@@ -153,6 +153,15 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param artifactFactory an {@link ArtifactFactory} instance
+     * @param repositorySystem a {@link RepositorySystem} instance
+     * @param wagonMap       a map of wagon providers per protocol
+     * @param changeRecorders a map of change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     @Inject
     public DisplayExtensionUpdatesMojo(
             ArtifactFactory artifactFactory,
@@ -195,7 +204,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                             .withVersion(e.getVersion())
                             .build())
                     .filter(includeFilter::matchersMatch)
-                    .filter(excludeFilter::matchersDontMatch)
+                    .filter(dependency -> !excludeFilter.matchersMatch(dependency))
                     .collect(Collectors.toSet());
 
             if (dependencies.isEmpty()) {

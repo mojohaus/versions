@@ -27,9 +27,21 @@ import java.util.Optional;
  * @author Andrzej Jarmoniuk
  */
 public enum Segment implements Comparable<Segment> {
+    /**
+     * Major segment (0-based index 0)
+     */
     MAJOR,
+    /**
+     * Minor segment (0-based index 1)
+     */
     MINOR,
+    /**
+     * Incremental segment (0-based index 2)
+     */
     INCREMENTAL,
+    /**
+     * Sub-incremental segment (0-based index 3)
+     */
     SUBINCREMENTAL;
 
     /**
@@ -41,6 +53,11 @@ public enum Segment implements Comparable<Segment> {
         return ordinal();
     }
 
+    /**
+     * Creates a segment from its 0-based index
+     * @param index 0-based index
+     * @return segment
+     */
     public static Segment of(int index) {
         if (index < 0 || index > 3) {
             throw new IllegalArgumentException("Wrong segment index: " + index);

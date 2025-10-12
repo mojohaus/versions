@@ -98,6 +98,14 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
 
     private boolean outputFileError = false;
 
+    /**
+     * Creates a new instance.
+     * @param artifactFactory a {@link ArtifactFactory} instance
+     * @param repositorySystem a {@link RepositorySystem} instance
+     * @param wagonMap a map of {@link Wagon} instances per protocol
+     * @param changeRecorders a map of change recorders
+     * @throws MojoExecutionException thrown if an error occurs
+     */
     @Inject
     protected AbstractVersionsDisplayMojo(
             ArtifactFactory artifactFactory,
@@ -108,6 +116,9 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
         super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
     }
 
+    /**
+     * Initialise logging to file if required.
+     */
     @SuppressWarnings("unchecked")
     protected void logInit() {
         if (outputFile != null && !outputFileError) {
@@ -150,6 +161,11 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
         }
     }
 
+    /**
+     * Log a line to the console and/or the output file as configured.
+     * @param error if {@code true} log as error, otherwise as info
+     * @param line the line to log
+     */
     protected void logLine(boolean error, String line) {
         if (logOutput) {
             if (error) {
@@ -173,6 +189,7 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
     }
 
     /**
+     * Get the offset of the configured output line width compared to the default with of 80.
      * @return Offset of the configured output line width compared to the default with of 80.
      */
     protected int getOutputLineWidthOffset() {

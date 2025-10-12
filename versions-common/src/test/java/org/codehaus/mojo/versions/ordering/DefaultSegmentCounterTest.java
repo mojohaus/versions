@@ -34,7 +34,7 @@ class DefaultSegmentCounterTest {
 
     @BeforeEach
     void beforeEach() {
-        this.instance = new DefaultSegmentCounter();
+        this.instance = DefaultSegmentCounter.INSTANCE;
     }
 
     @Test

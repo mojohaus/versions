@@ -174,8 +174,9 @@ public interface VersionsHelper {
             throws MojoExecutionException;
 
     /**
-     * Argument builder class for
-     * {@link VersionsHelper#getVersionPropertiesMap(VersionPropertiesMapRequest)}.
+     * Argument builder class for {@link VersionsHelper#getVersionPropertiesMap(VersionPropertiesMapRequest)}.
+     * <p>
+     * Instances of this class are used to collect parameters required to build the version properties map.
      */
     class VersionPropertiesMapRequest {
         private MavenProject mavenProject;
@@ -191,6 +192,13 @@ public interface VersionsHelper {
         private boolean autoLinkItems;
 
         private Predicate<Artifact> includeFilter;
+
+        /**
+         * Deprecated no-arg constructor. Use {@link #builder()} instead.
+         * @deprecated use {@link #builder()} instead
+         */
+        @Deprecated
+        public VersionPropertiesMapRequest() {}
 
         /**
          * Returns the {@link MavenProject} object
@@ -261,6 +269,11 @@ public interface VersionsHelper {
          * Returns a new {@link Builder} instance
          *
          * @return new {@link Builder} instance
+         */
+        /**
+         * Create a new builder instance.
+         *
+         * @return a fresh {@link Builder}
          */
         public static Builder builder() {
             return new Builder();

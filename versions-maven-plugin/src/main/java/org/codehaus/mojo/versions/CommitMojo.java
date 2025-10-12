@@ -46,6 +46,12 @@ public class CommitMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
+    /**
+     * Creates a new instance.
+     */
+    public CommitMojo() {}
+
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         Path outFile = project.getFile().toPath();
         Path backupFile = outFile.getParent().resolve(outFile.getFileName() + ".versionsBackup");

@@ -17,6 +17,13 @@ import org.codehaus.mojo.versions.model.Rule;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.utils.RegexUtils;
 
+/**
+ * Service providing access to rules and ignore-version handling.
+ * <p>
+ * The service is constructed with a {@link Log} and a {@link RuleSet} and offers
+ * methods to find the best-fitting {@link Rule} for a given artifact and to
+ * collect the ignored versions for an artifact.
+ */
 public class RuleService {
     Log log;
 
@@ -24,6 +31,12 @@ public class RuleService {
 
     private final RuleSet ruleSet;
 
+    /**
+     * Creates a new {@code RuleService}.
+     *
+     * @param log the Maven log to use; may be {@code null}
+     * @param ruleSet the rules to apply; may be {@code null}
+     */
     public RuleService(Log log, RuleSet ruleSet) {
         this.log = log;
         this.ruleSet = ruleSet;
@@ -34,7 +47,7 @@ public class RuleService {
      *
      * @param groupId    Group id of the artifact
      * @param artifactId Artifact id of the artifact
-     * @return Rule which best describes the given artifact
+     * @return rule which best describes the given artifact, or {@code null} if none
      */
     public Rule getBestFitRule(String groupId, String artifactId) {
         String groupArtifactId = groupId + ':' + artifactId;
@@ -93,8 +106,8 @@ public class RuleService {
     /**
      * Returns a list of versions which should not be considered when looking for updates.
      *
-     * @param artifact The artifact
-     * @return List of ignored version
+     * @param artifact the artifact to evaluate
+     * @return list of ignored versions (never {@code null})
      */
     public List<IgnoreVersion> getIgnoredVersions(Artifact artifact) {
         Rule bestFitRule = getBestFitRule(artifact.getGroupId(), artifact.getArtifactId());
@@ -117,7 +130,9 @@ public class RuleService {
     }
 
     /**
-     * @return rule set
+     * Returns the configured {@link RuleSet}.
+     *
+     * @return the rule set; may be {@code null}
      */
     public RuleSet getRuleSet() {
         return ruleSet;

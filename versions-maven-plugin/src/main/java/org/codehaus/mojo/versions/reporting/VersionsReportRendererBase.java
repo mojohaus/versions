@@ -55,6 +55,16 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
      */
     protected String bundleName;
 
+    /**
+     * Creates a new report renderer instance.
+     *
+     * @param sink          the sink to render to, must not be {@code null}
+     * @param i18n          the i18n component, must not be {@code null}
+     * @param locale        the locale we are rendering for, must not be {@code null}
+     * @param bundleName    the name of the resource bundle to use, must not be {@code null}
+     * @param allowSnapshots whether snapshots should be included
+     * @throws IllegalArgumentException if any of the parameters are {@code null}
+     */
     protected VersionsReportRendererBase(
             Sink sink, I18N i18n, Locale locale, String bundleName, boolean allowSnapshots) {
         super(sink);
@@ -83,14 +93,27 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
         return i18n.getString(bundleName, locale, key);
     }
 
+    /**
+     * Renders a warning icon.
+     */
     protected void renderWarningIcon() {
         sink.figureGraphics("images/icon_warning_sml.gif");
     }
 
+    /**
+     * Renders a success icon.
+     */
     protected void renderSuccessIcon() {
         sink.figureGraphics("images/icon_success_sml.gif");
     }
 
+    /**
+     * Compares two artifact versions for equality.
+     *
+     * @param v1 the first artifact version to compare, may be {@code null}
+     * @param v2 the second artifact version to compare, may be {@code null}
+     * @return {@code true} if the two versions are considered equal, {@code false} otherwise
+     */
     protected boolean equals(ArtifactVersion v1, ArtifactVersion v2) {
         return v1 == v2
                 || (v1 != null && v1.equals(v2))

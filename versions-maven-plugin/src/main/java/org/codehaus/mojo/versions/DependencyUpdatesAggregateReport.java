@@ -46,6 +46,15 @@ import org.eclipse.aether.RepositorySystem;
         aggregator = true)
 public class DependencyUpdatesAggregateReport extends AbstractDependencyUpdatesReport {
 
+    /**
+     * Creates a new instance
+     *
+     * @param i18n               an {@link I18N} instance
+     * @param artifactFactory    an {@link ArtifactFactory} instance
+     * @param repositorySystem   a {@link RepositorySystem} instance
+     * @param wagonMap           a map of wagon providers per protocol
+     * @param rendererFactory    a {@link ReportRendererFactory} instance
+     */
     @Inject
     protected DependencyUpdatesAggregateReport(
             I18N i18n,

@@ -34,6 +34,13 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
 
     private final String newVersion;
 
+    /**
+     * Creates a new instance, providing groupId, artifactId of the dependency as well as the old and new versions.
+     * @param groupId groupId of the dependency
+     * @param artifactId artifactId of the dependency
+     * @param oldVersion old version
+     * @param newVersion new version
+     */
     public DefaultDependencyVersionChange(String groupId, String artifactId, String oldVersion, String newVersion) {
         this.groupId = groupId;
         this.artifactId = artifactId;
@@ -41,22 +48,39 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
         this.newVersion = newVersion;
     }
 
+    /**
+     * Returns the groupId of the dependency
+     * @return groupId of the dependency
+     */
     public String getGroupId() {
         return groupId;
     }
 
+    /**
+     * Returns the artifact of the dependency
+     * @return artifactId of the dependency
+     */
     public String getArtifactId() {
         return artifactId;
     }
 
+    /**
+     * Returns the old version of the dependency
+     * @return old version of the dependency
+     */
     public String getOldVersion() {
         return oldVersion;
     }
 
+    /**
+     * Returns the new version of the dependency
+     * @return new version of the dependency
+     */
     public String getNewVersion() {
         return newVersion;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -79,6 +103,7 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
         return Objects.equals(oldVersion, versionChange.oldVersion);
     }
 
+    @Override
     public int hashCode() {
         int result = groupId != null ? groupId.hashCode() : 0;
         result = 31 * result + (artifactId != null ? artifactId.hashCode() : 0);
@@ -87,6 +112,7 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
         return result;
     }
 
+    @Override
     public String toString() {
         return "DefaultDependencyVersionChange(" + groupId + ':' + artifactId + ":" + oldVersion + "-->" + newVersion
                 + ')';

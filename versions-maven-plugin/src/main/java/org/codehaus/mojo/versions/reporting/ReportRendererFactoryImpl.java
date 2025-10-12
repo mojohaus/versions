@@ -39,15 +39,42 @@ import org.codehaus.plexus.i18n.I18N;
 @Named
 @Singleton
 public class ReportRendererFactoryImpl implements ReportRendererFactory {
+    /**
+     * The report name for the dependency updates report
+     */
     public static final String DEPENDENCY_UPDATES_REPORT = "dependency-updates-report";
+    /**
+     * The report name for the aggregate dependency updates report
+     */
     public static final String DEPENDENCY_UPDATES_AGGREGATE_REPORT = "dependency-updates-aggregate-report";
+    /**
+     * The report name for the plugin updates report
+     */
     public static final String PLUGIN_UPDATES_REPORT = "plugin-updates-report";
+    /**
+     * The report name for the aggregate plugin updates report
+     */
     public static final String PLUGIN_UPDATES_AGGREGATE_REPORT = "plugin-updates-aggregate-report";
+    /**
+     * The report name for the property updates report
+     */
     public static final String PROPERTY_UPDATES_REPORT = "property-updates-report";
+    /**
+     * The report name for the aggregate property updates report
+     */
     public static final String PROPERTY_UPDATES_AGGREGATE_REPORT = "property-updates-aggregate-report";
+    /**
+     * The report name for the parent updates report
+     */
     public static final String PARENT_UPDATES_REPORT = "parent-updates-report";
+
     private final I18N i18N;
 
+    /**
+     * Creates a new instance
+     *
+     * @param i18N an {@link I18N} instance
+     */
     @Inject
     public ReportRendererFactoryImpl(I18N i18N) {
         this.i18N = i18N;

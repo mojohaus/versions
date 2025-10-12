@@ -34,9 +34,20 @@ import org.codehaus.plexus.i18n.I18N;
 import static java.util.Optional.empty;
 
 /**
+ * A renderer for Property updates reports, using a {@link PropertyUpdatesModel}.
  * @since 1.0-beta-1
  */
 public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRenderer<PropertyUpdatesModel> {
+    /**
+     * Creates a new instance.
+     *
+     * @param i18n an {@link I18N} instance
+     * @param sink the {@link Sink} to render to
+     * @param locale the locale to render in
+     * @param bundleName the resource bundle name to use
+     * @param model object containing the updates model
+     * @param allowSnapshots whether snapshots should be included
+     */
     public PropertyUpdatesReportRenderer(
             I18N i18n,
             Sink sink,
@@ -63,6 +74,10 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         model.getAllUpdates().forEach(this::renderPropertyDetail);
     }
 
+    /**
+     * Renders the table of property updates. If there are no property updates, a suitable message is shown.
+     * @param contents the map of properties to their details
+     */
     protected void renderTable(Map<Property, PropertyVersions> contents) {
         startSection(getText("report.overview.property"));
 
@@ -74,6 +89,10 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         endSection();
     }
 
+    /**
+     * Renders the summary table of property updates. If there are no property updates, nothing is rendered.
+     * @param contents the map of properties to their details
+     */
     protected void renderSummaryTable(Map<Property, PropertyVersions> contents) {
         startTable();
 
@@ -106,6 +125,11 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.tableRow_();
     }
 
+    /**
+     * Renders the details table for a property. If there are no updates, only the current version is shown.
+     * @param property the property being detailed
+     * @param details the details of the property
+     */
     protected void renderPropertyDetailTable(Property property, PropertyVersions details) {
         ArtifactVersion[] allUpdates = allUpdatesCache.get(details, empty(), isAllowSnapshots());
         boolean upToDate = allUpdates == null || allUpdates.length == 0;

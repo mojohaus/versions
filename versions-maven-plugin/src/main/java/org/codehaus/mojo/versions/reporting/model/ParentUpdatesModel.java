@@ -30,6 +30,12 @@ import static java.util.Collections.singletonMap;
  * Model class for using with the {@linkplain ReportRenderer} API
  */
 public class ParentUpdatesModel extends DependencyUpdatesModel {
+    /**
+     * Creates a new model instance with the given parent and its updates.
+     *
+     * @param parent            the parent dependency
+     * @param dependencyUpdates the updates for the parent
+     */
     public ParentUpdatesModel(Dependency parent, ArtifactVersions dependencyUpdates) {
         super(singletonMap(parent, dependencyUpdates), emptyMap());
     }

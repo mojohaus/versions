@@ -26,6 +26,12 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 
+/**
+ * Provides a dependency matcher based on the list of strings of
+ * {@code groupId[:artifactId[:version[:type[:classifier[:scope]]]]]} for matching dependencies.
+ *
+ * @see TokenizedMatcher
+ */
 public class DependencyFilter {
 
     private final String pattern;
@@ -36,6 +42,16 @@ public class DependencyFilter {
         this.matchers = matchers;
     }
 
+    /**
+     * Creates a new instance based on a list of {@code groupId[:artifactId[:version[:type[:classifier[:scope]]]]]}
+     * expressions representing dependencies to be matched.
+     *
+     * @param dependencies a list of {@code groupId[:artifactId[:version[:type[:classifier[:scope]]]]]}
+     *                     expressions representing dependencies to be matched
+     * @return a new instance of {@link DependencyFilter}
+     *
+     * @see TokenizedMatcher
+     */
     public static DependencyFilter parseFrom(List<String> dependencies) {
         List<TokenizedMatcher> matchers =
                 dependencies.stream().map(TokenizedMatcher::parse).collect(Collectors.toList());
@@ -54,20 +70,33 @@ public class DependencyFilter {
         return String.format("%s{%s}", getClass().getSimpleName(), pattern);
     }
 
+    /**
+     * Filters the provided collection of dependencies, providing only the dependencies matching the set of expressions
+     * provided to the {@link DependencyFilter} instance
+     * @param dependencies dependencies to be filtered
+     * @return filtered list of dependencies, retaining only the dependencies matching the filter
+     */
     public Set<Dependency> retainingIn(Collection<Dependency> dependencies) {
         return filterBy(dependencies, this::matchersMatch);
     }
 
+    /**
+     * Filters the provided collection of dependencies, providing only the dependencies which <em>do not</em> match the set of expressions
+     * provided to the {@link DependencyFilter} instance
+     * @param dependencies dependencies to be filtered
+     * @return filtered list of dependencies, excluding the dependencies matching the filter
+     */
     public Set<Dependency> removingFrom(Collection<Dependency> dependencies) {
         return filterBy(dependencies, not(this::matchersMatch));
     }
 
+    /**
+     * Says whether the given dependency matches the set of matchers defined by the {@link DependencyFilter} instance
+     * @param dependency dependency to be matched
+     * @return {@code true} if the given dependency satisfies the list of dependencies to be matched against
+     */
     public boolean matchersMatch(Dependency dependency) {
         return matchers.stream().anyMatch(m -> m.test(dependency));
-    }
-
-    public boolean matchersDontMatch(Dependency dependency) {
-        return !matchersMatch(dependency);
     }
 
     private TreeSet<Dependency> filterBy(Collection<Dependency> dependencies, Predicate<Dependency> predicate) {

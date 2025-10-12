@@ -55,6 +55,9 @@ import static org.mockito.Mockito.when;
  * Various mock creating utilities
  */
 public class MockUtils {
+
+    private MockUtils() {}
+
     private static final Map<String, String[]> DEFAULT_VERSION_MAP = new HashMap<String, String[]>() {
         {
             put("artifactA", new String[] {"1.0.0", "2.0.0"});
@@ -104,6 +107,13 @@ public class MockUtils {
         return repositorySystem;
     }
 
+    /**
+     * Provides an mocked {@link RepositorySystem} instance for the given map of version updates.
+     *
+     * @param repositorySystem mocked {@link RepositorySystem} instance
+     * @param versionMap       a map consisting of artifact name as key of the map, and an array of versions
+     *                         which the repository system should return
+     */
     public static void prepareAetherRepositorySystemMockForVersionRange(
             RepositorySystem repositorySystem, Map<String, String[]> versionMap) {
         try {
@@ -133,12 +143,20 @@ public class MockUtils {
         }
     }
 
+    /**
+     * Provides a mock of the {@link I18N} bean
+     * @return mock of the {@link I18N} bean
+     */
     public static I18N mockI18N() {
         I18N i18n = mock(I18N.class);
         when(i18n.getString(anyString(), any(), anyString())).thenAnswer(invocation -> invocation.getArgument(2));
         return i18n;
     }
 
+    /**
+     * Provides a mock of the {@link SiteTool} bean
+     * @return mock of the {@link SiteTool} bean
+     */
     public static SiteTool mockSiteTool() {
         Artifact skinArtifact = mock(Artifact.class);
         when(skinArtifact.getId()).thenReturn("");
@@ -151,6 +169,10 @@ public class MockUtils {
         return siteTool;
     }
 
+    /**
+     * Provides a mock of the {@link ArtifactHandlerManager} bean
+     * @return mock of the {@link ArtifactHandlerManager} bean
+     */
     public static ArtifactHandlerManager mockArtifactHandlerManager() {
         ArtifactHandlerManager artifactHandlerManager = mock(ArtifactHandlerManager.class);
         when(artifactHandlerManager.getArtifactHandler(anyString())).thenAnswer(i -> {

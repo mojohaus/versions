@@ -36,6 +36,17 @@ public abstract class AbstractUpdatesModel<V extends ArtifactVersions> {
     private final Map<Dependency, V> artifactManagementUpdates;
     private final Map<Dependency, V> allUpdates;
 
+    /**
+     * <p>Creates a new instance of the model, based on the provided map of artifact (dependency or plugin) updates
+     * per artifact, provided map of dependency or plugin management updates, and provided list of all updates.</p>
+     * <p>The model uses {@link Dependency} to model dependencies or plugins, hereby called artifacts, and
+     * therefore requires an adapter function the {@code supplier} argument, converting the type of artifact
+     * to a {@link Dependency}.</p>
+     * @param artifactUpdates map of artifact (dependency or plugin) updates per artifact
+     * @param artifactManagementUpdates map of artifact (dependency or plugin) management updates per artifact
+     * @param supplier function converting the given "artifact" type (plugin, dependency) to a {@link Dependency}
+     * @param <K> concrete {@link ArtifactVersions} subclass, used by the provided maps
+     */
     public <K> AbstractUpdatesModel(
             Map<K, V> artifactUpdates, Map<K, V> artifactManagementUpdates, Function<K, Dependency> supplier) {
         this.artifactUpdates = artifactUpdates.entrySet().stream()
@@ -54,14 +65,26 @@ public abstract class AbstractUpdatesModel<V extends ArtifactVersions> {
         allUpdates.putAll(this.artifactUpdates);
     }
 
+    /**
+     * Returns a map of updates per "artifact" (here modeled by {@link Dependency}).
+     * @return map of updates
+     */
     public Map<Dependency, V> getArtifactUpdates() {
         return artifactUpdates;
     }
 
+    /**
+     * Returns a map of "management updates" per "artifact" (here modeled by {@link Dependency}).
+     * @return map of "management updates"
+     */
     public Map<Dependency, V> getArtifactManagementUpdates() {
         return artifactManagementUpdates;
     }
 
+    /**
+     * Returns a map of all updates per "artifact" (here modeled by {@link Dependency}).
+     * @return map of all updates
+     */
     public Map<Dependency, V> getAllUpdates() {
         return allUpdates;
     }

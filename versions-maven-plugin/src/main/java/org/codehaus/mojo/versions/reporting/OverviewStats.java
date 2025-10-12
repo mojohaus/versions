@@ -51,6 +51,11 @@ public class OverviewStats {
     private int upToDate;
 
     /**
+     * Creates a new instance.
+     */
+    public OverviewStats() {}
+
+    /**
      * Creates a {@linkplain OverviewStats} instance based on the collection of version updates in
      * the argument
      *
@@ -82,48 +87,95 @@ public class OverviewStats {
         return (T) stats;
     }
 
+    /**
+     * Retrieves the newest update for the given details, segment and snapshot allowance from the cache.
+     * If the cache is null, an assertion error is thrown.
+     *
+     * @param cache if not null, cache to retrieve the version information, initialised with
+     * the {@link ArtifactVersions#getNewestUpdateWithinSegment(Optional, boolean)} update information
+     * @param details details of the artifact to check
+     * @param segment segment to check
+     * @param allowSnapshots whether snapshots should be included
+     * @param <V> subclass of {@linkplain AbstractVersionDetails}
+     * @return the newest update or null if there is no update within the segment
+     */
     protected static <V extends AbstractVersionDetails> ArtifactVersion getNewestUpdate(
             ArtifactVersionsCache cache, V details, Optional<Segment> segment, boolean allowSnapshots) {
         assert cache != null;
         return cache.get(details, segment, allowSnapshots);
     }
 
+    /**
+     * Gets the number of updates available within the major segment
+     * @return number of updates available within the major segment
+     */
     public int getMajor() {
         return major;
     }
 
+    /**
+     * Increments the number of updates available within the major segment
+     */
     public void incrementMajor() {
         major++;
     }
 
+    /**
+     * Gets the number of updates available within the minor segment
+     * @return number of updates available within the minor segment
+     */
     public int getMinor() {
         return minor;
     }
 
+    /**
+     * Increments the number of updates available within the minor segment
+     */
     public void incrementMinor() {
         minor++;
     }
 
+    /**
+     * Gets the number of updates available within the incremental segment
+     * @return number of updates available within the incremental segment
+     */
     public int getIncremental() {
         return incremental;
     }
 
+    /**
+     * Increments the number of updates available within the incremental segment
+     */
     public void incrementIncremental() {
         incremental++;
     }
 
+    /**
+     * Gets the number of updates available within the sub-incremental segment
+     * @return number of updates available within the sub-incremental segment
+     */
     public int getAny() {
         return any;
     }
 
+    /**
+     * Increments the number of updates available within the sub-incremental segment
+     */
     public void incrementAny() {
         any++;
     }
 
+    /**
+     * Gets the number of up-to-date artifacts
+     * @return number of up-to-date artifacts
+     */
     public int getUpToDate() {
         return upToDate;
     }
 
+    /**
+     * Increments the number of up-to-date artifacts
+     */
     public void incrementUpToDate() {
         upToDate++;
     }

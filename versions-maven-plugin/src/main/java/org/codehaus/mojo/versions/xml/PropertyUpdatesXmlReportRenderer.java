@@ -68,6 +68,7 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
      * Creates a new instance
      * @param model object containing the updates model
      * @param outputFile output file for the report
+     * @param allowSnapshots whether snapshots should be included
      */
     public PropertyUpdatesXmlReportRenderer(PropertyUpdatesModel model, Path outputFile, boolean allowSnapshots) {
         this.model = model;

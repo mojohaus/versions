@@ -47,6 +47,7 @@ import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 
 /**
  * Generates a report of available updates for the plugins of a project.
+ * Base class, abstracting functionality regardless of whether we're rendering an individual, or an aggregate report.
  */
 public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport<PluginUpdatesModel> {
 
@@ -75,6 +76,15 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
     @Parameter(property = "onlyUpgradable", defaultValue = "false")
     protected boolean onlyUpgradable;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param i18n             {@link I18N} bean instance
+     * @param artifactFactory  {@link ArtifactFactory} bean instance
+     * @param repositorySystem {@link RepositorySystem} bean instance
+     * @param wagonMap         map of {@link Wagon} instances per protocol
+     * @param rendererFactory  {@link ReportRendererFactory} instance
+     */
     protected AbstractPluginUpdatesReport(
             I18N i18n,
             ArtifactFactory artifactFactory,
@@ -100,6 +110,11 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
         return haveBuildPlugins(getProject()) || haveBuildPluginManagementPlugins(getProject());
     }
 
+    /**
+     * Returns {@code true} if the given {@link MavenProject} has a non-empty plugin management section
+     * @param project {@link MavenProject} instance
+     * @return {@code true} if the given {@link MavenProject} has a non-empty plugin management section
+     */
     protected boolean haveBuildPluginManagementPlugins(MavenProject project) {
         return project.getBuild() != null
                 && project.getBuild().getPluginManagement() != null
@@ -107,6 +122,11 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
                 && !project.getBuild().getPluginManagement().getPlugins().isEmpty();
     }
 
+    /**
+     * Returns {@code true} if the given {@link MavenProject} has a non-empty plugins section.
+     * @param project {@link MavenProject} instance
+     * @return {@code true} if the given {@link MavenProject} has a non-empty plugins section.
+     */
     protected boolean haveBuildPlugins(MavenProject project) {
         return project.getBuild() != null
                 && project.getBuild().getPlugins() != null

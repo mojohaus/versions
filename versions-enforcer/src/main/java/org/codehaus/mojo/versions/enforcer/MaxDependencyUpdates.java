@@ -68,6 +68,10 @@ import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependen
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractDependenciesFromPlugins;
 import static org.codehaus.mojo.versions.utils.MavenProjectUtils.extractPluginDependenciesFromPluginsInPluginManagement;
 
+/**
+ * Enforcer rule that fails the build when the number of dependencies with available updates
+ * exceeds the configured maximum.
+ */
 @Named("maxDependencyUpdates")
 public class MaxDependencyUpdates extends AbstractEnforcerRule {
     private final ArtifactFactory artifactFactory;
@@ -275,6 +279,17 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
 
     private final MojoExecution mojoExecution;
 
+    /**
+     * Create a new MaxDependencyUpdates enforcer rule instance.
+     *
+     * @param project current Maven project
+     * @param artifactFactory artifact factory
+     * @param artifactHandlerManager artifact handler manager
+     * @param repositorySystem repository system
+     * @param wagonMap map of Wagon implementations
+     * @param mavenSession current Maven session
+     * @param mojoExecution mojo execution context
+     */
     @Inject
     public MaxDependencyUpdates(
             MavenProject project,
@@ -294,8 +309,13 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
     }
 
     /**
-     * Creates the VersionsHelper object
-     * @return VersionsHelper object
+     * Creates the VersionsHelper object.
+     *
+     * @param serverId server id from settings.xml used for authentication (may be null)
+     * @param rulesUri URI of the rules file (may be null)
+     * @param ruleSet RuleSet instance (may be null)
+     * @return a configured VersionsHelper
+     * @throws EnforcerRuleError if the VersionsHelper cannot be created
      */
     private synchronized VersionsHelper createVersionsHelper(String serverId, String rulesUri, RuleSet ruleSet)
             throws EnforcerRuleError {
@@ -325,6 +345,11 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
         }
     }
 
+    /**
+     * Execute the enforcer rule check.
+     *
+     * @throws EnforcerRuleException if the rule condition is violated or retrieval fails
+     */
     @Override
     public void execute() throws EnforcerRuleException {
 

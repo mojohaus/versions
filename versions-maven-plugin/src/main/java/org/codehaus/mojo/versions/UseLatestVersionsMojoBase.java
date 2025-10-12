@@ -67,22 +67,70 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
     @Parameter(property = "numThreads", defaultValue = "5")
     private int numThreads = 5;
 
+    /**
+     * Whether snapshots should be allowed when searching for newer versions
+     * @return {@code true} if snapshots should be allowed when searching for newer versions
+     */
     protected abstract boolean getAllowMajorUpdates();
 
+    /**
+     * Whether minor updates should be allowed when searching for newer versions
+     * @return {@code true} if minor updates should be allowed when searching for newer versions
+     */
     protected abstract boolean getAllowMinorUpdates();
 
+    /**
+     * Whether incremental updates should be allowed when searching for newer versions
+     * @return {@code true} if incremental updates should be allowed when searching for newer versions
+     */
     protected abstract boolean getAllowIncrementalUpdates();
 
+    /**
+     * Whether downgrades should be allowed when searching for newer versions
+     * @return {@code true} if downgrades should be allowed when searching for newer versions
+     */
     protected abstract boolean getAllowDowngrade();
 
+    /**
+     * Whether snapshots should be allowed when searching for newer versions
+     * @return {@code true} if snapshots should be allowed when searching for newer versions
+     */
+    protected abstract boolean getAllowSnapshots();
+    /**
+     * A filter for dependencies to be updated.
+     *
+     * @param dep the dependency to check
+     * @return {@code true} if the dependency should be updated, {@code false} otherwise
+     */
     protected abstract boolean updateFilter(Dependency dep);
 
+    /**
+     * A filter for artifact versions to be considered.
+     *
+     * @param ver the artifact version to check
+     * @return {@code true} if the artifact version should be considered, {@code false} otherwise
+     */
     protected abstract boolean artifactVersionsFilter(ArtifactVersion ver);
 
+    /**
+     * Produces a version from a stream of artifact versions.
+     *
+     * @param stream the stream of artifact versions
+     * @return an optional containing the produced version, or an empty optional if no version could be produced
+     */
     protected abstract Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream);
 
     private final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
+    /**
+     * Creates a new instance
+     *
+     * @param artifactFactory   an {@link ArtifactFactory} instance
+     * @param repositorySystem  a {@link RepositorySystem} instance
+     * @param wagonMap          a map of wagon providers per protocol
+     * @param changeRecorders   a map of change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     public UseLatestVersionsMojoBase(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,

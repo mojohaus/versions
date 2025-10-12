@@ -26,6 +26,10 @@ import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.VERSIO
  */
 public class DependencyUpdatesLoggingHelper {
 
+    private DependencyUpdatesLoggingHelper() {
+        // utility class
+    }
+
     /**
      * @return {@code true} if the version of the dependency is in the project
      */
@@ -128,11 +132,15 @@ public class DependencyUpdatesLoggingHelper {
     public interface DependencyUpdatesResult {
 
         /**
+         * Returns the list of dependencies using the latest version available (i.e. no update available)
+         *
          * @return Dependencies using the latest version
          */
         List<String> getUsingLatest();
 
         /**
+         * Returns the list of dependencies with updates available (i.e. not using the latest version)
+         *
          * @return Dependencies with updates available
          */
         List<String> getWithUpdates();

@@ -77,6 +77,10 @@ public class PropertyVersions extends AbstractVersionDetails {
         this.resolvedVersions = resolvedVersions;
     }
 
+    /**
+     * Returns an array of artifacts associated with the property
+     * @return an array of {@link Artifact} instances associated with the property
+     */
     public ArtifactAssociation[] getAssociations() {
         return associations.toArray(new ArtifactAssociation[0]);
     }

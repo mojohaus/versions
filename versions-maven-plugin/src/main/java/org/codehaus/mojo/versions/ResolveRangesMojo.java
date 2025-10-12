@@ -162,6 +162,15 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     // ------------------------------ METHODS --------------------------
 
+    /**
+     * Creates a new instance.
+     *
+     * @param artifactFactory   the artifact factory
+     * @param repositorySystem  the repository system
+     * @param wagonMap          the map of wagon implementations
+     * @param changeRecorders   the change recorders
+     * @throws MojoExecutionException when things go wrong
+     */
     @Inject
     public ResolveRangesMojo(
             ArtifactFactory artifactFactory,

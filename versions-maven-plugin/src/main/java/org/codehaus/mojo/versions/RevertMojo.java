@@ -72,6 +72,11 @@ public class RevertMojo extends AbstractMojo {
      */
     protected final ProjectBuilder projectBuilder;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param projectBuilder the project builder
+     */
     @Inject
     protected RevertMojo(ProjectBuilder projectBuilder) {
         this.projectBuilder = projectBuilder;

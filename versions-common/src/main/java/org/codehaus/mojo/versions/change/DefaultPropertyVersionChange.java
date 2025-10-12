@@ -33,24 +33,43 @@ public final class DefaultPropertyVersionChange implements PropertyVersionChange
 
     private final String newValue;
 
+    /**
+     * Creates a new instance, providing a property name, old and new values of the property.
+     * @param property property name
+     * @param oldValue old property value
+     * @param newValue new property value
+     */
     public DefaultPropertyVersionChange(String property, String oldValue, String newValue) {
         this.property = property;
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
 
+    /**
+     * Returns the property name
+     * @return property name
+     */
     public String getProperty() {
         return property;
     }
 
+    /**
+     * Returns the old value of the property
+     * @return old property value
+     */
     public String getOldValue() {
         return oldValue;
     }
 
+    /**
+     * Returns the new value of the property
+     * @return new property value
+     */
     public String getNewValue() {
         return newValue;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -70,6 +89,7 @@ public final class DefaultPropertyVersionChange implements PropertyVersionChange
         return Objects.equals(newValue, versionChange.newValue);
     }
 
+    @Override
     public int hashCode() {
         int result = property != null ? property.hashCode() : 0;
         result = 7 * result + (oldValue != null ? oldValue.hashCode() : 0);
@@ -77,6 +97,7 @@ public final class DefaultPropertyVersionChange implements PropertyVersionChange
         return result;
     }
 
+    @Override
     public String toString() {
         return "DefaultPropertyVersionChange(" + property + ':' + oldValue + "-->" + newValue + ')';
     }

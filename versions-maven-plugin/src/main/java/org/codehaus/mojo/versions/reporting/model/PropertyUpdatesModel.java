@@ -32,11 +32,20 @@ import org.codehaus.mojo.versions.utils.PropertyComparator;
 public class PropertyUpdatesModel {
     private final Map<Property, PropertyVersions> allUpdates;
 
+    /**
+     * Creates a new model instance with the given comparator and map of property updates.
+     * @param comparator the comparator to use for ordering the properties
+     * @param propertyUpdates the map of properties to their updates
+     */
     public PropertyUpdatesModel(PropertyComparator comparator, Map<Property, PropertyVersions> propertyUpdates) {
         this.allUpdates = new TreeMap<>(comparator);
         this.allUpdates.putAll(propertyUpdates);
     }
 
+    /**
+     * Gets the map of all property updates.
+     * @return the map of all property updates
+     */
     public Map<Property, PropertyVersions> getAllUpdates() {
         return allUpdates;
     }

@@ -28,7 +28,8 @@ import org.codehaus.mojo.versions.api.change.VersionChange;
  */
 public interface ChangeRecord<T extends VersionChange> {
     /**
-     * @return a details about changed item
+     * Returns the details about changed item
+     * @return details about changed item
      * @since 2.14.0
      */
     T getVersionChange();

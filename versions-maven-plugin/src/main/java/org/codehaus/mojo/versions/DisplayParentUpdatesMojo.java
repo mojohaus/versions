@@ -59,6 +59,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Mojo(name = "display-parent-updates", threadSafe = true)
 public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
 
+    /**
+     * Length of the message part of the output, used to calculate padding.
+     */
     public static final int MESSAGE_LENGTH = 68;
 
     // ------------------------------ FIELDS ------------------------------
@@ -141,6 +144,15 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     // -------------------------- OTHER METHODS --------------------------
 
+    /**
+     * Creates a new instance
+     *
+     * @param artifactFactory   the artifact factory
+     * @param repositorySystem  the repository system
+     * @param wagonMap          the wagon map
+     * @param changeRecorders   the change recorders
+     * @throws MojoExecutionException if any
+     */
     @Inject
     public DisplayParentUpdatesMojo(
             ArtifactFactory artifactFactory,
@@ -221,6 +233,18 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
         }
     }
 
+    /**
+     * Resolves the target version of the parent artifact.
+     * The initial version may be a version range. If it is, the resolved version will be
+     * restricted by that range.
+     *
+     * @param initialVersion the initial version, may be a version range
+     * @return the resolved target version, or {@code null} if no update is available
+     * @throws MojoExecutionException             if an error occurred
+     * @throws VersionRetrievalException          if an error occurred while retrieving versions
+     * @throws InvalidVersionSpecificationException if the version specification is invalid
+     * @throws InvalidSegmentException            if the segment configuration is invalid
+     */
     protected ArtifactVersion resolveTargetVersion(String initialVersion)
             throws MojoExecutionException, VersionRetrievalException, InvalidVersionSpecificationException,
                     InvalidSegmentException {

@@ -135,6 +135,14 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
     @Parameter(property = "excludeReactor", defaultValue = "true")
     private boolean excludeReactor = true;
 
+    /**
+     * The reactor projects for the current build.
+     * @param artifactFactory {@link ArtifactFactory} bean instance
+     * @param repositorySystem {@link RepositorySystem} bean instance
+     * @param wagonMap a map of {@link Wagon} instances per protocol
+     * @param changeRecorders a map of change recorders
+     * @throws MojoExecutionException thrown if an error occurs
+     */
     @Inject
     protected AbstractVersionsDependencyUpdaterMojo(
             ArtifactFactory artifactFactory,
@@ -219,6 +227,12 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
         return findArtifact(dependency).orElse(artifactFactory.createArtifact(dependency));
     }
 
+    /**
+     * Try to find the artifact that matches the given parent model.
+     * @param model Parent model
+     * @return Artifact for the parent
+     * @throws MojoExecutionException thrown if the dependency cannot be converted to an artifacted
+     */
     protected Artifact toArtifact(Parent model) throws MojoExecutionException {
         return this.toArtifact(DependencyBuilder.newBuilder()
                 .withGroupId(model.getGroupId())
@@ -242,6 +256,13 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
                 .build();
     }
 
+    /**
+     * Returns a string representation of the project in the form groupId:artifactId:version (omitting version if it is
+     * null or empty).
+     *
+     * @param project MavenProject
+     * @return String representation of the project
+     */
     protected String toString(MavenProject project) {
         StringBuilder buf = new StringBuilder();
 
@@ -257,6 +278,13 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
         return buf.toString();
     }
 
+    /**
+     * Returns a string representation of the dependency in the form groupId:artifactId:type:classifier:version
+     * (omitting type and classifier if they are null or empty, and omitting version if it is null or empty).
+     *
+     * @param d Dependency
+     * @return String representation of the dependency
+     */
     protected String toString(Dependency d) {
         StringBuilder buf = new StringBuilder();
         buf.append(d.getGroupId());
@@ -464,6 +492,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @param changeKind title for the {@link ChangeRecorder} log
      * @return {@code true} if an update has been made, {@code false} otherwise
      * @throws XMLStreamException thrown if updating the XML doesn't succeed
+     * @throws MojoExecutionException thrown if the dependency cannot be converted to an artifact
      */
     protected boolean updateDependencyVersion(
             MutableXMLStreamReader pom, Dependency dep, String newVersion, DependencyChangeRecord.ChangeKind changeKind)
