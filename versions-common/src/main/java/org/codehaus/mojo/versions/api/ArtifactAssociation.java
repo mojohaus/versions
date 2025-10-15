@@ -22,8 +22,10 @@ package org.codehaus.mojo.versions.api;
 import org.apache.maven.artifact.Artifact;
 
 /**
- * Created by IntelliJ IDEA.
- *
+ * An association between a property and an artifact.
+ * <p>
+ * This is used to track which properties are associated with which artifacts so that when
+ * a property is updated the correct artifacts can be updated.
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */

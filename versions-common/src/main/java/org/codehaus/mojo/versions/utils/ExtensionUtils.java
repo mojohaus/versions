@@ -47,6 +47,10 @@ import static java.util.Optional.ofNullable;
  * Utilities for reading and handling extensions.
  */
 public final class ExtensionUtils {
+    private ExtensionUtils() {
+        // prevent instantiation
+    }
+
     /**
      * Reads the core extensions configured for the given project
      * from the {@code ${project}/.mvn/extensions.xml} file.

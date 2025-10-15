@@ -27,9 +27,12 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 
 /**
- * Created by IntelliJ IDEA.
+ * Describes the details of available versions for an artifact.
  *
- * @author connollys
+ * <p>This interface provides methods to query available versions, check for specific versions,
+ * and retrieve the current version of the artifact.</p>
+ *
+ * @author Stephen Connolly
  * @since 1.0-beta-1
  */
 public interface VersionDetails {

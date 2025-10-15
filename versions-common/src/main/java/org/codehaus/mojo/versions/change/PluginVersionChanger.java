@@ -24,10 +24,13 @@ import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
- * Created by IntelliJ IDEA.
- *
+ * A {@link VersionChanger} implementation that changes plugin versions.
+ * <p>
+ * This class extends the {@link AbstractVersionChanger} and provides functionality to update
+ * plugin versions in a Maven POM file. It utilizes the {@link PomHelper} to
+ * set the new versions and logs the changes made.
+ * </p>
  * @author Stephen Connolly
- * @since 15-Sep-2010 16:00:54
  */
 public class PluginVersionChanger extends AbstractVersionChanger {
 

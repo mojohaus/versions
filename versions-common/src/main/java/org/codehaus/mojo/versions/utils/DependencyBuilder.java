@@ -25,9 +25,21 @@ import org.apache.maven.model.InputLocation;
  * Builder class for {@linkplain Dependency}
  */
 public class DependencyBuilder {
+    /**
+     * Enum representing the location of the element in the POM
+     */
     public enum Location {
+        /**
+         * groupId location
+         */
         GROUP_ID("groupId"),
+        /**
+         * artifactId location
+         */
         ARTIFACT_ID("artifactId"),
+        /**
+         * version location
+         */
         VERSION("version");
 
         private final String stringValue;
@@ -134,6 +146,12 @@ public class DependencyBuilder {
         return this;
     }
 
+    /**
+     * Passes location of the element in the POM to the builder
+     * @param element element name
+     * @param location location instance
+     * @return builder instance
+     */
     public DependencyBuilder withLocation(String element, InputLocation location) {
         this.inputLocationMap.put(element, location);
         return this;

@@ -25,12 +25,16 @@ import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 
 /**
- * Created by IntelliJ IDEA.
- *
+ * An expression evaluator that can resolve plugin parameters as well as standard expressions.
  * @author Stephen Connolly
- * @since 17-Mar-2009 08:51:42
  */
 public class VersionsExpressionEvaluator extends PluginParameterExpressionEvaluator implements ExpressionEvaluator {
+    /**
+     * Creates a new {@link VersionsExpressionEvaluator} instance.
+     *
+     * @param mavenSession the current maven session
+     * @param mojoExecution the current mojo execution
+     */
     public VersionsExpressionEvaluator(MavenSession mavenSession, MojoExecution mojoExecution) {
         super(mavenSession, mojoExecution);
     }

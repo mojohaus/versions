@@ -31,6 +31,9 @@ import static java.util.Optional.ofNullable;
  * @since 1.0-alpha-1
  */
 public enum DependencyComparator implements Comparator<Dependency> {
+    /**
+     * The singleton instance.
+     */
     INSTANCE;
 
     /**

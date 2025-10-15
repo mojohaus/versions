@@ -24,7 +24,13 @@ import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
- * Version changer for the parent
+ * A {@link VersionChanger} implementation that changes dependency versions.
+ * <p>
+ * This class extends the {@link AbstractVersionChanger} and provides functionality to update
+ * dependency versions in a Maven POM file. It utilizes the {@link PomHelper} to
+ * set the new versions and logs the changes made.
+ * </p>
+ * @author Stephen Connolly
  */
 public class ParentVersionChanger extends AbstractVersionChanger {
 

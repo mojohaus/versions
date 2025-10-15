@@ -72,4 +72,19 @@
     </plugins>
   </build>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <!-- Lenient linter due to generated classes -->
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <doclint>all,-missing</doclint>
+          <additionalOptions>
+            <additionalOption>-quiet</additionalOption>
+          </additionalOptions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
 </project>

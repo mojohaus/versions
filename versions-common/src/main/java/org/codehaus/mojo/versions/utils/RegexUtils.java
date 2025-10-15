@@ -90,6 +90,18 @@ public final class RegexUtils {
         return sb.toString();
     }
 
+    /**
+     * Calculates a score for a wildcard rule. The score is calculated as follows:
+     * <ul>
+     * <li>each {@code ?} character adds 1 to the score</li>
+     * <li>each {@code *} character adds 1000 to the score</li>
+     * </ul>
+     * Thus rules with fewer wildcards will have a lower score, and rules with more specific wildcards (i.e. {@code ?})
+     * will have a lower score than those with less specific wildcards (i.e. {@code *}).
+     *
+     * @param wildcardRule the wildcard rule, may be {@code null}
+     * @return the score
+     */
     public static int getWildcardScore(String wildcardRule) {
         int score = 0;
         if (wildcardRule != null) {

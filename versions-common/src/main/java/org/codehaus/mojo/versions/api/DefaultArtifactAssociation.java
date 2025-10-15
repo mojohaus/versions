@@ -25,10 +25,11 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 
 /**
- * Created by IntelliJ IDEA.
- *
- * @author connollys
- * @since Aug 6, 2009 9:23:13 AM
+ * An association between a property and an artifact.
+ * <p>
+ * This is used to track which properties are associated with which artifacts so that when
+ * a property is updated the correct artifacts can be updated.
+ * @author Stephen Connolly
  */
 final class DefaultArtifactAssociation implements ArtifactAssociation {
     private final Artifact artifact;

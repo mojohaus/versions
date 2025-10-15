@@ -29,6 +29,9 @@ import org.codehaus.mojo.versions.api.Property;
  * @since 1.0-beta-1
  */
 public enum PropertyComparator implements Comparator<Property> {
+    /**
+     * The singleton instance.
+     */
     INSTANCE;
 
     /**
