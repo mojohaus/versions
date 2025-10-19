@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -50,7 +51,7 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase {
      * @since 1.0-alpha-3
      */
     @Parameter
-    private Property[] properties;
+    private List<Property> properties;
 
     /**
      * A comma separated list of properties to update.

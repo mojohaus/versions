@@ -803,7 +803,7 @@ public class PomHelper {
     /**
      * Examines the project to find any properties which are associated with versions of artifacts in the project.
      *
-     * @param helper        {@link VersionsHelper} instance
+     * @param resolverAdapter        {@link ResolverAdapter} instance
      * @param log           {@link Log} instance
      * @param project       The project to examine.
      * @param includeParent whether parent POMs should be included
@@ -813,7 +813,7 @@ public class PomHelper {
      * @since 1.0-alpha-3
      */
     public PropertyVersionsBuilder[] getPropertyVersionsBuilders(
-            VersionsHelper helper, Log log, MavenProject project, boolean includeParent)
+            ResolverAdapter resolverAdapter, Log log, MavenProject project, boolean includeParent)
             throws ExpressionEvaluationException, IOException {
 
         Map<MavenProject, Model> reactorModels = includeParent
@@ -825,8 +825,8 @@ public class PomHelper {
 
         Map<String, PropertyVersionsBuilder> propertiesMap = new TreeMap<>();
         reactorModels.values().forEach(model -> {
-            processProfiles(helper, log, propertiesMap, model, activeProfileIds);
-            putPropertiesIfAbsent(helper, log, propertiesMap, null, model.getProperties());
+            processProfiles(resolverAdapter, log, propertiesMap, model, activeProfileIds);
+            putPropertiesIfAbsent(resolverAdapter, log, propertiesMap, null, model.getProperties());
         });
 
         // Process the project and its parent hierarchy
@@ -847,7 +847,7 @@ public class PomHelper {
     }
 
     private void processProfiles(
-            VersionsHelper helper,
+            ResolverAdapter resolverAdapter,
             Log log,
             Map<String, PropertyVersionsBuilder> propertiesMap,
             Model model,
@@ -857,7 +857,8 @@ public class PomHelper {
                 .filter(profile -> activeProfileIds.contains(profile.getId()))
                 .forEach(profile -> {
                     try {
-                        putPropertiesIfAbsent(helper, log, propertiesMap, profile.getId(), profile.getProperties());
+                        putPropertiesIfAbsent(
+                                resolverAdapter, log, propertiesMap, profile.getId(), profile.getProperties());
                         processDependencies(
                                 propertiesMap, profile.getDependencyManagement(), profile.getDependencies());
                         processBuild(propertiesMap, profile.getBuild());
@@ -1076,7 +1077,7 @@ public class PomHelper {
     }
 
     private void putPropertiesIfAbsent(
-            VersionsHelper helper,
+            ResolverAdapter resolverAdapter,
             Log log,
             Map<String, PropertyVersionsBuilder> result,
             String profileId,
@@ -1084,7 +1085,7 @@ public class PomHelper {
         ofNullable(properties)
                 .map(Properties::stringPropertyNames)
                 .ifPresent(propertyNames -> propertyNames.forEach(propertyName -> result.putIfAbsent(
-                        propertyName, new PropertyVersionsBuilder(helper, profileId, propertyName, log))));
+                        propertyName, new PropertyVersionsBuilder(resolverAdapter, profileId, propertyName, log))));
     }
 
     /**

@@ -24,7 +24,9 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -137,7 +139,7 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
      */
     protected void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
-        Property[] propertiesConfig;
+        List<Property> propertiesConfig;
         String properties;
         if (!isEmpty(propertiesVersionsFile)) {
             logWrongConfigWarning();
@@ -161,7 +163,7 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
                         propertyConfig.setVersion(newVersion);
                         return propertyConfig;
                     })
-                    .toArray(Property[]::new);
+                    .collect(Collectors.toList());
             properties = property;
         } else {
             throw new MojoExecutionException("Please provide either 'property' or 'propertiesVersionsFile' parameter.");
@@ -169,7 +171,7 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
         update(pom, propertiesConfig, properties);
     }
 
-    private void update(MutableXMLStreamReader pom, Property[] propertiesConfig, String properties)
+    private void update(MutableXMLStreamReader pom, List<Property> propertiesConfig, String properties)
             throws MojoExecutionException, XMLStreamException {
         Map<Property, PropertyVersions> propertyVersions = this.getHelper()
                 .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()

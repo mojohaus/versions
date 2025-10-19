@@ -43,7 +43,7 @@ class PropertiesVersionsFileReaderTest {
         int numberOfPropertiesConfig = 3;
         assertTrue(equalsCvsUnordered(
                 "booking-api.version,booking-lib.version,be-air-impl.version", reader.getProperties()));
-        assertEquals(numberOfPropertiesConfig, reader.getPropertiesConfig().length);
+        assertEquals(numberOfPropertiesConfig, reader.getPropertiesConfig().size());
     }
 
     private boolean equalsCvsUnordered(String csvExpected, String csvActual) {

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -40,12 +39,13 @@ public class PropertiesVersionsFileReader {
      */
     private String propertiesCsv;
 
-    private Property[] propertiesConfig;
+    private List<Property> propertiesConfig;
 
-    private String propertyFilePath;
+    private final String propertyFilePath;
 
     /**
      * Creates an instance of the object with the given path to the property file
+     *
      * @param filePath path to the property file
      */
     public PropertiesVersionsFileReader(String filePath) {
@@ -54,28 +54,23 @@ public class PropertiesVersionsFileReader {
 
     /**
      * Reads the property file
+     *
      * @throws IOException thrown if an I/O exception occurs during the read operation
      */
     public void read() throws IOException {
         try (InputStream input = Files.newInputStream(Paths.get(propertyFilePath))) {
-
             Properties prop = new Properties();
-
             // load a properties file
             prop.load(input);
-
             prop.propertyNames();
-
             propertiesCsv = prop.keySet().stream().map(Object::toString).collect(Collectors.joining(","));
-
-            List<Property> propertiesConfigList = new ArrayList<>();
-            prop.forEach((name, version) -> {
-                Property propertyConfig = new Property((String) name);
-                propertyConfig.setVersion((String) version);
-                propertiesConfigList.add(propertyConfig);
-            });
-
-            propertiesConfig = propertiesConfigList.toArray(new Property[0]);
+            propertiesConfig = prop.entrySet().stream()
+                    .map(e -> new Property((String) e.getKey()) {
+                        {
+                            setVersion((String) e.getValue());
+                        }
+                    })
+                    .collect(Collectors.toList());
         }
     }
 
@@ -91,7 +86,7 @@ public class PropertiesVersionsFileReader {
      * Returns the array of {@link Property} objects
      * @return array of properties
      */
-    public Property[] getPropertiesConfig() {
+    public List<Property> getPropertiesConfig() {
         return propertiesConfig;
     }
 }

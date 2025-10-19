@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -33,7 +34,7 @@ import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
-import org.codehaus.mojo.versions.api.VersionsHelper.VersionPropertiesMapRequest;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.PropertyUpdatesModel;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -57,7 +58,7 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
      * @since 1.0-beta-1
      */
     @Parameter
-    private Property[] properties;
+    private List<Property> properties;
 
     /**
      * A comma separated list of properties to include in the report.
@@ -199,15 +200,15 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
     }
 
     /**
-     * Creates a new instance of the {@link VersionPropertiesMapRequest} based on the provided {@link MavenProject}.
+     * Creates a new instance of the {@link VersionsHelper.VersionPropertiesMapRequest} based on the provided {@link MavenProject}.
      * The created instance is built taking into consideration the provided project as well as parameters of the Mojo
      * such as {@link #properties}, {@link #includeProperties}, {@link #excludeProperties}, {@link #includeParent},
      * {@link #autoLinkItems}.
      * @param project {@link MavenProject} instance for which the request is to be generated
-     * @return an initialised {@link VersionPropertiesMapRequest} instance
+     * @return an initialised {@link VersionsHelper.VersionPropertiesMapRequest} instance
      */
-    protected VersionPropertiesMapRequest getRequest(MavenProject project) {
-        return VersionPropertiesMapRequest.builder()
+    protected VersionsHelper.VersionPropertiesMapRequest getRequest(MavenProject project) {
+        return VersionsHelper.VersionPropertiesMapRequest.builder()
                 .withMavenProject(project)
                 .withPropertyDefinitions(this.properties)
                 .withIncludeProperties(this.includeProperties)

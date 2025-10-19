@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -249,15 +250,42 @@ public class DefaultVersionsHelper implements VersionsHelper {
         }
     }
 
-    public Map<Dependency, ArtifactVersions> lookupDependenciesUpdates(
+    @Override
+    public ArtifactVersions resolveArtifactVersions(
+            Artifact artifact, boolean usePluginRepositories, boolean useProjectRepositories)
+            throws VersionRetrievalException {
+        return lookupArtifactVersions(artifact, null, usePluginRepositories, !usePluginRepositories);
+    }
+
+    @Override
+    public SortedMap<Dependency, ArtifactVersions> resolveDependencyVersions(
+            Collection<Dependency> dependencies, boolean usePluginRepositories, boolean useProjectRepositories)
+            throws VersionRetrievalException {
+        return lookupDependenciesUpdates(dependencies.stream(), usePluginRepositories, useProjectRepositories, true);
+    }
+
+    @Override
+    public PluginUpdatesDetails resolvePluginVersions(Plugin plugin) throws VersionRetrievalException {
+        return lookupPluginUpdates(plugin, true);
+    }
+
+    @Override
+    public SortedMap<Plugin, PluginUpdatesDetails> resolvePluginVersions(Collection<Plugin> plugins)
+            throws VersionRetrievalException {
+        return lookupPluginsUpdates(plugins.stream(), true);
+    }
+
+    @Override
+    public SortedMap<Dependency, ArtifactVersions> lookupDependenciesUpdates(
             Stream<Dependency> dependencies,
             boolean usePluginRepositories,
             boolean useProjectRepositories,
             boolean allowSnapshots)
             throws VersionRetrievalException {
+        @SuppressWarnings("resource")
         ExecutorService executor = Executors.newFixedThreadPool(LOOKUP_PARALLEL_THREADS);
         try {
-            Map<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>(DependencyComparator.INSTANCE);
+            SortedMap<Dependency, ArtifactVersions> dependencyUpdates = new TreeMap<>(DependencyComparator.INSTANCE);
             List<Future<? extends Pair<Dependency, ArtifactVersions>>> futures = dependencies
                     .map(dependency -> executor.submit(() -> new ImmutablePair<>(
                             dependency,
@@ -303,11 +331,12 @@ public class DefaultVersionsHelper implements VersionsHelper {
     }
 
     @Override
-    public Map<Plugin, PluginUpdatesDetails> lookupPluginsUpdates(Stream<Plugin> plugins, boolean allowSnapshots)
+    public SortedMap<Plugin, PluginUpdatesDetails> lookupPluginsUpdates(Stream<Plugin> plugins, boolean allowSnapshots)
             throws VersionRetrievalException {
+        @SuppressWarnings("resource")
         ExecutorService executor = Executors.newFixedThreadPool(LOOKUP_PARALLEL_THREADS);
         try {
-            Map<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>(PluginComparator.INSTANCE);
+            SortedMap<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>(PluginComparator.INSTANCE);
             List<Future<? extends Pair<Plugin, PluginUpdatesDetails>>> futures = plugins.map(
                             p -> executor.submit(() -> new ImmutablePair<>(p, lookupPluginUpdates(p, allowSnapshots))))
                     .collect(Collectors.toList());
@@ -354,7 +383,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
         Map<String, Property> properties = new HashMap<>();
         // Populate properties map from request
         if (request.getPropertyDefinitions() != null) {
-            Arrays.stream(request.getPropertyDefinitions()).forEach(p -> properties.put(p.getName(), p));
+            request.getPropertyDefinitions().forEach(p -> properties.put(p.getName(), p));
         }
 
         Map<String, PropertyVersionsBuilder> builders = new HashMap<>();
