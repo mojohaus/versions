@@ -39,7 +39,7 @@ import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -150,7 +150,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param artifactFactory   the artifact factory
      * @param repositorySystem  the repository system
      * @param wagonMap          the wagon map
-     * @param changeRecorders   the change recorders
+     * @param changeRecorderFactories   the change recorder factories
      * @throws MojoExecutionException if any
      */
     @Inject
@@ -158,9 +158,9 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     @Override

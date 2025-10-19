@@ -51,9 +51,10 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord.ChangeKind;
-import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
+import org.codehaus.mojo.versions.model.PropertyVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
@@ -64,6 +65,9 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.DEPENDENCY_MANAGEMENT_UPDATE;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.DEPENDENCY_UPDATE;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.PARENT_UPDATE;
 
 /**
  * Updates a dependency to a specific version.
@@ -162,7 +166,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @param artifactFactory  the artifact factory
      * @param repositorySystem the repository system
      * @param wagonMap         the map of wagon implementations
-     * @param changeRecorders  the change recorders
+     * @param changeRecorderFactories  the change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -170,9 +174,9 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     @Override
@@ -265,27 +269,19 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                 useDepVersion(
                         node,
                         node.getModel().getDependencyManagement().getDependencies(),
-                        ChangeKind.DEPENDENCY_MANAGEMENT,
+                        DEPENDENCY_MANAGEMENT_UPDATE,
                         propertyBacklog,
                         propertyConflicts);
             }
 
             if (getProcessDependencies()) {
                 useDepVersion(
-                        node,
-                        getDependencies(node.getModel()),
-                        ChangeKind.DEPENDENCY,
-                        propertyBacklog,
-                        propertyConflicts);
+                        node, getDependencies(node.getModel()), DEPENDENCY_UPDATE, propertyBacklog, propertyConflicts);
             }
 
             if (getProject().getParent() != null && getProcessParent()) {
                 useDepVersion(
-                        node,
-                        singletonList(getParentDependency()),
-                        ChangeKind.PARENT,
-                        propertyBacklog,
-                        propertyConflicts);
+                        node, singletonList(getParentDependency()), PARENT_UPDATE, propertyBacklog, propertyConflicts);
             }
         } catch (XMLStreamException e) {
             throw new MojoFailureException(
@@ -375,7 +371,6 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @param node model tree node to process
      * @param dependencies collection of dependencies to process (can be taken from dependency management,
      *                     parent, or dependencies)
-     * @param changeKind {@link ChangeKind} instance for the change recorder
      * @param propertyBacklog a {@link Set} instance used to store dependencies to be updated, but which were not found
      *                        in the current subtree. These properties need to be carried over to the parent node for
      *                        processing.
@@ -390,20 +385,14 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
     private void useDepVersion(
             ModelNode node,
             Collection<Dependency> dependencies,
-            ChangeKind changeKind,
+            DependencyChangeKind changeKind,
             Set<String> propertyBacklog,
             Map<String, Set<Dependency>> propertyConflicts)
             throws MojoExecutionException, XMLStreamException, VersionRetrievalException {
         // an additional pass is necessary to collect conflicts if processProperties is enabled
         if (processProperties) {
             dependencies.stream()
-                    .filter(dep -> {
-                        try {
-                            return !isIncluded(toArtifact(dep));
-                        } catch (MojoExecutionException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
+                    .filter(dep -> !isIncluded(toArtifact(dep)))
                     .forEach(dep ->
                             // if a dependency that is _not_ to be changed is set using a property, register that
                             // property
@@ -450,7 +439,14 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                         }
                     }
                     if (!propertyName.isPresent()) {
-                        updateDependencyVersion(node.getMutableXMLStreamReader(), dep, depVersion, changeKind);
+                        updateDependencyVersion(
+                                node.getMutableXMLStreamReader(),
+                                new DependencyVersionChange()
+                                        .withKind(changeKind)
+                                        .withGroupId(dep.getGroupId())
+                                        .withArtifactId(dep.getArtifactId())
+                                        .withOldVersion(dep.getVersion())
+                                        .withNewVersion(depVersion));
                     } else {
                         // propertyName is present
                         ofNullable(propertyConflicts.get(propertyName.get()))
@@ -512,16 +508,11 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                                 property,
                                 depVersion);
                         if (result) {
-                            try {
-                                getChangeRecorder()
-                                        .recordChange(DefaultPropertyChangeRecord.builder()
-                                                .withProperty(property)
-                                                .withOldValue(pair.getRight())
-                                                .withNewValue(depVersion)
-                                                .build());
-                            } catch (MojoExecutionException e) {
-                                throw new RuntimeException(e);
-                            }
+                            getChangeRecorder()
+                                    .recordChange(new PropertyVersionChange()
+                                            .withProperty(property)
+                                            .withOldValue(pair.getRight())
+                                            .withNewValue(depVersion));
                         }
                         return result;
                     } catch (XMLStreamException e) {

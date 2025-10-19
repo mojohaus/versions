@@ -84,7 +84,7 @@ import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ArtifactVersionService;
@@ -196,7 +196,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param lifecycleExecutor the (injected) instance of {@link LifecycleExecutor}
      * @param modelInterpolator the (injected) instance of {@link ModelInterpolator}
      * @param runtimeInformation the (injected) instance of {@link RuntimeInformation}
-     * @param changeRecorders   a map of change recorders
+     * @param changeRecorderFactories   a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -209,9 +209,9 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             LifecycleExecutor lifecycleExecutor,
             ModelInterpolator modelInterpolator,
             RuntimeInformation runtimeInformation,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
         this.projectBuilder = projectBuilder;
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;

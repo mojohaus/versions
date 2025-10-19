@@ -23,10 +23,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
@@ -39,14 +39,14 @@ import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.ScopeArtifactFilter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.codehaus.mojo.versions.recording.DefaultDependencyChangeRecord;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.codehaus.mojo.versions.utils.DependencyComparator;
+import org.codehaus.mojo.versions.utils.VersionStringComparator;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.util.version.GenericVersionScheme;
 
 /**
  * Base class for a mojo that updates dependency versions.
@@ -64,6 +64,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * Pattern to match snapshot versions
      */
     protected static final Pattern SNAPSHOT_REGEX = Pattern.compile("^(.+)-((SNAPSHOT)|(\\d{8}\\.\\d{6}-\\d+))$");
+
+    private final GenericVersionScheme versionScheme;
 
     /**
      * A comma separated list of artifact patterns to include. Follows the pattern
@@ -140,7 +142,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @param artifactFactory {@link ArtifactFactory} bean instance
      * @param repositorySystem {@link RepositorySystem} bean instance
      * @param wagonMap a map of {@link Wagon} instances per protocol
-     * @param changeRecorders a map of change recorders
+     * @param changeRecorderFactories a map of change recorder factories
      * @throws MojoExecutionException thrown if an error occurs
      */
     @Inject
@@ -148,9 +150,10 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
+        this.versionScheme = new GenericVersionScheme();
     }
 
     /**
@@ -220,24 +223,23 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      *
      * @param dependency Dependency
      * @return Artifact
-     * @throws MojoExecutionException Mojo execution exception
      * @since 1.0-alpha-3
      */
-    protected Artifact toArtifact(Dependency dependency) throws MojoExecutionException {
+    protected Artifact toArtifact(Dependency dependency) {
         return findArtifact(dependency).orElse(artifactFactory.createArtifact(dependency));
     }
 
     /**
      * Try to find the artifact that matches the given parent model.
-     * @param model Parent model
-     * @return Artifact for the parent
-     * @throws MojoExecutionException thrown if the dependency cannot be converted to an artifacted
+     *
+     * @param parentModel {@link Parent} object representing the parent model
+     * @return Artifact representing the parent
      */
-    protected Artifact toArtifact(Parent model) throws MojoExecutionException {
+    protected Artifact toArtifact(Parent parentModel) {
         return this.toArtifact(DependencyBuilder.newBuilder()
-                .withGroupId(model.getGroupId())
-                .withArtifactId(model.getArtifactId())
-                .withVersion(model.getVersion())
+                .withGroupId(parentModel.getGroupId())
+                .withArtifactId(parentModel.getArtifactId())
+                .withVersion(parentModel.getVersion())
                 .withType("pom")
                 .withScope(Artifact.SCOPE_COMPILE)
                 .build());
@@ -326,7 +328,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @return true if project and dep refer to the same artifact
      */
     private boolean compare(MavenProject project, Dependency dep) {
-        if (!StringUtils.equals(project.getGroupId(), dep.getGroupId())) {
+        if (!Objects.equals(project.getGroupId(), dep.getGroupId())) {
             return false;
         }
         return project.getArtifactId().equals(dep.getArtifactId());
@@ -341,16 +343,16 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @return true if artifact and dep refer to the same artifact
      */
     private boolean compare(Artifact artifact, Dependency dep) {
-        if (!StringUtils.equals(artifact.getGroupId(), dep.getGroupId())) {
+        if (!Objects.equals(artifact.getGroupId(), dep.getGroupId())) {
             return false;
         }
-        if (!StringUtils.equals(artifact.getArtifactId(), dep.getArtifactId())) {
+        if (!Objects.equals(artifact.getArtifactId(), dep.getArtifactId())) {
             return false;
         }
-        if (!StringUtils.equals(artifact.getType(), dep.getType())) {
+        if (!Objects.equals(artifact.getType(), dep.getType())) {
             return false;
         }
-        return StringUtils.equals(artifact.getClassifier(), dep.getClassifier());
+        return Objects.equals(artifact.getClassifier(), dep.getClassifier());
     }
 
     /**
@@ -487,84 +489,52 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * be the parent project or any given dependency.
      *
      * @param pom {@link MutableXMLStreamReader} instance to update the POM XML document
-     * @param dep dependency to be updated (can also be a dependency made from the parent)
-     * @param newVersion new version to update the dependency to
-     * @param changeKind title for the {@link ChangeRecorder} log
+     * @param change {@link DependencyVersionChange} object describing the change
      * @return {@code true} if an update has been made, {@code false} otherwise
      * @throws XMLStreamException thrown if updating the XML doesn't succeed
-     * @throws MojoExecutionException thrown if the dependency cannot be converted to an artifact
      */
-    protected boolean updateDependencyVersion(
-            MutableXMLStreamReader pom, Dependency dep, String newVersion, DependencyChangeRecord.ChangeKind changeKind)
-            throws XMLStreamException, MojoExecutionException {
+    protected boolean updateDependencyVersion(MutableXMLStreamReader pom, DependencyVersionChange change)
+            throws XMLStreamException {
         boolean updated = false;
-        if (getProcessParent()
-                && getProject().getParent() != null
-                && (DependencyComparator.INSTANCE.compare(
-                                        dep,
-                                        DependencyBuilder.newBuilder()
-                                                .withGroupId(getProject()
-                                                        .getParentArtifact()
-                                                        .getGroupId())
-                                                .withArtifactId(getProject()
-                                                        .getParentArtifact()
-                                                        .getArtifactId())
-                                                .withVersion(getProject()
-                                                        .getParentArtifact()
-                                                        .getVersion())
-                                                .build())
-                                == 0
-                        || getProject().getParentArtifact().getBaseVersion() != null
-                                && DependencyComparator.INSTANCE.compare(
-                                                dep,
-                                                DependencyBuilder.newBuilder()
-                                                        .withGroupId(getProject()
-                                                                .getParentArtifact()
-                                                                .getGroupId())
-                                                        .withArtifactId(getProject()
-                                                                .getParentArtifact()
-                                                                .getArtifactId())
-                                                        .withVersion(getProject()
-                                                                .getParentArtifact()
-                                                                .getBaseVersion())
-                                                        .build())
-                                        == 0)) {
-            if (PomHelper.setProjectParentVersion(pom, newVersion)) {
-                if (getLog().isDebugEnabled()) {
-                    getLog().debug("Made parent update from " + dep.getVersion() + " to " + newVersion);
+        if (getProcessParent() && getProject().getParentArtifact() != null) {
+            Artifact parent = getProject().getParentArtifact();
+            if (Objects.equals(change.getGroupId(), parent.getGroupId())
+                    && Objects.equals(change.getArtifactId(), parent.getArtifactId())
+                    && (VersionStringComparator.STRICT.compare(change.getOldVersion(), parent.getVersion()) == 0
+                            || VersionStringComparator.STRICT.compare(change.getOldVersion(), parent.getBaseVersion())
+                                    == 0)) {
+                if (PomHelper.setProjectParentVersion(pom, change.getNewVersion())) {
+                    if (getLog().isDebugEnabled()) {
+                        getLog().debug("Made parent update from " + change.getOldVersion() + " to "
+                                + change.getNewVersion());
+                    }
+                    updated = true;
+                } else {
+                    getLog().warn("Could not update parent from " + change.getOldVersion() + " to "
+                            + change.getNewVersion());
                 }
-                getChangeRecorder()
-                        .recordChange(DefaultDependencyChangeRecord.builder()
-                                .withKind(changeKind)
-                                .withDependency(dep)
-                                .withNewVersion(newVersion)
-                                .build());
-                updated = true;
-            } else {
-                getLog().warn("Could not update parent: " + dep.toString() + " to " + newVersion);
             }
         }
 
         if (PomHelper.setDependencyVersion(
                 pom,
-                dep.getGroupId(),
-                dep.getArtifactId(),
-                dep.getVersion(),
-                newVersion,
+                change.getGroupId(),
+                change.getArtifactId(),
+                change.getOldVersion(),
+                change.getNewVersion(),
                 getProject().getModel(),
                 getLog())) {
             if (getLog().isInfoEnabled()) {
-                getLog().info("Updated " + toString(dep) + " to version " + newVersion);
+                getLog().info(String.format(
+                        "Updated %s:%s:%s to version %s",
+                        change.getGroupId(), change.getArtifactId(), change.getOldVersion(), change.getNewVersion()));
             }
-            getChangeRecorder()
-                    .recordChange(DefaultDependencyChangeRecord.builder()
-                            .withKind(changeKind)
-                            .withDependency(dep)
-                            .withNewVersion(newVersion)
-                            .build());
             updated = true;
         }
 
+        if (updated) {
+            getChangeRecorder().recordChange(change);
+        }
         return updated;
     }
 

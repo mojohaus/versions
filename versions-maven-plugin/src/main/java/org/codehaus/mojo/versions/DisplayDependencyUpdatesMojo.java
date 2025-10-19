@@ -38,7 +38,7 @@ import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper;
 import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper.DependencyUpdatesResult;
@@ -324,7 +324,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param artifactFactory  an {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
      * @param wagonMap         a map of wagon providers per protocol
-     * @param changeRecorders a map of change recorders
+     * @param changeRecorderFactories a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -332,9 +332,9 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     @Override

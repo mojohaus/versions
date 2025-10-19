@@ -35,6 +35,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ExtensionBuilder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.junit.After;
 import org.junit.Before;
@@ -85,7 +86,8 @@ public class DisplayExtensionUpdatesMojoTest {
         openMocks(this);
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
-        mojo = new DisplayExtensionUpdatesMojo(artifactFactory, mockAetherRepositorySystem(), null, null);
+        mojo = new DisplayExtensionUpdatesMojo(
+                artifactFactory, mockAetherRepositorySystem(), null, TestVersionChangeRecorder.asTestMap());
         mojo.project = new MavenProject() {
             {
                 setModel(new Model() {

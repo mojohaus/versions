@@ -15,11 +15,12 @@ import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.rule.RuleService;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +63,8 @@ import static org.mockito.MockitoAnnotations.openMocks;
  * Unit tests for {@link UseReleasesMojo}
  */
 public class UseReleasesMojoTest extends AbstractMojoTestCase {
-    private TestChangeRecorder changeRecorder;
+    private TestVersionChangeRecorder changeRecorder;
+
     private UseReleasesMojo mojo;
 
     @Mock
@@ -84,8 +86,9 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase {
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
         MavenSession mavenSession = mockMavenSession();
-        changeRecorder = new TestChangeRecorder();
-        mojo = new UseReleasesMojo(artifactFactory, mockAetherRepositorySystem(), null, changeRecorder.asTestMap());
+        mojo = new UseReleasesMojo(
+                artifactFactory, mockAetherRepositorySystem(), null, TestVersionChangeRecorder.asTestMap());
+        changeRecorder = (TestVersionChangeRecorder) mojo.getChangeRecorder();
         setVariableValueToObject(mojo, "reactorProjects", emptyList());
         mojo.mojoExecution = mock(MojoExecution.class);
         mojo.project = new MavenProject() {
@@ -129,9 +132,12 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase {
         }
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "1.0.0-SNAPSHOT", "1.0.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactA")
+                        .withOldVersion("1.0.0-SNAPSHOT")
+                        .withNewVersion("1.0.0")));
     }
 
     @Test
@@ -172,9 +178,12 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase {
         }
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "1.0.0-SNAPSHOT", "1.0.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactA")
+                        .withOldVersion("1.0.0-SNAPSHOT")
+                        .withNewVersion("1.0.0")));
     }
 
     @Test
@@ -199,9 +208,12 @@ public class UseReleasesMojoTest extends AbstractMojoTestCase {
         }
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "1.0.0-SNAPSHOT", "1.0.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactA")
+                        .withOldVersion("1.0.0-SNAPSHOT")
+                        .withNewVersion("1.0.0")));
     }
 
     @Test

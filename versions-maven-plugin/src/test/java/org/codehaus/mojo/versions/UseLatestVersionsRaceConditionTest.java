@@ -14,11 +14,12 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
-import org.codehaus.mojo.versions.utils.TestChangeRecorder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 public class UseLatestVersionsRaceConditionTest {
     protected UseLatestVersionsMojoBase mojo;
 
-    protected TestChangeRecorder changeRecorder;
+    protected TestVersionChangeRecorder changeRecorder;
 
     @Mock
     protected Log log;
@@ -58,7 +59,7 @@ public class UseLatestVersionsRaceConditionTest {
     @Before
     public void setUp() throws Exception {
         openMocks(this);
-        changeRecorder = new TestChangeRecorder();
+        changeRecorder = new TestVersionChangeRecorder();
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
         pomHelper = new PomHelper(artifactFactory, expressionEvaluator);
@@ -103,8 +104,9 @@ public class UseLatestVersionsRaceConditionTest {
                 artifactFactory,
                 MockUtils.mockAetherRepositorySystem(),
                 Collections.singletonMap("proto", testWagon),
-                changeRecorder.asTestMap()) {
+                TestVersionChangeRecorder.asTestMap()) {
             {
+                changeRecorder = (TestVersionChangeRecorder) getChangeRecorder();
                 reactorProjects = emptyList();
                 MavenProject project = new MavenProject() {
                     {
@@ -168,11 +170,17 @@ public class UseLatestVersionsRaceConditionTest {
         assertThat(
                 changeRecorder.getChanges(),
                 allOf(
-                        hasItem(new DefaultDependencyVersionChange(
-                                "default-group", "artifactA",
-                                "1.0.0", "2.0.0")),
-                        hasItem(new DefaultDependencyVersionChange(
-                                "default-group", "artifactB",
-                                "1.0.0", "1.1.0"))));
+                        hasItem(new DependencyVersionChange()
+                                .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                                .withGroupId("default-group")
+                                .withArtifactId("artifactA")
+                                .withOldVersion("1.0.0")
+                                .withNewVersion("2.0.0")),
+                        hasItem(new DependencyVersionChange()
+                                .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                                .withGroupId("default-group")
+                                .withArtifactId("artifactB")
+                                .withOldVersion("1.0.0")
+                                .withNewVersion("1.1.0"))));
     }
 }
