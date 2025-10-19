@@ -91,6 +91,18 @@ or:
 </configuration>
 ```
 
+Alternatively, with greater readability, you can write:
+
+```xml
+<configuration>
+    ...
+    <ignoredVersions>
+        <ignoredVersion>.*-M.*</ignoredVersion>
+    </ignoredVersions>
+    ...
+</configuration>
+```
+
 in your project config.
 
 See [Issue #258](https://github.com/mojohaus/versions/issues/258) and [the documentation for ignoredVersions](https://www.mojohaus.org/versions/versions-maven-plugin/display-dependency-updates-mojo.html#ignoredVersions)

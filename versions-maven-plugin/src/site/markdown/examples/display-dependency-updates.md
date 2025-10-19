@@ -80,6 +80,19 @@ or:
 </configuration>
 ```
 
+Alternatively, with greater readability, you can write:
+
+```xml
+<configuration>
+    ...
+    <ignoredVersions>
+        <ignoredVersion>.*-M.*</ignoredVersion>
+        <ignoredVersion>.*-alpha.*</ignoredVersion>
+    </ignoredVersions>
+    ...
+</configuration>
+```
+
 in your project config. That will result in the following output. Instead of:
 
 ```shell
