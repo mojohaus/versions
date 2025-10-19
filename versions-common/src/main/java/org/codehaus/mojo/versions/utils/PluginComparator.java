@@ -30,6 +30,9 @@ import org.apache.maven.model.ReportPlugin;
  * @since 1.0-beta-1
  */
 public enum PluginComparator implements Comparator<Object> {
+    /**
+     * The singleton instance.
+     */
     INSTANCE;
 
     private static boolean isPluginOrReportPlugin(Object o) {

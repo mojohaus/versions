@@ -20,7 +20,9 @@ import javax.xml.stream.XMLStreamException;
 import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
 
 /**
- * An abstract version changer, capable of changing versions of a given dependency.
+ * Describes an operation that can change the version of a dependency in a POM.
+ *
+ * @author Stephen Connolly
  */
 public interface VersionChanger {
     /**

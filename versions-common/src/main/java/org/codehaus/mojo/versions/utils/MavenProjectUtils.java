@@ -44,6 +44,11 @@ import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.VERSIO
  * Utility methods for extracting dependencies from a {@link org.apache.maven.project.MavenProject}
  */
 public class MavenProjectUtils {
+
+    private MavenProjectUtils() {
+        // prevent instantiation
+    }
+
     /**
      * Retrieves dependencies from the plugins section
      *
@@ -190,6 +195,8 @@ public class MavenProjectUtils {
     }
 
     /**
+     * Retrieves dependencies from the dependencies of the project as well as its immediate parent project.
+     * @param dependency {@link Dependency} instance
      * @return {@code true} if the version of the dependency is definned locally in the same project
      */
     public static boolean dependencyVersionLocalToReactor(Dependency dependency) {

@@ -42,7 +42,8 @@ public interface VersionsHelper {
     /**
      * Looks up the versions of the specified artifact that are available in either the local repository, or the
      * appropriate remote repositories.
-     * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
+     * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots,
+     * regardless of the version range specified in the artifact.</b>
      *
      * @param artifact              The artifact to look for versions of.
      * @param usePluginRepositories {@code true} will consult the pluginRepositories, while {@code false} will
@@ -57,7 +58,8 @@ public interface VersionsHelper {
     /**
      * Looks up the versions of the specified artifact that are available in either the local repository, or the
      * appropriate remote repositories.
-     * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
+     * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots,
+     * regardless of the version range specified in the artifact.</b>
      *
      * @param artifact               The artifact to look for versions of.
      * @param versionRange           versionRange to restrict the search, may be {@code null}
@@ -74,7 +76,8 @@ public interface VersionsHelper {
     /**
      * Looks up the versions of the specified artifact that are available in either the local repository, or the
      * appropriate remote repositories.
-     * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots.</b>
+     * <b>The resulting {@link ArtifactVersions} instance will contain all versions, including snapshots,
+     * regardless of the version range specified in the artifact.</b>
      *
      * @param artifact              The artifact to look for versions of.
      * @param versionRange          versionRange to restrict the search, may be {@code null}
@@ -104,6 +107,8 @@ public interface VersionsHelper {
     /**
      * Returns a map of all possible updates per dependency. The lookup is done in parallel using
      * {@code LOOKUP_PARALLEL_THREADS} threads.
+     * The resulting {@link ArtifactVersions} instance per dependency will only contain versions that are newer
+     * than the current version of the dependency.
      *
      * @param dependencies           stream of {@link Dependency} instances to look up.
      * @param usePluginRepositories  Search the plugin repositories.
@@ -120,7 +125,9 @@ public interface VersionsHelper {
             throws VersionRetrievalException;
 
     /**
-     * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency.
+     * Creates an {@link org.codehaus.mojo.versions.api.ArtifactVersions} instance from a dependency
+     * The resulting {@link ArtifactVersions} instance will only contain versions that are newer than the current version
+     * of the dependency.
      *
      * @param dependency             The dependency.
      * @param usePluginRepositories  Search the plugin repositories.
@@ -138,7 +145,8 @@ public interface VersionsHelper {
             throws VersionRetrievalException;
 
     /**
-     * Looks up the updates for a set of plugins.
+     * Looks up the updates for a set of plugins. he resulting {@link org.codehaus.mojo.versions.api.PluginUpdatesDetails} instance per plugin
+     * will only contain versions that are newer than the current version of the plugin.
      *
      * @param plugins        A stream of {@link Plugin} instances to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
@@ -150,7 +158,8 @@ public interface VersionsHelper {
             throws VersionRetrievalException;
 
     /**
-     * Looks up the updates for a plugin.
+     * Looks up the updates for a plugin. The resulting {@link org.codehaus.mojo.versions.api.PluginUpdatesDetails}
+     * instance will only contain versions that are newer than the current version of the plugin.
      *
      * @param plugin         The {@link Plugin} instance to look up.
      * @param allowSnapshots Include snapshots in the list of updates.
@@ -164,6 +173,12 @@ public interface VersionsHelper {
      * Returns a map of {@link org.codehaus.mojo.versions.api.PropertyVersions} values keyed by
      * {@link Property} instances consisting of the properties defined in the project which
      * are associated with version information.
+     * <p>
+     * The associations can be defined explicitly via the property definitions, or
+     * inferred automatically if {@code autoLinkItems} is set to {@code true}. In the latter
+     * case, any property that matches the version of a dependency or plugin
+     * (and passes the {@code includeFilter} test, if provided) will be considered
+     * associated with that artifact.
      *
      * @param request {@link VersionPropertiesMapRequest} instance containing the arguments
      * @return a map of {@link org.codehaus.mojo.versions.api.PropertyVersions} values keyed by
@@ -397,7 +412,8 @@ public interface VersionsHelper {
     }
 
     /**
-     * Attempts to resolve the artifact.
+     * Attempts to resolve the artifact. If the artifact cannot be resolved, an
+     * {@link ArtifactResolutionException} is thrown.
      *
      * @param artifact              The artifact to resolve.
      * @param usePluginRepositories whether to resolve from the plugin repositories or the regular repositories.

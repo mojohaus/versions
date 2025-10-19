@@ -33,8 +33,16 @@ public class ArtifactVersionService {
     private static final Map<String, DefaultArtifactVersion> CACHE = new LRUMap<>(MAX_CACHE_SIZE);
     private static final ReentrantReadWriteLock CACHE_LOCK = new ReentrantReadWriteLock();
 
+    private ArtifactVersionService() {
+        // prevent instantiation
+    }
+
     /**
-     * Get a ComparableVersion representing the version in a string.
+     * Get an {@link ArtifactVersion} instance for the given version string. Uses a cache to avoid
+     * re-parsing versions that have already been seen.
+     *
+     * @param version the version string
+     * @return the corresponding {@link ArtifactVersion} instance
      */
     public static ArtifactVersion getArtifactVersion(String version) {
         try {

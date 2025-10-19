@@ -24,10 +24,21 @@ import java.util.Objects;
 import org.apache.maven.plugin.logging.Log;
 
 /**
- * Created by IntelliJ IDEA.
+ * A {@link ContextualLog} implementation that delegates to a given {@link Log}.
+ * <p>
+ * This class provides a way to add contextual information to log messages by
+ * maintaining a current context. When a context is set, the first log message
+ * at each level (debug, info, warn, error) will be prefixed with the context.
+ * When the context is cleared, a blank line is logged at the highest level
+ * that was used during the context.
+ * </p>
+ * <p>
+ * This is useful for grouping log messages related to a specific operation or
+ * component, making it easier to identify and understand the context of log
+ * entries.
+ * </p>
  *
  * @author Stephen Connolly
- * @since 15-Sep-2010 15:52:21
  */
 public class DelegatingContextualLog implements ContextualLog {
     private final Log delegate;
@@ -42,6 +53,11 @@ public class DelegatingContextualLog implements ContextualLog {
 
     private boolean currentContextReportedError = false;
 
+    /**
+     * Creates a new {@link DelegatingContextualLog} instance.
+     *
+     * @param delegate the delegate log
+     */
     public DelegatingContextualLog(Log delegate) {
         this.delegate = delegate;
     }

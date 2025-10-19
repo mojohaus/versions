@@ -30,7 +30,15 @@ import org.apache.maven.plugin.logging.Log;
  */
 public interface ContextualLog extends Log {
 
+    /**
+     * Set the current context. This will be printed before any log messages.
+     *
+     * @param context the context (e.g. the artifact being processed)
+     */
     void setContext(String context);
 
+    /**
+     * Clear the current context.
+     */
     void clearContext();
 }

@@ -35,6 +35,8 @@ import org.apache.maven.artifact.versioning.VersionRange;
 
 /**
  * Holds the results of a search for versions of an artifact.
+ * <p>
+ * Includes the artifact itself (which holds the current version and version range) and the list of available versions.
  *
  * @author Stephen Connolly
  * @since 1.0-alpha-3

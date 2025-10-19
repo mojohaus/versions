@@ -13,6 +13,9 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 
+/**
+ * Factory for creating {@link Artifact} instances.
+ */
 @Named
 public class ArtifactFactory {
     private final ArtifactHandlerManager artifactHandlerManager;
@@ -27,7 +30,18 @@ public class ArtifactFactory {
     }
 
     /**
-     * Creates a new {@link Artifact} instance
+     * Creates a new {@link Artifact} instance with the given parameters.
+     * The version parameter may be a version range.
+     * @param groupId the groupId
+     * @param artifactId the artifactId
+     * @param version the version or version range
+     * @param type the type
+     * @param classifier the classifier
+     * @param scope the scope
+     * @param optional whether the dependency is optional
+     * @return the created {@link Artifact} instance
+     * @throws RuntimeException if the version parameter is not a valid version or version range
+     * (in this case the cause will be an {@link InvalidVersionSpecificationException})
      */
     public Artifact createArtifact(
             String groupId,
@@ -54,7 +68,11 @@ public class ArtifactFactory {
     }
 
     /**
-     * Creates a new "maven-plugin"-type artifact
+     * Creates a new "maven-plugin"-type artifact with the given coordinates. The scope will be {@code runtime}.
+     * @param groupId the groupId
+     * @param artifactId the artifactId
+     * @param version the version
+     * @return the created {@link Artifact} instance
      */
     public Artifact createMavenPluginArtifact(String groupId, String artifactId, String version) {
         return createArtifact(groupId, artifactId, version, "maven-plugin", null, "runtime", false);
@@ -62,6 +80,8 @@ public class ArtifactFactory {
 
     /**
      * Creates an {@link Artifact} object based on a {@link Dependency} instance
+     * @param dependency the dependency
+     * @return the created {@link Artifact} instance
      */
     public Artifact createArtifact(Dependency dependency) {
         Artifact artifact = createArtifact(

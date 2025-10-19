@@ -34,6 +34,10 @@ import static org.codehaus.mojo.versions.api.Segment.MINOR;
  * Utility class for manipulating with {@link Segment} objects
  */
 public class SegmentUtils {
+    private SegmentUtils() {
+        // prevent instantiation
+    }
+
     /**
      * <p>Based on the passed flags, determines which segment which is not to be changed.</p>
      *

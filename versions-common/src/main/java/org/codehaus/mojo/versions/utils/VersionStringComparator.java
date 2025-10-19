@@ -7,8 +7,18 @@ import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.Version;
 import org.eclipse.aether.version.VersionScheme;
 
+/**
+ * A comparator for version strings. Can be strict (throws IllegalArgumentException if a version string
+ * cannot be parsed) or lenient (treats unparseable version strings as "0").
+ */
 public enum VersionStringComparator implements Comparator<String> {
+    /**
+     * Strict comparator: throws IllegalArgumentException if a version string cannot be parsed.
+     */
     STRICT(false),
+    /**
+     * Lenient comparator: treats unparseable version strings as "0".
+     */
     LENIENT(true);
 
     private final boolean lenient;

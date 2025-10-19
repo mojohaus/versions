@@ -24,8 +24,11 @@ import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 
 /**
- * Created by IntelliJ IDEA.
- *
+ * Abstract base class for {@link VersionChanger} implementations.
+ * <p>
+ * This class provides common functionality and holds references to the Maven Model, a mutable XML stream reader for the POM file,
+ * and a logger for logging purposes.
+ * </p>
  * @author Stephen Connolly
  * @since 15-Sep-2010 15:59:46
  */
