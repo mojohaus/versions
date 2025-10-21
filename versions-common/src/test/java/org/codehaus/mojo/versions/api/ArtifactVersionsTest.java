@@ -20,15 +20,22 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
@@ -38,10 +45,13 @@ import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.versions;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -271,5 +281,27 @@ class ArtifactVersionsTest {
         assertThat(
                 instance.getNewestVersion("1.0.0", of(INCREMENTAL), true, false).get(),
                 hasToString("1.0.0-1-SNAPSHOT"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"(1, 3]", "(0, 1], (2, 3]"})
+    void testAllUpdatesWithCurrentVersionRange(String versionRange) throws InvalidVersionSpecificationException {
+        ArtifactVersions instance = new ArtifactVersions(
+                new DefaultArtifact(
+                        "default-group",
+                        "dummy-api",
+                        VersionRange.createFromVersionSpec(versionRange),
+                        "foo",
+                        "bar",
+                        "jar",
+                        null),
+                Stream.of("1", "2", "3", "4")
+                        .map(ArtifactVersionService::getArtifactVersion)
+                        .collect(Collectors.toList()));
+        List<String> allUpdates = Arrays.stream(instance.getAllUpdates(false))
+                .map(Object::toString)
+                .collect(Collectors.toList());
+        assertThat(allUpdates, hasItem("4"));
+        assertThat(allUpdates, allOf(not(hasItem("1")), not(hasItem("2")), not(hasItem("3"))));
     }
 }
