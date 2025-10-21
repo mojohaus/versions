@@ -337,7 +337,16 @@ public abstract class AbstractVersionDetails implements VersionDetails {
 
     @Override
     public final ArtifactVersion[] getAllUpdates(boolean includeSnapshots) {
-        return getAllUpdates((VersionRange) null, includeSnapshots);
+        ArtifactVersion[] updates = getAllUpdates((VersionRange) null, includeSnapshots);
+        if (getCurrentVersion() == null) {
+            ArtifactVersion lowerBound = getHighestLowerBound(null);
+            return Arrays.stream(updates)
+                    .filter(v -> !getCurrentVersionRange().containsVersion(v))
+                    .filter(v -> v.compareTo(lowerBound) > 0)
+                    .toArray(ArtifactVersion[]::new);
+        } else {
+            return updates;
+        }
     }
 
     @Override
