@@ -352,27 +352,26 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @return true if the dependencies match, false otherwise
      */
     // open for tests
-    protected static boolean dependenciesMatch(Dependency dependency, Dependency managedDependency) {
-        if (!managedDependency.getGroupId().equals(dependency.getGroupId())) {
+    static boolean dependenciesMatch(Dependency dependency, Dependency managedDependency) {
+        if (!Objects.equals(managedDependency.getGroupId(), dependency.getGroupId())) {
             return false;
         }
 
-        if (!managedDependency.getArtifactId().equals(dependency.getArtifactId())) {
+        if (!Objects.equals(managedDependency.getArtifactId(), dependency.getArtifactId())) {
             return false;
         }
 
-        if (managedDependency.getScope() == null
-                || Objects.equals(managedDependency.getScope(), dependency.getScope())) {
+        if (managedDependency.getScope() != null
+                && !Objects.equals(managedDependency.getScope(), dependency.getScope())) {
             return false;
         }
 
-        if (managedDependency.getClassifier() == null
-                || Objects.equals(managedDependency.getClassifier(), dependency.getClassifier())) {
+        if (managedDependency.getClassifier() != null
+                && !Objects.equals(managedDependency.getClassifier(), dependency.getClassifier())) {
             return false;
         }
 
-        return dependency.getVersion() == null
-                || managedDependency.getVersion() == null
+        return managedDependency.getVersion() == null
                 || Objects.equals(managedDependency.getVersion(), dependency.getVersion());
     }
 
