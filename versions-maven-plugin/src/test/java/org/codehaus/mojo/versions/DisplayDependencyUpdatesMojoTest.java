@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.InputLocation;
 import org.apache.maven.model.InputSource;
 import org.apache.maven.model.Model;
@@ -667,5 +668,37 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                             .count(),
                     is(overwrite ? 1L : 2L));
         }
+    }
+
+    private static Dependency createManagedDependency(
+            Dependency prototype, String version, String scope, String classifier) {
+        return DependencyBuilder.newBuilder()
+                .withGroupId(prototype.getGroupId())
+                .withArtifactId(prototype.getArtifactId())
+                .withVersion(version)
+                .withScope(scope)
+                .withClassifier(classifier)
+                .build();
+    }
+
+    public void testDependenciesMatchTestScope() {
+        Dependency dependency = DependencyBuilder.newBuilder()
+                .withGroupId("default-group")
+                .withArtifactId("default-artifact")
+                .withVersion("1.0.0")
+                .withScope("compile")
+                .withClassifier("sources")
+                .build();
+
+        assertTrue(DisplayDependencyUpdatesMojo.dependenciesMatch(
+                dependency, createManagedDependency(dependency, null, null, null)));
+        assertTrue(DisplayDependencyUpdatesMojo.dependenciesMatch(
+                dependency, createManagedDependency(dependency, "1.0.0", null, null)));
+        assertTrue(DisplayDependencyUpdatesMojo.dependenciesMatch(
+                dependency, createManagedDependency(dependency, null, "compile", null)));
+        assertTrue(DisplayDependencyUpdatesMojo.dependenciesMatch(
+                dependency, createManagedDependency(dependency, null, null, "sources")));
+        assertTrue(DisplayDependencyUpdatesMojo.dependenciesMatch(
+                dependency, createManagedDependency(dependency, null, null, "sources")));
     }
 }
