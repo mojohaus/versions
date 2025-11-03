@@ -98,7 +98,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @since 1.0-alpha-3
      */
     @Parameter(property = "maven.version.rules.serverId", defaultValue = "serverId")
-    private String serverId;
+    protected String serverId;
 
     /**
      * URI of a ruleSet file containing the rules that control how to compare
@@ -108,7 +108,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @since 1.0-alpha-3
      */
     @Parameter(property = "maven.version.rules")
-    private String rulesUri;
+    protected String rulesUri;
 
     /**
      * Controls whether a backup pom should be created.

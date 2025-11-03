@@ -24,9 +24,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Extension;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -35,15 +38,20 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.ResolverAdapter;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
+import org.codehaus.mojo.versions.api.internal.DefaultResolverAdapter;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.DependencyFilter;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.rule.RuleService;
+import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.ExtensionUtils;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
@@ -189,6 +197,28 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
 
         DependencyFilter includeFilter = DependencyFilter.parseFrom(extensionIncludes);
         DependencyFilter excludeFilter = DependencyFilter.parseFrom(extensionExcludes);
+        ResolverAdapter resolverAdapter =
+                new DefaultResolverAdapter(artifactFactory, repositorySystem, getLog(), session);
+        RuleService ruleService = new RulesServiceBuilder()
+                .withMavenSession(session)
+                .withWagonMap(wagonMap)
+                .withServerId(serverId)
+                .withRulesUri(rulesUri)
+                .withRuleSet(ruleSet)
+                .withIgnoredVersions(ignoredVersions)
+                .withLog(getLog())
+                .build();
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
+        DependencyUpdatesLoggingHelper loggingHelper = new DependencyUpdatesLoggingHelper(
+                getProject(),
+                getLog(),
+                artifactFactory,
+                ruleService,
+                unchangedSegment,
+                allowSnapshots,
+                INFO_PAD_SIZE + getOutputLineWidthOffset(),
+                verbose);
 
         try {
             Stream<Extension> coreExtensions =
@@ -212,7 +242,18 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                 return;
             }
 
-            logUpdates(getHelper().lookupDependenciesUpdates(dependencies.stream(), true, true, allowSnapshots));
+            SortedMap<Dependency, ArtifactVersions> versionMap =
+                    resolverAdapter.resolveDependencyVersions(dependencies, true, true);
+            if (!allowSnapshots) {
+                versionMap = versionMap.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                e -> new ArtifactVersions(e.getValue()).filter(v -> !ArtifactUtils.isSnapshot(v)),
+                                (v1, v2) -> v1,
+                                () -> new TreeMap<>(DependencyComparator.INSTANCE)));
+            }
+
+            logUpdates(loggingHelper, versionMap);
         } catch (IOException | XMLStreamException | TransformerException e) {
             throw new MojoExecutionException(e.getMessage());
         } catch (VersionRetrievalException e) {
@@ -220,17 +261,9 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
         }
     }
 
-    private void logUpdates(Map<Dependency, ArtifactVersions> versionMap) {
-        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
-                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
-        DependencyUpdatesLoggingHelper.DependencyUpdatesResult updates =
-                DependencyUpdatesLoggingHelper.getDependencyUpdates(
-                        getProject(),
-                        versionMap,
-                        allowSnapshots,
-                        unchangedSegment,
-                        INFO_PAD_SIZE + getOutputLineWidthOffset(),
-                        verbose);
+    private void logUpdates(
+            DependencyUpdatesLoggingHelper loggingHelper, SortedMap<Dependency, ArtifactVersions> versionMap) {
+        DependencyUpdatesLoggingHelper.DependencyUpdatesResult updates = loggingHelper.getDependencyUpdates(versionMap);
 
         if (verbose) {
             if (updates.getUsingLatest().isEmpty()) {

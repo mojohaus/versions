@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.maven.artifact.Artifact;
@@ -57,7 +59,8 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
     private final SortedSet<ArtifactVersion> versions;
 
     /**
-     * Creates a new {@link ArtifactVersions} instance.
+     * Creates a new {@link ArtifactVersions} instance given the artifact and a list of {@link ArtifactVersion}
+     * objects.
      *
      * @param artifact          The artifact.
      * @param versions          The versions.
@@ -69,6 +72,26 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
         this.versions.addAll(versions);
         setCurrentVersion(artifact.getVersion());
         setCurrentVersionRange(artifact.getVersionRange());
+    }
+
+    /**
+     * <p>Creates a new {@link ArtifactVersions} instance from the current instance using a filter predicate,
+     * matching version strings allowing to select versions which can remain in the resulting list of versions.</p>
+     * <p>The filtering operation uses a shallow copy of the version elements. Also, the underlying artifact
+     * refers to the same {@link Artifact} object as the original.</p>
+     * @param versionFilter a {@link Predicate<String>}, saying which artifact versions of the original
+     *               should be present in the newly created object
+     * @return a new instance with versions filtered by the predicate
+     * @since 2.20.0
+     */
+    public ArtifactVersions filter(Predicate<String> versionFilter) {
+        ArtifactVersions result = new ArtifactVersions(
+                artifact,
+                versions.stream().filter(v -> versionFilter.test(v.toString())).collect(Collectors.toList()));
+        if (!versionFilter.test(result.artifact.getVersion())) {
+            result.setCurrentVersion((ArtifactVersion) null);
+        }
+        return result;
     }
 
     /**

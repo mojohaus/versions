@@ -75,7 +75,7 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 1.0-alpha-3
      */
     @Parameter
-    private Property[] properties;
+    private List<Property> properties;
 
     /**
      * A comma separated list of properties to update.

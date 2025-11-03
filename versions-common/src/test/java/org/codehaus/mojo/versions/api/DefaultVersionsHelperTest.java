@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -179,7 +180,7 @@ class DefaultVersionsHelperTest {
         VersionsHelper helper = createHelper();
         MavenProject project = null;
 
-        Property[] propertyDefinitions = new Property[] {new Property("bar.version")};
+        List<Property> propertyDefinitions = Collections.singletonList(new Property("bar.version"));
         // should not throw an IllegalStateException
         Map<Property, PropertyVersions> result =
                 helper.getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()

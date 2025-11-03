@@ -22,6 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -98,10 +99,10 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
     /**
      * Creates a new instance
      *
-     * @param artifactFactory   the artifact factory
-     * @param repositorySystem  the repository system
-     * @param wagonMap          the wagon map
-     * @param changeRecorders   the change recorders
+     * @param artifactFactory  the artifact factory
+     * @param repositorySystem the repository system
+     * @param wagonMap         the wagon map
+     * @param changeRecorders  the change recorders
      * @throws MojoExecutionException if any
      */
     @Inject
@@ -144,13 +145,11 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
                 getHelper()
                         .getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
                                 .withMavenProject(getProject())
-                                .withPropertyDefinitions(new Property[] {
-                                    new Property(property) {
-                                        {
-                                            setVersion(newVersion);
-                                        }
+                                .withPropertyDefinitions(Collections.singletonList(new Property(property) {
+                                    {
+                                        setVersion(newVersion);
                                     }
-                                })
+                                }))
                                 .withIncludeProperties(property)
                                 .withAutoLinkItems(autoLinkItems)
                                 .withIncludeParent(includeParent)

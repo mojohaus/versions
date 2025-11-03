@@ -48,7 +48,7 @@ public class PropertyVersionsBuilder {
 
     private final String profileId;
 
-    private final Set<ArtifactAssociation> associations;
+    private final Set<ArtifactAssociation> associations = new TreeSet<>();
 
     private final Map<String, Boolean> upperBounds = new LinkedHashMap<>();
 
@@ -56,7 +56,7 @@ public class PropertyVersionsBuilder {
 
     private final Log log;
 
-    private final VersionsHelper helper;
+    private final ResolverAdapter resolverAdapter;
 
     private ArtifactVersion currentVersion;
 
@@ -65,16 +65,16 @@ public class PropertyVersionsBuilder {
     /**
      * Constructs a new {@link org.codehaus.mojo.versions.api.PropertyVersions}.
      *
+     * @param resolverAdapter {@link ResolverAdapter} instance
      * @param profileId The profileId.
      * @param name The property name.
-     * @param helper The {@link org.codehaus.mojo.versions.api.DefaultVersionsHelper}.
+     * @param log The {@link Log} instance.
      */
-    PropertyVersionsBuilder(VersionsHelper helper, String profileId, String name, Log log) {
-        this.helper = helper;
+    PropertyVersionsBuilder(ResolverAdapter resolverAdapter, String profileId, String name, Log log) {
         this.profileId = profileId;
         this.name = name;
-        this.associations = new TreeSet<>();
         this.log = log;
+        this.resolverAdapter = resolverAdapter;
     }
 
     /**
@@ -112,13 +112,15 @@ public class PropertyVersionsBuilder {
     }
 
     /**
-     * Creates a new instance of {@link PropertyVersions}, based on the values provided to the builder.
+     * <p>Creates a new instance of {@link PropertyVersions}, based on the values provided to the builder.
+     * The object is a mutable view on a property along with all its associated dependencies or plugins.</p>
+     * <p>The builder uses {@link ResolverAdapter} to resolve available versions for all associations.</p>
      * @return new {@link PropertyVersions} instance
      * @throws VersionRetrievalException thrown if there are problems retrieving versions of artifacts linked
      * with the property
      */
     public PropertyVersions build() throws VersionRetrievalException {
-        SortedSet<ArtifactVersion> resolvedVersions = resolveAssociatedVersions(helper, associations);
+        SortedSet<ArtifactVersion> resolvedVersions = resolveAssociatedVersions(associations);
         PropertyVersions instance = new PropertyVersions(profileId, name, log, associations, resolvedVersions);
         instance.setCurrentVersion(currentVersion);
         instance.setCurrentVersionRange(currentVersionRange);
@@ -202,11 +204,32 @@ public class PropertyVersionsBuilder {
     }
 
     private SortedSet<ArtifactVersion> resolveAssociatedVersions(
-            VersionsHelper helper, Set<ArtifactAssociation> associations) throws VersionRetrievalException {
+            ResolverAdapter resolverAdapter, Set<ArtifactAssociation> associations) throws VersionRetrievalException {
         SortedSet<ArtifactVersion> result = new TreeSet<>();
         for (ArtifactAssociation association : associations) {
-            ArtifactVersions artifactVersions =
-                    helper.lookupArtifactVersions(association.getArtifact(), association.isUsePluginRepositories());
+            ArtifactVersions artifactVersions = resolverAdapter.resolveArtifactVersions(
+                    association.getArtifact(),
+                    association.isUsePluginRepositories(),
+                    !association.isUsePluginRepositories());
+            List<ArtifactVersion> associatedVersions = Arrays.asList(artifactVersions.getVersions(true));
+            if (result.isEmpty()) {
+                result.addAll(associatedVersions);
+            } else {
+                result.retainAll(associatedVersions);
+            }
+        }
+        return result;
+    }
+
+    @Deprecated
+    private SortedSet<ArtifactVersion> resolveAssociatedVersions(Set<ArtifactAssociation> associations)
+            throws VersionRetrievalException {
+        SortedSet<ArtifactVersion> result = new TreeSet<>();
+        for (ArtifactAssociation association : associations) {
+            ArtifactVersions artifactVersions = resolverAdapter.resolveArtifactVersions(
+                    association.getArtifact(),
+                    association.isUsePluginRepositories(),
+                    !association.isUsePluginRepositories());
             List<ArtifactVersion> associatedVersions = Arrays.asList(artifactVersions.getVersions(true));
             if (result.isEmpty()) {
                 result.addAll(associatedVersions);

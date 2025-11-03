@@ -106,6 +106,33 @@ public class RuleService {
     /**
      * Returns a list of versions which should not be considered when looking for updates.
      *
+     * @param groupId groupId of the artifact to evaluate
+     * @param artifactId artifactId of the artifact to evaluate
+     * @return list of ignored versions (never {@code null})
+     */
+    public List<IgnoreVersion> getIgnoredVersions(String groupId, String artifactId) {
+        Rule bestFitRule = getBestFitRule(groupId, artifactId);
+        return Stream.concat(
+                        ruleSet.getIgnoreVersions().stream(),
+                        Optional.ofNullable(bestFitRule)
+                                .map(Rule::getIgnoreVersions)
+                                .map(Collection::stream)
+                                .orElse(Stream.empty()))
+                .filter(v -> {
+                    if (!IgnoreVersionHelper.isValidType(v)) {
+                        log.warn("The type attribute '" + v.getType() + "' for global ignoreVersion["
+                                + v + "] is not valid. Please use one of '" + IgnoreVersionHelper.VALID_TYPES
+                                + "'.");
+                        return false;
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a list of versions which should not be considered when looking for updates.
+     *
      * @param artifact the artifact to evaluate
      * @return list of ignored versions (never {@code null})
      */

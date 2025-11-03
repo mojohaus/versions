@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -37,7 +38,7 @@ import org.apache.maven.project.MavenProject;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public interface VersionsHelper {
+public interface VersionsHelper extends ResolverAdapter {
 
     /**
      * Looks up the versions of the specified artifact that are available in either the local repository, or the
@@ -196,7 +197,7 @@ public interface VersionsHelper {
     class VersionPropertiesMapRequest {
         private MavenProject mavenProject;
 
-        private Property[] propertyDefinitions;
+        private List<Property> propertyDefinitions;
 
         private String includeProperties;
 
@@ -229,7 +230,7 @@ public interface VersionsHelper {
          *
          * @return {@link Property} array
          */
-        protected Property[] getPropertyDefinitions() {
+        protected List<Property> getPropertyDefinitions() {
             return propertyDefinitions;
         }
 
@@ -281,11 +282,6 @@ public interface VersionsHelper {
         }
 
         /**
-         * Returns a new {@link Builder} instance
-         *
-         * @return new {@link Builder} instance
-         */
-        /**
          * Create a new builder instance.
          *
          * @return a fresh {@link Builder}
@@ -300,7 +296,7 @@ public interface VersionsHelper {
         public static class Builder {
             private MavenProject mavenProject;
 
-            private Property[] propertyDefinitions;
+            private List<Property> propertyDefinitions;
 
             private String includeProperties;
 
@@ -331,7 +327,7 @@ public interface VersionsHelper {
              * @param propertyDefinitions array of property definitions
              * @return {@link Builder} instance
              */
-            public Builder withPropertyDefinitions(Property[] propertyDefinitions) {
+            public Builder withPropertyDefinitions(List<Property> propertyDefinitions) {
                 this.propertyDefinitions = propertyDefinitions;
                 return this;
             }

@@ -26,7 +26,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Dependency;
@@ -36,13 +40,17 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
+import org.codehaus.mojo.versions.api.ResolverAdapter;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
+import org.codehaus.mojo.versions.api.internal.DefaultResolverAdapter;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
 import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper;
 import org.codehaus.mojo.versions.internal.DependencyUpdatesLoggingHelper.DependencyUpdatesResult;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.rule.RuleService;
+import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.MavenProjectUtils;
@@ -324,7 +332,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param artifactFactory  an {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
      * @param wagonMap         a map of wagon providers per protocol
-     * @param changeRecorders a map of change recorders
+     * @param changeRecorders  a map of change recorders
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -347,7 +355,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * groupId and artifactId are equal, and if scope, classifier or version is set
      * in the managed dependency, they must be equal, too.
      *
-     * @param dependency the dependency to check
+     * @param dependency        the dependency to check
      * @param managedDependency the managed dependency to check against
      * @return true if the dependencies match, false otherwise
      */
@@ -390,86 +398,123 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
         logInit();
         validateInput();
 
-        Set<Dependency> dependencyManagement;
+        Set<Dependency> dependencyManagement, dependencies;
+        ResolverAdapter resolverAdapter =
+                new DefaultResolverAdapter(artifactFactory, repositorySystem, getLog(), session);
+        RuleService ruleService = new RulesServiceBuilder()
+                .withMavenSession(session)
+                .withWagonMap(wagonMap)
+                .withServerId(serverId)
+                .withRulesUri(rulesUri)
+                .withRuleSet(ruleSet)
+                .withIgnoredVersions(ignoredVersions)
+                .withLog(getLog())
+                .build();
+        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
+                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
+        DependencyUpdatesLoggingHelper loggingHelper = new DependencyUpdatesLoggingHelper(
+                getProject(),
+                getLog(),
+                artifactFactory,
+                ruleService,
+                unchangedSegment,
+                allowSnapshots,
+                INFO_PAD_SIZE + getOutputLineWidthOffset(),
+                verbose);
+
         try {
             if (processDependencyManagement) {
                 dependencyManagement = filterDependencies(
-                        extractDependenciesFromDependencyManagement(
-                                getProject(), processDependencyManagementTransitive, getLog()),
-                        dependencyManagementIncludes,
-                        dependencyManagementExcludes,
-                        "Dependecy Management",
-                        getLog());
-
-                logUpdates(
-                        getHelper()
-                                .lookupDependenciesUpdates(
-                                        dependencyManagement.stream().filter(d -> d.getVersion() != null),
-                                        false,
-                                        allowSnapshots),
-                        "Dependency Management");
+                                extractDependenciesFromDependencyManagement(
+                                        getProject(), processDependencyManagementTransitive, getLog()),
+                                dependencyManagementIncludes,
+                                dependencyManagementExcludes,
+                                "Dependency Management",
+                                getLog())
+                        .stream()
+                        .filter(d -> d.getVersion() != null)
+                        .collect(Collectors.toSet());
             } else {
                 dependencyManagement = emptySet();
             }
             if (processDependencies) {
+                dependencies = filterDependencies(
+                                getProject().getDependencies().stream()
+                                        .filter(dep -> dependencyManagement.stream()
+                                                .noneMatch(depMan -> dependenciesMatch(dep, depMan)))
+                                        .filter(dep -> showVersionless
+                                                || MavenProjectUtils.dependencyVersionLocalToReactor(dep))
+                                        .collect(Collectors.toSet()),
+                                dependencyIncludes,
+                                dependencyExcludes,
+                                "Dependencies",
+                                getLog())
+                        .stream()
+                        .filter(d -> d.getVersion() != null)
+                        .collect(Collectors.toSet());
+            } else {
+                dependencies = emptySet();
+            }
+
+            Map<Dependency, ArtifactVersions> dependencyArtifactVersionsMap = resolverAdapter.resolveDependencyVersions(
+                    Stream.concat(dependencyManagement.stream(), dependencies.stream())
+                            .collect(Collectors.toSet()),
+                    false,
+                    true);
+
+            if (processDependencies) {
                 logUpdates(
-                        getHelper()
-                                .lookupDependenciesUpdates(
-                                        filterDependencies(
-                                                        getProject().getDependencies().stream()
-                                                                .filter(dep -> dependencyManagement.stream()
-                                                                        .noneMatch(depMan ->
-                                                                                dependenciesMatch(dep, depMan)))
-                                                                .filter(dep -> showVersionless
-                                                                        || MavenProjectUtils
-                                                                                .dependencyVersionLocalToReactor(dep))
-                                                                .collect(
-                                                                        () -> new TreeSet<>(
-                                                                                DependencyComparator.INSTANCE),
-                                                                        Set::add,
-                                                                        Set::addAll),
-                                                        dependencyIncludes,
-                                                        dependencyExcludes,
-                                                        "Dependencies",
-                                                        getLog())
-                                                .stream()
-                                                .filter(d -> d.getVersion() != null),
-                                        false,
-                                        allowSnapshots),
+                        loggingHelper,
+                        dependencies.stream()
+                                .collect(Collectors.toMap(
+                                        Function.identity(),
+                                        dependencyArtifactVersionsMap::get,
+                                        (v1, v2) -> v1,
+                                        () -> new TreeMap<>(DependencyComparator.INSTANCE))),
                         "Dependencies");
             }
-            if (processPluginDependenciesInPluginManagement) {
+
+            if (processDependencyManagement) {
                 logUpdates(
-                        getHelper()
-                                .lookupDependenciesUpdates(
-                                        filterDependencies(
-                                                        extractPluginDependenciesFromPluginsInPluginManagement(
-                                                                getProject()),
-                                                        pluginManagementDependencyIncludes,
-                                                        pluginManagementDependencyExcludes,
-                                                        "Plugin Management Dependencies",
-                                                        getLog())
-                                                .stream()
-                                                .filter(d -> d.getVersion() != null),
-                                        false,
-                                        allowSnapshots),
-                        "pluginManagement of plugins");
+                        loggingHelper,
+                        dependencyManagement.stream()
+                                .collect(Collectors.toMap(
+                                        Function.identity(),
+                                        dependencyArtifactVersionsMap::get,
+                                        (v1, v2) -> v1,
+                                        () -> new TreeMap<>(DependencyComparator.INSTANCE))),
+                        "Dependency Management");
+            }
+
+            if (processPluginDependenciesInPluginManagement) {
+                SortedMap<Dependency, ArtifactVersions> updates = resolverAdapter.resolveDependencyVersions(
+                        filterDependencies(
+                                        extractPluginDependenciesFromPluginsInPluginManagement(getProject()),
+                                        pluginManagementDependencyIncludes,
+                                        pluginManagementDependencyExcludes,
+                                        "Plugin Management Dependencies",
+                                        getLog())
+                                .stream()
+                                .filter(d -> d.getVersion() != null)
+                                .collect(Collectors.toSet()),
+                        false,
+                        true);
+                logUpdates(loggingHelper, updates, "pluginManagement of plugins");
             }
             if (processPluginDependencies) {
-                logUpdates(
-                        getHelper()
-                                .lookupDependenciesUpdates(
-                                        filterDependencies(
-                                                        extractDependenciesFromPlugins(getProject()),
-                                                        pluginDependencyIncludes,
-                                                        pluginDependencyExcludes,
-                                                        "Plugin Dependencies",
-                                                        getLog())
-                                                .stream()
-                                                .filter(d -> d.getVersion() != null),
-                                        false,
-                                        allowSnapshots),
-                        "Plugin Dependencies");
+                SortedMap<Dependency, ArtifactVersions> updates = resolverAdapter.resolveDependencyVersions(
+                        filterDependencies(
+                                        extractDependenciesFromPlugins(getProject()),
+                                        pluginDependencyIncludes,
+                                        pluginDependencyExcludes,
+                                        "Plugin Dependencies",
+                                        getLog())
+                                .stream()
+                                .filter(d -> d.getVersion() != null)
+                                .collect(Collectors.toSet()),
+                        true,
+                        false);
+                logUpdates(loggingHelper, updates, "Plugin Dependencies");
             }
         } catch (VersionRetrievalException e) {
             throw new MojoExecutionException(e.getMessage(), e);
@@ -503,17 +548,11 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
         }
     }
 
-    private void logUpdates(Map<Dependency, ArtifactVersions> versionMap, String section) {
-        Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
-                allowMajorUpdates, allowMinorUpdates, allowIncrementalUpdates, getLog());
-        DependencyUpdatesResult updates = DependencyUpdatesLoggingHelper.getDependencyUpdates(
-                getProject(),
-                versionMap,
-                allowSnapshots,
-                unchangedSegment,
-                INFO_PAD_SIZE + getOutputLineWidthOffset(),
-                verbose);
-
+    private void logUpdates(
+            DependencyUpdatesLoggingHelper loggingHelper,
+            SortedMap<Dependency, ArtifactVersions> versionMap,
+            String section) {
+        DependencyUpdatesResult updates = loggingHelper.getDependencyUpdates(versionMap);
         if (verbose) {
             if (updates.getUsingLatest().isEmpty()) {
                 if (!updates.getWithUpdates().isEmpty()) {

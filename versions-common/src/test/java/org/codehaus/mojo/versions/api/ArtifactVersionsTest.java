@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -48,6 +49,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
@@ -303,5 +305,43 @@ class ArtifactVersionsTest {
                 .collect(Collectors.toList());
         assertThat(allUpdates, hasItem("4"));
         assertThat(allUpdates, allOf(not(hasItem("1")), not(hasItem("2")), not(hasItem("3"))));
+    }
+
+    @Test
+    void testPredicate() {
+        ArtifactVersions original = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", "1.1.2-SNAPSHOT", "foo", "bar", "jar", null),
+                Arrays.asList(versions(
+                        "1.0.1",
+                        "1.0",
+                        "1.1.0-2",
+                        "1.1.1",
+                        "1.1.1-2",
+                        "1.1.2",
+                        "1.1.2-SNAPSHOT",
+                        "1.1.3",
+                        "1.1",
+                        "1.1-SNAPSHOT",
+                        "1.2.1",
+                        "1.2.2",
+                        "1.2",
+                        "1.3",
+                        "1.9.1-SNAPSHOT",
+                        "2.0",
+                        "2.1.1-SNAPSHOT",
+                        "2.1",
+                        "3.0",
+                        "3.1.1-SNAPSHOT",
+                        "3.1.5-SNAPSHOT",
+                        "3.4.0-SNAPSHOT")));
+        ArtifactVersions onlySnapshots = new ArtifactVersions(original).filter(ArtifactUtils::isSnapshot);
+        assertThat(onlySnapshots.getVersions(false), emptyArray());
+        assertThat(onlySnapshots.getVersions(true), arrayWithSize(7));
+        assertThat(onlySnapshots.getCurrentVersion(), is(original.getCurrentVersion()));
+
+        ArtifactVersions noSnapshots = new ArtifactVersions(original).filter(v -> !ArtifactUtils.isSnapshot(v));
+        assertThat(noSnapshots.getVersions(false), arrayWithSize(15));
+        assertThat(noSnapshots.getVersions(true), arrayWithSize(15));
+        assertThat(noSnapshots.getCurrentVersion(), nullValue());
     }
 }
