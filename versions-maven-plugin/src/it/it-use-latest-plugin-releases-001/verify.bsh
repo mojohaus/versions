@@ -1,0 +1,42 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+try
+{
+    File file = new File( basedir, "pom.xml" );
+    String buf = FileUtils.fileRead( file, "UTF-8" );
+
+    // Check that dummy-maven-plugin version was updated from 1.0 to 3.0
+    if ( !buf.contains( "<version>3.0</version>" ) )
+    {
+        System.out.println( "Plugin version was not updated to 3.0" );
+        return false;
+    }
+
+    // Verify that maven-clean-plugin in pluginManagement was also updated
+    // Look for the pattern after clean-plugin definition
+    int cleanPluginIndex = buf.indexOf( "maven-clean-plugin" );
+    if ( cleanPluginIndex < 0 )
+    {
+        System.out.println( "Could not find maven-clean-plugin" );
+        return false;
+    }
+
+    // Check for version update in pluginManagement section
+    // The exact version may vary, but it should be higher than 2.2
+    String afterCleanPlugin = buf.substring( cleanPluginIndex );
+    if ( afterCleanPlugin.contains( "<version>2.2</version>" ) )
+    {
+        System.out.println( "maven-clean-plugin version was not updated from 2.2" );
+        return false;
+    }
+
+    System.out.println( "Plugin versions were updated successfully" );
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;

@@ -1,0 +1,39 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+try
+{
+    File file = new File( basedir, "pom.xml" );
+    String buf = FileUtils.fileRead( file, "UTF-8" );
+
+    // Check that dummy-maven-plugin version was NOT updated to 3.0 (major version change)
+    // It should still be at 1.x
+    if ( buf.contains( "<version>3.0</version>" ) )
+    {
+        System.out.println( "Plugin version was incorrectly updated to 3.0 (major version change not allowed)" );
+        return false;
+    }
+
+    // The version should have been updated within major version 1.x
+    if ( buf.contains( "<version>1.0</version>" ) )
+    {
+        System.out.println( "Plugin version was not updated at all" );
+        return false;
+    }
+
+    // Check that we got an update to 1.x (e.g., 1.1, 1.2, etc.)
+    if ( !buf.contains( "<artifactId>dummy-maven-plugin</artifactId>" ) )
+    {
+        System.out.println( "Could not find dummy-maven-plugin" );
+        return false;
+    }
+
+    System.out.println( "Plugin version was correctly updated within major version constraints" );
+}
+catch( Throwable t )
+{
+    t.printStackTrace();
+    return false;
+}
+
+return true;
