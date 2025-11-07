@@ -126,7 +126,7 @@
     <reportingApiVersion>4.0.0</reportingApiVersion>
     <reportingImplVersion>4.0.0</reportingImplVersion>
 
-    <mockitoVersion>4.11.0</mockitoVersion>
+    <mockitoVersion>5.0.0</mockitoVersion>
     <woodstoxVersion>7.1.1</woodstoxVersion>
     <stax2ApiVersion>4.2.2</stax2ApiVersion>
 
