@@ -285,7 +285,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-interactivity-api</artifactId>
-        <version>1.4</version>
+        <version>1.5.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
