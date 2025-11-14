@@ -17,6 +17,7 @@ package org.codehaus.mojo.versions;
 
 import javax.xml.stream.XMLStreamException;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +41,7 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.TestUtils;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.After;
@@ -62,13 +64,13 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class DisplayParentUpdatesMojoTest {
     private DisplayParentUpdatesMojo mojo;
-
-    private static ArtifactHandlerManager artifactHandlerManager;
 
     private static RepositorySystem repositorySystem;
 
@@ -86,7 +88,7 @@ public class DisplayParentUpdatesMojoTest {
 
     @BeforeClass
     public static void setUpStatic() throws MojoExecutionException {
-        artifactHandlerManager = mockArtifactHandlerManager();
+        ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
         repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
@@ -103,14 +105,16 @@ public class DisplayParentUpdatesMojoTest {
     public void setUp() throws IllegalAccessException, IOException, MojoExecutionException {
         tempDir = TestUtils.createTempDir("display-property-updates");
         tempFile = Files.createTempFile(tempDir, "output", "");
-        mojo = new DisplayParentUpdatesMojo(artifactFactory, repositorySystem, null, null) {
-            {
-                setProject(createProject());
-                reactorProjects = Collections.emptyList();
-                session = mockMavenSession();
-                mojoExecution = mock(MojoExecution.class);
-            }
-        };
+        mojo =
+                new DisplayParentUpdatesMojo(
+                        artifactFactory, repositorySystem, null, TestVersionChangeRecorder.asTestMap()) {
+                    {
+                        setProject(createProject());
+                        reactorProjects = Collections.emptyList();
+                        session = mockMavenSession();
+                        mojoExecution = mock(MojoExecution.class);
+                    }
+                };
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
         openMocks(this);
@@ -122,6 +126,10 @@ public class DisplayParentUpdatesMojoTest {
     }
 
     private MavenProject createProject() {
+        File baseDir = mock(File.class);
+        Path basePath = mock(Path.class);
+        doReturn(basePath).when(baseDir).toPath();
+        doReturn(basePath).when(basePath).resolve(anyString());
         return new MavenProject() {
             {
                 setModel(new Model() {
@@ -139,6 +147,12 @@ public class DisplayParentUpdatesMojoTest {
                         setVersion("1.0.1-SNAPSHOT");
                     }
                 });
+                getBuild().setDirectory("target");
+            }
+
+            @Override
+            public File getBasedir() {
+                return baseDir;
             }
         };
     }

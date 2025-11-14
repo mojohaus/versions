@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
@@ -16,6 +17,7 @@ import org.codehaus.mojo.versions.DisplayDependencyUpdatesMojo;
 import org.codehaus.mojo.versions.DisplayExtensionUpdatesMojo;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.Segment;
+import org.codehaus.mojo.versions.model.VersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rule.RuleService;
 import org.codehaus.mojo.versions.rule.RuleServiceUtils;
@@ -97,11 +99,15 @@ public class DependencyUpdatesLoggingHelper {
      * <p>The resulting dependencies are filtered using the include/exclude rules from the {@link RuleService}.</p>
      *
      * @param updates map of available versions per dependency
+     * @param versionChangeProvider a producer of the {@link VersionChange} object for discovered updates per (dependency, old version and new version)
      * @return a {@link DependencyUpdatesResult} object containing the result
      */
-    public DependencyUpdatesResult getDependencyUpdates(Map<Dependency, ArtifactVersions> updates) {
+    public DependencyUpdatesResult getDependencyUpdates(
+            Map<Dependency, ArtifactVersions> updates,
+            TriFunction<Dependency, String, String, ? extends VersionChange> versionChangeProvider) {
         List<String> withUpdates = new ArrayList<>();
         List<String> usingCurrent = new ArrayList<>();
+        List<VersionChange> versionChanges = new ArrayList<>();
         for (Map.Entry<Dependency, ArtifactVersions> entry : updates.entrySet()) {
             Dependency dep = entry.getKey();
             ArtifactVersions versions = RuleServiceUtils.filterByRuleService(
@@ -144,7 +150,12 @@ public class DependencyUpdatesLoggingHelper {
             }
             String right =
                     " " + latestVersion.map(v -> currentVersion + " -> " + v).orElse(currentVersion);
-            List<String> t = latestVersion.isPresent() ? withUpdates : usingCurrent;
+            List<String> t = latestVersion
+                    .map(v -> {
+                        versionChanges.add(versionChangeProvider.apply(dep, currentVersion, v.toString()));
+                        return withUpdates;
+                    })
+                    .orElse(usingCurrent);
             if (right.length() + left.length() + 3 > maxLineWidth) {
                 t.add(left + "...");
                 t.add(StringUtils.leftPad(right, maxLineWidth));
@@ -163,6 +174,11 @@ public class DependencyUpdatesLoggingHelper {
             @Override
             public List<String> getWithUpdates() {
                 return withUpdates;
+            }
+
+            @Override
+            public List<VersionChange> getVersionChanges() {
+                return versionChanges;
             }
         };
     }
@@ -185,5 +201,13 @@ public class DependencyUpdatesLoggingHelper {
          * @return Dependencies with updates available
          */
         List<String> getWithUpdates();
+
+        /**
+         * Returns a list of {@link VersionChange} describing all registered version changes in the
+         * {@link org.codehaus.mojo.versions.api.recording.VersionChangeRecorder} comprehension
+         *
+         * @return a list of {@link VersionChange} objects describing the changes
+         */
+        List<VersionChange> getVersionChanges();
     }
 }

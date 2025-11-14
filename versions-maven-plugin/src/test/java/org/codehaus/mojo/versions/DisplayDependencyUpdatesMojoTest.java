@@ -18,6 +18,7 @@ package org.codehaus.mojo.versions;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.codehaus.mojo.versions.model.TestIgnoreVersions;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.CloseableTempFile;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -65,6 +67,8 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -146,6 +150,10 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     }
 
     private MavenProject createProject() {
+        File baseDir = mock(File.class);
+        Path basePath = mock(Path.class);
+        doReturn(basePath).when(baseDir).toPath();
+        doReturn(basePath).when(basePath).resolve(anyString());
         return new MavenProject(new Model() {
             {
                 setGroupId("default-group");
@@ -164,6 +172,12 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
         }) {
             {
                 setOriginalModel(getModel());
+                getBuild().setDirectory("target");
+            }
+
+            @Override
+            public File getBasedir() {
+                return baseDir;
             }
         };
     }
@@ -181,7 +195,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowMajorUpdates = false;
@@ -218,7 +232,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowMajorUpdates = false;
@@ -252,7 +266,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowMinorUpdates = false;
@@ -287,7 +301,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowIncrementalUpdates = false;
@@ -325,7 +339,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     allowMinorUpdates = false;
@@ -423,7 +437,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     processDependencies = true;
@@ -455,7 +469,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                         }
                     }),
                     null,
-                    null) {
+                    TestVersionChangeRecorder.asTestMap()) {
                 {
                     setProject(createProject());
                     processDependencies = true;
@@ -643,7 +657,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                             }
                         }),
                         null,
-                        null) {
+                        TestVersionChangeRecorder.asTestMap()) {
                     {
                         setProject(createProject());
                         processDependencies = true;

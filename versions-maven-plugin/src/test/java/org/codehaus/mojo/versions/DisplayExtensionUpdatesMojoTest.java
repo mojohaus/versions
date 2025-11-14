@@ -16,6 +16,7 @@ package org.codehaus.mojo.versions;
  * limitations under the License.
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,6 +36,7 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ExtensionBuilder;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.junit.After;
 import org.junit.Before;
@@ -57,6 +59,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -85,7 +88,13 @@ public class DisplayExtensionUpdatesMojoTest {
         openMocks(this);
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
-        mojo = new DisplayExtensionUpdatesMojo(artifactFactory, mockAetherRepositorySystem(), null, null);
+        mojo = new DisplayExtensionUpdatesMojo(
+                artifactFactory, mockAetherRepositorySystem(), null, TestVersionChangeRecorder.asTestMap());
+        File baseDir = mock(File.class);
+        Path basePath = mock(Path.class);
+        doReturn(basePath).when(baseDir).toPath();
+        doReturn(basePath).when(basePath).resolve(ArgumentMatchers.<Path>any());
+        doReturn(basePath).when(basePath).resolve(ArgumentMatchers.<String>any());
         mojo.project = new MavenProject() {
             {
                 setModel(new Model() {
@@ -95,6 +104,11 @@ public class DisplayExtensionUpdatesMojoTest {
                         setVersion("1.0.0");
                     }
                 });
+            }
+
+            @Override
+            public File getBasedir() {
+                return baseDir;
             }
         };
         mojo.project.setRemoteArtifactRepositories(emptyList());
