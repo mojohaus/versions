@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.codehaus.mojo.versions.model"},{"l":"org.codehaus.mojo.versions.model.io.stax"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"org.codehaus.mojo.versions.model"},{"l":"org.codehaus.mojo.versions.model.io.stax"}];updateSearchResults();

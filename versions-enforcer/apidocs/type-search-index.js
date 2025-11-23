@@ -1,1 +1,1 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"org.codehaus.mojo.versions.enforcer","l":"MaxDependencyUpdates"}];updateSearchResults();
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html","k":"18"},{"p":"org.codehaus.mojo.versions.enforcer","l":"MaxDependencyUpdates"}];updateSearchResults();
