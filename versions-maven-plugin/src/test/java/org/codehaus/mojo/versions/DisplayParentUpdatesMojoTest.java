@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -55,7 +56,9 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySys
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -410,5 +413,20 @@ public class DisplayParentUpdatesMojoTest {
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
             assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
         }
+    }
+
+    @Test
+    public void testLatestVersion() throws Exception {
+        mojo.getProject().setParent(new MavenProject() {
+            {
+                setGroupId("default-group");
+                setArtifactId("parent-artifact");
+                setVersion("1.0.0");
+            }
+        });
+        mojo.allowSnapshots = false;
+        mojo.execute();
+        List<String> output = Files.readAllLines(tempFile);
+        assertThat(output, hasItem(containsString("The parent project is the latest version")));
     }
 }

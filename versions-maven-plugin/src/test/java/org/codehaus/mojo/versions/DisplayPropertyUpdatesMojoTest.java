@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -36,6 +37,7 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySys
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
@@ -155,5 +157,23 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
             assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
         }
+    }
+
+    @Test
+    public void testLatestVersion() throws Exception {
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/updates-only"), tempDir);
+        DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
+                mojoRule.lookupConfiguredMojo(tempDir.toFile(), "display-property-updates");
+        mojo.outputEncoding = UTF_8;
+        mojo.outputFile = tempFile.toFile();
+        mojo.setPluginContext(new HashMap<>());
+        mojo.repositorySystem = mockAetherRepositorySystem();
+        mojo.execute();
+
+        List<String> output = Files.readAllLines(tempFile);
+        assertThat(
+                output,
+                hasItem(containsString("All version properties are referencing the newest version available.")));
     }
 }

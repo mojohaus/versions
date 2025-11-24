@@ -701,4 +701,36 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
         assertTrue(DisplayDependencyUpdatesMojo.dependenciesMatch(
                 dependency, createManagedDependency(dependency, null, null, "sources")));
     }
+
+    @Test
+    public void testShouldOnlyShowUpdates() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            new DisplayDependencyUpdatesMojo(
+                    artifactFactory,
+                    mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                        {
+                            put("default-dependency", new String[] {"0.0.1", "0.0.2", "1.0.0"});
+                        }
+                    }),
+                    null,
+                    null) {
+                {
+                    setProject(createProject());
+                    allowMajorUpdates = true;
+                    processDependencies = true;
+                    processDependencyManagement = false;
+                    dependencyIncludes = singletonList(WildcardMatcher.WILDCARD);
+                    dependencyExcludes = emptyList();
+                    allowSnapshots = true;
+                    outputFile = tempFile.getPath().toFile();
+                    setPluginContext(new HashMap<>());
+
+                    session = mockMavenSession();
+                    mojoExecution = mock(MojoExecution.class);
+                }
+            }.execute();
+
+            assertThat(String.join("", Files.readAllLines(tempFile.getPath())), not(containsString("1.0.0")));
+        }
+    }
 }

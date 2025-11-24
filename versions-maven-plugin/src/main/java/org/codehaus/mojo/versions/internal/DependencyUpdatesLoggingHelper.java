@@ -142,6 +142,7 @@ public class DependencyUpdatesLoggingHelper {
                 latestVersion = Optional.of(newVersionRestriction)
                         .map(restriction -> versions.getNewestVersion(restriction, allowSnapshots));
             }
+
             String right =
                     " " + latestVersion.map(v -> currentVersion + " -> " + v).orElse(currentVersion);
             List<String> t = latestVersion.isPresent() ? withUpdates : usingCurrent;

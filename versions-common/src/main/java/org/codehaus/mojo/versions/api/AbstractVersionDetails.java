@@ -120,6 +120,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         return Optional.ofNullable(getCurrentVersionRange())
                 .map(VersionRange::getRestrictions)
                 .flatMap(r -> r.stream()
+                        .filter(rr -> rr.getLowerBound() != null || rr.getUpperBound() != null)
                         .filter(rr -> rr.containsVersion(selectedVersion))
                         .findAny());
     }
