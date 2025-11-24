@@ -183,4 +183,18 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
             assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
         }
     }
+
+    @Test
+    public void testLatestVersion() throws Exception {
+        Files.copy(
+                Paths.get("src/test/resources/org/codehaus/mojo/display-plugin-updates/updates-only.xml"),
+                tempDir.resolve("pom.xml"));
+
+        DisplayPluginUpdatesMojo mojo = createMojo();
+        mojo.execute();
+
+        List<String> output = Files.readAllLines(outputPath);
+        assertThat(
+                output, hasItem(containsString("All plugins with a version specified are using the latest versions.")));
+    }
 }

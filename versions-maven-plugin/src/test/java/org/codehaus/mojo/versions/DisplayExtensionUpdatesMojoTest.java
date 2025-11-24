@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
@@ -54,6 +55,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -311,5 +313,30 @@ public class DisplayExtensionUpdatesMojoTest {
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
             assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
         }
+    }
+
+    @Test
+    public void testLatestVersion()
+            throws MojoExecutionException, MojoFailureException, IOException, IllegalAccessException {
+        setVariableValueToObject(mojo, "extensionExcludes", emptyList());
+        setVariableValueToObject(mojo, "extensionIncludes", singletonList("*"));
+        mojo.getProject().setBuild(new Build());
+        mojo.getProject()
+                .getBuild()
+                .setExtensions(Collections.singletonList(ExtensionBuilder.newBuilder()
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactC")
+                        .withVersion("1.0.0")
+                        .build()));
+
+        try (MockedStatic<PomHelper> pomHelper = mockStatic(PomHelper.class)) {
+            pomHelper
+                    .when(() -> PomHelper.getChildModels(ArgumentMatchers.any(MavenProject.class), any()))
+                    .then(i -> Collections.singletonMap(null, ((MavenProject) i.getArgument(0)).getModel()));
+            mojo.execute();
+        }
+
+        List<String> output = Files.readAllLines(tempPath);
+        assertThat(output, hasItem(containsString("No extensions have newer versions.")));
     }
 }
