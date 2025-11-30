@@ -15,6 +15,8 @@ package org.codehaus.mojo.versions.api;
  * limitations under the License.
  */
 
+import javax.annotation.Nonnull;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -92,13 +94,17 @@ public class IgnoreVersionHelper {
     }
 
     /**
-     * Check if the provided version is ignored by the provided {@link IgnoreVersion} instance
+     * <p>Check if the provided version is ignored by the provided {@link IgnoreVersion} instance.</p>
+     * <p>In the rare case that the {@code v} should be be {@code null}, the function returns {@code true}.</p>
      *
      * @param v version string to be checked
      * @param ignoreVersion {@link IgnoreVersion} instance providing the filter
-     * @return {@code true} if the provided version is ignored
+     * @return {@code true} if the provided version is ignored or if it is equal to {@code null}.
      */
     public static boolean isVersionIgnored(String v, IgnoreVersion ignoreVersion) {
+        if (v == null) {
+            return true;
+        }
         return IgnoreVersionType.forType(ignoreVersion.getType())
                 .map(t -> t.getPredicate().apply(v, ignoreVersion))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid version type: " + ignoreVersion.getType()));
@@ -111,7 +117,7 @@ public class IgnoreVersionHelper {
      * @param ignoreVersion {@link IgnoreVersion} instance providing the filter
      * @return {@code true} if the provided version is ignored
      */
-    public static boolean isVersionIgnored(Version v, IgnoreVersion ignoreVersion) {
+    public static boolean isVersionIgnored(@Nonnull Version v, IgnoreVersion ignoreVersion) {
         return isVersionIgnored(v.toString(), ignoreVersion);
     }
 
@@ -119,11 +125,11 @@ public class IgnoreVersionHelper {
         return ignoreVersion.getVersion().equals(v);
     }
 
-    private static boolean isVersionIgnoredRegex(String v, IgnoreVersion ignoreVersion) {
+    private static boolean isVersionIgnoredRegex(@Nonnull String v, IgnoreVersion ignoreVersion) {
         return Pattern.compile(ignoreVersion.getVersion()).matcher(v).matches();
     }
 
-    private static boolean isVersionIgnoredRange(String v, IgnoreVersion ignoreVersion) {
+    private static boolean isVersionIgnoredRange(@Nonnull String v, IgnoreVersion ignoreVersion) {
         try {
             ArtifactVersion aVersion = ArtifactVersionService.getArtifactVersion(v);
             VersionRange versionRange = VersionRange.createFromVersionSpec(ignoreVersion.getVersion());

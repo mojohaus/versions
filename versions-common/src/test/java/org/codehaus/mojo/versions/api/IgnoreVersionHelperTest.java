@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.of;
 
 class IgnoreVersionHelperTest {
@@ -62,6 +63,15 @@ class IgnoreVersionHelperTest {
 
         assertEquals(
                 expected, IgnoreVersionHelper.isVersionIgnored(VERSION_SCHEME.parseVersion(version), ignoreVersion));
+    }
+
+    /*
+     * Additional safety measure: prevent a NPE coming from Matcher if the current version happens to be null.
+     */
+    @Test
+    public void testNullIgnoreVersion() {
+        IgnoreVersion ignoreVersion = aIgnoreVersion("Alpha", IgnoreVersion.TYPE_REGEX);
+        assertTrue(IgnoreVersionHelper.isVersionIgnored((String) null, ignoreVersion));
     }
 
     public static Stream<Arguments> ignoredTypeRange() {
