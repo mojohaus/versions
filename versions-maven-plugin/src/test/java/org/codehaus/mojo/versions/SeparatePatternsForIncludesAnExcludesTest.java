@@ -7,6 +7,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.TestVersionChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,30 +38,32 @@ public class SeparatePatternsForIncludesAnExcludesTest {
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
         pomHelper = new PomHelper(artifactFactory, expressionEvaluator);
 
-        mojo = new AbstractVersionsDependencyUpdaterMojo(artifactFactory, null, null, null) {
-            @Override
-            protected boolean getProcessDependencies() {
-                return true;
-            }
+        mojo =
+                new AbstractVersionsDependencyUpdaterMojo(
+                        artifactFactory, null, null, TestVersionChangeRecorder.asTestMap()) {
+                    @Override
+                    protected boolean getProcessDependencies() {
+                        return true;
+                    }
 
-            @Override
-            protected boolean getProcessDependencyManagement() {
-                return true;
-            }
+                    @Override
+                    protected boolean getProcessDependencyManagement() {
+                        return true;
+                    }
 
-            @Override
-            public boolean getProcessParent() {
-                return false;
-            }
+                    @Override
+                    public boolean getProcessParent() {
+                        return false;
+                    }
 
-            @Override
-            protected boolean getAllowSnapshots() {
-                return false;
-            }
+                    @Override
+                    protected boolean getAllowSnapshots() {
+                        return false;
+                    }
 
-            @Override
-            protected void update(MutableXMLStreamReader pom) {}
-        };
+                    @Override
+                    protected void update(MutableXMLStreamReader pom) {}
+                };
     }
 
     @Test

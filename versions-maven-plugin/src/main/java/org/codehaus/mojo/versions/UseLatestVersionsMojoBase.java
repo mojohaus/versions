@@ -42,8 +42,9 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -52,6 +53,9 @@ import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
 
 import static java.util.Collections.singletonList;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.DEPENDENCY_MANAGEMENT_UPDATE;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.DEPENDENCY_UPDATE;
+import static org.codehaus.mojo.versions.model.DependencyChangeKind.PARENT_UPDATE;
 
 /**
  * Common base class for {@link UseLatestVersionsMojo}
@@ -128,77 +132,16 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      * @param artifactFactory   an {@link ArtifactFactory} instance
      * @param repositorySystem  a {@link RepositorySystem} instance
      * @param wagonMap          a map of wagon providers per protocol
-     * @param changeRecorders   a map of change recorders
+     * @param changeRecorderFactories   a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     public UseLatestVersionsMojoBase(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             Map<String, Wagon> wagonMap,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
-    }
-
-    /**
-     * Represents a version change of an artifact
-     */
-    private abstract static class ArtifactVersionChange {
-        private final DependencyChangeRecord.ChangeKind changeKind;
-
-        private final String newVersion;
-
-        /**
-         * Creates a new instance
-         *
-         * @param changeKind change kind
-         * @param newVersion new version
-         */
-        ArtifactVersionChange(DependencyChangeRecord.ChangeKind changeKind, String newVersion) {
-            this.changeKind = changeKind;
-            this.newVersion = newVersion;
-        }
-
-        /**
-         * @return change kind
-         */
-        DependencyChangeRecord.ChangeKind getChangeKind() {
-            return changeKind;
-        }
-
-        /**
-         * @return new version
-         */
-        String getNewVersion() {
-            return newVersion;
-        }
-    }
-
-    /**
-     * Represents a version change of a dependency
-     */
-    private static final class DependencyVersionChange extends ArtifactVersionChange {
-        private final Dependency dependency;
-
-        /**
-         * Constructs a new instance
-         *
-         * @param changeKind change kind
-         * @param dependency {@code Dependency} instance
-         * @param newVersion new version
-         */
-        DependencyVersionChange(
-                DependencyChangeRecord.ChangeKind changeKind, Dependency dependency, String newVersion) {
-            super(changeKind, newVersion);
-            this.dependency = dependency;
-        }
-
-        /**
-         * @return {@code Dependency} instance
-         */
-        Dependency getDependency() {
-            return dependency;
-        }
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
     }
 
     /**
@@ -226,29 +169,23 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
                     versionChangeFutures.add(getUpdates(
                             versionChanges,
                             dependencyManagement.getDependencies(),
-                            DependencyChangeRecord.ChangeKind.DEPENDENCY_MANAGEMENT,
+                            DEPENDENCY_MANAGEMENT_UPDATE,
                             unchangedSegment));
                 }
             }
             if (getProject().getDependencies() != null && getProcessDependencies()) {
                 versionChangeFutures.add(getUpdates(
-                        versionChanges,
-                        getProject().getDependencies(),
-                        DependencyChangeRecord.ChangeKind.DEPENDENCY,
-                        unchangedSegment));
+                        versionChanges, getProject().getDependencies(), DEPENDENCY_UPDATE, unchangedSegment));
             }
             if (getProject().getParent() != null && getProcessParent()) {
                 versionChangeFutures.add(getUpdates(
-                        versionChanges,
-                        singletonList(getParentDependency()),
-                        DependencyChangeRecord.ChangeKind.PARENT,
-                        unchangedSegment));
+                        versionChanges, singletonList(getParentDependency()), PARENT_UPDATE, unchangedSegment));
             }
 
             CompletableFuture.allOf(versionChangeFutures.toArray(new CompletableFuture[0]))
                     .join();
             for (DependencyVersionChange change : versionChanges) {
-                updateDependencyVersion(pom, change.getDependency(), change.getNewVersion(), change.getChangeKind());
+                updateDependencyVersion(pom, change);
             }
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage(), e);
@@ -269,7 +206,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
     private CompletableFuture<Void> getUpdates(
             ConcurrentLinkedQueue<DependencyVersionChange> updates,
             Collection<Dependency> dependencies,
-            DependencyChangeRecord.ChangeKind changeKind,
+            DependencyChangeKind kind,
             Optional<Segment> unchangedSegment) {
         return CompletableFuture.allOf(dependencies.stream()
                 .map(dep -> CompletableFuture.runAsync(
@@ -299,8 +236,13 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
                                                             getAllowSnapshots(),
                                                             getAllowDowngrade()))
                                                     .filter(this::artifactVersionsFilter))
-                                            .ifPresent(ver -> updates.add(
-                                                    new DependencyVersionChange(changeKind, dep, ver.toString())));
+                                            .map(ver -> new DependencyVersionChange()
+                                                    .withKind(kind)
+                                                    .withGroupId(dep.getGroupId())
+                                                    .withArtifactId(dep.getArtifactId())
+                                                    .withOldVersion(dep.getVersion())
+                                                    .withNewVersion(ver.toString()))
+                                            .ifPresent(updates::add);
                                 } catch (VersionRetrievalException
                                         | InvalidSegmentException
                                         | MojoExecutionException e) {

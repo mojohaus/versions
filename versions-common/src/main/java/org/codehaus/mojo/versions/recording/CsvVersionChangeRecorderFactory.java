@@ -1,0 +1,40 @@
+package org.codehaus.mojo.versions.recording;
+
+import javax.inject.Named;
+
+import java.util.Map;
+
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.plugin.logging.Log;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.ObjectFactory;
+import org.codehaus.mojo.versions.recording.csv.CsvVersionChangeRenderer;
+
+/**
+ * A factory for rendering version changes into a CSV file
+ */
+@Named("csv")
+public class CsvVersionChangeRecorderFactory implements VersionChangeRecorderFactory {
+    /**
+     * Create a new instance.
+     */
+    public CsvVersionChangeRecorderFactory() {}
+
+    @Override
+    public synchronized VersionChangeRecorder create(
+            MavenSession mavenSession,
+            MojoExecution mojoExecution,
+            Log log,
+            Map<String, String> changeRendererOptions) {
+        ObjectFactory objectFactory = new ObjectFactory();
+        return new GenericVersionChangeRecorder(
+                "versions-changes.csv",
+                objectFactory,
+                mavenSession,
+                mojoExecution,
+                log,
+                new CsvVersionChangeRenderer(objectFactory));
+    }
+}

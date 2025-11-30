@@ -27,7 +27,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.junit.Test;
 
@@ -98,8 +99,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withOldVersion("1.1.1-SNAPSHOT")
+                        .withNewVersion("1.1.0")));
     }
 
     @Test
@@ -127,9 +132,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact",
-                        "1.1.0-SNAPSHOT", "1.1.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withOldVersion("1.1.0-SNAPSHOT")
+                        .withNewVersion("1.1.0")));
     }
 
     @Test
@@ -146,9 +154,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact",
-                        "1.1.1-SNAPSHOT", "1.1.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withOldVersion("1.1.1-SNAPSHOT")
+                        .withNewVersion("1.1.0")));
     }
 
     @Test
@@ -165,8 +176,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_MANAGEMENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withOldVersion("1.1.1-SNAPSHOT")
+                        .withNewVersion("1.1.0")));
     }
 
     @Test
@@ -194,8 +209,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.PARENT_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withOldVersion("1.1.1-SNAPSHOT")
+                        .withNewVersion("1.1.0")));
     }
 
     @Test
@@ -234,8 +253,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         // being present in the dependency list
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withOldVersion("1.1.1-SNAPSHOT")
+                        .withNewVersion("1.1.0")));
     }
 
     @Test
@@ -261,7 +284,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         // With allowPreReleases=false (default), beta is excluded and 1.1.0 is selected
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "pre-release-artifact", "1.0.0", "1.1.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("pre-release-artifact")
+                        .withOldVersion("1.0.0")
+                        .withNewVersion("1.1.0")));
     }
 
     @Test
@@ -287,7 +315,11 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         // Beta version 1.2.0-beta1 is highest and will be selected
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "pre-release-artifact", "1.0.0", "1.2.0-beta1")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("pre-release-artifact")
+                        .withOldVersion("1.0.0")
+                        .withNewVersion("1.2.0-beta1")));
     }
 }
