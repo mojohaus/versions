@@ -88,7 +88,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
         ArtifactVersions result = new ArtifactVersions(
                 artifact,
                 versions.stream().filter(v -> versionFilter.test(v.toString())).collect(Collectors.toList()));
-        if (!versionFilter.test(result.artifact.getVersion())) {
+        if (result.artifact.getVersion() != null && !versionFilter.test(result.artifact.getVersion())) {
             result.setCurrentVersion((ArtifactVersion) null);
         }
         return result;

@@ -19,6 +19,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -731,6 +732,33 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             }.execute();
 
             assertThat(String.join("", Files.readAllLines(tempFile.getPath())), not(containsString("1.0.0")));
+        }
+    }
+
+    /*
+     * Regression guard: in case a dependency artifact has no "immediate" version defined, which can happen if the version
+     * is defined as a restriction, ArtifactVersions::filter would still call the IgnoreVersionHelper on the current
+     * version, which is null, causing a NullPointerException.
+     */
+    @Test
+    public void testIgnoredVersionsWithNoCurrentVersion() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+
+            DisplayDependencyUpdatesMojo mojo = mojoRule.lookupConfiguredMojo(
+                    new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/ranges"),
+                    "display-dependency-updates");
+            mojo.ignoredVersions = Collections.singleton("Alpha");
+            mojo.outputFile = tempFile.getPath().toFile();
+            mojo.setPluginContext(new HashMap<>());
+            mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                {
+                    put("dummy-api", new String[] {"1.0.0"});
+                }
+            });
+
+            mojo.execute();
+            List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
+            assertThat(output, not(hasItem(containsString("1.0.0"))));
         }
     }
 }
