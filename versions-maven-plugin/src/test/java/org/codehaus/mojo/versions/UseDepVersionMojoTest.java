@@ -19,14 +19,22 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.change.DefaultPropertyVersionChange;
@@ -43,6 +51,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -435,5 +444,66 @@ public class UseDepVersionMojoTest extends AbstractMojoTestCase {
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
             assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
         }
+    }
+
+    /**
+     * Creates a {@link MavenSession} object for a session spanning multiple projects. The project names
+     * are provided as the variable-list arguments.
+     *
+     * @param baseDir parent directory to all modules on the {@code modules} list
+     * @param modules string array listing all modules that are to be part of the session
+     * @return an initialised {@link MavenSession} object with the listed projects on the project list
+     */
+    private MavenSession createMavenSession(Path baseDir, String... modules) {
+        List<MavenProject> projectList = Arrays.stream(modules)
+                .map(m -> baseDir.resolve(m).toFile())
+                .map(f -> {
+                    try {
+                        return mojoRule.readMavenProject(f);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+        MavenSession session = new MavenSession(
+                mojoRule.getContainer(),
+                MavenRepositorySystemUtils.newSession(),
+                new DefaultMavenExecutionRequest(),
+                new DefaultMavenExecutionResult());
+        session.setProjects(projectList);
+        session.setCurrentProject(projectList.get(0));
+        return session;
+    }
+
+    /**
+     * Tests a regression since 2.15.0 when the mojo is only executed on the project on the module list
+     * (that is, if a -pl parameter is used providing a list of modules to process).
+     * @throws Exception thrown if something goes not according to plan
+     */
+    @Test
+    public void testModuleList() throws Exception {
+        Log logger = new SystemStreamLog() {
+            @Override
+            public boolean isDebugEnabled() {
+                return true;
+            }
+        };
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-dep-version/module-list"), tempDir);
+
+        MavenSession session = createMavenSession(tempDir, "mod1", "mod2");
+        UseDepVersionMojo mojo = mojoRule.lookupConfiguredMojo(session, newMojoExecution("use-dep-version"));
+        mojo.depVersion = "2.0.0";
+        mojo.forceVersion = true;
+        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem());
+        setVariableValueToObject(mojo, "log", logger);
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+
+        mojo.execute();
+
+        String mod1 = String.join("", Files.readAllLines(tempDir.resolve("mod1/pom.xml")));
+        String mod2 = String.join("", Files.readAllLines(tempDir.resolve("mod2/pom.xml")));
+        assertThat(mod1, containsString("<version>2.0.0</version>"));
+        assertThat(mod2, containsString("<version>2.0.0</version>"));
+        assertThat(changeRecorder.getChanges(), hasSize(2));
     }
 }
