@@ -84,7 +84,9 @@ import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.PluginVersionChange;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ArtifactVersionService;
@@ -97,6 +99,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
+import static org.codehaus.mojo.versions.api.PomHelper.APACHE_MAVEN_PLUGINS_GROUPID;
 
 /**
  * Displays all plugins that have newer versions available, taking care of Maven version prerequisites.
@@ -196,7 +199,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param lifecycleExecutor the (injected) instance of {@link LifecycleExecutor}
      * @param modelInterpolator the (injected) instance of {@link ModelInterpolator}
      * @param runtimeInformation the (injected) instance of {@link RuntimeInformation}
-     * @param changeRecorders   a map of change recorders
+     * @param changeRecorderFactories   a map of change recorder factories
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -209,9 +212,9 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             LifecycleExecutor lifecycleExecutor,
             ModelInterpolator modelInterpolator,
             RuntimeInformation runtimeInformation,
-            Map<String, ChangeRecorder> changeRecorders)
+            Map<String, VersionChangeRecorderFactory> changeRecorderFactories)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, wagonMap, changeRecorderFactories);
         this.projectBuilder = projectBuilder;
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;
@@ -221,6 +224,57 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Override
     protected boolean getAllowSnapshots() {
         return allowSnapshots;
+    }
+
+    private static class GroupArtifact {
+        private final String groupId;
+        private final String artifactId;
+
+        GroupArtifact(String groupId, String artifactId) {
+            this.groupId = groupId;
+            this.artifactId = artifactId;
+        }
+
+        GroupArtifact(Plugin plugin) {
+            this(plugin.getGroupId(), plugin.getArtifactId());
+        }
+
+        String getGroupId() {
+            return groupId;
+        }
+
+        String getArtifactId() {
+            return artifactId;
+        }
+
+        @Override
+        public int hashCode() {
+            return 31
+                            * Optional.ofNullable(groupId)
+                                    .orElse(APACHE_MAVEN_PLUGINS_GROUPID)
+                                    .hashCode()
+                    + 37 * artifactId.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof GroupArtifact)) {
+                return false;
+            }
+            GroupArtifact that = (GroupArtifact) obj;
+            return Optional.ofNullable(groupId)
+                            .orElse(APACHE_MAVEN_PLUGINS_GROUPID)
+                            .equals(Optional.ofNullable(that.groupId).orElse(APACHE_MAVEN_PLUGINS_GROUPID))
+                    && Objects.equals(artifactId, that.artifactId);
+        }
+
+        @Override
+        public String toString() {
+            return (groupId != null && !APACHE_MAVEN_PLUGINS_GROUPID.equals(groupId) ? groupId + ":" : "") + artifactId;
+        }
     }
 
     /**
@@ -277,9 +331,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                             && PATTERN_PROJECT_PLUGIN.matcher(curState.path).matches()) {
                         result.putIfAbsent(
                                 Plugin.constructKey(
-                                        curState.groupId == null
-                                                ? PomHelper.APACHE_MAVEN_PLUGINS_GROUPID
-                                                : curState.groupId,
+                                        curState.groupId == null ? APACHE_MAVEN_PLUGINS_GROUPID : curState.groupId,
                                         curState.artifactId),
                                 curState.version);
                     }
@@ -350,6 +402,8 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         logInit();
         Set<String> pluginsWithVersionsSpecified;
+        VersionChangeRecorder changeRecorder = getChangeRecorder();
+
         try (MutableXMLStreamReader pomReader =
                 new MutableXMLStreamReader(getProject().getFile().toPath())) {
             pluginsWithVersionsSpecified = findPluginsWithVersionsSpecified(pomReader);
@@ -389,7 +443,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         ArtifactVersion minMavenVersion = null;
         boolean superPomDrivingMinVersion = false;
         // if Maven prerequisite upgraded to a version, Map<plugin compact key, latest compatible plugin vesion>
-        Map<ArtifactVersion, Map<String, String>> mavenUpgrades = new TreeMap<>();
+        Map<ArtifactVersion, Map<Plugin, Pair<String, String>>> mavenUpgrades = new TreeMap<>();
 
         for (Plugin plugin : plugins) {
             String coords = ArtifactUtils.versionlessKey(plugin.getGroupId(), plugin.getArtifactId());
@@ -481,6 +535,11 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                         effectiveVersion,
                         " -> ",
                         newVersion));
+                changeRecorder.recordChange(new PluginVersionChange()
+                        .withGroupId(plugin.getGroupId())
+                        .withArtifactId(plugin.getArtifactId())
+                        .withOldVersion(effectiveVersion)
+                        .withNewVersion(newVersion));
             }
         }
 
@@ -562,19 +621,42 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
         }
 
         // updates if minimum Maven version is changed
-        for (Map.Entry<ArtifactVersion, Map<String, String>> mavenUpgrade : mavenUpgrades.entrySet()) {
+        for (Map.Entry<ArtifactVersion, Map<Plugin, Pair<String, String>>> mavenUpgrade : mavenUpgrades.entrySet()) {
             ArtifactVersion mavenUpgradeVersion = mavenUpgrade.getKey();
-            Map<String, String> upgradePlugins = mavenUpgrade.getValue();
+            Map<Plugin, Pair<String, String>> upgradePlugins = mavenUpgrade.getValue();
             if (upgradePlugins.isEmpty() || compare(mavenUpgradeVersion, specMavenVersion) < 0) {
                 continue;
             }
             logLine(false, "");
             logLine(false, "Require Maven " + mavenUpgradeVersion + " to use the following plugin updates:");
-            for (Map.Entry<String, String> entry : upgradePlugins.entrySet()) {
-                logLine(false, entry.getValue());
+            for (Map.Entry<Plugin, Pair<String, String>> entry : upgradePlugins.entrySet()) {
+                String effectiveVer = entry.getValue().getKey();
+                String upgradedVer = entry.getValue().getValue();
+                String key =
+                        compactKey(entry.getKey().getGroupId(), entry.getKey().getArtifactId());
+                if (upgradedVer != null) {
+                    changeRecorder.recordChange(new PluginVersionChange()
+                            .withGroupId(Optional.ofNullable(entry.getKey().getGroupId())
+                                    .orElse(APACHE_MAVEN_PLUGINS_GROUPID))
+                            .withArtifactId(entry.getKey().getArtifactId())
+                            .withOldVersion(effectiveVer)
+                            .withNewVersion(upgradedVer)
+                            .withMinimumMavenVersion(mavenUpgradeVersion.toString()));
+                    logLine(
+                            false,
+                            pad(key, INFO_PAD_SIZE + getOutputLineWidthOffset(), effectiveVer, " -> ", upgradedVer));
+                } else {
+                    logLine(false, pad(key, INFO_PAD_SIZE + getOutputLineWidthOffset(), effectiveVer));
+                }
             }
         }
         logLine(false, "");
+
+        try {
+            saveChangeRecorderResults();
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage());
+        }
     }
 
     private Pair<ArtifactVersion, String> getEffectivePluginVersion(
@@ -582,7 +664,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             String effectiveVersion,
             ArtifactVersion specMavenVersion,
             ArtifactVersion curMavenVersion,
-            Map<ArtifactVersion, Map<String, String>> mavenUpgrades)
+            Map<ArtifactVersion, Map<Plugin, Pair<String, String>>> mavenUpgrades)
             throws MojoExecutionException, VersionRetrievalException {
         Artifact artifactRange = artifactFactory.createMavenPluginArtifact(
                 plugin.getGroupId(), plugin.getArtifactId(), effectiveVersion);
@@ -609,29 +691,21 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 // newer version not compatible with current specMavenVersion: track opportunity if Maven spec
                 // upgrade
                 if (minRequires == null || compare(minRequires, pluginRequires) > 0) {
-                    Map<String, String> upgradePlugins =
+                    Map<Plugin, Pair<String, String>> upgradePlugins =
                             mavenUpgrades.computeIfAbsent(pluginRequires, k -> new LinkedHashMap<>());
-
-                    String upgradePluginKey = compactKey(plugin.getGroupId(), plugin.getArtifactId());
-                    if (!upgradePlugins.containsKey(upgradePluginKey)) {
-                        String newer = newerVersions[j].toString();
-                        if (newer.equals(effectiveVersion)) {
+                    int finalJ = j;
+                    String finalEffectiveVersion = effectiveVersion;
+                    upgradePlugins.computeIfAbsent(plugin, pluginKey -> {
+                        assert newerVersions[finalJ] != null;
+                        String newer = newerVersions[finalJ].toString();
+                        if (newer.equals(finalEffectiveVersion)) {
                             // plugin version configured that require a Maven version higher than spec
-                            upgradePlugins.put(
-                                    upgradePluginKey,
-                                    pad(upgradePluginKey, INFO_PAD_SIZE + getOutputLineWidthOffset(), newer));
+                            return Pair.of(finalEffectiveVersion, null);
                         } else {
                             // plugin that can be upgraded
-                            upgradePlugins.put(
-                                    upgradePluginKey,
-                                    pad(
-                                            upgradePluginKey,
-                                            INFO_PAD_SIZE + getOutputLineWidthOffset(),
-                                            effectiveVersion,
-                                            " -> ",
-                                            newer));
+                            return Pair.of(finalEffectiveVersion, newer);
                         }
-                    }
+                    });
                     minRequires = pluginRequires;
                 }
             } catch (ArtifactResolutionException | ProjectBuildingException e) {
@@ -734,7 +808,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                         map.keySet().retainAll(withVersionSpecified);
                         parentPlugins.putAll(map);
 
-                        map = getBuildPlugins(interpolatedModel, true);
+                        map = getBuildPlugins(interpolatedModel);
                         map.keySet().retainAll(withVersionSpecified);
                         parentPlugins.putAll(map);
 
@@ -747,7 +821,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                 }
             } else {
                 parentPlugins.putAll(getPluginManagement(interpolatedModel));
-                parentPlugins.putAll(getBuildPlugins(interpolatedModel, true));
+                parentPlugins.putAll(getBuildPlugins(interpolatedModel));
                 parentPlugins.putAll(getReportPlugins(interpolatedModel, true));
             }
         }
@@ -759,7 +833,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     }
 
     private String compactKey(String groupId, String artifactId) {
-        return PomHelper.APACHE_MAVEN_PLUGINS_GROUPID.equals(groupId)
+        return APACHE_MAVEN_PLUGINS_GROUPID.equals(groupId)
                 // a core plugin... group id is not needed
                 ? artifactId
                 : groupId + ":" + artifactId;
@@ -824,7 +898,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
                         && PATTERN_PROJECT_PLUGIN.matcher(curState.path).matches()) {
                     if (curState.artifactId != null && curState.version != null) {
                         if (curState.groupId == null) {
-                            curState.groupId = PomHelper.APACHE_MAVEN_PLUGINS_GROUPID;
+                            curState.groupId = APACHE_MAVEN_PLUGINS_GROUPID;
                         }
                         result.add(curState.groupId + ":" + curState.artifactId);
                     }
@@ -857,16 +931,14 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Retrieves plugins from the given model
      *
-     * @param build                build
-     * @param onlyIncludeInherited {@code true} to only return the plugins definitions that will be inherited by
-     *                             child projects.
+     * @param build build
      * @return map of plugin name x version
      */
-    private Map<String, String> getPluginsFromBuild(BuildBase build, boolean onlyIncludeInherited) {
+    private Map<String, String> getPluginsFromBuild(BuildBase build) {
         return ofNullable(build)
                 .flatMap(b -> ofNullable(b.getPlugins()).map(plugins -> plugins.stream()
                         .filter(plugin -> plugin.getVersion() != null)
-                        .filter(plugin -> !onlyIncludeInherited || getPluginInherited(plugin))
+                        .filter(DisplayPluginUpdatesMojo::getPluginInherited)
                         .collect(toMap(Plugin::getKey, Plugin::getVersion))))
                 .orElse(emptyMap());
     }
@@ -874,16 +946,14 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
     /**
      * Gets the build plugins of a specific project.
      *
-     * @param model                the model to get the build plugins from.
-     * @param onlyIncludeInherited {@code true} to only return the plugins definitions that will be inherited by
-     *                             child projects.
+     * @param model the model to get the build plugins from.
      * @return The map of effective plugin versions keyed by coordinates.
      * @since 1.0-alpha-1
      */
-    private Map<String, String> getBuildPlugins(Model model, boolean onlyIncludeInherited) {
-        Map<String, String> buildPlugins = new HashMap<>(getPluginsFromBuild(model.getBuild(), onlyIncludeInherited));
+    private Map<String, String> getBuildPlugins(Model model) {
+        Map<String, String> buildPlugins = new HashMap<>(getPluginsFromBuild(model.getBuild()));
         ofNullable(model.getProfiles()).ifPresent(profiles -> profiles.stream()
-                .map(profile -> getPluginsFromBuild(profile.getBuild(), onlyIncludeInherited))
+                .map(profile -> getPluginsFromBuild(profile.getBuild()))
                 .forEach(buildPlugins::putAll));
         return buildPlugins;
     }

@@ -7,3 +7,4 @@ target
 .vscode
 .checkstyle
 /.factorypath
+/hs_err_pid*.log

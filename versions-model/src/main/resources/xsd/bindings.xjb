@@ -1,0 +1,22 @@
+<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema"
+               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+               jaxb:version="2.1">
+
+  <jaxb:globalBindings>
+    <!-- Map xs:dateTime to java.time.LocalDateTime -->
+    <jaxb:javaType name="java.time.ZonedDateTime"
+                   xmlType="xs:dateTime"
+                   parseMethod="org.codehaus.mojo.versions.model.xjb.ZonedDateTimeXmlAdapter.parse"
+                   printMethod="org.codehaus.mojo.versions.model.xjb.ZonedDateTimeXmlAdapter.print"/>
+    <xjc:superClass name="org.codehaus.mojo.versions.model.VersionChangeBase"/>
+    <xjc:serializable uid="1"/>
+  </jaxb:globalBindings>
+
+  <!-- Rename property in VersionsExecution -->
+  <jaxb:bindings schemaLocation="updates-3.0.xsd"
+                 node="/xs:schema/xs:complexType[@name='VersionsExecution']/xs:sequence/xs:choice">
+    <jaxb:property name="versionChanges"/>
+  </jaxb:bindings>
+
+</jaxb:bindings>
