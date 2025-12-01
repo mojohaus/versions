@@ -206,7 +206,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                 Optional<String> targetVersion =
                         findReleaseVersion(releaseVersion, getHelper().lookupArtifactVersions(artifact, false));
                 if (targetVersion.isPresent()) {
-                    updateDependencyVersion(pom, dep, targetVersion.get(), changeKind);
+                    updateDependencyVersion(getProject(), pom, dep, targetVersion.get(), changeKind);
                 } else {
                     getLog().info("No matching release of " + toString(dep) + " to update.");
                     if (failIfNotReplaced) {

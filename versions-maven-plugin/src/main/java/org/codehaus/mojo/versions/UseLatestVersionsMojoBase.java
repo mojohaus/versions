@@ -248,7 +248,8 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
             CompletableFuture.allOf(versionChangeFutures.toArray(new CompletableFuture[0]))
                     .join();
             for (DependencyVersionChange change : versionChanges) {
-                updateDependencyVersion(pom, change.getDependency(), change.getNewVersion(), change.getChangeKind());
+                updateDependencyVersion(
+                        getProject(), pom, change.getDependency(), change.getNewVersion(), change.getChangeKind());
             }
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage(), e);

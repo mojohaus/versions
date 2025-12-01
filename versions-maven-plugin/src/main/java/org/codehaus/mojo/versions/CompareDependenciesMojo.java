@@ -238,6 +238,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
         List<String> propertyDiffs = new ArrayList<>();
         if (getProject().getDependencyManagement() != null && getProcessDependencyManagement()) {
             totalDiffs.addAll(compareVersions(
+                    getProject(),
                     pom,
                     getProject().getDependencyManagement().getDependencies(),
                     remoteDepsMap,
@@ -245,7 +246,11 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
         }
         if (getProject().getDependencies() != null && getProcessDependencies()) {
             totalDiffs.addAll(compareVersions(
-                    pom, getProject().getDependencies(), remoteDepsMap, DependencyChangeRecord.ChangeKind.DEPENDENCY));
+                    getProject(),
+                    pom,
+                    getProject().getDependencies(),
+                    remoteDepsMap,
+                    DependencyChangeRecord.ChangeKind.DEPENDENCY));
         }
         if (updatePropertyVersions) {
             Map<Property, PropertyVersions> versionProperties = this.getHelper()
@@ -268,6 +273,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
             }
             remoteDepsMap.putIfAbsent(parent.getManagementKey(), parent);
             totalDiffs.addAll(compareVersions(
+                    getProject(),
                     pom,
                     singletonList(getParentDependency()),
                     remoteDepsMap,
@@ -338,6 +344,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
      * @throws MojoExecutionException
      */
     private List<String> compareVersions(
+            MavenProject project,
             MutableXMLStreamReader pom,
             List<Dependency> dependencies,
             Map<String, Dependency> remoteDependencies,
@@ -357,7 +364,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
                     StringBuilder buf = writeDependencyDiffMessage(dep, remoteVersion);
                     updates.add(buf.toString());
                     if (!reportMode) {
-                        updateDependencyVersion(pom, dep, remoteVersion, changeKind);
+                        updateDependencyVersion(project, pom, dep, remoteVersion, changeKind);
                     }
                 }
             }

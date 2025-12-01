@@ -486,6 +486,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * Attempts to update the dependency {@code dep} to the given {@code newVersion}. The dependency can either
      * be the parent project or any given dependency.
      *
+     * @param project {@link MavenProject} being updated
      * @param pom {@link MutableXMLStreamReader} instance to update the POM XML document
      * @param dep dependency to be updated (can also be a dependency made from the parent)
      * @param newVersion new version to update the dependency to
@@ -495,11 +496,15 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @throws MojoExecutionException thrown if the dependency cannot be converted to an artifact
      */
     protected boolean updateDependencyVersion(
-            MutableXMLStreamReader pom, Dependency dep, String newVersion, DependencyChangeRecord.ChangeKind changeKind)
+            MavenProject project,
+            MutableXMLStreamReader pom,
+            Dependency dep,
+            String newVersion,
+            DependencyChangeRecord.ChangeKind changeKind)
             throws XMLStreamException, MojoExecutionException {
         boolean updated = false;
         if (getProcessParent()
-                && getProject().getParent() != null
+                && project.getParent() != null
                 && (DependencyComparator.INSTANCE.compare(
                                         dep,
                                         DependencyBuilder.newBuilder()
@@ -554,7 +559,8 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
                 getProject().getModel(),
                 getLog())) {
             if (getLog().isInfoEnabled()) {
-                getLog().info("Updated " + toString(dep) + " to version " + newVersion);
+                getLog().info("Updated " + toString(dep) + " to version " + newVersion + " in " + project.getGroupId()
+                        + ":" + project.getArtifactId() + ":" + project.getVersion());
             }
             getChangeRecorder()
                     .recordChange(DefaultDependencyChangeRecord.builder()

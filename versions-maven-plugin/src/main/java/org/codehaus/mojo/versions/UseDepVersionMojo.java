@@ -48,6 +48,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -202,55 +203,65 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
         validateInput();
         List<ModelNode> rawModels;
 
-        try {
-            MutableXMLStreamReader pomReader =
-                    new MutableXMLStreamReader(getProject().getFile().toPath());
-            ModelNode rootNode = new ModelNode(
-                    PomHelper.getRawModel(pomReader.getSource(), getProject().getFile()), pomReader);
-            rawModels = PomHelper.getRawModelTree(rootNode, getLog());
-            // reversing to process depth-first
-            Collections.reverse(rawModels);
+        for (MavenProject project : session.getProjects()) {
+            if (getLog().isDebugEnabled() && session.getProjects().size() > 1) {
+                getLog().debug("Processing " + project.getGroupId() + ":" + project.getArtifactId() + ":"
+                        + project.getVersion() + "...");
+            }
+            try {
+                MutableXMLStreamReader pomReader =
+                        new MutableXMLStreamReader(project.getFile().toPath());
+                ModelNode rootNode =
+                        new ModelNode(PomHelper.getRawModel(pomReader.getSource(), project.getFile()), pomReader);
+                rawModels = PomHelper.getRawModelTree(rootNode, getLog());
+                // reversing to process depth-first
+                Collections.reverse(rawModels);
 
-            Set<String> propertyBacklog = new HashSet<>();
-            Map<String, Set<Dependency>> propertyConflicts = new HashMap<>();
-            for (ModelNode node : rawModels) {
-                processModel(
-                        node,
-                        propertyBacklog,
-                        propertyConflicts,
-                        ofNullable(pomReader.getEncoding())
-                                .map(Charset::forName)
-                                .orElse(Charset.defaultCharset()));
+                Set<String> propertyBacklog = new HashSet<>();
+                Map<String, Set<Dependency>> propertyConflicts = new HashMap<>();
+                for (ModelNode node : rawModels) {
+                    processModel(
+                            project,
+                            node,
+                            propertyBacklog,
+                            propertyConflicts,
+                            ofNullable(pomReader.getEncoding())
+                                    .map(Charset::forName)
+                                    .orElse(Charset.defaultCharset()));
+                }
+                propertyBacklog.forEach(p -> getLog().warn("Not updating property ${" + p + "}: defined in parent"));
+            } catch (IOException | XMLStreamException e) {
+                throw new MojoFailureException(e.getMessage(), e);
+            } catch (RuntimeException e) {
+                if (e.getCause() instanceof MojoFailureException) {
+                    throw (MojoFailureException) e.getCause();
+                } else if (e.getCause() instanceof MojoExecutionException) {
+                    throw (MojoExecutionException) e.getCause();
+                }
+                throw e;
             }
-            propertyBacklog.forEach(p -> getLog().warn("Not updating property ${" + p + "}: defined in parent"));
-        } catch (IOException | XMLStreamException e) {
-            throw new MojoFailureException(e.getMessage(), e);
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof MojoFailureException) {
-                throw (MojoFailureException) e.getCause();
-            } else if (e.getCause() instanceof MojoExecutionException) {
-                throw (MojoExecutionException) e.getCause();
-            }
-            throw e;
         }
     }
 
     /**
      * Processes a single model and POM file associated with it
-     * @param node tree node to process
-     * @param propertyBacklog a {@link Set} instance used to store dependencies to be updated, but which were not found
-     *                        in the current subtree. These properties need to be carried over to the parent node for
-     *                        processing.
+     *
+     * @param project           {@link MavenProject} reference to the project to be processed
+     * @param node              tree node to process
+     * @param propertyBacklog   a {@link Set} instance used to store dependencies to be updated, but which were not
+     *                          found
+     *                          in the current subtree. These properties need to be carried over to the parent node for
+     *                          processing.
      * @param propertyConflicts an {@link Map} instance to store properties
      *                          which are associated with dependencies which do not fit the filter and thus may not
      *                          be changed. This is then used for conflict detection if a dependency to be changed
      *                          used one of these properties. Such a change is not allowed and must be reported instead.
      * @param charset           charset for file writing
-     * @return {@code true} if the file has been changed
-     * @throws MojoFailureException thrown if a version may not be changed
+     * @throws MojoFailureException   thrown if a version may not be changed
      * @throws MojoExecutionException thrown if a version may not be changed
      */
-    protected boolean processModel(
+    protected void processModel(
+            MavenProject project,
             ModelNode node,
             Set<String> propertyBacklog,
             Map<String, Set<Dependency>> propertyConflicts,
@@ -263,6 +274,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
         try {
             if (getProcessDependencyManagement() && node.getModel().getDependencyManagement() != null) {
                 useDepVersion(
+                        project,
                         node,
                         node.getModel().getDependencyManagement().getDependencies(),
                         ChangeKind.DEPENDENCY_MANAGEMENT,
@@ -272,6 +284,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
             if (getProcessDependencies()) {
                 useDepVersion(
+                        project,
                         node,
                         getDependencies(node.getModel()),
                         ChangeKind.DEPENDENCY,
@@ -279,8 +292,9 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                         propertyConflicts);
             }
 
-            if (getProject().getParent() != null && getProcessParent()) {
+            if (project.getParent() != null && getProcessParent()) {
                 useDepVersion(
+                        project,
                         node,
                         singletonList(getParentDependency()),
                         ChangeKind.PARENT,
@@ -343,8 +357,6 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                                     + node.getModel().getPomFile(),
                             e);
         }
-
-        return node.getMutableXMLStreamReader().isModified();
     }
 
     private static List<Dependency> getDependencies(Model model) {
@@ -372,6 +384,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      * used for conflict detection if a dependency to be changed used one of these properties. Such a change
      * is not allowed and must be reported instead.</p>
      *
+     * @param project {@link MavenProject} being updated
      * @param node model tree node to process
      * @param dependencies collection of dependencies to process (can be taken from dependency management,
      *                     parent, or dependencies)
@@ -388,6 +401,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @throws VersionRetrievalException thrown if dependency versions cannot be retrieved
      */
     private void useDepVersion(
+            MavenProject project,
             ModelNode node,
             Collection<Dependency> dependencies,
             ChangeKind changeKind,
@@ -450,7 +464,7 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                         }
                     }
                     if (!propertyName.isPresent()) {
-                        updateDependencyVersion(node.getMutableXMLStreamReader(), dep, depVersion, changeKind);
+                        updateDependencyVersion(project, node.getMutableXMLStreamReader(), dep, depVersion, changeKind);
                     } else {
                         // propertyName is present
                         ofNullable(propertyConflicts.get(propertyName.get()))

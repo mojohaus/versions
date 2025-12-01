@@ -183,7 +183,7 @@ public class ForceReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                 getLog().debug("Looking for a release of " + toString(dep));
                 ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
                 if (versions.containsVersion(releaseVersion)) {
-                    updateDependencyVersion(pom, dep, releaseVersion, changeKind);
+                    updateDependencyVersion(getProject(), pom, dep, releaseVersion, changeKind);
                 } else {
                     ArtifactVersion newestRelease = versions.getNewestVersion((VersionRange) null, null, false, true);
                     if (newestRelease == null) {
@@ -193,7 +193,7 @@ public class ForceReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
                                     "No matching release of " + toString(dep) + " found for update.");
                         }
                     } else {
-                        updateDependencyVersion(pom, dep, newestRelease.toString(), changeKind);
+                        updateDependencyVersion(getProject(), pom, dep, newestRelease.toString(), changeKind);
                     }
                 }
             }
