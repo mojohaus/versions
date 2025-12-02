@@ -198,48 +198,58 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
         // not used
     }
 
+    private void execute(MavenProject currentProject) throws MojoExecutionException, MojoFailureException {
+        List<ModelNode> rawModels;
+        try {
+            MutableXMLStreamReader pomReader =
+                    new MutableXMLStreamReader(currentProject.getFile().toPath());
+            ModelNode rootNode =
+                    new ModelNode(PomHelper.getRawModel(pomReader.getSource(), currentProject.getFile()), pomReader);
+            rawModels = PomHelper.getRawModelTree(rootNode, getLog());
+            // reversing to process depth-first
+            Collections.reverse(rawModels);
+
+            Set<String> propertyBacklog = new HashSet<>();
+            Map<String, Set<Dependency>> propertyConflicts = new HashMap<>();
+            for (ModelNode node : rawModels) {
+                processModel(
+                        currentProject,
+                        node,
+                        propertyBacklog,
+                        propertyConflicts,
+                        ofNullable(pomReader.getEncoding())
+                                .map(Charset::forName)
+                                .orElse(Charset.defaultCharset()));
+            }
+            propertyBacklog.forEach(p -> getLog().warn("Not updating property ${" + p + "}: defined in parent"));
+        } catch (IOException | XMLStreamException e) {
+            throw new MojoFailureException(e.getMessage(), e);
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof MojoFailureException) {
+                throw (MojoFailureException) e.getCause();
+            } else if (e.getCause() instanceof MojoExecutionException) {
+                throw (MojoExecutionException) e.getCause();
+            }
+            throw e;
+        }
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         validateInput();
-        List<ModelNode> rawModels;
 
-        for (MavenProject project : session.getProjects()) {
-            if (getLog().isDebugEnabled() && session.getProjects().size() > 1) {
-                getLog().debug("Processing " + project.getGroupId() + ":" + project.getArtifactId() + ":"
-                        + project.getVersion() + "...");
-            }
-            try {
-                MutableXMLStreamReader pomReader =
-                        new MutableXMLStreamReader(project.getFile().toPath());
-                ModelNode rootNode =
-                        new ModelNode(PomHelper.getRawModel(pomReader.getSource(), project.getFile()), pomReader);
-                rawModels = PomHelper.getRawModelTree(rootNode, getLog());
-                // reversing to process depth-first
-                Collections.reverse(rawModels);
-
-                Set<String> propertyBacklog = new HashSet<>();
-                Map<String, Set<Dependency>> propertyConflicts = new HashMap<>();
-                for (ModelNode node : rawModels) {
-                    processModel(
-                            project,
-                            node,
-                            propertyBacklog,
-                            propertyConflicts,
-                            ofNullable(pomReader.getEncoding())
-                                    .map(Charset::forName)
-                                    .orElse(Charset.defaultCharset()));
+        if (session.getProjects().size() != session.getAllProjects().size()) {
+            // we are running on a restricted module set (-pl)
+            for (MavenProject currentProject : session.getProjects()) {
+                if (getLog().isDebugEnabled()) {
+                    getLog().debug("Processing " + currentProject.getGroupId() + ":" + currentProject.getArtifactId()
+                            + ":" + currentProject.getVersion() + "...");
                 }
-                propertyBacklog.forEach(p -> getLog().warn("Not updating property ${" + p + "}: defined in parent"));
-            } catch (IOException | XMLStreamException e) {
-                throw new MojoFailureException(e.getMessage(), e);
-            } catch (RuntimeException e) {
-                if (e.getCause() instanceof MojoFailureException) {
-                    throw (MojoFailureException) e.getCause();
-                } else if (e.getCause() instanceof MojoExecutionException) {
-                    throw (MojoExecutionException) e.getCause();
-                }
-                throw e;
+                execute(currentProject);
             }
+        } else {
+            // normally, session.getProjects() will contain the whole reactor, just run on the reactor root
+            execute(session.getCurrentProject());
         }
     }
 

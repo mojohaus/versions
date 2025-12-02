@@ -35,6 +35,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
@@ -105,11 +106,27 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
      * @throws MojoFailureException   when things go wrong.
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
+        validateInput();
+        if (session.getProjects().size() != session.getAllProjects().size()) {
+            // we are running on a restricted module set (-pl)
+            for (MavenProject currentProject : session.getProjects()) {
+                if (getLog().isDebugEnabled() && session.getProjects().size() > 1) {
+                    getLog().debug("Processing " + currentProject.getGroupId() + ":" + currentProject.getArtifactId()
+                            + ":" + currentProject.getVersion() + "...");
+                }
+                execute(currentProject);
+            }
+        } else {
+            // normally, session.getProjects() will contain the whole reactor, just run on the reactor root
+            execute(session.getCurrentProject());
+        }
+    }
 
+    private void execute(MavenProject currentProject) throws MojoExecutionException {
         boolean didSomething = false;
 
         try {
-            final Map<File, Model> reactor = PomHelper.getChildModels(getProject(), getLog());
+            final Map<File, Model> reactor = PomHelper.getChildModels(currentProject, getLog());
             List<File> order = new ArrayList<>(reactor.keySet());
             order.sort((o1, o2) -> {
                 Model m1 = reactor.get(o1);
@@ -180,7 +197,7 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
                 }
             }
 
-        } catch (IOException e) {
+        } catch (IOException | MojoFailureException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
         if (!didSomething) {
@@ -196,6 +213,7 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
      * @throws MojoFailureException   when things go wrong.
      * @throws XMLStreamException     when things go wrong.
      */
+    @Override
     protected synchronized void update(MutableXMLStreamReader pom)
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         getLog().debug("Updating parent to " + sourceVersion);
