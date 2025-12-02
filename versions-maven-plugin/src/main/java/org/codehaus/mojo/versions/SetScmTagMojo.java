@@ -3,6 +3,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
@@ -104,12 +106,33 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo {
      */
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        validateInput();
+        if (session.getProjects().size() != session.getAllProjects().size()) {
+            // we are running on a restricted module set (-pl)
+            for (MavenProject currentProject : session.getProjects()) {
+                if (getLog().isDebugEnabled()) {
+                    getLog().debug("Processing " + currentProject.getGroupId() + ":" + currentProject.getArtifactId()
+                            + ":" + currentProject.getVersion() + "...");
+                }
+                execute(currentProject);
+            }
+        } else {
+            // normally, session.getProjects() will contain the whole reactor, just run on the reactor root
+            execute(session.getCurrentProject());
+        }
+    }
+
+    private void execute(MavenProject currentProject) throws MojoExecutionException, MojoFailureException {
+        File outFile = currentProject.getFile();
+        process(outFile);
+    }
+
+    @Override
+    protected void validateInput() throws MojoExecutionException {
         if (isAllBlank(newTag, connection, developerConnection, url)) {
-            throw new MojoFailureException(
+            throw new MojoExecutionException(
                     "One of: \"newTag\", \"connection\", \"developerConnection\", \"url\" should be provided.");
         }
-
-        super.execute();
     }
 
     @Override
