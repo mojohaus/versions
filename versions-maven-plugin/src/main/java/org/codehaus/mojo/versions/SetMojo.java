@@ -213,9 +213,12 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     protected Integer nextSnapshotIndexToIncrement;
 
     /**
-     * Whether to start processing at the local aggregation root (which might be a parent module
+     * <p>Whether to start processing at the local aggregation root (which might be a parent module
      * of that module where Maven is executed in, and the version change may affect parent and sibling modules).
-     * Setting to false makes sure only the module (and it's submodules) where Maven is executed for is affected.
+     * Setting to false makes sure only the module (and its submodules) where Maven is executed for is affected.</p>
+     *
+     * <p>Since 2.20.2: If the plugin is executed with a project list (Maven CLI option {@code -pl}),
+     * the plugin is always executed on every project on the list as local aggregation root.</p>
      *
      * @since 2.9
      */
@@ -301,10 +304,19 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      * Called when this mojo is executed.
      *
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
-     * @throws org.apache.maven.plugin.MojoFailureException   when things go wrong.
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        if (getProject().getOriginalModel().getVersion() == null) {
+    public void execute() throws MojoExecutionException {
+        for (MavenProject currentProject : session.getProjects()) {
+            if (getLog().isDebugEnabled() && session.getProjects().size() > 1) {
+                getLog().debug("Processing " + project.getGroupId() + ":" + project.getArtifactId() + ":"
+                        + project.getVersion() + "...");
+            }
+            execute(currentProject);
+        }
+    }
+
+    private void execute(MavenProject currentProject) throws MojoExecutionException {
+        if (currentProject.getOriginalModel().getVersion() == null) {
             throw new MojoExecutionException("Project version is inherited from parent.");
         }
 
@@ -335,7 +347,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                 try {
                     newVersion = prompter.prompt(
                             "Enter the new version to set",
-                            getProject().getOriginalModel().getVersion());
+                            currentProject.getOriginalModel().getVersion());
                 } catch (PrompterException e) {
                     throw new MojoExecutionException(e.getMessage(), e);
                 }
@@ -354,9 +366,9 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
         }
 
         try {
-            final MavenProject project = processFromLocalAggregationRoot
+            final MavenProject project = session.getProjects().size() == 1 && processFromLocalAggregationRoot
                     ? PomHelper.getLocalRoot(projectBuilder, session, getLog())
-                    : getProject();
+                    : currentProject;
 
             getLog().info("Local aggregation root: " + project.getBasedir());
             Map<File, Model> reactorModels = PomHelper.getChildModels(project, getLog());
@@ -370,7 +382,11 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             // needs to be changed as well
             // setting them to the main project coordinates in case they are not set by the user,
             // so that the main project can be selected
-            Model rootModel = reactorModels.get(session.getCurrentProject().getFile());
+            Model rootModel = reactorModels.get(currentProject.getFile());
+
+            String groupId = this.groupId;
+            String artifactId = this.artifactId;
+            String oldVersion = this.oldVersion;
             if (groupId == null) {
                 groupId = PomHelper.getGroupId(rootModel);
             }
@@ -429,11 +445,10 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                 process(file);
             }
 
-        } catch (IOException e) {
+        } catch (IOException | MojoFailureException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }
-
     /**
      * Returns the incremented version, with the nextSnapshotIndexToIncrement indicating the 1-based index,
      * from the left, or the most major version component, of the version string.

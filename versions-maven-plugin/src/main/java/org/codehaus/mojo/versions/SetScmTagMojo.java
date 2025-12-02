@@ -3,6 +3,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
@@ -104,12 +106,23 @@ public class SetScmTagMojo extends AbstractVersionsUpdaterMojo {
      */
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        validateInput();
+        for (MavenProject currentProject : session.getProjects()) {
+            if (getLog().isDebugEnabled() && session.getProjects().size() > 1) {
+                getLog().debug("Processing " + project.getGroupId() + ":" + project.getArtifactId() + ":"
+                        + project.getVersion() + "...");
+            }
+            File outFile = currentProject.getFile();
+            process(outFile);
+        }
+    }
+
+    @Override
+    protected void validateInput() throws MojoExecutionException {
         if (isAllBlank(newTag, connection, developerConnection, url)) {
-            throw new MojoFailureException(
+            throw new MojoExecutionException(
                     "One of: \"newTag\", \"connection\", \"developerConnection\", \"url\" should be provided.");
         }
-
-        super.execute();
     }
 
     @Override

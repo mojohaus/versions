@@ -18,12 +18,23 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.codehaus.plexus.PlexusContainer;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -93,5 +104,59 @@ public class TestUtils {
                 return CONTINUE;
             }
         });
+    }
+
+    /**
+     * An auxiliary interface for passing functions throwing checked exceptions to lambdas.
+     * @param <T> argument type
+     * @param <R> return type
+     */
+    @FunctionalInterface
+    public interface CheckedFunction<T, R> {
+        /**
+         * Applies this function to the given argument.
+         * @param t the function argument
+         * @return the function result
+         * @throws Exception checked exception that may be thrown
+         */
+        R apply(T t) throws Exception;
+    }
+
+    /**
+     * <p>Creates a {@link MavenSession} object for a session spanning multiple projects. The project names
+     * are provided as the variable-list arguments.</p>
+     * <p>The first argument can be obtained by e.g. using {@code MojoRule::getContainer}, if using Maven Testing Harness.</p>
+     * <p>The second argument is a function producing a {@link MavenProject} instance based on the pom.xml file.
+     * If using Maven Testing Harness, this can be the result of {@code MojoRule::readMavenProject}.</p>
+     *
+     * @param container {@link PlexusContainer} instance
+     * @param projectReader a {@link CheckedFunction<File,MavenProject>} which reads the project given the file name
+     * @param baseDir parent directory to all modules on the {@code modules} list
+     * @param modules string array listing all modules that are to be part of the session
+     * @return an initialised {@link MavenSession} object with the listed projects on the project list
+     */
+    public static MavenSession createMavenSession(
+            PlexusContainer container,
+            CheckedFunction<File, MavenProject> projectReader,
+            Path baseDir,
+            String... modules) {
+        List<MavenProject> projectList = Arrays.stream(modules)
+                .map(m -> baseDir.resolve(m).toFile())
+                .map(f -> {
+                    try {
+                        return projectReader.apply(f);
+                    } catch (Throwable e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+        MavenSession session = new MavenSession(
+                container,
+                MavenRepositorySystemUtils.newSession(),
+                new DefaultMavenExecutionRequest(),
+                new DefaultMavenExecutionResult());
+        session.setProjects(projectList);
+        session.setCurrentProject(projectList.get(0));
+        return session;
     }
 }
