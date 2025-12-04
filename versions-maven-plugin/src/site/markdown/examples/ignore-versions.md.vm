@@ -1,0 +1,67 @@
+Ignoring specific version suffixes
+----------------------------------
+
+Let's suppose you wanted `org.apache.maven.doxia:doxia-core:` not to be updated to `2.0.0-M6` or `org.apache.maven:maven-core` to `4.0.0-alpha-5'` or anything with a `-M` or `-alpha` in it.
+
+You can either use `ruleSet` or `ignoredVersions`.
+
+**Note:** _Upon first sight of the `dependencyExcludes` option, one might consider to use it to filter out anything with `2.*-M.*` or `*-alpha.*`. Well, that would be wrong. `dependencyIncludes` and `dependencyExcludes` work only on **original** dependency version, that is, dependency versions that **are already used** by your project. This means that it is likely that you will still see the dreaded `2.0.0-M6`-like version in the updates._
+
+$h3 Using `ignoredVersions` (simple regex filters)
+
+**Note:** _Both *ignoredVersions* and *ruleSet* filter **target** versions, and not the **original** versions of the dependencies_.
+
+Say we want to avoid versions with `-M` or `-alpha` suffixes:
+
+```shell
+mvn versions:$goal "-Dmaven.version.ignore=.*-M.*,.*-alpha.*"
+```
+
+or in your POM:
+
+```xml
+<configuration>
+    <ignoredVersions>
+        <ignoredVersion>.*-M.*</ignoredVersion>
+        <ignoredVersion>.*-alpha.*</ignoredVersion>
+    </ignoredVersions>
+</configuration>
+```
+
+or, using just one regular expression:
+
+```xml
+<configuration>
+    <ignoredVersions>.*-M.*,.*-alpha.*</ignoredVersions>
+</configuration>
+```
+
+$h3 Using ruleSet (more control)
+
+```xml
+<configuration>
+  <ruleSet>
+    <ignoreVersions>
+      <ignoreVersion type="regex">.*-M.*</ignoreVersion>
+      <ignoreVersion type="regex">.*-alpha.*</ignoreVersion>
+    </ignoreVersions>
+  </ruleSet>
+</configuration>
+```
+
+See also: [Version rules](../version-rules.md.vm)
+
+$h3 Output with ignored versions
+
+Instead of:
+
+```
+org.apache.maven:maven-core ........ 3.2.5 -> 4.0.0-alpha-5
+```
+
+You will only see stable updates:
+
+```
+org.apache.maven:maven-core ........ 3.2.5 -> 3.9.2
+```
+
