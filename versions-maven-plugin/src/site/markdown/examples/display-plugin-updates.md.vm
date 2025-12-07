@@ -18,10 +18,12 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
+#set( $goal = "display-plugin-updates" )
+#set( $h3 = '###' )
+Checking for new plugin updates
+===============================
 
-# Checking for new plugin updates
-
-The `display-plugin-updates` goal will check all the plugins and reports used in your project and display a list
+The `$goal` goal will check all the plugins and reports used in your project and display a list
 of those plugins with newer versions available, first staying with the same Maven version prerequisite, then
 additional options if you update the Maven version prerequisite.
 
@@ -30,7 +32,7 @@ Here are some examples of what this looks like:
 ```sh
 svn checkout http://svn.codehaus.org/mojo/trunk/mojo/build-helper-maven-plugin build-helper-maven-plugin
 cd build-helper-maven-plugin
-mvn versions:display-plugin-updates
+mvn versions:$goal
 ```
 
 Which produces the following output:
@@ -348,4 +350,8 @@ produces the following output:
 [INFO] Final Memory: 17M/81M
 [INFO] ------------------------------------------------------------------------
 ```
+<!--- Ignoring specific version suffixes -->
+
+#parse( "ignore-versions.md.vm" )
+
 
