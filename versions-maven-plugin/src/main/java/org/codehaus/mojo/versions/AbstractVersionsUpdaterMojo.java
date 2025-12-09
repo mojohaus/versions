@@ -185,6 +185,14 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected Set<String> ignoredVersions;
 
     /**
+     * If true, the plugin execution will be skipped.
+     *
+     * @since 2.20.2
+     */
+    @Parameter(property = "versions.skip", defaultValue = "false")
+    protected boolean skip;
+
+    /**
      * (injected) map of {@link Wagon} instances per protocol
      *
      * @since 2.14.0
@@ -304,6 +312,10 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @since 1.0-alpha-1
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         validateInput();
         File outFile = project.getFile();
         process(outFile);

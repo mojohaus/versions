@@ -170,6 +170,10 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         logInit();
         if (getProject().getParent() == null) {
             logLine(false, "Project does not have a parent.");

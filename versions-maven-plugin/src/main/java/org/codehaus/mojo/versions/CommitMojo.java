@@ -47,12 +47,24 @@ public class CommitMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
+     * If true, the plugin execution will be skipped.
+     *
+     * @since 2.20.2
+     */
+    @Parameter(property = "versions.skip", defaultValue = "false")
+    private boolean skip;
+
+    /**
      * Creates a new instance.
      */
     public CommitMojo() {}
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         Path outFile = project.getFile().toPath();
         Path backupFile = outFile.getParent().resolve(outFile.getFileName() + ".versionsBackup");
 

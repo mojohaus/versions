@@ -348,6 +348,10 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     @SuppressWarnings("checkstyle:MethodLength")
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         logInit();
         Set<String> pluginsWithVersionsSpecified;
         try (MutableXMLStreamReader pomReader =

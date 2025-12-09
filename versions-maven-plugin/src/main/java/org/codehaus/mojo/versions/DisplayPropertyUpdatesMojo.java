@@ -176,6 +176,10 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         logInit();
         List<String> current = new ArrayList<>();
         List<String> updates = new ArrayList<>();

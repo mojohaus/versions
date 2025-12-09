@@ -1,0 +1,23 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-skip-002</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>Test versions.skip parameter with display goal</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>localhost</groupId>
+      <artifactId>dummy-api</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+
+  <description>
+    Test that the versions.skip parameter works with display goals.
+    When versions.skip=true, the goal should be skipped.
+  </description>
+</project>

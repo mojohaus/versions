@@ -106,6 +106,10 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
      * @throws MojoFailureException   when things go wrong.
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         validateInput();
         if (session.getProjects().size() != session.getAllProjects().size()) {
             // we are running on a restricted module set (-pl)
