@@ -82,6 +82,9 @@ public class ChangeRecorderXML implements ChangeRecorder {
         DependencyVersionChange change = (DependencyVersionChange) changeRecord.getVersionChange();
         update.setAttribute("groupId", change.getGroupId());
         update.setAttribute("artifactId", change.getArtifactId());
+        if (change.getClassifier() != null) {
+            update.setAttribute("classifier", change.getClassifier());
+        }
         update.setAttribute("oldVersion", change.getOldVersion());
         update.setAttribute("newVersion", change.getNewVersion());
 

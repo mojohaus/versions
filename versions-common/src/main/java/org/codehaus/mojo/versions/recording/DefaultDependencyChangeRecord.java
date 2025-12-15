@@ -63,6 +63,7 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
         private ChangeKind kind;
         private String groupId;
         private String artifactId;
+        private String classifier;
         private String oldVersion;
         private String newVersion;
 
@@ -99,6 +100,16 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
         }
 
         /**
+         * Supplies the classifier
+         * @param classifier requested classifier
+         * @return builder instance
+         */
+        public Builder withClassifier(String classifier) {
+            this.classifier = classifier;
+            return this;
+        }
+
+        /**
          * Supplies the version from before the change
          * @param oldVersion version from before the change
          * @return builder instance
@@ -126,6 +137,7 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
         public Builder withDependency(Dependency dependency) {
             groupId = dependency.getGroupId();
             artifactId = dependency.getArtifactId();
+            classifier = dependency.getClassifier();
             oldVersion = dependency.getVersion();
             return this;
         }
@@ -138,6 +150,7 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
         public Builder withArtifact(Artifact artifact) {
             groupId = artifact.getGroupId();
             artifactId = artifact.getArtifactId();
+            classifier = artifact.getClassifier();
             oldVersion = artifact.getVersion();
             return this;
         }
@@ -148,7 +161,7 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
          */
         public DependencyChangeRecord build() {
             return new DefaultDependencyChangeRecord(
-                    kind, new DefaultDependencyVersionChange(groupId, artifactId, oldVersion, newVersion));
+                    kind, new DefaultDependencyVersionChange(groupId, artifactId, classifier, oldVersion, newVersion));
         }
     }
 }
