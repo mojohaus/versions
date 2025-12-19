@@ -306,6 +306,10 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      * @throws org.apache.maven.plugin.MojoExecutionException when things go wrong.
      */
     public void execute() throws MojoExecutionException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         validateInput();
         if (session.getProjects().size() != session.getAllProjects().size()) {
             // we are running on a restricted module set (-pl)

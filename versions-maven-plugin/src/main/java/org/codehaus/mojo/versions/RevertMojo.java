@@ -66,6 +66,14 @@ public class RevertMojo extends AbstractMojo {
     private boolean processFromLocalAggregationRoot;
 
     /**
+     * If true, the plugin execution will be skipped.
+     *
+     * @since 2.20.2
+     */
+    @Parameter(property = "versions.skip", defaultValue = "false")
+    private boolean skip;
+
+    /**
      * The (injected) {@link ProjectBuilder} instance
      *
      * @since 2.14.0
@@ -83,6 +91,10 @@ public class RevertMojo extends AbstractMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         final MavenProject projectToProcess = !processFromLocalAggregationRoot
                 ? PomHelper.getLocalRoot(projectBuilder, session, getLog())
                 : session.getCurrentProject();

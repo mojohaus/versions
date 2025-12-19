@@ -395,6 +395,10 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         logInit();
         validateInput();
 

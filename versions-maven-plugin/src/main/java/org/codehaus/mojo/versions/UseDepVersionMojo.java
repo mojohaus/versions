@@ -236,6 +236,10 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping execution");
+            return;
+        }
         validateInput();
 
         if (session.getProjects().size() != session.getAllProjects().size()) {
