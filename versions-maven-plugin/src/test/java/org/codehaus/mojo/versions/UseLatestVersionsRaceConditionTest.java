@@ -169,10 +169,8 @@ public class UseLatestVersionsRaceConditionTest {
                 changeRecorder.getChanges(),
                 allOf(
                         hasItem(new DefaultDependencyVersionChange(
-                                "default-group", "artifactA",
-                                "1.0.0", "2.0.0")),
+                                "default-group", "artifactA", "default", "1.0.0", "2.0.0")),
                         hasItem(new DefaultDependencyVersionChange(
-                                "default-group", "artifactB",
-                                "1.0.0", "1.1.0"))));
+                                "default-group", "artifactB", "default", "1.0.0", "1.1.0"))));
     }
 }
