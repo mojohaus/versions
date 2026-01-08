@@ -7,7 +7,7 @@ assert buildLog.text.contains( '[INFO]   localhost:dummy-api ...................
 assert buildLog.text.contains( '[INFO] The following dependencies in Dependencies have newer versions:' )
 assert buildLog.text.contains( '[INFO]   localhost:dummy-api ....................................... 2.0 -> 3.0' )
 
-assert buildLog.text.contains( '[INFO] The following dependencies in pluginManagement of plugins have newer versions:' )
+assert buildLog.text.contains( '[INFO] The following dependencies in Plugin Management Dependencies have newer versions:' )
 assert buildLog.text.contains( '[INFO]   localhost:dummy-api ....................................... 1.2 -> 3.0' )
 
 assert !buildLog.text.contains( '[INFO] The following dependencies in Plugin Dependencies have newer versions:')
