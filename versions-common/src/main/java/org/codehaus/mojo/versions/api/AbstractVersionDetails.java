@@ -131,6 +131,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         ArtifactVersion nextVersion = selectedSegment
                 .filter(s -> s.isMajorTo(SUBINCREMENTAL))
                 .map(Segment::minorTo)
+                .filter(__ -> highestLowerBound != null)
                 .map(s -> (ArtifactVersion) new BoundArtifactVersion(highestLowerBound, s))
                 .orElse(highestLowerBound);
         return new Restriction(
@@ -138,6 +139,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
                 false,
                 selectedSegment
                         .filter(MAJOR::isMajorTo)
+                        .filter(__ -> highestLowerBound != null)
                         .map(s -> (ArtifactVersion) new BoundArtifactVersion(highestLowerBound, s))
                         .orElse(null),
                 false);
@@ -157,6 +159,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
                         .orElse(null)
                 : selectedRestrictionUpperBound;
         ArtifactVersion upperBound = unchangedSegment
+                .filter(__ -> selectedRestrictionUpperBound != null)
                 .map(s -> (ArtifactVersion) new BoundArtifactVersion(
                         selectedRestrictionUpperBound, s.isMajorTo(SUBINCREMENTAL) ? Segment.minorTo(s) : s))
                 .orElse(null);
@@ -174,7 +177,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     @Override
     public Restriction restrictionForIgnoreScope(ArtifactVersion lowerBound, Optional<Segment> ignored) {
         ArtifactVersion highestLowerBound = getHighestLowerBound(lowerBound);
-        ArtifactVersion nextVersion = ignored.map(s -> (ArtifactVersion) new BoundArtifactVersion(highestLowerBound, s))
+        ArtifactVersion nextVersion = ignored.filter(__ -> highestLowerBound != null)
+                .map(s -> (ArtifactVersion) new BoundArtifactVersion(highestLowerBound, s))
                 .orElse(highestLowerBound);
         return new Restriction(nextVersion, false, null, false);
     }
