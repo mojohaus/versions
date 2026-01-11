@@ -50,6 +50,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
@@ -343,5 +344,35 @@ class ArtifactVersionsTest {
         assertThat(noSnapshots.getVersions(false), arrayWithSize(15));
         assertThat(noSnapshots.getVersions(true), arrayWithSize(15));
         assertThat(noSnapshots.getCurrentVersion(), nullValue());
+    }
+
+    @Test
+    void testRestrictionForUnchangedSegmentIfActualVersionNullAndUpperRestrictionNull() throws InvalidSegmentException {
+        ArtifactVersions versions = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", "(,2)", "foo", "bar", "jar", null),
+                Arrays.asList(versions("1.0.0")));
+        assertThat(
+                versions.restrictionForUnchangedSegment(null, Optional.of(MAJOR), false),
+                is(equalTo(new Restriction(null, false, null, false))));
+    }
+
+    @Test
+    void testRestrictionForSelectedSegmentIfLowerBoundNull() throws InvalidSegmentException {
+        ArtifactVersions versions = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", "(,)", "foo", "bar", "jar", null),
+                Arrays.asList(versions("1.0.0")));
+        assertThat(
+                versions.restrictionForSelectedSegment(null, Optional.of(MAJOR)),
+                is(equalTo(new Restriction(null, false, null, false))));
+    }
+
+    @Test
+    void testRestrictionForIgnoreScopeLowerBoundNull() throws InvalidSegmentException {
+        ArtifactVersions versions = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", "(,)", "foo", "bar", "jar", null),
+                Arrays.asList(versions("1.0.0")));
+        assertThat(
+                versions.restrictionForIgnoreScope(null, Optional.of(MAJOR)),
+                is(equalTo(new Restriction(null, false, null, false))));
     }
 }
