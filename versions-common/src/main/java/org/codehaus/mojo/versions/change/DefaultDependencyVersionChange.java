@@ -30,6 +30,8 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
 
     private final String artifactId;
 
+    private final String classifier;
+
     private final String oldVersion;
 
     private final String newVersion;
@@ -42,8 +44,14 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
      * @param newVersion new version
      */
     public DefaultDependencyVersionChange(String groupId, String artifactId, String oldVersion, String newVersion) {
+        this(groupId, artifactId, null, oldVersion, newVersion);
+    }
+
+    public DefaultDependencyVersionChange(
+            String groupId, String artifactId, String classifier, String oldVersion, String newVersion) {
         this.groupId = groupId;
         this.artifactId = artifactId;
+        this.classifier = classifier;
         this.oldVersion = oldVersion;
         this.newVersion = newVersion;
     }
@@ -62,6 +70,14 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
      */
     public String getArtifactId() {
         return artifactId;
+    }
+
+    /**
+     * Returns the classifier of the dependency
+     * @return classifier of the dependency
+     */
+    public String getClassifier() {
+        return classifier;
     }
 
     /**
@@ -94,6 +110,11 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
         if (!Objects.equals(artifactId, versionChange.artifactId)) {
             return false;
         }
+
+        if (!Objects.equals(classifier, versionChange.classifier)) {
+            return false;
+        }
+
         if (!Objects.equals(groupId, versionChange.groupId)) {
             return false;
         }
@@ -107,6 +128,7 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
     public int hashCode() {
         int result = groupId != null ? groupId.hashCode() : 0;
         result = 31 * result + (artifactId != null ? artifactId.hashCode() : 0);
+        result = 31 * result + (classifier != null ? classifier.hashCode() : 0);
         result = 31 * result + (oldVersion != null ? oldVersion.hashCode() : 0);
         result = 31 * result + (newVersion != null ? newVersion.hashCode() : 0);
         return result;
@@ -114,7 +136,7 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
 
     @Override
     public String toString() {
-        return "DefaultDependencyVersionChange(" + groupId + ':' + artifactId + ":" + oldVersion + "-->" + newVersion
-                + ')';
+        return "DefaultDependencyVersionChange(" + groupId + ':' + artifactId + ':' + classifier + ":" + oldVersion
+                + "-->" + newVersion + ')';
     }
 }

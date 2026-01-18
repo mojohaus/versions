@@ -130,7 +130,7 @@ public class UseNextVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.0-SNAPSHOT", "1.1.1")));
+                        "default-group", "dependency-artifact", "default", "1.1.0-SNAPSHOT", "1.1.1")));
     }
 
     @Test
