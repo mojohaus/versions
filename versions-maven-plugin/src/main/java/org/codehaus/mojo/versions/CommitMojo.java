@@ -49,7 +49,7 @@ public class CommitMojo extends AbstractMojo {
     /**
      * If true, the plugin execution will be skipped.
      *
-     * @since 2.20.2
+     * @since 2.21.0
      */
     @Parameter(property = "versions.skip", defaultValue = "false")
     private boolean skip;
