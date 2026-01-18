@@ -27,7 +27,9 @@ import org.codehaus.mojo.versions.change.DefaultPropertyVersionChange;
  *
  * @author Slawomir Jaranowski
  * @since 2.14.0
+ * @deprecated replaced by {@link org.codehaus.mojo.versions.model.PropertyVersionChange}
  */
+@Deprecated
 public class DefaultPropertyChangeRecord implements PropertyChangeRecord {
     private final PropertyVersionChange versionChange;
 

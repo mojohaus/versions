@@ -24,7 +24,10 @@ import org.codehaus.mojo.versions.api.change.DependencyVersionChange;
  *
  * @author Stephen Connolly
  * @since 15-Sep-2010 14:48:10
+ *
+ * @deprecated replaced by {@code versions-model}
  */
+@Deprecated
 public final class DefaultDependencyVersionChange implements DependencyVersionChange {
     private final String groupId;
 

@@ -27,7 +27,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
-import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
+import org.codehaus.mojo.versions.model.DependencyChangeKind;
+import org.codehaus.mojo.versions.model.DependencyVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -129,8 +130,12 @@ public class UseNextVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         }
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.0-SNAPSHOT", "1.1.1")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("dependency-artifact")
+                        .withOldVersion("1.1.0-SNAPSHOT")
+                        .withNewVersion("1.1.1")));
     }
 
     @Test
@@ -162,9 +167,12 @@ public class UseNextVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         }
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "1.0.1-SNAPSHOT", "1.0.0")));
+                hasItem(new DependencyVersionChange()
+                        .withKind(DependencyChangeKind.DEPENDENCY_UPDATE)
+                        .withGroupId("default-group")
+                        .withArtifactId("artifactA")
+                        .withOldVersion("1.0.1-SNAPSHOT")
+                        .withNewVersion("1.0.0")));
     }
 
     @Test

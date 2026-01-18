@@ -1,49 +1,75 @@
-title: Writing a own ChangeRecorder
-author: Slawomir Jaranowski
-date: 2022-11-20
+title: Providing a custom VersionsChangeRecorder
+date: 2025-10-04
 
-Writing an own ChangeRecorder
-============================
+Providing a custom VersionsChangeRecorder
+=========================================
 
-In order to create an own ChangeRecorder you must implement [ChangeRecorder](apidocs/org/codehaus/mojo/versions/api/recording/ChangeRecorder.html) interface.
+A change recorder is a component responsible for outputting version changes. Currently, it is only being used for
+recording changes for plugins that change the project. Out of the box, the following recorders are provided:
 
-Write code
-----------
+| Name | Description                                                                                                                                                                                                                                                          |
+|------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| none | An "empty" recorder that will not output any changes                                                                                                                                                                                                                 |
+| xml  | A recorder writing to an XML file conforming to the legacy http://www.mojohaus.org/versions-maven-plugin/schema/updates/2.0 namespace, or to the http://www.mojohaus.org/versions-maven-plugin/schema/updates/3.0 namespace if `legacy=false` is provided as options |     
+| json | A recorder writing to a Json file                                                                                                                                                                                                                                    |
+| csv  | A recorder writing to a CSV file                                                                                                                                                                                                                                     | 
+
+In order to create an own VersionChangeRecorder you must implement [VersionChangeRecorder](apidocs/org/codehaus/mojo/versions/api/recording/VersionsChangeRecorder.html) interface as well as a factory
+implementing [VersionChangeRecorderFactory](apidocs/org/codehaus/mojo/versions/api/recording/VersionsChangeRecorderFactory.html).
+
+Create the recorder
+------------------
+
+The below class will create a factory instantiating an anonymous class implementing the interface.
 
 ```java
-import java.io.IOException;
 import javax.inject.Named;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
-import org.codehaus.mojo.versions.api.recording.PropertyChangeRecord;
-import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.MojoExecution;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorder;
+import org.codehaus.mojo.versions.api.recording.VersionChangeRecorderFactory;
+import org.codehaus.mojo.versions.model.VersionChange;
 
 @Named("my-recorder")
-public class MyChangeRecorder implements ChangeRecorder {
-
+public class ExampleChangeRecorderFactory implements VersionChangeRecorderFactory {
     @Override
-    public final void recordChange(DependencyChangeRecord changeRecord) {
-        // your code here
-    }
+    public VersionChangeRecorder create(
+            MavenSession mavenSession, MojoExecution mojoExecution, Map<String, String> ignored) {
+        return new VersionChangeRecorder() {
+            final List<String> versionChanges = new ArrayList<>();
 
-    @Override
-    public final void recordChange(PropertyChangeRecord changeRecord) {
-        // your code here
-    }
+            @Override
+            public void recordChange(VersionChange versionChange) {
+                versionChanges.add(versionChange.toString());
+            }
 
-    @Override
-    public final void writeReport(Path outputPath) throws IOException {
-        // your code here
+            @Override
+            public void writeReport(Path outputPath) throws IOException {
+                Files.write(outputPath, versionChanges, StandardCharsets.UTF_8);
+            }
+
+            @Override
+            public String getDefaultFileName() {
+                return "versions-changes.log";
+            }
+        };
     }
 }
 ```
 
-`Changerecoder` is stateful component, so you must not add `Singleton` annotation to it.
+As `VersionChangeRecorder` is stateful, so you must not add the `Singleton` annotation to it.
 
-Using extension
----------------
+Using the custom recorder
+-------------------------
 
 Plugin configuration:
 
@@ -56,7 +82,7 @@ Plugin configuration:
 
   <groupId>your.group</groupId>
   <artifactId>your-project</artifactId>
-  
+
   <build>
     <pluginManagement>
       <plugins>
@@ -67,7 +93,6 @@ Plugin configuration:
           <configuration>
             <!-- your component name -->
             <changeRecorderFormat>my-recorder</changeRecorderFormat>
-            <changeRecorderOutputFile>\${project.build.directory}/my-versions-changes.txt</changeRecorderOutputFile>
           </configuration>
           <dependencies>
             <dependency>

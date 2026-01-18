@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.maven.plugin.logging.SystemStreamLog;
+
 /**
  * A test utility provided a closeable temporary file, implementing {@link AutoCloseable}, which
  * deletes the temporary file on {@link #close()}, typically upon completion of a {@code try-finally} block.
@@ -45,6 +47,10 @@ public class CloseableTempFile implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        Files.deleteIfExists(path);
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            new SystemStreamLog().error("Error deleting temporary directory " + path, e);
+        }
     }
 }

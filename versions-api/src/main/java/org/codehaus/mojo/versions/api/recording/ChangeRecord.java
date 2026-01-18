@@ -25,7 +25,9 @@ import org.codehaus.mojo.versions.api.change.VersionChange;
  * @author Slawomir Jaranowski
  * @since 2.14.0
  * @param <T> concrete {@link VersionChange} sub-interface
+ * @deprecated use classes from {@code versions-model}
  */
+@Deprecated
 public interface ChangeRecord<T extends VersionChange> {
     /**
      * Returns the details about changed item
