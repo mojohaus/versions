@@ -34,14 +34,14 @@ If you have a full working example or a log file this is also helpful.
 You should of course describe only a single issue in a single ticket and not
 mixing up several things into a single issue.
 
-Please always check your issue with the latest Plugin and tha latest Maven version.
+Please always check your issue with the latest Plugin and the latest Maven version.
 
 ### Creating a Pull Request
 
 Before you start working on more complicated change, new feature
 it is good practice to create an issue in
 the [ticket system](https://github.com/mojohaus/versions-maven-plugin/issues)
-or send an emil to [development list](https://www.mojohaus.org/versions-maven-plugin/mailing-lists.html)
+or send an email to [development list](https://www.mojohaus.org/versions-maven-plugin/mailing-lists.html)
 and describe what the problem is or what kind of feature you would like to add.
 Wait a few days for feedback from other contributors.
 Afterwards you can create an appropriate pull request.
@@ -56,12 +56,12 @@ Fixed #Issue - change subject
 a description
 ```
 
-Please take consider that change subject will be used in release notes
+Please take into consideration that change subject will be used in release notes
 and will be present in git history so should be enough descriptive.
 
 This makes it simpler to merge it and this will also close the
 appropriate issue automatically in one go.
-This make the life as maintainer a little bit easier.
+This makes the life as maintainer a little bit easier.
 
 A pull request has to fulfill only a single ticket and should never
 create/add/fix several issues in one, cause otherwise the history is hard to
