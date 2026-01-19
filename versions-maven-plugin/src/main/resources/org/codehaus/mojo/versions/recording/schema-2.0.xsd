@@ -28,6 +28,7 @@
                 <attribute name="kind" type="string" use="required"/>
                 <attribute name="groupId" type="string" use="required"/>
                 <attribute name="artifactId" type="string" use="required"/>
+                <attribute name="classifier" type="string"/>
                 <attribute name="oldVersion" type="string" use="required"/>
                 <attribute name="newVersion" type="string" use="required"/>
             </extension>
