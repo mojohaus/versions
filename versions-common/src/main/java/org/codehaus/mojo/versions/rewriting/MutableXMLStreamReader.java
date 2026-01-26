@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.maven.shared.utils.io.IOUtil;
 import org.codehaus.stax2.LocationInfo;
@@ -44,6 +46,7 @@ import static java.util.Optional.ofNullable;
  */
 public class MutableXMLStreamReader extends StreamReader2Delegate implements AutoCloseable {
     private static final XMLInputFactory FACTORY = XMLInputFactory2.newInstance();
+    private static final Pattern INDENTATION_PATTERN = Pattern.compile("^(\\s+)<", Pattern.MULTILINE);
 
     private StringBuilder source;
 
@@ -385,5 +388,36 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
         public String toString() {
             return "MarkInfo[" + getStart() + ":" + getEnd() + "]";
         }
+    }
+
+    /**
+     * Determine the line separator.
+     *
+     * @return line separator
+     */
+    public String getLineSeparator() {
+        String text = getSource();
+        if (text.contains("\r\n")) {
+            return "\r\n";
+        }
+        if (text.contains("\r")) {
+            return "\r";
+        }
+        return "\n";
+    }
+
+    /**
+     * Determine the indentation.
+     *
+     * @return indentation
+     */
+    public String getIndentation() {
+        Pattern indentPattern = INDENTATION_PATTERN;
+        Matcher matcher = indentPattern.matcher(getSource());
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return "";
     }
 }

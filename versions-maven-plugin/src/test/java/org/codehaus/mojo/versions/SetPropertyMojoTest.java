@@ -231,4 +231,25 @@ public class SetPropertyMojoTest {
                 Paths.get(pomDir.toAbsolutePath().toString(), "pom.xml").toFile());
         return model;
     }
+
+    @Test
+    public void testSetNew() throws Exception {
+        String newVersion = UUID.randomUUID().toString();
+        copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-property/issue-1268"), pomDir);
+        Path childPomDir = pomDir.resolve("child");
+        SetPropertyMojo mojo = (SetPropertyMojo) mojos.lookup("set-property", childPomDir);
+
+        mojo.repositorySystem = mock(org.eclipse.aether.RepositorySystem.class);
+        when(mojo.repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> new VersionRangeResult(i.getArgument(1)));
+
+        setVariableValueToObject(mojo, "newVersion", newVersion);
+        setVariableValueToObject(mojo, "property", "dummy-api-version");
+        setVariableValueToObject(mojo, "insert", true);
+        mojo.execute();
+
+        Model model = PomHelper.getRawModel(
+                Paths.get(childPomDir.toAbsolutePath().toString(), "pom.xml").toFile());
+        assertEquals(newVersion, model.getProperties().getProperty("dummy-api-version"));
+    }
 }
