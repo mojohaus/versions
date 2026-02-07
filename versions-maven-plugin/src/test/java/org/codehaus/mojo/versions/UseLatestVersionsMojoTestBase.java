@@ -154,7 +154,7 @@ public abstract class UseLatestVersionsMojoTestBase {
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "other-artifact", "1.0", expectedNewVersion)));
+                        "default-group", "other-artifact", "default", "1.0", expectedNewVersion)));
     }
 
     @Test
