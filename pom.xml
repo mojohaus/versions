@@ -141,7 +141,7 @@
 
     <!-- use the same version as in Maven core -->
     <mavenResolverVersion>1.4.1</mavenResolverVersion>
-    <sisuVersion>0.3.4</sisuVersion>
+    <sisuVersion>1.0.0</sisuVersion>
 
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
     <!-- execute ITS in parallel by default -->
