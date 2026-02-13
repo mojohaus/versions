@@ -22,7 +22,7 @@ under the License.
 # Checking for new property-linked updates
 
 The `display-property-updates` goal will check all the properties in your project and display a list
-of those properties which are used to control versions of dependencies, plugins and plugin dependencies and
+of those properties which are used to control versions of dependencies, plugins and plugin dependencies, and
 it will detail which properties have newer versions available.
 
 Here are some examples of what this looks like:
