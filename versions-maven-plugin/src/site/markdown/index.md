@@ -46,7 +46,7 @@ associated artifacts.
 of a project so the version matches the version of the current project. For example, if you have an aggregator pom
 that is also the parent for the projects that it aggregates and the children and parent versions get out of sync, this
 mojo can help fix the versions of the child modules. (Note you may need to invoke Maven with the -N option in order to
-run this goal if your project is broken so badly that it cannot build because of the version mis-match).
+run this goal if your project is broken so badly that it cannot build because of the version mismatch).
 * [versions:lock-snapshots](./lock-snapshots-mojo.html) searches the pom for all -SNAPSHOT versions and replaces them
 with the current timestamp version of that -SNAPSHOT, e.g. -20090327.172306-4
 * [versions:unlock-snapshots](./unlock-snapshots-mojo.html) searches the pom for all timestamp locked snapshot versions

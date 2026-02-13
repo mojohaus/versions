@@ -67,7 +67,7 @@ mvn versions:use-releases -Dincludes=org.codehaus.plexus:plexus-utils
 ```
 
 The `includes` and `excludes` parameters follow the format `groupId:artifactId:type:classifier`.
-Use a comma separated separated list to specify multiple includes.  Wildcards (*) can also be used to match
+Use a comma separated list to specify multiple includes.  Wildcards (*) can also be used to match
 multiple values.
 
 This example will match anything with the groupId "org.codehaus.plexus" and anything with the groupId and

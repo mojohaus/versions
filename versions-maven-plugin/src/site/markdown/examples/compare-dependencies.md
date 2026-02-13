@@ -31,7 +31,7 @@ should be compared, for example
 mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0
 ```
 
-By default the list of dependency differences will be output to the command line.  This can be
+By default, the list of dependency differences will be output to the command line.  This can be
 written to a file using the "reportOutputFile" parameter.
 
 ```sh
@@ -39,7 +39,7 @@ mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -DreportOutput
 ```
 
 The plugin can also automatically update the dependencies of the current project to match
-the remote project using the "updateDependencies" parameter.  By default this is turned off.
+the remote project using the "updateDependencies" parameter.  By default, this is turned off.
 
 ```sh
 mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -DupdateDependencies=true
@@ -47,7 +47,7 @@ mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -DupdateDepend
 
 In addition to that, any property defined in the current project that represent the version
 of one of several artifacts can be updated to match the remote project using the "updatePropertyVersions"
-parameter. By default this is turned off.
+parameter. By default, this is turned off.
 
 ```sh
 mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -updatePropertyVersions=true
