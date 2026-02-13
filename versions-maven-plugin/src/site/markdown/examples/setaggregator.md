@@ -94,7 +94,7 @@ And two other modules first `module-a2` which looks like this:
 </project>
 ```
 
-An finally the module `module-a3` which looks like this:
+And finally the module `module-a3` which looks like this:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -185,7 +185,7 @@ mvn versions:set -DnewVersion=3.6.0 -DoldVersion=* -DgroupId=* -DartifactId=*
 
 This is needed otherwise the filter for the versions (via `-DoldVersion=*`) would have
 filtered out that module cause it has a different version than the rest of modules.
-Furthermore you need to add the `-DgroupId=*` and `-DartifactId=*` otherwise
+Furthermore, you need to add the `-DgroupId=*` and `-DartifactId=*` otherwise
 the `separate-module` will also filtered out based on the differences in groupId
 and artifactId.
 
