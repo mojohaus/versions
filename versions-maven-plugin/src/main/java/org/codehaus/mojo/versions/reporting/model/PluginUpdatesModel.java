@@ -38,10 +38,13 @@ public class PluginUpdatesModel extends AbstractUpdatesModel<PluginUpdatesDetail
     public PluginUpdatesModel(
             Map<Plugin, PluginUpdatesDetails> pluginUpdates,
             Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates) {
-        super(pluginUpdates, pluginManagementUpdates, p -> DependencyBuilder.newBuilder()
-                .withGroupId(p.getGroupId())
-                .withArtifactId(p.getArtifactId())
-                .withVersion(p.getVersion())
-                .build());
+        super(
+                pluginUpdates,
+                pluginManagementUpdates,
+                p -> DependencyBuilder.newBuilder()
+                        .withGroupId(p.getGroupId())
+                        .withArtifactId(p.getArtifactId())
+                        .withVersion(p.getVersion())
+                        .build());
     }
 }

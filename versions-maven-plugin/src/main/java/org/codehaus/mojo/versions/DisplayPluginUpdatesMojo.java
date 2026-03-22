@@ -868,10 +868,11 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     private Map<String, String> getPluginsFromBuild(BuildBase build, boolean onlyIncludeInherited) {
         return ofNullable(build)
-                .flatMap(b -> ofNullable(b.getPlugins()).map(plugins -> plugins.stream()
-                        .filter(plugin -> plugin.getVersion() != null)
-                        .filter(plugin -> !onlyIncludeInherited || getPluginInherited(plugin))
-                        .collect(toMap(Plugin::getKey, Plugin::getVersion))))
+                .flatMap(b -> ofNullable(b.getPlugins())
+                        .map(plugins -> plugins.stream()
+                                .filter(plugin -> plugin.getVersion() != null)
+                                .filter(plugin -> !onlyIncludeInherited || getPluginInherited(plugin))
+                                .collect(toMap(Plugin::getKey, Plugin::getVersion))))
                 .orElse(emptyMap());
     }
 
@@ -886,9 +887,10 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      */
     private Map<String, String> getBuildPlugins(Model model, boolean onlyIncludeInherited) {
         Map<String, String> buildPlugins = new HashMap<>(getPluginsFromBuild(model.getBuild(), onlyIncludeInherited));
-        ofNullable(model.getProfiles()).ifPresent(profiles -> profiles.stream()
-                .map(profile -> getPluginsFromBuild(profile.getBuild(), onlyIncludeInherited))
-                .forEach(buildPlugins::putAll));
+        ofNullable(model.getProfiles())
+                .ifPresent(profiles -> profiles.stream()
+                        .map(profile -> getPluginsFromBuild(profile.getBuild(), onlyIncludeInherited))
+                        .forEach(buildPlugins::putAll));
         return buildPlugins;
     }
 
