@@ -22,15 +22,16 @@ public class ArtifactFactoryTest {
 
     @BeforeEach
     public void beforeEach() {
-        when(artifactHandlerManager.getArtifactHandler(any())).thenAnswer(i -> of(i.getArgument(0))
-                .map(type -> new DefaultArtifactHandler(String.valueOf(type)) {
-                    {
-                        if (type.equals("maven-plugin")) {
-                            setExtension("jar");
-                        }
-                    }
-                })
-                .get());
+        when(artifactHandlerManager.getArtifactHandler(any()))
+                .thenAnswer(i -> of(i.getArgument(0))
+                        .map(type -> new DefaultArtifactHandler(String.valueOf(type)) {
+                            {
+                                if (type.equals("maven-plugin")) {
+                                    setExtension("jar");
+                                }
+                            }
+                        })
+                        .get());
     }
 
     @Test

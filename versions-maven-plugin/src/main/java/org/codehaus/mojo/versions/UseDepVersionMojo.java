@@ -438,16 +438,19 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
                             // in propertyConflicts; these are the properties that must not be changed
                             // the list in the value is the list of dependencies that use the said property
                             PomHelper.extractExpression(dep.getVersion())
-                                    .ifPresent(p -> propertyConflicts.compute(p, (k, v) -> ofNullable(v)
-                                            .map(set -> {
-                                                set.add(dep);
-                                                return set;
-                                            })
-                                            .orElseGet(() -> {
-                                                Set<Dependency> set = new TreeSet<>(DependencyComparator.INSTANCE);
-                                                set.add(dep);
-                                                return set;
-                                            }))));
+                                    .ifPresent(p -> propertyConflicts.compute(
+                                            p,
+                                            (k, v) -> ofNullable(v)
+                                                    .map(set -> {
+                                                        set.add(dep);
+                                                        return set;
+                                                    })
+                                                    .orElseGet(() -> {
+                                                        Set<Dependency> set =
+                                                                new TreeSet<>(DependencyComparator.INSTANCE);
+                                                        set.add(dep);
+                                                        return set;
+                                                    }))));
         }
 
         // 2nd pass: check dependencies
@@ -508,14 +511,19 @@ public class UseDepVersionMojo extends AbstractVersionsDependencyUpdaterMojo {
         }
 
         // third pass: if a property is defined at this node, it is not going to conflict with anything from parent
-        propertyConflicts.keySet().removeIf(key -> ofNullable(node.getModel().getProperties())
-                .filter(p -> p.containsKey(key))
-                .isPresent());
-        propertyConflicts.keySet().removeIf(key -> ofNullable(node.getModel().getProfiles())
-                .map(list -> list.stream().anyMatch(p -> ofNullable(p.getProperties())
-                        .filter(prop -> prop.containsKey(key))
-                        .isPresent()))
-                .orElse(false));
+        propertyConflicts
+                .keySet()
+                .removeIf(key -> ofNullable(node.getModel().getProperties())
+                        .filter(p -> p.containsKey(key))
+                        .isPresent());
+        propertyConflicts
+                .keySet()
+                .removeIf(key -> ofNullable(node.getModel().getProfiles())
+                        .map(list -> list.stream()
+                                .anyMatch(p -> ofNullable(p.getProperties())
+                                        .filter(prop -> prop.containsKey(key))
+                                        .isPresent()))
+                        .orElse(false));
     }
 
     private boolean updatePropertyValue(ModelNode node, String property) {

@@ -434,8 +434,11 @@ public class PomHelper {
      */
     public static String getProjectVersion(final MutableXMLStreamReader pom) throws XMLStreamException {
         pom.rewind();
-        return executeOnPatternFound("", pom, PATTERN_PROJECT_VERSION, () -> pom.getBetween(START, END)
-                .trim());
+        return executeOnPatternFound(
+                "",
+                pom,
+                PATTERN_PROJECT_VERSION,
+                () -> pom.getBetween(START, END).trim());
     }
 
     /**

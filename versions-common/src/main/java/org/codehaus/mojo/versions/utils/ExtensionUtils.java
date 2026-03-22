@@ -69,11 +69,12 @@ public final class ExtensionUtils {
 
         try (Reader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(extensionsFile)))) {
             return new CoreExtensionsStaxReader()
-                    .read(reader).getExtensions().stream().map(ex -> ExtensionBuilder.newBuilder()
-                            .withGroupId(ex.getGroupId())
-                            .withArtifactId(ex.getArtifactId())
-                            .withVersion(ex.getVersion())
-                            .build());
+                    .read(reader).getExtensions().stream()
+                            .map(ex -> ExtensionBuilder.newBuilder()
+                                    .withGroupId(ex.getGroupId())
+                                    .withArtifactId(ex.getArtifactId())
+                                    .withVersion(ex.getVersion())
+                                    .build());
         }
     }
 
