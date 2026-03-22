@@ -114,20 +114,6 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
     private String scope = null;
 
     /**
-     * Artifact filter to determine if artifact should be included
-     *
-     * @since 1.0-alpha-3
-     */
-    private PatternIncludesArtifactFilter includesFilter;
-
-    /**
-     * Artifact filter to determine if artifact should be excluded
-     *
-     * @since 1.0-alpha-3
-     */
-    private PatternExcludesArtifactFilter excludesFilter;
-
-    /**
      * Whether to skip processing dependencies that are produced as part of the current reactor.
      *
      * @since 1.0-alpha-3
@@ -393,29 +379,31 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
     }
 
     private ArtifactFilter getIncludesArtifactFilter() {
-        if (includesFilter == null && (includes != null || includesList != null)) {
-            List<String> patterns = new ArrayList<>();
-            if (this.includesList != null) {
-                patterns.addAll(separatePatterns(includesList));
-            } else {
-                patterns.addAll(Arrays.asList(includes));
-            }
-            includesFilter = new PatternIncludesArtifactFilter(patterns);
+        if (includes == null && includesList == null) {
+            return null;
         }
-        return includesFilter;
+
+        List<String> patterns = new ArrayList<>();
+        if (this.includesList != null) {
+            patterns.addAll(separatePatterns(includesList));
+        } else {
+            patterns.addAll(Arrays.asList(includes));
+        }
+        return new PatternIncludesArtifactFilter(patterns);
     }
 
     private ArtifactFilter getExcludesArtifactFilter() {
-        if (excludesFilter == null && (excludes != null || excludesList != null)) {
-            List<String> patterns = new ArrayList<>();
-            if (excludesList != null) {
-                patterns.addAll(separatePatterns(excludesList));
-            } else {
-                patterns.addAll(Arrays.asList(excludes));
-            }
-            excludesFilter = new PatternExcludesArtifactFilter(patterns);
+        if (excludes == null && excludesList == null) {
+            return null;
         }
-        return excludesFilter;
+
+        List<String> patterns = new ArrayList<>();
+        if (excludesList != null) {
+            patterns.addAll(separatePatterns(excludesList));
+        } else {
+            patterns.addAll(Arrays.asList(excludes));
+        }
+        return new PatternExcludesArtifactFilter(patterns);
     }
 
     private ArtifactFilter getScopeArtifactFilter() {

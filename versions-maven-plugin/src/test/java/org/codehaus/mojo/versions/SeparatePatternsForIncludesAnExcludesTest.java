@@ -1,5 +1,7 @@
 package org.codehaus.mojo.versions;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class SeparatePatternsForIncludesAnExcludesTest {
@@ -113,5 +116,31 @@ public class SeparatePatternsForIncludesAnExcludesTest {
         assertEquals("group:artifact:type:version2", patterns.get(1));
         assertEquals("group:artifact:type:version3", patterns.get(2));
         assertEquals("group:artifact:type:version4", patterns.get(3));
+    }
+
+    @Test
+    public void testIncludesAndExcludesFiltersAreNotCached() throws Exception {
+        setField(mojo, "includesList", "com.acme:demo");
+        setField(mojo, "excludesList", "com.acme:blocked");
+
+        Object includesFirst = invokeNoArgMethod(mojo, "getIncludesArtifactFilter");
+        Object includesSecond = invokeNoArgMethod(mojo, "getIncludesArtifactFilter");
+        assertNotSame(includesFirst, includesSecond);
+
+        Object excludesFirst = invokeNoArgMethod(mojo, "getExcludesArtifactFilter");
+        Object excludesSecond = invokeNoArgMethod(mojo, "getExcludesArtifactFilter");
+        assertNotSame(excludesFirst, excludesSecond);
+    }
+
+    private static void setField(Object target, String fieldName, Object value) throws Exception {
+        Field field = AbstractVersionsDependencyUpdaterMojo.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
+    }
+
+    private static Object invokeNoArgMethod(Object target, String methodName) throws Exception {
+        Method method = AbstractVersionsDependencyUpdaterMojo.class.getDeclaredMethod(methodName);
+        method.setAccessible(true);
+        return method.invoke(target);
     }
 }
