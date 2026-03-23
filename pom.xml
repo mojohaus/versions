@@ -121,7 +121,7 @@
   <properties>
     <mavenVersion>3.6.3</mavenVersion>
 
-    <doxiaVersion>2.0.0</doxiaVersion>
+    <doxiaVersion>2.1.0</doxiaVersion>
     <doxia-sitetoolsVersion>2.0.0</doxia-sitetoolsVersion>
     <reportingApiVersion>4.0.0</reportingApiVersion>
     <reportingImplVersion>4.0.0</reportingImplVersion>
