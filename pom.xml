@@ -128,7 +128,7 @@
 
     <mockitoVersion>4.11.0</mockitoVersion>
     <woodstoxVersion>7.1.1</woodstoxVersion>
-    <stax2ApiVersion>4.2.2</stax2ApiVersion>
+    <stax2ApiVersion>4.3.0</stax2ApiVersion>
 
     <!-- dotted property can not be used in .vm -->
     <pluginVersion>${project.version}</pluginVersion>
