@@ -407,7 +407,6 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
 
     private void execute(MavenProject currentProject) throws MojoExecutionException {
         if (currentProject.getOriginalModel().getVersion() == null && currentProject.getParent() == null) {
-
             if (!processAllModules && groupId != null) {
                 getLog().warn("Project version is inherited from parent, but proceeding to update references.");
             } else {
@@ -488,8 +487,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                 String rGroupId = PomHelper.getGroupId(rootModel);
                 String rArtifactId = rootModel.getArtifactId();
 
-                if (processAllModules ||
-                        (Objects.equals(rGroupId, groupId) && Objects.equals(rArtifactId, artifactId))) {
+                if (processAllModules
+                        || (Objects.equals(rGroupId, groupId) && Objects.equals(rArtifactId, artifactId))) {
                     files.add(project.getFile());
                 }
             }
@@ -548,12 +547,10 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                         .map(Model::getPomFile)
                         .forEach(files::add);
             }
-
             // now process all the updates
             for (File file : files) {
                 process(file);
             }
-
         } catch (IOException | MojoFailureException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
@@ -572,8 +569,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      */
     protected String getIncrementedVersion(String version, Integer nextSnapshotIndexToIncrement)
             throws MojoExecutionException {
-        String versionWithoutSnapshot = version.endsWith(SNAPSHOT) ? version.substring(0, version.indexOf(SNAPSHOT))
-                : version;
+        String versionWithoutSnapshot =
+                version.endsWith(SNAPSHOT) ? version.substring(0, version.indexOf(SNAPSHOT)) : version;
         String[] versionComponents = versionWithoutSnapshot.split("\\.");
 
         if (nextSnapshotIndexToIncrement == null) {
@@ -587,15 +584,15 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
 
         int finalNextSnapshotIndexToIncrement = nextSnapshotIndexToIncrement;
         return IntStream.range(0, versionComponents.length)
-                .mapToObj(i -> {
-                    if (i + 1 < finalNextSnapshotIndexToIncrement) {
-                        return versionComponents[i];
-                    } else if (i + 1 == finalNextSnapshotIndexToIncrement) {
-                        return String.valueOf(Integer.parseInt(versionComponents[i]) + 1);
-                    }
-                    return "0";
-                })
-                .collect(Collectors.joining("."))
+                        .mapToObj(i -> {
+                            if (i + 1 < finalNextSnapshotIndexToIncrement) {
+                                return versionComponents[i];
+                            } else if (i + 1 == finalNextSnapshotIndexToIncrement) {
+                                return String.valueOf(Integer.parseInt(versionComponents[i]) + 1);
+                            }
+                            return "0";
+                        })
+                        .collect(Collectors.joining("."))
                 + "-SNAPSHOT";
     }
 
@@ -620,9 +617,9 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             final Model sourceModel = sourceEntry.getValue();
 
             getLog().debug(
-                    sourcePath.length() == 0
-                            ? "Processing root module as parent"
-                            : "Processing " + sourcePath + " as a parent.");
+                            sourcePath.length() == 0
+                                    ? "Processing root module as parent"
+                                    : "Processing " + sourcePath + " as a parent.");
 
             final String sourceGroupId = PomHelper.getGroupId(sourceModel);
             if (sourceGroupId == null) {
@@ -709,7 +706,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             throws MojoExecutionException, MojoFailureException, XMLStreamException {
         ContextualLog log = new DelegatingContextualLog(getLog());
         try {
-            Model model = PomHelper.getRawModel(pom.getSource(), pom.getFileName().toFile());
+            Model model =
+                    PomHelper.getRawModel(pom.getSource(), pom.getFileName().toFile());
             log.setContext("Processing " + PomHelper.getGroupId(model) + ":" + PomHelper.getArtifactId(model));
 
             VersionChangerFactory versionChangerFactory = new VersionChangerFactory();
