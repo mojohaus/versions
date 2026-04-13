@@ -81,6 +81,7 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.shared.utils.io.IOUtil;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
+import org.codehaus.mojo.versions.rewriting.PropertyVersionInternal;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ModelNode;
 import org.codehaus.mojo.versions.utils.RegexUtils;
@@ -224,59 +225,24 @@ public class PomHelper {
      */
     public static boolean setPropertyVersion(
             MutableXMLStreamReader pom, String profileId, String property, String value) throws XMLStreamException {
-        class PropertyVersionInternal {
-            final Pattern propertyRegex = Pattern.compile(
-                    (profileId == null ? "/project/properties/" : "/project/profiles/profile/properties/")
-                            + RegexUtils.quote(property));
-            final Pattern matchScopeRegex = profileId == null
-                    ? Pattern.compile("/project/properties")
-                    : Pattern.compile("/project/profiles/profile");
-            final Pattern profileIdRegex = profileId == null ? null : Pattern.compile("/project/profiles/profile/id");
+        return setPropertyVersion(pom, profileId, property, value, false);
+    }
 
-            boolean setPropertyVersion(String path, boolean inMatchScope) throws XMLStreamException {
-                boolean replaced = false;
-                while (!replaced && pom.hasNext()) {
-                    pom.next();
-                    if (pom.isStartElement()) {
-                        String elementPath = path + "/" + pom.getLocalName();
-                        if (propertyRegex.matcher(elementPath).matches()) {
-                            pom.mark(START);
-                        } else if (matchScopeRegex.matcher(elementPath).matches()) {
-                            // we're in a new match scope -> reset any previous partial matches
-                            inMatchScope = profileId == null;
-                            pom.clearMark(START);
-                            pom.clearMark(END);
-                        } else if (profileId != null
-                                && profileIdRegex.matcher(elementPath).matches()) {
-                            inMatchScope =
-                                    profileId.trim().equals(pom.getElementText().trim());
-                        }
-
-                        // getElementText could've pushed the pointer to END_ELEMENT
-                        if (!pom.isEndElement()) {
-                            // inMatchScope will not change in the child element
-                            replaced = setPropertyVersion(elementPath, inMatchScope);
-                        }
-                    } else if (pom.isEndElement()) {
-                        if (propertyRegex.matcher(path).matches()) {
-                            pom.mark(END);
-                        } else if (matchScopeRegex.matcher(path).matches()) {
-                            if (inMatchScope && pom.hasMark(START) && pom.hasMark(END)) {
-                                pom.replaceBetween(START, END, value);
-                                replaced = true;
-                            }
-                            pom.clearMark(START);
-                            pom.clearMark(END);
-                        }
-                        return replaced;
-                    }
-                }
-                return replaced;
-            }
-        }
-
-        pom.rewind();
-        return new PropertyVersionInternal().setPropertyVersion("", false);
+    /**
+     * Searches the pom re-defining the specified property to the specified version.
+     *
+     * @param pom        The pom to modify.
+     * @param profileId  The profile in which to modify the property.
+     * @param property   The property to modify.
+     * @param value      The new value of the property.
+     * @param insert     Whether to insert a new property or just replace an existing one.
+     * @return <code>true</code> if a replacement was made.
+     * @throws XMLStreamException if somethinh went wrong.
+     */
+    public static boolean setPropertyVersion(
+            MutableXMLStreamReader pom, String profileId, String property, String value, boolean insert)
+            throws XMLStreamException {
+        return new PropertyVersionInternal(pom, profileId, property, value).update(insert);
     }
 
     /**
