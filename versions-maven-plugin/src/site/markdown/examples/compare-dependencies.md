@@ -50,7 +50,7 @@ of one of several artifacts can be updated to match the remote project using the
 parameter. By default, this is turned off.
 
 ```sh
-mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -updatePropertyVersions=true
+mvn versions:compare-dependencies -DremotePom=org.foo:bom-pom:1.0 -DupdatePropertyVersions=true
 ```
 
 Such update will only occur if the dependencies linked to that version exist in the remote project

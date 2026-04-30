@@ -77,11 +77,11 @@ artifactId matching "junit".
 mvn versions:use-releases -Dincludes=org.codehaus.plexus:*,junit:junit
 ```
 
-By default, both the `project/dependencyManagment` and `project/dependencies` sections will be processed.
+By default, both the `project/dependencyManagement` and `project/dependencies` sections will be processed.
 You can use the `processDependencies` and `processDependencyManagement` parameters to control which sections
 are processed.
 
-This example will only process the `project/dependencyManagment` section of your pom:
+This example will only process the `project/dependencyManagement` section of your pom:
 
 ```shell
 mvn versions:use-releases -DprocessDependencies=false

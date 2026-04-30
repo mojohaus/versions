@@ -57,17 +57,17 @@ to the specific version being used.
 * [versions:set-property](./set-property-mojo.html) can be used to set one or multiple properties to a given version from the command line.
 * [versions:use-releases](./use-releases-mojo.html) searches the pom for all -SNAPSHOT versions which have been
 released and replaces them with the corresponding release version.
-* [versions:use-next-releases](./use-next-releases-mojo.html) searches the pom for all non-SNAPSHOT versions which
-have been a newer release and replaces them with the next release version.
+* [versions:use-next-releases](./use-next-releases-mojo.html) searches the pom for all non-SNAPSHOT versions for
+which a newer release is available, and replaces them with the next release version.
 * [versions:use-latest-releases](./use-latest-releases-mojo.html) searches the pom for all dependencies using *release* versions (i.e. not SNAPSHOT and not versions ending with a year-month-day suffix) and replaces them with the latest *release* version.
-* [versions:use-next-snapshots](./use-next-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions which
-have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
-* [versions:use-latest-snapshots](./use-latest-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions
-which have been a newer -SNAPSHOT version and replaces them with the latest -SNAPSHOT version.
-* [versions:use-next-versions](./use-next-versions-mojo.html) searches the pom for all versions which
-have been a newer version and replaces them with the next version.
-* [versions:use-latest-versions](./use-latest-versions-mojo.html) searches the pom for all versions which
-have been a newer version and replaces them with the latest version.
+* [versions:use-next-snapshots](./use-next-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions for
+which a newer -SNAPSHOT version is available, and replaces them with the next -SNAPSHOT version.
+* [versions:use-latest-snapshots](./use-latest-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions for
+which a newer -SNAPSHOT version is available, and replaces them with the latest -SNAPSHOT version.
+* [versions:use-next-versions](./use-next-versions-mojo.html) searches the pom for all versions for
+which a newer version is available, and replaces them with the next version.
+* [versions:use-latest-versions](./use-latest-versions-mojo.html) searches the pom for all versions for
+which a newer version is available, and replaces them with the latest version.
 * [versions:use-dep-version](./use-dep-version-mojo.html) updates a dependency to a specific version.
 * [versions:commit](./commit-mojo.html) removes the `pom.xml.versionsBackup` files. Forms one half of the
 built-in "Poor Man's SCM".
@@ -80,7 +80,7 @@ The Versions Plugin has the following reporting goals.
 * [versions:dependency-updates-report](./dependency-updates-report-mojo.html) produces a report of those
 project dependencies which have newer versions available.
 * [versions:dependency-updates-aggregate-report](./dependency-updates-aggregate-report-mojo.html) produces an aggregated
-report(project + its submodules) of those dependencies which have newer versions available.
+report (project + its submodules) of those dependencies which have newer versions available.
 * [versions:plugin-updates-report](./plugin-updates-report-mojo.html) produces a report of those plugins which have
 newer versions available.
 * [versions:plugin-updates-aggregate-report](./plugin-updates-aggregate-report-mojo.html) produces an aggregated report
@@ -88,7 +88,7 @@ newer versions available.
 * [versions:property-updates-report](./property-updates-report-mojo.html) produces a report of
 those properties which are used to control artifact versions and which properties have newer versions available.
 * [versions:property-updates-aggregate-report](./property-updates-aggregate-report-mojo.html) produces an aggregated
-report(project + its submodules) of those properties which are used to control artifact versions and
+report (project + its submodules) of those properties which are used to control artifact versions and
 which properties have newer versions available.
 * [versions:parent-updates-report](./parent-updates-report-mojo.html) produces a report on possible parent artifact
 upgrades.
@@ -105,14 +105,14 @@ General instructions on how to use the Versions Plugin can be found on the [usag
 specific use cases are described in the examples given below.
 
 In case you still have questions regarding the plugin's usage, please have a look at the [FAQ](./faq.html) and feel
-free to post a question on our [Github issue tracker](./issue-management.html) or contact
-the [user mailing list](./mailing-lists.html). The posts to Github or the mailing list are archived and could
+free to post a question on our [GitHub issue tracker](./issue-management.html) or contact
+the [user mailing list](./mailing-lists.html). The posts to GitHub or the mailing list are archived and could
 already contain the answer to your question as part of an older thread.
 
 For older issues, it is also worth browsing/searching the [mail archive](./mail-lists.html).
 
 If you feel like the plugin is missing a feature or has a defect, you can fill a feature request or bug report in our
-[Github issue tracker](./issue-management.html). When creating a new issue, please provide a comprehensive description
+[GitHub issue tracker](./issue-management.html). When creating a new issue, please provide a comprehensive description
 of your concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this
 reason, entire debug logs, POMs or most preferably little demo projects attached to the issue are very much appreciated.
 Of course, patches are welcome, too. Contributors can check out the project from our
@@ -121,7 +121,7 @@ Of course, patches are welcome, too. Contributors can check out the project from
 
 ## Examples
 
-To provide you with better understanding of some usages of the Plugin Name,
+To provide you with a better understanding of some usages of the Versions Plugin,
 you can take a look into the following examples:
 * [Advancing dependency versions](./examples/advancing-dependency-versions.html)
 * [Compare project dependencies to a remote project](./examples/compare-dependencies.html)

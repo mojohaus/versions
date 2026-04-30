@@ -1,7 +1,7 @@
 Ignoring specific version suffixes
 ----------------------------------
 
-Let's suppose you wanted `org.apache.maven.doxia:doxia-core:` not to be updated to `2.0.0-M6` or `org.apache.maven:maven-core` to `4.0.0-alpha-5'` or anything with a `-M` or `-alpha` in it.
+Let's suppose you wanted `org.apache.maven.doxia:doxia-core` not to be updated to `2.0.0-M6` or `org.apache.maven:maven-core` to `4.0.0-alpha-5` or anything with a `-M` or `-alpha` in it.
 
 You can either use `ruleSet` or `ignoredVersions`.
 
@@ -49,19 +49,19 @@ $h3 Using ruleSet (more control)
 </configuration>
 ```
 
-See also: [Version rules](../version-rules.md.vm)
+See also: [Version rules](../version-rules.html)
 
 $h3 Output with ignored versions
 
 Instead of:
 
-```
+```log
 org.apache.maven:maven-core ........ 3.2.5 -> 4.0.0-alpha-5
 ```
 
 You will only see stable updates:
 
-```
+```log
 org.apache.maven:maven-core ........ 3.2.5 -> 3.9.2
 ```
 
