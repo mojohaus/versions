@@ -105,7 +105,7 @@ match the version specified in the parent section of the child modules, Maven wi
 To fix all the child modules, use the [versions:update-child-modules](./update-child-modules-mojo.html) goal and
 invoke Maven in non-recursive mode.
 
-```
+```shell
 mvn -N versions:update-child-modules
 ```
 
@@ -177,7 +177,7 @@ goal.
 mvn versions:use-releases
 ```
 
-More examples of the [`lock-snapshots`](./examples/use-releases.html) goal.
+More examples of the [`use-releases`](./examples/use-releases.html) goal.
 
 $h3  Setting the project version
 
@@ -215,7 +215,7 @@ mvn versions:display-dependency-updates
 
 [A more detailed example of the `display-dependency-updates` goal](./examples/display-dependency-updates.html).
 
-$h3  Checking for new versions of specified by properties
+$h3  Checking for new versions specified by properties
 
 To get information about newer versions of dependencies that you are using in your build, just invoke the
 `display-property-updates` goal.

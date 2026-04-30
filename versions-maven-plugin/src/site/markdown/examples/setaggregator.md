@@ -184,9 +184,9 @@ mvn versions:set -DnewVersion=3.6.0 -DoldVersion=* -DgroupId=* -DartifactId=*
 ```
 
 This is needed otherwise the filter for the versions (via `-DoldVersion=*`) would have
-filtered out that module cause it has a different version than the rest of modules.
+filtered out that module because it has a different version than the rest of the modules.
 Furthermore, you need to add the `-DgroupId=*` and `-DartifactId=*` otherwise
-the `separate-module` will also filtered out based on the differences in groupId
+the `separate-module` will also be filtered out based on the differences in groupId
 and artifactId.
 
 So in end the result of the above call looks like this:

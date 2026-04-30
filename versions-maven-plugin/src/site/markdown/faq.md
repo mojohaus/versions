@@ -24,7 +24,7 @@ under the License.
 
 ### What does the Versions Maven Plugin do?
 
-The Versions Maven Plugin provides a means to update version information in a Maven project
+The Versions Maven Plugin provides a means to update version information in a Maven project.
 
 ### Why is this plugin reporting version 1.0.0.9 of foo:bar as the latest version when I can see version 1.0.0.23?
 
@@ -71,7 +71,7 @@ rebuild the metadata files based on the artifacts that are present.
 
 The reason for that is that the option filters *input* dependency versions.
 
-Let's suppose you wanted `org.apache.maven.doxia:doxia-core:` not to be updated to `2.0.0-M6` or `org.apache.maven:maven-core` to `4.0.0-alpha-5'  or anything with a `-M` or `-alpha' in it. Upon first sight of the `dependencyExcludes` option, one might consider to use it to filter out anything with `2.*-M.*` or `*-alpha.*`.
+Let's suppose you wanted `org.apache.maven.doxia:doxia-core` not to be updated to `2.0.0-M6` or `org.apache.maven:maven-core` to `4.0.0-alpha-5` or anything with a `-M` or `-alpha` in it. Upon first sight of the `dependencyExcludes` option, one might consider using it to filter out anything with `2.*-M.*` or `*-alpha.*`.
 
 Well, that would be wrong. `dependencyIncludes` and `dependencyExcludes` work only on *input* dependencies, that is, dependency versions that are already being used by your project. This means that it is likely that you will still see the dreaded `2.0.0-M6`-like version in the updates.
 

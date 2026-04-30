@@ -8,9 +8,9 @@ This is the [versions-maven-plugin](http://www.mojohaus.org/versions-maven-plugi
 
 ## Maintained versions
 
-Versions Maven Plugin requires Maven 3.6.3+ and JDK 1.8+
+Versions Maven Plugin requires Maven 3.6.3+ and JDK 1.8+.
 
-However, we maintain the latest Plugin version with the latest Maven.
+However, we maintain the latest plugin version alongside the latest Maven release.
 
 We execute tests against different operating systems and JDKs
 by [GitHub Actions](https://github.com/mojohaus/versions-maven-plugin/actions/workflows/maven.yml?query=branch%3Amaster)
@@ -19,26 +19,25 @@ by [GitHub Actions](https://github.com/mojohaus/versions-maven-plugin/actions/wo
 
 ### Creating Issues
 
-If you find a problem please first search current opened and closed issues and pull requests.
-It can be that someone already has reported similar.
+If you find a problem, please first search the current open and closed issues and pull requests.
+Someone may have already reported a similar issue.
 
-You can also check current [milestone](https://github.com/mojohaus/versions-maven-plugin/milestones)
-in order to see what will be in next release.
+You can also check the current [milestone](https://github.com/mojohaus/versions-maven-plugin/milestones)
+to see what will be in the next release.
 
-Only when you can not find similar issue please create a new one in the
+Only if you cannot find a similar issue, please create a new one in the
 [ticket system](https://github.com/mojohaus/versions-maven-plugin/issues)
 and describe what is going wrong or what you expect to happen.
 
-If you have a full working example or a log file this is also helpful.
+If you have a full working example or a log file, this is also helpful.
 
-You should of course describe only a single issue in a single ticket and not
-mixing up several things into a single issue.
+Describe only a single issue per ticket; do not mix several issues into one.
 
 Please always check your issue with the latest Plugin and the latest Maven version.
 
 ### Creating a Pull Request
 
-Before you start working on more complicated change, new feature
+Before working on a more complicated change or new feature,
 it is good practice to create an issue in
 the [ticket system](https://github.com/mojohaus/versions-maven-plugin/issues)
 or send an email to [development list](https://www.mojohaus.org/versions-maven-plugin/mailing-lists.html)
@@ -46,27 +45,24 @@ and describe what the problem is or what kind of feature you would like to add.
 Wait a few days for feedback from other contributors.
 Afterwards you can create an appropriate pull request.
 
-It is required if you want to get a pull request to be integrated into please
-squash your commits into a single commit which references the optional issue
-in the commit message which looks like this:
+To have a pull request integrated, please squash your commits into a single commit
+that references the issue in the commit message, for example:
 
-```
-Fixed #Issue - change subject 
+```text
+Fixed #Issue - change subject
 
 a description
 ```
 
-Please take into consideration that change subject will be used in release notes
-and will be present in git history so should be enough descriptive.
+Note that the commit subject will be used in release notes and preserved in Git history,
+so it should be sufficiently descriptive.
 
-This makes it simpler to merge it and this will also close the
-appropriate issue automatically in one go.
-This makes the life as maintainer a little bit easier.
+This simplifies merging and automatically closes the related issue. It also makes life
+as a maintainer a little easier.
 
-A pull request has to fulfill only a single ticket and should never
-create/add/fix several issues in one, cause otherwise the history is hard to
-read and to understand and makes the maintenance of the issues and pull request
-hard or to be honest impossible.
+A pull request must address only a single ticket and should never create, add, or fix
+several issues at once, as otherwise the history is hard to read and maintenance of
+issues and pull requests becomes very difficult.
 
 ## Releasing
 
@@ -75,10 +71,10 @@ hard or to be honest impossible.
 
 For publishing the site do the following:
 
-```
+```shell
 cd target/checkout
 mvn site
 mvn scm-publish:publish-scm
 ```
 
-for multi module site - we need two executions
+For a multi-module site, two executions are needed.

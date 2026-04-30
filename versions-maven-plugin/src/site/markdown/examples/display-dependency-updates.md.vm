@@ -36,7 +36,7 @@ mvn versions:$goal
 
 Which produces the following output:
 
-```sh
+```log
 [INFO] ------------------------------------------------------------------------
 [INFO] Building Build Helper Maven Plugin
 [INFO]    task-segment: [versions:display-dependency-updates]
@@ -106,7 +106,7 @@ $h3 Difference between *ignoredVersions* or *ruleSet* and *dependencyExcludes*
 
 You might wonder when to use *ignoredVersions* or *ruleSet* versus *dependencyExcludes*.
 
-As said before, *dependencyExcludes* target the version **before the upgrade** while *ignoredVersions* or *ruleSet* filter the possible upgrades.
+As mentioned above, *dependencyExcludes* target the version **before the upgrade** while *ignoredVersions* or *ruleSet* filter the possible upgrades.
 
 | Option             | Applies to…                                         | Typical use case                                               |
 |--------------------|-----------------------------------------------------|----------------------------------------------------------------|
@@ -127,7 +127,7 @@ Our project has a couple build plugins, which are defined with dependencies to `
   <plugins>
     <plugin>
       <groupId>com.mygroup</groupId>
-      <artifact>myartifact</artifact>
+      <artifactId>myartifact</artifactId>
       <version>1.10.2</version>
       <dependencies>
         <dependency>

@@ -95,7 +95,7 @@ Note: the `groupId` attribute in the `rule` elements has a lazy `.*` at the end,
 $h3 Using the `ruleSet` element in the POM
 
 As an alternative to providing a separate `rules.xml` file, starting with version `2.13.0` it is possible
-to provide the `ruleSet` element directly in the POM. The structure is somewhat simpler to
+to provide the `ruleSet` element directly in the POM. The structure is somewhat similar to
 the `rules.xml` file:
 
 ```xml
@@ -139,7 +139,7 @@ the `rules.xml` file:
               <!-- if provided, restricts the groupId for the rule -->
               <groupId>org.codehaus.mojo</groupId>
 
-              <!-- if provided,
+              <!-- if provided, restricts the artifactId for the rule -->
               <artifactId>versions-maven-plugin</artifactId>
 
               <!-- syntax the same as for the general ignoreVersions -->
@@ -165,8 +165,8 @@ $h3 Ignoring certain versions
 
 It is possible to ignore versions on a global and on a per-rule basis.
 
-The other methods (via the `<ruleSet>` element and via the `maven.version.ignore`) property have been
-explained above. The described
+The other methods—via the `<ruleSet>` element and the `maven.version.ignore` property—have been
+explained above. The `rules.xml` example below demonstrates both global and per-rule version ignoring:
 
 ```xml
 <ruleset xmlns="https://www.mojohaus.org/VERSIONS/RULE/3.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

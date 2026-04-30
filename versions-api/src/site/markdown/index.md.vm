@@ -1,11 +1,11 @@
-title: Writing an extensions for Versions Plugin
+title: Writing Extensions for the Versions Plugin
 author: Slawomir Jaranowski
 date: 2022-11-20
 
-Writing an extensions for Versions Plugin
-========================================
+Writing Extensions for the Versions Plugin
+==========================================
 
-`Versions API` allow you write extension for `Versions Plugin`.
+`Versions API` allows you to write extensions for `Versions Plugin`.
 
 Project template for extensions
 -------------------------------
@@ -62,13 +62,13 @@ Your Maven project should look like:
 
 Note that the classloader is shared with the `versions-maven-plugin` [plugin classloader](https://maven.apache.org/guides/mini/guide-maven-classloading.html#plugin-classloaders)
 
-The artifacts `org.codehaus.mojo.versions:versions-api` and `javax.inject:javax.inject` are always loaded in the same version as used `versions-maven-plugin` use.
+The artifacts `org.codehaus.mojo.versions:versions-api` and `javax.inject:javax.inject` are always loaded in the same version as the one used by `versions-maven-plugin`.
 
 Extension artifact should therefore only depend on them with `provided` scope.
 
 
-Using extensions with Version Maven Plugin
-------------------------------------------
+Using Extensions with the Versions Maven Plugin
+------------------------------------------------
 
 You need to add your extension as plugin dependency:
 

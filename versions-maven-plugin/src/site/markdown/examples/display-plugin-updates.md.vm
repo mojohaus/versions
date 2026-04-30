@@ -202,7 +202,7 @@ produces the following output (when run using Maven 2.0.6):
 [INFO] ------------------------------------------------------------------------
 ```
 
-Note: that because the POM does not specify versions for some plugins, Maven
+Note that because the POM does not specify versions for some plugins, Maven
 defaults to using the latest compatible version (Maven 3 complains about the
 version not being specified), and hence the reported minimum required Maven
 version tends to be the same as the version of Maven that is running the mojo
@@ -350,7 +350,7 @@ produces the following output:
 [INFO] Final Memory: 17M/81M
 [INFO] ------------------------------------------------------------------------
 ```
-<!--- Ignoring specific version suffixes -->
+<!-- Ignoring specific version suffixes -->
 
 #parse( "ignore-versions.md.vm" )
 

@@ -24,18 +24,18 @@ Advancing dependency versions
 
 There are a number of goals which can be used to advance dependency versions:
 
-- [versions:use-next-releases](../use-next-releases-mojo.html) searches the pom for all non-SNAPSHOT versions which
-have been a newer release and replaces them with the next release version.
-- [versions:use-latest-releases](../use-latest-releases-mojo.html) searches the pom for all non-SNAPSHOT versions
-which have been a newer release and replaces them with the latest release version.
-- [versions:use-next-snapshots](../use-next-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions 
-which have been a newer -SNAPSHOT version and replaces them with the next -SNAPSHOT version.
-- [versions:use-latest-snapshots](../use-latest-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions 
-which have been a newer -SNAPSHOT version and replaces them with the latest -SNAPSHOT version.
-- [versions:use-next-versions](../use-next-versions-mojo.html) searches the pom for all versions which
-have been a newer version and replaces them with the next version.
- [versions:use-latest-versions](../use-latest-versions-mojo.html) searches the pom for all versions which
-have been a newer version and replaces them with the latest version.
+- [versions:use-next-releases](../use-next-releases-mojo.html) searches the pom for all non-SNAPSHOT versions for
+which a newer release is available, and replaces them with the next release version.
+- [versions:use-latest-releases](../use-latest-releases-mojo.html) searches the pom for all non-SNAPSHOT versions for
+which a newer release is available, and replaces them with the latest release version.
+- [versions:use-next-snapshots](../use-next-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions for
+which a newer -SNAPSHOT version is available, and replaces them with the next -SNAPSHOT version.
+- [versions:use-latest-snapshots](../use-latest-snapshots-mojo.html) searches the pom for all non-SNAPSHOT versions for
+which a newer -SNAPSHOT version is available, and replaces them with the latest -SNAPSHOT version.
+- [versions:use-next-versions](../use-next-versions-mojo.html) searches the pom for all versions for
+which a newer version is available, and replaces them with the next version.
+- [versions:use-latest-versions](../use-latest-versions-mojo.html) searches the pom for all versions for
+which a newer version is available, and replaces them with the latest version.
 
 All of these goals share a common set of parameters.
 
@@ -61,7 +61,7 @@ are for release versions (i.e. non-SNAPSHOT versions).
 are for -SNAPSHOT versions.
 - *Considers releases* when building the list of newer versions of a dependency, include release versions (i.e. non-SNAPSHOT
 versions) in the list.
-- *Considers releases* when building the list of newer versions of a dependency, include -SNAPSHOT versions in the list.
+- *Considers -SNAPSHOTs* when building the list of newer versions of a dependency, include -SNAPSHOT versions in the list.
 - *Picks Next* when the list of newer versions is sorted in increasing order, pick the first newer version in the list, i.e.
 the oldest newer version available, also known as the "next" version.
 - *Picks Latest* when the list of newer versions is sorted in increasing order, pick the last newer version in the list, i.e.

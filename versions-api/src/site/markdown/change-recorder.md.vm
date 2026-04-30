@@ -1,9 +1,9 @@
-title: Writing a own ChangeRecorder
+title: Writing Your Own ChangeRecorder
 author: Slawomir Jaranowski
 date: 2022-11-20
 
-Writing an own ChangeRecorder
-============================
+Writing Your Own ChangeRecorder
+================================
 
 In order to create an own ChangeRecorder you must implement [ChangeRecorder](apidocs/org/codehaus/mojo/versions/api/recording/ChangeRecorder.html) interface.
 
@@ -40,7 +40,7 @@ public class MyChangeRecorder implements ChangeRecorder {
 }
 ```
 
-`Changerecoder` is stateful component, so you must not add `Singleton` annotation to it.
+`ChangeRecorder` is a stateful component, so you must not add the `Singleton` annotation to it.
 
 Using extension
 ---------------
@@ -86,7 +86,7 @@ Plugin configuration:
 
 Now execution like:
 
-```
+```shell
 mvn versions:update-properties
 ```
 

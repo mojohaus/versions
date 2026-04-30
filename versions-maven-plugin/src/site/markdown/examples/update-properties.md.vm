@@ -89,7 +89,7 @@ which depends on evaluating a single property that is defined in the POM, for ex
     </dependency>
 ```
 
-If multiple dependencies use the property to define the version, then the all dependencies will be used to determine
+If multiple dependencies use the property to define the version, then all dependencies will be used to determine
 what versions are available (and consequently what version to update the property to).  The version chosen in such 
 cases must be available for all associated dependencies.
 
@@ -136,7 +136,7 @@ for example if we add the following to the POM:
 ```
 
 Then executing the `update-properties` goal will update the `manchu.version` property to the latest common 
-version of both manchu-core and manchu-wibble available to  you (i.e. based on your local repository and all 
+version of both manchu-core and manchu-wibble available to you (i.e. based on your local repository and all 
 currently active remote repositories).
 
 If you want to restrict updates to within a specific range, for example, suppose we only want the 1.5 stream of
@@ -176,7 +176,7 @@ manchu:
 </project>
 ```
 
-Additionally, if you want to disable the automatic detection of properties set the autoLinkItemDependencies to false
+Additionally, if you want to disable automatic property detection, set `autoLinkDependencies` to `false`:
 
 ```xml
 <project>
@@ -250,7 +250,7 @@ If you want to disable the preference given to the reactor (i.e. stop the reacto
 </project>
 ```
 
-If you want to disable the searching the reactor at all:
+If you want to disable searching the reactor entirely:
 
 ```xml
 <project>
@@ -286,8 +286,8 @@ If you want to disable the searching the reactor at all:
 </project>
 ```
 
-The allowSnapshots property and configuration option allow the inclusion of snapshots, if you want to ensure that
-snapshots are *never* resolved,
+The `allowSnapshots` property and configuration option allow the inclusion of snapshots; if you want to ensure that
+snapshots are *never* resolved for a specific property:
 
 ```xml
 <project>
@@ -327,7 +327,7 @@ snapshots are *never* resolved,
 
 ## Restricting the properties to be updated using includes / excludes
 
-The **includes** and **excludes` parameters follow the format `groupId:artifactId:type:classifier`.
+The `includes` and `excludes` parameters follow the format `groupId:artifactId:type:classifier`.
 Use a comma separated list to specify multiple includes.  Wildcards (*) can also be used to match
 multiple values.
 
