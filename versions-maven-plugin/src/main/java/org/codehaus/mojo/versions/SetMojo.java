@@ -65,7 +65,8 @@ import org.eclipse.aether.RepositorySystem;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * Sets the current project's version and based on that change propagates that change onto any child modules as
+ * Sets the current project's version and based on that change propagates that
+ * change onto any child modules as
  * necessary.
  *
  * @author Stephen Connolly
@@ -94,13 +95,30 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private boolean processAllModules;
 
     /**
-     * <p>The <b>non-interpolated</b> groupId of the dependency/module to be selected for update.</p>
-     * <p>If not set, will be equal to the non-interpolated groupId of the project file.</p>
-     * <p>If you wish to update modules of a aggregator regardless of the groupId, you
-     * should set {@code -DgroupId='*'} to ignore the groupId of the current project.</p>
-     * <p>Alternatively, you can use {@code -DprocessAllModules=true}</p>
-     * <p><u>The goal does not interpolate the properties used in groupId used in the pom.xml file.</u></p>
-     * <p><i>The single quotes are only necessary on POSIX-compatible shells (Linux, MacOS, etc.).</i></p>
+     * <p>
+     * The <b>non-interpolated</b> groupId of the dependency/module to be selected
+     * for update.
+     * </p>
+     * <p>
+     * If not set, will be equal to the non-interpolated groupId of the project
+     * file.
+     * </p>
+     * <p>
+     * If you wish to update modules of a aggregator regardless of the groupId, you
+     * should set {@code -DgroupId='*'} to ignore the groupId of the current
+     * project.
+     * </p>
+     * <p>
+     * Alternatively, you can use {@code -DprocessAllModules=true}
+     * </p>
+     * <p>
+     * <u>The goal does not interpolate the properties used in groupId used in the
+     * pom.xml file.</u>
+     * </p>
+     * <p>
+     * <i>The single quotes are only necessary on POSIX-compatible shells (Linux,
+     * MacOS, etc.).</i>
+     * </p>
      *
      * @since 1.2
      */
@@ -108,13 +126,31 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private String groupId;
 
     /**
-     * <p>The <b>non-interpolated</b> artifactId of the dependency/module to be selected for update.</p>
-     * <p>If not set, will be equal to the non-interpolated artifactId of the project file.</p>
-     * <p>If you wish to update modules of a aggregator regardless of the artifactId, you
-     * should set {@code -DartifactId='*'} to ignore the artifactId of the current project.</p>
-     * <p>Alternatively, you can use {@code -DprocessAllModules=true}</p>
-     * <p><u>The goal does not interpolate the properties used in artifactId used in the pom.xml file.</u></p>
-     * <p><i>The single quotes are only necessary on POSIX-compatible shells (Linux, MacOS, etc.).</i></p>
+     * <p>
+     * The <b>non-interpolated</b> artifactId of the dependency/module to be
+     * selected for update.
+     * </p>
+     * <p>
+     * If not set, will be equal to the non-interpolated artifactId of the project
+     * file.
+     * </p>
+     * <p>
+     * If you wish to update modules of a aggregator regardless of the artifactId,
+     * you
+     * should set {@code -DartifactId='*'} to ignore the artifactId of the current
+     * project.
+     * </p>
+     * <p>
+     * Alternatively, you can use {@code -DprocessAllModules=true}
+     * </p>
+     * <p>
+     * <u>The goal does not interpolate the properties used in artifactId used in
+     * the pom.xml file.</u>
+     * </p>
+     * <p>
+     * <i>The single quotes are only necessary on POSIX-compatible shells (Linux,
+     * MacOS, etc.).</i>
+     * </p>
      *
      * @since 1.2
      */
@@ -122,13 +158,30 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private String artifactId;
 
     /**
-     * <p>The <b>non-interpolated</b> version of the dependency/module to be selected for update.</p>
-     * <p>If not set, will be equal to the non-interpolated version of the project file.</p>
-     * <p>If you wish to update modules of a aggregator regardless of the version, you
-     * should set {@code -Dversion='*'} to ignore the version of the current project.</p>
-     * <p>Alternatively, you can use {@code -DprocessAllModules=true}</p>
-     * <p><u>The goal does not interpolate the properties used in version used in the pom.xml file.</u></p>
-     * <p><i>The single quotes are only necessary on POSIX-compatible shells (Linux, MacOS, etc.).</i></p>
+     * <p>
+     * The <b>non-interpolated</b> version of the dependency/module to be selected
+     * for update.
+     * </p>
+     * <p>
+     * If not set, will be equal to the non-interpolated version of the project
+     * file.
+     * </p>
+     * <p>
+     * If you wish to update modules of a aggregator regardless of the version, you
+     * should set {@code -Dversion='*'} to ignore the version of the current
+     * project.
+     * </p>
+     * <p>
+     * Alternatively, you can use {@code -DprocessAllModules=true}
+     * </p>
+     * <p>
+     * <u>The goal does not interpolate the properties used in version used in the
+     * pom.xml file.</u>
+     * </p>
+     * <p>
+     * <i>The single quotes are only necessary on POSIX-compatible shells (Linux,
+     * MacOS, etc.).</i>
+     * </p>
      *
      * @since 1.2
      */
@@ -136,7 +189,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private String oldVersion;
 
     /**
-     * Whether matching versions explicitly specified (as /project/version) in child modules should be updated.
+     * Whether matching versions explicitly specified (as /project/version) in child
+     * modules should be updated.
      *
      * @since 1.3
      */
@@ -189,9 +243,11 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private boolean removeSnapshot;
 
     /**
-     * Whether to add next version number and <code>-SNAPSHOT</code> to the existing version.
+     * Whether to add next version number and <code>-SNAPSHOT</code> to the existing
+     * version.
      * Unless specified by <code>nextSnapshotIndexToIncrement</code>, will increment
-     * the last minor index of the snapshot version, e.g. the <code>z</code> in <code>x.y.z-SNAPSHOT</code>
+     * the last minor index of the snapshot version, e.g. the <code>z</code> in
+     * <code>x.y.z-SNAPSHOT</code>
      *
      * @since 2.10
      */
@@ -199,13 +255,22 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     protected boolean nextSnapshot;
 
     /**
-     * <p>Specifies the version index to increment when using <code>nextSnapshot</code>.
-     * Will increment the (1-based, counting from the left, or the most major component) index
-     * of the snapshot version, e.g. for @{code -DnextSnapshotIndexToIncrement=1} whilst
-     * all lesser components will become 0's.</p>
-     * <p>For example, the version being @{code 1.2.3-SNAPSHOT}, the new version will
-     * become {@code 2.0.0-SNAPSHOT}.</p>
-     * <p>Only valid with {@code nextSnapshot}.</p>
+     * <p>
+     * Specifies the version index to increment when using
+     * <code>nextSnapshot</code>.
+     * Will increment the (1-based, counting from the left, or the most major
+     * component) index
+     * of the snapshot version, e.g. for @{code -DnextSnapshotIndexToIncrement=1}
+     * whilst
+     * all lesser components will become 0's.
+     * </p>
+     * <p>
+     * For example, the version being @{code 1.2.3-SNAPSHOT}, the new version will
+     * become {@code 2.0.0-SNAPSHOT}.
+     * </p>
+     * <p>
+     * Only valid with {@code nextSnapshot}.
+     * </p>
      *
      * @since 2.12
      */
@@ -213,12 +278,21 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     protected Integer nextSnapshotIndexToIncrement;
 
     /**
-     * <p>Whether to start processing at the local aggregation root (which might be a parent module
-     * of that module where Maven is executed in, and the version change may affect parent and sibling modules).
-     * Setting to false makes sure only the module (and its submodules) where Maven is executed for is affected.</p>
+     * <p>
+     * Whether to start processing at the local aggregation root (which might be a
+     * parent module
+     * of that module where Maven is executed in, and the version change may affect
+     * parent and sibling modules).
+     * Setting to false makes sure only the module (and its submodules) where Maven
+     * is executed for is affected.
+     * </p>
      *
-     * <p>Since 2.21.0: If the plugin is executed with a project list (Maven CLI option {@code -pl}),
-     * the plugin is always executed on every project on the list as local aggregation root.</p>
+     * <p>
+     * Since 2.21.0: If the plugin is executed with a project list (Maven CLI option
+     * {@code -pl}),
+     * the plugin is always executed on every project on the list as local
+     * aggregation root.
+     * </p>
      *
      * @since 2.9
      */
@@ -226,7 +300,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private boolean processFromLocalAggregationRoot;
 
     /**
-     * Whether to update the <code>project.build.outputTimestamp</code> property in the POM when setting version.
+     * Whether to update the <code>project.build.outputTimestamp</code> property in
+     * the POM when setting version.
      *
      * @since 2.10
      * @deprecated please use {@link #updateBuildOutputTimestampPolicy} instead
@@ -235,8 +310,10 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private boolean updateBuildOutputTimestamp;
 
     /**
-     * Whether to update the <code>project.build.outputTimestamp</code> property in the POM when setting version.
-     * Valid values are: <code>onchange</code>, which will only change <code>outputTimestamp</code> for changed POMs,
+     * Whether to update the <code>project.build.outputTimestamp</code> property in
+     * the POM when setting version.
+     * Valid values are: <code>onchange</code>, which will only change
+     * <code>outputTimestamp</code> for changed POMs,
      * <code>always</code>, <code>never</code>.
      *
      * @since 2.12
@@ -245,7 +322,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     private String updateBuildOutputTimestampPolicy;
 
     /**
-     * Whether to allow snapshots when searching for the latest version of an artifact.
+     * Whether to allow snapshots when searching for the latest version of an
+     * artifact.
      *
      * @since 1.0-alpha-1
      */
@@ -267,12 +345,12 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
     /**
      * Creates a new instance.
      *
-     * @param artifactFactory   the artifact factory
-     * @param repositorySystem  the repository system
-     * @param projectBuilder    the project builder
-     * @param wagonMap          the map of wagon implementations
-     * @param changeRecorders   the change recorders
-     * @param prompter          the prompter
+     * @param artifactFactory  the artifact factory
+     * @param repositorySystem the repository system
+     * @param projectBuilder   the project builder
+     * @param wagonMap         the map of wagon implementations
+     * @param changeRecorders  the change recorders
+     * @param prompter         the prompter
      * @throws MojoExecutionException when things go wrong
      */
     @Inject
@@ -321,14 +399,19 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                 execute(currentProject);
             }
         } else {
-            // normally, session.getProjects() will contain the whole reactor, just run on the reactor root
+            // normally, session.getProjects() will contain the whole reactor, just run on
+            // the reactor root
             execute(session.getCurrentProject());
         }
     }
 
     private void execute(MavenProject currentProject) throws MojoExecutionException {
-        if (currentProject.getOriginalModel().getVersion() == null) {
-            throw new MojoExecutionException("Project version is inherited from parent.");
+        if (currentProject.getOriginalModel().getVersion() == null && currentProject.getParent() == null) {
+            if (!processAllModules && groupId != null) {
+                getLog().warn("Project version is inherited from parent, but proceeding to update references.");
+            } else {
+                throw new MojoExecutionException("Project version is inherited from parent.");
+            }
         }
 
         if (removeSnapshot && !nextSnapshot) {
@@ -391,12 +474,24 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             // set of files to update
             final Set<File> files = new LinkedHashSet<>();
 
-            // groupId, artifactId, oldVersion are matched against every module of the project to see if the module
+            // groupId, artifactId, oldVersion are matched against every module of the
+            // project to see if the module
             // needs to be changed as well
-            // setting them to the main project coordinates in case they are not set by the user,
+            // setting them to the main project coordinates in case they are not set by the
+            // user,
             // so that the main project can be selected
-            Model rootModel = reactorModels.get(currentProject.getFile());
+            Model rootModel = reactorModels.get(project.getFile());
 
+            if (project.getFile() != null && (session.getProjects().size() > 1 || project.equals(currentProject))) {
+
+                String rGroupId = PomHelper.getGroupId(rootModel);
+                String rArtifactId = rootModel.getArtifactId();
+
+                if (processAllModules
+                        || (Objects.equals(rGroupId, groupId) && Objects.equals(rArtifactId, artifactId))) {
+                    files.add(project.getFile());
+                }
+            }
             String groupId = this.groupId;
             String artifactId = this.artifactId;
             String oldVersion = this.oldVersion;
@@ -452,23 +547,24 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
                         .map(Model::getPomFile)
                         .forEach(files::add);
             }
-
             // now process all the updates
             for (File file : files) {
                 process(file);
             }
-
         } catch (IOException | MojoFailureException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }
+
     /**
-     * Returns the incremented version, with the nextSnapshotIndexToIncrement indicating the 1-based index,
+     * Returns the incremented version, with the nextSnapshotIndexToIncrement
+     * indicating the 1-based index,
      * from the left, or the most major version component, of the version string.
      *
-     * @param version input version
+     * @param version                      input version
      * @param nextSnapshotIndexToIncrement 1-based segment number to be incremented
-     * @return version with the incremented index specified by nextSnapshotIndexToIncrement or last index
+     * @return version with the incremented index specified by
+     *         nextSnapshotIndexToIncrement or last index
      * @throws MojoExecutionException thrown if the input parameters are invalid
      */
     protected String getIncrementedVersion(String version, Integer nextSnapshotIndexToIncrement)
