@@ -39,6 +39,13 @@ public interface DependencyVersionChange extends VersionChange {
     String getArtifactId();
 
     /**
+     * Returns the classifier of the dependency
+     * @return classifier of the dependency
+     * @since 2.20.2
+     */
+    String getClassifier();
+
+    /**
      * Returns the old version of the dependency
      * @return old version the dependency
      * @since 2.14.0
