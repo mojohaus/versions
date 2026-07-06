@@ -393,9 +393,9 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         }
         if (segmentCount > 2) {
             if (version.getQualifier() != null) {
-                newVersion.append("-").append(unchangedSegment.get().value() >= 3 ? version.getQualifier() : "0");
+                newVersion.append("-").append(unchangedSegment.get().value() >= 3 ? version.getQualifier() : "A0");
             } else {
-                newVersion.append("-").append(unchangedSegment.get().value() >= 3 ? version.getBuildNumber() : "0");
+                newVersion.append("-").append(unchangedSegment.get().value() >= 3 ? version.getBuildNumber() : "A0");
             }
         }
         return of(newVersion.toString());

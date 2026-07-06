@@ -381,4 +381,31 @@ class ArtifactVersionsTest {
                 new Restriction(null, false, null, false),
                 versions.restrictionForIgnoreScope(null, Optional.of(MAJOR)));
     }
+
+    @Test
+    void testGetNewerVersionsSnapshotToPrereleaseMajor() throws InvalidSegmentException {
+        ArtifactVersions instance = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", "1.0.0-SNAPSHOT", "foo", "bar", "jar", null),
+                Arrays.asList(versions("1.0.0-SNAPSHOT", "1.0.0-RC1", "1.0.0-beta", "1.0.0")));
+
+        ArtifactVersion[] result = instance.getNewerVersions("1.0.0-SNAPSHOT", of(MAJOR), false, true);
+
+        assertArrayEquals(
+                new ArtifactVersion[] {version("1.0.0-beta"), version("1.0.0-RC1"), version("1.0.0")},
+                result,
+                "Prerelease versions should be filterable from snapshot with MAJOR segment");
+    }
+
+    @Test
+    void testLowerBoundPreservesQualifierForMajorSegment() throws InvalidSegmentException {
+        ArtifactVersions instance = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", "1.0.0-SNAPSHOT", "foo", "bar", "jar", null),
+                Arrays.asList(versions("1.0.0-SNAPSHOT")));
+
+        Optional<String> lowerBound =
+                instance.getLowerBound(ArtifactVersionService.getArtifactVersion("1.0.0-SNAPSHOT"), of(MAJOR));
+
+        assertTrue(lowerBound.isPresent(), "Lower bound must be present");
+        assertFalse(lowerBound.get().endsWith("-0"), "Lower bound should preserve qualifier, not replace with -0");
+    }
 }
