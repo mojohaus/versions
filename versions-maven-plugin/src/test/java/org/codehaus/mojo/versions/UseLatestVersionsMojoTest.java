@@ -99,7 +99,7 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
+                        "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
@@ -128,8 +128,7 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact",
-                        "1.1.0-SNAPSHOT", "1.1.0")));
+                        "default-group", "dependency-artifact", "default", "1.1.0-SNAPSHOT", "1.1.0")));
     }
 
     @Test
@@ -147,8 +146,7 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact",
-                        "1.1.1-SNAPSHOT", "1.1.0")));
+                        "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
@@ -166,7 +164,7 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
+                        "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
@@ -235,7 +233,7 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
+                        "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")));
     }
 
     @Test
@@ -261,7 +259,8 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         // With allowPreReleases=false (default), beta is excluded and 1.1.0 is selected
         assertThat(
                 changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "pre-release-artifact", "1.0.0", "1.1.0")));
+                hasItem(new DefaultDependencyVersionChange(
+                        "default-group", "pre-release-artifact", "default", "1.0.0", "1.1.0")));
     }
 
     @Test
@@ -288,6 +287,6 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         assertThat(
                 changeRecorder.getChanges(),
                 hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "pre-release-artifact", "1.0.0", "1.2.0-beta1")));
+                        "default-group", "pre-release-artifact", "default", "1.0.0", "1.2.0-beta1")));
     }
 }
