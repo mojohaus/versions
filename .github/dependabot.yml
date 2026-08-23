@@ -2,6 +2,11 @@ version: 2
 updates:
 - package-ecosystem: maven
   directory: "/"
+  exclude-paths:
+    - "versions-common/src/test/resources/**"
+    - "versions-enforcer/src/it/**"
+    - "versions-maven-plugin/src/it/**"
+    - "versions-maven-plugin/src/test/resources/**"
   schedule:
     interval: daily
 - package-ecosystem: github-actions
