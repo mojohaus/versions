@@ -137,6 +137,21 @@ public class PluginUpdatesReportTest {
     }
 
     @Test
+    public void testBuildVersionOverridesManagedDefaultWithoutReplacingIt() throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        new TestPluginUpdatesReport()
+                .withPlugins(pluginOf("maven-dependency-plugin", "3.8.1"))
+                .withPluginManagement(pluginOf("maven-dependency-plugin", "3.7.0"))
+                .withAetherRepositorySystem(mockAetherRepositorySystem(
+                        Collections.singletonMap("maven-dependency-plugin", new String[] {"3.7.0", "3.8.1"})))
+                .generate(sinkFactory.createSink(output), sinkFactory, Locale.ROOT);
+        String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
+        assertThat(text, containsString("maven-dependency-plugin 3.8.1"));
+        assertThat(text, containsString("maven-dependency-plugin 3.7.0"));
+    }
+
+    @Test
     public void testOnlyUpgradablePlugins() throws IOException, MavenReportException {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
