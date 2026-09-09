@@ -31,12 +31,20 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
+import org.apache.maven.model.ReportPlugin;
+import org.apache.maven.model.Reporting;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.reporting.MavenReportException;
+import org.apache.maven.rtinfo.RuntimeInformation;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactoryImpl;
@@ -44,7 +52,10 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
+import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
@@ -83,7 +94,38 @@ public class PluginUpdatesReportTest {
             project.getBuild().setPluginManagement(new PluginManagement());
 
             session = mockMavenSession();
+            Mockito.when(session.getRequest()).thenReturn(new DefaultMavenExecutionRequest());
             mojoExecution = mock(MojoExecution.class);
+            projectBuilder = Mockito.mock(ProjectBuilder.class);
+            runtimeInformation = Mockito.mock(RuntimeInformation.class);
+            Mockito.when(runtimeInformation.getMavenVersion()).thenReturn("3.9.11");
+            ProjectBuildingResult result = mock(ProjectBuildingResult.class);
+            Mockito.when(result.getProject()).thenReturn(new MavenProject());
+            try {
+                Mockito.when(projectBuilder.build(
+                                ArgumentMatchers.any(Artifact.class),
+                                ArgumentMatchers.eq(true),
+                                ArgumentMatchers.any(ProjectBuildingRequest.class)))
+                        .thenReturn(result);
+            } catch (ProjectBuildingException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @Override
+        public MavenProject getProject() {
+            return super.getProject();
+        }
+
+        public TestPluginUpdatesReport withReportingPlugin(String artifactId, String version) {
+            Reporting reporting = new Reporting();
+            ReportPlugin plugin = new ReportPlugin();
+            plugin.setGroupId("defaultGroup");
+            plugin.setArtifactId(artifactId);
+            plugin.setVersion(version);
+            reporting.addPlugin(plugin);
+            project.getModel().setReporting(reporting);
+            return this;
         }
 
         public TestPluginUpdatesReport withPlugins(Plugin... plugins) {
@@ -149,6 +191,38 @@ public class PluginUpdatesReportTest {
         String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
         assertThat(text, containsString("maven-dependency-plugin 3.8.1"));
         assertThat(text, containsString("maven-dependency-plugin 3.7.0"));
+    }
+
+    @Test
+    public void testReportingOnlyPluginsAndDistinctBuildVersions() throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SinkFactory factory = new Xhtml5SinkFactory();
+        TestPluginUpdatesReport report = new TestPluginUpdatesReport().withReportingPlugin("artifactA", "1.0.0");
+        Assert.assertTrue(report.canGenerateReport());
+        report.withPlugins(pluginOf("artifactA", "2.0.0")).generate(factory.createSink(output), factory, Locale.ROOT);
+        String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
+        assertThat(text, containsString("artifactA 1.0.0"));
+        assertThat(text, containsString("artifactA 2.0.0"));
+    }
+
+    @Test
+    public void testUnspecifiedReportingVersionUsesInferredVersionWithoutChangingTheProject() throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SinkFactory factory = new Xhtml5SinkFactory();
+        TestPluginUpdatesReport report = new TestPluginUpdatesReport().withReportingPlugin("artifactA", null);
+        report.generate(factory.createSink(output), factory, Locale.ROOT);
+        String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
+        assertThat(text, containsString("artifactA 2.0.0"));
+        Assert.assertNull(report.getProject().getReportPlugins().get(0).getVersion());
+    }
+
+    @Test
+    public void testSpecifiedPluginsDoNotBuildCandidatePoms() throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SinkFactory factory = new Xhtml5SinkFactory();
+        TestPluginUpdatesReport report = new TestPluginUpdatesReport().withPlugins(pluginOf("artifactA"));
+        report.generate(factory.createSink(output), factory, Locale.ROOT);
+        Mockito.verifyNoInteractions(report.projectBuilder);
     }
 
     @Test

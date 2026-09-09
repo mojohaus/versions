@@ -27,6 +27,7 @@ import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
@@ -183,31 +184,40 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
      */
     public synchronized VersionsHelper getHelper() throws MavenReportException {
         if (helper == null) {
-            try {
-                RuleService ruleService = new RulesServiceBuilder()
-                        .withWagonMap(wagonMap)
-                        .withServerId(serverId)
-                        .withRulesUri(rulesUri)
-                        .withRuleSet(ruleSet)
-                        .withIgnoredVersions(ignoredVersions)
-                        .withLog(getLog())
-                        .withMavenSession(session)
-                        .build();
-                PomHelper pomHelper =
-                        new PomHelper(artifactFactory, new VersionsExpressionEvaluator(session, mojoExecution));
-                helper = new DefaultVersionsHelper.Builder()
-                        .withArtifactFactory(artifactFactory)
-                        .withRepositorySystem(repositorySystem)
-                        .withLog(getLog())
-                        .withMavenSession(session)
-                        .withPomHelper(pomHelper)
-                        .withRuleService(ruleService)
-                        .build();
-            } catch (MojoExecutionException e) {
-                throw new MavenReportException(e.getMessage(), e);
-            }
+            helper = createHelper(getProject());
         }
         return helper;
+    }
+
+    /** Creates a helper with a project-specific repository context, without changing the live session. */
+    protected VersionsHelper createHelper(MavenProject project) throws MavenReportException {
+        MavenSession analysisSession = project == getProject() ? session : session.clone();
+        if (project != getProject()) {
+            analysisSession.setCurrentProject(project);
+        }
+        try {
+            RuleService ruleService = new RulesServiceBuilder()
+                    .withWagonMap(wagonMap)
+                    .withServerId(serverId)
+                    .withRulesUri(rulesUri)
+                    .withRuleSet(ruleSet)
+                    .withIgnoredVersions(ignoredVersions)
+                    .withLog(getLog())
+                    .withMavenSession(analysisSession)
+                    .build();
+            PomHelper pomHelper =
+                    new PomHelper(artifactFactory, new VersionsExpressionEvaluator(analysisSession, mojoExecution));
+            return new DefaultVersionsHelper.Builder()
+                    .withArtifactFactory(artifactFactory)
+                    .withRepositorySystem(repositorySystem)
+                    .withLog(getLog())
+                    .withMavenSession(analysisSession)
+                    .withPomHelper(pomHelper)
+                    .withRuleService(ruleService)
+                    .build();
+        } catch (MojoExecutionException e) {
+            throw new MavenReportException(e.getMessage(), e);
+        }
     }
     /**
      * {@inheritDoc}
