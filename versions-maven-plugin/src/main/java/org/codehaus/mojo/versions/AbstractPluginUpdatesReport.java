@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.model.Plugin;
@@ -40,6 +43,7 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.wagon.Wagon;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.VersionsHelper;
@@ -164,23 +168,33 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
                         continue;
                     }
                     PluginUpdatesDetails details = analyzer.reportDetails(plugin);
-                    if (onlyUpgradable && details.isEmpty(getAllowSnapshots())) {
-                        continue;
-                    }
                     Plugin reportPlugin = plugin.clone();
                     if (reportPlugin.getVersion() == null) {
                         reportPlugin.setVersion(details.getVersion());
                     }
-                    (managed ? pluginManagementUpdates : pluginUpdates).merge(reportPlugin, details, (left, right) -> {
-                        left.addDependencyVersions(right.getDependencyVersions());
-                        return left;
-                    });
+                    (managed ? pluginManagementUpdates : pluginUpdates)
+                            .merge(reportPlugin, details, AbstractPluginUpdatesReport::mergePluginUpdates);
                 }
+            }
+            if (onlyUpgradable) {
+                pluginUpdates.values().removeIf(details -> details.isEmpty(getAllowSnapshots()));
+                pluginManagementUpdates.values().removeIf(details -> details.isEmpty(getAllowSnapshots()));
             }
             renderReport(locale, sink, new PluginUpdatesModel(pluginUpdates, pluginManagementUpdates));
         } catch (VersionRetrievalException | MojoExecutionException e) {
             throw new MavenReportException(e.getMessage(), e);
         }
+    }
+
+    private static PluginUpdatesDetails mergePluginUpdates(PluginUpdatesDetails left, PluginUpdatesDetails right) {
+        left.addDependencyVersions(right.getDependencyVersions());
+        return new PluginUpdatesDetails(
+                new ArtifactVersions(
+                        left.getArtifact(),
+                        Stream.concat(Arrays.stream(left.getVersions(true)), Arrays.stream(right.getVersions(true)))
+                                .collect(Collectors.toList())),
+                left.getDependencyVersions(),
+                left.isIncludeSnapshots());
     }
 
     /** Analyze aggregate projects separately to use each project's repositories and effective plugin versions. */
