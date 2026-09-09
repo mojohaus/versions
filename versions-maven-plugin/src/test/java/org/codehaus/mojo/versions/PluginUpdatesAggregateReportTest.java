@@ -102,21 +102,68 @@ public class PluginUpdatesAggregateReportTest {
         }
     }
 
-    private static List<String> versions(PluginUpdatesDetails details) {
+    @Test
+    public void sharedDependencyUpdatesSurviveAnEmptyResultFromEitherProject() throws Exception {
+        assertSharedDependencyVersions(new String[] {"2.0"}, new String[0], Collections.singletonList("2.0"));
+        assertSharedDependencyVersions(new String[0], new String[] {"2.0"}, Collections.singletonList("2.0"));
+    }
+
+    @Test
+    public void sharedDependencyCandidatesFromEveryProjectAreCombinedWithoutDuplicates() throws Exception {
+        assertSharedDependencyVersions(
+                new String[] {"2.0", "3.0"}, new String[] {"2.0", "4.0"}, Arrays.asList("2.0", "3.0", "4.0"));
+    }
+
+    private void assertSharedDependencyVersions(String[] rootUpdates, String[] childUpdates, List<String> expected)
+            throws Exception {
+        for (boolean managed : new boolean[] {false, true}) {
+            for (boolean onlyUpgradable : new boolean[] {false, true}) {
+                PluginUpdatesDetails result = aggregate(
+                        managed,
+                        onlyUpgradable,
+                        project("root", managed, "shared-dependency"),
+                        helper("shared-dependency", rootUpdates, "1.0", "2.0"),
+                        project("child", managed, "shared-dependency"),
+                        helper("shared-dependency", childUpdates, "1.0", "2.0"));
+                assertEquals(1, result.getDependencyVersions().size());
+                ArtifactVersions dependency =
+                        result.getDependencyVersions().values().iterator().next();
+                assertEquals("1.0", dependency.getVersion());
+                assertEquals(expected, versions(dependency));
+            }
+        }
+    }
+
+    private static List<String> versions(ArtifactVersions details) {
         return Arrays.stream(details.getVersions(false)).map(Object::toString).collect(Collectors.toList());
     }
 
     private PluginUpdatesDetails aggregate(boolean managed, boolean onlyUpgradable, String[] rootVersions)
             throws Exception {
-        MavenProject root = project("root", managed);
-        MavenProject child = project("child", managed);
+        return aggregate(
+                managed,
+                onlyUpgradable,
+                project("root", managed, "root-dependency"),
+                helper("root-dependency", new String[0], rootVersions),
+                project("child", managed, "child-dependency"),
+                helper("child-dependency", new String[0], "1.0", "2.0"));
+    }
+
+    private PluginUpdatesDetails aggregate(
+            boolean managed,
+            boolean onlyUpgradable,
+            MavenProject root,
+            VersionsHelper rootHelper,
+            MavenProject child,
+            VersionsHelper childHelper)
+            throws Exception {
         root.setCollectedProjects(Collections.singletonList(child));
         ReportRendererFactory rendererFactory = mock(ReportRendererFactory.class);
         when(rendererFactory.createReportRenderer(anyString(), isNull(), any(), any(), anyBoolean()))
                 .thenReturn(mock(ReportRenderer.class));
         TestReport report = new TestReport(root, rendererFactory, onlyUpgradable);
-        report.helpers.put(root, helper("root-dependency", rootVersions));
-        report.helpers.put(child, helper("child-dependency", "1.0", "2.0"));
+        report.helpers.put(root, rootHelper);
+        report.helpers.put(child, childHelper);
         report.doGenerateReport(Locale.ROOT, null);
         ArgumentCaptor<PluginUpdatesModel> captured = ArgumentCaptor.forClass(PluginUpdatesModel.class);
         verify(rendererFactory)
@@ -130,7 +177,7 @@ public class PluginUpdatesAggregateReportTest {
         return result;
     }
 
-    private static MavenProject project(String artifactId, boolean managed) {
+    private static MavenProject project(String artifactId, boolean managed, String dependencyId) {
         MavenProject project = new MavenProject();
         project.setArtifactId(artifactId);
         project.setBuild(new Build());
@@ -140,7 +187,7 @@ public class PluginUpdatesAggregateReportTest {
         plugin.setVersion("1.0");
         Dependency dependency = new Dependency();
         dependency.setGroupId("example");
-        dependency.setArtifactId(artifactId + "-dependency");
+        dependency.setArtifactId(dependencyId);
         dependency.setVersion("1.0");
         plugin.addDependency(dependency);
         if (managed) {
@@ -153,7 +200,8 @@ public class PluginUpdatesAggregateReportTest {
         return project;
     }
 
-    private static VersionsHelper helper(String dependencyId, String... versions) throws Exception {
+    private static VersionsHelper helper(String dependencyId, String[] dependencyVersions, String... versions)
+            throws Exception {
         VersionsHelper helper = mock(VersionsHelper.class);
         when(helper.lookupArtifactVersions(any(Artifact.class), eq(true)))
                 .thenAnswer(invocation -> new ArtifactVersions(
@@ -167,7 +215,13 @@ public class PluginUpdatesAggregateReportTest {
         dependency.setVersion("1.0");
         ArtifactFactory factory = new ArtifactFactory(mockArtifactHandlerManager());
         Map<Dependency, ArtifactVersions> dependencies = new TreeMap<>(DependencyComparator.INSTANCE);
-        dependencies.put(dependency, new ArtifactVersions(factory.createArtifact(dependency), Collections.emptyList()));
+        dependencies.put(
+                dependency,
+                new ArtifactVersions(
+                        factory.createArtifact(dependency),
+                        Arrays.stream(dependencyVersions)
+                                .map(ArtifactVersionService::getArtifactVersion)
+                                .collect(Collectors.toList())));
         when(helper.lookupDependenciesUpdates(any(), eq(false), eq(false))).thenReturn(dependencies);
         return helper;
     }
