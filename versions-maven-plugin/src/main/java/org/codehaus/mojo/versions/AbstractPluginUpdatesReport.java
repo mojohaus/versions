@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.doxia.sink.Sink;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -51,6 +52,7 @@ import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ArtifactVersionService;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.xml.PluginUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
@@ -187,14 +189,19 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
     }
 
     private static PluginUpdatesDetails mergePluginUpdates(PluginUpdatesDetails left, PluginUpdatesDetails right) {
-        left.addDependencyVersions(right.getDependencyVersions());
-        return new PluginUpdatesDetails(
-                new ArtifactVersions(
-                        left.getArtifact(),
-                        Stream.concat(Arrays.stream(left.getVersions(true)), Arrays.stream(right.getVersions(true)))
-                                .collect(Collectors.toList())),
-                left.getDependencyVersions(),
-                left.isIncludeSnapshots());
+        Map<Dependency, ArtifactVersions> dependencies = new TreeMap<>(DependencyComparator.INSTANCE);
+        dependencies.putAll(left.getDependencyVersions());
+        right.getDependencyVersions()
+                .forEach((dependency, versions) ->
+                        dependencies.merge(dependency, versions, AbstractPluginUpdatesReport::mergeVersions));
+        return new PluginUpdatesDetails(mergeVersions(left, right), dependencies, left.isIncludeSnapshots());
+    }
+
+    private static ArtifactVersions mergeVersions(ArtifactVersions left, ArtifactVersions right) {
+        return new ArtifactVersions(
+                left.getArtifact(),
+                Stream.concat(Arrays.stream(left.getVersions(true)), Arrays.stream(right.getVersions(true)))
+                        .collect(Collectors.toList()));
     }
 
     /** Analyze aggregate projects separately to use each project's repositories and effective plugin versions. */
