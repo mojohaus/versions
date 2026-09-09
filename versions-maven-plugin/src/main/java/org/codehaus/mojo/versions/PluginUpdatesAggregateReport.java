@@ -19,10 +19,10 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
@@ -64,30 +64,10 @@ public class PluginUpdatesAggregateReport extends AbstractPluginUpdatesReport {
     }
 
     @Override
-    protected void populatePluginManagement(Set<Plugin> pluginManagementCollector) {
-        for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
-            if (haveBuildPluginManagementPlugins(project)) {
-                pluginManagementCollector.addAll(
-                        project.getBuild().getPluginManagement().getPlugins());
-            }
-        }
+    protected List<MavenProject> getProjectsToAnalyze() {
+        return new ArrayList<>(AggregateReportUtils.getProjectsToProcess(getProject()));
     }
 
-    /**
-     * {@inheritDoc}
-     * */
-    @Override
-    protected void populatePlugins(Set<Plugin> pluginsCollector) {
-        for (MavenProject project : AggregateReportUtils.getProjectsToProcess(getProject())) {
-            if (haveBuildPluginManagementPlugins(project)) {
-                pluginsCollector.addAll(project.getBuild().getPlugins());
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getOutputPath() {
         return "plugin-updates-aggregate-report";
