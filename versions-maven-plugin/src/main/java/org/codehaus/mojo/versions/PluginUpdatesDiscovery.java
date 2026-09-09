@@ -170,7 +170,19 @@ final class PluginUpdatesDiscovery {
                     .forEach(p -> result.add(new Declaration(p, "pluginManagement")));
         }
         if (project.getReporting() != null) {
-            project.getReportPlugins().forEach(p -> result.add(new Declaration(toPlugin(p), "reporting")));
+            // Maven resolves unspecified reporting versions from build plugins before plugin management.
+            Map<String, String> defaults = new HashMap<>();
+            result.stream()
+                    .map(d -> d.plugin)
+                    .filter(p -> p.getVersion() != null)
+                    .forEach(p -> defaults.putIfAbsent(p.getKey(), p.getVersion()));
+            project.getReportPlugins().forEach(p -> {
+                Plugin plugin = toPlugin(p);
+                if (plugin.getVersion() == null) {
+                    plugin.setVersion(defaults.get(plugin.getKey()));
+                }
+                result.add(new Declaration(plugin, "reporting"));
+            });
         }
         return result;
     }
