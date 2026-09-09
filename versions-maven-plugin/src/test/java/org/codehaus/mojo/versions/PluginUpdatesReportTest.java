@@ -217,6 +217,57 @@ public class PluginUpdatesReportTest {
     }
 
     @Test
+    public void testUnspecifiedReportingVersionUsesPluginManagement() throws Exception {
+        assertReportingVersion(
+                new TestPluginUpdatesReport()
+                        .withReportingPlugin("artifactA", null)
+                        .withPluginManagement(pluginOf("artifactA", "1.0.0")),
+                "1.0.0",
+                null);
+    }
+
+    @Test
+    public void testUnspecifiedReportingVersionPrefersBuildPluginOverManagement() throws Exception {
+        assertReportingVersion(
+                new TestPluginUpdatesReport()
+                        .withReportingPlugin("artifactA", null)
+                        .withPlugins(pluginOf("artifactA", "1.1.0"))
+                        .withPluginManagement(pluginOf("artifactA", "1.0.0")),
+                "1.1.0",
+                null);
+    }
+
+    @Test
+    public void testExplicitReportingVersionOverridesBuildAndManagement() throws Exception {
+        assertReportingVersion(
+                new TestPluginUpdatesReport()
+                        .withReportingPlugin("artifactA", "1.2.0")
+                        .withPlugins(pluginOf("artifactA", "1.1.0"))
+                        .withPluginManagement(pluginOf("artifactA", "1.0.0")),
+                "1.2.0",
+                "1.2.0");
+    }
+
+    private void assertReportingVersion(TestPluginUpdatesReport report, String expectedVersion, String originalVersion)
+            throws Exception {
+        assertThat(
+                PluginUpdatesDiscovery.effectivePlugins(report.getProject()).stream()
+                        .filter(d -> "reporting".equals(d.context))
+                        .findFirst()
+                        .map(d -> d.plugin.getVersion())
+                        .orElse(null),
+                equalTo(expectedVersion));
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SinkFactory factory = new Xhtml5SinkFactory();
+        report.withOnlyProjectPlugins(true).generate(factory.createSink(output), factory, Locale.ROOT);
+        String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
+        assertThat(text, containsString("artifactA " + expectedVersion));
+        assertThat(text, not(containsString("artifactA 2.0.0")));
+        assertThat(report.getProject().getReportPlugins().get(0).getVersion(), equalTo(originalVersion));
+        Mockito.verifyNoInteractions(report.projectBuilder);
+    }
+
+    @Test
     public void testSpecifiedPluginsDoNotBuildCandidatePoms() throws Exception {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         SinkFactory factory = new Xhtml5SinkFactory();
