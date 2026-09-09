@@ -1191,8 +1191,22 @@ public class PomHelper {
      * @return The local root (note this may be the project passed as an argument).
      */
     public static MavenProject getLocalRoot(ProjectBuilder projectBuilder, MavenSession mavenSession, Log logger) {
+        return getLocalRoot(projectBuilder, mavenSession, mavenSession.getCurrentProject(), logger);
+    }
+
+    /**
+     * Finds the local aggregation root of the specified project.
+     *
+     * @param projectBuilder {@link ProjectBuilder} instance
+     * @param mavenSession   {@link MavenSession} instance
+     * @param project        the project to start from
+     * @param logger         the logger
+     * @return the local aggregation root, which may be the supplied project
+     * @since 2.21.1
+     */
+    public static MavenProject getLocalRoot(
+            ProjectBuilder projectBuilder, MavenSession mavenSession, MavenProject project, Log logger) {
         logger.info("Searching for local aggregator root...");
-        MavenProject project = mavenSession.getCurrentProject();
         while (true) {
             final File parentDir = project.getBasedir().getParentFile();
             if (parentDir != null && parentDir.isDirectory()) {
