@@ -185,6 +185,20 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
     }
 
     @Test
+    public void testUpdatesAreGroupedByRequiredMavenVersion() throws Exception {
+        Files.copy(
+                Paths.get("src/test/resources/org/codehaus/mojo/display-plugin-updates/updates-only.xml"),
+                tempDir.resolve("pom.xml"));
+        DisplayPluginUpdatesMojo mojo = createMojo();
+        mojo.repositorySystem = mockAetherRepositorySystem(
+                java.util.Collections.singletonMap("default-plugin", new String[] {"1.0.0", "2.0.0"}));
+        mojo.execute();
+        List<String> output = Files.readAllLines(outputPath);
+        assertThat(output, hasItem(containsString("Require Maven 3.6.3 to use the following plugin updates:")));
+        assertThat(output, hasItem(containsString("1.0.0 -> 2.0.0")));
+    }
+
+    @Test
     public void testLatestVersion() throws Exception {
         Files.copy(
                 Paths.get("src/test/resources/org/codehaus/mojo/display-plugin-updates/updates-only.xml"),

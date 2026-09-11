@@ -22,9 +22,7 @@ package org.codehaus.mojo.versions;
 import javax.inject.Inject;
 
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.maven.model.Plugin;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.wagon.Wagon;
@@ -64,27 +62,6 @@ public class PluginUpdatesReport extends AbstractPluginUpdatesReport {
     /**
      * {@inheritDoc}
      * */
-    @Override
-    protected void populatePluginManagement(Set<Plugin> pluginManagementCollector) {
-        if (haveBuildPluginManagementPlugins(getProject())) {
-            pluginManagementCollector.addAll(
-                    getProject().getBuild().getPluginManagement().getPlugins());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * */
-    @Override
-    protected void populatePlugins(Set<Plugin> pluginsCollector) {
-        if (haveBuildPlugins(getProject())) {
-            pluginsCollector.addAll(getProject().getBuild().getPlugins());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getOutputPath() {
         return "plugin-updates-report";
