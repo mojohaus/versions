@@ -10,7 +10,7 @@
 
   <groupId>org.codehaus.mojo.versions</groupId>
   <artifactId>versions</artifactId>
-  <version>2.21.1-SNAPSHOT</version>
+  <version>2.22.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Versions</name>
@@ -137,7 +137,7 @@
     <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
     <modelloNamespaceRuleVersion>3.0.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
-    <byteBuddyVersion>1.18.12</byteBuddyVersion>
+    <byteBuddyVersion>1.18.13</byteBuddyVersion>
 
     <!-- use the same version as in Maven core -->
     <mavenResolverVersion>1.4.1</mavenResolverVersion>
@@ -147,7 +147,7 @@
     <!-- execute ITS in parallel by default -->
     <invoker.parallelThreads>0.75C</invoker.parallelThreads>
     <!-- mono-module doesn't require site:stage for scm-publish -->
-    <project.build.outputTimestamp>2026-01-18T22:38:11Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-09-11T20:49:26Z</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
