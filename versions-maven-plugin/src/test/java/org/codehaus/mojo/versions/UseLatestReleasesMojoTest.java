@@ -167,6 +167,7 @@ public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         assertThat(
                 changeRecorder.getChanges(),
-                not(hasItem(new DefaultDependencyVersionChange("default-group", "other-artifact", "1.0", "2.0"))));
+                not(hasItem(new DefaultDependencyVersionChange(
+                        "default-group", "other-artifact", "default", "1.0", "2.0"))));
     }
 }
