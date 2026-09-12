@@ -299,7 +299,20 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
                                                             unchangedSegment,
                                                             getAllowSnapshots(),
                                                             getAllowDowngrade()))
-                                                    .filter(this::artifactVersionsFilter))
+                                                    .filter(this::artifactVersionsFilter)
+                                                    // isIncluded() above only checked the artifact's *current*
+                                                    // version; excludes/includes patterns targeting a candidate
+                                                    // version (e.g. "groupId:artifactId:*:*:4*") were silently
+                                                    // never applied after #1202 removed the old per-candidate
+                                                    // getLastFiltered() method -- restore that check here (gh-1378).
+                                                    .filter(ver -> isIncluded(artifactFactory.createArtifact(
+                                                            artifact.getGroupId(),
+                                                            artifact.getArtifactId(),
+                                                            ver.toString(),
+                                                            artifact.getType(),
+                                                            artifact.getClassifier(),
+                                                            artifact.getScope(),
+                                                            artifact.isOptional()))))
                                             .ifPresent(ver -> updates.add(
                                                     new DependencyVersionChange(changeKind, dep, ver.toString())));
                                 } catch (VersionRetrievalException
