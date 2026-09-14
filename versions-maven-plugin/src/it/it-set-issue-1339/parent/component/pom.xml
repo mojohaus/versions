@@ -1,0 +1,11 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>localhost</groupId>
+    <artifactId>issue-1339-parent</artifactId>
+    <version>1.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>issue-1339-component</artifactId>
+  <packaging>pom</packaging>
+</project>
