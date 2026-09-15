@@ -50,6 +50,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasToString;
@@ -374,5 +375,32 @@ class ArtifactVersionsTest {
         assertThat(
                 versions.restrictionForIgnoreScope(null, Optional.of(MAJOR)),
                 is(equalTo(new Restriction(null, false, null, false))));
+    }
+
+    @Test
+    void testGetNewerVersionsSnapshotToPrereleaseMajor() throws InvalidSegmentException {
+        ArtifactVersions instance = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", "1.0.0-SNAPSHOT", "foo", "bar", "jar", null),
+                Arrays.asList(versions("1.0.0-SNAPSHOT", "1.0.0-RC1", "1.0.0-beta", "1.0.0")));
+
+        ArtifactVersion[] result = instance.getNewerVersions("1.0.0-SNAPSHOT", of(MAJOR), false, true);
+
+        assertThat(
+                "Prerelease versions should be filterable from snapshot with MAJOR segment",
+                result,
+                arrayContaining(version("1.0.0-beta"), version("1.0.0-RC1"), version("1.0.0")));
+    }
+
+    @Test
+    void testLowerBoundPreservesQualifierForMajorSegment() throws InvalidSegmentException {
+        ArtifactVersions instance = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", "1.0.0-SNAPSHOT", "foo", "bar", "jar", null),
+                Arrays.asList(versions("1.0.0-SNAPSHOT")));
+
+        Optional<String> lowerBound =
+                instance.getLowerBound(ArtifactVersionService.getArtifactVersion("1.0.0-SNAPSHOT"), of(MAJOR));
+
+        assertThat("Lower bound must be present", lowerBound.isPresent());
+        assertThat("Lower bound should preserve qualifier, not replace with -0", lowerBound.get(), not(endsWith("-0")));
     }
 }
