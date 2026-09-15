@@ -193,6 +193,31 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected boolean skip;
 
     /**
+     * Minimum number of days a new release must be available before it is considered as an update candidate.
+     * This allows you to ignore very recent releases that may not yet be stable or have undetected supply-chain
+     * attacks.<br>
+     * For example, {@code <minDaysOld>7</minDaysOld>} will only suggest updates that have been
+     * published for at least 7 days.
+     * A value of {@code 0} (the default) disables this filter and all versions are considered.
+     *
+     * @since 2.24.0
+     */
+    @Parameter(property = "versions.minDaysOld", defaultValue = "0")
+    protected int minDaysOld = 0;
+
+    /**
+     * The regular expression for artifacts to ignore when applying the minimum-age filter.
+     *
+     * <p>Artifacts matching this pattern are excluded from the age-based filtering, even if
+     * their version is newer than the configured {@code minDaysOld} threshold.<br>
+     * It matches against <code>groupId:artifactId</code> of the artifact.</p>
+     *
+     * @since 2.24.0
+     */
+    @Parameter(property = "versions.minDaysOldIgnore")
+    protected String minDaysOldIgnore;
+
+    /**
      * (injected) map of {@link Wagon} instances per protocol
      *
      * @since 2.14.0
@@ -267,6 +292,8 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
                     .withMavenSession(session)
                     .withPomHelper(pomHelper)
                     .withRuleService(ruleService)
+                    .withMinDaysOld(minDaysOld)
+                    .withMinDaysOldIgnore(minDaysOldIgnore)
                     .build();
         }
         return helper;
