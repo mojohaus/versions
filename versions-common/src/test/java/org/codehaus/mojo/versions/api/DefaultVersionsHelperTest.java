@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -45,6 +46,7 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.codehaus.mojo.versions.api.internal.AgeFilteringUtils;
 import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.DefaultRepositorySystemSession;
@@ -286,6 +288,64 @@ class DefaultVersionsHelperTest {
         assertThat(
                 remoteRepositories.get(1).getPolicy(false).getUpdatePolicy(),
                 equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
+    }
+
+    @Test
+    void testMinDaysOldFilterExcludesRecentVersions() throws Exception {
+        when(artifact.getGroupId()).thenReturn("com.example");
+        when(artifact.getArtifactId()).thenReturn("my-artifact");
+        when(artifact.getType()).thenReturn("jar");
+        when(artifact.getArtifactHandler()).thenReturn(new DefaultArtifactHandler("default"));
+
+        RemoteRepository recentRepo = new RemoteRepository.Builder("recent", "default", "file:///recent").build();
+        RemoteRepository oldRepo = new RemoteRepository.Builder("old", "default", "file:///old").build();
+
+        when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> new VersionRangeResult(i.getArgument(1))
+                        .addVersion(parseVersion("1.0.0"))
+                        .addVersion(parseVersion("2.0.0"))
+                        .setRepository(parseVersion("1.0.0"), oldRepo)
+                        .setRepository(parseVersion("2.0.0"), recentRepo));
+
+        DefaultVersionsHelper helper = new DefaultVersionsHelper.Builder()
+                .withArtifactFactory(artifactFactory)
+                .withPomHelper(pomHelper)
+                .withRepositorySystem(repositorySystem)
+                .withLog(log)
+                .withMavenSession(mavenSession)
+                .withRuleService(new RulesServiceBuilder()
+                        .withMavenSession(mavenSession)
+                        .withLog(log)
+                        .build())
+                .withMinDaysOld(7)
+                .build();
+
+        // Mock ArtifactAgeService via ThreadLocal in AgeFilteringUtils
+        AgeFilteringUtils.clearCache();
+        Field ageServiceThreadLocalField = AgeFilteringUtils.class.getDeclaredField("ageServiceCache");
+        ageServiceThreadLocalField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        ThreadLocal<ArtifactAgeService> threadLocal =
+                (ThreadLocal<ArtifactAgeService>) ageServiceThreadLocalField.get(null);
+        threadLocal.set(new ArtifactAgeService(log) {
+            @Override
+            public boolean isOldEnough(
+                    String groupId, String artifactId, String version, int minDaysOld, RemoteRepository repository) {
+                return "1.0.0".equals(version);
+            }
+        });
+
+        try {
+            ArtifactVersions versions = helper.lookupArtifactVersions(artifact, null, true, false);
+
+            List<String> versionStrings = Arrays.stream(versions.getVersions(true))
+                    .map(ArtifactVersion::toString)
+                    .collect(Collectors.toList());
+            assertThat(versionStrings, hasItems("1.0.0"));
+            assertThat(versionStrings.size(), equalTo(1));
+        } finally {
+            AgeFilteringUtils.clearCache();
+        }
     }
 
     private static Version parseVersion(String version) {

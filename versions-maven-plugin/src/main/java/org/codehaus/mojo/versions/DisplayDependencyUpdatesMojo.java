@@ -404,7 +404,7 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
 
         Set<Dependency> dependencyManagement, dependencies;
         ResolverAdapter resolverAdapter =
-                new DefaultResolverAdapter(artifactFactory, repositorySystem, getLog(), session);
+                new DefaultResolverAdapter(artifactFactory, repositorySystem, getLog(), session, minDaysOld);
         RuleService ruleService = new RulesServiceBuilder()
                 .withMavenSession(session)
                 .withWagonMap(wagonMap)
