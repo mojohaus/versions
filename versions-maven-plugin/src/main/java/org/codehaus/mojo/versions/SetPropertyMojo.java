@@ -97,6 +97,14 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
     private String profileId = null;
 
     /**
+     * Whether to insert a new version property or just replace an existing one.
+     *
+     * @since 2.21
+     */
+    @Parameter(property = "insert", defaultValue = "false")
+    private boolean insert;
+
+    /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
      *
      * @since 1.0-alpha-1
@@ -201,7 +209,7 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
                 continue;
             }
             PomHelper.setPropertyVersion(
-                    pom, profileToApply, currentProperty.getName(), defaultString(newVersionGiven));
+                    pom, profileToApply, currentProperty.getName(), defaultString(newVersionGiven), insert);
         }
     }
 
