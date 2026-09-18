@@ -17,39 +17,60 @@ package org.codehaus.mojo.versions;
  *
  */
 
+import javax.inject.Inject;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.doxia.sink.Sink;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.reporting.MavenReportException;
+import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.wagon.Wagon;
+import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
+import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.PluginUpdatesModel;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.ArtifactVersionService;
+import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.PluginComparator;
 import org.codehaus.mojo.versions.xml.PluginUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
-
-import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
 
 /**
  * Generates a report of available updates for the plugins of a project.
  * Base class, abstracting functionality regardless of whether we're rendering an individual, or an aggregate report.
  */
 public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport<PluginUpdatesModel> {
+
+    @Inject
+    protected ProjectBuilder projectBuilder;
+
+    @Inject
+    protected RuntimeInformation runtimeInformation;
+
+    private final ArtifactFactory pluginArtifactFactory;
 
     private static final PluginComparator PLUGIN_COMPARATOR = PluginComparator.INSTANCE;
 
@@ -92,6 +113,7 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
             Map<String, Wagon> wagonMap,
             ReportRendererFactory rendererFactory) {
         super(i18n, artifactFactory, repositorySystem, wagonMap, rendererFactory);
+        this.pluginArtifactFactory = artifactFactory;
     }
 
     /**
@@ -107,30 +129,8 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
      */
     @Override
     public boolean canGenerateReport() {
-        return haveBuildPlugins(getProject()) || haveBuildPluginManagementPlugins(getProject());
-    }
-
-    /**
-     * Returns {@code true} if the given {@link MavenProject} has a non-empty plugin management section
-     * @param project {@link MavenProject} instance
-     * @return {@code true} if the given {@link MavenProject} has a non-empty plugin management section
-     */
-    protected boolean haveBuildPluginManagementPlugins(MavenProject project) {
-        return project.getBuild() != null
-                && project.getBuild().getPluginManagement() != null
-                && project.getBuild().getPluginManagement().getPlugins() != null
-                && !project.getBuild().getPluginManagement().getPlugins().isEmpty();
-    }
-
-    /**
-     * Returns {@code true} if the given {@link MavenProject} has a non-empty plugins section.
-     * @param project {@link MavenProject} instance
-     * @return {@code true} if the given {@link MavenProject} has a non-empty plugins section.
-     */
-    protected boolean haveBuildPlugins(MavenProject project) {
-        return project.getBuild() != null
-                && project.getBuild().getPlugins() != null
-                && !project.getBuild().getPlugins().isEmpty();
+        return getProjectsToAnalyze().stream()
+                .anyMatch(p -> !PluginUpdatesDiscovery.effectivePlugins(p).isEmpty());
     }
 
     /**
@@ -142,77 +142,72 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
     @Override
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
 
-        Set<Plugin> pluginManagement = getPluginManagement();
-
-        Set<Plugin> plugins = getPlugins();
-
-        handleOnlyProjectPlugins(pluginManagement, plugins);
-
+        Map<Plugin, PluginUpdatesDetails> pluginUpdates = new TreeMap<>(PLUGIN_COMPARATOR);
+        Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates = new TreeMap<>(PLUGIN_COMPARATOR);
         try {
-
-            Map<Plugin, PluginUpdatesDetails> pluginUpdates =
-                    getHelper().lookupPluginsUpdates(plugins.stream(), getAllowSnapshots());
-            Map<Plugin, PluginUpdatesDetails> pluginManagementUpdates =
-                    getHelper().lookupPluginsUpdates(pluginManagement.stream(), getAllowSnapshots());
-
-            if (onlyUpgradable) {
-
-                BinaryOperator<PluginUpdatesDetails> merger = (pluginUpdatesDetails, pluginUpdatesDetails2) -> {
-                    pluginUpdatesDetails.addDependencyVersions(pluginUpdatesDetails2.getDependencyVersions());
-                    return pluginUpdatesDetails;
-                };
-                pluginUpdates = filter(pluginUpdates, p -> !p.isEmpty(allowSnapshots), merger);
-                pluginManagementUpdates = filter(pluginManagementUpdates, p -> !p.isEmpty(allowSnapshots));
+            for (MavenProject project : getProjectsToAnalyze()) {
+                VersionsHelper helper = project == getProject() ? getHelper() : createHelper(project);
+                PluginUpdatesAnalyzer analyzer = new PluginUpdatesAnalyzer(
+                        pluginArtifactFactory,
+                        helper,
+                        projectBuilder,
+                        session,
+                        project,
+                        getLog(),
+                        ArtifactVersionService.getArtifactVersion(runtimeInformation.getMavenVersion()),
+                        getAllowSnapshots());
+                List<PluginUpdatesDiscovery.Declaration> declarations =
+                        PluginUpdatesDiscovery.effectivePlugins(project);
+                Set<Plugin> plugins = new TreeSet<>(PLUGIN_COMPARATOR);
+                Set<Plugin> management = new TreeSet<>(PLUGIN_COMPARATOR);
+                declarations.forEach(d -> ("pluginManagement".equals(d.context) ? management : plugins).add(d.plugin));
+                handleOnlyProjectPlugins(management, plugins);
+                for (PluginUpdatesDiscovery.Declaration declaration : declarations) {
+                    Plugin plugin = declaration.plugin;
+                    boolean managed = "pluginManagement".equals(declaration.context);
+                    boolean inSummary = (managed ? management : plugins).contains(plugin);
+                    if (!inSummary) {
+                        continue;
+                    }
+                    PluginUpdatesDetails details = analyzer.reportDetails(plugin);
+                    Plugin reportPlugin = plugin.clone();
+                    if (reportPlugin.getVersion() == null) {
+                        reportPlugin.setVersion(details.getVersion());
+                    }
+                    (managed ? pluginManagementUpdates : pluginUpdates)
+                            .merge(reportPlugin, details, AbstractPluginUpdatesReport::mergePluginUpdates);
+                }
             }
-
+            if (onlyUpgradable) {
+                pluginUpdates.values().removeIf(details -> details.isEmpty(getAllowSnapshots()));
+                pluginManagementUpdates.values().removeIf(details -> details.isEmpty(getAllowSnapshots()));
+            }
             renderReport(locale, sink, new PluginUpdatesModel(pluginUpdates, pluginManagementUpdates));
-        } catch (VersionRetrievalException e) {
+        } catch (VersionRetrievalException | MojoExecutionException e) {
             throw new MavenReportException(e.getMessage(), e);
         }
     }
 
-    /**
-     * Constructs a instance of a {@link Set<Plugin>} with a {@link PluginComparator} comparator. This set can be
-     * further populated by implementations and should contain plugins, that are present in projects pluginManagement
-     * section.
-     *
-     * @return a {@link Set<Plugin>} that can be additionally populated by {@link #populatePluginManagement(Set)}}.
-     * If not, an empty set is returned
-     * */
-    private Set<Plugin> getPluginManagement() {
-        final Set<Plugin> pluginManagementCollector = new TreeSet<>(PLUGIN_COMPARATOR);
-        populatePluginManagement(pluginManagementCollector);
-        return pluginManagementCollector;
+    private static PluginUpdatesDetails mergePluginUpdates(PluginUpdatesDetails left, PluginUpdatesDetails right) {
+        Map<Dependency, ArtifactVersions> dependencies = new TreeMap<>(DependencyComparator.INSTANCE);
+        dependencies.putAll(left.getDependencyVersions());
+        right.getDependencyVersions()
+                .forEach((dependency, versions) ->
+                        dependencies.merge(dependency, versions, AbstractPluginUpdatesReport::mergeVersions));
+        return new PluginUpdatesDetails(mergeVersions(left, right), dependencies, left.isIncludeSnapshots());
     }
 
-    /**
-     * Implementations of {@link AbstractPluginUpdatesReport} may use this to supply the main processing logic
-     * with desired pluginManagement data, which will be used in the creation of the report.
-     *
-     * @param pluginManagementCollector, a set initialized with a {@link PluginComparator} comparator.
-     * */
-    protected abstract void populatePluginManagement(Set<Plugin> pluginManagementCollector);
-
-    /**
-     * Constructs a final instance of a {@link Set<Plugin>} with a {@link PluginComparator} comparator. This set can be
-     * further populated by implementations, and should contain plugins, that are present in projects build section.
-     *
-     * @return a {@link Set<Plugin>} that can be additionally populated by {@link #populatePlugins(Set)}.
-     * If not, an empty set is returned
-     * */
-    private Set<Plugin> getPlugins() {
-        final Set<Plugin> pluginsCollector = new TreeSet<>(PLUGIN_COMPARATOR);
-        populatePlugins(pluginsCollector);
-        return pluginsCollector;
+    private static ArtifactVersions mergeVersions(ArtifactVersions left, ArtifactVersions right) {
+        return new ArtifactVersions(
+                left.getArtifact(),
+                Stream.concat(Arrays.stream(left.getVersions(true)), Arrays.stream(right.getVersions(true)))
+                        .collect(Collectors.toList()));
     }
 
-    /**
-     * Implementations of {@link  AbstractPluginUpdatesReport} may use this to supply the main processing logic
-     * with desired build plugin information, which will be used to create the report.
-     *
-     *@param pluginsCollector, a set initialized with a {@link PluginComparator} comparator.
-     * */
-    protected abstract void populatePlugins(Set<Plugin> pluginsCollector);
+    /** Analyze aggregate projects separately to use each project's repositories and effective plugin versions. */
+    protected List<MavenProject> getProjectsToAnalyze() {
+        return Collections.singletonList(getProject());
+    }
 
     private void renderReport(Locale locale, Sink sink, PluginUpdatesModel model) throws MavenReportException {
         for (String format : formats) {
