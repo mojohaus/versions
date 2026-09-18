@@ -1,0 +1,25 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>localhost</groupId>
+    <artifactId>issue-1339-parent</artifactId>
+    <version>1.0</version>
+    <relativePath>../parent/pom.xml</relativePath>
+  </parent>
+  <artifactId>issue-1339-tests</artifactId>
+  <packaging>pom</packaging>
+  <modules>
+    <module>child</module>
+  </modules>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>localhost</groupId>
+        <artifactId>issue-1339-bom</artifactId>
+        <version>1.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

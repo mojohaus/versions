@@ -1,0 +1,10 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>localhost</groupId>
+  <artifactId>it-set-issue-1338-local-only-parent</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>child</module>
+  </modules>
+</project>
