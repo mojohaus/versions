@@ -12,7 +12,7 @@ boolean test()
     try
     {
         parentPomFile = new File( basedir, "pom.xml" );
-        childPomFile = new File( basedir + File.separator + "child" + File.separator + "pom.xml" );
+        childPomFile = new File( basedir.toString() + File.separator + "child" + File.separator + "pom.xml" );
     
         result = result && verifyThatRangesAreResolvedInParentPom( parentPomFile );
         result = result && verifyThatNoVersionsAreSetInChildPom( childPomFile );

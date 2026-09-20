@@ -4,14 +4,14 @@ try
 {
     File file = new File( basedir, "target/site/plugin-updates-report.html" );
 
-    BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     StringBuilder buf = new StringBuilder();
-    String line = in.readLine();
+    String line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( ' ' );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     String result = buf.toString()

@@ -11,7 +11,7 @@ try
         System.err.println( "versionProp has been changed which shouldn't happen." );
         return false;
     }
-    if ( buf.indexOf( "<version>${versionProp}</version>" ) < 0 )
+    if ( buf.indexOf( '<version>${versionProp}</version>' ) < 0 )
     {
         System.err.println( "version entry has been changed which should not happen." );
         return false;

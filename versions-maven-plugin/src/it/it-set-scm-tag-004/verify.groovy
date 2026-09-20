@@ -5,14 +5,14 @@ try
 {
     File file = new File( basedir, "pom.xml" );
 
-    BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     StringBuilder buf = new StringBuilder();
-    String line = in.readLine();
+    String line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( " " );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     Pattern p = Pattern.compile( "\\Q<scm>\\E\\s*\\Q<tag>\\Ev1\\.0\\Q</tag>\\E\\s*\\Q</scm>\\E" );

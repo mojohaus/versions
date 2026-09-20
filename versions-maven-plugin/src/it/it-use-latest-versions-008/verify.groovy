@@ -11,7 +11,7 @@ try
         System.err.println( "The version property has been changed which should never happen." );
         return false;
     }
-    if ( buf.indexOf( "<version>${api.version}</version>" ) < 0 ) 
+    if ( buf.indexOf( '<version>${api.version}</version>' ) < 0 ) 
     {
         System.err.println( "The version entry in dependencyManagement has been changed which should never happen." );
         return false;

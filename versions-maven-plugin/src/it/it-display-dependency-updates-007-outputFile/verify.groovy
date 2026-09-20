@@ -23,7 +23,7 @@ try
         return false;
     }
     buf = FileUtils.fileRead( file );
-    Matcher m = p.matcher( buf.toString() );
+    m = p.matcher( buf.toString() );
     if ( !m.find() )
     {
         System.out.println( "Did not suggest updating dummy-api to version 3.0 in outputFile" );

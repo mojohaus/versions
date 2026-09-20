@@ -11,9 +11,9 @@ try
         System.err.println( "Version not updated to 3.0" );
         return false;
     }
-    if ( buf.indexOf( "<version>[${api}]</version>" ) < 0 )
+    if ( buf.indexOf( '<version>[${api}]</version>' ) < 0 )
     {
-        System.err.println( "Version entry <version>[${api}]</version> has been changed which should not happen!" );
+        System.err.println( 'Version entry <version>[${api}]</version> has been changed which should not happen!' );
         return false;
     }
 }

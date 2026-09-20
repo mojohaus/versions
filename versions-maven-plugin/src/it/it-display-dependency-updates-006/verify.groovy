@@ -17,8 +17,8 @@ try
         return false;
     }
     
-    Pattern p = Pattern.compile( "localhost:dummy-api .* 2\\.0 -> 3\\.0" );
-    Matcher m = p.matcher( buf.toString() );
+    p = Pattern.compile( "localhost:dummy-api .* 2\\.0 -> 3\\.0" );
+    m = p.matcher( buf.toString() );
     if ( !m.find() )
     {
         System.out.println( "localhost:dummy-api 2.0 -> 2.0 was not processed." );
