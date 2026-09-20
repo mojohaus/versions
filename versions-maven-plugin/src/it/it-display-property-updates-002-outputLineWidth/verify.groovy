@@ -11,7 +11,7 @@ try
         return false;
     }
     buf = FileUtils.fileRead( outputFile );
-    if ( !buf.contains("${api} ........................................................................................... 1.0 ->") )
+    if ( !buf.contains('${api} ........................................................................................... 1.0 ->') )
     {
         System.out.println( "displayTerminalWidth parameter not respected" );
         return false;

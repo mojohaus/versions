@@ -6,14 +6,14 @@ try
 
     File file = new File( basedir, "module-a2/pom.xml" );
 
-    BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     StringBuilder buf = new StringBuilder();
-    String line = in.readLine();
+    String line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( " " );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     Pattern p1 = Pattern.compile( "\\Q<parent>\\E.*\\Q<version>1.0</version>\\E.*\\Q</parent>\\E" );

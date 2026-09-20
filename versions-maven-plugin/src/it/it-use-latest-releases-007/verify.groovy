@@ -5,14 +5,14 @@ try
 {
     File file = new File( basedir, "pom.xml" );
 
-    BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     StringBuilder buf = new StringBuilder();
-    String line = in.readLine();
+    String line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( " " );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     Pattern p = Pattern.compile( "\\Q<parent>\\E.*\\Q<version>\\E\\s*3\\.0\\s*\\Q</version>\\E.*\\Q</parent>\\E" );
@@ -34,14 +34,14 @@ try
 {
     File file = new File( basedir, "pom.xml" );
 
-    BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     StringBuilder buf = new StringBuilder();
-    String line = in.readLine();
+    String line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( " " );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     Pattern p = Pattern.compile( "\\Q<version>\\E\\s*3\\.0\\s*\\Q</version>\\E.*\\Q<type>pom</type>\\E" );

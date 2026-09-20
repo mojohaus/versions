@@ -9,12 +9,12 @@ try
 
     if ( buf.indexOf( "<api>3.0</api>" ) < 0 )
     {
-        System.err.println( "${api} version not updated to 3.0" );
+        System.err.println( '${api} version not updated to 3.0' );
         return false;
     }
     if ( buf.indexOf( "<impl>2.2</impl>" ) < 0 )
     {
-        System.err.println( "${impl} version not updated to 2.2" );
+        System.err.println( '${impl} version not updated to 2.2' );
         return false;
     }
 }

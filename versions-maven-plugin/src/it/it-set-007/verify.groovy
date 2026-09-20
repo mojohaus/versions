@@ -6,14 +6,14 @@ try
 {
     File file = new File( basedir, "pom.xml" );
 
-    BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     StringBuilder buf = new StringBuilder();
-    String line = in.readLine();
+    String line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( " " );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     Pattern p = Pattern.compile( "\\Q<version>\\E\\s*1\\.2\\.0-SNAPSHOT\\s*\\Q</version>\\E" );
@@ -26,14 +26,14 @@ try
 
     file = new File( basedir, "module-a1/pom.xml" );
 
-    in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     buf = new StringBuilder();
-    line = in.readLine();
+    line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( " " );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     p = Pattern.compile( "\\Q<version>\\E\\s*2\\.0\\.7-SNAPSHOT\\s*\\Q</version>\\E" );
@@ -46,14 +46,14 @@ try
 
     file = new File( basedir, "module-a2/pom.xml" );
 
-    in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     buf = new StringBuilder();
-    line = in.readLine();
+    line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( " " );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     p = Pattern.compile( "\\Q<version>\\E\\s*1\\.0\\.3-SNAPSHOT\\s*\\Q</version>\\E" );

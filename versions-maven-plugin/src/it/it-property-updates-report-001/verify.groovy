@@ -5,14 +5,14 @@ try
 {
     File file = new File( basedir, "target/site/property-updates-report.html" );
 
-    BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
+    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
     StringBuilder buf = new StringBuilder();
-    String line = in.readLine();
+    String line = reader.readLine();
     while ( line != null )
     {
         buf.append( line );
         buf.append( ' ' );
-        line = in.readLine();
+        line = reader.readLine();
     }
 
     String result = buf.toString()
@@ -50,21 +50,21 @@ try
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
-    if ( result.indexOf( "${impl-version} 2.0 2.2" ) < 0 )
+    if ( result.indexOf( '${impl-version} 2.0 2.2' ) < 0 )
     {
-        System.out.println( "Did not generate summary for ${impl-version} correctly" );
+        System.out.println( 'Did not generate summary for ${impl-version} correctly' );
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
-    if ( result.indexOf( "${api-version} 1.0 1.0.1 1.3 3.0" ) < 0 )
+    if ( result.indexOf( '${api-version} 1.0 1.0.1 1.3 3.0' ) < 0 )
     {
-        System.out.println( "Did not generate summary for ${api-version} correctly" );
+        System.out.println( 'Did not generate summary for ${api-version} correctly' );
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
-    if ( result.indexOf( "${plugin-version} 3.0" ) < 0 )
+    if ( result.indexOf( '${plugin-version} 3.0' ) < 0 )
     {
-        System.out.println( "Did not generate summary for ${plugin-version} correctly" );
+        System.out.println( 'Did not generate summary for ${plugin-version} correctly' );
         System.out.println( "Result = \"" + result +"\"" );
         return false;
     }
