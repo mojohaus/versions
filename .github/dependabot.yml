@@ -9,6 +9,10 @@ updates:
     - "versions-maven-plugin/src/test/resources/**"
   schedule:
     interval: daily
+  ignore:
+    # plexus-xml 4.x depends on the Maven 4 XML API
+    - dependency-name: "org.codehaus.plexus:plexus-xml"
+      versions: [">= 4.0.0"]
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
