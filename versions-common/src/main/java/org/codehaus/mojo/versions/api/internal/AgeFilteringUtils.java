@@ -31,7 +31,7 @@ import org.eclipse.aether.repository.RemoteRepository;
  */
 public class AgeFilteringUtils {
 
-    private static ThreadLocal<ArtifactAgeService> ageServiceCache = new ThreadLocal<>();
+    private static final ThreadLocal<ArtifactAgeService> AGE_SERVICE_CACHE = new ThreadLocal<>();
 
     private AgeFilteringUtils() {
         // utility class
@@ -44,17 +44,17 @@ public class AgeFilteringUtils {
      * @return the {@link ArtifactAgeService}
      */
     public static ArtifactAgeService getArtifactAgeService(Log log) {
-        ArtifactAgeService service = ageServiceCache.get();
+        ArtifactAgeService service = AGE_SERVICE_CACHE.get();
         if (service == null) {
             service = new ArtifactAgeService(log);
-            ageServiceCache.set(service);
+            AGE_SERVICE_CACHE.set(service);
         }
         return service;
     }
 
     /**
-     * Converts an {@link ArtifactRepository} to a {@link RemoteRepository}, or returns
-     * null if the repository is not a remote repository.
+     * Converts an {@link ArtifactRepository} to a {@link RemoteRepository}, or returns null if the repository is not a
+     * remote repository.
      *
      * @param repository the artifact repository
      * @return the remote repository, or null
@@ -67,6 +67,6 @@ public class AgeFilteringUtils {
      * Clears the cached {@link ArtifactAgeService}. Useful for testing.
      */
     public static void clearCache() {
-        ageServiceCache.remove();
+        AGE_SERVICE_CACHE.remove();
     }
 }

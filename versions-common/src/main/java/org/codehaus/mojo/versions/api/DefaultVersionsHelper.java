@@ -210,14 +210,14 @@ public class DefaultVersionsHelper implements VersionsHelper {
             VersionRangeResult versionRangeResult =
                     repositorySystem.resolveVersionRange(mavenSession.getRepositorySession(), versionRangeRequest);
 
-            Stream<org.eclipse.aether.version.Version> versions = versionRangeResult.getVersions().stream()
-                    .filter(v -> ignoredVersions.stream().noneMatch(i -> {
-                        if (IgnoreVersionHelper.isVersionIgnored(v, i)) {
+            Stream<Version> versions = versionRangeResult.getVersions().stream()
+                    .filter(version -> ignoredVersions.stream().noneMatch(ignoredVersion -> {
+                        if (IgnoreVersionHelper.isVersionIgnored(version, ignoredVersion)) {
                             if (log.isDebugEnabled()) {
-                                log.debug("Version " + v + " for artifact "
+                                log.debug("Version " + version + " for artifact "
                                         + ArtifactUtils.versionlessKey(artifact)
                                         + " found on ignore list: "
-                                        + i);
+                                        + ignoredVersion);
                             }
                             return true;
                         }

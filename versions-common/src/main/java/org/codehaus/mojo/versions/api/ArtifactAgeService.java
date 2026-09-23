@@ -24,6 +24,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,6 +54,10 @@ import static org.codehaus.mojo.versions.api.internal.AgeFilteringUtils.toRemote
  * @since 2.18.0
  */
 public class ArtifactAgeService {
+
+    private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter.ofPattern(
+                    "EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH)
+            .withZone(ZoneOffset.UTC);
 
     private final Log log;
 
@@ -109,7 +117,9 @@ public class ArtifactAgeService {
     Optional<Instant> getPublicationDate(
             String groupId, String artifactId, String version, RemoteRepository repository) {
 
-        String cacheKey = groupId + ":" + artifactId + ":" + version;
+        String cacheKey = repository == null
+                ? groupId + ":" + artifactId + ":" + version + ":null"
+                : repository.getId() + ":" + repository.getUrl() + ":" + groupId + ":" + artifactId + ":" + version;
         return cache.computeIfAbsent(cacheKey, k -> resolvePublicationDate(groupId, artifactId, version, repository));
     }
 
@@ -212,6 +222,18 @@ public class ArtifactAgeService {
             // consume minimal response to avoid leaking connections
             int status = connection.getResponseCode();
             if (status == HttpURLConnection.HTTP_OK) {
+                String lastModifiedHeader = connection.getHeaderField("Last-Modified");
+                if (lastModifiedHeader != null && !lastModifiedHeader.isEmpty()) {
+                    try {
+                        return Optional.of(Instant.from(HTTP_DATE_FORMATTER.parse(lastModifiedHeader)));
+                    } catch (DateTimeParseException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Unparseable Last-Modified header '" + lastModifiedHeader + "' for " + groupId
+                                    + ":" + artifactId + ":" + version + " at " + pomUrlStr);
+                        }
+                    }
+                }
+
                 long lastModified = connection.getLastModified();
                 if (lastModified > 0) {
                     return Optional.of(Instant.ofEpochMilli(lastModified));

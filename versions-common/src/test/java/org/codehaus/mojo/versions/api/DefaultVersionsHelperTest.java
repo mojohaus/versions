@@ -322,7 +322,7 @@ class DefaultVersionsHelperTest {
 
         // Mock ArtifactAgeService via ThreadLocal in AgeFilteringUtils
         AgeFilteringUtils.clearCache();
-        Field ageServiceThreadLocalField = AgeFilteringUtils.class.getDeclaredField("ageServiceCache");
+        Field ageServiceThreadLocalField = AgeFilteringUtils.class.getDeclaredField("AGE_SERVICE_CACHE");
         ageServiceThreadLocalField.setAccessible(true);
         @SuppressWarnings("unchecked")
         ThreadLocal<ArtifactAgeService> threadLocal =

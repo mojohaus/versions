@@ -118,7 +118,7 @@ class ArtifactAgeServiceTest {
     void readsHttpLastModifiedHeader() throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
         server.createContext("/repo/com/example/artifact/3.0.0/artifact-3.0.0.pom", exchange -> {
-            exchange.getResponseHeaders().add("Last-Modified", "Sun, 13 Sep 2026 01:05:37 GMT");
+            exchange.getResponseHeaders().add("Last-Modified", "Sun, 13 Sep 2026 01:05:37 Z");
             exchange.sendResponseHeaders(200, -1);
             exchange.close();
         });
