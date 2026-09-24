@@ -23,10 +23,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -149,11 +151,17 @@ public class ArtifactAgeService {
             }
             return true;
         }
-        Instant threshold = Instant.now().minusSeconds((long) minDaysOld * 86400);
+        Instant threshold = Instant.now().minus(minDaysOld, ChronoUnit.DAYS);
         boolean old = publicationDate.get().isBefore(threshold);
         if (!old && log.isDebugEnabled()) {
-            log.debug("Skipping " + groupId + ":" + artifactId + ":" + version + " – published " + publicationDate.get()
-                    + " which is less than " + minDaysOld + " days ago");
+            log.debug(String.format(
+                    "Skipping %s:%s:%s – published %s which is less than %d days ago. It's only %s days old.",
+                    groupId,
+                    artifactId,
+                    version,
+                    publicationDate.get(),
+                    minDaysOld,
+                    Duration.between(publicationDate.get(), Instant.now()).toDays()));
         }
         return old;
     }
@@ -186,6 +194,9 @@ public class ArtifactAgeService {
         String pomPath = groupIdPath + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".pom";
 
         if (repoUrl.startsWith("file:")) {
+            log.warn(String.format(
+                    "Repository for %s:%s:%s is a file repository; this may be unreliable. Examining: %s.",
+                    groupId, artifactId, version, pomPath));
             return probeFileRepository(repoUrl, pomPath);
         }
 

@@ -24,12 +24,15 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
@@ -329,9 +332,18 @@ class DefaultVersionsHelperTest {
                 (ThreadLocal<ArtifactAgeService>) ageServiceThreadLocalField.get(null);
         threadLocal.set(new ArtifactAgeService(log) {
             @Override
-            public boolean isOldEnough(
-                    String groupId, String artifactId, String version, int minDaysOld, RemoteRepository repository) {
-                return "1.0.0".equals(version);
+            Optional<Instant> getPublicationDate(
+                    String groupId, String artifactId, String version, RemoteRepository repository) {
+                switch (version) {
+                    case "1.0.0":
+                        // 10 days old
+                        return Optional.of(Instant.now().minus(10, ChronoUnit.DAYS));
+                    case "2.0.0":
+                        // 2 days old
+                        return Optional.of(Instant.now().minus(2, ChronoUnit.DAYS));
+                    default:
+                        throw new IllegalArgumentException("Unknown version: " + version);
+                }
             }
         });
 

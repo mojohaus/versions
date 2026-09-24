@@ -54,6 +54,7 @@ import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.Version;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -284,11 +285,9 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
                         .then(invocation -> {
                             VersionRangeRequest request = invocation.getArgument(1);
-                            org.eclipse.aether.version.Version current =
-                                    new GenericVersionScheme().parseVersion("1.0.0");
-                            org.eclipse.aether.version.Version old = new GenericVersionScheme().parseVersion("1.1.0");
-                            org.eclipse.aether.version.Version recent =
-                                    new GenericVersionScheme().parseVersion("4.5.6.Final");
+                            Version current = new GenericVersionScheme().parseVersion("1.0.0");
+                            Version old = new GenericVersionScheme().parseVersion("1.1.0");
+                            Version recent = new GenericVersionScheme().parseVersion("4.5.6.Final");
                             return new VersionRangeResult(request)
                                     .addVersion(current)
                                     .addVersion(old)
