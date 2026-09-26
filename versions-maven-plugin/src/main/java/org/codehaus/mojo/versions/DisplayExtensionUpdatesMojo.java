@@ -202,7 +202,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
         DependencyFilter includeFilter = DependencyFilter.parseFrom(extensionIncludes);
         DependencyFilter excludeFilter = DependencyFilter.parseFrom(extensionExcludes);
         ResolverAdapter resolverAdapter =
-                new DefaultResolverAdapter(artifactFactory, repositorySystem, getLog(), session);
+                new DefaultResolverAdapter(artifactFactory, repositorySystem, getLog(), session, minDaysOld);
         RuleService ruleService = new RulesServiceBuilder()
                 .withMavenSession(session)
                 .withWagonMap(wagonMap)

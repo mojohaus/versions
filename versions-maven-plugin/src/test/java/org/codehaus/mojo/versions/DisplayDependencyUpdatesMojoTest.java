@@ -16,13 +16,20 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
+import com.sun.net.httpserver.HttpServer;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
@@ -42,6 +49,12 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.CloseableTempFile;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.Version;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,7 +79,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
@@ -239,6 +254,85 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             assertThat(output, containsString("1.1.0"));
             assertThat(output, not(containsString("2.0.0")));
+        }
+    }
+
+    @Test
+    public void testMinDaysOldExcludesRecentDependencyUpdate() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            DateTimeFormatter httpDate = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH)
+                    .withZone(ZoneOffset.UTC);
+            String oldDate = httpDate.format(Instant.now().minus(30, ChronoUnit.DAYS));
+            String recentDate = httpDate.format(Instant.now().minus(1, ChronoUnit.DAYS));
+
+            HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
+            server.createContext(
+                    "/old/default-group/default-dependency/1.1.0/default-dependency-1.1.0.pom", exchange -> {
+                        exchange.getResponseHeaders().add("Last-Modified", oldDate);
+                        exchange.sendResponseHeaders(200, -1);
+                        exchange.close();
+                    });
+            server.createContext(
+                    "/recent/default-group/default-dependency/4.5.6.Final/default-dependency-4.5.6.Final.pom",
+                    exchange -> {
+                        exchange.getResponseHeaders().add("Last-Modified", recentDate);
+                        exchange.sendResponseHeaders(200, -1);
+                        exchange.close();
+                    });
+            server.start();
+            try {
+                RepositorySystem repositorySystem = mock(RepositorySystem.class);
+                when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                        .then(invocation -> {
+                            VersionRangeRequest request = invocation.getArgument(1);
+                            Version current = new GenericVersionScheme().parseVersion("1.0.0");
+                            Version old = new GenericVersionScheme().parseVersion("1.1.0");
+                            Version recent = new GenericVersionScheme().parseVersion("4.5.6.Final");
+                            return new VersionRangeResult(request)
+                                    .addVersion(current)
+                                    .addVersion(old)
+                                    .addVersion(recent)
+                                    .setRepository(
+                                            old,
+                                            new RemoteRepository.Builder(
+                                                            "old",
+                                                            "default",
+                                                            "http://127.0.0.1:"
+                                                                    + server.getAddress()
+                                                                            .getPort() + "/old")
+                                                    .build())
+                                    .setRepository(
+                                            recent,
+                                            new RemoteRepository.Builder(
+                                                            "recent",
+                                                            "default",
+                                                            "http://127.0.0.1:"
+                                                                    + server.getAddress()
+                                                                            .getPort() + "/recent")
+                                                    .build());
+                        });
+
+                new DisplayDependencyUpdatesMojo(artifactFactory, repositorySystem, null, null) {
+                    {
+                        setProject(createProject());
+                        processDependencies = true;
+                        processDependencyManagement = false;
+                        dependencyIncludes = singletonList(WildcardMatcher.WILDCARD);
+                        dependencyExcludes = emptyList();
+                        outputFile = tempFile.getPath().toFile();
+                        setPluginContext(new HashMap<>());
+                        minDaysOld = 7;
+                        session = mockMavenSession();
+                        mojoExecution = mock(MojoExecution.class);
+                    }
+                }.execute();
+
+                String output = String.join("", Files.readAllLines(tempFile.getPath()));
+                assertThat(output, containsString("1.1.0"));
+                assertThat(output, not(containsString("4.5.6.Final")));
+            } finally {
+                server.stop(0);
+            }
         }
     }
 

@@ -40,9 +40,12 @@ import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
+import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.version.Version;
 
 import static java.util.Optional.of;
 import static org.apache.maven.RepositoryUtils.toArtifact;
+import static org.codehaus.mojo.versions.api.internal.AgeFilteringUtils.getArtifactAgeService;
 
 public class DefaultResolverAdapter implements ResolverAdapter {
 
@@ -56,16 +59,23 @@ public class DefaultResolverAdapter implements ResolverAdapter {
 
     private final MavenSession mavenSession;
 
+    private final int minDaysOld;
+
     private final List<RemoteRepository> remotePluginRepositories;
 
     private final List<RemoteRepository> remoteProjectRepositories;
 
     public DefaultResolverAdapter(
-            ArtifactFactory artifactFactory, RepositorySystem repositorySystem, Log log, MavenSession mavenSession) {
+            ArtifactFactory artifactFactory,
+            RepositorySystem repositorySystem,
+            Log log,
+            MavenSession mavenSession,
+            int minDaysOld) {
         this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
         this.log = log;
         this.mavenSession = mavenSession;
+        this.minDaysOld = minDaysOld;
 
         this.remoteProjectRepositories = of(mavenSession)
                 .map(MavenSession::getCurrentProject)
@@ -129,22 +139,24 @@ public class DefaultResolverAdapter implements ResolverAdapter {
             Artifact artifact, boolean usePluginRepositories, boolean useProjectRepositories)
             throws VersionRetrievalException {
         try {
+            List<RemoteRepository> repositories = Stream.concat(
+                            usePluginRepositories ? remotePluginRepositories.stream() : Stream.empty(),
+                            useProjectRepositories ? remoteProjectRepositories.stream() : Stream.empty())
+                    .distinct()
+                    .collect(Collectors.toList());
             VersionRangeRequest versionRangeRequest = new VersionRangeRequest(
-                    toArtifact(artifact).setVersion("(,)"),
-                    Stream.concat(
-                                    usePluginRepositories ? remotePluginRepositories.stream() : Stream.empty(),
-                                    useProjectRepositories ? remoteProjectRepositories.stream() : Stream.empty())
-                            .distinct()
-                            .collect(Collectors.toList()),
-                    "lookupArtifactVersions");
+                    toArtifact(artifact).setVersion("(,)"), repositories, "lookupArtifactVersions");
+
+            VersionRangeResult versionRangeResult =
+                    repositorySystem.resolveVersionRange(mavenSession.getRepositorySession(), versionRangeRequest);
+
+            Stream<org.eclipse.aether.version.Version> versions = versionRangeResult.getVersions().stream();
+            versions =
+                    getArtifactAgeService(log).filterVersionsByAge(artifact, minDaysOld, versions, versionRangeResult);
 
             return new ArtifactVersions(
                     artifact,
-                    repositorySystem
-                            .resolveVersionRange(mavenSession.getRepositorySession(), versionRangeRequest)
-                            .getVersions()
-                            .stream()
-                            .map(v -> ArtifactVersionService.getArtifactVersion(v.toString()))
+                    versions.map((Version version) -> ArtifactVersionService.getArtifactVersion(version.toString()))
                             .collect(Collectors.toList()));
         } catch (VersionRangeResolutionException e) {
             throw new VersionRetrievalException(e.getMessage(), artifact, e);
