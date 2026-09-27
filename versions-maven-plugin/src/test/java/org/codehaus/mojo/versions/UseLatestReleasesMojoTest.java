@@ -17,6 +17,7 @@ package org.codehaus.mojo.versions;
 
 import javax.xml.stream.XMLStreamException;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.maven.model.Model;
@@ -39,6 +40,7 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 
 public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
@@ -132,5 +134,40 @@ public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
 
         tryUpdate();
         assertThat(changeRecorder.getChanges(), empty());
+    }
+
+    @Test
+    public void testExcludeFilterAppliesToCandidateVersion()
+            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
+                    VersionRetrievalException {
+        mojo.getProject()
+                .getModel()
+                .setDependencies(Arrays.asList(
+                        DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("dependency-artifact")
+                                .withVersion("0.9.0")
+                                .withType("pom")
+                                .withClassifier("default")
+                                .withScope(SCOPE_COMPILE)
+                                .build(),
+                        DependencyBuilder.newBuilder()
+                                .withGroupId("default-group")
+                                .withArtifactId("other-artifact")
+                                .withVersion("1.0")
+                                .withType("pom")
+                                .withClassifier("default")
+                                .withScope(SCOPE_COMPILE)
+                                .build()));
+        setVariableValueToObject(mojo, "processDependencies", true);
+        // The current version (1.0) does not match this pattern, but the only
+        // available newer release (2.0) does -- gh-1378.
+        setVariableValueToObject(mojo, "excludes", new String[] {"default-group:other-artifact:*:*:2*"});
+
+        tryUpdate();
+        assertThat(
+                changeRecorder.getChanges(),
+                not(hasItem(new DefaultDependencyVersionChange(
+                        "default-group", "other-artifact", "default", "1.0", "2.0"))));
     }
 }
