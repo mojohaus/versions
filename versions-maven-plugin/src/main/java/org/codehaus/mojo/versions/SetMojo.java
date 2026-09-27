@@ -217,8 +217,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      * of that module where Maven is executed in, and the version change may affect parent and sibling modules).
      * Setting to false makes sure only the module (and its submodules) where Maven is executed for is affected.</p>
      *
-     * <p>Since 2.21.0: If the plugin is executed with a project list (Maven CLI option {@code -pl}),
-     * the plugin is always executed on every project on the list as local aggregation root.</p>
+     * <p>If the plugin is executed with a project list (Maven CLI option {@code -pl}),
+     * each selected project is processed using this setting.</p>
      *
      * @since 2.9
      */
@@ -378,8 +378,8 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
 
         try {
             final MavenProject project;
-            if (session.getProjects().size() == session.getAllProjects().size() && processFromLocalAggregationRoot) {
-                project = PomHelper.getLocalRoot(projectBuilder, session, getLog());
+            if (processFromLocalAggregationRoot) {
+                project = PomHelper.getLocalRoot(projectBuilder, session, currentProject, getLog());
             } else {
                 project = currentProject;
             }
