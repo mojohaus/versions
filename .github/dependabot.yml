@@ -13,6 +13,9 @@ updates:
     # plexus-xml 4.x depends on the Maven 4 XML API
     - dependency-name: "org.codehaus.plexus:plexus-xml"
       versions: [">= 4.0.0"]
+    # Mockito 5 requires Java 11; the build still runs on JDK 8
+    - dependency-name: "org.mockito:*"
+      versions: [">= 5.0.0"]
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
