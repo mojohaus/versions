@@ -2,13 +2,12 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>localhost</groupId>
-		<artifactId>grandparent</artifactId>
-		<version>1.0</version>
-	</parent>
-
+	<!-- No parent: the BOM must not inherit the managed moduleTest version from grandparent.
+	     Since Maven 4.0.0-rc-7 (apache/maven#12660) a versionless dependencyManagement entry takes
+	     its version from an imported BOM, which would defeat the versionless entry in parent. -->
+	<groupId>localhost</groupId>
 	<artifactId>bom</artifactId>
+	<version>1.0</version>
 	<packaging>pom</packaging>
 
 	<dependencyManagement>
