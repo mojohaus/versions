@@ -92,6 +92,8 @@ public class PluginUpdatesXmlRendererTest {
 
         String output = String.join("", Files.readAllLines(tempFile)).replaceAll(">\\s*<", "><");
 
+        assertThat(output, containsString("https://www.mojohaus.org/VERSIONS/PLUGIN-UPDATES-REPORT/2.0.0"));
+
         assertThat(output, containsString("<usingLastVersion>0</usingLastVersion>"));
         assertThat(output, containsString("<nextVersionAvailable>0</nextVersionAvailable>"));
         assertThat(output, containsString("<nextIncrementalAvailable>1</nextIncrementalAvailable>"));
