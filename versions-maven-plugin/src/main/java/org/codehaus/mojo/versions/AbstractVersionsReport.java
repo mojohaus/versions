@@ -137,6 +137,19 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     protected Set<String> ignoredVersions;
 
     /**
+     * Minimum number of days a new release must be available before it is considered as an update candidate.
+     * This allows you to ignore very recent releases that may not yet be stable or have undetected
+     * supply-chain attacks.<br>
+     * For example, {@code <minDaysOld>7</minDaysOld>} will only suggest updates that have been
+     * published for at least 7 days.
+     * A value of {@code 0} (the default) disables this filter and all versions are considered.
+     *
+     * @since 2.18.0
+     */
+    @Parameter(property = "versions.minDaysOld", defaultValue = "0")
+    protected int minDaysOld = 0;
+
+    /**
      * Renderer factory
      *
      * @since 2.13.0
@@ -202,6 +215,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
                         .withMavenSession(session)
                         .withPomHelper(pomHelper)
                         .withRuleService(ruleService)
+                        .withMinDaysOld(minDaysOld)
                         .build();
             } catch (MojoExecutionException e) {
                 throw new MavenReportException(e.getMessage(), e);
