@@ -68,12 +68,14 @@ import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
+import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.version.Version;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.apache.maven.RepositoryUtils.toArtifact;
-;
+import static org.codehaus.mojo.versions.api.internal.AgeFilteringUtils.getArtifactAgeService;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -112,6 +114,12 @@ public class DefaultVersionsHelper implements VersionsHelper {
     private final PomHelper pomHelper;
 
     /**
+     * Minimum age in days a version must have before it is considered as an update candidate.
+     * {@code 0} (the default) disables the filter and all versions are considered.
+     */
+    private final int minDaysOld;
+
+    /**
      * Private constructor used by the builder
      */
     private DefaultVersionsHelper(
@@ -120,13 +128,15 @@ public class DefaultVersionsHelper implements VersionsHelper {
             RepositorySystem repositorySystem,
             MavenSession mavenSession,
             RuleService ruleService,
-            Log log) {
+            Log log,
+            int minDaysOld) {
         this.pomHelper = requireNonNull(pomHelper);
         this.artifactFactory = requireNonNull(artifactFactory);
         this.repositorySystem = requireNonNull(repositorySystem);
         this.mavenSession = requireNonNull(mavenSession);
         this.ruleService = requireNonNull(ruleService);
         this.log = requireNonNull(log);
+        this.minDaysOld = minDaysOld;
 
         this.remoteProjectRepositories = of(mavenSession)
                 .map(MavenSession::getCurrentProject)
@@ -182,39 +192,45 @@ public class DefaultVersionsHelper implements VersionsHelper {
                 log.debug("Found ignored versions: " + ignoredVersions + " for artifact" + artifact);
             }
 
+            List<RemoteRepository> repositories = Stream.concat(
+                            usePluginRepositories ? remotePluginRepositories.stream() : Stream.empty(),
+                            useProjectRepositories ? remoteProjectRepositories.stream() : Stream.empty())
+                    .distinct()
+                    .collect(Collectors.toList());
+
             VersionRangeRequest versionRangeRequest = new VersionRangeRequest(
                     toArtifact(artifact)
                             .setVersion(ofNullable(versionRange)
                                     .map(VersionRange::getRestrictions)
                                     .flatMap(list -> list.stream().findFirst().map(Restriction::toString))
                                     .orElse("(,)")),
-                    Stream.concat(
-                                    usePluginRepositories ? remotePluginRepositories.stream() : Stream.empty(),
-                                    useProjectRepositories ? remoteProjectRepositories.stream() : Stream.empty())
-                            .distinct()
-                            .collect(Collectors.toList()),
+                    repositories,
                     "lookupArtifactVersions");
+
+            VersionRangeResult versionRangeResult =
+                    repositorySystem.resolveVersionRange(mavenSession.getRepositorySession(), versionRangeRequest);
+
+            Stream<Version> versions = versionRangeResult.getVersions().stream()
+                    .filter(version -> ignoredVersions.stream().noneMatch(ignoredVersion -> {
+                        if (IgnoreVersionHelper.isVersionIgnored(version, ignoredVersion)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Version " + version + " for artifact "
+                                        + ArtifactUtils.versionlessKey(artifact)
+                                        + " found on ignore list: "
+                                        + ignoredVersion);
+                            }
+                            return true;
+                        }
+
+                        return false;
+                    }));
+
+            versions =
+                    getArtifactAgeService(log).filterVersionsByAge(artifact, minDaysOld, versions, versionRangeResult);
 
             return new ArtifactVersions(
                     artifact,
-                    repositorySystem
-                            .resolveVersionRange(mavenSession.getRepositorySession(), versionRangeRequest)
-                            .getVersions()
-                            .stream()
-                            .filter(v -> ignoredVersions.stream().noneMatch(i -> {
-                                if (IgnoreVersionHelper.isVersionIgnored(v, i)) {
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Version " + v + " for artifact "
-                                                + ArtifactUtils.versionlessKey(artifact)
-                                                + " found on ignore list: "
-                                                + i);
-                                    }
-                                    return true;
-                                }
-
-                                return false;
-                            }))
-                            .map(v -> ArtifactVersionService.getArtifactVersion(v.toString()))
+                    versions.map((Version version) -> ArtifactVersionService.getArtifactVersion(version.toString()))
                             .collect(Collectors.toList()));
         } catch (VersionRangeResolutionException e) {
             throw new VersionRetrievalException(e.getMessage(), artifact, e);
@@ -527,6 +543,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
         private PomHelper pomHelper;
 
+        private int minDaysOld = 0;
+
         /**
          * Creates a new instance
          */
@@ -593,6 +611,19 @@ public class DefaultVersionsHelper implements VersionsHelper {
         }
 
         /**
+         * Sets the minimum age (in days) that a version must have before it is considered as an
+         * update candidate. Versions whose publication date is less than {@code minDaysOld} days
+         * ago are excluded from the result. A value of {@code 0} (the default) disables the filter.
+         *
+         * @param minDaysOld minimum age in days; must be &ge; 0
+         * @return {@link Builder} instance
+         */
+        public Builder withMinDaysOld(int minDaysOld) {
+            this.minDaysOld = minDaysOld;
+            return this;
+        }
+
+        /**
          * Builds the constructed {@linkplain DefaultVersionsHelper} object
          *
          * @return constructed {@linkplain DefaultVersionsHelper}
@@ -600,7 +631,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
          */
         public DefaultVersionsHelper build() throws MojoExecutionException {
             return new DefaultVersionsHelper(
-                    pomHelper, artifactFactory, repositorySystem, mavenSession, ruleService, log);
+                    pomHelper, artifactFactory, repositorySystem, mavenSession, ruleService, log, minDaysOld);
         }
     }
 }
