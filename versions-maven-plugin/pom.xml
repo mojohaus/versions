@@ -358,6 +358,10 @@
                 <configuration>
                   <streamLogs>false</streamLogs>
                   <debug>true</debug>
+                  <environmentVariables>
+                    <!-- each IT is a short-lived JVM: C2 compilation and parallel GC only add startup time -->
+                    <JAVA_TOOL_OPTIONS>-XX:TieredStopAtLevel=1 -XX:+UseSerialGC</JAVA_TOOL_OPTIONS>
+                  </environmentVariables>
                 </configuration>
               </execution>
             </executions>
