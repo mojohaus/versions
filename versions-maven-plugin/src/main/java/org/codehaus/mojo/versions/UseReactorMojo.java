@@ -25,8 +25,8 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -163,9 +163,9 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
             }
 
             for (MavenProject reactorProject : reactorProjects) {
-                if (StringUtils.equals(reactorProject.getGroupId(), dep.getGroupId())
-                        && StringUtils.equals(reactorProject.getArtifactId(), dep.getArtifactId())
-                        && !StringUtils.equals(reactorProject.getVersion(), dep.getVersion())) {
+                if (Objects.equals(reactorProject.getGroupId(), dep.getGroupId())
+                        && Objects.equals(reactorProject.getArtifactId(), dep.getArtifactId())
+                        && !Objects.equals(reactorProject.getVersion(), dep.getVersion())) {
                     if (PomHelper.setDependencyVersion(
                             pom,
                             dep.getGroupId(),
@@ -185,9 +185,9 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
     private void useReactor(MutableXMLStreamReader pom, MavenProject parent)
             throws XMLStreamException, VersionRetrievalException {
         for (MavenProject project : reactorProjects) {
-            if (StringUtils.equals(project.getGroupId(), parent.getGroupId())
-                    && StringUtils.equals(project.getArtifactId(), parent.getArtifactId())
-                    && !StringUtils.equals(project.getVersion(), parent.getVersion())) {
+            if (Objects.equals(project.getGroupId(), parent.getGroupId())
+                    && Objects.equals(project.getArtifactId(), parent.getArtifactId())
+                    && !Objects.equals(project.getVersion(), parent.getVersion())) {
                 if (PomHelper.setProjectParentVersion(pom, project.getVersion())) {
                     getLog().info("Updated parent " + toString(parent) + " to version " + project.getVersion());
                 }
