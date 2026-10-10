@@ -1,33 +1,4 @@
-import java.io.*;
-import java.util.regex.*;
+import java.util.regex.Pattern
 
-try
-{
-    File file = new File( basedir, "pom.xml" );
-
-    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
-    StringBuilder buf = new StringBuilder();
-    String line = reader.readLine();
-    while ( line != null )
-    {
-        buf.append( line );
-        buf.append( " " );
-        line = reader.readLine();
-    }
-
-    Pattern p = Pattern.compile( "\\Q<parent>\\E.*\\Q<version>\\E\\s*3\\.0\\s*\\Q</version>\\E.*\\Q</parent>\\E" );
-    Matcher m = p.matcher( buf.toString() );
-    if ( !m.find() )
-    {
-        System.out.println( "Did not update parent to version 3.0" );
-        return false;
-    }
-    System.out.println( m.group( 0 ) );
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "pom.xml").readLines("UTF-8").collect { it + " " }.join('')
+assert Pattern.compile("\\Q<parent>\\E.*\\Q<version>\\E\\s*3\\.0\\s*\\Q</version>\\E.*\\Q</parent>\\E").matcher(buf).find() : "Did not update parent to version 3.0"

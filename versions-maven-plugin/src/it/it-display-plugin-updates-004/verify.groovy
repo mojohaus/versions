@@ -1,24 +1,4 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-import java.util.regex.*;
+import java.util.regex.Pattern
 
-try
-{
-    File file = new File( basedir, "build.log" );
-    String buf = FileUtils.fileRead( file );
-
-    Pattern p = Pattern.compile( "\\QAll plugins have a version specified.\\E" );
-    Matcher m = p.matcher( buf.toString() );
-    if ( m.find() )
-    {
-        System.out.println( "Did not notice that clean plugin does not have a version specified" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "build.log").text
+assert !Pattern.compile("\\QAll plugins have a version specified.\\E").matcher(buf).find() : "Did not notice that clean plugin does not have a version specified"

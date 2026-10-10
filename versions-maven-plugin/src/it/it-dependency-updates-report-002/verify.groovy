@@ -1,69 +1,8 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
+def report = new File(basedir, "target/site/dependency-updates-report.html").getText("UTF-8")
+        .replaceAll("<[^>]+>", " ")
+        .replaceAll("&[^;]+;", " ")
+        .replaceAll("\\s+", " ")
 
-try
-{
-    File file = new File( basedir, "target/site/dependency-updates-report.html" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-
-    String result = buf.toString()
-            .replaceAll( "<[^>]+>", " " )
-            .replaceAll( "&[^;]+;", " " )
-            .replaceAll( "\\s+", " " );
-
-//    if ( result.indexOf( "localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.1 1.2 2.0" ) < 0 )
-//    {
-//        System.out.println( "Did not generate summary correctly" );
-//        System.out.println( "Result = \"" + result +"\"" );
-//        return false;
-//    }
-//    if ( result.indexOf( "1.1.0-2" ) < 0)
-//    {
-//        System.out.println( "Did not identify next version" );
-//        System.out.println( "Result = \"" + result +"\"" );
-//        return false;
-//    }
-//    if ( result.indexOf( "1.1.1" ) < 0)
-//    {
-//        System.out.println( "Did not identify next incremental" );
-//        System.out.println( "Result = \"" + result +"\"" );
-//        return false;
-//    }
-//    if ( result.indexOf( "1.1.3 Latest Incremental" ) < 0)
-//    {
-//        System.out.println( "Did not identify latest incremental" );
-//        System.out.println( "Result = \"" + result +"\"" );
-//        return false;
-//    }
-//    if ( result.indexOf( "1.2" ) < 0)
-//    {
-//        System.out.println( "Did not identify next minor version" );
-//        System.out.println( "Result = \"" + result +"\"" );
-//        return false;
-//    }
-//    if ( result.indexOf( "1.3 Latest Minor" ) < 0)
-//    {
-//        System.out.println( "Did not identify latest minor version" );
-//        System.out.println( "Result = \"" + result +"\"" );
-//        return false;
-//    }
-//    if ( result.indexOf( "2.0" ) < 0)
-//    {
-//        System.out.println( "Did not identify next major version" );
-//        System.out.println( "Result = \"" + result +"\"" );
-//        return false;
-//    }
-//    if ( result.indexOf( "3.0 Latest Major" ) < 0 )
-//    {
-//        System.out.println( "Did not identify latest major version" );
-//        System.out.println( "Result = \"" + result +"\"" );
-//        return false;
-//    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+// the range stays as declared, and 3.0 is reported as lying outside it
+assert report.contains("localhost dummy-api [1.1,3.0) compile jar 3.0")
+assert report.contains("3.0 Latest Major * Outside allowed version range")

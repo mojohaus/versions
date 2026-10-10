@@ -1,25 +1,4 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-import java.util.regex.*;
+import java.util.regex.Pattern
 
-try
-{
-    File file = new File( basedir, "build.log" );
-    String buf = FileUtils.fileRead( file );
-
-    Pattern p = Pattern.compile( "\\Qlocalhost:dummy-maven-plugin\\E\\s*\\.*\\s*1\\.0\\s+->\\s+3\\.1" );
-    Matcher m = p.matcher( buf.toString() );
-    if ( !m.find() )
-    {
-        System.out.println( "Did not suggest updating dummy-maven-plugin to version 3.1" );
-        return false;
-    }
-    System.out.println( m.group( 0 ) );
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "build.log").text
+assert Pattern.compile("\\Qlocalhost:dummy-maven-plugin\\E\\s*\\.*\\s*1\\.0\\s+->\\s+3\\.1").matcher(buf).find() : "Did not suggest updating dummy-maven-plugin to version 3.1"

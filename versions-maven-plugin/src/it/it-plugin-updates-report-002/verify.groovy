@@ -1,42 +1,4 @@
-import java.io.*;
-
-try
-{
-    File file = new File( basedir, "target/site/plugin-updates-report.html" );
-
-    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
-    StringBuilder buf = new StringBuilder();
-    String line = reader.readLine();
-    while ( line != null )
-    {
-        buf.append( line );
-        buf.append( ' ' );
-        line = reader.readLine();
-    }
-
-    String result = buf.toString()
-            .replaceAll( "<[^>]+>", " " )
-            .replaceAll( "&[^;]+;", " " )
-            .replaceAll( "\\s+", " " );
-
-    if ( result.indexOf( "localhost dummy-maven-plugin 1.0 3.1" ) < 0 )
-    {
-        System.out.println( "Did not generate summary correctly" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "Group Id localhost Artifact Id dummy-maven-plugin Current Version 1.0 Newer versions 2.0 "
-            + "2.1 3.0 3.1 Latest Major" ) < 0)
-    {
-        System.out.println( "Did not identify plugin next versions" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "target/site/plugin-updates-report.html").readLines("UTF-8").collect { it + " " }.join('')
+def result = buf.toString().replaceAll( "<[^>]+>", " " ).replaceAll( "&[^;]+;", " " ).replaceAll( "\\s+", " " )
+assert result.contains("localhost dummy-maven-plugin 1.0 3.1") : "Did not generate summary correctly" + "\n" + "Result = \"" + result +"\""
+assert result.contains("Group Id localhost Artifact Id dummy-maven-plugin Current Version 1.0 Newer versions 2.0 " + "2.1 3.0 3.1 Latest Major") : "Did not identify plugin next versions" + "\n" + "Result = \"" + result +"\""
