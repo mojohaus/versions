@@ -27,7 +27,7 @@ final class TextAssertions {
 
     private TextAssertions() {}
 
-    static void assertContains(String actual, String... expected) {
+    static void assertTextContains(String actual, String... expected) {
         for (String part : expected) {
             if (actual == null || !actual.contains(part)) {
                 fail("expected to contain \"" + part + "\" but was:\n" + actual);
@@ -35,7 +35,7 @@ final class TextAssertions {
         }
     }
 
-    static void assertNotContains(String actual, String... unexpected) {
+    static void assertTextNotContains(String actual, String... unexpected) {
         for (String part : unexpected) {
             if (actual != null && actual.contains(part)) {
                 fail("expected not to contain \"" + part + "\" but was:\n" + actual);
@@ -43,7 +43,7 @@ final class TextAssertions {
         }
     }
 
-    static void assertContainsInOrder(String actual, String... parts) {
+    static void assertTextContainsInOrder(String actual, String... parts) {
         int from = 0;
         for (String part : parts) {
             int at = actual == null ? -1 : actual.indexOf(part, from);
@@ -57,9 +57,22 @@ final class TextAssertions {
     /**
      * Matches the whole text against the expression, like {@link java.util.regex.Matcher#matches()}.
      */
-    static void assertMatches(String actual, String regex) {
+    static void assertTextMatches(String actual, String regex) {
         if (actual == null || !Pattern.compile(regex).matcher(actual).matches()) {
             fail("expected to match " + regex + " but was:\n" + actual);
+        }
+    }
+
+    /** Finds the expression somewhere in the text, like {@link java.util.regex.Matcher#find()}. */
+    static void assertTextContainsPattern(String actual, String regex) {
+        if (actual == null || !Pattern.compile(regex).matcher(actual).find()) {
+            fail("expected to find " + regex + " in:\n" + actual);
+        }
+    }
+
+    static void assertTextNotContainsPattern(String actual, String regex) {
+        if (actual != null && Pattern.compile(regex).matcher(actual).find()) {
+            fail("expected not to find " + regex + " in:\n" + actual);
         }
     }
 

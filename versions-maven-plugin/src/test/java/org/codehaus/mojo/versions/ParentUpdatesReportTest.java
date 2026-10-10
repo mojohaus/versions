@@ -41,7 +41,7 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.plexus.i18n.I18N;
 import org.junit.jupiter.api.Test;
 
-import static org.codehaus.mojo.versions.TextAssertions.assertContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
@@ -104,7 +104,7 @@ public class ParentUpdatesReportTest {
         }.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertContains(output, "1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT");
+        assertTextContains(output, "1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT");
     }
 
     @Test

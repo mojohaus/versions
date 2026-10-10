@@ -53,7 +53,7 @@ import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.TextAssertions.assertAnyLineContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertContainsInOrder;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContainsInOrder;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
@@ -169,7 +169,7 @@ public class DisplayParentUpdatesMojoTest {
     public void testParentDowngradeAllowed() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowDowngrade = true;
         mojo.execute();
-        assertContainsInOrder(
+        assertTextContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
                 "The parent project has a newer version:",
                 "default-group:parent-artifact",
@@ -180,7 +180,7 @@ public class DisplayParentUpdatesMojoTest {
     public void testParentDowngradeForbidden() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowDowngrade = false;
         mojo.execute();
-        assertContainsInOrder(
+        assertTextContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
                 "The parent project is the latest version:",
                 "default-group:parent-artifact",
@@ -235,7 +235,7 @@ public class DisplayParentUpdatesMojoTest {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "0.0.1-1-impl-SNAPSHOT";
         mojo.execute();
-        assertContainsInOrder(
+        assertTextContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
                 "The parent project is the latest version:",
                 "default-group:parent-artifact",
@@ -284,7 +284,7 @@ public class DisplayParentUpdatesMojoTest {
             }
         });
         mojo.execute();
-        assertContainsInOrder(
+        assertTextContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
                 "The parent project is the latest version:",
                 "default-group:parent-artifact",
@@ -303,7 +303,7 @@ public class DisplayParentUpdatesMojoTest {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "[0,1.0.1-SNAPSHOT]";
         mojo.execute();
-        assertContainsInOrder(
+        assertTextContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
                 "The parent project has a newer version:",
                 "default-group:parent-artifact",
@@ -365,7 +365,7 @@ public class DisplayParentUpdatesMojoTest {
         mojo.parentVersion = "[,3.0-!)";
         mojo.execute();
 
-        assertContainsInOrder(
+        assertTextContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
                 "The parent project has a newer version:",
                 "dummy-parent2",
@@ -386,7 +386,7 @@ public class DisplayParentUpdatesMojoTest {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "[,3.0-!)";
         mojo.execute();
-        assertContainsInOrder(
+        assertTextContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
                 "The parent project is the latest version:",
                 "dummy-parent2",

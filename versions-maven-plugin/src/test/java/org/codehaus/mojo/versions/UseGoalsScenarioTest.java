@@ -17,174 +17,118 @@ package org.codehaus.mojo.versions;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
 
-import org.apache.maven.plugin.Mojo;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
-import org.codehaus.mojo.versions.utils.TestChangeRecorder;
-import org.codehaus.mojo.versions.utils.TestUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.apache.maven.api.plugin.testing.Basedir;
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.junit.jupiter.api.Test;
 
-import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
-import static org.codehaus.mojo.versions.utils.TestUtils.createTempDir;
-import static org.codehaus.mojo.versions.utils.TestUtils.tearDownTempDir;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContains;
 
 /**
  * Scenarios of the {@code use-latest-*}, {@code use-next-*} and {@code use-releases} goals that used to be the
  * {@code it-use-*} integration tests. Each test runs the POM of the former IT against the versions of its test
  * repository.
  */
-public class UseGoalsScenarioTest extends AbstractMojoTestCase {
+@ProjectMojoTest
+@Basedir("src/test/resources/org/codehaus/mojo/use-goals")
+class UseGoalsScenarioTest {
 
-    @Rule
-    public final MojoRule mojoRule = new MojoRule(this);
-
-    private Path pomDir;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        pomDir = createTempDir("use-goals");
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            tearDownTempDir(pomDir);
-        } finally {
-            super.tearDown();
-        }
-    }
-
-    private String run(String goal, String scenario) throws Exception {
-        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/use-goals/" + scenario), pomDir);
-        Mojo mojo = mojoRule.lookupConfiguredMojo(pomDir.toFile(), goal);
-        setVariableValueToObject(mojo, "repositorySystem", mockAetherRepositorySystem(new HashMap<String, String[]>() {
-            {
-                put("dummy-api", new String[] {
-                    "1.0",
-                    "1.0.1",
-                    "1.1",
-                    "1.1-SNAPSHOT",
-                    "1.1.0-2",
-                    "1.1.1",
-                    "1.1.1-2",
-                    "1.1.2",
-                    "1.1.2-SNAPSHOT",
-                    "1.1.3",
-                    "1.2",
-                    "1.2.1",
-                    "1.2.2",
-                    "1.3",
-                    "1.9.1-SNAPSHOT",
-                    "2.0",
-                    "2.1",
-                    "2.1.1-SNAPSHOT",
-                    "3.0",
-                    "3.1.1-SNAPSHOT",
-                    "3.1.5-SNAPSHOT",
-                    "3.4.0-SNAPSHOT"
-                });
-                put("update-api", new String[] {"1.9.5", "2.0.0-beta"});
-                put(
-                        "latest-versions-api",
-                        new String[] {"2.0.8", "2.0.11", "2.1.0-M1", "2.2.1", "3.0", "3.0-beta-3", "3.1.0", "3.3.0"});
-            }
-        }));
-        setVariableValueToObject(mojo, "generateBackupPoms", false);
-        setVariableValueToObject(mojo, "changeRecorderFormat", "none");
-        setVariableValueToObject(mojo, "changeRecorders", new TestChangeRecorder().asTestMap());
+    private String run(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        mojo.repositorySystem = ItRepository.repositorySystem();
         mojo.execute();
-        return new String(Files.readAllBytes(pomDir.resolve("pom.xml")), StandardCharsets.UTF_8);
+        return new String(Files.readAllBytes(mojo.getProject().getFile().toPath()), StandardCharsets.UTF_8);
     }
 
     @Test
-    public void testUseLatestReleasesUpdatesToTheLatestRelease() throws Exception {
-        assertThat(run("use-latest-releases", "use-latest-releases-001"), containsString("<version>3.0</version>"));
+    @InjectMojo(goal = "use-latest-releases", pom = "use-latest-releases-001/pom.xml")
+    void useLatestReleasesUpdatesToTheLatestRelease(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>3.0</version>");
     }
 
     @Test
-    public void testUseLatestReleasesWithoutMajorUpdates() throws Exception {
-        assertThat(run("use-latest-releases", "use-latest-releases-004"), containsString("<version>1.3</version>"));
+    @InjectMojo(goal = "use-latest-releases", pom = "use-latest-releases-004/pom.xml")
+    void useLatestReleasesWithoutMajorUpdates(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>1.3</version>");
     }
 
     @Test
-    public void testUseLatestReleasesSkipsABetaOfTheNextMajor() throws Exception {
-        assertThat(
-                run("use-latest-releases", "use-latest-releases-005"),
-                not(containsString("<version>2.0.0-beta</version>")));
+    @InjectMojo(goal = "use-latest-releases", pom = "use-latest-releases-005/pom.xml")
+    void useLatestReleasesSkipsABetaOfTheNextMajor(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextNotContains(run(mojo), "<version>2.0.0-beta</version>");
     }
 
     @Test
-    public void testUseLatestVersionsUpdatesToTheLatestVersion() throws Exception {
-        assertThat(run("use-latest-versions", "use-latest-versions-001"), containsString("<version>3.0</version>"));
+    @InjectMojo(goal = "use-latest-versions", pom = "use-latest-versions-001/pom.xml")
+    void useLatestVersionsUpdatesToTheLatestVersion(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>3.0</version>");
     }
 
     @Test
-    public void testUseLatestVersionsSkipsABetaOfTheNextMajor() throws Exception {
-        assertThat(
-                run("use-latest-versions", "use-latest-versions-004"),
-                not(containsString("<version>2.0.0-beta</version>")));
+    @InjectMojo(goal = "use-latest-versions", pom = "use-latest-versions-004/pom.xml")
+    void useLatestVersionsSkipsABetaOfTheNextMajor(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextNotContains(run(mojo), "<version>2.0.0-beta</version>");
     }
 
     @Test
-    public void testUseLatestVersionsWithoutAnyUpdate() throws Exception {
-        assertThat(run("use-latest-versions", "use-latest-versions-005"), containsString("<version>2.0.8</version>"));
+    @InjectMojo(goal = "use-latest-versions", pom = "use-latest-versions-005/pom.xml")
+    void useLatestVersionsWithoutAnyUpdate(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>2.0.8</version>");
     }
 
     @Test
-    public void testUseLatestVersionsWithIncrementalUpdatesOnly() throws Exception {
-        assertThat(run("use-latest-versions", "use-latest-versions-006"), containsString("<version>2.0.11</version>"));
+    @InjectMojo(goal = "use-latest-versions", pom = "use-latest-versions-006/pom.xml")
+    void useLatestVersionsWithIncrementalUpdatesOnly(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>2.0.11</version>");
     }
 
     @Test
-    public void testUseLatestVersionsWithMinorUpdates() throws Exception {
-        assertThat(run("use-latest-versions", "use-latest-versions-007"), containsString("<version>2.2.1</version>"));
+    @InjectMojo(goal = "use-latest-versions", pom = "use-latest-versions-007/pom.xml")
+    void useLatestVersionsWithMinorUpdates(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>2.2.1</version>");
     }
 
     @Test
-    public void testUseLatestVersionsLeavesAManagedPropertyAlone() throws Exception {
-        String pom = run("use-latest-versions", "use-latest-versions-008");
-        assertThat(pom, containsString("<api.version>2.0.8</api.version>"));
-        assertThat(pom, containsString("<version>${api.version}</version>"));
+    @InjectMojo(goal = "use-latest-versions", pom = "use-latest-versions-008/pom.xml")
+    void useLatestVersionsLeavesAManagedPropertyAlone(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<api.version>2.0.8</api.version>");
+        assertTextContains(pom, "<version>${api.version}</version>");
     }
 
     @Test
-    public void testUseNextReleasesUpdatesToTheNextRelease() throws Exception {
-        assertThat(run("use-next-releases", "use-next-releases-001"), containsString("<version>1.1.2</version>"));
+    @InjectMojo(goal = "use-next-releases", pom = "use-next-releases-001/pom.xml")
+    void useNextReleasesUpdatesToTheNextRelease(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>1.1.2</version>");
     }
 
     @Test
-    public void testUseNextReleasesIgnoresSnapshotsEvenWhenAllowed() throws Exception {
-        assertThat(run("use-next-releases", "use-next-releases-002"), containsString("<version>1.1.2</version>"));
+    @InjectMojo(goal = "use-next-releases", pom = "use-next-releases-002/pom.xml")
+    void useNextReleasesIgnoresSnapshotsEvenWhenAllowed(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>1.1.2</version>");
     }
 
     @Test
-    public void testUseNextReleasesRespectsExcludes() throws Exception {
-        assertThat(run("use-next-releases", "use-next-releases-004"), containsString("<version>1.1.1</version>"));
+    @InjectMojo(goal = "use-next-releases", pom = "use-next-releases-004/pom.xml")
+    void useNextReleasesRespectsExcludes(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>1.1.1</version>");
     }
 
     @Test
-    public void testUseNextVersionsUpdatesToTheNextVersion() throws Exception {
-        assertThat(run("use-next-versions", "use-next-versions-001"), containsString("<version>1.1.2</version>"));
+    @InjectMojo(goal = "use-next-versions", pom = "use-next-versions-001/pom.xml")
+    void useNextVersionsUpdatesToTheNextVersion(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>1.1.2</version>");
     }
 
     @Test
-    public void testUseNextVersionsWithoutSnapshots() throws Exception {
-        assertThat(run("use-next-versions", "use-next-versions-002"), containsString("<version>1.1.2</version>"));
+    @InjectMojo(goal = "use-next-versions", pom = "use-next-versions-002/pom.xml")
+    void useNextVersionsWithoutSnapshots(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>1.1.2</version>");
     }
 
     @Test
-    public void testUseReleasesKeepsAReleaseVersion() throws Exception {
-        assertThat(run("use-releases", "use-releases-001"), containsString("<version>1.1.1-2</version>"));
+    @InjectMojo(goal = "use-releases", pom = "use-releases-001/pom.xml")
+    void useReleasesKeepsAReleaseVersion(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<version>1.1.1-2</version>");
     }
 }
