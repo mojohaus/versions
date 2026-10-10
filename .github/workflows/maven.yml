@@ -27,7 +27,7 @@ jobs:
       ff-goal: 'install'                # site use project version for reporting, no ITs
       verify-goal: '-P run-its verify'
       maven4-enabled: true
-      timeout-minutes: 45                # Windows runs the ITs serially, see the windows profile in pom.xml
+      timeout-minutes: 45                # Windows with Maven 4 came close to the default 30
 
 #  deploy:
 #    name: Deploy

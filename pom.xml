@@ -449,19 +449,4 @@
       </plugin>
     </plugins>
   </reporting>
-
-  <profiles>
-    <profile>
-      <id>windows</id>
-      <activation>
-        <os>
-          <family>windows</family>
-        </os>
-      </activation>
-      <properties>
-        <!-- on windows there are some issues with parallel build -->
-        <invoker.parallelThreads>1</invoker.parallelThreads>
-      </properties>
-    </profile>
-  </profiles>
 </project>
