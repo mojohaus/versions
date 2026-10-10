@@ -52,18 +52,15 @@ import org.mockito.Mock;
 import static java.util.Collections.singleton;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
+import static org.codehaus.mojo.versions.TextAssertions.assertAnyLineContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertContainsInOrder;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -165,33 +162,29 @@ public class DisplayParentUpdatesMojoTest {
                 "pom",
                 "default",
                 new DefaultArtifactHandlerStub("default"));
-        assertThat(
-                mojo.findLatestVersion(artifact, VersionRange.createFromVersionSpec("1.0.1-SNAPSHOT"), null, false),
-                is(nullValue()));
+        assertNull(mojo.findLatestVersion(artifact, VersionRange.createFromVersionSpec("1.0.1-SNAPSHOT"), null, false));
     }
 
     @Test
     public void testParentDowngradeAllowed() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowDowngrade = true;
         mojo.execute();
-        assertThat(
+        assertContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
-                stringContainsInOrder(
-                        "The parent project has a newer version:",
-                        "default-group:parent-artifact",
-                        "1.0.1-SNAPSHOT -> 1.0.0"));
+                "The parent project has a newer version:",
+                "default-group:parent-artifact",
+                "1.0.1-SNAPSHOT -> 1.0.0");
     }
 
     @Test
     public void testParentDowngradeForbidden() throws MojoExecutionException, MojoFailureException, IOException {
         mojo.allowDowngrade = false;
         mojo.execute();
-        assertThat(
+        assertContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
-                stringContainsInOrder(
-                        "The parent project is the latest version:",
-                        "default-group:parent-artifact",
-                        "1.0.1-SNAPSHOT"));
+                "The parent project is the latest version:",
+                "default-group:parent-artifact",
+                "1.0.1-SNAPSHOT");
     }
 
     @Test
@@ -207,8 +200,8 @@ public class DisplayParentUpdatesMojoTest {
         });
 
         ArtifactVersion newVersion = mojo.resolveTargetVersion("[1.0.1-SNAPSHOT,)");
-        assertThat(newVersion, notNullValue());
-        assertThat(newVersion.toString(), is("1.0.0"));
+        assertNotNull(newVersion);
+        assertEquals("1.0.0", newVersion.toString());
     }
 
     @Test
@@ -217,7 +210,7 @@ public class DisplayParentUpdatesMojoTest {
                     InvalidSegmentException {
         mojo.allowDowngrade = false;
         ArtifactVersion newVersion = mojo.resolveTargetVersion("[1.0.1-SNAPSHOT,)");
-        assertThat(newVersion, nullValue());
+        assertNull(newVersion);
     }
 
     @Test
@@ -233,8 +226,8 @@ public class DisplayParentUpdatesMojoTest {
         });
 
         ArtifactVersion newVersion = mojo.resolveTargetVersion("0.0.1-1");
-        assertThat(newVersion, notNullValue());
-        assertThat(newVersion.toString(), is("0.0.1-1-impl-SNAPSHOT"));
+        assertNotNull(newVersion);
+        assertEquals("0.0.1-1-impl-SNAPSHOT", newVersion.toString());
     }
 
     @Test
@@ -242,12 +235,11 @@ public class DisplayParentUpdatesMojoTest {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "0.0.1-1-impl-SNAPSHOT";
         mojo.execute();
-        assertThat(
+        assertContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
-                stringContainsInOrder(
-                        "The parent project is the latest version:",
-                        "default-group:parent-artifact",
-                        "0.0.1-1-impl-SNAPSHOT"));
+                "The parent project is the latest version:",
+                "default-group:parent-artifact",
+                "0.0.1-1-impl-SNAPSHOT");
     }
 
     @Test
@@ -261,7 +253,7 @@ public class DisplayParentUpdatesMojoTest {
             }
         });
         setVariableValueToObject(mojo, "ignoredVersions", singleton("1.0.0"));
-        assertThat(mojo.resolveTargetVersion("0.9.0"), nullValue());
+        assertNull(mojo.resolveTargetVersion("0.9.0"));
     }
 
     @Test
@@ -292,10 +284,11 @@ public class DisplayParentUpdatesMojoTest {
             }
         });
         mojo.execute();
-        assertThat(
+        assertContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
-                stringContainsInOrder(
-                        "The parent project is the latest version:", "default-group:parent-artifact", version));
+                "The parent project is the latest version:",
+                "default-group:parent-artifact",
+                version);
     }
 
     @Test
@@ -310,13 +303,12 @@ public class DisplayParentUpdatesMojoTest {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "[0,1.0.1-SNAPSHOT]";
         mojo.execute();
-        assertThat(
+        assertContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
-                stringContainsInOrder(
-                        "The parent project has a newer version:",
-                        "default-group:parent-artifact",
-                        "[0,1.0.1-SNAPSHOT]",
-                        "1.0.1-SNAPSHOT"));
+                "The parent project has a newer version:",
+                "default-group:parent-artifact",
+                "[0,1.0.1-SNAPSHOT]",
+                "1.0.1-SNAPSHOT");
     }
 
     @Test
@@ -336,8 +328,8 @@ public class DisplayParentUpdatesMojoTest {
 
         ArtifactVersion newVersion = mojo.resolveTargetVersion("0.8.0");
 
-        assertThat(newVersion, notNullValue());
-        assertThat(newVersion.toString(), is("0.9.0"));
+        assertNotNull(newVersion);
+        assertEquals("0.9.0", newVersion.toString());
     }
 
     @Test
@@ -356,8 +348,8 @@ public class DisplayParentUpdatesMojoTest {
 
         ArtifactVersion newVersion = mojo.resolveTargetVersion("1.1.0");
 
-        assertThat(newVersion, notNullValue());
-        assertThat(newVersion.toString(), is("1.1.1"));
+        assertNotNull(newVersion);
+        assertEquals("1.1.1", newVersion.toString());
     }
 
     @Test
@@ -373,9 +365,12 @@ public class DisplayParentUpdatesMojoTest {
         mojo.parentVersion = "[,3.0-!)";
         mojo.execute();
 
-        assertThat(
+        assertContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
-                stringContainsInOrder("The parent project has a newer version:", "dummy-parent2", "[,3.0-!)", "2.0"));
+                "The parent project has a newer version:",
+                "dummy-parent2",
+                "[,3.0-!)",
+                "2.0");
     }
 
     @Test
@@ -391,9 +386,11 @@ public class DisplayParentUpdatesMojoTest {
         mojo.allowSnapshots = true;
         mojo.parentVersion = "[,3.0-!)";
         mojo.execute();
-        assertThat(
+        assertContainsInOrder(
                 String.join("", Files.readAllLines(tempFile)),
-                stringContainsInOrder("The parent project is the latest version:", "dummy-parent2", "[,3.0-!)"));
+                "The parent project is the latest version:",
+                "dummy-parent2",
+                "[,3.0-!)");
     }
 
     @Test
@@ -409,9 +406,11 @@ public class DisplayParentUpdatesMojoTest {
             mojo.execute();
             fail("Should throw an exception");
         } catch (MojoExecutionException e) {
-            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, e.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 
@@ -427,6 +426,6 @@ public class DisplayParentUpdatesMojoTest {
         mojo.allowSnapshots = false;
         mojo.execute();
         List<String> output = Files.readAllLines(tempFile);
-        assertThat(output, hasItem(containsString("The parent project is the latest version")));
+        assertAnyLineContains(output, "The parent project is the latest version");
     }
 }

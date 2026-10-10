@@ -31,10 +31,7 @@ import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
@@ -90,7 +87,7 @@ public class UseLatestVersionsRaceConditionTest {
         AtomicBoolean inUse = new AtomicBoolean(false);
         Wagon testWagon = new TestWagonStub(file -> {
             try {
-                assertThat("Resource is in use", inUse.compareAndSet(false, true), is(true));
+                assertTrue(inUse.compareAndSet(false, true), "Resource is in use");
                 Files.write(file.toPath(), getRulesString().getBytes(StandardCharsets.UTF_8));
                 Thread.sleep(200);
             } catch (Exception e) {
@@ -165,12 +162,14 @@ public class UseLatestVersionsRaceConditionTest {
             mojo.update(null);
         }
 
-        assertThat(
-                changeRecorder.getChanges(),
-                allOf(
-                        hasItem(new DefaultDependencyVersionChange(
-                                "default-group", "artifactA", "default", "1.0.0", "2.0.0")),
-                        hasItem(new DefaultDependencyVersionChange(
-                                "default-group", "artifactB", "default", "1.0.0", "1.1.0"))));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .containsAll(Arrays.asList(
+                                new DefaultDependencyVersionChange(
+                                        "default-group", "artifactA", "default", "1.0.0", "2.0.0"),
+                                new DefaultDependencyVersionChange(
+                                        "default-group", "artifactB", "default", "1.0.0", "1.1.0"))),
+                () -> "changes: " + changeRecorder.getChanges());
     }
 }

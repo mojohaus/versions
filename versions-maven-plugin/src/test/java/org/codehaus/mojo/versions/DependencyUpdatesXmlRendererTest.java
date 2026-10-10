@@ -37,8 +37,7 @@ import org.junit.jupiter.api.Test;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.codehaus.mojo.versions.TextAssertions.assertContains;
 
 /**
  * Basic tests for {@linkplain DependencyUpdatesXmlReportRenderer}.
@@ -90,17 +89,17 @@ public class DependencyUpdatesXmlRendererTest {
                 .render();
         String output = String.join("", Files.readAllLines(tempFile)).replaceAll(">\\s*<", "><");
 
-        assertThat(output, containsString("<usingLastVersion>0</usingLastVersion>"));
-        assertThat(output, containsString("<nextVersionAvailable>0</nextVersionAvailable>"));
-        assertThat(output, containsString("<nextIncrementalAvailable>1</nextIncrementalAvailable>"));
-        assertThat(output, containsString("<nextMinorAvailable>0</nextMinorAvailable>"));
-        assertThat(output, containsString("<nextMajorAvailable>0</nextMajorAvailable>"));
+        assertContains(output, "<usingLastVersion>0</usingLastVersion>");
+        assertContains(output, "<nextVersionAvailable>0</nextVersionAvailable>");
+        assertContains(output, "<nextIncrementalAvailable>1</nextIncrementalAvailable>");
+        assertContains(output, "<nextMinorAvailable>0</nextMinorAvailable>");
+        assertContains(output, "<nextMajorAvailable>0</nextMajorAvailable>");
 
-        assertThat(output, containsString("<currentVersion>1.0.0</currentVersion>"));
-        assertThat(output, containsString("<lastVersion>2.0.0</lastVersion>"));
-        assertThat(output, containsString("<incremental>1.0.1</incremental>"));
-        assertThat(output, containsString("<minor>1.1.0</minor>"));
-        assertThat(output, containsString("<major>2.0.0</major>"));
-        assertThat(output, containsString("<status>incremental available</status>"));
+        assertContains(output, "<currentVersion>1.0.0</currentVersion>");
+        assertContains(output, "<lastVersion>2.0.0</lastVersion>");
+        assertContains(output, "<incremental>1.0.1</incremental>");
+        assertContains(output, "<minor>1.1.0</minor>");
+        assertContains(output, "<major>2.0.0</major>");
+        assertContains(output, "<status>incremental available</status>");
     }
 }

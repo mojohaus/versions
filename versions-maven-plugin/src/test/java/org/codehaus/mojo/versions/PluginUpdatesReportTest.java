@@ -57,17 +57,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
+import static org.codehaus.mojo.versions.TextAssertions.assertContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertMatches;
+import static org.codehaus.mojo.versions.TextAssertions.assertNotContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
@@ -189,8 +187,8 @@ public class PluginUpdatesReportTest {
                         Collections.singletonMap("maven-dependency-plugin", new String[] {"3.7.0", "3.8.1"})))
                 .generate(sinkFactory.createSink(output), sinkFactory, Locale.ROOT);
         String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
-        assertThat(text, containsString("maven-dependency-plugin 3.8.1"));
-        assertThat(text, containsString("maven-dependency-plugin 3.7.0"));
+        assertContains(text, "maven-dependency-plugin 3.8.1");
+        assertContains(text, "maven-dependency-plugin 3.7.0");
     }
 
     @Test
@@ -201,8 +199,8 @@ public class PluginUpdatesReportTest {
         Assertions.assertTrue(report.canGenerateReport());
         report.withPlugins(pluginOf("artifactA", "2.0.0")).generate(factory.createSink(output), factory, Locale.ROOT);
         String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
-        assertThat(text, containsString("artifactA 1.0.0"));
-        assertThat(text, containsString("artifactA 2.0.0"));
+        assertContains(text, "artifactA 1.0.0");
+        assertContains(text, "artifactA 2.0.0");
     }
 
     @Test
@@ -212,7 +210,7 @@ public class PluginUpdatesReportTest {
         TestPluginUpdatesReport report = new TestPluginUpdatesReport().withReportingPlugin("artifactA", null);
         report.generate(factory.createSink(output), factory, Locale.ROOT);
         String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
-        assertThat(text, containsString("artifactA 2.0.0"));
+        assertContains(text, "artifactA 2.0.0");
         Assertions.assertNull(report.getProject().getReportPlugins().get(0).getVersion());
     }
 
@@ -250,20 +248,21 @@ public class PluginUpdatesReportTest {
 
     private void assertReportingVersion(TestPluginUpdatesReport report, String expectedVersion, String originalVersion)
             throws Exception {
-        assertThat(
+        assertEquals(
+                expectedVersion,
                 PluginUpdatesDiscovery.effectivePlugins(report.getProject()).stream()
                         .filter(d -> "reporting".equals(d.context))
                         .findFirst()
                         .map(d -> d.plugin.getVersion())
-                        .orElse(null),
-                equalTo(expectedVersion));
+                        .orElse(null));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         SinkFactory factory = new Xhtml5SinkFactory();
         report.withOnlyProjectPlugins(true).generate(factory.createSink(output), factory, Locale.ROOT);
         String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
-        assertThat(text, containsString("artifactA " + expectedVersion));
-        assertThat(text, not(containsString("artifactA 2.0.0")));
-        assertThat(report.getProject().getReportPlugins().get(0).getVersion(), equalTo(originalVersion));
+        assertContains(text, "artifactA " + expectedVersion);
+        assertNotContains(text, "artifactA 2.0.0");
+        assertEquals(
+                originalVersion, report.getProject().getReportPlugins().get(0).getVersion());
         Mockito.verifyNoInteractions(report.projectBuilder);
     }
 
@@ -294,9 +293,9 @@ public class PluginUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertThat(output, containsString("artifactA"));
-        assertThat(output, not(containsString("artifactB")));
-        assertThat(output, not(containsString("artifactC")));
+        assertContains(output, "artifactA");
+        assertNotContains(output, "artifactB");
+        assertNotContains(output, "artifactC");
     }
 
     @Test
@@ -317,9 +316,9 @@ public class PluginUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertThat(output, containsString("artifactA"));
-        assertThat(output, not(containsString("artifactB")));
-        assertThat(output, not(containsString("artifactC")));
+        assertContains(output, "artifactA");
+        assertNotContains(output, "artifactB");
+        assertNotContains(output, "artifactC");
     }
 
     @Test
@@ -334,8 +333,8 @@ public class PluginUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertThat(output, containsString("artifactA"));
-        assertThat(output, not(anyOf(containsString("artifactB"), containsString("artifactC"))));
+        assertContains(output, "artifactA");
+        assertNotContains(output, "artifactB", "artifactC");
     }
 
     @Test
@@ -352,7 +351,7 @@ public class PluginUpdatesReportTest {
 
         String output =
                 os.toString().replaceAll("\\s", " ").replaceAll("<[^>]+>", " ").replaceAll("&[^;]+;", " ");
-        assertThat(output, matchesPattern(".*\\breport.overview.numNewerVersionAvailable\\s+0\\b.*"));
+        assertMatches(output, ".*\\breport.overview.numNewerVersionAvailable\\s+0\\b.*");
     }
 
     @Test
@@ -367,9 +366,11 @@ public class PluginUpdatesReportTest {
                     .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
             fail("Should throw an exception");
         } catch (MavenReportException e) {
-            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, e.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 }
