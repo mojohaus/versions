@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>localhost</groupId>
-  <artifactId>it-use-releases-issue-134</artifactId>
+  <artifactId>it-use-latest-versions-issue-134</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
   <name>Check if boms are upated</name>
