@@ -49,7 +49,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.TextAssertions.assertAnyLineContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
@@ -180,7 +180,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertContains(String.join("", Files.readAllLines(tempPath)), "default-group:artifactA ... 1.0.0 -> 2.0.0");
+        assertTextContains(String.join("", Files.readAllLines(tempPath)), "default-group:artifactA ... 1.0.0 -> 2.0.0");
     }
 
     @Test
@@ -228,7 +228,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 2.0.0");
+        assertTextContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 2.0.0");
     }
 
     @Test
@@ -252,7 +252,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 1.1.0");
+        assertTextContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 1.1.0");
     }
 
     @Test
@@ -281,7 +281,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 1.0.1");
+        assertTextContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 1.0.1");
     }
 
     @Test

@@ -48,10 +48,10 @@ import org.eclipse.aether.RepositorySystem;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.codehaus.mojo.versions.TextAssertions.assertContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertContainsInOrder;
-import static org.codehaus.mojo.versions.TextAssertions.assertMatches;
-import static org.codehaus.mojo.versions.TextAssertions.assertNotContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContainsInOrder;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextMatches;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
@@ -189,9 +189,9 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertContains(output, "artifactA");
-        assertNotContains(output, "artifactB");
-        assertNotContains(output, "artifactC");
+        assertTextContains(output, "artifactA");
+        assertTextNotContains(output, "artifactB");
+        assertTextNotContains(output, "artifactC");
     }
 
     @Test
@@ -207,8 +207,8 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertContains(output, "artifactA", "artifactB");
-        assertNotContains(output, "artifactC");
+        assertTextContains(output, "artifactA", "artifactB");
+        assertTextNotContains(output, "artifactC");
     }
 
     @Test
@@ -225,8 +225,8 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertContains(output, "artifactA", "artifactB");
-        assertNotContains(output, "artifactC");
+        assertTextContains(output, "artifactA", "artifactB");
+        assertTextNotContains(output, "artifactC");
     }
 
     @Test
@@ -242,8 +242,8 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertContains(output, "artifactA");
-        assertNotContains(output, "artifactB", "artifactC");
+        assertTextContains(output, "artifactA");
+        assertTextNotContains(output, "artifactB", "artifactC");
     }
 
     @Test
@@ -261,7 +261,7 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString().replaceAll("\n", "");
-        assertContains(output, "report.noUpdatesAvailable");
+        assertTextContains(output, "report.noUpdatesAvailable");
     }
 
     /**
@@ -288,7 +288,7 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString().replaceAll("\n", "");
-        assertContainsInOrder(output, "amstrad", "atari", "commodore", "spectrum");
+        assertTextContainsInOrder(output, "amstrad", "atari", "commodore", "spectrum");
     }
 
     /**
@@ -307,7 +307,7 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString().replaceAll("\n", "");
-        assertContainsInOrder(output, "artifactB");
+        assertTextContainsInOrder(output, "artifactB");
     }
 
     @Test
@@ -325,8 +325,8 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString().replaceAll("\n", "").replaceAll("\r", "");
-        assertMatches(output, ".*<td>report.overview.numNewerMajorAvailable</td>\\s*<td>1</td>.*");
-        assertMatches(output, ".*<td>report.overview.numUpToDate</td>\\s*<td>0</td>.*");
+        assertTextMatches(output, ".*<td>report.overview.numNewerMajorAvailable</td>\\s*<td>1</td>.*");
+        assertTextMatches(output, ".*<td>report.overview.numUpToDate</td>\\s*<td>0</td>.*");
     }
 
     @Test
@@ -372,7 +372,7 @@ public class DependencyUpdatesReportTest {
                 .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertContainsInOrder(output, "artifactA", "1.0.0", "artifactB", "1.2.3");
+        assertTextContainsInOrder(output, "artifactA", "1.0.0", "artifactB", "1.2.3");
     }
 
     /*
