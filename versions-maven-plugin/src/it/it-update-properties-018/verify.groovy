@@ -1,26 +1,3 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "pom.xml" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-
-    if ( buf.indexOf( "<api>2.1.1-SNAPSHOT</api>" ) < 0 )
-    {
-        System.err.println( "Version of api not updated to 2.1.1-SNAPSHOT" );
-        return false;
-    }
-    if ( buf.indexOf( "<impl>1.4</impl>" ) < 0 )
-    {
-        System.err.println( "Version of impl not updated to 1.4" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "pom.xml").getText("UTF-8")
+assert buf.contains("<api>2.1.1-SNAPSHOT</api>") : "Version of api not updated to 2.1.1-SNAPSHOT"
+assert buf.contains("<impl>1.4</impl>") : "Version of impl not updated to 1.4"

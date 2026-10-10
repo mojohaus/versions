@@ -1,26 +1,3 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "pom.xml" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-
-    if ( buf.indexOf( "<version>[1.2, 1.3)</version>" ) >= 0 ) 
-    {
-        System.err.println( "Version of dummy-api not resolved" );
-        return false;
-    }
-    if ( buf.indexOf( "<version>[1.3, 1.4)</version>" ) >= 0 )
-    {
-        System.err.println( "Version of dummy-impl not resolved" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "pom.xml").getText("UTF-8")
+assert !buf.contains("<version>[1.2, 1.3)</version>") : "Version of dummy-api not resolved"
+assert !buf.contains("<version>[1.3, 1.4)</version>") : "Version of dummy-impl not resolved"
