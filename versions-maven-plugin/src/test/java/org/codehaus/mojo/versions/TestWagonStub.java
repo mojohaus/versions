@@ -81,6 +81,7 @@ class TestWagonStub implements Wagon {
             Repository source, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider) {}
 
     @Override
+    @SuppressWarnings("deprecation") // part of the Wagon interface
     public void openConnection() {}
 
     @Override
