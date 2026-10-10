@@ -23,10 +23,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
@@ -312,7 +312,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @return true if project and dep refer to the same artifact
      */
     private boolean compare(MavenProject project, Dependency dep) {
-        if (!StringUtils.equals(project.getGroupId(), dep.getGroupId())) {
+        if (!Objects.equals(project.getGroupId(), dep.getGroupId())) {
             return false;
         }
         return project.getArtifactId().equals(dep.getArtifactId());
@@ -327,16 +327,16 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @return true if artifact and dep refer to the same artifact
      */
     private boolean compare(Artifact artifact, Dependency dep) {
-        if (!StringUtils.equals(artifact.getGroupId(), dep.getGroupId())) {
+        if (!Objects.equals(artifact.getGroupId(), dep.getGroupId())) {
             return false;
         }
-        if (!StringUtils.equals(artifact.getArtifactId(), dep.getArtifactId())) {
+        if (!Objects.equals(artifact.getArtifactId(), dep.getArtifactId())) {
             return false;
         }
-        if (!StringUtils.equals(artifact.getType(), dep.getType())) {
+        if (!Objects.equals(artifact.getType(), dep.getType())) {
             return false;
         }
-        return StringUtils.equals(artifact.getClassifier(), dep.getClassifier());
+        return Objects.equals(artifact.getClassifier(), dep.getClassifier());
     }
 
     /**
