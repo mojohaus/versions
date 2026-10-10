@@ -15,6 +15,7 @@ package org.codehaus.mojo.versions;
  *  limitations under the License.
  */
 
+import java.io.File;
 import java.nio.file.Path;
 
 import org.apache.maven.plugin.Mojo;
@@ -31,6 +32,11 @@ interface ProjectMojos {
      * working on the project built from it.
      */
     <T extends Mojo> T lookup(String goal, Path pom) throws Exception;
+
+    /** {@link #lookup(String, Path)} for a {@link File}. */
+    default <T extends Mojo> T lookup(String goal, File pom) throws Exception {
+        return lookup(goal, pom.toPath());
+    }
 
     /**
      * The mojo of {@code goal} in a reactor of the {@code modules} of {@code baseDir}, running in the first module:

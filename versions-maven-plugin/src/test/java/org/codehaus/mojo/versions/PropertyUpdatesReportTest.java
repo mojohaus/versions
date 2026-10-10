@@ -19,8 +19,8 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 import org.apache.maven.artifact.Artifact;
@@ -28,28 +28,32 @@ import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.doxia.tools.SiteTool;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.eclipse.aether.RepositorySystem;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockSiteTool;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit tests for {@link PropertyUpdatesReport}
  */
-public class PropertyUpdatesReportTest extends AbstractMojoTestCase {
-    @Rule
-    public MojoRule mojoRule = new MojoRule(this);
+@ProjectMojoTest
+public class PropertyUpdatesReportTest {
+    protected ProjectMojos mojos;
+
+    @BeforeEach
+    public void injectMojos(ProjectMojos mojos) {
+        this.mojos = mojos;
+    }
 
     private static final RepositorySystem AETHER_REPOSITORY_SYSTEM = mockAetherRepositorySystem();
     private static final SiteTool SITE_TOOL = mockSiteTool();
@@ -59,9 +63,9 @@ public class PropertyUpdatesReportTest extends AbstractMojoTestCase {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
 
-        PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojoRule.lookupConfiguredMojo(
-                new File("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child"),
-                "property-updates-report");
+        PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojos.lookup(
+                "property-updates-report",
+                Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child"));
         setVariableValueToObject(mojo, "siteTool", SITE_TOOL);
         setVariableValueToObject(mojo, "repositorySystem", AETHER_REPOSITORY_SYSTEM);
         setVariableValueToObject(mojo, "includeParent", true);
@@ -71,7 +75,7 @@ public class PropertyUpdatesReportTest extends AbstractMojoTestCase {
                 .replaceAll("<[^>]+>", " ")
                 .replaceAll("&[^;]+;", " ")
                 .replaceAll("\\s+", " ");
-        assertThat(output, containsString("${ver}"));
+        assertTextContains(output, "${ver}");
     }
 
     @Test
@@ -79,9 +83,9 @@ public class PropertyUpdatesReportTest extends AbstractMojoTestCase {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
 
-        PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojoRule.lookupConfiguredMojo(
-                new File("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child"),
-                "property-updates-report");
+        PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojos.lookup(
+                "property-updates-report",
+                Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367/child"));
         setVariableValueToObject(mojo, "siteTool", SITE_TOOL);
         setVariableValueToObject(mojo, "repositorySystem", AETHER_REPOSITORY_SYSTEM);
         setVariableValueToObject(mojo, "includeParent", false);
@@ -91,7 +95,7 @@ public class PropertyUpdatesReportTest extends AbstractMojoTestCase {
                 .replaceAll("<[^>]+>", " ")
                 .replaceAll("&[^;]+;", " ")
                 .replaceAll("\\s+", " ");
-        assertThat(output, not(containsString("${ver}")));
+        assertTextNotContains(output, "${ver}");
     }
 
     @Test
@@ -99,9 +103,9 @@ public class PropertyUpdatesReportTest extends AbstractMojoTestCase {
         OutputStream os = new ByteArrayOutputStream();
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
 
-        PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojoRule.lookupConfiguredMojo(
-                new File("src/test/resources/org/codehaus/mojo/update-properties/problem-causing"),
-                "property-updates-report");
+        PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojos.lookup(
+                "property-updates-report",
+                Paths.get("src/test/resources/org/codehaus/mojo/update-properties/problem-causing"));
         setVariableValueToObject(mojo, "siteTool", SITE_TOOL);
         setVariableValueToObject(mojo, "repositorySystem", AETHER_REPOSITORY_SYSTEM);
 
@@ -109,11 +113,13 @@ public class PropertyUpdatesReportTest extends AbstractMojoTestCase {
             mojo.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
             fail("Should throw an exception");
         } catch (MavenReportException e) {
-            assertThat(e.getCause(), instanceOf(MojoExecutionException.class));
+            assertInstanceOf(MojoExecutionException.class, e.getCause());
             MojoExecutionException moe = (MojoExecutionException) e.getCause();
-            assertThat(moe.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, moe.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) moe.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 }
