@@ -211,7 +211,12 @@ public class PluginUpdatesReportTest {
         report.generate(factory.createSink(output), factory, Locale.ROOT);
         String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
         assertTextContains(text, "artifactA 2.0.0");
-        Assertions.assertNull(report.getProject().getReportPlugins().get(0).getVersion());
+        Assertions.assertNull(report.getProject()
+                .getModel()
+                .getReporting()
+                .getPlugins()
+                .get(0)
+                .getVersion());
     }
 
     @Test
@@ -262,7 +267,13 @@ public class PluginUpdatesReportTest {
         assertTextContains(text, "artifactA " + expectedVersion);
         assertTextNotContains(text, "artifactA 2.0.0");
         assertEquals(
-                originalVersion, report.getProject().getReportPlugins().get(0).getVersion());
+                originalVersion,
+                report.getProject()
+                        .getModel()
+                        .getReporting()
+                        .getPlugins()
+                        .get(0)
+                        .getVersion());
         Mockito.verifyNoInteractions(report.projectBuilder);
     }
 
