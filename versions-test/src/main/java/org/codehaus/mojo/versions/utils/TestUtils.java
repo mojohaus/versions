@@ -18,7 +18,6 @@ package org.codehaus.mojo.versions.utils;
  * under the License.
  */
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.FileVisitResult;
@@ -26,19 +25,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.apache.maven.execution.DefaultMavenExecutionRequest;
-import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
-import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.util.ReflectionUtils;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -112,22 +101,6 @@ public class TestUtils {
     }
 
     /**
-     * An auxiliary interface for passing functions throwing checked exceptions to lambdas.
-     * @param <T> argument type
-     * @param <R> return type
-     */
-    @FunctionalInterface
-    public interface CheckedFunction<T, R> {
-        /**
-         * Applies this function to the given argument.
-         * @param t the function argument
-         * @return the function result
-         * @throws Exception checked exception that may be thrown
-         */
-        R apply(T t) throws Exception;
-    }
-
-    /**
      * <p>{@code MojoRule#lookupConfiguredMojo(File, String)} does not initialise {@link MavenSession#getAllProjects()},
      * which leads to NullPointerExceptions.</p>
      * <p>This method simply fixes that by setting it as equal to {@link MavenSession#getProjects()}
@@ -144,64 +117,5 @@ public class TestUtils {
         MavenSession session = (MavenSession) sessionField.get(mojo);
         session.setAllProjects(session.getProjects());
         return mojo;
-    }
-
-    /**
-     * <p>Creates a {@link MavenSession} object for a session spanning multiple projects. The project names
-     * are provided as the variable-list arguments.</p>
-     * <p>The listed modules will be listed in {@link MavenSession#getProjects()}.</p>
-     * <p>If the reactor root ({@code baseDir}) contains a pom.xml file, a separate project will be loaded for it
-     * it will be added to {@link MavenSession#getAllProjects()} on top of the listed modules.</p>
-     * <p>Otherwise, {@link MavenSession#getAllProjects()} will be <em>empty</em>.
-     * <p>The first argument can be obtained by e.g. using {@code MojoRule::getContainer}, if using Maven Testing Harness.</p>
-     * <p>The second argument is a function producing a {@link MavenProject} instance based on the pom.xml file.
-     * If using Maven Testing Harness, this can be the result of {@code MojoRule::readMavenProject}.</p>
-     *
-     * @param container {@link PlexusContainer} instance
-     * @param projectReader a {@link CheckedFunction<File,MavenProject>} which reads the project given the file name
-     * @param baseDir parent directory to all modules on the {@code modules} list
-     * @param modules string array listing all modules that are to be part of the session
-     * @return an initialised {@link MavenSession} object with the listed projects on the project list
-     */
-    public static MavenSession createMavenSession(
-            PlexusContainer container,
-            CheckedFunction<File, MavenProject> projectReader,
-            Path baseDir,
-            String... modules) {
-        List<MavenProject> projectList = Arrays.stream(modules)
-                .map(m -> baseDir.resolve(m).toFile())
-                .map(f -> {
-                    try {
-                        return projectReader.apply(f);
-                    } catch (Throwable e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
-
-        // every MavenSession constructor is deprecated in Maven 3.9, so there is none to switch to
-        @SuppressWarnings("deprecation")
-        MavenSession session = new MavenSession(
-                container,
-                MavenRepositorySystemUtils.newSession(),
-                new DefaultMavenExecutionRequest(),
-                new DefaultMavenExecutionResult());
-        session.setProjects(projectList);
-        session.setCurrentProject(projectList.get(0));
-
-        if (Files.exists(baseDir.resolve("pom.xml"))) {
-            MavenProject rootProject;
-            try {
-                rootProject = projectReader.apply(baseDir.toFile());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            session.setAllProjects(
-                    Stream.concat(Stream.of(rootProject), projectList.stream()).collect(Collectors.toList()));
-        } else {
-            session.setAllProjects(Collections.emptyList());
-        }
-
-        return session;
     }
 }

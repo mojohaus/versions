@@ -25,20 +25,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.codehaus.mojo.versions.utils.TestUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextMatches;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
@@ -46,23 +41,23 @@ import static org.mockito.MockitoAnnotations.openMocks;
  *
  * @author Andrzej Jarmoniuk
  */
-public class SetScmTagMojoTest extends AbstractMojoTestCase {
-    @Rule
-    public MojoRule mojoRule = new MojoRule(this);
+@ProjectMojoTest
+public class SetScmTagMojoTest {
+    protected ProjectMojos mojos;
 
     private Path tempDir;
 
     @Mock
     protected Log log;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    public void setUp(ProjectMojos mojos) throws Exception {
+        this.mojos = mojos;
         openMocks(this);
         tempDir = TestUtils.createTempDir("set");
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         TestUtils.tearDownTempDir(tempDir);
     }
@@ -70,19 +65,16 @@ public class SetScmTagMojoTest extends AbstractMojoTestCase {
     @Test
     public void testNewScmValues() throws Exception {
         TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-scm-tag/new-scm-values"), tempDir);
-        SetScmTagMojo mojo = mojoRule.lookupConfiguredMojo(tempDir.toFile(), "set-scm-tag");
-        TestUtils.fixAllProjects(mojo);
+        SetScmTagMojo mojo = mojos.lookup("set-scm-tag", tempDir);
         mojo.execute();
         String output =
                 String.join("", Files.readAllLines(tempDir.resolve("pom.xml"))).replaceAll("\\s*", "");
-        assertThat(
+        assertTextMatches(output, ".*<scm>.*<tag>\\s*newTag\\s*</tag>.*</scm>.*");
+        assertTextMatches(output, ".*<scm>.*<url>\\s*url\\s*</url>.*</scm>.*");
+        assertTextMatches(output, ".*<scm>.*<connection>\\s*connection\\s*</connection>.*</scm>.*");
+        assertTextMatches(
                 output,
-                allOf(
-                        matchesPattern(".*<scm>.*<tag>\\s*newTag\\s*</tag>.*</scm>.*"),
-                        matchesPattern(".*<scm>.*<url>\\s*url\\s*</url>.*</scm>.*"),
-                        matchesPattern(".*<scm>.*<connection>\\s*connection\\s*</connection>.*</scm>.*"),
-                        matchesPattern(".*<scm>.*<developerConnection>\\s*"
-                                + "developerConnection\\s*</developerConnection>.*</scm>.*")));
+                ".*<scm>.*<developerConnection>\\s*" + "developerConnection\\s*</developerConnection>.*</scm>.*");
     }
 
     /**
@@ -95,9 +87,7 @@ public class SetScmTagMojoTest extends AbstractMojoTestCase {
     public void testModuleList() throws Exception {
         TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-scm-tag/module-list"), tempDir);
 
-        MavenSession session = TestUtils.createMavenSession(
-                mojoRule.getContainer(), mojoRule::readMavenProject, tempDir, "mod1", "mod2");
-        SetScmTagMojo mojo = mojoRule.lookupConfiguredMojo(session, newMojoExecution("set-scm-tag"));
+        SetScmTagMojo mojo = mojos.lookupInReactor("set-scm-tag", tempDir, "mod1", "mod2");
         setVariableValueToObject(mojo, "newTag", "newTag");
         setVariableValueToObject(mojo, "connection", "connection");
         setVariableValueToObject(mojo, "developerConnection", "developerConnection");
@@ -106,14 +96,12 @@ public class SetScmTagMojoTest extends AbstractMojoTestCase {
         for (String project : Arrays.asList("mod1", "mod2")) {
             Path pomFile = tempDir.resolve(project).resolve("pom.xml");
             String output = String.join("", Files.readAllLines(pomFile)).replaceAll("\\s*", "");
-            assertThat(
+            assertTextMatches(output, ".*<scm>.*<tag>\\s*newTag\\s*</tag>.*</scm>.*");
+            assertTextMatches(output, ".*<scm>.*<url>\\s*url\\s*</url>.*</scm>.*");
+            assertTextMatches(output, ".*<scm>.*<connection>\\s*connection\\s*</connection>.*</scm>.*");
+            assertTextMatches(
                     output,
-                    allOf(
-                            matchesPattern(".*<scm>.*<tag>\\s*newTag\\s*</tag>.*</scm>.*"),
-                            matchesPattern(".*<scm>.*<url>\\s*url\\s*</url>.*</scm>.*"),
-                            matchesPattern(".*<scm>.*<connection>\\s*connection\\s*</connection>.*</scm>.*"),
-                            matchesPattern(".*<scm>.*<developerConnection>\\s*"
-                                    + "developerConnection\\s*</developerConnection>.*</scm>.*")));
+                    ".*<scm>.*<developerConnection>\\s*" + "developerConnection\\s*</developerConnection>.*</scm>.*");
         }
     }
 }

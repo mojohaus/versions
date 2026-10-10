@@ -27,36 +27,34 @@ import java.util.stream.Stream;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.eclipse.aether.RepositorySystem;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.TestUtils.createTempDir;
 import static org.codehaus.mojo.versions.utils.TestUtils.tearDownTempDir;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Base class for {@link UpdatePropertiesMojo} and {@link UpdatePropertyMojo} test suites
  */
-public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase {
-    @Rule
-    public MojoRule mojoRule = new MojoRule(this);
+@ProjectMojoTest
+public abstract class UpdatePropertiesMojoTestBase {
+    protected ProjectMojos mojos;
 
     protected Path pomDir;
     protected RepositorySystem repositorySystem;
     protected TestChangeRecorder changeRecorder;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    public void setUp(ProjectMojos mojos) throws Exception {
+        this.mojos = mojos;
         pomDir = createTempDir("update-property");
         repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
             {
@@ -65,18 +63,14 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase 
         });
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
-        try {
-            tearDownTempDir(pomDir);
-        } finally {
-            super.tearDown();
-        }
+        tearDownTempDir(pomDir);
     }
 
     @SuppressWarnings("unchecked")
     protected <T extends Mojo> T setUpMojo(String goal) throws Exception {
-        T mojo = (T) mojoRule.lookupConfiguredMojo(pomDir.toFile(), goal);
+        T mojo = mojos.lookup(goal, pomDir);
         setVariableValueToObject(mojo, "repositorySystem", repositorySystem);
         setVariableValueToObject(mojo, "generateBackupPoms", false);
         setVariableValueToObject(mojo, "changeRecorderFormat", "none");
@@ -90,15 +84,17 @@ public abstract class UpdatePropertiesMojoTestBase extends AbstractMojoTestCase 
     protected <T extends Mojo> void testProblemCausingArtifact(String goal, Consumer<Mojo>... initializers)
             throws Exception {
         File projectDir = new File("src/test/resources/org/codehaus/mojo/update-properties/problem-causing");
-        T mojo = (T) mojoRule.lookupConfiguredMojo(projectDir, goal);
+        T mojo = mojos.lookup(goal, projectDir.toPath());
         Stream.of(initializers).forEach(m -> m.accept(mojo));
         try {
             mojo.execute();
             fail("Should throw an exception");
         } catch (MojoExecutionException e) {
-            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, e.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 }
