@@ -1,78 +1,10 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "target/site/property-updates-report.html" );
-
-    BufferedReader reader = new BufferedReader( new InputStreamReader( new FileInputStream( file ), "UTF-8" ) );
-    StringBuilder buf = new StringBuilder();
-    String line = reader.readLine();
-    while ( line != null )
-    {
-        buf.append( line );
-        buf.append( ' ' );
-        line = reader.readLine();
-    }
-
-    String result = buf.toString()
-            .replaceAll( "<[^>]+>", " " )
-            .replaceAll( "&[^;]+;", " " )
-            .replaceAll( "\\s+", " " );
-
-    if ( result.indexOf( "# of properties using the latest version available 1" ) < 0 )
-    {
-        System.out.println( "Did not generate using current version totals correctly" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "# of properties where the next version available is smaller than an incremental version update 0" ) < 0 )
-    {
-        System.out.println( "Did not generate with subincremental totals correctly" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "# of properties where the next version available is an incremental version update 1" ) < 0 )
-    {
-        System.out.println( "Did not generate with incremental totals correctly" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "# of properties where the next version available is a minor version update 1" ) < 0 )
-    {
-        System.out.println( "Did not generate with minor totals correctly" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "# of properties where the next version available is a major version update 0" ) < 0 )
-    {
-        System.out.println( "Did not generate with major totals correctly" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( '${impl-version} 2.0 2.2' ) < 0 )
-    {
-        System.out.println( 'Did not generate summary for ${impl-version} correctly' );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( '${api-version} 1.0 1.0.1 1.3 3.0' ) < 0 )
-    {
-        System.out.println( 'Did not generate summary for ${api-version} correctly' );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( '${plugin-version} 3.0' ) < 0 )
-    {
-        System.out.println( 'Did not generate summary for ${plugin-version} correctly' );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "target/site/property-updates-report.html").readLines("UTF-8").collect { it + " " }.join('')
+def result = buf.toString().replaceAll( "<[^>]+>", " " ).replaceAll( "&[^;]+;", " " ).replaceAll( "\\s+", " " )
+assert result.contains("# of properties using the latest version available 1") : "Did not generate using current version totals correctly" + "\n" + "Result = \"" + result +"\""
+assert result.contains("# of properties where the next version available is smaller than an incremental version update 0") : "Did not generate with subincremental totals correctly" + "\n" + "Result = \"" + result +"\""
+assert result.contains("# of properties where the next version available is an incremental version update 1") : "Did not generate with incremental totals correctly" + "\n" + "Result = \"" + result +"\""
+assert result.contains("# of properties where the next version available is a minor version update 1") : "Did not generate with minor totals correctly" + "\n" + "Result = \"" + result +"\""
+assert result.contains("# of properties where the next version available is a major version update 0") : "Did not generate with major totals correctly" + "\n" + "Result = \"" + result +"\""
+assert result.contains('${impl-version} 2.0 2.2') : 'Did not generate summary for ${impl-version} correctly' + "\n" + "Result = \"" + result +"\""
+assert result.contains('${api-version} 1.0 1.0.1 1.3 3.0') : 'Did not generate summary for ${api-version} correctly' + "\n" + "Result = \"" + result +"\""
+assert result.contains('${plugin-version} 3.0') : 'Did not generate summary for ${plugin-version} correctly' + "\n" + "Result = \"" + result +"\""

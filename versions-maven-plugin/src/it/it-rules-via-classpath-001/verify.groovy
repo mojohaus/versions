@@ -1,22 +1,3 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "build.log" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-    String expectedMessage = "Resource \"classpath:///package/foo/bar/rule-set.xml\" not found in classpath.";
-
-    if ( buf.indexOf( expectedMessage ) < 0 )
-    {
-        System.err.println( "Build should have failed as the requested resource is not present." );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "build.log").getText("UTF-8")
+def expectedMessage = "Resource \"classpath:///package/foo/bar/rule-set.xml\" not found in classpath."
+assert buf.contains(expectedMessage) : "Build should have failed as the requested resource is not present."

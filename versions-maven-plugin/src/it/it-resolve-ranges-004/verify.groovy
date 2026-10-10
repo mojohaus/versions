@@ -1,76 +1,9 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Dependency;
-import java.util.List;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 
+def read = { path -> new File(basedir, path).withReader { new MavenXpp3Reader().read(it) } }
 
-boolean test()
-{
-    result = true;
-    try
-    {
-        parentPomFile = new File( basedir, "pom.xml" );
-        childPomFile = new File( basedir.toString() + File.separator + "child" + File.separator + "pom.xml" );
-    
-        result = result && verifyThatRangesAreResolvedInParentPom( parentPomFile );
-        result = result && verifyThatNoVersionsAreSetInChildPom( childPomFile );
-    }
-    catch( Throwable t )
-    {
-        t.printStackTrace();
-        return false;
-    }
-    
-    return result;
-}
+def ranges = read("pom.xml").dependencyManagement.dependencies.findAll { it.version.contains(",") }
+assert ranges.isEmpty() : "Unresolved dependency ranges: " + ranges.collect { it.managementKey + ":" + it.version }
 
-
-// == Support functions ===
-
-boolean verifyThatRangesAreResolvedInParentPom( parentPomFile ) {
-    pomReader = new MavenXpp3Reader();
-    pomModel = pomReader.read( new InputStreamReader( new FileInputStream( parentPomFile ) ) );
-    
-    return verifyThatDependenciesContainNoRanges( pomModel.getDependencyManagement().getDependencies() );
-}
-
-boolean verifyThatNoVersionsAreSetInChildPom( childPomFile ) {
-    pomReader = new MavenXpp3Reader();
-    pomModel = pomReader.read( new InputStreamReader( new FileInputStream( childPomFile ) ) );
-    
-    return verifyThatDependenciesContainNoVersion( pomModel.getDependencies() );
-}
-
-boolean verifyThatDependenciesContainNoRanges( dependencies ) {
-    for (dependency: dependencies)
-    {
-        if ( dependency.getVersion().contains( "," ) )
-        {
-            System.err.println("Unresolved dependency-range: " + dependencyToString( dependency ) );
-            return false;
-        }
-    }
-    return true;
-}
-
-boolean verifyThatDependenciesContainNoVersion( dependencies ) {
-    for (dependency: dependencies)
-    {
-        if ( dependency.getVersion() != null )
-        {
-            System.err.println( "Declared version (version should not be set): " + dependencyToString( dependency ) );
-            return false;
-        }
-    }
-    return true;
-}
-  
-String dependencyToString( dependency ) {
-    return dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion();
-}
-
-
-
-return test();
+def versioned = read("child/pom.xml").dependencies.findAll { it.version != null }
+assert versioned.isEmpty() : "Declared versions (version should not be set): " + versioned.collect { it.managementKey + ":" + it.version }

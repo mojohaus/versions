@@ -1,69 +1,10 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "target/site/dependency-updates-report.html" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-
-    String result = buf.toString()
-            .replaceAll( "<[^>]+>", " " )
-            .replaceAll( "&[^;]+;", " " )
-            .replaceAll( "\\s+", " " );
-
-    if ( result.indexOf( "localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.3 1.3 3.0" ) < 0 )
-    {
-        System.out.println( "Did not generate summary correctly" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "1.1.0-2 Latest Subincremental" ) < 0)
-    {
-        System.out.println( "Did not identify next version" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "1.1.1" ) < 0)
-    {
-        System.out.println( "Did not identify next incremental" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "1.1.3 Latest Incremental" ) < 0)
-    {
-        System.out.println( "Did not identify latest incremental" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "1.2" ) < 0)
-    {
-        System.out.println( "Did not identify next minor version" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "1.3 Latest Minor" ) < 0)
-    {
-        System.out.println( "Did not identify latest minor version" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "2.0" ) < 0)
-    {
-        System.out.println( "Did not identify next major version" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( result.indexOf( "3.0 Latest Major" ) < 0 )
-    {
-        System.out.println( "Did not identify latest major version" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "target/site/dependency-updates-report.html").getText("UTF-8")
+def result = buf.toString().replaceAll( "<[^>]+>", " " ).replaceAll( "&[^;]+;", " " ).replaceAll( "\\s+", " " )
+assert result.contains("localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.3 1.3 3.0") : "Did not generate summary correctly" + "\n" + "Result = \"" + result +"\""
+assert result.contains("1.1.0-2 Latest Subincremental") : "Did not identify next version" + "\n" + "Result = \"" + result +"\""
+assert result.contains("1.1.1") : "Did not identify next incremental" + "\n" + "Result = \"" + result +"\""
+assert result.contains("1.1.3 Latest Incremental") : "Did not identify latest incremental" + "\n" + "Result = \"" + result +"\""
+assert result.contains("1.2") : "Did not identify next minor version" + "\n" + "Result = \"" + result +"\""
+assert result.contains("1.3 Latest Minor") : "Did not identify latest minor version" + "\n" + "Result = \"" + result +"\""
+assert result.contains("2.0") : "Did not identify next major version" + "\n" + "Result = \"" + result +"\""
+assert result.contains("3.0 Latest Major") : "Did not identify latest major version" + "\n" + "Result = \"" + result +"\""

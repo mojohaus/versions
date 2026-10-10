@@ -1,33 +1,6 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "target/site/dependency-updates-report.html" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-
-    String result = buf.toString()
-            .replaceAll( "<[^>]+>", " " )
-            .replaceAll( "&[^;]+;", " " )
-            .replaceAll( "\\s+", " " );
-
-    if ( result.indexOf( "localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.3 1.3 3.0" ) < 0 )
-    {
-        System.out.println( "Did not pick up updated in dependencies section" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-    if ( !result.contains("This project does not declare any dependencies in a dependencyManagement section."))
-    {
-        System.out.println( "Did not ignore dependencyManagement" );
-        System.out.println( "Result = \"" + result +"\"" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def report = new File(basedir, "target/site/dependency-updates-report.html").getText("UTF-8")
+        .replaceAll("<[^>]+>", " ")
+        .replaceAll("&[^;]+;", " ")
+        .replaceAll("\\s+", " ")
+assert report.contains("localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.3 1.3 3.0") : "Did not pick up updated in dependencies section"
+assert report.contains("This project does not declare any dependencies in a dependencyManagement section.") : "Did not ignore dependencyManagement"
