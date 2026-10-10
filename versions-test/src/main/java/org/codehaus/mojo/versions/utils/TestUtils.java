@@ -179,7 +179,7 @@ public class TestUtils {
                 })
                 .collect(Collectors.toList());
 
-        // Maven 3 has no MavenSession constructor without the deprecated PlexusContainer
+        // every MavenSession constructor is deprecated in Maven 3.9, so there is none to switch to
         @SuppressWarnings("deprecation")
         MavenSession session = new MavenSession(
                 container,
