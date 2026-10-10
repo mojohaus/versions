@@ -119,7 +119,9 @@
   </ciManagement>
 
   <properties>
-    <mavenVersion>3.6.3</mavenVersion>
+    <mavenVersion>3.9.16</mavenVersion>
+    <!-- the plugin still runs on, and builds with, Maven 3.6.3 -->
+    <minimalMavenBuildVersion>3.6.3</minimalMavenBuildVersion>
 
     <doxiaVersion>2.1.0</doxiaVersion>
     <doxia-sitetoolsVersion>2.1.0</doxia-sitetoolsVersion>
@@ -140,7 +142,7 @@
     <byteBuddyVersion>1.18.14</byteBuddyVersion>
 
     <!-- use the same version as in Maven core -->
-    <mavenResolverVersion>1.4.1</mavenResolverVersion>
+    <mavenResolverVersion>1.9.27</mavenResolverVersion>
     <sisuVersion>1.1.0</sisuVersion>
 
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>

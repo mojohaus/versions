@@ -15,8 +15,6 @@ package org.codehaus.mojo.versions.api;
  * limitations under the License.
  */
 
-import javax.annotation.Nonnull;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -117,7 +115,7 @@ public class IgnoreVersionHelper {
      * @param ignoreVersion {@link IgnoreVersion} instance providing the filter
      * @return {@code true} if the provided version is ignored
      */
-    public static boolean isVersionIgnored(@Nonnull Version v, IgnoreVersion ignoreVersion) {
+    public static boolean isVersionIgnored(Version v, IgnoreVersion ignoreVersion) {
         return isVersionIgnored(v.toString(), ignoreVersion);
     }
 
@@ -125,11 +123,11 @@ public class IgnoreVersionHelper {
         return ignoreVersion.getVersion().equals(v);
     }
 
-    private static boolean isVersionIgnoredRegex(@Nonnull String v, IgnoreVersion ignoreVersion) {
+    private static boolean isVersionIgnoredRegex(String v, IgnoreVersion ignoreVersion) {
         return Pattern.compile(ignoreVersion.getVersion()).matcher(v).matches();
     }
 
-    private static boolean isVersionIgnoredRange(@Nonnull String v, IgnoreVersion ignoreVersion) {
+    private static boolean isVersionIgnoredRange(String v, IgnoreVersion ignoreVersion) {
         try {
             ArtifactVersion aVersion = ArtifactVersionService.getArtifactVersion(v);
             VersionRange versionRange = VersionRange.createFromVersionSpec(ignoreVersion.getVersion());
